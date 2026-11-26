@@ -91,9 +91,9 @@
           "index": 5,
           "documents": ["Controls/CommandBar.xaml"],
           "keys": [],
-          "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
+          "type_keys": ["CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton"],
           "references": ["CommandBarButtonCompactWidth", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonLabelRightMinWidth", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarOverflowButtonPadding", "CommandBarPadding", "CommandBarSeparatorMargin", "CommandBarSeparatorMinHeight", "CommandBarSeparatorOverflowHeight", "CommandBarSeparatorOverflowMargin", "CommandBarSeparatorWidth", "CommandBarToggleButtonPadding", "OverlayCornerRadius", "SystemControlBackgroundChromeMediumBrush", "SystemControlBackgroundChromeMediumLowBrush", "SystemControlForegroundBaseMediumLowBrush", "SystemControlHighlightAccentBrush", "SystemControlHighlightListLowBrush", "SystemControlHighlightListMediumBrush"],
-          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
+          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
         },
         {
           "name": "Controls/CarouselPage.xaml",

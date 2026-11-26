@@ -186,3 +186,55 @@ fn standard_ui_command_deletes_the_item_of_the_parameter_or_the_selection() {
     command.execute(None);
     assert_eq!(items().first().map(String::as_str), Some("List item 1"));
 }
+
+/// The CommandBarFlyout page: a click of the image opens the flyout transient (the bar stays
+/// closed), a context request opens it standard (the bar opens with it), both at
+/// RightEdgeAlignedTop; a click of a command writes its label, and a secondary command closes the
+/// flyout.
+#[test]
+fn command_bar_flyout_opens_transient_on_click_and_standard_on_context_request() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::input::{ContextRequestedEventArgs, InputElement};
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::{CommandBarFlyout, FlyoutShowMode, PlacementMode, Window};
+    let _application = start();
+    let root = page("CommandBarFlyout");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let flyout = root
+        .try_find_resource(&ResourceKey::from("CommandBarFlyout1"), None)
+        .flatten()
+        .and_then(|value| value.downcast_ref::<Ref<CommandBarFlyout>>().cloned())
+        .expect("the flyout resource");
+    assert_eq!(flyout.primary_commands().count(), 3);
+    assert_eq!(flyout.secondary_commands().count(), 2);
+    let image_button = root.get_control::<Button>("myImageButton");
+    click(&image_button);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(flyout.is_open());
+    assert_eq!(flyout.show_mode(), FlyoutShowMode::Transient);
+    assert_eq!(flyout.placement(), PlacementMode::RightEdgeAlignedTop);
+    let bar = flyout.command_bar().expect("the bar");
+    assert!(!bar.is_open());
+    let command = |list: &ferroui_controls::CommandBarElementList, index: usize| {
+        list.get(index).as_object().and_then(|object| object.to_ref().cast::<Button>()).expect("a button")
+    };
+    click(&command(&flyout.primary_commands(), 1));
+    assert_eq!(text(&root, "SelectedOptionText").as_deref(), Some("You clicked: Save"));
+    assert!(flyout.is_open());
+    flyout.hide();
+
+    let mut args = ContextRequestedEventArgs::new();
+    args.set_routed_event(Some(InputElement::context_requested_event()));
+    image_button.raise_event(&args);
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(flyout.is_open());
+    assert_eq!(flyout.show_mode(), FlyoutShowMode::Standard);
+    assert!(bar.is_open());
+    click(&command(&flyout.secondary_commands(), 0));
+    assert_eq!(text(&root, "SelectedOptionText").as_deref(), Some("You clicked: Resize"));
+    assert!(!flyout.is_open());
+    window.close();
+}

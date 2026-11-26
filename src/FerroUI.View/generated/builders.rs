@@ -270,6 +270,19 @@ pub fn command_bar_button() -> El<ferroui_controls::CommandBarButton> {
     El::new()
 }
 
+pub use ferroui_controls::primitives::CommandBarFlyoutCommandBar;
+
+impl ViewClass for ferroui_controls::primitives::CommandBarFlyoutCommandBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::primitives::CommandBarFlyoutCommandBar>::new()
+    }
+}
+
+/// Starts an element of [`CommandBarFlyoutCommandBar`](ferroui_controls::primitives::CommandBarFlyoutCommandBar).
+pub fn command_bar_flyout_command_bar() -> El<ferroui_controls::primitives::CommandBarFlyoutCommandBar> {
+    El::new()
+}
+
 pub use ferroui_controls::CommandBarSeparator;
 
 impl ViewClass for ferroui_controls::CommandBarSeparator {
@@ -3351,6 +3364,15 @@ pub trait CommandBarButtonProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::CommandBarButton>> CommandBarButtonProps for El<T> {}
+
+/// The properties and routed events of [`CommandBarFlyout`](ferroui_controls::CommandBarFlyout).
+pub trait CommandBarFlyoutProps: ElementBuilder {
+    /// Sets [`CommandBarFlyout::always_expanded_property`](ferroui_controls::CommandBarFlyout::always_expanded_property).
+    fn always_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::CommandBarFlyout>::always_expanded_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::CommandBarFlyout>> CommandBarFlyoutProps for El<T> {}
 
 /// The properties and routed events of [`CommandBarSeparator`](ferroui_controls::CommandBarSeparator).
 pub trait CommandBarSeparatorProps: ElementBuilder {

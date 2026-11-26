@@ -4975,7 +4975,7 @@ pub fn build_controls_fluentcontrols_xaml(
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 7, 10)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 7, 10)?, count_0.wrapping_add(289_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 7, 10)?, count_0.wrapping_add(290_i32));
     }
     rt::apply_theme_unit(active_theme_units(), 4, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 6, 0, &context, &resource_dictionary_0)?;
@@ -5634,6 +5634,9 @@ fn build_controls_fluentcontrols_xaml_unit_36(
     // Controls/FluentControls.xaml(251,4) Content (resource)
     let deferred_40 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_83, 251, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_40) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 251, 4)?;
+    // Controls/FluentControls.xaml(336,4) Content (resource)
+    let deferred_41 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_87, 336, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CommandBarFlyoutCommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_41) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 336, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5645,14 +5648,14 @@ fn build_controls_fluentcontrols_xaml_unit_37(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(14,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DrawerPaneButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_87, 14, 48)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DrawerPaneButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_88, 14, 48)?;
     // Controls/FluentControls.xaml(16,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 51)?, rt::string_object("NavigationControlNavBarHeight"), rt::to_object(48.0_f64)), 16, 51)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1)?;
     // Controls/FluentControls.xaml(19,4) Content (resource)
-    let deferred_43 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_89, 19, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_43) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    let deferred_44 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_90, 19, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_44) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5664,16 +5667,16 @@ fn build_controls_fluentcontrols_xaml_unit_38(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,50) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_91, 10, 50)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_92, 10, 50)?;
     // Controls/FluentControls.xaml(12,50) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_92, 12, 50)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageBackIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_93, 12, 50)?;
     // Controls/FluentControls.xaml(14,4) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_95, 17, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationBarShadowBackground", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_96, 17, 4)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
-    let deferred_49 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_96, 22, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_49) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    let deferred_50 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_97, 22, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_50) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5721,12 +5724,12 @@ fn build_controls_fluentcontrols_xaml_unit_39(
     // Controls/FluentControls.xaml(55,47) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14)?;
     // Controls/FluentControls.xaml(59,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_110, 59, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_111, 59, 4)?;
     // Controls/FluentControls.xaml(105,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_113, 105, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabItemTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_114, 105, 4)?;
     // Controls/FluentControls.xaml(249,4) Content (resource)
-    let deferred_64 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_118, 249, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_64) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 249, 4)?;
+    let deferred_65 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_119, 249, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_65) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 249, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5740,8 +5743,8 @@ fn build_controls_fluentcontrols_xaml_unit_40(
     // Controls/FluentControls.xaml(14,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 42)?, rt::string_object("RadioButtonMinHeight"), rt::to_object(32.0_f64)), 14, 42)?;
     // Controls/FluentControls.xaml(16,4) Content (resource)
-    let deferred_65 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_120, 16, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_65) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    let deferred_66 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_121, 16, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_66) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5765,18 +5768,18 @@ fn build_controls_fluentcontrols_xaml_unit_41(
     // Controls/FluentControls.xaml(61,45) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_16)?;
     // Controls/FluentControls.xaml(67,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_122, 67, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_123, 67, 4)?;
     // Controls/FluentControls.xaml(191,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonUpTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_124, 191, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonUpTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_125, 191, 4)?;
     // Controls/FluentControls.xaml(197,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonDownTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_125, 197, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonDownTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_126, 197, 4)?;
     // Controls/FluentControls.xaml(203,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonLeftTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_126, 203, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonLeftTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_127, 203, 4)?;
     // Controls/FluentControls.xaml(209,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonRightTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_127, 209, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonRightTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_128, 209, 4)?;
     // Controls/FluentControls.xaml(215,4) Content (resource)
-    let deferred_71 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_128, 215, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_71) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 215, 4)?;
+    let deferred_72 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_129, 215, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_72) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 215, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5788,10 +5791,10 @@ fn build_controls_fluentcontrols_xaml_unit_42(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(26,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_130, 26, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "StringFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_131, 26, 4)?;
     // Controls/FluentControls.xaml(28,4) Content (resource)
-    let deferred_73 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_131, 28, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_73) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
+    let deferred_74 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_132, 28, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_74) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5803,18 +5806,18 @@ fn build_controls_fluentcontrols_xaml_unit_43(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(39,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerLeftThickness", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_133, 39, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerLeftThickness", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_134, 39, 4)?;
     // Controls/FluentControls.xaml(40,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerRightThickness", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_134, 40, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerRightThickness", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_135, 40, 4)?;
     // Controls/FluentControls.xaml(41,59) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerIncreaseButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_135, 41, 59)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerIncreaseButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_136, 41, 59)?;
     // Controls/FluentControls.xaml(42,59) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerDecreaseButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_136, 42, 59)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ButtonSpinnerDecreaseButtonIcon", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_137, 42, 59)?;
     // Controls/FluentControls.xaml(44,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentButtonSpinnerRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_137, 44, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentButtonSpinnerRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_138, 44, 4)?;
     // Controls/FluentControls.xaml(73,4) Content (resource)
-    let deferred_79 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_139, 73, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_79) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 73, 4)?;
+    let deferred_80 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_140, 73, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_80) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 73, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5828,10 +5831,10 @@ fn build_controls_fluentcontrols_xaml_unit_44(
     // Controls/FluentControls.xaml(11,58) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_17)?;
     // Controls/FluentControls.xaml(14,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentCalendarDatePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_141, 14, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentCalendarDatePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_142, 14, 4)?;
     // Controls/FluentControls.xaml(63,4) Content (resource)
-    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_143, 63, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 63, 4)?;
+    let deferred_82 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_144, 63, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_82) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 63, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5843,10 +5846,10 @@ fn build_controls_fluentcontrols_xaml_unit_45(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(27,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentCalendarButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_145, 27, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentCalendarButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_146, 27, 4)?;
     // Controls/FluentControls.xaml(57,4) Content (resource)
-    let deferred_83 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_147, 57, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_83) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 57, 4)?;
+    let deferred_84 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_148, 57, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_84) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 57, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5858,12 +5861,12 @@ fn build_controls_fluentcontrols_xaml_unit_46(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(15,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CheckMarkPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_150, 15, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CheckMarkPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_151, 15, 45)?;
     // Controls/FluentControls.xaml(16,39) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 39)?, rt::string_object("CheckBoxMinHeight"), rt::to_object(32.0_f64)), 16, 39)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
-    let deferred_85 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_151, 18, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_85) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    let deferred_86 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_152, 18, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_86) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5877,8 +5880,8 @@ fn build_controls_fluentcontrols_xaml_unit_47(
     // Controls/FluentControls.xaml(4,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 4, 49)?, rt::string_object("FlyoutBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 4, 49)?;
     // Controls/FluentControls.xaml(5,4) Content (resource)
-    let deferred_86 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_153, 5, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_86) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
+    let deferred_87 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_154, 5, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_87) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 5, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5890,10 +5893,10 @@ fn build_controls_fluentcontrols_xaml_unit_48(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BorderGapMaskConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_155, 10, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "BorderGapMaskConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_156, 10, 4)?;
     // Controls/FluentControls.xaml(12,4) Content (resource)
-    let deferred_88 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_156, 12, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_88) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_157, 12, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5907,8 +5910,8 @@ fn build_controls_fluentcontrols_xaml_unit_49(
     // Controls/FluentControls.xaml(13,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 13, 58)?, rt::string_object("HyperlinkButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 13, 58)?;
     // Controls/FluentControls.xaml(15,4) Content (resource)
-    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_158, 15, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
+    let deferred_90 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_159, 15, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_90) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5922,8 +5925,8 @@ fn build_controls_fluentcontrols_xaml_unit_50(
     // Controls/FluentControls.xaml(16,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 41)?, rt::string_object("ListBoxItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 9.0_f64, 12.0_f64, 12.0_f64))), 16, 41)?;
     // Controls/FluentControls.xaml(17,4) Content (resource)
-    let deferred_90 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_160, 17, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_90) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
+    let deferred_91 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_161, 17, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_91) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 17, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5937,10 +5940,10 @@ fn build_controls_fluentcontrols_xaml_unit_51(
     // Controls/FluentControls.xaml(14,35) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 14, 35)?, rt::string_object("MenuBarHeight"), rt::to_object(32.0_f64)), 14, 35)?;
     // Controls/FluentControls.xaml(16,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentTopLevelMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_162, 16, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentTopLevelMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_163, 16, 4)?;
     // Controls/FluentControls.xaml(94,4) Content (resource)
-    let deferred_92 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_164, 94, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_92) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
+    let deferred_93 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_165, 94, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_93) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5952,20 +5955,20 @@ fn build_controls_fluentcontrols_xaml_unit_52(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(52,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_166, 52, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "KeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_167, 52, 4)?;
     // Controls/FluentControls.xaml(53,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 60)?, rt::string_object("MenuFlyoutSubItemPopupHorizontalOffset"), rt::to_object(-4.0_f64)), 53, 60)?;
     // Controls/FluentControls.xaml(54,46) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18)?;
     // Controls/FluentControls.xaml(56,51) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MenuItemChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_167, 56, 51)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "MenuItemChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_168, 56, 51)?;
     // Controls/FluentControls.xaml(58,4) Content (resource)
-    let deferred_95 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_168, 58, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_95) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 58, 4)?;
+    let deferred_96 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_169, 58, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_96) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 58, 4)?;
     // Controls/FluentControls.xaml(239,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_173, 239, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_174, 239, 4)?;
     // Controls/FluentControls.xaml(244,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentMenuItemIconTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_174, 244, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentMenuItemIconTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_175, 244, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5977,10 +5980,10 @@ fn build_controls_fluentcontrols_xaml_unit_53(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
-    let deferred_98 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_176, 4, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_98) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    let deferred_99 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_177, 4, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_99) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     // Controls/FluentControls.xaml(35,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuFlyoutPresenter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_178, 35, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalMenuFlyoutPresenter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_179, 35, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6028,24 +6031,24 @@ fn build_controls_fluentcontrols_xaml_unit_57(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(10,59) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_261, 10, 59)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_262, 10, 59)?;
     // Controls/FluentControls.xaml(11,55) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_262, 11, 55)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_263, 11, 55)?;
     // Controls/FluentControls.xaml(14,67) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonVerticalData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_263, 14, 67)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonVerticalData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_264, 14, 67)?;
     // Controls/FluentControls.xaml(15,63) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonVerticalData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_264, 15, 63)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonVerticalData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_265, 15, 63)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNavigationButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_265, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNavigationButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_266, 18, 4)?;
     // Controls/FluentControls.xaml(64,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_267, 64, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_268, 64, 4)?;
     // Controls/FluentControls.xaml(67,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_268, 67, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_269, 67, 4)?;
     // Controls/FluentControls.xaml(69,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerItemTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_269, 69, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerItemTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_270, 69, 4)?;
     // Controls/FluentControls.xaml(160,4) Content (resource)
-    let deferred_189 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_271, 160, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_189) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 160, 4)?;
+    let deferred_190 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_272, 160, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_190) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 160, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6057,18 +6060,18 @@ fn build_controls_fluentcontrols_xaml_unit_58(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(21,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "VerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_274, 21, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "VerticalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_275, 21, 4)?;
     // Controls/FluentControls.xaml(34,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_275, 34, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalScrollBarContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_276, 34, 4)?;
     // Controls/FluentControls.xaml(47,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarThumb", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_276, 47, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarThumb", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_277, 47, 4)?;
     // Controls/FluentControls.xaml(75,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarPageButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_278, 75, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarPageButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_279, 75, 4)?;
     // Controls/FluentControls.xaml(87,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarLineButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_280, 87, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentScrollBarLineButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_281, 87, 4)?;
     // Controls/FluentControls.xaml(132,4) Content (resource)
-    let deferred_195 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_282, 132, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_195) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 132, 4)?;
+    let deferred_196 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_283, 132, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_196) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 132, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6082,16 +6085,16 @@ fn build_controls_fluentcontrols_xaml_unit_59(
     // Controls/FluentControls.xaml(34,50) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22)?;
     // Controls/FluentControls.xaml(39,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PrimaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_285, 39, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PrimaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_286, 39, 4)?;
     // Controls/FluentControls.xaml(40,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SecondaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_286, 40, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SecondaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_287, 40, 4)?;
     // Controls/FluentControls.xaml(41,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SeparatorBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_287, 41, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SeparatorBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_288, 41, 4)?;
     // Controls/FluentControls.xaml(43,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentSplitButtonComponent", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_288, 43, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentSplitButtonComponent", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_289, 43, 4)?;
     // Controls/FluentControls.xaml(120,4) Content (resource)
-    let deferred_200 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_290, 120, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_200) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 120, 4)?;
+    let deferred_201 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_291, 120, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_201) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 120, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6111,10 +6114,10 @@ fn build_controls_fluentcontrols_xaml_unit_60(
     let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(1000000_i64);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 61)?, rt::string_object("SplitViewPaneAnimationCloseDuration"), rt::to_object(::core::clone::Clone::clone(&value_7))), 22, 61)?;
     // Controls/FluentControls.xaml(23,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitViewPaneAnimationEasing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_292, 23, 48)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitViewPaneAnimationEasing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_293, 23, 48)?;
     // Controls/FluentControls.xaml(25,4) Content (resource)
-    let deferred_202 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_293, 25, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_202) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 25, 4)?;
+    let deferred_203 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_294, 25, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_203) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 25, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6128,8 +6131,8 @@ fn build_controls_fluentcontrols_xaml_unit_61(
     // Controls/FluentControls.xaml(20,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 55)?, rt::string_object("TabControlTopPlacementItemMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64))), 20, 55)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
-    let deferred_203 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_298, 22, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_203) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    let deferred_204 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_299, 22, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_204) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6143,8 +6146,8 @@ fn build_controls_fluentcontrols_xaml_unit_62(
     // Controls/FluentControls.xaml(15,38) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_24)?;
     // Controls/FluentControls.xaml(19,4) Content (resource)
-    let deferred_204 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_300, 19, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_204) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
+    let deferred_205 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_301, 19, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_205) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 19, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6156,10 +6159,10 @@ fn build_controls_fluentcontrols_xaml_unit_63(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_302, 17, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TableViewScrollViewerTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_303, 17, 4)?;
     // Controls/FluentControls.xaml(79,4) Content (resource)
-    let deferred_206 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_304, 79, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_206) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
+    let deferred_207 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_305, 79, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_207) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 79, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6173,8 +6176,8 @@ fn build_controls_fluentcontrols_xaml_unit_64(
     // Controls/FluentControls.xaml(5,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 43)?, rt::string_object("TableViewCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64))), 5, 43)?;
     // Controls/FluentControls.xaml(7,4) Content (resource)
-    let deferred_207 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_306, 7, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewCell as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_207) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    let deferred_208 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_307, 7, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewCell as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_208) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6190,10 +6193,10 @@ fn build_controls_fluentcontrols_xaml_unit_65(
     // Controls/FluentControls.xaml(12,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 12, 51)?, rt::string_object("TableViewColumnResizerMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -9.0_f64, -6.0_f64, -12.0_f64))), 12, 51)?;
     // Controls/FluentControls.xaml(14,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TableViewColumnHeaderResizerTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_307, 14, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TableViewColumnHeaderResizerTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_308, 14, 4)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
-    let deferred_209 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_309, 22, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewColumnHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_209) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    let deferred_210 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_310, 22, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewColumnHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_210) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6207,8 +6210,8 @@ fn build_controls_fluentcontrols_xaml_unit_66(
     // Controls/FluentControls.xaml(5,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 5, 42)?, rt::string_object("TableViewRowPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(6.0_f64, 9.0_f64, 6.0_f64, 12.0_f64))), 5, 42)?;
     // Controls/FluentControls.xaml(7,4) Content (resource)
-    let deferred_210 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_311, 7, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewRow as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_210) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
+    let deferred_211 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_312, 7, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TableViewRow as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_211) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6222,8 +6225,8 @@ fn build_controls_fluentcontrols_xaml_unit_67(
     // Controls/FluentControls.xaml(15,43) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_25)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
-    let deferred_211 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_313, 18, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_211) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
+    let deferred_212 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_314, 18, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_212) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 18, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6237,22 +6240,22 @@ fn build_controls_fluentcontrols_xaml_unit_68(
     // Controls/FluentControls.xaml(19,45) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 19, 45)?, rt::string_object("TextBoxTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 19, 45)?;
     // Controls/FluentControls.xaml(20,50) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextBoxClearButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_315, 20, 50)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextBoxClearButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_316, 20, 50)?;
     // Controls/FluentControls.xaml(21,55) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_316, 21, 55)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxRevealButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_317, 21, 55)?;
     // Controls/FluentControls.xaml(22,53) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxHideButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_317, 22, 53)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PasswordBoxHideButtonData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_318, 22, 53)?;
     // Controls/FluentControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_318, 24, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_319, 24, 4)?;
     // Controls/FluentControls.xaml(29,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_319, 29, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "HorizontalTextBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_320, 29, 4)?;
     // Controls/FluentControls.xaml(35,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentTextBoxButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_320, 35, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentTextBoxButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_321, 35, 4)?;
     // Controls/FluentControls.xaml(74,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentTextBoxToggleButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_322, 74, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentTextBoxToggleButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_323, 74, 4)?;
     // Controls/FluentControls.xaml(96,4) Content (resource)
-    let deferred_219 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_324, 96, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_219) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 96, 4)?;
+    let deferred_220 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_325, 96, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_220) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 96, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6272,8 +6275,8 @@ fn build_controls_fluentcontrols_xaml_unit_69(
     // Controls/FluentControls.xaml(22,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 22, 47)?, rt::string_object("ToggleSwitchThemeMinWidth"), rt::to_object(0.0_f64)), 22, 47)?;
     // Controls/FluentControls.xaml(24,4) Content (resource)
-    let deferred_220 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_328, 24, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_220) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
+    let deferred_221 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_329, 24, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_221) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 24, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6287,8 +6290,8 @@ fn build_controls_fluentcontrols_xaml_unit_70(
     // Controls/FluentControls.xaml(20,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 46)?, rt::string_object("ToolTipContentMaxWidth"), rt::to_object(320.0_f64)), 20, 46)?;
     // Controls/FluentControls.xaml(22,4) Content (resource)
-    let deferred_221 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_330, 22, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_221) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
+    let deferred_222 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_331, 22, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_222) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 22, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6304,14 +6307,14 @@ fn build_controls_fluentcontrols_xaml_unit_71(
     // Controls/FluentControls.xaml(25,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 25, 62)?, rt::string_object("TreeViewItemExpandCollapseChevronMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64))), 25, 62)?;
     // Controls/FluentControls.xaml(26,64) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemCollapsedChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_332, 26, 64)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemCollapsedChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_333, 26, 64)?;
     // Controls/FluentControls.xaml(27,63) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemExpandedChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_333, 27, 63)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemExpandedChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_334, 27, 63)?;
     // Controls/FluentControls.xaml(29,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentTreeViewExpandCollapseChevron", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_334, 29, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentTreeViewExpandCollapseChevron", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_335, 29, 4)?;
     // Controls/FluentControls.xaml(55,4) Content (resource)
-    let deferred_225 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_336, 55, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_225) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 55, 4)?;
+    let deferred_226 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_337, 55, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_226) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 55, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6330,10 +6333,10 @@ fn build_controls_fluentcontrols_xaml_unit_72(
     // Controls/FluentControls.xaml(8,4) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_28)?;
     // Controls/FluentControls.xaml(11,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_340, 11, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDrawnCaptionButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_341, 11, 4)?;
     // Controls/FluentControls.xaml(36,4) Content (resource)
-    let deferred_229 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_342, 36, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_229) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
+    let deferred_230 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_343, 36, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_230) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6355,8 +6358,8 @@ fn build_controls_fluentcontrols_xaml_unit_73(
     // Controls/FluentControls.xaml(59,39) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 59, 39)?, rt::string_object("ComboBoxMinHeight"), rt::to_object(32.0_f64)), 59, 39)?;
     // Controls/FluentControls.xaml(61,4) Content (resource)
-    let deferred_230 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_344, 61, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_230) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 61, 4)?;
+    let deferred_231 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_345, 61, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_231) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 61, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6370,8 +6373,8 @@ fn build_controls_fluentcontrols_xaml_unit_74(
     // Controls/FluentControls.xaml(34,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 47)?, rt::string_object("MenuFlyoutScrollerMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64))), 34, 47)?;
     // Controls/FluentControls.xaml(36,4) Content (resource)
-    let deferred_231 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_348, 36, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_231) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
+    let deferred_232 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_349, 36, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_232) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 36, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6383,10 +6386,10 @@ fn build_controls_fluentcontrols_xaml_unit_75(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(28,4) Content (resource)
-    let deferred_232 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_350, 28, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_232) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
+    let deferred_233 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_351, 28, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_233) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 28, 4)?;
     // Controls/FluentControls.xaml(65,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TooltipDataValidationErrors", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_353, 65, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TooltipDataValidationErrors", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_354, 65, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6398,13 +6401,13 @@ fn build_controls_fluentcontrols_xaml_unit_76(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_356, 24, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_357, 24, 4)?;
     // Controls/FluentControls.xaml(46,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_357, 46, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_358, 46, 4)?;
     // Controls/FluentControls.xaml(86,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_359, 86, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerUpButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_360, 86, 4)?;
     // Controls/FluentControls.xaml(102,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_361, 102, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDateTimePickerDownButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_362, 102, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6422,13 +6425,13 @@ fn build_controls_fluentcontrols_xaml_unit_77(
     // Controls/FluentControls.xaml(40,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 40, 48)?;
     // Controls/FluentControls.xaml(42,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentDatePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_363, 42, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentDatePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_364, 42, 4)?;
     // Controls/FluentControls.xaml(74,4) Content (resource)
-    let deferred_239 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_365, 74, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_239) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
+    let deferred_240 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_366, 74, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_240) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
     // Controls/FluentControls.xaml(151,4) Content (resource)
-    let deferred_240 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_367, 151, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_240) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 151, 4)?;
+    let deferred_241 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_368, 151, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_241) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 151, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6448,13 +6451,13 @@ fn build_controls_fluentcontrols_xaml_unit_78(
     // Controls/FluentControls.xaml(38,59) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_34)?;
     // Controls/FluentControls.xaml(41,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_369, 41, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_370, 41, 4)?;
     // Controls/FluentControls.xaml(73,4) Content (resource)
-    let deferred_242 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_371, 73, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_242) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 73, 4)?;
+    let deferred_243 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_372, 73, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_243) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 73, 4)?;
     // Controls/FluentControls.xaml(191,4) Content (resource)
-    let deferred_243 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_373, 191, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_243) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 191, 4)?;
+    let deferred_244 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_374, 191, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_244) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 191, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6468,8 +6471,8 @@ fn build_controls_fluentcontrols_xaml_unit_79(
     // Controls/FluentControls.xaml(13,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 13, 47)?, rt::string_object("DropDownButtonMinHeight"), rt::to_object(32.0_f64)), 13, 47)?;
     // Controls/FluentControls.xaml(15,6) Content (resource)
-    let deferred_244 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_375, 15, 6)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_244) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 6)?;
+    let deferred_245 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_376, 15, 6)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_245) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 6)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6493,14 +6496,14 @@ fn build_controls_fluentcontrols_xaml_unit_80(
     // Controls/FluentControls.xaml(43,48) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_36)?;
     // Controls/FluentControls.xaml(48,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderHorizontalRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_377, 48, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderHorizontalRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_378, 48, 4)?;
     // Controls/FluentControls.xaml(63,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderVerticalRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_379, 63, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderVerticalRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_380, 63, 4)?;
     // Controls/FluentControls.xaml(78,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderThumbTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_381, 78, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderThumbTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_382, 78, 4)?;
     // Controls/FluentControls.xaml(90,4) Content (resource)
-    let deferred_248 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_383, 90, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_248) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
+    let deferred_249 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_384, 90, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_249) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6515,11 +6518,11 @@ fn build_controls_fluentcontrols_xaml_unit_81(
     let value_9 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("inset -6 0 3 -3 #20000000")), 7, 61)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 61)?, rt::string_object("ManagedFileChooserQuickLinksBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_9))), 7, 61)?;
     // Controls/FluentControls.xaml(15,4) Content (resource)
-    let deferred_249 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_386, 15, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_249) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
+    let deferred_250 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_387, 15, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_250) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
     // Controls/FluentControls.xaml(350,4) Content (resource)
-    let deferred_250 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_397, 350, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_250) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 350, 4)?;
+    let deferred_251 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_398, 350, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_251) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 350, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6531,10 +6534,10 @@ fn build_controls_fluentcontrols_xaml_unit_82(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(8,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SelectableTextBlockContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_399, 8, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SelectableTextBlockContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_400, 8, 4)?;
     // Controls/FluentControls.xaml(13,4) Content (resource)
-    let deferred_252 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_400, 13, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_252) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    let deferred_253 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_401, 13, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_253) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6548,16 +6551,16 @@ fn build_controls_fluentcontrols_xaml_unit_83(
     // Controls/FluentControls.xaml(16,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 42)?, rt::string_object("TextSelectHandleSize"), rt::to_object(32.0_f64)), 16, 42)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_401, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_402, 18, 4)?;
     // Controls/FluentControls.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_402, 30, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_403, 30, 4)?;
     // Controls/FluentControls.xaml(42,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_403, 42, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_404, 42, 4)?;
     // Controls/FluentControls.xaml(55,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_404, 55, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_405, 55, 4)?;
     // Controls/FluentControls.xaml(74,4) Content (resource)
-    let deferred_257 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_405, 74, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_257) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
+    let deferred_258 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_406, 74, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_258) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -10361,106 +10364,150 @@ fn build_controls_fluentcontrols_xaml_deferred_83_value_0() -> ::ferroui_base::m
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_133() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::SplitView::display_mode_property())
+    rt::property(::ferroui_controls::CommandBar::default_label_position_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_134() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::DrawerPage::display_mode_property())
+    rt::property(::ferroui_base::layout::Layoutable::max_width_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_135() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::SplitView::open_pane_length_property())
+    rt::property(::ferroui_controls::CommandBar::is_dynamic_overflow_enabled_property())
+}
+
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_87`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_87_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::primitives::CommandBarFlyoutCommandBar as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Type(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), line: 337, position: 17 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_87_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_87_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_133, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_87_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(440.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_135, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_87` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_87_value_0() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
+}
+
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_87` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_87_value_1() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
+}
+
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_87` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_87_value_2() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_controls::CommandBarDefaultLabelPosition::Collapsed)
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_136() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::DrawerPage::drawer_length_property())
+    rt::property(::ferroui_controls::SplitView::display_mode_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_137() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::SplitView::compact_pane_length_property())
+    rt::property(::ferroui_controls::DrawerPage::display_mode_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_138() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::SplitView::open_pane_length_property())
+}
+
+/// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_property_139() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::DrawerPage::drawer_length_property())
+}
+
+/// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_property_140() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::SplitView::compact_pane_length_property())
+}
+
+/// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_property_141() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::compact_drawer_length_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_61: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_133, source: build_controls_fluentcontrols_xaml_property_134, line: 25, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_135, source: build_controls_fluentcontrols_xaml_property_136, line: 26, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_137, source: build_controls_fluentcontrols_xaml_property_138, line: 27, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_136, source: build_controls_fluentcontrols_xaml_property_137, line: 25, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_138, source: build_controls_fluentcontrols_xaml_property_139, line: 26, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_140, source: build_controls_fluentcontrols_xaml_property_141, line: 27, position: 20 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_62: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_37, source: build_controls_fluentcontrols_xaml_property_138, line: 39, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_70, source: build_controls_fluentcontrols_xaml_property_138, line: 40, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_37, source: build_controls_fluentcontrols_xaml_property_141, line: 39, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_70, source: build_controls_fluentcontrols_xaml_property_141, line: 40, position: 29 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_139() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_142() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::drawer_header_template_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_140() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_143() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::drawer_header_background_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_63: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_139, line: 61, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_140, line: 62, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_142, line: 61, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_143, line: 62, position: 33 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_141() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_144() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::drawer_footer_template_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_142() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_145() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::drawer_footer_background_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_64: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_141, line: 67, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_142, line: 68, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_144, line: 67, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_145, line: 68, position: 33 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_143() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_146() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::horizontal_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_144() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_147() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::vertical_content_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_65: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_143, line: 176, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_144, line: 177, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_146, line: 176, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_147, line: 177, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_1, line: 178, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_2, source: build_controls_fluentcontrols_xaml_property_3, line: 179, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_4, source: build_controls_fluentcontrols_xaml_property_5, line: 180, position: 33 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_145() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_148() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::content_template_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_66: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_145, line: 182, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_148, line: 182, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_6, source: build_controls_fluentcontrols_xaml_property_7, line: 183, position: 33 },
 ];
 
@@ -10480,7 +10527,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_68: &[rt::DynamicResourceRow
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_55: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneButton")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_146() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_149() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DockPanel::dock_property())
 }
 
@@ -10496,7 +10543,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_2() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_58: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_3() -> ::ferroui_base::BoxedValue {
@@ -10504,7 +10551,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_3() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_59: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_BottomBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-bottom"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
@@ -10513,7 +10560,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_60: &[rt::SelectorStep] = &[r
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_61: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":placement-top"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_147() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_150() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DrawerPage::drawer_behavior_property())
 }
 
@@ -10523,7 +10570,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_4() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_62: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_150, value: build_controls_fluentcontrols_xaml_selector_value_4 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_5() -> ::ferroui_base::BoxedValue {
@@ -10531,49 +10578,49 @@ fn build_controls_fluentcontrols_xaml_selector_value_5() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_147, value: build_controls_fluentcontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_63: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_150, value: build_controls_fluentcontrols_xaml_selector_value_5 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_64: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_65: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_65: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_66: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_2 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_67: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_134, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_68: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_137, value: build_controls_fluentcontrols_xaml_selector_value_3 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_148() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_151() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Page::is_in_navigation_page_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_148, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_69: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_151, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopBar")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_70: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":detail-is-navpage"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_CompactPaneToggle")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_89`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_89_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_90`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_90_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DrawerPage as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlPageBackgroundAltHighBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlForegroundBaseHighBrush") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_90, parent: true, line: 24, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_91, parent: true, line: 24, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_55),
             line: 194,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_89_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_90_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -10618,7 +10665,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_89_THEME: rt::ControlThemeTab
             line: 215,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_89_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_90_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -10627,7 +10674,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_89_THEME: rt::ControlThemeTab
             line: 218,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_89_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_90_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -10714,28 +10761,28 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_89_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_89` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_89_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_90` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_90_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_89` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_89_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_90` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_90_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_89` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_89_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_90` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_90_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Left)
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_149() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_152() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NavigationPage::page_transition_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_150() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_153() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NavigationPage::modal_transition_property())
 }
 
@@ -10748,20 +10795,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_72: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_73: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":nav-bar-compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TopCommandBar"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::CommandBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_151() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::CommandBar::default_label_position_property())
-}
-
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_96`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_96_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_97`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_97_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NavigationPage as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_96_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_96_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_150, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_96_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_97, parent: true, line: 52, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_97_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_152, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_97_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_153, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_97_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_98, parent: true, line: 52, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_71),
@@ -10786,19 +10828,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_96_THEME: rt::ControlThemeTab
             line: 218,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_151, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_96_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_133, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_97_value_3) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_96` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_96_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_97` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_97_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_96` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_96_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_97` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_97_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let page_slide_0 = ::ferroui_base::animation::PageSlide::__markup_new_0();
@@ -10821,8 +10863,8 @@ fn build_controls_fluentcontrols_xaml_deferred_96_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&page_slide_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_96` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_96_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_97` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_97_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let page_slide_1 = ::ferroui_base::animation::PageSlide::__markup_new_0();
@@ -10845,8 +10887,8 @@ fn build_controls_fluentcontrols_xaml_deferred_96_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&page_slide_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_96` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_96_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_97` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_97_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::CommandBarDefaultLabelPosition::Collapsed)
 }
 
@@ -10859,14 +10901,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_69: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_152() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_154() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabControl::tab_strip_placement_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_70: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 74, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_146, source: build_controls_fluentcontrols_xaml_property_152, line: 75, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_149, source: build_controls_fluentcontrols_xaml_property_154, line: 75, position: 19 },
 ];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
@@ -10880,20 +10922,20 @@ fn build_controls_fluentcontrols_xaml_selector_value_7() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_74: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_74: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_154, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_154, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY)]] }];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_153() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_155() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::UniformGrid::rows_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_154() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_156() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::UniformGrid::columns_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_110`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_110_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_111`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_111_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE),
@@ -10902,15 +10944,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_110_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabStripBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabStripBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabStripPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_111, parent: true, line: 67, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_112, parent: true, line: 67, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_74),
             line: 97,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_153, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_154, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_155, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_156, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
             ],
         },
     ],
@@ -10938,14 +10980,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_73: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_155() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_157() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::ContentPresenter::font_family_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_74: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_114, line: 149, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_155, source: build_controls_fluentcontrols_xaml_property_90, line: 150, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_157, source: build_controls_fluentcontrols_xaml_property_90, line: 150, position: 33 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -10971,7 +11013,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_77: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_156() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_158() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabItem::indicator_template_property())
 }
 
@@ -10979,7 +11021,7 @@ fn build_controls_fluentcontrols_xaml_property_156() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_75: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_157() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_159() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabItem::tab_strip_placement_property())
 }
 
@@ -10989,7 +11031,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_8() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_76: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_76: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_9() -> ::ferroui_base::BoxedValue {
@@ -10997,7 +11039,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_9() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_77: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_10() -> ::ferroui_base::BoxedValue {
@@ -11005,10 +11047,10 @@ fn build_controls_fluentcontrols_xaml_selector_value_10() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_78: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_78: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_10 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_79: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_11() -> ::ferroui_base::BoxedValue {
@@ -11016,10 +11058,10 @@ fn build_controls_fluentcontrols_xaml_selector_value_11() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_80: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_80: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_11 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_81: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_82: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
@@ -11039,8 +11081,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_86: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_87: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_LayoutRoot")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_113`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_114`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_114_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE),
@@ -11052,10 +11094,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabItemHeaderMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabItemHeaderMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabItemHeaderCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_156, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_113_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_115, parent: true, line: 127, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_114_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_116, parent: true, line: 127, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_8),
@@ -11081,7 +11123,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 177,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_3) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabItemHeaderPipeThickness") }),
             ],
         },
@@ -11091,7 +11133,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 181,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_4) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabbedPageTabItemHeaderPipeThickness") }),
             ],
         },
@@ -11101,7 +11143,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 185,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_156, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_113_value_5) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_114_value_5) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11110,8 +11152,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 196,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_6) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_7) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11120,7 +11162,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 200,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_156, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_113_value_8) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_114_value_8) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11129,8 +11171,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
             line: 211,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_9) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_113_value_10) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_9) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_114_value_10) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11192,89 +11234,89 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_114, 118, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_115, 118, 10)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&data_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_5(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let data_template_1 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_1.clone()));
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_116, 188, 12)?;
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_117, 188, 12)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&data_template_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_7() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_7() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_8(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_8(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let data_template_2 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_2.clone()));
-    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_117, 203, 12)?;
+    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_118, 203, 12)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_2, rt::to_object(::core::clone::Clone::clone(&deferred_3)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&data_template_2)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_9() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_9() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_113` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_113_value_10() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_114` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_114_value_10() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_118`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_118_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_119`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_119_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabbedPage as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlPageBackgroundAltHighBrush") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_119, parent: true, line: 253, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_120, parent: true, line: 253, position: 10 }) }),
     ],
 };
 
@@ -11300,26 +11342,26 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_80: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_158() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_160() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::shapes::Shape::stroke_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_159() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_161() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::shapes::Shape::stroke_thickness_property())
 }
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_81: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_71, key: "RadioButtonOuterEllipseFill", line: 41, position: 19 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_158, key: "RadioButtonOuterEllipseStroke", line: 42, position: 19 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_159, key: "RadioButtonBorderThemeThickness", line: 43, position: 19 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "RadioButtonOuterEllipseStroke", line: 42, position: 19 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_161, key: "RadioButtonBorderThemeThickness", line: 43, position: 19 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_82: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_158, key: "RadioButtonOuterEllipseCheckedStroke", line: 52, position: 19 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_159, key: "RadioButtonBorderThemeThickness", line: 53, position: 19 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "RadioButtonOuterEllipseCheckedStroke", line: 52, position: 19 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_161, key: "RadioButtonBorderThemeThickness", line: 53, position: 19 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -11367,8 +11409,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_101: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_102: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckOuterEllipse")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_120`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_121`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_121_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE),
@@ -11377,11 +11419,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_120_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_120_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_120_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_120_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_121, parent: true, line: 28, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_121_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_121_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_121_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_121_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::RadioButton as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_122, parent: true, line: 28, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -11416,7 +11458,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 94,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokePointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokePointerOver") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseFillPointerOver") }),
             ],
         },
@@ -11426,7 +11468,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 99,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokePointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokePointerOver") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedFillPointerOver") }),
             ],
         },
@@ -11436,7 +11478,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 104,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokePointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokePointerOver") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphFillPointerOver") }),
             ],
         },
@@ -11465,7 +11507,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 120,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokePressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokePressed") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseFillPressed") }),
             ],
         },
@@ -11475,7 +11517,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 125,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokePressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokePressed") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedFillPressed") }),
             ],
         },
@@ -11485,7 +11527,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 130,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokePressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokePressed") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphFillPressed") }),
             ],
         },
@@ -11514,7 +11556,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 146,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokeDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseStrokeDisabled") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseFillDisabled") }),
             ],
         },
@@ -11524,7 +11566,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             line: 151,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokeDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedStrokeDisabled") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonOuterEllipseCheckedFillDisabled") }),
             ],
         },
@@ -11535,7 +11577,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphFillDisabled") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokeDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RadioButtonCheckGlyphStrokeDisabled") }),
             ],
         },
         rt::StyleMember::Style {
@@ -11568,23 +11610,23 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_120` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_120_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_121` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_121_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_120` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_120_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_121` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_121_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_120` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_120_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_121` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_121_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_120` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_120_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_121` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_121_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -11619,8 +11661,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_85: &[rt::DynamicResourceRow
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_124`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_124_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_125`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_125_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
@@ -11629,32 +11671,6 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_124_THEME: rt::ControlThemeTa
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103),
             line: 192,
-            position: 6,
-            members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_124_value_0) }),
-            ],
-        },
-    ],
-};
-
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_124` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_124_value_0(
-    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
-    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
-}
-
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_125`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_125_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
-    parent: true,
-    members: &[
-        rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 197, position: 87 },
-        rt::StyleMember::Style {
-            parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103),
-            line: 198,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_125_value_0) }),
@@ -11667,7 +11683,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_125_THEME: rt::ControlThemeTa
 fn build_controls_fluentcontrols_xaml_deferred_125_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
@@ -11676,11 +11692,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_126_THEME: rt::ControlThemeTa
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 203, position: 87 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 197, position: 87 },
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103),
-            line: 204,
+            line: 198,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_126_value_0) }),
@@ -11693,7 +11709,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_126_THEME: rt::ControlThemeTa
 fn build_controls_fluentcontrols_xaml_deferred_126_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
@@ -11702,11 +11718,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_127_THEME: rt::ControlThemeTa
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 209, position: 88 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 203, position: 87 },
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103),
-            line: 210,
+            line: 204,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_127_value_0) }),
@@ -11719,23 +11735,44 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_127_THEME: rt::ControlThemeTa
 fn build_controls_fluentcontrols_xaml_deferred_127_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_160() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_base::layout::Layoutable::max_width_property())
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_128`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentExpanderToggleButtonTheme"), line: 209, position: 88 },
+        rt::StyleMember::Style {
+            parent: false,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_103),
+            line: 210,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_0) }),
+            ],
+        },
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_128_value_0(
+    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
+    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_86: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_54, source: build_controls_fluentcontrols_xaml_property_54, line: 228, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_160, source: build_controls_fluentcontrols_xaml_property_160, line: 229, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_134, source: build_controls_fluentcontrols_xaml_property_134, line: 229, position: 20 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_161() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_162() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::input::InputElement::is_enabled_property())
 }
 
@@ -11743,7 +11780,7 @@ fn build_controls_fluentcontrols_xaml_property_161() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_87: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_55, source: build_controls_fluentcontrols_xaml_property_55, line: 231, position: 25 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_7, source: build_controls_fluentcontrols_xaml_property_7, line: 232, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_161, source: build_controls_fluentcontrols_xaml_property_161, line: 233, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_162, source: build_controls_fluentcontrols_xaml_property_162, line: 233, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -11772,7 +11809,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_105: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_106: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_162() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_163() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Control::tag_property())
 }
 
@@ -11816,7 +11853,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_118: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_119: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_163() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_164() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::StyledElement::theme_property())
 }
 
@@ -11832,8 +11869,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_122: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_123: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":down"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderContent")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_128`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_129`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_129_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE),
@@ -11844,10 +11881,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ExpanderContentBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ExpanderContentDownBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ExpanderContentPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_129, parent: false, line: 228, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_130, parent: false, line: 228, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_104),
@@ -11863,7 +11900,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 261,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11872,7 +11909,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 265,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_162, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("expanded") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("expanded") }),
             ],
         },
         rt::StyleMember::Style {
@@ -11881,8 +11918,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 269,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_3) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_162, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("collapsed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("collapsed") }),
             ],
         },
         rt::StyleMember::Style {
@@ -11891,7 +11928,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 273,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_4) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11900,7 +11937,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 276,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_5) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_5) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11909,7 +11946,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 279,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_6) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11918,7 +11955,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 282,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_7) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11927,7 +11964,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 285,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_8) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_8) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11936,7 +11973,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 288,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_9) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_9) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11945,7 +11982,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 291,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_10) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_10) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11954,7 +11991,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 294,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_128_value_11) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_47, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_129_value_11) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11963,7 +12000,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 298,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_12) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_12) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11972,7 +12009,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 301,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_13) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_13) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11981,7 +12018,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 304,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_14) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_14) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11990,7 +12027,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 307,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_128_value_15) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_129_value_15) }),
             ],
         },
         rt::StyleMember::Style {
@@ -11999,7 +12036,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 311,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonLeftTheme") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_164, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonLeftTheme") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12008,7 +12045,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 314,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonUpTheme") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_164, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonUpTheme") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12017,7 +12054,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 317,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonRightTheme") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_164, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonRightTheme") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12026,7 +12063,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
             line: 320,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonDownTheme") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_164, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FluentExpanderToggleButtonDownTheme") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12068,23 +12105,23 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_0 = {
@@ -12100,8 +12137,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_3(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_7)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12114,8 +12151,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_4(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_9)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_5(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12128,8 +12165,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_5(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_11)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_6(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_6(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12142,8 +12179,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_6(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_13)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_7(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12156,8 +12193,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_7(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_15)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_8(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_8(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12170,8 +12207,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_8(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_17)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_9(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_9(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12184,8 +12221,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_9(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_19)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_10(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_10(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12198,8 +12235,8 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_10(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_21)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_11(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_11(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -12212,23 +12249,23 @@ fn build_controls_fluentcontrols_xaml_deferred_128_value_11(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_23)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_12() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_12() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_13() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_13() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_14() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_14() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_128` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_128_value_15() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_129` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_129_value_15() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Top)
 }
 
@@ -12275,13 +12312,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_95: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 56, position: 27 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_137`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_137_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_138`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_138_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlInnerButtonMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_138, parent: false, line: 48, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_139, parent: false, line: 48, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_1),
@@ -12353,8 +12390,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_126: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_127: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_139`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_140`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_140_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE),
@@ -12366,10 +12403,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemeMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemeMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_139_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_139_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_140_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_140_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_140, parent: true, line: 87, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_141, parent: true, line: 87, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_124),
@@ -12382,7 +12419,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTa
                     line: 144,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_146, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_139_value_2) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_149, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_140_value_2) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -12391,7 +12428,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTa
                     line: 147,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_139_value_3) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_140_value_3) }),
                     ],
                 },
             ],
@@ -12408,23 +12445,23 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_139` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_139_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_140` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_140_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_139` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_139_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_140` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_140_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_139` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_139_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_140` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_140_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_139` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_139_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_140` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_140_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()));
@@ -12437,15 +12474,15 @@ fn build_controls_fluentcontrols_xaml_deferred_139_value_3(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_9)))
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_141`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_141_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_142`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_142_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_113, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerCalendarGlyphForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([2.0_f64, 0.0_f64, 4.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerDropDownButtonWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_142, parent: true, line: 20, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_143, parent: true, line: 20, position: 10 }) }),
     ],
 };
 
@@ -12458,22 +12495,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_100: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_164() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_165() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_165() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_166() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::placeholder_foreground_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_166() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_167() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::use_floating_placeholder_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_167() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_168() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::use_floating_placeholder_property())
 }
 
@@ -12482,110 +12519,110 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_101: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_7, source: build_controls_fluentcontrols_xaml_property_7, line: 93, position: 24 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_5, line: 94, position: 24 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_11, source: build_controls_fluentcontrols_xaml_property_11, line: 95, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_33, source: build_controls_fluentcontrols_xaml_property_164, line: 96, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_35, source: build_controls_fluentcontrols_xaml_property_165, line: 97, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_166, source: build_controls_fluentcontrols_xaml_property_167, line: 98, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_33, source: build_controls_fluentcontrols_xaml_property_165, line: 96, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_35, source: build_controls_fluentcontrols_xaml_property_166, line: 97, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_167, source: build_controls_fluentcontrols_xaml_property_168, line: 98, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_168() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_169() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::vertical_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_169() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_170() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::horizontal_content_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_102: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_82, source: build_controls_fluentcontrols_xaml_property_168, line: 101, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_84, source: build_controls_fluentcontrols_xaml_property_169, line: 102, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_82, source: build_controls_fluentcontrols_xaml_property_169, line: 101, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_84, source: build_controls_fluentcontrols_xaml_property_170, line: 102, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_170() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_171() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::first_day_of_week_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_171() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_172() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::first_day_of_week_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_172() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_173() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::is_today_highlighted_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_173() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_174() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::is_today_highlighted_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_103: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_170, source: build_controls_fluentcontrols_xaml_property_171, line: 131, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_172, source: build_controls_fluentcontrols_xaml_property_173, line: 132, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_171, source: build_controls_fluentcontrols_xaml_property_172, line: 131, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_173, source: build_controls_fluentcontrols_xaml_property_174, line: 132, position: 27 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_174() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_175() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::display_date_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_175() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_176() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::display_date_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_176() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_177() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::display_date_start_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_177() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_178() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::display_date_start_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_178() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_179() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::display_date_end_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_179() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_180() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::display_date_end_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_180() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_181() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::is_week_number_visible_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_181() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_182() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::is_week_number_visible_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_182() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_183() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Calendar::week_number_rule_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_183() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_184() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::CalendarDatePicker::week_number_rule_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_104: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_174, source: build_controls_fluentcontrols_xaml_property_175, line: 134, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_176, source: build_controls_fluentcontrols_xaml_property_177, line: 135, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_178, source: build_controls_fluentcontrols_xaml_property_179, line: 136, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_180, source: build_controls_fluentcontrols_xaml_property_181, line: 137, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_182, source: build_controls_fluentcontrols_xaml_property_183, line: 138, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_175, source: build_controls_fluentcontrols_xaml_property_176, line: 134, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_177, source: build_controls_fluentcontrols_xaml_property_178, line: 135, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_179, source: build_controls_fluentcontrols_xaml_property_180, line: 136, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_181, source: build_controls_fluentcontrols_xaml_property_182, line: 137, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_183, source: build_controls_fluentcontrols_xaml_property_184, line: 138, position: 27 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -12609,24 +12646,24 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_133: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_134: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_143`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_143_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_144`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_144_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::CalendarDatePicker as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_165, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_166, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_143_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_143_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_169, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_143_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_168, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_143_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_144_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_144_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_170, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_144_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_169, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_144_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarDatePickerPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_144, parent: true, line: 78, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_145, parent: true, line: 78, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_128),
@@ -12697,36 +12734,36 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_143_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_143` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_143_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_144` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_144_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_143` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_143_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_144` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_144_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_143` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_143_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_144` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_144_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_143` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_143_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_144` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_144_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_145`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_145_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_146`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_146_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_145_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_145_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_145_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_146_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_146_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_146_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_146, parent: true, line: 35, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_147, parent: true, line: 35, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_1),
@@ -12758,18 +12795,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_145_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_145` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_145_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_146` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_146_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_145` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_145_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_146` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_146_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_145` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_145_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_146` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_146_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -12782,7 +12819,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_105: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_184() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_185() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::CalendarItem::day_title_template_property())
 }
 
@@ -12801,21 +12838,21 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_138: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_139: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_147`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_148`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_148_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::CalendarItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_184, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_147_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_149, parent: true, line: 70, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_185, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_148_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_150, parent: true, line: 70, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_135),
             line: 196,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12824,7 +12861,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
             line: 199,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPressed") }),
             ],
         },
         rt::StyleMember::Style {
@@ -12847,8 +12884,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_51, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarWeekNumberFontSize") }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_147_value_1) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_147_value_2) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_148_value_1) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_148_value_2) }),
                             ],
                         },
                     ],
@@ -12858,25 +12895,25 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_147` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_147_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_148` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_148_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_148, 61, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_149, 61, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_147` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_147_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_148` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_148_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_147` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_147_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_148` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_148_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -12914,22 +12951,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_142: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_143: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_151`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_151_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_152`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_152_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::CheckBox as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_151_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_151_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_151_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_151_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_152_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_152_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_152_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_152_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxForegroundUnchecked") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxBackgroundUnchecked") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxBorderBrushUnchecked") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_152, parent: true, line: 31, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_153, parent: true, line: 31, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -13274,7 +13311,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_151_THEME: rt::ControlThemeTa
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CheckBoxCheckGlyphForegroundIndeterminate") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_151_value_4) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_152_value_4) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(7.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(1.0_f64) }),
                     ],
@@ -13422,28 +13459,28 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_151_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_151` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_151_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_152` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_152_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_151` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_151_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_152` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_152_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_151` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_151_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_152` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_152_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_151` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_151_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_152` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_152_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_151` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_151_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_152` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_152_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(1536.0_f64, 1536.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1536.0_f64, 512.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(512.0_f64, 512.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(512.0_f64, 1536.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1536.0_f64, 1536.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
@@ -13472,49 +13509,49 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_111: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_185() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_186() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::layout::Layoutable::max_height_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_153`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_153_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_154`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_154_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_153_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_153_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_154_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_154_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutPresenterBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutContentThemePadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_185, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_153_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_153_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_186, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxHeight") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_154_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_154_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_154, parent: true, line: 21, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_155, parent: true, line: 21, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_153` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_153_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_154` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_154_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_153` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_153_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_154` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_154_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_153` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_153_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_154` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_154_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_153` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_153_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_154` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_154_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
@@ -13532,7 +13569,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_113: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_186() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_187() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::layout::Layoutable::use_layout_rounding_property())
 }
 
@@ -13541,30 +13578,30 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_114: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_114, line: 61, position: 31 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_13, line: 62, position: 31 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 63, position: 31 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_186, source: build_controls_fluentcontrols_xaml_property_186, line: 64, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_187, source: build_controls_fluentcontrols_xaml_property_187, line: 64, position: 31 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_115: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 73, position: 29 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_13, line: 74, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_186, source: build_controls_fluentcontrols_xaml_property_186, line: 75, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_187, source: build_controls_fluentcontrols_xaml_property_187, line: 75, position: 29 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 76, position: 29 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_187() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_188() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::ContentPresenter::font_size_property())
 }
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_116: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_187, key: "GroupBoxHeaderFontSize", line: 59, position: 31 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_188, key: "GroupBoxHeaderFontSize", line: 59, position: 31 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_23, key: "GroupBoxHeaderForeground", line: 60, position: 31 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_156`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_156_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_157`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_157_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE),
@@ -13573,7 +13610,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_156_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GroupBoxBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GroupBoxPadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_157, parent: true, line: 21, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_158, parent: true, line: 21, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -13596,19 +13633,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_156_THEME: rt::ControlThemeTa
 };
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_188() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_189() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::ContentPresenter::background_sizing_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_189() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_190() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::TemplatedControl::background_sizing_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_117: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_0, source: build_controls_fluentcontrols_xaml_property_1, line: 37, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_188, source: build_controls_fluentcontrols_xaml_property_189, line: 38, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_189, source: build_controls_fluentcontrols_xaml_property_190, line: 38, position: 27 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_2, source: build_controls_fluentcontrols_xaml_property_3, line: 39, position: 27 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_4, source: build_controls_fluentcontrols_xaml_property_5, line: 40, position: 27 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_6, source: build_controls_fluentcontrols_xaml_property_7, line: 41, position: 27 },
@@ -13623,37 +13660,37 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_118: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_190() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_191() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::input::InputElement::cursor_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_191() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_192() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBlock::text_decorations_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_144: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":visited")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_158`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_158_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_159`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_159_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::HyperlinkButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_158_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_191, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_159_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("HyperlinkButtonBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_189, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_158_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_159_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("HyperlinkButtonForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("HyperlinkButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("HyperlinkButtonBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_158_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_158_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_158_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_191, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_158_value_5) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_158_value_6) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_159, parent: false, line: 36, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_159_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_159_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_159_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_192, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_159_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_159_value_6) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_160, parent: false, line: 36, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -13680,7 +13717,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_158_THEME: rt::ControlThemeTa
             line: 60,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_158_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_159_value_7) }),
             ],
         },
         rt::StyleMember::Style {
@@ -13743,44 +13780,44 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_158_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::Cursor::__markup_new_0(::ferroui_base::input::StandardCursorType::Hand))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::BackgroundSizing::OuterBorderEdge)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("none")), 26, 40)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_5(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_5(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = ::ferroui_base::media::TextDecorations::__markup_static_get_Underline();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_6(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_6(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -13792,8 +13829,8 @@ fn build_controls_fluentcontrols_xaml_deferred_158_value_6(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_158` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_158_value_7(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_159` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_159_value_7(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_3 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.98)")), 61, 42)?;
@@ -13819,14 +13856,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_120: &[rt::TemplateBindingRow
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_145: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":focus")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_160`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_160_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_161`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_161_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_160_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_161_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListBoxItemPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_161, parent: false, line: 22, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_162, parent: false, line: 22, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_4),
@@ -13907,8 +13944,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_160_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_160` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_160_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_161` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_161_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -13926,7 +13963,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_122: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_45, key: "MenuFlyoutPresenterBorderBrush", line: 43, position: 23 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_44, key: "MenuFlyoutPresenterBorderThemeThickness", line: 44, position: 23 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_43, key: "MenuFlyoutPresenterThemePadding", line: 45, position: 23 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "FlyoutThemeMaxWidth", line: 46, position: 23 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_134, key: "FlyoutThemeMaxWidth", line: 46, position: 23 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_55, key: "MenuFlyoutThemeMinHeight", line: 47, position: 23 },
 ];
 
@@ -13939,15 +13976,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_147: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_148: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_HeaderPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_162`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_162_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_163`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_163_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuBarItemPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_163, parent: true, line: 23, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_164, parent: true, line: 23, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_30),
@@ -14039,24 +14076,24 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_123: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_192() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_193() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ItemsControl::item_container_theme_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_164`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_164_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_165`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_165_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_164_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_165_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuBarHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_192, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "FluentTopLevelMenuItem", line: 97, position: 43 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_165, parent: false, line: 100, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_193, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "FluentTopLevelMenuItem", line: 97, position: 43 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_166, parent: false, line: 100, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_164` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_164_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_165` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_165_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -14081,7 +14118,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_126: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_45, key: "MenuFlyoutPresenterBorderBrush", line: 129, position: 21 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_44, key: "MenuFlyoutPresenterBorderThemeThickness", line: 130, position: 21 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_43, key: "MenuFlyoutPresenterThemePadding", line: 131, position: 21 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "FlyoutThemeMaxWidth", line: 132, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_134, key: "FlyoutThemeMaxWidth", line: 132, position: 21 },
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_55, key: "MenuFlyoutThemeMinHeight", line: 133, position: 21 },
 ];
 
@@ -14118,15 +14155,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_158: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_159: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":radio"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ContentControl as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ToggleIconPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_168`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_168_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_169`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_169_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutItemThemePaddingNarrow") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_169, parent: true, line: 65, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_170, parent: true, line: 65, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_30),
@@ -14293,7 +14330,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_168_THEME: rt::ControlThemeTa
             line: 207,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_170, parent: false, line: 210, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_171, parent: false, line: 210, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -14312,7 +14349,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_168_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_120, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_168_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_169_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -14322,38 +14359,38 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_168_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_120, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_168_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_169_value_1) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_168` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_168_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_169` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_169_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_171, 223, 12)?;
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_172, 223, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_168` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_168_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_169` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_169_value_1(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_1 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_1.clone()));
-    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_172, 233, 12)?;
+    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_173, 233, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_1, rt::to_object(::core::clone::Clone::clone(&deferred_3)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_1)))
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_173`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_173_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_174`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_174_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -14363,14 +14400,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_173_THEME: rt::ControlThemeTa
     ],
 };
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_174`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_174_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_175`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_175_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_175, parent: false, line: 252, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_176, parent: false, line: 252, position: 10 }) }),
     ],
 };
 
@@ -14381,8 +14418,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_127: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 19, position: 17 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_176`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_176_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_177`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_177_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
@@ -14390,42 +14427,42 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_176_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutThemeMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_176_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_176_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_177_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_177_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_177, parent: true, line: 16, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_178, parent: true, line: 16, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_176` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_176_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_177` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_177_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_176` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_176_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_177` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_177_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_178`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_178_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_179`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_179_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Type(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), line: 35, position: 89 },
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("HorizontalMenuFlyoutThemeMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_28, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_178_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_28, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_179_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_178` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_178_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_179` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_179_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_179, 39, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_180, 39, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
@@ -14446,8 +14483,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_129: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 40, position: 27 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_265`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_265_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_266`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_266_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -14458,10 +14495,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_265_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerNavigationButtonSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerNavigationButtonSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_265_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_265_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_266_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_266_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_266, parent: false, line: 31, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_267, parent: false, line: 31, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_1),
@@ -14498,18 +14535,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_265_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_265` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_265_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_266` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_266_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_265` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_265_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_266` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_266_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_267`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_267_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_268`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_268_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -14517,8 +14554,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_267_THEME: rt::ControlThemeTa
     ],
 };
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_268`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_268_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_269`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -14529,7 +14566,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_268_THEME: rt::ControlThemeTa
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_130: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_71, key: "PipsPagerSelectionIndicatorBackground", line: 86, position: 20 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_158, key: "PipsPagerSelectionIndicatorBorderBrush", line: 87, position: 20 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "PipsPagerSelectionIndicatorBorderBrush", line: 87, position: 20 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -14562,8 +14599,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_168: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_169: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PipBackground")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_269`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_270`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_270_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -14574,8 +14611,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_56, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_269_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_270, parent: true, line: 80, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_270_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_271, parent: true, line: 80, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_160),
@@ -14594,7 +14631,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBackgroundPointerOver") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
@@ -14615,7 +14652,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBackgroundPressed") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPressed") }),
             ],
         },
         rt::StyleMember::Style {
@@ -14636,7 +14673,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBackgroundSelected") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushSelected") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushSelected") }),
             ],
         },
         rt::StyleMember::Style {
@@ -14657,7 +14694,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBackgroundPointerOver") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
@@ -14676,63 +14713,63 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBackgroundDisabled") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrushDisabled") }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_269` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_269_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_270` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_270_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_193() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_194() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_194() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_195() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Panel::background_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_131: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_122, source: build_controls_fluentcontrols_xaml_property_193, line: 170, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_194, source: build_controls_fluentcontrols_xaml_property_1, line: 171, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_122, source: build_controls_fluentcontrols_xaml_property_194, line: 170, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_195, source: build_controls_fluentcontrols_xaml_property_1, line: 171, position: 21 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_195() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_196() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::previous_button_theme_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_196() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_197() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::is_previous_button_visible_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_132: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_163, source: build_controls_fluentcontrols_xaml_property_195, line: 174, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_196, line: 175, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_164, source: build_controls_fluentcontrols_xaml_property_196, line: 174, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_197, line: 175, position: 19 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_197() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_198() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::next_button_theme_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_198() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_199() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::is_next_button_visible_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_133: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_163, source: build_controls_fluentcontrols_xaml_property_197, line: 211, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_198, line: 212, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_164, source: build_controls_fluentcontrols_xaml_property_198, line: 211, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_199, line: 212, position: 19 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -14760,32 +14797,32 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_176: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_177: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PreviousButton"), rt::SelectorStep::Class(":pressed")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_199() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_200() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::Visual::render_transform_origin_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_178: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_NextButton"), rt::SelectorStep::Class(":pressed")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_271`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_272`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_272_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_110, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerPreviousButtonTheme", line: 165, position: 44 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_197, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNextButtonTheme", line: 166, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_272, parent: true, line: 169, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_196, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerPreviousButtonTheme", line: 165, position: 44 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_198, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNextButtonTheme", line: 166, position: 40 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_273, parent: true, line: 169, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_170),
             line: 222,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_122, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_122, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -14804,8 +14841,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME: rt::ControlThemeTa
             line: 231,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_122, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_4) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_5) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_122, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_5) }),
             ],
         },
         rt::StyleMember::Style {
@@ -14852,8 +14889,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME: rt::ControlThemeTa
             line: 253,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_199, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_6) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_271_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_200, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_272_value_7) }),
             ],
         },
         rt::StyleMember::Style {
@@ -14862,63 +14899,63 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME: rt::ControlThemeTa
             line: 257,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_199, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_271_value_8) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_271_value_9) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_200, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_272_value_8) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_272_value_9) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::Orientation::Horizontal)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::Orientation::Vertical)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Absolute))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_7(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_7(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.875)")), 255, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_8() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_8() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Absolute))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_271` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_271_value_9(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_272` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_272_value_9(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.875)")), 259, 42)?;
@@ -14940,14 +14977,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_180: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_181: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_276`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_276_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_277`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_277_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarPanningThumbBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_277, parent: false, line: 52, position: 12 }) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_276_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_278, parent: false, line: 52, position: 12 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_277_value_0) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_179),
@@ -14978,8 +15015,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_276_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_276` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_276_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_277` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_277_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -14996,31 +15033,31 @@ fn build_controls_fluentcontrols_xaml_deferred_276_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_0)))
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_278`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_278_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_279`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_279_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_278_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_278_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_278_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_279_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_279_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_279_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_279, parent: false, line: 82, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_280, parent: false, line: 82, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_278` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_278_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_279` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_279_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_278` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_278_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_279` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_279_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_278` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_278_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_279` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_279_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
@@ -15030,15 +15067,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_135: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_2, key: "ScrollBarButtonBorderBrush", line: 94, position: 27 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_280`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_280_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_281`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_281_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_113, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarButtonArrowForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_281, parent: true, line: 92, position: 10 }) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_280_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_282, parent: true, line: 92, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_281_value_0) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_11),
@@ -15099,8 +15136,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_280_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_280` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_280_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_281` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_281_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -15119,68 +15156,68 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_136: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_200() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_201() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Track::minimum_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_201() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_202() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RangeBase::minimum_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_202() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_203() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Track::maximum_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_203() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_204() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RangeBase::maximum_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_137: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_200, source: build_controls_fluentcontrols_xaml_property_201, line: 175, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_202, source: build_controls_fluentcontrols_xaml_property_203, line: 176, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_201, source: build_controls_fluentcontrols_xaml_property_202, line: 175, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_203, source: build_controls_fluentcontrols_xaml_property_204, line: 176, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_204() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_205() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Track::defer_thumb_drag_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_205() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_206() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Track::viewport_size_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_206() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_207() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::ScrollBar::viewport_size_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_207() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_208() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Track::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_208() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_209() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::ScrollBar::orientation_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_138: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_204, source: build_controls_fluentcontrols_xaml_property_67, line: 178, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_205, source: build_controls_fluentcontrols_xaml_property_206, line: 179, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_207, source: build_controls_fluentcontrols_xaml_property_208, line: 180, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_205, source: build_controls_fluentcontrols_xaml_property_67, line: 178, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_206, source: build_controls_fluentcontrols_xaml_property_207, line: 179, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_208, source: build_controls_fluentcontrols_xaml_property_209, line: 180, position: 24 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_139: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_71, key: "ScrollBarTrackFill", line: 149, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_158, key: "ScrollBarTrackStroke", line: 150, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_159, key: "ScrollBarTrackBorderThemeThickness", line: 151, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "ScrollBarTrackStroke", line: 150, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_161, key: "ScrollBarTrackBorderThemeThickness", line: 151, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -15222,22 +15259,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_145: &[rt::TemplateBindingRow
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_146: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_200, source: build_controls_fluentcontrols_xaml_property_201, line: 259, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_202, source: build_controls_fluentcontrols_xaml_property_203, line: 260, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_201, source: build_controls_fluentcontrols_xaml_property_202, line: 259, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_203, source: build_controls_fluentcontrols_xaml_property_204, line: 260, position: 24 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_147: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_204, source: build_controls_fluentcontrols_xaml_property_67, line: 262, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_205, source: build_controls_fluentcontrols_xaml_property_206, line: 263, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_207, source: build_controls_fluentcontrols_xaml_property_208, line: 264, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_205, source: build_controls_fluentcontrols_xaml_property_67, line: 262, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_206, source: build_controls_fluentcontrols_xaml_property_207, line: 263, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_208, source: build_controls_fluentcontrols_xaml_property_209, line: 264, position: 24 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_148: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_71, key: "ScrollBarTrackFill", line: 233, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_158, key: "ScrollBarTrackStroke", line: 234, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_159, key: "ScrollBarTrackBorderThemeThickness", line: 235, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_160, key: "ScrollBarTrackStroke", line: 234, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_161, key: "ScrollBarTrackBorderThemeThickness", line: 235, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -15275,7 +15312,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_153: &[rt::DynamicResourceRo
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_182: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_209() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_210() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Control::context_flyout_property())
 }
 
@@ -15283,12 +15320,12 @@ fn build_controls_fluentcontrols_xaml_property_209() -> &'static ::ferroui_base:
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_183: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":horizontal")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_210() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_211() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::ScrollBar::is_expanded_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_184: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_210, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_184: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_211, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_185: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Root")];
@@ -15299,8 +15336,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_186: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_187: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_282`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_283`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_283_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE),
@@ -15315,8 +15352,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
             line: 139,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "VerticalScrollBarContextFlyout", line: 140, position: 40 } }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_283, parent: true, line: 143, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_210, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "VerticalScrollBarContextFlyout", line: 140, position: 40 } }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_284, parent: true, line: 143, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -15325,8 +15362,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
             line: 223,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "HorizontalScrollBarContextFlyout", line: 224, position: 40 } }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_284, parent: true, line: 227, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_210, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "HorizontalScrollBarContextFlyout", line: 224, position: 40 } }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_285, parent: true, line: 227, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -15341,7 +15378,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
                     line: 307,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarBackgroundPointerOver") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarBackgroundPointerOver") }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -15351,7 +15388,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarTrackFillPointerOver") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarTrackStrokePointerOver") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarTrackStrokePointerOver") }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(1.0_f64) }),
                     ],
                 },
@@ -15362,7 +15399,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ScrollBarThumbBackgroundColor") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_282_value_0) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_283_value_0) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -15379,8 +15416,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_282` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_282_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_283` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_283_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("none")), 317, 44)?;
@@ -15409,7 +15446,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_12() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_162, value: build_controls_fluentcontrols_xaml_selector_value_12 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_188: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_163, value: build_controls_fluentcontrols_xaml_selector_value_12 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_13() -> ::ferroui_base::BoxedValue {
@@ -15417,7 +15454,7 @@ fn build_controls_fluentcontrols_xaml_selector_value_13() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_189: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_162, value: build_controls_fluentcontrols_xaml_selector_value_13 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_189: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_163, value: build_controls_fluentcontrols_xaml_selector_value_13 }];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_14() -> ::ferroui_base::BoxedValue {
@@ -15425,14 +15462,14 @@ fn build_controls_fluentcontrols_xaml_selector_value_14() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_162, value: build_controls_fluentcontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_190: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_163, value: build_controls_fluentcontrols_xaml_selector_value_14 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_288`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_288_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_289`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_289_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_289, parent: false, line: 46, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_290, parent: false, line: 46, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -15559,19 +15596,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_156: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_211() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_212() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Button::command_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_212() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_213() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::SplitButton::command_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_157: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_9, source: build_controls_fluentcontrols_xaml_property_9, line: 152, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_211, source: build_controls_fluentcontrols_xaml_property_212, line: 153, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_212, source: build_controls_fluentcontrols_xaml_property_213, line: 153, position: 19 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -15589,7 +15626,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_159: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_213() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_214() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::input::KeyboardNavigation::is_tab_stop_property())
 }
 
@@ -15602,8 +15639,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_192: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_193: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_290`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_290_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_291`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_291_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE),
@@ -15612,22 +15649,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_290_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_290_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_290_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_290_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_290_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_213, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_291_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_291_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_291_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_291_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_214, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonPadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_291, parent: true, line: 136, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_292, parent: true, line: 136, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_191),
             line: 194,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_162, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("flyout-open") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("flyout-open") }),
             ],
         },
         rt::StyleMember::Style {
@@ -15636,7 +15673,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_290_THEME: rt::ControlThemeTa
             line: 198,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_162, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("checked") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("checked") }),
             ],
         },
         rt::StyleMember::Style {
@@ -15645,34 +15682,34 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_290_THEME: rt::ControlThemeTa
             line: 202,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_162, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("checked-flyout-open") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_163, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("checked-flyout-open") }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_290` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_290_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_291` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_291_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_290` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_290_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_291` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_291_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_290` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_290_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_291` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_291_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_290` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_290_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_291` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_291_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_214() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_215() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::SplitView::pane_background_property())
 }
 
@@ -15683,7 +15720,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_195: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PaneRoot")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_215() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_216() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Grid::column_property())
 }
 
@@ -15706,7 +15743,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_200: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_201: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_216() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_217() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Grid::row_property())
 }
 
@@ -15746,21 +15783,21 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_212: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_213: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compactoverlay"), rt::SelectorStep::Class(":open"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LightDismissLayer")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_293`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_294`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_294_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SplitView as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_135, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitViewOpenPaneThemeLength") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_137, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitViewCompactPaneThemeLength") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_214, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlPageBackgroundChromeLowBrush") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_138, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitViewOpenPaneThemeLength") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_140, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitViewCompactPaneThemeLength") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlPageBackgroundChromeLowBrush") }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_124),
             line: 30,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_294, parent: true, line: 33, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_295, parent: true, line: 33, position: 12 }) }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194),
@@ -15773,9 +15810,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 68,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_0) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_0) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15784,7 +15821,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 74,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
                             ],
                         },
@@ -15803,8 +15840,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_1) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_1) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15813,7 +15850,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 87,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -15832,8 +15869,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_2) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_2) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15842,7 +15879,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 100,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -15861,8 +15898,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_3) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_3) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15871,7 +15908,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 113,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -15885,7 +15922,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 120,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_295, parent: true, line: 123, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_296, parent: true, line: 123, position: 12 }) }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194),
@@ -15898,9 +15935,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 153,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_4) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_4) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15909,7 +15946,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 159,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
                             ],
                         },
@@ -15928,8 +15965,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_5) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_5) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15938,7 +15975,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 172,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -15957,8 +15994,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_6) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_6) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15967,7 +16004,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 185,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -15986,8 +16023,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_7) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_7) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -15996,7 +16033,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 198,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_215, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16010,7 +16047,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 206,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_296, parent: true, line: 209, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_297, parent: true, line: 209, position: 12 }) }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194),
@@ -16023,9 +16060,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 243,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_8) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_8) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16034,7 +16071,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 249,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
                             ],
                         },
@@ -16053,8 +16090,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_9) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_9) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16063,7 +16100,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 262,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16082,8 +16119,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_10) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_10) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16092,7 +16129,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 275,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16111,8 +16148,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_11) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_11) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16121,7 +16158,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 288,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16135,7 +16172,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 296,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_297, parent: true, line: 299, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_298, parent: true, line: 299, position: 12 }) }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_194),
@@ -16148,9 +16185,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 329,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_12) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_12) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16159,7 +16196,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 335,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
                             ],
                         },
@@ -16178,8 +16215,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_13) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_13) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16188,7 +16225,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 348,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16207,8 +16244,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(2_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_14) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_14) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16217,7 +16254,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 361,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16236,8 +16273,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_15) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_15) }),
                             ],
                         },
                         rt::StyleMember::Style {
@@ -16246,7 +16283,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
                             line: 374,
                             position: 10,
                             members: &[
-                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_216, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
+                                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_106, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
                             ],
                         },
@@ -16260,8 +16297,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 382,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_16) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_17) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_16) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_17) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16270,8 +16307,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 393,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_18) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_19) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_18) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_19) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16280,8 +16317,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 405,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_20) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_21) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_20) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_21) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16290,8 +16327,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 414,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_22) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_23) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_22) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_23) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16300,8 +16337,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 425,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_24) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_25) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_24) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_25) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16310,8 +16347,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 437,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_26) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_27) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_26) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_27) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16320,8 +16357,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 449,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_28) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_29) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_28) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_29) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16330,8 +16367,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
             line: 459,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_30) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_293_value_31) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_30) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_294_value_31) }),
             ],
         },
         rt::StyleMember::Style {
@@ -16364,8 +16401,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16379,8 +16416,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_4)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_1(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16394,8 +16431,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_6)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16409,8 +16446,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_8)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16424,8 +16461,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_3(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_10)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16439,8 +16476,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_4(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_12)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_5(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16454,8 +16491,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_5(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_14)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_6(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_6(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_6 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16469,8 +16506,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_6(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_16)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_7(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_7 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16484,8 +16521,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_7(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_18)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_8(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_8(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_8 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16499,8 +16536,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_8(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_20)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_9(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_9(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_9 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16514,8 +16551,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_9(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_22)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_10(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_10(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_10 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16529,8 +16566,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_10(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_24)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_11(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_11(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_11 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16544,8 +16581,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_11(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_26)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_12(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_12(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_12 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16559,8 +16596,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_12(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_28)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_13(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_13(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_13 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16574,8 +16611,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_13(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_30)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_14(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_14(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_14 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16589,8 +16626,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_14(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_32)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_15(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_15(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_15 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16604,8 +16641,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_15(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_34)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_16(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_16(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16645,8 +16682,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_16(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_17(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_17(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_16 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16660,8 +16697,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_17(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_38)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_18(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_18(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_1 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16701,8 +16738,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_18(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_19(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_19(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_17 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16716,8 +16753,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_19(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_42)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_20(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_20(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_2 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16757,8 +16794,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_20(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_2)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_21(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_21(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_18 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16772,8 +16809,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_21(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_46)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_22(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_22(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_3 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16813,8 +16850,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_22(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_3)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_23(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_23(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_19 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16828,8 +16865,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_23(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_50)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_24(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_24(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_4 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16869,8 +16906,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_24(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_4)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_25(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_25(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_20 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16884,8 +16921,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_25(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_54)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_26(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_26(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_5 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16925,8 +16962,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_26(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_5)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_27(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_27(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_21 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16940,8 +16977,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_27(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_58)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_28(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_28(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_6 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -16981,8 +17018,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_28(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_6)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_29(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_29(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_22 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -16996,8 +17033,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_29(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_62)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_30(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_30(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_7 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -17037,8 +17074,8 @@ fn build_controls_fluentcontrols_xaml_deferred_293_value_30(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&transitions_7)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_293` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_293_value_31(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_294` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_294_value_31(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let reflection_binding_extension_23 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
@@ -17065,43 +17102,43 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_160: &[rt::TemplateBindingRow
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_161: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_58, source: build_controls_fluentcontrols_xaml_property_28, line: 36, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_146, source: build_controls_fluentcontrols_xaml_property_152, line: 37, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_149, source: build_controls_fluentcontrols_xaml_property_154, line: 37, position: 29 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_217() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_218() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabControl::horizontal_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_218() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_219() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabControl::vertical_content_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_162: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 40, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_217, line: 41, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_218, line: 42, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_218, line: 41, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_219, line: 42, position: 33 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_163: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 45, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_217, line: 46, position: 33 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_218, line: 47, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_218, line: 46, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_219, line: 47, position: 33 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_214: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_154, value: build_controls_fluentcontrols_xaml_selector_value_6 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_219() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_220() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::WrapPanel::orientation_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_215: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_154, value: build_controls_fluentcontrols_xaml_selector_value_7 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter"), rt::SelectorStep::Child, rt::SelectorStep::OfType(<::ferroui_controls::WrapPanel as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_15() -> ::ferroui_base::BoxedValue {
@@ -17109,24 +17146,24 @@ fn build_controls_fluentcontrols_xaml_selector_value_15() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_152, value: build_controls_fluentcontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_216: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_154, value: build_controls_fluentcontrols_xaml_selector_value_15 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ItemsPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ItemsPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_298`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_298_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_299`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_299_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabControl as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabControlBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_299, parent: false, line: 28, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_300, parent: false, line: 28, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_214),
             line: 54,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_219, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_298_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_220, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_299_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -17135,7 +17172,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_298_THEME: rt::ControlThemeTa
             line: 57,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_219, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_298_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_220, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_299_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -17150,13 +17187,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_298_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_298` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_298_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_299` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_299_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::Orientation::Vertical)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_298` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_298_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_299` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_299_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::Orientation::Vertical)
 }
 
@@ -17185,22 +17222,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_166: &[rt::DynamicResourceRo
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_217: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_218: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_219: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_11 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_220: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_8 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_9 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_221: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_SelectedPipe")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_157, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_222: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_159, value: build_controls_fluentcontrols_xaml_selector_value_10 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_300`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_301`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_301_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabItem as ::ferroui_base::StaticType>::TYPE),
@@ -17211,8 +17248,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemHeaderMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_301, parent: true, line: 30, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_302, parent: true, line: 30, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -17300,8 +17337,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTa
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemPipeThickness") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemVerticalPipeHeight") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 2.0_f64, 0.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_1) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -17321,8 +17358,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTa
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemPipeThickness") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_3) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_4) }),
             ],
         },
         rt::StyleMember::Style {
@@ -17334,8 +17371,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTa
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemPipeThickness") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemVerticalPipeHeight") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([2.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_5) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_5) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_6) }),
             ],
         },
         rt::StyleMember::Style {
@@ -17353,49 +17390,49 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME: rt::ControlThemeTa
             line: 127,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_300_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_301_value_7) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_300` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_300_value_7() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_301` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_301_value_7() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
@@ -17419,13 +17456,13 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_168: &[rt::DynamicResourceRo
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_223: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_68, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentPanel")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_302`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_302_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_303`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_303_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_302_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_303, parent: true, line: 21, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_303_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_304, parent: true, line: 21, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_16),
@@ -17448,8 +17485,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_302_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_302` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_302_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_303` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_303_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -17482,12 +17519,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_171: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_220() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_221() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBlock::text_trimming_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_304`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_304_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_305`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_305_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TableView as ::ferroui_base::StaticType>::TYPE),
@@ -17495,35 +17532,35 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_304_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlBackgroundChromeMediumLowBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlForegroundBaseHighBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListBoxBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_304_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_304_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_305_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_305_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_65, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_66, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_220, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_304_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_305, parent: true, line: 91, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_221, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_305_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_306, parent: true, line: 91, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_304` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_304_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_305` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_305_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_304` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_304_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_305` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_305_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_304` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_304_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_305` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_305_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = <dyn ::ferroui_base::media::TextTrimming>::__markup_static_get_CharacterEllipsis();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_306`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_306_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_307`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_307_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TableViewCell as ::ferroui_base::StaticType>::TYPE),
@@ -17547,35 +17584,35 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_173: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_13, line: 40, position: 29 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_309`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_309_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_310`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_310_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TableViewColumnHeader as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_91, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_309_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_91, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_310_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TableViewCellPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_309_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_309_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_310_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_310_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_56, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_310, parent: true, line: 30, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_311, parent: true, line: 30, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_309` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_309_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_310` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_310_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 23, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_309` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_309_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_310` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_310_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_309` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_309_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_310` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_310_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -17593,14 +17630,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_174: &[rt::TemplateBindingRow
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_224: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_311`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_311_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_312`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_312_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TableViewRow as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TableViewRowBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TableViewRowPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_312, parent: false, line: 12, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_313, parent: false, line: 12, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_224),
@@ -17694,8 +17731,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_177: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_70, key: "TabStripItemPipeThickness", line: 46, position: 21 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_313`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_313_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_314`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_314_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::TabStripItem as ::ferroui_base::StaticType>::TYPE),
@@ -17706,8 +17743,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_313_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabItemHeaderMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabStripItemMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_313_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_314, parent: true, line: 29, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_314_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_315, parent: true, line: 29, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_8),
@@ -17780,8 +17817,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_313_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_313` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_313_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_314` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_314_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -17792,8 +17829,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_178: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_4, source: build_controls_fluentcontrols_xaml_property_5, line: 49, position: 29 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_320`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_320_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_321`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_321_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -17802,9 +17839,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_320_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlInnerButtonMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_320_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_321_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_113, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlButtonForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_321, parent: false, line: 46, position: 12 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_322, parent: false, line: 46, position: 12 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_26),
@@ -17839,8 +17876,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_320_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_320` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_320_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_321` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_321_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_0 = {
@@ -17860,13 +17897,13 @@ fn build_controls_fluentcontrols_xaml_deferred_320_value_0(
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_225: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)], &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":indeterminate"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY)]] }];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_322`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_322_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_323`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_323_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentTextBoxButton"), line: 76, position: 17 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_323, parent: false, line: 80, position: 12 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_324, parent: false, line: 80, position: 12 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_225),
@@ -17901,192 +17938,192 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_180: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_221() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_222() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBlock::text_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_222() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_223() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBlock::text_wrapping_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_223() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_224() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::text_wrapping_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_181: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_116, source: build_controls_fluentcontrols_xaml_property_33, line: 152, position: 34 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_221, source: build_controls_fluentcontrols_xaml_property_88, line: 153, position: 34 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_222, source: build_controls_fluentcontrols_xaml_property_223, line: 154, position: 34 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_222, source: build_controls_fluentcontrols_xaml_property_88, line: 153, position: 34 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_223, source: build_controls_fluentcontrols_xaml_property_224, line: 154, position: 34 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_84, line: 155, position: 34 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_82, line: 156, position: 34 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_224() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_225() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::text_style_overrides_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_225() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_226() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::text_style_overrides_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_226() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_227() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::text_paragraph_styles_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_227() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_228() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::text_paragraph_styles_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_228() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_229() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::caret_blink_interval_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_229() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_230() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::caret_blink_interval_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_230() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_231() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::caret_index_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_231() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_232() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::caret_index_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_232() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_233() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::selection_start_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_233() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_234() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::selection_start_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_234() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_235() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::selection_end_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_235() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_236() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::selection_end_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_236() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_237() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::text_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_237() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_238() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::text_wrapping_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_238() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_239() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::line_height_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_239() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_240() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::line_height_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_240() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_241() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::letter_spacing_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_241() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_242() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::TemplatedControl::letter_spacing_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_242() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_243() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::password_char_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_243() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_244() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::password_char_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_244() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::reveal_password_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_246() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::reveal_password_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_246() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_247() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::selection_brush_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_247() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_248() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::selection_brush_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_248() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_249() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_249() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_250() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_250() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_251() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::TextPresenter::caret_brush_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_251() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_252() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::caret_brush_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_182: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_224, source: build_controls_fluentcontrols_xaml_property_225, line: 167, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_226, source: build_controls_fluentcontrols_xaml_property_227, line: 168, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_228, source: build_controls_fluentcontrols_xaml_property_229, line: 169, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_230, source: build_controls_fluentcontrols_xaml_property_231, line: 170, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_232, source: build_controls_fluentcontrols_xaml_property_233, line: 171, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_234, source: build_controls_fluentcontrols_xaml_property_235, line: 172, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_236, source: build_controls_fluentcontrols_xaml_property_88, line: 173, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_237, source: build_controls_fluentcontrols_xaml_property_223, line: 174, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_238, source: build_controls_fluentcontrols_xaml_property_239, line: 175, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_240, source: build_controls_fluentcontrols_xaml_property_241, line: 176, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_242, source: build_controls_fluentcontrols_xaml_property_243, line: 177, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_244, source: build_controls_fluentcontrols_xaml_property_245, line: 178, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_246, source: build_controls_fluentcontrols_xaml_property_247, line: 179, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_248, source: build_controls_fluentcontrols_xaml_property_249, line: 180, position: 38 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_250, source: build_controls_fluentcontrols_xaml_property_251, line: 181, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_225, source: build_controls_fluentcontrols_xaml_property_226, line: 167, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_227, source: build_controls_fluentcontrols_xaml_property_228, line: 168, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_229, source: build_controls_fluentcontrols_xaml_property_230, line: 169, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_231, source: build_controls_fluentcontrols_xaml_property_232, line: 170, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_233, source: build_controls_fluentcontrols_xaml_property_234, line: 171, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_235, source: build_controls_fluentcontrols_xaml_property_236, line: 172, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_237, source: build_controls_fluentcontrols_xaml_property_88, line: 173, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_238, source: build_controls_fluentcontrols_xaml_property_224, line: 174, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_239, source: build_controls_fluentcontrols_xaml_property_240, line: 175, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_241, source: build_controls_fluentcontrols_xaml_property_242, line: 176, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_243, source: build_controls_fluentcontrols_xaml_property_244, line: 177, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_245, source: build_controls_fluentcontrols_xaml_property_246, line: 178, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_247, source: build_controls_fluentcontrols_xaml_property_248, line: 179, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_249, source: build_controls_fluentcontrols_xaml_property_250, line: 180, position: 38 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_251, source: build_controls_fluentcontrols_xaml_property_252, line: 181, position: 38 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_84, line: 182, position: 38 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_82, line: 183, position: 38 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_252() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_253() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Control::focus_adorner_property())
 }
 
@@ -18106,10 +18143,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_229: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_230: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_166, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_231: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_167, value: build_controls_fluentcontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::Class(":empty")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FloatingPlaceholder")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_253() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_254() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::accepts_return_property())
 }
 
@@ -18119,43 +18156,43 @@ fn build_controls_fluentcontrols_xaml_selector_value_16() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_253, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_80, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_232: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("revealPasswordButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_254, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_80, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_254() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_255() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::inner_right_content_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_253, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_80, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_233: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("clearButton"), rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_254, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_80, value: build_controls_fluentcontrols_xaml_selector_value_16 }, rt::SelectorStep::Class(":focus"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":empty")] }];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_324`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_324_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_325`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_325_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_251, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_252, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderBrush") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_247, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_248, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_35, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemeMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemeMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_252, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_253, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_65, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_324_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_325, parent: true, line: 113, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_210, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_325_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_326, parent: true, line: 113, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_226),
             line: 203,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "HorizontalTextBoxContextFlyout", line: 204, position: 40 } }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_210, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "HorizontalTextBoxContextFlyout", line: 204, position: 40 } }),
             ],
         },
         rt::StyleMember::Style {
@@ -18231,7 +18268,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_324_THEME: rt::ControlThemeTa
             line: 244,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_324_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_191, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_325_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -18249,7 +18286,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_324_THEME: rt::ControlThemeTa
             line: 253,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_254, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_324_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_255, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_325_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -18258,14 +18295,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_324_THEME: rt::ControlThemeTa
             line: 272,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_254, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_324_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_255, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_325_value_3) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_324` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_324_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_325` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_325_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let on_form_factor_extension_0 = ::ferroui_markup_xaml::markup_extensions::OnFormFactorExtension::__markup_new_0();
@@ -18288,33 +18325,33 @@ fn build_controls_fluentcontrols_xaml_deferred_324_value_0(
     ::core::result::Result::Ok(provided_11.clone())
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_324` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_324_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_325` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_325_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 245, 33)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_324` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_324_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_325` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_325_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_326, 256, 12)?;
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_327, 256, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_324` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_324_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_325` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_325_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_1 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_1.clone()));
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_327, 275, 12)?;
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_328, 275, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_1)))
@@ -18347,7 +18384,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_186: &[rt::DynamicResourceRo
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_255() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_256() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::knob_transitions_property())
 }
 
@@ -18432,18 +18469,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_259: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_260: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":unchecked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_OnContentPresenter")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_328`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_328_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_329`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_329_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContentForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_328_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_328_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_328_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_328_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_255, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_328_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_329, parent: true, line: 40, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_329_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_329_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_329_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_329_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_256, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_329_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_330, parent: true, line: 40, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -18506,7 +18543,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_328_THEME: rt::ControlThemeTa
             line: 166,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContainerBackgroundPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContainerBackgroundPointerOver") }),
             ],
         },
         rt::StyleMember::Style {
@@ -18553,7 +18590,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_328_THEME: rt::ControlThemeTa
             line: 189,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContainerBackgroundPressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContainerBackgroundPressed") }),
             ],
         },
         rt::StyleMember::Style {
@@ -18714,28 +18751,28 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_328_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_328` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_328_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_329` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_329_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_328` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_328_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_329` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_329_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_328` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_328_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_329` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_329_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_328` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_328_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_329` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_329_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_328` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_328_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_329` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_329_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -18759,21 +18796,21 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_187: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_256() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_257() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBlock::letter_spacing_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_188: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_9, line: 48, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_256, source: build_controls_fluentcontrols_xaml_property_241, line: 49, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_257, source: build_controls_fluentcontrols_xaml_property_242, line: 49, position: 29 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_261: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":open")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_330`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_330_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_331`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_331_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ToolTip as ::ferroui_base::StaticType>::TYPE),
@@ -18783,11 +18820,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_330_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToolTipBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_51, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToolTipContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToolTipBorderThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToolTipContentMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToolTipContentMaxWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_104, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_330_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_331, parent: false, line: 39, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_20, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_331_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_332, parent: false, line: 39, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_261),
@@ -18800,8 +18837,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_330_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_330` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_330_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_331` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_331_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
@@ -18822,15 +18859,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_189: &[rt::TemplateBindingRow
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_262: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ChevronPath")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_334`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_334_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_335`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_335_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "TreeViewItemExpandCollapseChevronSize", line: 31, position: 30 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "TreeViewItemExpandCollapseChevronSize", line: 32, position: 31 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_335, parent: true, line: 35, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_336, parent: true, line: 35, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_262),
@@ -18853,26 +18890,26 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_190: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_257() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_258() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::HeaderedItemsControl::header_template_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_191: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_257, line: 95, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_8, source: build_controls_fluentcontrols_xaml_property_258, line: 95, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_17, line: 96, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_18, line: 97, position: 33 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 98, position: 33 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_258() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_259() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TreeViewItem::is_expanded_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_192: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_258, line: 102, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_259, line: 102, position: 27 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_58, source: build_controls_fluentcontrols_xaml_property_28, line: 103, position: 27 },
 ];
 
@@ -18918,8 +18955,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_275: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_276: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ExpandCollapseChevronContainer")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_336`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_336_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_337`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_337_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE),
@@ -18929,8 +18966,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_336_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_336_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_337, parent: true, line: 65, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_337_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_338, parent: true, line: 65, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_263),
@@ -19085,18 +19122,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_336_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_336` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_336_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_337` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_337_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_259() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_260() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDecorationProperties::element_role_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_340`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_340_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_341`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_341_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -19105,16 +19142,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_340_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CaptionButtonForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CaptionButtonWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CaptionButtonHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_340_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_259, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_340_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_341, parent: false, line: 21, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_341_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_260, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_341_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_342, parent: false, line: 21, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_26),
             line: 27,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_340_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_341_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -19123,24 +19160,24 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_340_THEME: rt::ControlThemeTa
             line: 31,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_340_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_341_value_3) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_340` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_340_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_341` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_341_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_340` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_340_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_341` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_341_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::WindowDecorationsElementRole::DecorationsElement)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_340` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_340_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_341` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_341_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
@@ -19148,8 +19185,8 @@ fn build_controls_fluentcontrols_xaml_deferred_340_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_5)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_340` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_340_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_341` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_341_value_3(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()));
@@ -19158,19 +19195,19 @@ fn build_controls_fluentcontrols_xaml_deferred_340_value_3(
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_260() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_261() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_bar_height_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_261() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_262() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::has_title_bar_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_193: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_70, source: build_controls_fluentcontrols_xaml_property_260, line: 77, position: 27 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_261, line: 78, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_70, source: build_controls_fluentcontrols_xaml_property_261, line: 77, position: 27 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_120, source: build_controls_fluentcontrols_xaml_property_262, line: 78, position: 27 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -19186,22 +19223,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_195: &[rt::DynamicResourceRo
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_262() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_263() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::default_title_bar_height_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_263() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_264() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::default_frame_thickness_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_264() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_265() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::default_shadow_thickness_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_265() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_266() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::template_property())
 }
 
@@ -19212,7 +19249,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_277: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_278: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":has-shadow"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_WindowBorder")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_266() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_267() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Border::box_shadow_property())
 }
 
@@ -19267,22 +19304,22 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_294: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_295: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":fullscreen"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TitleBar")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_342`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_343`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_343_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::chrome::WindowDrawnDecorations as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_262, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(30.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_263, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_265, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_342_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_263, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(30.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64]) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_265, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64]) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_266, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_343_value_0) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_277),
             line: 172,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_342_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_343_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -19291,7 +19328,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME: rt::ControlThemeTa
             line: 175,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_266, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("WindowDrawnDecorationsWindowBorderBoxShadow") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_267, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("WindowDrawnDecorationsWindowBorderBoxShadow") }),
             ],
         },
         rt::StyleMember::Style {
@@ -19300,7 +19337,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME: rt::ControlThemeTa
             line: 178,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_342_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_52, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_343_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -19336,7 +19373,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME: rt::ControlThemeTa
             line: 194,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_342_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_95, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_343_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -19450,20 +19487,20 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_342` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_342_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_343` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_343_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let window_drawn_decorations_template_0 = ::ferroui_markup_xaml::templates::WindowDrawnDecorationsTemplate::__markup_new_0();
     context.push_parent(rt::to_value(window_drawn_decorations_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::chrome::WindowDrawnDecorationsContent as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_343, 42, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::chrome::WindowDrawnDecorationsContent as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_344, 42, 10)?;
     ::ferroui_markup_xaml::templates::WindowDrawnDecorationsTemplate::__markup_set_Content(&window_drawn_decorations_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&window_drawn_decorations_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_342` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_342_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_343` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_343_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::shadow_thickness_property()));
@@ -19471,8 +19508,8 @@ fn build_controls_fluentcontrols_xaml_deferred_342_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_342` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_342_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_343` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_343_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::shadow_thickness_property()));
@@ -19480,8 +19517,8 @@ fn build_controls_fluentcontrols_xaml_deferred_342_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_2)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_342` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_342_value_3(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_343` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_343_value_3(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(2048.0_f64, 410.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1638.0_f64, 410.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1638.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 1638.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(410.0_f64, 1638.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(410.0_f64, 2048.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2048.0_f64, 2048.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2048.0_f64, 410.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(1434.0_f64, 1434.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(205.0_f64, 1434.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(205.0_f64, 205.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1434.0_f64, 205.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1434.0_f64, 1434.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(1843.0_f64, 1843.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(614.0_f64, 1843.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(614.0_f64, 1638.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1638.0_f64, 1638.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1638.0_f64, 614.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1843.0_f64, 614.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1843.0_f64, 1843.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
@@ -19503,56 +19540,56 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_197: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_267() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_268() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::horizontal_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_268() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_269() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::vertical_content_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_198: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_267, line: 100, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_268, line: 101, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_268, line: 100, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_269, line: 101, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_269() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_270() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_270() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_271() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::placeholder_foreground_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_199: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 103, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_116, source: build_controls_fluentcontrols_xaml_property_269, line: 104, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_118, source: build_controls_fluentcontrols_xaml_property_270, line: 105, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_116, source: build_controls_fluentcontrols_xaml_property_270, line: 104, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_118, source: build_controls_fluentcontrols_xaml_property_271, line: 105, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_271() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_272() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::selection_box_item_template_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_200: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 116, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_13, source: build_controls_fluentcontrols_xaml_property_267, line: 117, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_9, source: build_controls_fluentcontrols_xaml_property_271, line: 118, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_15, source: build_controls_fluentcontrols_xaml_property_268, line: 119, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_13, source: build_controls_fluentcontrols_xaml_property_268, line: 117, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_9, source: build_controls_fluentcontrols_xaml_property_272, line: 118, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_15, source: build_controls_fluentcontrols_xaml_property_269, line: 119, position: 29 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_201: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_11, source: build_controls_fluentcontrols_xaml_property_11, line: 125, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_267, line: 126, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_268, line: 127, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_268, line: 126, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_18, source: build_controls_fluentcontrols_xaml_property_269, line: 127, position: 22 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_16, source: build_controls_fluentcontrols_xaml_property_16, line: 128, position: 22 },
 ];
 
@@ -19577,7 +19614,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_204: &[rt::DynamicResourceRo
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_272() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_273() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::max_drop_down_height_property())
 }
 
@@ -19600,40 +19637,40 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_300: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_301: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("HighlightBackground")];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_273() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_274() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::is_editable_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_302: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_273, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_302: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_274, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_274() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_275() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::input::KeyboardNavigation::tab_navigation_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_344`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_344_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_345`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_345_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_252, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_272, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(504.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_253, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_273, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(504.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_16, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_63, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_64, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_267, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_268, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_5) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_270, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_345, parent: true, line: 80, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_268, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_269, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_271, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_346, parent: true, line: 80, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_129),
@@ -19795,44 +19832,44 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_344_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_110, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_274, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_344_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_275, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_345_value_6) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_344` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_344_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_345` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_345_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
@@ -19842,19 +19879,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_205: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 50, position: 17 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 51, position: 17 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 52, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_160, source: build_controls_fluentcontrols_xaml_property_160, line: 53, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_134, source: build_controls_fluentcontrols_xaml_property_134, line: 53, position: 17 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_55, source: build_controls_fluentcontrols_xaml_property_55, line: 54, position: 17 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_17, source: build_controls_fluentcontrols_xaml_property_17, line: 55, position: 17 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 56, position: 17 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_275() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_276() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ContextMenu::window_manager_add_shadow_hint_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_348`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_348_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_349`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_349_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ContextMenu as ::ferroui_base::StaticType>::TYPE),
@@ -19863,17 +19900,17 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_348_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutThemeMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_348_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_275, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_349, parent: true, line: 49, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_349_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_276, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_350, parent: true, line: 49, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_348` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_348_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_349` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_349_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
@@ -19891,27 +19928,27 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_207: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_276() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_277() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DataValidationErrors::error_template_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_350`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_350_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_351`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_351_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_351, parent: true, line: 32, position: 10 }) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_276, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_350_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_352, parent: true, line: 32, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_277, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_351_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_350` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_350_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_351` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_351_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_352, 52, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_353, 52, 10)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&data_template_0)))
@@ -19931,23 +19968,23 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_209: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_6, source: build_controls_fluentcontrols_xaml_property_7, line: 82, position: 29 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_353`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_353_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_354`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_354_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_354, parent: true, line: 69, position: 10 }) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_276, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_353_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::Some(<::ferroui_controls::DataValidationErrors as ::ferroui_base::StaticType>::TYPE), content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_355, parent: true, line: 69, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_277, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_354_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_353` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_353_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_354` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_354_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_355, 88, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_356, 88, 10)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&data_template_0)))
@@ -19959,15 +19996,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_303: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_304: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class("MonthItem")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_356`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_356_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_357`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Type(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), line: 24, position: 75 },
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerFlyoutPresenterItemPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_356_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_356_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_1) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_8),
@@ -19981,7 +20018,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_356_THEME: rt::ControlThemeTa
                     line: 31,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_356_value_2) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_71, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_2) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -19990,7 +20027,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_356_THEME: rt::ControlThemeTa
                     line: 34,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_356_value_3) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_0, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_3) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlForegroundBaseHighBrush") }),
                     ],
                 },
@@ -20003,34 +20040,34 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_356_THEME: rt::ControlThemeTa
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerFlyoutPresenterMonthPadding") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_356_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_4) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_356` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_356_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_357_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_356` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_356_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_357_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_356` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_356_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_357_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_356` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_356_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_357_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_356` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_356_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_357_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
@@ -20049,16 +20086,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_211: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_4, key: "DateTimeFlyoutButtonBorderThickness", line: 61, position: 19 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_357`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_358`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimePickerFlyoutButtonBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimePickerButtonHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_357_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_358, parent: true, line: 57, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_358_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_358_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_359, parent: true, line: 57, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_26),
@@ -20084,87 +20121,87 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_357_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_358` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_358_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_357` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_357_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_358` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_358_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_359`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_359_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_360`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_360_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentDateTimePickerButton"), line: 86, position: 80 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_359_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_360_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimePickerButtonHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_359_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_360_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlBackgroundChromeMediumLowBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_120, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_359_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_360_value_2) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_359` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_359_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_360` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_360_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_359` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_359_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_360` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_360_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_359` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_359_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_360` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_360_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_360, 95, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_361, 95, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_361`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_361_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_362`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_362_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("FluentDateTimePickerButton"), line: 102, position: 82 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_361_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_362_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_70, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimePickerButtonHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_361_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_362_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_59, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemControlBackgroundChromeMediumLowBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_120, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_361_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_112, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_362_value_2) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_361` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_361_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_362` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_362_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_361` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_361_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_362` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_362_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_361` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_361_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_362` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_362_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_362, 111, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_363, 111, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
@@ -20177,20 +20214,20 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_212: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_4, source: build_controls_fluentcontrols_xaml_property_5, line: 49, position: 27 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_363`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_363_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_364`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_364_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_363_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_364, parent: false, line: 46, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_364_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_365, parent: false, line: 46, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_2),
             line: 58,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_363_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_364_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20217,16 +20254,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_363_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_363` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_363_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_364` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_364_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("none")), 43, 40)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_363` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_363_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_364` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_364_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.98)")), 59, 42)?;
@@ -20240,9 +20277,9 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_213: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_3, source: build_controls_fluentcontrols_xaml_property_3, line: 92, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_5, source: build_controls_fluentcontrols_xaml_property_5, line: 93, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_7, source: build_controls_fluentcontrols_xaml_property_7, line: 94, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_161, source: build_controls_fluentcontrols_xaml_property_161, line: 95, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_162, source: build_controls_fluentcontrols_xaml_property_162, line: 95, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_54, source: build_controls_fluentcontrols_xaml_property_54, line: 96, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_160, source: build_controls_fluentcontrols_xaml_property_160, line: 97, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_134, source: build_controls_fluentcontrols_xaml_property_134, line: 97, position: 21 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -20257,8 +20294,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_307: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_308: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_365`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_365_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_366`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DatePicker as ::ferroui_base::StaticType>::TYPE),
@@ -20267,11 +20304,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_365_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_365_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_365_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_366_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_366_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerThemeMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerThemeMaxWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_366, parent: true, line: 86, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerThemeMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_367, parent: true, line: 86, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_305),
@@ -20287,7 +20324,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_365_THEME: rt::ControlThemeTa
             line: 136,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_365_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_366_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20311,18 +20348,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_365_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_365` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_365_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_366` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_366_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_365` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_365_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_366` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_366_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_365` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_365_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_366` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_366_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::DatePicker::vertical_content_alignment_property()));
@@ -20343,19 +20380,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_309: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_310: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pointerover"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_367`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_367_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_368`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_368_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DatePickerPresenter as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerPresenterWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerPresenterWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_185, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(398.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_186, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(398.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerFlyoutPresenterBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DatePickerFlyoutPresenterBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimeFlyoutBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_368, parent: true, line: 161, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_369, parent: true, line: 161, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_309),
@@ -20383,20 +20420,20 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_215: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_4, source: build_controls_fluentcontrols_xaml_property_5, line: 48, position: 27 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_369`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_370`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_370_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_369_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_370, parent: false, line: 45, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_370_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_371, parent: false, line: 45, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_2),
             line: 57,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_369_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_370_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20423,16 +20460,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_369` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_369_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_370` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_370_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("none")), 42, 40)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_369` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_369_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_370` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_370_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.98)")), 58, 42)?;
@@ -20446,16 +20483,16 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_216: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_3, source: build_controls_fluentcontrols_xaml_property_3, line: 91, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_5, source: build_controls_fluentcontrols_xaml_property_5, line: 92, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_7, source: build_controls_fluentcontrols_xaml_property_7, line: 93, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_161, source: build_controls_fluentcontrols_xaml_property_161, line: 94, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_162, source: build_controls_fluentcontrols_xaml_property_162, line: 94, position: 21 },
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_54, source: build_controls_fluentcontrols_xaml_property_54, line: 95, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_160, source: build_controls_fluentcontrols_xaml_property_160, line: 96, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_134, source: build_controls_fluentcontrols_xaml_property_134, line: 96, position: 21 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_311: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":hasnotime"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_FlyoutButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_371`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_371_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_372`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_372_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TimePicker as ::ferroui_base::StaticType>::TYPE),
@@ -20464,11 +20501,11 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_371_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_371_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_371_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_372_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_372_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerThemeMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerThemeMaxWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_372, parent: true, line: 85, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerThemeMaxWidth") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_373, parent: true, line: 85, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_305),
@@ -20484,7 +20521,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_371_THEME: rt::ControlThemeTa
             line: 178,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_371_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_372_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20508,18 +20545,18 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_371_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_371` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_371_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_372` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_372_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_371` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_371_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_372` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_372_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_371` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_371_value_2(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_372` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_372_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TimePicker::vertical_content_alignment_property()));
@@ -20535,19 +20572,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_217: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 205, position: 17 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_373`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_374`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_374_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TimePickerPresenter as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_37, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerPresenterWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerPresenterWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_185, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(398.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_186, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(398.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerFlyoutPresenterBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TimePickerFlyoutPresenterBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DateTimeFlyoutBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_374, parent: true, line: 201, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_375, parent: true, line: 201, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_309),
@@ -20593,8 +20630,8 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_313: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_314: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::PathIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_375`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_375_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_376`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE),
@@ -20604,12 +20641,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_375_THEME: rt::ControlThemeTa
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_5, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_11, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonPadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_55, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("DropDownButtonMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_375_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_375_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_375_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_375_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_376_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_376_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_376_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_15, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_376_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_376, parent: true, line: 30, position: 14 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_377, parent: true, line: 30, position: 14 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_0),
@@ -20645,7 +20682,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_375_THEME: rt::ControlThemeTa
             line: 82,
             position: 8,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_375_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_376_value_4) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20691,28 +20728,28 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_375_THEME: rt::ControlThemeTa
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_375` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_375_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_376` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_376_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_375` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_375_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_376` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_376_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_375` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_375_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_376` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_376_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_375` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_375_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_376` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_376_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_375` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_375_value_4(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_376` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_376_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.98)")), 83, 44)?;
@@ -20725,12 +20762,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_220: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_70, key: "SliderTrackThemeHeight", line: 56, position: 19 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_377`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_377_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_378`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_378_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_378, parent: true, line: 51, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_379, parent: true, line: 51, position: 10 }) }),
     ],
 };
 
@@ -20740,12 +20777,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_221: &[rt::DynamicResourceRo
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_37, key: "SliderTrackThemeHeight", line: 71, position: 19 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_379`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_379_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_380`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_380_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_380, parent: true, line: 66, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_381, parent: true, line: 66, position: 10 }) }),
     ],
 };
 
@@ -20756,12 +20793,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_222: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 84, position: 13 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_381`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_381_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_382`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_382_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_382, parent: true, line: 81, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_383, parent: true, line: 81, position: 10 }) }),
     ],
 };
 
@@ -20773,67 +20810,67 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_223: &[rt::TemplateBindingRow
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_277() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_278() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::ticks_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_278() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_279() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::ticks_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_279() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_280() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::tick_frequency_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_280() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_281() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::tick_frequency_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_281() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_282() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_282() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_283() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_283() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_284() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::minimum_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_284() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_285() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::maximum_property())
 }
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_224: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_277, source: build_controls_fluentcontrols_xaml_property_278, line: 122, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_279, source: build_controls_fluentcontrols_xaml_property_280, line: 123, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_281, source: build_controls_fluentcontrols_xaml_property_282, line: 124, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_283, source: build_controls_fluentcontrols_xaml_property_201, line: 125, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_203, line: 126, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_278, source: build_controls_fluentcontrols_xaml_property_279, line: 122, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_280, source: build_controls_fluentcontrols_xaml_property_281, line: 123, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_282, source: build_controls_fluentcontrols_xaml_property_283, line: 124, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_202, line: 125, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_285, source: build_controls_fluentcontrols_xaml_property_204, line: 126, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_225: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_277, source: build_controls_fluentcontrols_xaml_property_278, line: 138, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_279, source: build_controls_fluentcontrols_xaml_property_280, line: 139, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_281, source: build_controls_fluentcontrols_xaml_property_282, line: 140, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_283, source: build_controls_fluentcontrols_xaml_property_201, line: 141, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_203, line: 142, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_278, source: build_controls_fluentcontrols_xaml_property_279, line: 138, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_280, source: build_controls_fluentcontrols_xaml_property_281, line: 139, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_282, source: build_controls_fluentcontrols_xaml_property_283, line: 140, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_202, line: 141, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_285, source: build_controls_fluentcontrols_xaml_property_204, line: 142, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_226: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_200, source: build_controls_fluentcontrols_xaml_property_201, line: 154, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_202, source: build_controls_fluentcontrols_xaml_property_203, line: 155, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_201, source: build_controls_fluentcontrols_xaml_property_202, line: 154, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_203, source: build_controls_fluentcontrols_xaml_property_204, line: 155, position: 25 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -20851,26 +20888,26 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_228: &[rt::TemplateBindingRow
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_229: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_277, source: build_controls_fluentcontrols_xaml_property_278, line: 220, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_279, source: build_controls_fluentcontrols_xaml_property_280, line: 221, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_281, source: build_controls_fluentcontrols_xaml_property_282, line: 222, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_283, source: build_controls_fluentcontrols_xaml_property_201, line: 223, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_203, line: 224, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_278, source: build_controls_fluentcontrols_xaml_property_279, line: 220, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_280, source: build_controls_fluentcontrols_xaml_property_281, line: 221, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_282, source: build_controls_fluentcontrols_xaml_property_283, line: 222, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_202, line: 223, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_285, source: build_controls_fluentcontrols_xaml_property_204, line: 224, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_230: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_277, source: build_controls_fluentcontrols_xaml_property_278, line: 236, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_279, source: build_controls_fluentcontrols_xaml_property_280, line: 237, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_281, source: build_controls_fluentcontrols_xaml_property_282, line: 238, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_283, source: build_controls_fluentcontrols_xaml_property_201, line: 239, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_203, line: 240, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_278, source: build_controls_fluentcontrols_xaml_property_279, line: 236, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_280, source: build_controls_fluentcontrols_xaml_property_281, line: 237, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_282, source: build_controls_fluentcontrols_xaml_property_283, line: 238, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_284, source: build_controls_fluentcontrols_xaml_property_202, line: 239, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_285, source: build_controls_fluentcontrols_xaml_property_204, line: 240, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_231: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_200, source: build_controls_fluentcontrols_xaml_property_201, line: 253, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_202, source: build_controls_fluentcontrols_xaml_property_203, line: 254, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_201, source: build_controls_fluentcontrols_xaml_property_202, line: 253, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_203, source: build_controls_fluentcontrols_xaml_property_204, line: 254, position: 25 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -20880,7 +20917,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_232: &[rt::DynamicResourceRo
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_285() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_286() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::tick_placement_property())
 }
 
@@ -20895,10 +20932,10 @@ fn build_controls_fluentcontrols_xaml_selector_value_18() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_315: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_315: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_316: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_316: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")]] }];
 
 /// The value of a property selector of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_selector_value_19() -> ::ferroui_base::BoxedValue {
@@ -20906,10 +20943,10 @@ fn build_controls_fluentcontrols_xaml_selector_value_19() -> ::ferroui_base::Box
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_317: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_317: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_318: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_285, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")]] }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_318: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_286, value: build_controls_fluentcontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")]] }];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_319: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SliderContainer")];
@@ -20924,12 +20961,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_321: &[rt::SelectorStep] = &[
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_322: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY)];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_286() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_287() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::fill_property())
 }
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_383`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_384`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_384_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE),
@@ -20942,7 +20979,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
             line: 94,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_384, parent: true, line: 97, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_385, parent: true, line: 97, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -20951,7 +20988,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
             line: 191,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_385, parent: true, line: 194, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_386, parent: true, line: 194, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21002,7 +21039,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
                     line: 311,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundDisabled") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundDisabled") }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -21029,7 +21066,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
                     line: 322,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundPointerOver") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundPointerOver") }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -21055,7 +21092,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
                     line: 334,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundPressed") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_195, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderContainerBackgroundPressed") }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -21126,7 +21163,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
                     line: 363,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_286, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTickBarFillDisabled") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_287, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTickBarFillDisabled") }),
                     ],
                 },
             ],
@@ -21196,46 +21233,46 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_238: &[rt::TemplateBindingRow
     rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 359, position: 17 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_397`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_397_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_398`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ManagedFileChooserOverwritePromptMinWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(400.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_398, parent: true, line: 355, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_134, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(400.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_399, parent: true, line: 355, position: 10 }) }),
     ],
 };
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_287() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_288() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::SelectableTextBlock::selection_brush_property())
 }
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_323: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_323: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_162, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_400`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_401`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_401_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_287, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_288, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_323),
             line: 16,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_400_value_0) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "SelectableTextBlockContextFlyout", line: 18, position: 40 } }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_191, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_401_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_210, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "SelectableTextBlockContextFlyout", line: 18, position: 40 } }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_400` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_400_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_401` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_401_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 17, 33)?;
@@ -21243,36 +21280,36 @@ fn build_controls_fluentcontrols_xaml_deferred_400_value_0(
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_288() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_289() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::media::GeometryDrawing::geometry_property())
 }
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_289() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_290() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::media::GeometryDrawing::brush_property())
 }
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_239: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_288, key: "TextSelectionHandlePath", line: 20, position: 24 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_289, key: "TextControlSelectionHighlightColor", line: 21, position: 24 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_289, key: "TextSelectionHandlePath", line: 20, position: 24 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_290, key: "TextControlSelectionHighlightColor", line: 21, position: 24 },
 ];
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_240: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_288, key: "TextCaretHandlePath", line: 32, position: 24 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_289, key: "TextControlSelectionHighlightColor", line: 33, position: 24 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_289, key: "TextCaretHandlePath", line: 32, position: 24 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_290, key: "TextControlSelectionHighlightColor", line: 33, position: 24 },
 ];
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_property_290() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_fluentcontrols_xaml_property_291() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Image::source_property())
 }
 
 /// The dynamic resources of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_RESOURCES_241: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_70, key: "TextSelectHandleSize", line: 88, position: 22 },
-    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_290, key: "TextSelectionHandleDrawing", line: 89, position: 22 },
+    rt::DynamicResourceRow { property: build_controls_fluentcontrols_xaml_property_291, key: "TextSelectionHandleDrawing", line: 89, position: 22 },
 ];
 
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
@@ -21290,21 +21327,21 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_327: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_328: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_405`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_406`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_406, parent: true, line: 83, position: 12 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_407, parent: true, line: 83, position: 12 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_324),
             line: 101,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_290, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextCaretHandleDrawing") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_291, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextCaretHandleDrawing") }),
             ],
         },
         rt::StyleMember::Style {
@@ -21313,7 +21350,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 104,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_405_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_406_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21322,7 +21359,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 109,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21331,7 +21368,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 112,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21340,19 +21377,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 115,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_4) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let scale_transform_0 = ::ferroui_base::media::ScaleTransform::new();
@@ -21363,18 +21400,18 @@ fn build_controls_fluentcontrols_xaml_deferred_405_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&scale_transform_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
@@ -24708,8 +24745,17 @@ fn build_controls_fluentcontrols_xaml_deferred_86(
     ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(14,48)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(336,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_87(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
+    // Controls/FluentControls.xaml(336,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_87_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(14,48)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_88(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -24718,16 +24764,16 @@ fn build_controls_fluentcontrols_xaml_deferred_87(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(19,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_89(
+fn build_controls_fluentcontrols_xaml_deferred_90(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(19,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_89_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_90_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(24,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_90(
+fn build_controls_fluentcontrols_xaml_deferred_91(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -25472,7 +25518,7 @@ fn build_controls_fluentcontrols_xaml_deferred_90(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(10,50)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_91(
+fn build_controls_fluentcontrols_xaml_deferred_92(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -25481,7 +25527,7 @@ fn build_controls_fluentcontrols_xaml_deferred_91(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(12,50)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_92(
+fn build_controls_fluentcontrols_xaml_deferred_93(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -25490,7 +25536,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(17,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_95(
+fn build_controls_fluentcontrols_xaml_deferred_96(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -25524,16 +25570,16 @@ fn build_controls_fluentcontrols_xaml_deferred_95(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_96(
+fn build_controls_fluentcontrols_xaml_deferred_97(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(22,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_96_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_97_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(52,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_97(
+fn build_controls_fluentcontrols_xaml_deferred_98(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26169,16 +26215,16 @@ fn build_controls_fluentcontrols_xaml_deferred_97(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(59,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_110(
+fn build_controls_fluentcontrols_xaml_deferred_111(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(59,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_110_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_111_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(67,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_111(
+fn build_controls_fluentcontrols_xaml_deferred_112(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26213,7 +26259,7 @@ fn build_controls_fluentcontrols_xaml_deferred_111(
     // Controls/FluentControls.xaml(78,18) ItemsPanel
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(79,20) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_112, 79, 20)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_113, 79, 20)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), ::core::clone::Clone::clone(&items_panel_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::ITemplateOf<::std::option::Option<::ferroui_base::Ref<::ferroui_controls::Panel>>>>, priority_0);
@@ -26267,7 +26313,7 @@ fn build_controls_fluentcontrols_xaml_deferred_111(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(79,20)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_112(
+fn build_controls_fluentcontrols_xaml_deferred_113(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26283,16 +26329,16 @@ fn build_controls_fluentcontrols_xaml_deferred_112(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(105,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_113(
+fn build_controls_fluentcontrols_xaml_deferred_114(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(105,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_113_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_114_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(118,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_114(
+fn build_controls_fluentcontrols_xaml_deferred_115(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26320,7 +26366,7 @@ fn build_controls_fluentcontrols_xaml_deferred_114(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(127,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_115(
+fn build_controls_fluentcontrols_xaml_deferred_116(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26462,7 +26508,7 @@ fn build_controls_fluentcontrols_xaml_deferred_115(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(188,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_116(
+fn build_controls_fluentcontrols_xaml_deferred_117(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26486,7 +26532,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(203,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_117(
+fn build_controls_fluentcontrols_xaml_deferred_118(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26510,16 +26556,16 @@ fn build_controls_fluentcontrols_xaml_deferred_117(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(249,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_118(
+fn build_controls_fluentcontrols_xaml_deferred_119(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(249,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_118_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_119_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(253,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_119(
+fn build_controls_fluentcontrols_xaml_deferred_120(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26560,16 +26606,16 @@ fn build_controls_fluentcontrols_xaml_deferred_119(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(16,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_120(
+fn build_controls_fluentcontrols_xaml_deferred_121(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(16,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_120_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_121_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(28,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_121(
+fn build_controls_fluentcontrols_xaml_deferred_122(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26717,7 +26763,7 @@ fn build_controls_fluentcontrols_xaml_deferred_121(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(67,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_122(
+fn build_controls_fluentcontrols_xaml_deferred_123(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -26755,7 +26801,7 @@ fn build_controls_fluentcontrols_xaml_deferred_122(
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(78,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_123, 78, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_124, 78, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
@@ -27064,7 +27110,7 @@ fn build_controls_fluentcontrols_xaml_deferred_122(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(78,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_123(
+fn build_controls_fluentcontrols_xaml_deferred_124(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -27169,52 +27215,52 @@ fn build_controls_fluentcontrols_xaml_deferred_123(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(191,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_124(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(191,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_124_THEME)
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(197,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_125(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(197,4) ControlTheme
+    // Controls/FluentControls.xaml(191,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_125_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(203,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(197,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_126(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(203,4) ControlTheme
+    // Controls/FluentControls.xaml(197,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_126_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(209,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(203,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_127(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(209,4) ControlTheme
+    // Controls/FluentControls.xaml(203,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_127_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(215,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(209,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_128(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(215,4) ControlTheme
+    // Controls/FluentControls.xaml(209,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_128_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(228,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(215,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_129(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
+    // Controls/FluentControls.xaml(215,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_129_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(228,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_130(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -27304,7 +27350,7 @@ fn build_controls_fluentcontrols_xaml_deferred_129(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(26,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_130(
+fn build_controls_fluentcontrols_xaml_deferred_131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -27313,7 +27359,7 @@ fn build_controls_fluentcontrols_xaml_deferred_130(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(28,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_131(
+fn build_controls_fluentcontrols_xaml_deferred_132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -27350,7 +27396,7 @@ fn build_controls_fluentcontrols_xaml_deferred_131(
     // Controls/FluentControls.xaml(37,8) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE));
     // Controls/FluentControls.xaml(38,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_132, 38, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_133, 38, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
@@ -28087,7 +28133,7 @@ fn build_controls_fluentcontrols_xaml_deferred_131(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(38,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_132(
+fn build_controls_fluentcontrols_xaml_deferred_133(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -28280,7 +28326,7 @@ fn build_controls_fluentcontrols_xaml_deferred_132(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(39,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_133(
+fn build_controls_fluentcontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28293,7 +28339,7 @@ fn build_controls_fluentcontrols_xaml_deferred_133(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(40,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_134(
+fn build_controls_fluentcontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28306,7 +28352,7 @@ fn build_controls_fluentcontrols_xaml_deferred_134(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(41,59)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_135(
+fn build_controls_fluentcontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28315,7 +28361,7 @@ fn build_controls_fluentcontrols_xaml_deferred_135(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(42,59)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_136(
+fn build_controls_fluentcontrols_xaml_deferred_137(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28324,16 +28370,16 @@ fn build_controls_fluentcontrols_xaml_deferred_136(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(44,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_137(
+fn build_controls_fluentcontrols_xaml_deferred_138(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/FluentControls.xaml(44,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_137_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_138_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(48,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_138(
+fn build_controls_fluentcontrols_xaml_deferred_139(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28363,16 +28409,16 @@ fn build_controls_fluentcontrols_xaml_deferred_138(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(73,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_139(
+fn build_controls_fluentcontrols_xaml_deferred_140(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/FluentControls.xaml(73,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_139_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_140_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(87,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_140(
+fn build_controls_fluentcontrols_xaml_deferred_141(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -28565,16 +28611,16 @@ fn build_controls_fluentcontrols_xaml_deferred_140(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(14,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_141(
+fn build_controls_fluentcontrols_xaml_deferred_142(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(14,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_141_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_142_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(20,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_142(
+fn build_controls_fluentcontrols_xaml_deferred_143(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -28765,16 +28811,16 @@ fn build_controls_fluentcontrols_xaml_deferred_142(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(63,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_143(
+fn build_controls_fluentcontrols_xaml_deferred_144(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(63,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_143_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_144_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(78,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_144(
+fn build_controls_fluentcontrols_xaml_deferred_145(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -28998,16 +29044,16 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(27,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_145(
+fn build_controls_fluentcontrols_xaml_deferred_146(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(27,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_145_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_146_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(35,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_146(
+fn build_controls_fluentcontrols_xaml_deferred_147(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -29047,16 +29093,16 @@ fn build_controls_fluentcontrols_xaml_deferred_146(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(57,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_147(
+fn build_controls_fluentcontrols_xaml_deferred_148(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(57,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_148_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(61,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_148(
+fn build_controls_fluentcontrols_xaml_deferred_149(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -29082,7 +29128,7 @@ fn build_controls_fluentcontrols_xaml_deferred_148(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(70,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_149(
+fn build_controls_fluentcontrols_xaml_deferred_150(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -29664,7 +29710,7 @@ fn build_controls_fluentcontrols_xaml_deferred_149(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,45)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_150(
+fn build_controls_fluentcontrols_xaml_deferred_151(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -29673,16 +29719,16 @@ fn build_controls_fluentcontrols_xaml_deferred_150(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_151(
+fn build_controls_fluentcontrols_xaml_deferred_152(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(18,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_151_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_152_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(31,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_152(
+fn build_controls_fluentcontrols_xaml_deferred_153(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -29843,16 +29889,16 @@ fn build_controls_fluentcontrols_xaml_deferred_152(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(5,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_153(
+fn build_controls_fluentcontrols_xaml_deferred_154(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(5,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_153_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_154_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_154(
+fn build_controls_fluentcontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -29909,7 +29955,7 @@ fn build_controls_fluentcontrols_xaml_deferred_154(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(10,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_155(
+fn build_controls_fluentcontrols_xaml_deferred_156(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_5 });
@@ -29918,16 +29964,16 @@ fn build_controls_fluentcontrols_xaml_deferred_155(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(12,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_156(
+fn build_controls_fluentcontrols_xaml_deferred_157(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_5 });
     // Controls/FluentControls.xaml(12,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_156_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_157_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_157(
+fn build_controls_fluentcontrols_xaml_deferred_158(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_5 });
@@ -30160,16 +30206,16 @@ fn build_controls_fluentcontrols_xaml_deferred_157(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_158(
+fn build_controls_fluentcontrols_xaml_deferred_159(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(15,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_158_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_159_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(36,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_159(
+fn build_controls_fluentcontrols_xaml_deferred_160(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30199,16 +30245,16 @@ fn build_controls_fluentcontrols_xaml_deferred_159(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(17,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_160(
+fn build_controls_fluentcontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(17,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_160_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_161_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_161(
+fn build_controls_fluentcontrols_xaml_deferred_162(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30238,16 +30284,16 @@ fn build_controls_fluentcontrols_xaml_deferred_161(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(16,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_162(
+fn build_controls_fluentcontrols_xaml_deferred_163(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(16,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_162_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_163_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(23,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_163(
+fn build_controls_fluentcontrols_xaml_deferred_164(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30384,16 +30430,16 @@ fn build_controls_fluentcontrols_xaml_deferred_163(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(94,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_164(
+fn build_controls_fluentcontrols_xaml_deferred_165(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(94,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_164_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_165_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(100,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_165(
+fn build_controls_fluentcontrols_xaml_deferred_166(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30430,7 +30476,7 @@ fn build_controls_fluentcontrols_xaml_deferred_165(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(52,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_166(
+fn build_controls_fluentcontrols_xaml_deferred_167(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30439,7 +30485,7 @@ fn build_controls_fluentcontrols_xaml_deferred_166(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(56,51)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_167(
+fn build_controls_fluentcontrols_xaml_deferred_168(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30448,16 +30494,16 @@ fn build_controls_fluentcontrols_xaml_deferred_167(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(58,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_168(
+fn build_controls_fluentcontrols_xaml_deferred_169(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
     // Controls/FluentControls.xaml(58,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_168_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_169_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(65,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_169(
+fn build_controls_fluentcontrols_xaml_deferred_170(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30759,7 +30805,7 @@ fn build_controls_fluentcontrols_xaml_deferred_169(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(210,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_170(
+fn build_controls_fluentcontrols_xaml_deferred_171(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30772,7 +30818,7 @@ fn build_controls_fluentcontrols_xaml_deferred_170(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(223,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_171(
+fn build_controls_fluentcontrols_xaml_deferred_172(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30801,7 +30847,7 @@ fn build_controls_fluentcontrols_xaml_deferred_171(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(233,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_172(
+fn build_controls_fluentcontrols_xaml_deferred_173(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30832,25 +30878,25 @@ fn build_controls_fluentcontrols_xaml_deferred_172(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(239,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_173(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
-    // Controls/FluentControls.xaml(239,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_173_THEME)
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(244,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_174(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
-    // Controls/FluentControls.xaml(244,4) ControlTheme
+    // Controls/FluentControls.xaml(239,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_174_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(252,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(244,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_175(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
+    // Controls/FluentControls.xaml(244,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_175_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(252,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_176(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_6 });
@@ -30891,16 +30937,16 @@ fn build_controls_fluentcontrols_xaml_deferred_175(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(4,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_176(
+fn build_controls_fluentcontrols_xaml_deferred_177(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(4,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_176_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_177_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(16,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_177(
+fn build_controls_fluentcontrols_xaml_deferred_178(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30957,16 +31003,16 @@ fn build_controls_fluentcontrols_xaml_deferred_177(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(35,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_178(
+fn build_controls_fluentcontrols_xaml_deferred_179(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(35,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_178_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_179_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(39,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_179(
+fn build_controls_fluentcontrols_xaml_deferred_180(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30982,7 +31028,7 @@ fn build_controls_fluentcontrols_xaml_deferred_179(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(10,59)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_261(
+fn build_controls_fluentcontrols_xaml_deferred_262(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -30991,7 +31037,7 @@ fn build_controls_fluentcontrols_xaml_deferred_261(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(11,55)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_262(
+fn build_controls_fluentcontrols_xaml_deferred_263(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31000,7 +31046,7 @@ fn build_controls_fluentcontrols_xaml_deferred_262(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(14,67)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_263(
+fn build_controls_fluentcontrols_xaml_deferred_264(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31009,7 +31055,7 @@ fn build_controls_fluentcontrols_xaml_deferred_263(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,63)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_264(
+fn build_controls_fluentcontrols_xaml_deferred_265(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31018,16 +31064,16 @@ fn build_controls_fluentcontrols_xaml_deferred_264(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_265(
+fn build_controls_fluentcontrols_xaml_deferred_266(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(18,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_265_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_266_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(31,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_266(
+fn build_controls_fluentcontrols_xaml_deferred_267(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31057,34 +31103,34 @@ fn build_controls_fluentcontrols_xaml_deferred_266(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(64,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_267(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(64,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_267_THEME)
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(67,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_268(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(67,4) ControlTheme
+    // Controls/FluentControls.xaml(64,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_268_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(69,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(67,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_269(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(69,4) ControlTheme
+    // Controls/FluentControls.xaml(67,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_269_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(80,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(69,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_270(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
+    // Controls/FluentControls.xaml(69,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_270_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(80,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_271(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31206,16 +31252,16 @@ fn build_controls_fluentcontrols_xaml_deferred_270(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(160,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_271(
+fn build_controls_fluentcontrols_xaml_deferred_272(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(160,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_271_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_272_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(169,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_272(
+fn build_controls_fluentcontrols_xaml_deferred_273(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31346,7 +31392,7 @@ fn build_controls_fluentcontrols_xaml_deferred_272(
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     context.push_parent(rt::to_value(items_panel_template_0.clone()));
     // Controls/FluentControls.xaml(202,18) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_273, 202, 18)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_274, 202, 18)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
@@ -31394,7 +31440,7 @@ fn build_controls_fluentcontrols_xaml_deferred_272(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(202,18)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_273(
+fn build_controls_fluentcontrols_xaml_deferred_274(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31425,7 +31471,7 @@ fn build_controls_fluentcontrols_xaml_deferred_273(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_274(
+fn build_controls_fluentcontrols_xaml_deferred_275(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31647,7 +31693,7 @@ fn build_controls_fluentcontrols_xaml_deferred_274(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(34,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_275(
+fn build_controls_fluentcontrols_xaml_deferred_276(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31869,16 +31915,16 @@ fn build_controls_fluentcontrols_xaml_deferred_275(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(47,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_276(
+fn build_controls_fluentcontrols_xaml_deferred_277(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(47,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_276_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_277_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(52,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_277(
+fn build_controls_fluentcontrols_xaml_deferred_278(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31893,16 +31939,16 @@ fn build_controls_fluentcontrols_xaml_deferred_277(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(75,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_278(
+fn build_controls_fluentcontrols_xaml_deferred_279(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(75,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_278_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_279_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(82,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_279(
+fn build_controls_fluentcontrols_xaml_deferred_280(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31917,16 +31963,16 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(87,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_280(
+fn build_controls_fluentcontrols_xaml_deferred_281(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(87,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_280_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_281_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(92,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_281(
+fn build_controls_fluentcontrols_xaml_deferred_282(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -31955,16 +32001,16 @@ fn build_controls_fluentcontrols_xaml_deferred_281(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(132,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_282(
+fn build_controls_fluentcontrols_xaml_deferred_283(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(132,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_282_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_283_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(143,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_283(
+fn build_controls_fluentcontrols_xaml_deferred_284(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -32215,7 +32261,7 @@ fn build_controls_fluentcontrols_xaml_deferred_283(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(227,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_284(
+fn build_controls_fluentcontrols_xaml_deferred_285(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -32463,7 +32509,7 @@ fn build_controls_fluentcontrols_xaml_deferred_284(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(39,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_285(
+fn build_controls_fluentcontrols_xaml_deferred_286(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -32480,7 +32526,7 @@ fn build_controls_fluentcontrols_xaml_deferred_285(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(40,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_286(
+fn build_controls_fluentcontrols_xaml_deferred_287(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -32497,7 +32543,7 @@ fn build_controls_fluentcontrols_xaml_deferred_286(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(41,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_287(
+fn build_controls_fluentcontrols_xaml_deferred_288(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -32512,16 +32558,16 @@ fn build_controls_fluentcontrols_xaml_deferred_287(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(43,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_288(
+fn build_controls_fluentcontrols_xaml_deferred_289(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/FluentControls.xaml(43,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_288_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_289_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(46,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_289(
+fn build_controls_fluentcontrols_xaml_deferred_290(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -32551,16 +32597,16 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(120,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_290(
+fn build_controls_fluentcontrols_xaml_deferred_291(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/FluentControls.xaml(120,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_290_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_291_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(136,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_291(
+fn build_controls_fluentcontrols_xaml_deferred_292(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -32786,7 +32832,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(23,48)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_292(
+fn build_controls_fluentcontrols_xaml_deferred_293(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -32795,16 +32841,16 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(25,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_293(
+fn build_controls_fluentcontrols_xaml_deferred_294(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(25,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_293_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_294_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(33,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_294(
+fn build_controls_fluentcontrols_xaml_deferred_295(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -32961,7 +33007,7 @@ fn build_controls_fluentcontrols_xaml_deferred_294(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(123,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_295(
+fn build_controls_fluentcontrols_xaml_deferred_296(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -33118,7 +33164,7 @@ fn build_controls_fluentcontrols_xaml_deferred_295(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(209,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_296(
+fn build_controls_fluentcontrols_xaml_deferred_297(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -33275,7 +33321,7 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(299,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_297(
+fn build_controls_fluentcontrols_xaml_deferred_298(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -33432,16 +33478,16 @@ fn build_controls_fluentcontrols_xaml_deferred_297(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_298(
+fn build_controls_fluentcontrols_xaml_deferred_299(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(22,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_298_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_299_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(28,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_299(
+fn build_controls_fluentcontrols_xaml_deferred_300(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33509,16 +33555,16 @@ fn build_controls_fluentcontrols_xaml_deferred_299(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(19,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_300(
+fn build_controls_fluentcontrols_xaml_deferred_301(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(19,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_300_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_301_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(30,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_301(
+fn build_controls_fluentcontrols_xaml_deferred_302(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33582,16 +33628,16 @@ fn build_controls_fluentcontrols_xaml_deferred_301(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(17,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_302(
+fn build_controls_fluentcontrols_xaml_deferred_303(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(17,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_302_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_303_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_303(
+fn build_controls_fluentcontrols_xaml_deferred_304(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33769,16 +33815,16 @@ fn build_controls_fluentcontrols_xaml_deferred_303(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(79,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_304(
+fn build_controls_fluentcontrols_xaml_deferred_305(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(79,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_304_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_305_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(91,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_305(
+fn build_controls_fluentcontrols_xaml_deferred_306(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33820,16 +33866,16 @@ fn build_controls_fluentcontrols_xaml_deferred_305(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(7,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_306(
+fn build_controls_fluentcontrols_xaml_deferred_307(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(7,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_306_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_307_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(14,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_307(
+fn build_controls_fluentcontrols_xaml_deferred_308(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33838,14 +33884,14 @@ fn build_controls_fluentcontrols_xaml_deferred_307(
     // Controls/FluentControls.xaml(14,4) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE));
     // Controls/FluentControls.xaml(15,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_308, 15, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_309, 15, 6)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_template_0))
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,6)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_308(
+fn build_controls_fluentcontrols_xaml_deferred_309(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33877,16 +33923,16 @@ fn build_controls_fluentcontrols_xaml_deferred_308(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_309(
+fn build_controls_fluentcontrols_xaml_deferred_310(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(22,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_309_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_310_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(30,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_310(
+fn build_controls_fluentcontrols_xaml_deferred_311(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -33965,16 +34011,16 @@ fn build_controls_fluentcontrols_xaml_deferred_310(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(7,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_311(
+fn build_controls_fluentcontrols_xaml_deferred_312(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(7,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_311_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_312_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(12,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_312(
+fn build_controls_fluentcontrols_xaml_deferred_313(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34000,16 +34046,16 @@ fn build_controls_fluentcontrols_xaml_deferred_312(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_313(
+fn build_controls_fluentcontrols_xaml_deferred_314(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(18,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_313_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_314_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(29,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_314(
+fn build_controls_fluentcontrols_xaml_deferred_315(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34079,7 +34125,7 @@ fn build_controls_fluentcontrols_xaml_deferred_314(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(20,50)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_315(
+fn build_controls_fluentcontrols_xaml_deferred_316(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34088,7 +34134,7 @@ fn build_controls_fluentcontrols_xaml_deferred_315(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,55)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_316(
+fn build_controls_fluentcontrols_xaml_deferred_317(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34097,7 +34143,7 @@ fn build_controls_fluentcontrols_xaml_deferred_316(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,53)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_317(
+fn build_controls_fluentcontrols_xaml_deferred_318(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34106,7 +34152,7 @@ fn build_controls_fluentcontrols_xaml_deferred_317(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(24,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_318(
+fn build_controls_fluentcontrols_xaml_deferred_319(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34241,7 +34287,7 @@ fn build_controls_fluentcontrols_xaml_deferred_318(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(29,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_319(
+fn build_controls_fluentcontrols_xaml_deferred_320(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34389,16 +34435,16 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(35,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_320(
+fn build_controls_fluentcontrols_xaml_deferred_321(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(35,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_320_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_321_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(46,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_321(
+fn build_controls_fluentcontrols_xaml_deferred_322(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34428,16 +34474,16 @@ fn build_controls_fluentcontrols_xaml_deferred_321(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(74,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_322(
+fn build_controls_fluentcontrols_xaml_deferred_323(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(74,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_322_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_323_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(80,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_323(
+fn build_controls_fluentcontrols_xaml_deferred_324(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34467,16 +34513,16 @@ fn build_controls_fluentcontrols_xaml_deferred_323(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(96,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_324(
+fn build_controls_fluentcontrols_xaml_deferred_325(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(96,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_324_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_325_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(113,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_325(
+fn build_controls_fluentcontrols_xaml_deferred_326(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34736,7 +34782,7 @@ fn build_controls_fluentcontrols_xaml_deferred_325(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(256,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_326(
+fn build_controls_fluentcontrols_xaml_deferred_327(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34831,7 +34877,7 @@ fn build_controls_fluentcontrols_xaml_deferred_326(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(275,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_327(
+fn build_controls_fluentcontrols_xaml_deferred_328(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -34877,16 +34923,16 @@ fn build_controls_fluentcontrols_xaml_deferred_327(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(24,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_328(
+fn build_controls_fluentcontrols_xaml_deferred_329(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(24,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_328_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_329_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(40,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_329(
+fn build_controls_fluentcontrols_xaml_deferred_330(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -35219,16 +35265,16 @@ fn build_controls_fluentcontrols_xaml_deferred_329(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(22,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_330(
+fn build_controls_fluentcontrols_xaml_deferred_331(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(22,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_330_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_331_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(39,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_331(
+fn build_controls_fluentcontrols_xaml_deferred_332(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -35271,7 +35317,7 @@ fn build_controls_fluentcontrols_xaml_deferred_331(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(26,64)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_332(
+fn build_controls_fluentcontrols_xaml_deferred_333(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -35280,7 +35326,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(27,63)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_333(
+fn build_controls_fluentcontrols_xaml_deferred_334(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -35289,16 +35335,16 @@ fn build_controls_fluentcontrols_xaml_deferred_333(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(29,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_334(
+fn build_controls_fluentcontrols_xaml_deferred_335(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/FluentControls.xaml(29,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_334_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_335_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(35,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_335(
+fn build_controls_fluentcontrols_xaml_deferred_336(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -35348,16 +35394,16 @@ fn build_controls_fluentcontrols_xaml_deferred_335(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(55,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_336(
+fn build_controls_fluentcontrols_xaml_deferred_337(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
     // Controls/FluentControls.xaml(55,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_336_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_337_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(65,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_337(
+fn build_controls_fluentcontrols_xaml_deferred_338(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1 });
@@ -35520,16 +35566,16 @@ fn build_controls_fluentcontrols_xaml_deferred_337(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(11,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_340(
+fn build_controls_fluentcontrols_xaml_deferred_341(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(11,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_340_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_341_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(21,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_341(
+fn build_controls_fluentcontrols_xaml_deferred_342(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -35558,16 +35604,16 @@ fn build_controls_fluentcontrols_xaml_deferred_341(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(36,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_342(
+fn build_controls_fluentcontrols_xaml_deferred_343(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(36,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_342_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_343_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(42,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_343(
+fn build_controls_fluentcontrols_xaml_deferred_344(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -36054,16 +36100,16 @@ fn build_controls_fluentcontrols_xaml_deferred_343(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(61,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_344(
+fn build_controls_fluentcontrols_xaml_deferred_345(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(61,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_344_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_345_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(80,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_345(
+fn build_controls_fluentcontrols_xaml_deferred_346(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -36260,11 +36306,11 @@ fn build_controls_fluentcontrols_xaml_deferred_345(
     rt::bind_template_binding(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::ComboBox::is_editable_property()), 133, 22)?;
     // Controls/FluentControls.xaml(135,71) Resources (resource)
     let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(text_box_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_346, 135, 71)?;
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_347, 135, 71)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 135, 71)?, rt::string_object("TextControlBackgroundFocused"), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 135, 71)?;
     // Controls/FluentControls.xaml(136,75) Resources (resource)
     let dictionary_1 = ::ferroui_base::StyledElement::__markup_get_Resources(text_box_0.upcast_ref::<::ferroui_base::StyledElement>());
-    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_347, 136, 75)?;
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_348, 136, 75)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 136, 75)?, rt::string_object("TextControlBackgroundPointerOver"), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 136, 75)?;
     // Controls/FluentControls.xaml(137,75) Resources (resource)
     let dictionary_2 = ::ferroui_base::StyledElement::__markup_get_Resources(text_box_0.upcast_ref::<::ferroui_base::StyledElement>());
@@ -36428,14 +36474,6 @@ fn build_controls_fluentcontrols_xaml_deferred_345(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(135,71)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_346(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
-    ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)))
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(136,75)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_347(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
@@ -36443,17 +36481,25 @@ fn build_controls_fluentcontrols_xaml_deferred_347(
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(36,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(136,75)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_348(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
+    ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)))
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(36,4)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_349(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(36,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_348_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_349_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(49,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_349(
+fn build_controls_fluentcontrols_xaml_deferred_350(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -36500,16 +36546,16 @@ fn build_controls_fluentcontrols_xaml_deferred_349(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(28,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_350(
+fn build_controls_fluentcontrols_xaml_deferred_351(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/FluentControls.xaml(28,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_350_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_351_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(32,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_351(
+fn build_controls_fluentcontrols_xaml_deferred_352(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
@@ -36602,7 +36648,7 @@ fn build_controls_fluentcontrols_xaml_deferred_351(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(52,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_352(
+fn build_controls_fluentcontrols_xaml_deferred_353(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
@@ -36634,16 +36680,16 @@ fn build_controls_fluentcontrols_xaml_deferred_352(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(65,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_353(
+fn build_controls_fluentcontrols_xaml_deferred_354(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
     // Controls/FluentControls.xaml(65,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_353_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_354_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(69,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_354(
+fn build_controls_fluentcontrols_xaml_deferred_355(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
@@ -36731,7 +36777,7 @@ fn build_controls_fluentcontrols_xaml_deferred_354(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(88,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_355(
+fn build_controls_fluentcontrols_xaml_deferred_356(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7 });
@@ -36824,25 +36870,25 @@ fn build_controls_fluentcontrols_xaml_deferred_355(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(24,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_356(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(24,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_356_THEME)
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(46,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_357(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(46,4) ControlTheme
+    // Controls/FluentControls.xaml(24,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_357_THEME)
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(57,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(46,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_358(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
+    // Controls/FluentControls.xaml(46,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_358_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(57,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_359(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -36886,16 +36932,16 @@ fn build_controls_fluentcontrols_xaml_deferred_358(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(86,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_359(
+fn build_controls_fluentcontrols_xaml_deferred_360(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(86,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_359_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_360_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(95,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_360(
+fn build_controls_fluentcontrols_xaml_deferred_361(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -36943,16 +36989,16 @@ fn build_controls_fluentcontrols_xaml_deferred_360(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(102,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_361(
+fn build_controls_fluentcontrols_xaml_deferred_362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(102,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_361_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_362_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(111,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_362(
+fn build_controls_fluentcontrols_xaml_deferred_363(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -37000,16 +37046,16 @@ fn build_controls_fluentcontrols_xaml_deferred_362(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(42,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_363(
+fn build_controls_fluentcontrols_xaml_deferred_364(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(42,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_363_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_364_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(46,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_364(
+fn build_controls_fluentcontrols_xaml_deferred_365(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -37047,16 +37093,16 @@ fn build_controls_fluentcontrols_xaml_deferred_364(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(74,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_365(
+fn build_controls_fluentcontrols_xaml_deferred_366(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(74,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_365_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_366_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(86,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_366(
+fn build_controls_fluentcontrols_xaml_deferred_367(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -37258,16 +37304,16 @@ fn build_controls_fluentcontrols_xaml_deferred_366(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(151,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_367(
+fn build_controls_fluentcontrols_xaml_deferred_368(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(151,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_367_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_368_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(161,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_368(
+fn build_controls_fluentcontrols_xaml_deferred_369(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -37757,16 +37803,16 @@ fn build_controls_fluentcontrols_xaml_deferred_368(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(41,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_369(
+fn build_controls_fluentcontrols_xaml_deferred_370(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(41,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_369_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_370_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(45,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_370(
+fn build_controls_fluentcontrols_xaml_deferred_371(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -37804,16 +37850,16 @@ fn build_controls_fluentcontrols_xaml_deferred_370(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(73,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_371(
+fn build_controls_fluentcontrols_xaml_deferred_372(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(73,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_371_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_372_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(85,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_372(
+fn build_controls_fluentcontrols_xaml_deferred_373(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -38098,16 +38144,16 @@ fn build_controls_fluentcontrols_xaml_deferred_372(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(191,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_373(
+fn build_controls_fluentcontrols_xaml_deferred_374(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(191,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_373_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_374_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(201,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_374(
+fn build_controls_fluentcontrols_xaml_deferred_375(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -38696,16 +38742,16 @@ fn build_controls_fluentcontrols_xaml_deferred_374(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,6)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_375(
+fn build_controls_fluentcontrols_xaml_deferred_376(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(15,6) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_375_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_376_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(30,14)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_376(
+fn build_controls_fluentcontrols_xaml_deferred_377(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -38816,16 +38862,16 @@ fn build_controls_fluentcontrols_xaml_deferred_376(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(48,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_377(
+fn build_controls_fluentcontrols_xaml_deferred_378(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(48,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_377_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_378_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(51,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_378(
+fn build_controls_fluentcontrols_xaml_deferred_379(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -38872,16 +38918,16 @@ fn build_controls_fluentcontrols_xaml_deferred_378(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(63,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_379(
+fn build_controls_fluentcontrols_xaml_deferred_380(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(63,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_379_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_380_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(66,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_380(
+fn build_controls_fluentcontrols_xaml_deferred_381(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -38928,16 +38974,16 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(78,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_381(
+fn build_controls_fluentcontrols_xaml_deferred_382(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(78,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_381_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_382_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(81,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_382(
+fn build_controls_fluentcontrols_xaml_deferred_383(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -38955,16 +39001,16 @@ fn build_controls_fluentcontrols_xaml_deferred_382(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(90,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_383(
+fn build_controls_fluentcontrols_xaml_deferred_384(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
     // Controls/FluentControls.xaml(90,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_384_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(97,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_384(
+fn build_controls_fluentcontrols_xaml_deferred_385(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -39249,7 +39295,7 @@ fn build_controls_fluentcontrols_xaml_deferred_384(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(194,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_385(
+fn build_controls_fluentcontrols_xaml_deferred_386(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4 });
@@ -39540,7 +39586,7 @@ fn build_controls_fluentcontrols_xaml_deferred_385(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(15,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_386(
+fn build_controls_fluentcontrols_xaml_deferred_387(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -39558,13 +39604,13 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 8)?, count_0.wrapping_add(4_i32));
     }
     // Controls/FluentControls.xaml(18,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderBackGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_387, 18, 10)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderBackGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_388, 18, 10)?;
     // Controls/FluentControls.xaml(20,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderFrontGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_388, 20, 10)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderFrontGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_389, 20, 10)?;
     // Controls/FluentControls.xaml(24,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_389, 24, 10)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_390, 24, 10)?;
     // Controls/FluentControls.xaml(31,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_390, 31, 10)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_391, 31, 10)?;
     rt::invoked(::ferroui_base::styling::StyleBase::__markup_set_Resources(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(resource_dictionary_0.clone(), 17, 8)?), 17, 8)?;
     // Controls/FluentControls.xaml(139,6) Content
     // Controls/FluentControls.xaml(139,35) Value
@@ -39575,7 +39621,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
     // Controls/FluentControls.xaml(143,10) Content
-    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_391, 143, 10)?;
+    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_392, 143, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_4)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
@@ -39608,7 +39654,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let control_template_1 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_1.clone()));
     // Controls/FluentControls.xaml(288,12) Content
-    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_395, 288, 12)?;
+    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_396, 288, 12)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_5)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&control_template_1)));
@@ -39632,7 +39678,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let control_template_2 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_2.clone()));
     // Controls/FluentControls.xaml(303,16) Content
-    let deferred_6 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_396, 303, 16)?;
+    let deferred_6 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_397, 303, 16)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_2, rt::to_object(::core::clone::Clone::clone(&deferred_6)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&control_template_2)));
@@ -39758,7 +39804,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_387(
+fn build_controls_fluentcontrols_xaml_deferred_388(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -39767,7 +39813,7 @@ fn build_controls_fluentcontrols_xaml_deferred_387(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(20,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_388(
+fn build_controls_fluentcontrols_xaml_deferred_389(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -39794,7 +39840,7 @@ fn build_controls_fluentcontrols_xaml_deferred_388(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(24,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_389(
+fn build_controls_fluentcontrols_xaml_deferred_390(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -39854,7 +39900,7 @@ fn build_controls_fluentcontrols_xaml_deferred_389(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(31,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_390(
+fn build_controls_fluentcontrols_xaml_deferred_391(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -40292,7 +40338,7 @@ fn build_controls_fluentcontrols_xaml_deferred_390(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(143,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_391(
+fn build_controls_fluentcontrols_xaml_deferred_392(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -40348,7 +40394,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     // Controls/FluentControls.xaml(152,18) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_0, ::core::option::Option::Some(rt::markup_handle(<::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
     // Controls/FluentControls.xaml(153,20) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_392, 153, 20)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_393, 153, 20)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
@@ -40904,7 +40950,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     // Controls/FluentControls.xaml(216,24) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(217,26) Content
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_393, 217, 26)?;
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_394, 217, 26)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     rt::add_setter_value(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
     context.pop_parent();
@@ -41047,7 +41093,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     // Controls/FluentControls.xaml(241,20) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_1, ::core::option::Option::Some(rt::markup_handle(<::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
     // Controls/FluentControls.xaml(242,22) Content
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_394, 242, 22)?;
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_395, 242, 22)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     let priority_75 = ::ferroui_base::data::BindingPriority::Template;
@@ -41060,7 +41106,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(153,20)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_392(
+fn build_controls_fluentcontrols_xaml_deferred_393(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41136,7 +41182,7 @@ fn build_controls_fluentcontrols_xaml_deferred_392(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(217,26)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_393(
+fn build_controls_fluentcontrols_xaml_deferred_394(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41172,7 +41218,7 @@ fn build_controls_fluentcontrols_xaml_deferred_393(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(242,22)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_394(
+fn build_controls_fluentcontrols_xaml_deferred_395(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41383,7 +41429,7 @@ fn build_controls_fluentcontrols_xaml_deferred_394(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(288,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_395(
+fn build_controls_fluentcontrols_xaml_deferred_396(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41424,7 +41470,7 @@ fn build_controls_fluentcontrols_xaml_deferred_395(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(303,16)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_396(
+fn build_controls_fluentcontrols_xaml_deferred_397(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41512,16 +41558,16 @@ fn build_controls_fluentcontrols_xaml_deferred_396(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(350,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_397(
+fn build_controls_fluentcontrols_xaml_deferred_398(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
     // Controls/FluentControls.xaml(350,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_397_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_398_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(355,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_398(
+fn build_controls_fluentcontrols_xaml_deferred_399(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -41678,7 +41724,7 @@ fn build_controls_fluentcontrols_xaml_deferred_398(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(8,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_399(
+fn build_controls_fluentcontrols_xaml_deferred_400(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41728,16 +41774,16 @@ fn build_controls_fluentcontrols_xaml_deferred_399(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(13,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_400(
+fn build_controls_fluentcontrols_xaml_deferred_401(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(13,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_401_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_401(
+fn build_controls_fluentcontrols_xaml_deferred_402(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41769,7 +41815,7 @@ fn build_controls_fluentcontrols_xaml_deferred_401(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(30,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_402(
+fn build_controls_fluentcontrols_xaml_deferred_403(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41801,7 +41847,7 @@ fn build_controls_fluentcontrols_xaml_deferred_402(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(42,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_403(
+fn build_controls_fluentcontrols_xaml_deferred_404(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41833,7 +41879,7 @@ fn build_controls_fluentcontrols_xaml_deferred_403(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(55,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_404(
+fn build_controls_fluentcontrols_xaml_deferred_405(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41878,16 +41924,16 @@ fn build_controls_fluentcontrols_xaml_deferred_404(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(74,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_405(
+fn build_controls_fluentcontrols_xaml_deferred_406(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(74,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_406_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(83,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_406(
+fn build_controls_fluentcontrols_xaml_deferred_407(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -42468,7 +42514,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["OverlayPopupHost"], &["PopupRoot"], &["PathIcon"], &[], &["FontIcon"], &["SymbolIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["WindowDrawnDecorations"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["OverlayPopupHost"], &["PopupRoot"], &["PathIcon"], &[], &["FontIcon"], &["SymbolIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["WindowDrawnDecorations"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,

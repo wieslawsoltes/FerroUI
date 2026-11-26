@@ -4,6 +4,8 @@
 pub mod animation;
 mod swipe_control;
 mod ui_command;
+mod command_bar_flyout;
+pub use command_bar_flyout::CommandBarFlyout;
 pub mod application_lifetimes;
 pub mod automation;
 pub mod chrome;

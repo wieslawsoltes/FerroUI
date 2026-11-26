@@ -238,6 +238,7 @@ impl Migration<'_, '_> {
                     && matches!(
                         name,
                         "InfoBarPanel"
+                            | "CommandBarFlyoutCommandBar"
                             | "InfoBarTemplateSettings"
                             | "InfoBadgeTemplateSettings"
                             | "ProgressRingTemplateSettings"
@@ -302,6 +303,7 @@ impl Migration<'_, '_> {
                             | "KeyboardAccelerator"
                             | "ExecuteRequestedEventArgs"
                             | "CanExecuteRequestedEventArgs"
+                            | "CommandBarFlyout"
                             | "AutoSuggestBox"
                             | "AutoSuggestionBoxTextChangeReason"
                             | "AutoSuggestBoxTextChangedEventArgs"

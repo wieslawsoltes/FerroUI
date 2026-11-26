@@ -522,6 +522,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- command bar flyout (WinUI, docs/porting/winui-controls.md, section 10.17) ---
+    crate::command_bar_flyout::CommandBarFlyout,
+    crate::command_bar_flyout::CommandBarFlyoutCommandBar,
     // --- commands (WinUI, docs/porting/winui-controls.md, section 10.16) ---
     crate::ui_command::XamlUICommand,
     crate::ui_command::StandardUICommand,

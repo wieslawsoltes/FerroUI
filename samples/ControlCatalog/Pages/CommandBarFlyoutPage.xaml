@@ -1,0 +1,18 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="CommandBarFlyout"
+             x:Class="ControlCatalog.Pages.CommandBarFlyoutPage">
+  <!-- Not from upstream: WinUI's CommandBarFlyout (docs/porting/winui-controls.md, section 10.17).
+       The theme of its command bar is in every theme. The class of the page creates the flyout. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A CommandBarFlyout shows a row of commands with a menu of more commands below them. Opened transient it shows the row; opened standard, or with the "more" button, it shows the menu as well.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Open the flyout</TextBlock>
+    <StackPanel Orientation="Horizontal" Spacing="8" Margin="2">
+      <Button x:Name="Transient" Content="Transient (click)" />
+      <Button x:Name="Standard" Content="Standard (or right click here)" />
+    </StackPanel>
+    <CheckBox x:Name="AlwaysExpanded" Margin="2" Content="AlwaysExpanded" />
+    <TextBlock x:Name="Output" Margin="2" Text="Click a command of the flyout." />
+  </StackPanel>
+</ContentPage>

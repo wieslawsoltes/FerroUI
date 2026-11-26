@@ -1,0 +1,33 @@
+<!-- Ported from the pinned CommandBarFlyout example of WinUI Gallery (14061eea) and the code behind
+     of CommandBarFlyoutPage.xaml.cs (command_samples.rs); see ../NOTICE.md. The flyout is WinUI's
+     CommandBarFlyout of ferroui-controls; WinUI's AppBarButton is FerroUI's CommandBarButton with a
+     SymbolIcon and the tool tip as ToolTip.Tip. A click opens the flyout transient, the context
+     request (right click, the menu key or Shift+F10) opens it standard, at RightEdgeAlignedTop of
+     the image (FlyoutShowOptions are the flyout's ShowMode and Placement). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <CommandBarFlyout x:Key="CommandBarFlyout1" Placement="Right">
+      <CommandBarButton x:Name="ShareButton" Label="Share" ToolTip.Tip="Share">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Share" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <CommandBarButton x:Name="SaveButton" Label="Save" ToolTip.Tip="Save">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Save" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <CommandBarButton x:Name="DeleteButton" Label="Delete" ToolTip.Tip="Delete">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Delete" /></CommandBarButton.Icon>
+      </CommandBarButton>
+      <CommandBarFlyout.SecondaryCommands>
+        <CommandBarButton x:Name="ResizeButton" Label="Resize" />
+        <CommandBarButton x:Name="MoveButton" Label="Move" />
+      </CommandBarFlyout.SecondaryCommands>
+    </CommandBarFlyout>
+  </StackPanel.Resources>
+  <StackPanel>
+    <TextBlock Text="Click or right click the image to open a CommandBarFlyout" />
+    <Button x:Name="myImageButton" Margin="0,12" Padding="0" AutomationProperties.Name="mountain">
+      <Image x:Name="Image1" Height="300" />
+    </Button>
+    <TextBlock x:Name="SelectedOptionText" Text="" AutomationProperties.LiveSetting="Polite" />
+  </StackPanel>
+</StackPanel>

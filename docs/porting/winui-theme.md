@@ -421,7 +421,8 @@ comparison (section 8.3) checks.
 | `AnimatedIcon`, Lottie | the static fallback glyph |
 | visual state transitions with begin times | transitions without delays |
 | scroll indicator modes (`IndicatorMode`; NoIndicator, TouchIndicator) | the bar is in the mouse indicator mode, collapsed (the thin thumb) or expanded (`IsExpanded`, with the begin times of WinUI as `ShowDelay` and `HideDelay`); the scroll viewer hides its bars (NoIndicator) while the pointer is not over it; no touch indicator |
-| `TextCommandBarFlyout`, `CommandBarFlyout` | menu flyouts |
+| `TextCommandBarFlyout` | menu flyouts |
+| the template and animations of `CommandBarFlyout` | the command bar template with the setters of `DefaultCommandBarFlyoutCommandBarStyle` (`winui-controls.md`, section 10.17) |
 | `DesktopAcrylicBackdrop`, Mica | the fallback colours; the window background is `SolidBackgroundFillColorBaseBrush` |
 | `ListViewItemPresenter` (native chrome of list items) | templates with elements (batch B3) |
 | `CornerRadiusToThicknessConverter` | the converter of the crate (`FerroUI.Themes.WinUI.Converters`, section 5) |

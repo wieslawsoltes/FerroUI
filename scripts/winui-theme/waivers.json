@@ -124,12 +124,12 @@
     {
       "document": "controls/dev/CommandBarFlyout/CommandBarFlyout.xaml",
       "key": "*",
-      "reason": "CommandBarFlyout: no FerroUI control (the context menus of FerroUI are menu flyouts, ported from MenuFlyout)."
+      "reason": "CommandBarFlyout: the theme of CommandBarFlyoutCommandBar is the command bar template with the setters of DefaultCommandBarFlyoutCommandBarStyle (Controls/CommandBar.xaml); the flyout template, its animations and template settings are not converted (docs/porting/winui-controls.md, section 10.17)."
     },
     {
       "document": "controls/dev/CommandBarFlyout/CommandBarFlyout_themeresources.xaml",
       "key": "*",
-      "reason": "CommandBarFlyout: no FerroUI control (the context menus of FerroUI are menu flyouts, ported from MenuFlyout)."
+      "reason": "CommandBarFlyout: the theme of CommandBarFlyoutCommandBar is the command bar template with the setters of DefaultCommandBarFlyoutCommandBarStyle (Controls/CommandBar.xaml); the flyout template, its animations and template settings are not converted (docs/porting/winui-controls.md, section 10.17)."
     },
     {
       "document": "controls/dev/CommonStyles/Common_themeresources.xaml",

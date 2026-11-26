@@ -122,6 +122,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
         }),
         section("Menus & Flyouts", Icons::MENUS, &mut unavailable, |s| {
             s.add("/Pages/CommandBarPage.xaml", "CommandBar", Icons::TERMINAL, "A toolbar of commands with an overflow menu");
+            // Not from upstream: CommandBarFlyout of WinUI (docs/porting/winui-controls.md, section 10.17).
+            s.add("/Pages/CommandBarFlyoutPage.xaml", "CommandBarFlyout", Icons::FLYOUT, "A flyout of commands with a menu of more commands");
             s.add("/Pages/ContextFlyoutPage.xaml", "ContextFlyout", Icons::MENU, "Attach flyouts shown on right-click");
             s.add("/Pages/ContextMenuPage.xaml", "ContextMenu", Icons::MENU, "Traditional right-click context menus");
             s.add("/Pages/FlyoutsPage.xaml", "Flyouts", Icons::FLYOUT, "Lightweight popups anchored to controls");

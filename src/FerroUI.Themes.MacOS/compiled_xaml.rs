@@ -19317,7 +19317,7 @@ pub fn build_controls_macoscontrols_xaml(
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 12, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 12, 6)?, count_0.wrapping_add(338_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 12, 6)?, count_0.wrapping_add(339_i32));
     }
     rt::apply_theme_unit(active_theme_units(), 0, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 78, 0, &context, &resource_dictionary_0)?;
@@ -20603,6 +20603,9 @@ fn build_controls_macoscontrols_xaml_unit_68(
     // Controls/MacOSControls.xaml(668,4) Content (resource)
     let deferred_182 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_357, 668, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::CommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_182) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 668, 4)?;
+    // Controls/MacOSControls.xaml(675,4) Content (resource)
+    let deferred_183 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_358, 675, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::CommandBarFlyoutCommandBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_183) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 675, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20614,10 +20617,10 @@ fn build_controls_macoscontrols_xaml_unit_69(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(21,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultDropDownButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_358, 21, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultDropDownButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_359, 21, 4)?;
     // Controls/MacOSControls.xaml(177,4) Content (resource)
-    let deferred_184 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_365, 177, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_184) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 177, 4)?;
+    let deferred_185 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_366, 177, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_185) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 177, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20629,16 +20632,16 @@ fn build_controls_macoscontrols_xaml_unit_70(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(25,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_366, 25, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_367, 25, 4)?;
     // Controls/MacOSControls.xaml(75,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_369, 75, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_370, 75, 4)?;
     // Controls/MacOSControls.xaml(332,4) Content (resource)
-    let deferred_187 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_372, 332, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_187) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 332, 4)?;
+    let deferred_188 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_373, 332, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_188) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 332, 4)?;
     // Controls/MacOSControls.xaml(336,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_373, 336, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarInnerButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_374, 336, 4)?;
     // Controls/MacOSControls.xaml(384,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_376, 384, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_377, 384, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20650,10 +20653,10 @@ fn build_controls_macoscontrols_xaml_unit_71(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(13,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultToggleSwitchStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_379, 13, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultToggleSwitchStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_380, 13, 4)?;
     // Controls/MacOSControls.xaml(156,4) Content (resource)
-    let deferred_191 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_382, 156, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_191) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 156, 4)?;
+    let deferred_192 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_383, 156, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_192) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 156, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20665,18 +20668,18 @@ fn build_controls_macoscontrols_xaml_unit_72(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SliderThumbStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_383, 24, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SliderThumbStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_384, 24, 4)?;
     // Controls/MacOSControls.xaml(66,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SliderHorizontalDecreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_385, 66, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SliderHorizontalDecreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_386, 66, 4)?;
     // Controls/MacOSControls.xaml(82,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SliderVerticalDecreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_387, 82, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SliderVerticalDecreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_388, 82, 4)?;
     // Controls/MacOSControls.xaml(99,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SliderIncreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_389, 99, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SliderIncreaseButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_390, 99, 4)?;
     // Controls/MacOSControls.xaml(107,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultSliderStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_391, 107, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultSliderStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_392, 107, 4)?;
     // Controls/MacOSControls.xaml(391,4) Content (resource)
-    let deferred_197 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_395, 391, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_197) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 391, 4)?;
+    let deferred_198 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_396, 391, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_198) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 391, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20688,18 +20691,18 @@ fn build_controls_macoscontrols_xaml_unit_73(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(23,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_396, 23, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_397, 23, 4)?;
     // Controls/MacOSControls.xaml(38,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_397, 38, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_398, 38, 4)?;
     // Controls/MacOSControls.xaml(52,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_398, 52, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownSpinButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_399, 52, 4)?;
     // Controls/MacOSControls.xaml(83,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_399, 83, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_400, 83, 4)?;
     // Controls/MacOSControls.xaml(228,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownButtonSpinnerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_401, 228, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumericUpDownButtonSpinnerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_402, 228, 4)?;
     // Controls/MacOSControls.xaml(278,4) Content (resource)
-    let deferred_203 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_403, 278, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_203) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 278, 4)?;
+    let deferred_204 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_404, 278, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_204) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 278, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20711,18 +20714,18 @@ fn build_controls_macoscontrols_xaml_unit_74(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderDownStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_405, 30, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderDownStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_406, 30, 4)?;
     // Controls/MacOSControls.xaml(166,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderUpStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_408, 166, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderUpStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_409, 166, 4)?;
     // Controls/MacOSControls.xaml(240,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderLeftStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_410, 240, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderLeftStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_411, 240, 4)?;
     // Controls/MacOSControls.xaml(250,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderRightStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_411, 250, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ExpanderHeaderRightStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_412, 250, 4)?;
     // Controls/MacOSControls.xaml(259,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultExpanderStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_412, 259, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultExpanderStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_413, 259, 4)?;
     // Controls/MacOSControls.xaml(373,4) Content (resource)
-    let deferred_209 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_414, 373, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_209) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 373, 4)?;
+    let deferred_210 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_415, 373, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_210) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 373, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20734,24 +20737,24 @@ fn build_controls_macoscontrols_xaml_unit_75(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(59,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNavigationButtonBaseStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_415, 59, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNavigationButtonBaseStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_416, 59, 4)?;
     // Controls/MacOSControls.xaml(140,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_418, 140, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPreviousPageButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_419, 140, 4)?;
     // Controls/MacOSControls.xaml(147,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_419, 147, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNextPageButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_420, 147, 4)?;
     // Controls/MacOSControls.xaml(153,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerButtonBaseStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_420, 153, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerButtonBaseStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_421, 153, 4)?;
     // Controls/MacOSControls.xaml(234,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerSelectedPipButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_423, 234, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerSelectedPipButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_424, 234, 4)?;
     // Controls/MacOSControls.xaml(242,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNormalPipButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_424, 242, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerNormalPipButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_425, 242, 4)?;
     // Controls/MacOSControls.xaml(251,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPipItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_425, 251, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerPipItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_426, 251, 4)?;
     // Controls/MacOSControls.xaml(342,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerListStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_428, 342, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PipsPagerListStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_429, 342, 4)?;
     // Controls/MacOSControls.xaml(358,4) Content (resource)
-    let deferred_218 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_430, 358, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_218) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 358, 4)?;
+    let deferred_219 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_431, 358, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_219) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 358, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20763,10 +20766,10 @@ fn build_controls_macoscontrols_xaml_unit_76(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRefreshContainerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_433, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRefreshContainerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_434, 18, 4)?;
     // Controls/MacOSControls.xaml(42,4) Content (resource)
-    let deferred_220 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_435, 42, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_220) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 42, 4)?;
+    let deferred_221 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_436, 42, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_221) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 42, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20778,10 +20781,10 @@ fn build_controls_macoscontrols_xaml_unit_77(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_436, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_437, 18, 4)?;
     // Controls/MacOSControls.xaml(50,4) Content (resource)
-    let deferred_222 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_438, 50, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_222) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 50, 4)?;
+    let deferred_223 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_439, 50, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_223) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 50, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20793,10 +20796,10 @@ fn build_controls_macoscontrols_xaml_unit_78(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(17,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_439, 17, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutPresenterStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_440, 17, 4)?;
     // Controls/MacOSControls.xaml(44,4) Content (resource)
-    let deferred_224 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_441, 44, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_224) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 44, 4)?;
+    let deferred_225 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_442, 44, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_225) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 44, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20808,20 +20811,20 @@ fn build_controls_macoscontrols_xaml_unit_79(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(23,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MenuItemKeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_442, 23, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "MenuItemKeyGestureConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_443, 23, 4)?;
     // Controls/MacOSControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_443, 24, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_444, 24, 4)?;
     // Controls/MacOSControls.xaml(246,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultToggleMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_446, 246, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultToggleMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_447, 246, 4)?;
     // Controls/MacOSControls.xaml(250,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRadioMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_447, 250, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRadioMenuFlyoutItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_448, 250, 4)?;
     // Controls/MacOSControls.xaml(253,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutSubItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_448, 253, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuFlyoutSubItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_449, 253, 4)?;
     // Controls/MacOSControls.xaml(259,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "RadioMenuFlyoutSubItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_449, 259, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "RadioMenuFlyoutSubItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_450, 259, 4)?;
     // Controls/MacOSControls.xaml(285,4) Content (resource)
-    let deferred_231 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_450, 285, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_231) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 285, 4)?;
+    let deferred_232 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_451, 285, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_232) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 285, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20833,12 +20836,12 @@ fn build_controls_macoscontrols_xaml_unit_80(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_451, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_452, 18, 4)?;
     // Controls/MacOSControls.xaml(80,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_454, 80, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultMenuBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_455, 80, 4)?;
     // Controls/MacOSControls.xaml(94,4) Content (resource)
-    let deferred_234 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_456, 94, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_234) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
+    let deferred_235 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_457, 94, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_235) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 94, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20850,14 +20853,14 @@ fn build_controls_macoscontrols_xaml_unit_81(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(23,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListBoxItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_457, 23, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListBoxItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_458, 23, 4)?;
     // Controls/MacOSControls.xaml(90,4) Content (resource)
-    let deferred_236 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_459, 90, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_236) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
+    let deferred_237 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_460, 90, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_237) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 90, 4)?;
     // Controls/MacOSControls.xaml(91,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_460, 91, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_461, 91, 4)?;
     // Controls/MacOSControls.xaml(165,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ListViewItemExpanded", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_463, 165, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ListViewItemExpanded", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_464, 165, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20869,10 +20872,10 @@ fn build_controls_macoscontrols_xaml_unit_82(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(31,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_465, 31, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_466, 31, 4)?;
     // Controls/MacOSControls.xaml(77,4) Content (resource)
-    let deferred_240 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_468, 77, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_240) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 77, 4)?;
+    let deferred_241 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_469, 77, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_241) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 77, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20884,12 +20887,12 @@ fn build_controls_macoscontrols_xaml_unit_83(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(16,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ComboBoxItemPill", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_469, 16, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ComboBoxItemPill", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_470, 16, 4)?;
     // Controls/MacOSControls.xaml(24,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultComboBoxItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_470, 24, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultComboBoxItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_471, 24, 4)?;
     // Controls/MacOSControls.xaml(116,4) Content (resource)
-    let deferred_243 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_473, 116, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_243) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 116, 4)?;
+    let deferred_244 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_474, 116, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_244) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 116, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20901,12 +20904,12 @@ fn build_controls_macoscontrols_xaml_unit_84(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ComboBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_474, 30, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ComboBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_475, 30, 4)?;
     // Controls/MacOSControls.xaml(142,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultComboBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_476, 142, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultComboBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_477, 142, 4)?;
     // Controls/MacOSControls.xaml(393,4) Content (resource)
-    let deferred_246 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_479, 393, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_246) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 393, 4)?;
+    let deferred_247 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_480, 393, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_247) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 393, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20918,14 +20921,14 @@ fn build_controls_macoscontrols_xaml_unit_85(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(19,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemIndentationConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_480, 19, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemIndentationConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_481, 19, 4)?;
     // Controls/MacOSControls.xaml(20,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemExpandCollapseChevron", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_481, 20, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TreeViewItemExpandCollapseChevron", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_482, 20, 4)?;
     // Controls/MacOSControls.xaml(46,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MUX_TreeViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_483, 46, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "MUX_TreeViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_484, 46, 4)?;
     // Controls/MacOSControls.xaml(154,4) Content (resource)
-    let deferred_250 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_486, 154, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_250) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 154, 4)?;
+    let deferred_251 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_487, 154, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_251) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 154, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20937,10 +20940,10 @@ fn build_controls_macoscontrols_xaml_unit_86(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(38,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTreeViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_487, 38, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTreeViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_488, 38, 4)?;
     // Controls/MacOSControls.xaml(67,4) Content (resource)
-    let deferred_252 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_489, 67, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_252) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 67, 4)?;
+    let deferred_253 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_490, 67, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_253) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 67, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20952,14 +20955,14 @@ fn build_controls_macoscontrols_xaml_unit_87(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(21,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_490, 21, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_491, 21, 4)?;
     // Controls/MacOSControls.xaml(72,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_492, 72, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_493, 72, 4)?;
     // Controls/MacOSControls.xaml(230,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultAutoSuggestBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_494, 230, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultAutoSuggestBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_495, 230, 4)?;
     // Controls/MacOSControls.xaml(300,4) Content (resource)
-    let deferred_256 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_496, 300, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_256) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 300, 4)?;
+    let deferred_257 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_497, 300, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_257) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 300, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -20971,40 +20974,40 @@ fn build_controls_macoscontrols_xaml_unit_88(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(37,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_497, 37, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_498, 37, 4)?;
     // Controls/MacOSControls.xaml(86,4) Content (resource)
-    let deferred_258 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_499, 86, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_258) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 86, 4)?;
+    let deferred_259 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_500, 86, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_259) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 86, 4)?;
     // Controls/MacOSControls.xaml(88,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AttentionDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_500, 88, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AttentionDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_501, 88, 4)?;
     // Controls/MacOSControls.xaml(91,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AttentionValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_501, 91, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AttentionValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_502, 91, 4)?;
     // Controls/MacOSControls.xaml(92,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AttentionIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_502, 92, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AttentionIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_503, 92, 4)?;
     // Controls/MacOSControls.xaml(99,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "InformationalDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_503, 99, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "InformationalDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_504, 99, 4)?;
     // Controls/MacOSControls.xaml(102,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "InformationalValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_504, 102, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "InformationalValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_505, 102, 4)?;
     // Controls/MacOSControls.xaml(103,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "InformationalIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_505, 103, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "InformationalIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_506, 103, 4)?;
     // Controls/MacOSControls.xaml(110,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SuccessDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_506, 110, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SuccessDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_507, 110, 4)?;
     // Controls/MacOSControls.xaml(113,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SuccessValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_507, 113, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SuccessValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_508, 113, 4)?;
     // Controls/MacOSControls.xaml(114,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SuccessIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_508, 114, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SuccessIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_509, 114, 4)?;
     // Controls/MacOSControls.xaml(120,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CautionDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_509, 120, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CautionDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_510, 120, 4)?;
     // Controls/MacOSControls.xaml(123,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CautionValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_510, 123, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CautionValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_511, 123, 4)?;
     // Controls/MacOSControls.xaml(124,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CautionIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_511, 124, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CautionIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_512, 124, 4)?;
     // Controls/MacOSControls.xaml(130,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CriticalDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_512, 130, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CriticalDotInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_513, 130, 4)?;
     // Controls/MacOSControls.xaml(133,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CriticalValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_513, 133, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CriticalValueInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_514, 133, 4)?;
     // Controls/MacOSControls.xaml(134,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "CriticalIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_514, 134, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "CriticalIconInfoBadgeStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_515, 134, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21016,10 +21019,10 @@ fn build_controls_macoscontrols_xaml_unit_89(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(70,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupContentRootButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_515, 70, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NumberBoxPopupContentRootButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_516, 70, 4)?;
     // Controls/MacOSControls.xaml(99,4) Content (resource)
-    let deferred_275 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_516, 99, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_275) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 99, 4)?;
+    let deferred_276 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_517, 99, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_276) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 99, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21031,12 +21034,12 @@ fn build_controls_macoscontrols_xaml_unit_90(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(69,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxQueryButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_518, 69, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxQueryButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_519, 69, 4)?;
     // Controls/MacOSControls.xaml(109,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxQuerySymbolIconTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_520, 109, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxQuerySymbolIconTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_521, 109, 4)?;
     // Controls/MacOSControls.xaml(123,4) Content (resource)
-    let deferred_278 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_522, 123, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoSuggestBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_278) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 123, 4)?;
+    let deferred_279 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_523, 123, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoSuggestBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_279) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 123, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21048,10 +21051,10 @@ fn build_controls_macoscontrols_xaml_unit_91(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(49,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRadioButtonsStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_524, 49, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRadioButtonsStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_525, 49, 4)?;
     // Controls/MacOSControls.xaml(78,4) Content (resource)
-    let deferred_280 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_527, 78, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButtons as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_280) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 78, 4)?;
+    let deferred_281 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_528, 78, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RadioButtons as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_281) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 78, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21063,10 +21066,10 @@ fn build_controls_macoscontrols_xaml_unit_92(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(43,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPersonPictureStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_528, 43, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPersonPictureStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_529, 43, 4)?;
     // Controls/MacOSControls.xaml(136,4) Content (resource)
-    let deferred_282 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_530, 136, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PersonPicture as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_282) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 136, 4)?;
+    let deferred_283 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_531, 136, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PersonPicture as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_283) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 136, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21078,12 +21081,12 @@ fn build_controls_macoscontrols_xaml_unit_93(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(52,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PagerControlPageNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_531, 52, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PagerControlPageNavigationButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_532, 52, 4)?;
     // Controls/MacOSControls.xaml(115,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PagerControlNumberPanelButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_534, 115, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PagerControlNumberPanelButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_535, 115, 4)?;
     // Controls/MacOSControls.xaml(153,4) Content (resource)
-    let deferred_285 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_536, 153, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PagerControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_285) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 153, 4)?;
+    let deferred_286 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_537, 153, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PagerControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_286) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 153, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21097,12 +21100,12 @@ fn build_controls_macoscontrols_xaml_unit_94(
     // Controls/MacOSControls.xaml(25,44) Content (resource)
     rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1)?;
     // Controls/MacOSControls.xaml(28,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "WinUIRichEditBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_539, 28, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "WinUIRichEditBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_540, 28, 4)?;
     // Controls/MacOSControls.xaml(52,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRichEditBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_540, 52, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultRichEditBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_541, 52, 4)?;
     // Controls/MacOSControls.xaml(161,4) Content (resource)
-    let deferred_288 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_542, 161, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_288) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    let deferred_289 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_543, 161, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_289) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21114,21 +21117,21 @@ fn build_controls_macoscontrols_xaml_unit_95(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(114,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewPaneSearchButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_543, 114, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewPaneSearchButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_544, 114, 4)?;
     // Controls/MacOSControls.xaml(157,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewOverflowButtonStyleWhenPaneOnTop", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_545, 157, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationViewOverflowButtonStyleWhenPaneOnTop", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_546, 157, 4)?;
     // Controls/MacOSControls.xaml(202,4) Content (resource)
-    let deferred_291 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_547, 202, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_291) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 202, 4)?;
+    let deferred_292 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_548, 202, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_292) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 202, 4)?;
     // Controls/MacOSControls.xaml(566,4) Content (resource)
-    let deferred_292 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_549, 566, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_292) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 566, 4)?;
+    let deferred_293 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_550, 566, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_293) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 566, 4)?;
     // Controls/MacOSControls.xaml(996,4) Content (resource)
-    let deferred_293 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_551, 996, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_293) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 996, 4)?;
+    let deferred_294 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_552, 996, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_294) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 996, 4)?;
     // Controls/MacOSControls.xaml(1040,4) Content (resource)
-    let deferred_294 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_553, 1040, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_294) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1040, 4)?;
+    let deferred_295 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_554, 1040, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_295) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1040, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21140,10 +21143,10 @@ fn build_controls_macoscontrols_xaml_unit_96(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(43,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTitleBarControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_555, 43, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultTitleBarControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_556, 43, 4)?;
     // Controls/MacOSControls.xaml(231,4) Content (resource)
-    let deferred_296 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_557, 231, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TitleBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_296) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 231, 4)?;
+    let deferred_297 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_558, 231, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TitleBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_297) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 231, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21155,13 +21158,13 @@ fn build_controls_macoscontrols_xaml_unit_97(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(40,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_558, 40, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultListViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_559, 40, 4)?;
     // Controls/MacOSControls.xaml(80,4) Content (resource)
-    let deferred_298 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_561, 80, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_298) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
+    let deferred_299 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_562, 80, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_299) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 80, 4)?;
     // Controls/MacOSControls.xaml(82,4) Content (resource)
-    let deferred_299 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_562, 82, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_299) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 82, 4)?;
+    let deferred_300 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_563, 82, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ListViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_300) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 82, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21173,15 +21176,15 @@ fn build_controls_macoscontrols_xaml_unit_98(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(46,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultGridViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_563, 46, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultGridViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_564, 46, 4)?;
     // Controls/MacOSControls.xaml(87,4) Content (resource)
-    let deferred_301 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_566, 87, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_301) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 87, 4)?;
+    let deferred_302 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_567, 87, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_302) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 87, 4)?;
     // Controls/MacOSControls.xaml(89,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultGridViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_567, 89, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultGridViewItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_568, 89, 4)?;
     // Controls/MacOSControls.xaml(174,4) Content (resource)
-    let deferred_303 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_570, 174, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_303) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 174, 4)?;
+    let deferred_304 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_571, 174, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::GridViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_304) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 174, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21193,32 +21196,32 @@ fn build_controls_macoscontrols_xaml_unit_99(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(57,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NextTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_571, 57, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NextTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_572, 57, 4)?;
     // Controls/MacOSControls.xaml(74,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PreviousTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_573, 74, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PreviousTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_574, 74, 4)?;
     // Controls/MacOSControls.xaml(93,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PivotNextButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_575, 93, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PivotNextButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_576, 93, 4)?;
     // Controls/MacOSControls.xaml(113,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PivotPreviousButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_576, 113, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PivotPreviousButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_577, 113, 4)?;
     // Controls/MacOSControls.xaml(131,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TitleContentControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_577, 131, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TitleContentControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_578, 131, 4)?;
     // Controls/MacOSControls.xaml(148,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "PivotTitleContentControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_579, 148, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "PivotTitleContentControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_580, 148, 4)?;
     // Controls/MacOSControls.xaml(154,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_580, 154, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_581, 154, 4)?;
     // Controls/MacOSControls.xaml(266,4) Content (resource)
-    let deferred_311 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_583, 266, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Pivot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_311) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 266, 4)?;
+    let deferred_312 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_584, 266, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::Pivot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_312) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 266, 4)?;
     // Controls/MacOSControls.xaml(268,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_584, 268, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_585, 268, 4)?;
     // Controls/MacOSControls.xaml(290,4) Content (resource)
-    let deferred_313 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_586, 290, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PivotItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_313) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 290, 4)?;
+    let deferred_314 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_587, 290, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PivotItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_314) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 290, 4)?;
     // Controls/MacOSControls.xaml(292,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotHeaderItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_587, 292, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultPivotHeaderItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_588, 292, 4)?;
     // Controls/MacOSControls.xaml(376,4) Content (resource)
-    let deferred_315 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_589, 376, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PivotHeaderItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_315) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 376, 4)?;
+    let deferred_316 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_590, 376, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::PivotHeaderItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_316) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 376, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21230,12 +21233,12 @@ fn build_controls_macoscontrols_xaml_unit_100(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(40,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SwipeItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_590, 40, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SwipeItemStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_591, 40, 4)?;
     // Controls/MacOSControls.xaml(84,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultSwipeControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_592, 84, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultSwipeControlStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_593, 84, 4)?;
     // Controls/MacOSControls.xaml(114,4) Content (resource)
-    let deferred_318 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_594, 114, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SwipeControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_318) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 114, 4)?;
+    let deferred_319 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_595, 114, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SwipeControl as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_319) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 114, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -21247,16 +21250,16 @@ fn build_controls_macoscontrols_xaml_unit_101(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(75,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabViewScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_595, 75, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TabViewScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_596, 75, 4)?;
     // Controls/MacOSControls.xaml(161,4) Content (resource)
-    let deferred_320 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_597, 161, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_320) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    let deferred_321 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_598, 161, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_321) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
     // Controls/MacOSControls.xaml(237,4) Content (resource)
-    let deferred_321 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_599, 237, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabViewListView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_321) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 237, 4)?;
+    let deferred_322 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_600, 237, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabViewListView as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_322) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 237, 4)?;
     // Controls/MacOSControls.xaml(298,4) Content (resource)
-    let deferred_322 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_602, 298, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_322) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 298, 4)?;
+    let deferred_323 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_603, 298, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TabViewItem as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_323) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 298, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -38117,6 +38120,44 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_357_THEME: rt::ControlThemeTab
     ],
 };
 
+/// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
+fn build_controls_macoscontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::CommandBar::is_dynamic_overflow_enabled_property())
+}
+
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_358`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::primitives::CommandBarFlyoutCommandBar as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultCommandBarStyle"), line: 676, position: 17 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutPresenterBackground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeBrush") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeThickness") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_217, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_82, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(440.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_245, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
+fn build_controls_macoscontrols_xaml_deferred_358_value_0() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
+}
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
+fn build_controls_macoscontrols_xaml_deferred_358_value_1() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
+}
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
+fn build_controls_macoscontrols_xaml_deferred_358_value_2() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_controls::CommandBarDefaultLabelPosition::Collapsed)
+}
+
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_296: &[rt::DynamicResourceRow] = &[
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_0, key: "MacOSFocusBrush", line: 42, position: 17 },
@@ -38144,28 +38185,28 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_298: &[rt::TemplateBindingRow]
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_331: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ChevronIcon")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_358`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_359`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_359_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_359_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_359_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ButtonBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_359_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_359_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_4) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_358_value_5) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_6) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_360, parent: true, line: 48, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_359_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_6) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_361, parent: true, line: 48, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -38284,7 +38325,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([7.0_f64, 1.0_f64, 7.0_f64, 1.0_f64]) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(9.0_f64) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_7) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_7) }),
             ],
         },
         rt::StyleMember::Style {
@@ -38297,7 +38338,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64]) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(11.0_f64) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_8) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_8) }),
             ],
         },
         rt::StyleMember::Style {
@@ -38310,7 +38351,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([15.0_f64, 5.0_f64, 15.0_f64, 5.0_f64]) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(15.0_f64) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([999.0_f64, 999.0_f64, 999.0_f64, 999.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_9) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_9) }),
             ],
         },
         rt::StyleMember::Style {
@@ -38323,107 +38364,107 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([19.0_f64, 7.0_f64, 19.0_f64, 7.0_f64]) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(17.0_f64) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([999.0_f64, 999.0_f64, 999.0_f64, 999.0_f64]) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_358_value_10) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_359_value_10) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 35, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::BackgroundSizing::InnerBorderEdge)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_6(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_6(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_359, 41, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_360, 41, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 41, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_7(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_1 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_1.clone()));
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_361, 134, 12)?;
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_362, 134, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_1), 134, 12)?, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_8(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_8(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_2 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_2.clone()));
-    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_362, 146, 12)?;
+    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_363, 146, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_2), 146, 12)?, rt::to_object(::core::clone::Clone::clone(&deferred_3)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_2)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_9(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_9(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_3 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_3.clone()));
-    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_363, 158, 12)?;
+    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_364, 158, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_3), 158, 12)?, rt::to_object(::core::clone::Clone::clone(&deferred_4)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_3)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_358` (#568).
-fn build_controls_macoscontrols_xaml_deferred_358_value_10(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_359` (#568).
+fn build_controls_macoscontrols_xaml_deferred_359_value_10(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_4 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_4.clone()));
-    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_364, 170, 12)?;
+    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_365, 170, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_4), 170, 12)?, rt::to_object(::core::clone::Clone::clone(&deferred_5)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_4)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_365`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_365_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_366`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::DropDownButton as ::ferroui_base::StaticType>::TYPE),
@@ -38455,23 +38496,23 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_301: &[rt::TemplateBindingRow]
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_332: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RootGrid")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_366`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_367`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_367_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_4) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_366_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_367_value_5) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_366_value_6) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_368, parent: false, line: 47, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_367_value_6) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_369, parent: false, line: 47, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_6),
@@ -38485,7 +38526,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonForegroundDisabled") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_35, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_366_value_7) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_35, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_367_value_7) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -38502,53 +38543,53 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_5(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_5(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 36, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_6(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_6(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_367, 40, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_368, 40, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 40, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_366` (#568).
-fn build_controls_macoscontrols_xaml_deferred_366_value_7() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_367` (#568).
+fn build_controls_macoscontrols_xaml_deferred_367_value_7() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -38565,19 +38606,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_303: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_245() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_246() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Button::command_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_246() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_247() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::SplitButton::command_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_304: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_12, source: build_controls_macoscontrols_xaml_property_12, line: 133, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_245, source: build_controls_macoscontrols_xaml_property_246, line: 134, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_246, source: build_controls_macoscontrols_xaml_property_247, line: 134, position: 21 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -38633,29 +38674,29 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_344: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_345: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":flyout-open")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_369`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_370`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_370_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_369_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_370_value_4) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_369_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_370_value_5) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_49, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlPadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_371, parent: true, line: 103, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_372, parent: true, line: 103, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -38937,7 +38978,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                     line: 313,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_6) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_6) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderBrushDisabled") }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonForegroundDisabled") }),
                     ],
@@ -38948,7 +38989,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                     line: 318,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_7) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_7) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderBrushDisabled") }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonForegroundDisabled") }),
                     ],
@@ -38968,7 +39009,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
                     line: 326,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_369_value_8) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_370_value_8) }),
                     ],
                 },
             ],
@@ -38976,63 +39017,63 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 87, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_5(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_370, 91, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_371, 91, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 91, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_7() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_7() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_369` (#568).
-fn build_controls_macoscontrols_xaml_deferred_369_value_8() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_370` (#568).
+fn build_controls_macoscontrols_xaml_deferred_370_value_8() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_372`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_372_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_373`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE),
@@ -39061,21 +39102,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_309: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_22, source: build_controls_macoscontrols_xaml_property_23, line: 363, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_373`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_374`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_374_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_373_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_374_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_373_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_373_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_374_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_374_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_373_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_374_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_373_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_375, parent: false, line: 354, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_374_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_376, parent: false, line: 354, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_6),
@@ -39106,36 +39147,36 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_373_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_373` (#568).
-fn build_controls_macoscontrols_xaml_deferred_373_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_374` (#568).
+fn build_controls_macoscontrols_xaml_deferred_374_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_373` (#568).
-fn build_controls_macoscontrols_xaml_deferred_373_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_374` (#568).
+fn build_controls_macoscontrols_xaml_deferred_374_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_373` (#568).
-fn build_controls_macoscontrols_xaml_deferred_373_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_374` (#568).
+fn build_controls_macoscontrols_xaml_deferred_374_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_373` (#568).
-fn build_controls_macoscontrols_xaml_deferred_373_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_374` (#568).
+fn build_controls_macoscontrols_xaml_deferred_374_value_3(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 343, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_373` (#568).
-fn build_controls_macoscontrols_xaml_deferred_373_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_374` (#568).
+fn build_controls_macoscontrols_xaml_deferred_374_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_374, 347, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_375, 347, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 347, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
@@ -39164,7 +39205,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_312: &[rt::TemplateBindingRow]
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_313: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_12, source: build_controls_macoscontrols_xaml_property_12, line: 438, position: 21 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_245, source: build_controls_macoscontrols_xaml_property_246, line: 439, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_246, source: build_controls_macoscontrols_xaml_property_247, line: 439, position: 21 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -39190,29 +39231,29 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_316: &[rt::TemplateBindingRow]
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_346: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Border")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_376`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_377`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_377_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SplitButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_376_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_377_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SplitButtonBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_376_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_376_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_376_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_377_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_377_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_377_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_376_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_377_value_4) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(12.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_376_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_377_value_5) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_49, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([12.0_f64, 8.0_f64, 4.0_f64, 8.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarThemeCompactHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_378, parent: true, line: 412, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_379, parent: true, line: 412, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -39518,7 +39559,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                     line: 603,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_376_value_6) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_377_value_6) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonForegroundDisabled") }),
                     ],
                 },
@@ -39528,7 +39569,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
                     line: 607,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_376_value_7) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_377_value_7) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AppBarButtonForegroundDisabled") }),
                     ],
                 },
@@ -39546,48 +39587,48 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_376_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 396, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_5(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_377, 400, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_378, 400, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 400, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_6(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_6(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
@@ -39595,8 +39636,8 @@ fn build_controls_macoscontrols_xaml_deferred_376_value_6(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_50)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_376` (#568).
-fn build_controls_macoscontrols_xaml_deferred_376_value_7(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_377` (#568).
+fn build_controls_macoscontrols_xaml_deferred_377_value_7(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
@@ -39620,24 +39661,24 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_318: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_247() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_248() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::off_content_template_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_319: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_247, line: 89, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_248, line: 89, position: 33 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_41, source: build_controls_macoscontrols_xaml_property_3, line: 90, position: 33 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_248() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_249() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::on_content_template_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_320: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_248, line: 95, position: 33 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_249, line: 95, position: 33 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_41, source: build_controls_macoscontrols_xaml_property_3, line: 96, position: 33 },
 ];
 
@@ -39655,17 +39696,17 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_322: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_249() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_250() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::off_content_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_250() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_251() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::on_content_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_251() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_252() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ToggleSwitch::knob_transitions_property())
 }
 
@@ -39708,25 +39749,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_358: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_359: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SwitchTrack")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_379`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_379_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_380`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_380_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchContentForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_379_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_379_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_379_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_379_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_380_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_380_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_380_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_380_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(38.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(22.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_249, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_250, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_379_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_251, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSSwitchKnobTransitions") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_381, parent: true, line: 36, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_251, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_380_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_252, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSSwitchKnobTransitions") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_382, parent: true, line: 36, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_347),
@@ -39847,7 +39888,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_379_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ToggleSwitchKnobFillOffDisabled") }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(18.0_f64) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_62, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_379_value_5) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_62, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_380_value_5) }),
                     ],
                 },
             ],
@@ -39865,48 +39906,48 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_379_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_380, 27, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_381, 27, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 27, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_379` (#568).
-fn build_controls_macoscontrols_xaml_deferred_379_value_5(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_380` (#568).
+fn build_controls_macoscontrols_xaml_deferred_380_value_5(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("none")), 148, 38)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_382`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_382_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_383`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE),
@@ -39935,21 +39976,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_361: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_362: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SliderInnerThumb")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_383`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_384`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_384_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderThumbBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_384, parent: true, line: 29, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_385, parent: true, line: 29, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_360),
             line: 52,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_383_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_384_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -39958,7 +39999,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             line: 56,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_383_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_384_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -39967,60 +40008,60 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTab
             line: 60,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_383_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_384_value_2) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_383` (#568).
-fn build_controls_macoscontrols_xaml_deferred_383_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_384` (#568).
+fn build_controls_macoscontrols_xaml_deferred_384_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(1)")), 53, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_383` (#568).
-fn build_controls_macoscontrols_xaml_deferred_383_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_384` (#568).
+fn build_controls_macoscontrols_xaml_deferred_384_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.96)")), 57, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_383` (#568).
-fn build_controls_macoscontrols_xaml_deferred_383_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_384` (#568).
+fn build_controls_macoscontrols_xaml_deferred_384_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_2 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(1)")), 61, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_2)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_385`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_385_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_386`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_386_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_386, parent: true, line: 69, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_387, parent: true, line: 69, position: 10 }) }),
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_387`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_387_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_388`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_388_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_388, parent: true, line: 85, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_389, parent: true, line: 85, position: 10 }) }),
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_389`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_389_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_390`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_390_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_390, parent: false, line: 102, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_391, parent: false, line: 102, position: 10 }) }),
     ],
 };
 
@@ -40031,73 +40072,73 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_325: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_252() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_253() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::ticks_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_253() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_254() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::ticks_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_254() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_255() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::tick_frequency_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_255() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_256() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::tick_frequency_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_256() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_257() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_257() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_258() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::orientation_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_258() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_259() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::minimum_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_259() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_260() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::maximum_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_260() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_261() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::is_direction_reversed_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_261() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_262() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::is_direction_reversed_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_326: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_252, source: build_controls_macoscontrols_xaml_property_253, line: 163, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_254, source: build_controls_macoscontrols_xaml_property_255, line: 164, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_256, source: build_controls_macoscontrols_xaml_property_257, line: 165, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_258, source: build_controls_macoscontrols_xaml_property_99, line: 166, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_101, line: 167, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_261, line: 168, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_253, source: build_controls_macoscontrols_xaml_property_254, line: 163, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_255, source: build_controls_macoscontrols_xaml_property_256, line: 164, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_257, source: build_controls_macoscontrols_xaml_property_258, line: 165, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_99, line: 166, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_101, line: 167, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_261, source: build_controls_macoscontrols_xaml_property_262, line: 168, position: 28 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_327: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_252, source: build_controls_macoscontrols_xaml_property_253, line: 178, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_254, source: build_controls_macoscontrols_xaml_property_255, line: 179, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_256, source: build_controls_macoscontrols_xaml_property_257, line: 180, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_258, source: build_controls_macoscontrols_xaml_property_99, line: 181, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_101, line: 182, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_261, line: 183, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_253, source: build_controls_macoscontrols_xaml_property_254, line: 178, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_255, source: build_controls_macoscontrols_xaml_property_256, line: 179, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_257, source: build_controls_macoscontrols_xaml_property_258, line: 180, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_99, line: 181, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_101, line: 182, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_261, source: build_controls_macoscontrols_xaml_property_262, line: 183, position: 28 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -40113,19 +40154,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_329: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_262() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_263() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TickBar::fill_property())
 }
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_330: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_262, key: "SliderTickBarFill", line: 157, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_263, key: "SliderTickBarFill", line: 157, position: 28 },
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_75, key: "SliderOutsideTickBarThemeHeight", line: 158, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_331: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_262, key: "SliderTickBarFill", line: 171, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_263, key: "SliderTickBarFill", line: 171, position: 28 },
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_75, key: "SliderOutsideTickBarThemeHeight", line: 172, position: 28 },
 ];
 
@@ -40137,22 +40178,22 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_332: &[rt::DynamicResourceRow
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_333: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_252, source: build_controls_macoscontrols_xaml_property_253, line: 260, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_254, source: build_controls_macoscontrols_xaml_property_255, line: 261, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_256, source: build_controls_macoscontrols_xaml_property_257, line: 262, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_258, source: build_controls_macoscontrols_xaml_property_99, line: 263, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_101, line: 264, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_261, line: 265, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_253, source: build_controls_macoscontrols_xaml_property_254, line: 260, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_255, source: build_controls_macoscontrols_xaml_property_256, line: 261, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_257, source: build_controls_macoscontrols_xaml_property_258, line: 262, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_99, line: 263, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_101, line: 264, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_261, source: build_controls_macoscontrols_xaml_property_262, line: 265, position: 28 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_334: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_252, source: build_controls_macoscontrols_xaml_property_253, line: 275, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_254, source: build_controls_macoscontrols_xaml_property_255, line: 276, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_256, source: build_controls_macoscontrols_xaml_property_257, line: 277, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_258, source: build_controls_macoscontrols_xaml_property_99, line: 278, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_101, line: 279, position: 28 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_261, line: 280, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_253, source: build_controls_macoscontrols_xaml_property_254, line: 275, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_255, source: build_controls_macoscontrols_xaml_property_256, line: 276, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_257, source: build_controls_macoscontrols_xaml_property_258, line: 277, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_259, source: build_controls_macoscontrols_xaml_property_99, line: 278, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_260, source: build_controls_macoscontrols_xaml_property_101, line: 279, position: 28 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_261, source: build_controls_macoscontrols_xaml_property_262, line: 280, position: 28 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -40169,13 +40210,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_336: &[rt::TemplateBindingRow]
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_337: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_262, key: "SliderTickBarFill", line: 254, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_263, key: "SliderTickBarFill", line: 254, position: 28 },
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_58, key: "SliderOutsideTickBarThemeHeight", line: 255, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_338: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_262, key: "SliderTickBarFill", line: 268, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_263, key: "SliderTickBarFill", line: 268, position: 28 },
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_58, key: "SliderOutsideTickBarThemeHeight", line: 269, position: 28 },
 ];
 
@@ -40186,7 +40227,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_339: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_263() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_264() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Slider::tick_placement_property())
 }
 
@@ -40201,7 +40242,7 @@ fn build_controls_macoscontrols_xaml_selector_value_18() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_363: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_363: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TopTickBar")]] }];
 
 /// The value of a property selector of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_selector_value_19() -> ::ferroui_base::BoxedValue {
@@ -40209,13 +40250,13 @@ fn build_controls_macoscontrols_xaml_selector_value_19() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_364: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_364: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomTickBar")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_365: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_365: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_17 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LeftTickBar")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_366: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_263, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")]] }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_366: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_19 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")], &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_18 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TickBar as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightTickBar")]] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_367: &[rt::SelectorStep] = &[rt::SelectorStep::Or { alternatives: &[&[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("HorizontalTrackRect")], &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("VerticalTrackRect")]] }];
@@ -40238,8 +40279,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_372: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_373: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Thumb as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_391`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_392`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_392_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE),
@@ -40249,7 +40290,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTrackValueFill") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_391_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_392_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTrackCornerRadius") }),
         rt::StyleMember::Style {
             parent: true,
@@ -40257,7 +40298,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTab
             line: 124,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_393, parent: true, line: 128, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_394, parent: true, line: 128, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -40266,7 +40307,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTab
             line: 221,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_394, parent: true, line: 225, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_395, parent: true, line: 225, position: 12 }) }),
             ],
         },
         rt::StyleMember::Style {
@@ -40432,7 +40473,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTab
                     line: 373,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_262, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTickBarFillDisabled") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_263, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SliderTickBarFillDisabled") }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -40467,20 +40508,20 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_391` (#568).
-fn build_controls_macoscontrols_xaml_deferred_391_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_392` (#568).
+fn build_controls_macoscontrols_xaml_deferred_392_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_392, 116, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_393, 116, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 116, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_395`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_395_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_396`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_396_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Slider as ::ferroui_base::StaticType>::TYPE),
@@ -40488,8 +40529,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_395_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_396`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_396_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_397`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_397_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
@@ -40501,19 +40542,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_396_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(18.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(12.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_396_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_397_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NumberBoxSpinButtonBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(12.0_f64) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_396` (#568).
-fn build_controls_macoscontrols_xaml_deferred_396_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_397` (#568).
+fn build_controls_macoscontrols_xaml_deferred_397_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_397`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_397_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_398`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
@@ -40529,8 +40570,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_397_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_398`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_399`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_399_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
@@ -40671,7 +40712,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_347: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_264() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_265() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Control::tag_property())
 }
 
@@ -40681,7 +40722,7 @@ fn build_controls_macoscontrols_xaml_selector_value_20() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_374: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SpinButtonsSpace")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_374: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_265, value: build_controls_macoscontrols_xaml_selector_value_20 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SpinButtonsSpace")];
 
 /// The value of a property selector of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_selector_value_21() -> ::ferroui_base::BoxedValue {
@@ -40689,7 +40730,7 @@ fn build_controls_macoscontrols_xaml_selector_value_21() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_375: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SpinButtonsSpaceLeft")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_375: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_265, value: build_controls_macoscontrols_xaml_selector_value_21 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SpinButtonsSpaceLeft")];
 
 /// The value of a property selector of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_selector_value_22() -> ::ferroui_base::BoxedValue {
@@ -40697,15 +40738,15 @@ fn build_controls_macoscontrols_xaml_selector_value_22() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_376: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_264, value: build_controls_macoscontrols_xaml_selector_value_22 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PopupIndicator")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_376: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_265, value: build_controls_macoscontrols_xaml_selector_value_22 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PopupIndicator")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_399`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_399_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_400`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_400_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultTextBoxStyle"), line: 83, position: 68 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_400, parent: true, line: 88, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_401, parent: true, line: 88, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_374),
@@ -40752,106 +40793,106 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_348: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_22, source: build_controls_macoscontrols_xaml_property_23, line: 238, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_401`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_401_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_402`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_402_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ButtonSpinner as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_49, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_402, parent: true, line: 233, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_403, parent: true, line: 233, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_62),
             line: 272,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_401_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_402_value_0) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_401` (#568).
-fn build_controls_macoscontrols_xaml_deferred_401_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_402` (#568).
+fn build_controls_macoscontrols_xaml_deferred_402_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_265() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_266() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ButtonSpinner::allow_spin_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_266() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_267() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::allow_spin_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_267() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_268() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ButtonSpinner::show_button_spinner_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_268() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_269() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::show_button_spinner_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_269() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_270() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ButtonSpinner::button_spinner_location_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_270() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_271() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::button_spinner_location_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_349: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_29, source: build_controls_macoscontrols_xaml_property_29, line: 298, position: 26 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_265, source: build_controls_macoscontrols_xaml_property_266, line: 299, position: 26 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_267, source: build_controls_macoscontrols_xaml_property_268, line: 300, position: 26 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_269, source: build_controls_macoscontrols_xaml_property_270, line: 301, position: 26 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_266, source: build_controls_macoscontrols_xaml_property_267, line: 299, position: 26 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_268, source: build_controls_macoscontrols_xaml_property_269, line: 300, position: 26 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_270, source: build_controls_macoscontrols_xaml_property_271, line: 301, position: 26 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_271() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_272() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::text_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_272() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_273() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_273() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_274() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::placeholder_foreground_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_274() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_275() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::is_read_only_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_275() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_276() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_276() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_277() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_277() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_278() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::horizontal_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_278() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_279() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumericUpDown::vertical_content_alignment_property())
 }
 
@@ -40866,18 +40907,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_350: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_26, source: build_controls_macoscontrols_xaml_property_26, line: 312, position: 22 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_19, source: build_controls_macoscontrols_xaml_property_19, line: 313, position: 22 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 314, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_130, source: build_controls_macoscontrols_xaml_property_271, line: 315, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_130, source: build_controls_macoscontrols_xaml_property_272, line: 315, position: 22 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_29, source: build_controls_macoscontrols_xaml_property_29, line: 316, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_272, line: 317, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_149, source: build_controls_macoscontrols_xaml_property_273, line: 318, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_155, source: build_controls_macoscontrols_xaml_property_274, line: 319, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_275, source: build_controls_macoscontrols_xaml_property_276, line: 320, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_147, source: build_controls_macoscontrols_xaml_property_277, line: 321, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_148, source: build_controls_macoscontrols_xaml_property_278, line: 322, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_273, line: 317, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_149, source: build_controls_macoscontrols_xaml_property_274, line: 318, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_155, source: build_controls_macoscontrols_xaml_property_275, line: 319, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_276, source: build_controls_macoscontrols_xaml_property_277, line: 320, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_147, source: build_controls_macoscontrols_xaml_property_278, line: 321, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_148, source: build_controls_macoscontrols_xaml_property_279, line: 322, position: 22 },
 ];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_377: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_268, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_377: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_269, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
 
 /// The value of a property selector of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_selector_value_23() -> ::ferroui_base::BoxedValue {
@@ -40885,13 +40926,13 @@ fn build_controls_macoscontrols_xaml_selector_value_23() -> ::ferroui_base::Boxe
 }
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_378: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_268, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_270, value: build_controls_macoscontrols_xaml_selector_value_23 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_378: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_269, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_271, value: build_controls_macoscontrols_xaml_selector_value_23 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_379: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":error"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_TextBox")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_403`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_403_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_404`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_404_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NumericUpDown as ::ferroui_base::StaticType>::TYPE),
@@ -40905,8 +40946,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_403_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_273, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_404, parent: true, line: 295, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_274, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_405, parent: true, line: 295, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_377),
@@ -40914,7 +40955,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_403_THEME: rt::ControlThemeTab
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NumberBoxMinWidth", line: 334, position: 35 } }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisible") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_265, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisible") }),
             ],
         },
         rt::StyleMember::Style {
@@ -40923,7 +40964,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_403_THEME: rt::ControlThemeTab
             line: 338,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisibleLeft") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_265, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisibleLeft") }),
             ],
         },
         rt::StyleMember::Style {
@@ -40983,21 +41024,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_381: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_382: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":checked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_405`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_406`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_405_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_405_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_406_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_406_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_405_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_406_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_405_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_406_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([2.0_f64, 3.0_f64, 2.0_f64, 3.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_405_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_405_value_5) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_407, parent: true, line: 52, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_406_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_406_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_408, parent: true, line: 52, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -41139,54 +41180,54 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTab
             line: 161,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_405_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_406_value_6) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 37, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_406, 41, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_407, 41, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 41, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::BackgroundSizing::InnerBorderEdge)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_405` (#568).
-fn build_controls_macoscontrols_xaml_deferred_405_value_6(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_406` (#568).
+fn build_controls_macoscontrols_xaml_deferred_406_value_6(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(90deg)")), 162, 42)?;
@@ -41223,48 +41264,48 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_359: &[rt::DynamicResourceRow
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_0, key: "ExpanderChevronBorderBrush", line: 200, position: 21 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_408`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_408_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_409`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_409_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ExpanderHeaderDownStyle"), line: 166, position: 73 },
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([2.0_f64, 3.0_f64, 2.0_f64, 3.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_408_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_408_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_409, parent: true, line: 174, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_409_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_409_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_410, parent: true, line: 174, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_382),
             line: 233,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_408_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_409_value_2) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_408` (#568).
-fn build_controls_macoscontrols_xaml_deferred_408_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_409` (#568).
+fn build_controls_macoscontrols_xaml_deferred_409_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_408` (#568).
-fn build_controls_macoscontrols_xaml_deferred_408_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_409` (#568).
+fn build_controls_macoscontrols_xaml_deferred_409_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::BackgroundSizing::InnerBorderEdge)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_408` (#568).
-fn build_controls_macoscontrols_xaml_deferred_408_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_409` (#568).
+fn build_controls_macoscontrols_xaml_deferred_409_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(-90deg)")), 234, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_410`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_411`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_411_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
@@ -41275,56 +41316,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_410_THEME: rt::ControlThemeTab
             line: 241,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_410_value_0) }),
-            ],
-        },
-        rt::StyleMember::Style {
-            parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_382),
-            line: 244,
-            position: 6,
-            members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_410_value_1) }),
-            ],
-        },
-    ],
-};
-
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_410` (#568).
-fn build_controls_macoscontrols_xaml_deferred_410_value_0(
-    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 242, 42)?;
-    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
-}
-
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_410` (#568).
-fn build_controls_macoscontrols_xaml_deferred_410_value_1(
-    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(0deg)")), 245, 42)?;
-    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
-}
-
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_411`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_411_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
-    parent: true,
-    members: &[
-        rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ExpanderHeaderDownStyle"), line: 250, position: 76 },
-        rt::StyleMember::Style {
-            parent: false,
-            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_380),
-            line: 251,
-            position: 6,
-            members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_411_value_0) }),
             ],
         },
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_382),
-            line: 254,
+            line: 244,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_411_value_1) }),
@@ -41337,12 +41335,55 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_411_THEME: rt::ControlThemeTab
 fn build_controls_macoscontrols_xaml_deferred_411_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(0deg)")), 252, 42)?;
+    let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 242, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
 /// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_411` (#568).
 fn build_controls_macoscontrols_xaml_deferred_411_value_1(
+    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(0deg)")), 245, 42)?;
+    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
+}
+
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_412`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ExpanderHeaderDownStyle"), line: 250, position: 76 },
+        rt::StyleMember::Style {
+            parent: false,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_380),
+            line: 251,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_0) }),
+            ],
+        },
+        rt::StyleMember::Style {
+            parent: false,
+            selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_382),
+            line: 254,
+            position: 6,
+            members: &[
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_1) }),
+            ],
+        },
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
+fn build_controls_macoscontrols_xaml_deferred_412_value_0(
+    _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(0deg)")), 252, 42)?;
+    ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
+}
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
+fn build_controls_macoscontrols_xaml_deferred_412_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 255, 42)?;
@@ -41363,13 +41404,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_361: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_279() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_280() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::Expander::is_expanded_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_362: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_279, line: 299, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_280, line: 299, position: 21 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_25, source: build_controls_macoscontrols_xaml_property_4, line: 300, position: 21 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_40, source: build_controls_macoscontrols_xaml_property_34, line: 301, position: 21 },
 ];
@@ -41402,25 +41443,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_388: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_389: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":expanded"), rt::SelectorStep::Class(":right"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpanderHeader")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_412`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_413`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_413_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_34, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(24.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ExpanderContentBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([20.0_f64, 4.0_f64, 0.0_f64, 8.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_5) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_413, parent: true, line: 278, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_414, parent: true, line: 278, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_383),
@@ -41434,7 +41475,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_200, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ExpanderHeaderUpStyle", line: 324, position: 34 } }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_6) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_6) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -41444,7 +41485,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_27, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_7) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_7) }),
                     ],
                 },
             ],
@@ -41462,8 +41503,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_200, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ExpanderHeaderLeftStyle", line: 335, position: 34 } }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_8) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_9) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_8) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_9) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -41473,7 +41514,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_27, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_10) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_10) }),
                     ],
                 },
             ],
@@ -41491,8 +41532,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_200, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ExpanderHeaderRightStyle", line: 347, position: 34 } }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_11) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_412_value_12) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_73, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_11) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_413_value_12) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -41502,7 +41543,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_27, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_13) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_13) }),
                     ],
                 },
             ],
@@ -41513,7 +41554,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
             line: 359,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_14) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_14) }),
             ],
         },
         rt::StyleMember::Style {
@@ -41522,7 +41563,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
             line: 362,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_15) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_15) }),
             ],
         },
         rt::StyleMember::Style {
@@ -41531,7 +41572,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
             line: 365,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_16) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_16) }),
             ],
         },
         rt::StyleMember::Style {
@@ -41540,49 +41581,49 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME: rt::ControlThemeTab
             line: 368,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_412_value_17) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_413_value_17) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::BackgroundSizing::InnerBorderEdge)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_7(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41595,18 +41636,18 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_7(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_4)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_8() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_8() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_9() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_9() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_10(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_10(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41619,18 +41660,18 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_10(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_7)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_11() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_11() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::Dock::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_12() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_12() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_13(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_13(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41643,8 +41684,8 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_13(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_10)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_14(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_14(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41657,8 +41698,8 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_14(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_12)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_15(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_15(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41671,8 +41712,8 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_15(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_14)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_16(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_16(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41685,8 +41726,8 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_16(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_16)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_412` (#568).
-fn build_controls_macoscontrols_xaml_deferred_412_value_17(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_413` (#568).
+fn build_controls_macoscontrols_xaml_deferred_413_value_17(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
@@ -41699,8 +41740,8 @@ fn build_controls_macoscontrols_xaml_deferred_412_value_17(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_18)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_414`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_414_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_415`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Expander as ::ferroui_base::StaticType>::TYPE),
@@ -41742,8 +41783,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_368: &[rt::TemplateBindingRow]
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_390: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ScaleTransform")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_415`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_416`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_416_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -41753,14 +41794,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerNavigationButtonBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNavigationButtonBorderThickness", line: 63, position: 40 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNavigationButtonFontSize", line: 64, position: 33 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_415_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_415_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_415_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_415_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_416_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_416_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_416_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_416_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNavigationButtonWidth", line: 80, position: 30 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNavigationButtonHeight", line: 81, position: 31 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ControlCornerRadius", line: 82, position: 37 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_417, parent: false, line: 85, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_418, parent: false, line: 85, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -41819,7 +41860,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
                     line: 123,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_415_value_4) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_416_value_4) }),
                     ],
                 },
             ],
@@ -41854,43 +41895,43 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_415` (#568).
-fn build_controls_macoscontrols_xaml_deferred_415_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_416` (#568).
+fn build_controls_macoscontrols_xaml_deferred_416_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_416, 67, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_417, 67, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 67, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_415` (#568).
-fn build_controls_macoscontrols_xaml_deferred_415_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_416` (#568).
+fn build_controls_macoscontrols_xaml_deferred_416_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_415` (#568).
-fn build_controls_macoscontrols_xaml_deferred_415_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_416` (#568).
+fn build_controls_macoscontrols_xaml_deferred_416_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_415` (#568).
-fn build_controls_macoscontrols_xaml_deferred_415_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_416` (#568).
+fn build_controls_macoscontrols_xaml_deferred_416_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_415` (#568).
-fn build_controls_macoscontrols_xaml_deferred_415_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_416` (#568).
+fn build_controls_macoscontrols_xaml_deferred_416_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("scale(0.875)")), 124, 44)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_418`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_418_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_419`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_419_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -41907,8 +41948,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_418_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_419`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_419_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_420`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -41951,8 +41992,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_372: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 193, position: 17 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_420`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_421`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_421_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -41961,12 +42002,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerButtonBorderThickness", line: 157, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_420_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_420_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_420_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_421_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_421_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_421_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(4.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ControlCornerRadius", line: 174, position: 37 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_422, parent: true, line: 177, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_423, parent: true, line: 177, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -42055,30 +42096,30 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_420_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_420` (#568).
-fn build_controls_macoscontrols_xaml_deferred_420_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_421` (#568).
+fn build_controls_macoscontrols_xaml_deferred_421_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_420` (#568).
-fn build_controls_macoscontrols_xaml_deferred_420_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_421` (#568).
+fn build_controls_macoscontrols_xaml_deferred_421_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_420` (#568).
-fn build_controls_macoscontrols_xaml_deferred_420_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_421` (#568).
+fn build_controls_macoscontrols_xaml_deferred_421_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_421, 162, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_422, 162, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 162, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_423`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_423_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_424`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_424_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -42090,8 +42131,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_423_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_424`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_424_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_425`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -42132,8 +42173,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_377: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 293, position: 17 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_425`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_426`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_426_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -42141,9 +42182,9 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PipsPagerSelectionIndicatorBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerButtonBorderThickness", line: 255, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_425_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_425_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_425_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_426_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_426_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_426_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(4.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ControlCornerRadius", line: 272, position: 37 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerHorizontalOrientationButtonWidth", line: 273, position: 30 } }),
@@ -42151,7 +42192,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_427, parent: true, line: 280, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_428, parent: true, line: 280, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_15),
@@ -42252,86 +42293,86 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_425` (#568).
-fn build_controls_macoscontrols_xaml_deferred_425_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_426` (#568).
+fn build_controls_macoscontrols_xaml_deferred_426_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_425` (#568).
-fn build_controls_macoscontrols_xaml_deferred_425_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_426` (#568).
+fn build_controls_macoscontrols_xaml_deferred_426_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_425` (#568).
-fn build_controls_macoscontrols_xaml_deferred_425_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_426` (#568).
+fn build_controls_macoscontrols_xaml_deferred_426_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_426, 260, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_427, 260, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 260, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_428`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_428_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_429`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_429_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_428_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_429_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_429, parent: false, line: 348, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_430, parent: false, line: 348, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_428` (#568).
-fn build_controls_macoscontrols_xaml_deferred_428_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_429` (#568).
+fn build_controls_macoscontrols_xaml_deferred_429_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_280() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_281() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::orientation_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_378: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_207, source: build_controls_macoscontrols_xaml_property_280, line: 368, position: 21 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_207, source: build_controls_macoscontrols_xaml_property_281, line: 368, position: 21 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_94, source: build_controls_macoscontrols_xaml_property_4, line: 369, position: 21 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_281() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_282() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::previous_button_theme_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_282() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_283() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::is_previous_button_visible_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_379: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_200, source: build_controls_macoscontrols_xaml_property_281, line: 371, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_282, line: 372, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_200, source: build_controls_macoscontrols_xaml_property_282, line: 371, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_283, line: 372, position: 19 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_283() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_284() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::next_button_theme_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_284() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_285() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PipsPager::is_next_button_visible_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_380: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_200, source: build_controls_macoscontrols_xaml_property_283, line: 392, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_284, line: 393, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_200, source: build_controls_macoscontrols_xaml_property_284, line: 392, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_285, line: 393, position: 19 },
 ];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
@@ -42349,18 +42390,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_394: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_395: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::ListBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_PipsPagerList"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::ListBoxItem as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_430`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_430_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_431`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_431_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PipsPager as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_430_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_430_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_430_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_431_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_431_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_431_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_281, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerPreviousPageButtonStyle", line: 363, position: 44 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_283, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNextPageButtonStyle", line: 364, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_431, parent: true, line: 367, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_282, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerPreviousPageButtonStyle", line: 363, position: 44 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_284, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PipsPagerNextPageButtonStyle", line: 364, position: 40 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_432, parent: true, line: 367, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_391),
@@ -42391,7 +42432,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_430_THEME: rt::ControlThemeTab
                     line: 410,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_207, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_430_value_3) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_207, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_431_value_3) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -42400,7 +42441,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_430_THEME: rt::ControlThemeTab
                     line: 413,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_430_value_4) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_431_value_4) }),
                     ],
                 },
             ],
@@ -42418,28 +42459,28 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_430_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_430` (#568).
-fn build_controls_macoscontrols_xaml_deferred_430_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_431` (#568).
+fn build_controls_macoscontrols_xaml_deferred_431_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_430` (#568).
-fn build_controls_macoscontrols_xaml_deferred_430_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_431` (#568).
+fn build_controls_macoscontrols_xaml_deferred_431_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_430` (#568).
-fn build_controls_macoscontrols_xaml_deferred_430_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_431` (#568).
+fn build_controls_macoscontrols_xaml_deferred_431_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_430` (#568).
-fn build_controls_macoscontrols_xaml_deferred_430_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_431` (#568).
+fn build_controls_macoscontrols_xaml_deferred_431_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::Orientation::Horizontal)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_430` (#568).
-fn build_controls_macoscontrols_xaml_deferred_430_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_431` (#568).
+fn build_controls_macoscontrols_xaml_deferred_431_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(-90deg)")), 414, 44)?;
@@ -42461,20 +42502,20 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_382: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_22, source: build_controls_macoscontrols_xaml_property_23, line: 34, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_433`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_433_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_434`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_434_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RefreshContainerForegroundBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("RefreshContainerBackgroundBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_434, parent: false, line: 24, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_435, parent: false, line: 24, position: 10 }) }),
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_435`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_435_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_436`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_436_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RefreshContainer as ::ferroui_base::StaticType>::TYPE),
@@ -42504,16 +42545,16 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_385: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 42, position: 256 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_436`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_436_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_437`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_437_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_53, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_436_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_436_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_437_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_437_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_436_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_437_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([16.0_f64, 16.0_f64, 16.0_f64, 16.0_f64]) }),
@@ -42521,41 +42562,41 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_436_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_82, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_83, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("FlyoutThemeMaxHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_436_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_436_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_437_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_437_value_4) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSMenuShadowMargin") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_437, parent: true, line: 37, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_438, parent: true, line: 37, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_436` (#568).
-fn build_controls_macoscontrols_xaml_deferred_436_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_437` (#568).
+fn build_controls_macoscontrols_xaml_deferred_437_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_436` (#568).
-fn build_controls_macoscontrols_xaml_deferred_436_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_437` (#568).
+fn build_controls_macoscontrols_xaml_deferred_437_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_436` (#568).
-fn build_controls_macoscontrols_xaml_deferred_436_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_437` (#568).
+fn build_controls_macoscontrols_xaml_deferred_437_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_436` (#568).
-fn build_controls_macoscontrols_xaml_deferred_436_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_437` (#568).
+fn build_controls_macoscontrols_xaml_deferred_437_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_436` (#568).
-fn build_controls_macoscontrols_xaml_deferred_436_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_437` (#568).
+fn build_controls_macoscontrols_xaml_deferred_437_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_438`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_438_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_439`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_439_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::FlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
@@ -42578,43 +42619,43 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_387: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_78, source: build_controls_macoscontrols_xaml_property_78, line: 35, position: 257 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_439`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_439_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_440`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_440_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_53, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_439_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_440_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuFlyoutPresenterBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_439_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_439_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_440_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_440_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(160.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSMenuShadowMargin") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_440, parent: true, line: 31, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_441, parent: true, line: 31, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_439` (#568).
-fn build_controls_macoscontrols_xaml_deferred_439_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_440` (#568).
+fn build_controls_macoscontrols_xaml_deferred_440_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_439` (#568).
-fn build_controls_macoscontrols_xaml_deferred_439_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_440` (#568).
+fn build_controls_macoscontrols_xaml_deferred_440_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_439` (#568).
-fn build_controls_macoscontrols_xaml_deferred_439_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_440` (#568).
+fn build_controls_macoscontrols_xaml_deferred_440_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_441`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_441_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_442`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_442_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuFlyoutPresenter as ::ferroui_base::StaticType>::TYPE),
@@ -42630,13 +42671,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_388: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_285() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_286() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_template_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_389: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_285, line: 49, position: 114 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_286, line: 49, position: 114 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_41, source: build_controls_macoscontrols_xaml_property_3, line: 49, position: 165 },
 ];
 
@@ -42750,8 +42791,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_428: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_429: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":separator")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_443`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_444`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_444_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -42763,7 +42804,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_444, parent: true, line: 35, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_445, parent: true, line: 35, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_15),
@@ -43032,7 +43073,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
             line: 157,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_443_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_444_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -43041,7 +43082,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
             line: 160,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_443_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_444_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -43275,14 +43316,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME: rt::ControlThemeTab
             line: 238,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_445, parent: true, line: 241, position: 12 }) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_446, parent: true, line: 241, position: 12 }) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_443` (#568).
-fn build_controls_macoscontrols_xaml_deferred_443_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_444` (#568).
+fn build_controls_macoscontrols_xaml_deferred_444_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
@@ -43290,8 +43331,8 @@ fn build_controls_macoscontrols_xaml_deferred_443_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_29)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_443` (#568).
-fn build_controls_macoscontrols_xaml_deferred_443_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_444` (#568).
+fn build_controls_macoscontrols_xaml_deferred_444_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()));
@@ -43300,29 +43341,8 @@ fn build_controls_macoscontrols_xaml_deferred_443_value_1(
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_286() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_287() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::MenuItem::toggle_type_property())
-}
-
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_446`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_446_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
-    parent: true,
-    members: &[
-        rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultMenuFlyoutItemStyle"), line: 246, position: 80 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_286, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_446_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_446_value_1) }),
-    ],
-};
-
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_446` (#568).
-fn build_controls_macoscontrols_xaml_deferred_446_value_0() -> ::ferroui_base::metadata::MarkupValue {
-    rt::to_object(::ferroui_controls::MenuItemToggleType::CheckBox)
-}
-
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_446` (#568).
-fn build_controls_macoscontrols_xaml_deferred_446_value_1() -> ::ferroui_base::metadata::MarkupValue {
-    rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_447`, interpreted by `rt::build_control_theme` (#568).
@@ -43330,18 +43350,39 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_447_THEME: rt::ControlThemeTab
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultMenuFlyoutItemStyle"), line: 250, position: 79 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_286, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_447_value_0) }),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultMenuFlyoutItemStyle"), line: 246, position: 80 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_287, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_447_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_447_value_1) }),
     ],
 };
 
 /// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_447` (#568).
 fn build_controls_macoscontrols_xaml_deferred_447_value_0() -> ::ferroui_base::metadata::MarkupValue {
-    rt::to_object(::ferroui_controls::MenuItemToggleType::Radio)
+    rt::to_object(::ferroui_controls::MenuItemToggleType::CheckBox)
+}
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_447` (#568).
+fn build_controls_macoscontrols_xaml_deferred_447_value_1() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_448`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_448_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultMenuFlyoutItemStyle"), line: 250, position: 79 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_287, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_448_value_0) }),
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_448` (#568).
+fn build_controls_macoscontrols_xaml_deferred_448_value_0() -> ::ferroui_base::metadata::MarkupValue {
+    rt::to_object(::ferroui_controls::MenuItemToggleType::Radio)
+}
+
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_449`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -43365,8 +43406,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_432: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_433: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("CheckGlyph")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_449`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_450`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_450_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -43434,8 +43475,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_449_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_450`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_450_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_451`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -43465,7 +43506,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_393: &[rt::TemplateBindingRow]
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_394: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_285, line: 38, position: 98 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_286, line: 38, position: 98 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_41, source: build_controls_macoscontrols_xaml_property_3, line: 38, position: 149 },
 ];
 
@@ -43499,8 +43540,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_437: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_438: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Background")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_451`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_452`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_452_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::MenuItem as ::ferroui_base::StaticType>::TYPE),
@@ -43512,8 +43553,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_451_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_453, parent: true, line: 34, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_452_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_454, parent: true, line: 34, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_434),
@@ -43582,13 +43623,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_451` (#568).
-fn build_controls_macoscontrols_xaml_deferred_451_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_452` (#568).
+fn build_controls_macoscontrols_xaml_deferred_452_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_452, 29, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_453, 29, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 29, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
@@ -43607,38 +43648,38 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_398: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_39, source: build_controls_macoscontrols_xaml_property_19, line: 88, position: 256 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_454`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_454_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_455`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_455_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MenuBarBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(26.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_454_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_455_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_218, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "DefaultMenuBarItemStyle", line: 85, position: 43 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_455, parent: false, line: 88, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_456, parent: false, line: 88, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_454` (#568).
-fn build_controls_macoscontrols_xaml_deferred_454_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_455` (#568).
+fn build_controls_macoscontrols_xaml_deferred_455_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_456`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_456_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_457`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_457_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Menu as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultMenuBarStyle"), line: 94, position: 57 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_456_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_456` (#568).
-fn build_controls_macoscontrols_xaml_deferred_456_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
+fn build_controls_macoscontrols_xaml_deferred_457_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -43670,19 +43711,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_440: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_441: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":selected"), rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_457`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_457_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_458`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_458_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(28.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_458_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_458_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_458_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_458, parent: true, line: 33, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_458_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_459, parent: true, line: 33, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -43807,7 +43848,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_457_THEME: rt::ControlThemeTab
                     line: 76,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_32, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_457_value_4) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_32, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_458_value_4) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -43842,33 +43883,33 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_457_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
-fn build_controls_macoscontrols_xaml_deferred_457_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_458` (#568).
+fn build_controls_macoscontrols_xaml_deferred_458_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
-fn build_controls_macoscontrols_xaml_deferred_457_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_458` (#568).
+fn build_controls_macoscontrols_xaml_deferred_458_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
-fn build_controls_macoscontrols_xaml_deferred_457_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_458` (#568).
+fn build_controls_macoscontrols_xaml_deferred_458_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
-fn build_controls_macoscontrols_xaml_deferred_457_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_458` (#568).
+fn build_controls_macoscontrols_xaml_deferred_458_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_457` (#568).
-fn build_controls_macoscontrols_xaml_deferred_457_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_458` (#568).
+fn build_controls_macoscontrols_xaml_deferred_458_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_459`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_459_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_460`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_460_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -43902,8 +43943,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_442: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_443: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Root")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_460`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_460_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_461`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_461_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -43913,14 +43954,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_460_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_460_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_461_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_460_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_460_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_461_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_461_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(28.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_460_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_462, parent: true, line: 110, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_461_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_463, parent: true, line: 110, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -44080,28 +44121,28 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_460_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_460` (#568).
-fn build_controls_macoscontrols_xaml_deferred_460_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_461` (#568).
+fn build_controls_macoscontrols_xaml_deferred_461_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_460` (#568).
-fn build_controls_macoscontrols_xaml_deferred_460_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_461` (#568).
+fn build_controls_macoscontrols_xaml_deferred_461_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_460` (#568).
-fn build_controls_macoscontrols_xaml_deferred_460_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_461` (#568).
+fn build_controls_macoscontrols_xaml_deferred_461_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_460` (#568).
-fn build_controls_macoscontrols_xaml_deferred_460_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_461` (#568).
+fn build_controls_macoscontrols_xaml_deferred_461_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_461, 105, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_462, 105, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 105, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
@@ -44133,8 +44174,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_444: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_445: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentBorder")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_463`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_463_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_464`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_464_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -44144,15 +44185,15 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_463_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_463_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_464_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_463_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_464_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_463_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_463_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_464_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_464_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(28.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_464, parent: true, line: 181, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_465, parent: true, line: 181, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -44298,23 +44339,23 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_463_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_463` (#568).
-fn build_controls_macoscontrols_xaml_deferred_463_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_464` (#568).
+fn build_controls_macoscontrols_xaml_deferred_464_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_463` (#568).
-fn build_controls_macoscontrols_xaml_deferred_463_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_464` (#568).
+fn build_controls_macoscontrols_xaml_deferred_464_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_463` (#568).
-fn build_controls_macoscontrols_xaml_deferred_463_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_464` (#568).
+fn build_controls_macoscontrols_xaml_deferred_464_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_463` (#568).
-fn build_controls_macoscontrols_xaml_deferred_463_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_464` (#568).
+fn build_controls_macoscontrols_xaml_deferred_464_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -44345,8 +44386,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_410: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_193, source: build_controls_macoscontrols_xaml_property_193, line: 68, position: 25 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_465`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_465_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_466`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_466_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE),
@@ -44354,46 +44395,46 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_465_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListBoxBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListBoxBorder") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListBoxBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_465_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_465_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_466_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_466_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_465_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_466_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_465_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_467, parent: false, line: 51, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_466_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_468, parent: false, line: 51, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_465` (#568).
-fn build_controls_macoscontrols_xaml_deferred_465_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_466` (#568).
+fn build_controls_macoscontrols_xaml_deferred_466_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_465` (#568).
-fn build_controls_macoscontrols_xaml_deferred_465_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_466` (#568).
+fn build_controls_macoscontrols_xaml_deferred_466_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_465` (#568).
-fn build_controls_macoscontrols_xaml_deferred_465_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_466` (#568).
+fn build_controls_macoscontrols_xaml_deferred_466_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_465` (#568).
-fn build_controls_macoscontrols_xaml_deferred_465_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_466` (#568).
+fn build_controls_macoscontrols_xaml_deferred_466_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_466, 46, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_467, 46, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_468`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_468_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_469`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_469_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListBox as ::ferroui_base::StaticType>::TYPE),
@@ -44402,31 +44443,31 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_468_THEME: rt::ControlThemeTab
 };
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_287() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_288() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::Visual::render_transform_origin_property())
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_469`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_469_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_470`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_469_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_470_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ComboBoxItemPillHeight", line: 18, position: 31 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ComboBoxItemPillWidth", line: 19, position: 30 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_25, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxItemPillFillBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_1, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ComboBoxItemPillCornerRadius", line: 21, position: 37 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_287, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_469_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_288, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_470_value_1) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_469` (#568).
-fn build_controls_macoscontrols_xaml_deferred_469_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
+fn build_controls_macoscontrols_xaml_deferred_470_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_469` (#568).
-fn build_controls_macoscontrols_xaml_deferred_469_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
+fn build_controls_macoscontrols_xaml_deferred_470_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative))
 }
 
@@ -44463,21 +44504,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_448: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_449: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("MacOSSelectionCheck")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_470`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_471`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_471_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(24.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_470_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_471_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxItemBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_470_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_471_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([26.0_f64, 3.0_f64, 8.0_f64, 3.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_470_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_471_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_470_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_472, parent: true, line: 40, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_471_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_473, parent: true, line: 40, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -44680,35 +44721,35 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_470_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
-fn build_controls_macoscontrols_xaml_deferred_470_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_471` (#568).
+fn build_controls_macoscontrols_xaml_deferred_471_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
-fn build_controls_macoscontrols_xaml_deferred_470_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_471` (#568).
+fn build_controls_macoscontrols_xaml_deferred_471_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
-fn build_controls_macoscontrols_xaml_deferred_470_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_471` (#568).
+fn build_controls_macoscontrols_xaml_deferred_471_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_470` (#568).
-fn build_controls_macoscontrols_xaml_deferred_470_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_471` (#568).
+fn build_controls_macoscontrols_xaml_deferred_471_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_471, 35, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_472, 35, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 35, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_473`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_473_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_474`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_474_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ComboBoxItem as ::ferroui_base::StaticType>::TYPE),
@@ -44773,13 +44814,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_450: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_451: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_474`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_474_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_475`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_475_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultTextBoxStyle"), line: 30, position: 67 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_475, parent: true, line: 33, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_476, parent: true, line: 33, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_6),
@@ -44896,60 +44937,60 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_421: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_288() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_289() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::selection_box_item_template_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_289() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_290() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::horizontal_content_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_290() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_291() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::vertical_content_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_422: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_12, source: build_controls_macoscontrols_xaml_property_288, line: 196, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_12, source: build_controls_macoscontrols_xaml_property_289, line: 196, position: 29 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 197, position: 29 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_18, source: build_controls_macoscontrols_xaml_property_19, line: 198, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_21, source: build_controls_macoscontrols_xaml_property_289, line: 199, position: 29 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_23, source: build_controls_macoscontrols_xaml_property_290, line: 200, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_21, source: build_controls_macoscontrols_xaml_property_290, line: 199, position: 29 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_23, source: build_controls_macoscontrols_xaml_property_291, line: 200, position: 29 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_291() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_292() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::placeholder_text_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_423: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_85, source: build_controls_macoscontrols_xaml_property_291, line: 204, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_85, source: build_controls_macoscontrols_xaml_property_292, line: 204, position: 24 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_80, source: build_controls_macoscontrols_xaml_property_3, line: 205, position: 24 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_18, source: build_controls_macoscontrols_xaml_property_19, line: 206, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_48, source: build_controls_macoscontrols_xaml_property_289, line: 207, position: 24 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_290, line: 208, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_48, source: build_controls_macoscontrols_xaml_property_290, line: 207, position: 24 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_291, line: 208, position: 24 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_424: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_48, source: build_controls_macoscontrols_xaml_property_289, line: 222, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_290, line: 223, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_291, line: 224, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_48, source: build_controls_macoscontrols_xaml_property_290, line: 222, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_291, line: 223, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_292, line: 224, position: 22 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 225, position: 22 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_292() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_293() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::is_editable_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_425: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_29, source: build_controls_macoscontrols_xaml_property_29, line: 227, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_292, line: 228, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_293, line: 228, position: 22 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -44975,12 +45016,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_428: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_293() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_294() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::max_drop_down_height_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_294() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_295() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ComboBox::placeholder_foreground_property())
 }
 
@@ -45003,59 +45044,59 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_456: &[rt::SelectorStep] = &[r
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_457: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus-visible"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":dropdownopen")] }];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_458: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_458: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_459: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_459: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_460: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_460: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownGlyph")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_461: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_461: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_462: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_462: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_463: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_463: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::ComboBox as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":focus-within"), rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("DropDownOverlay"), rt::SelectorStep::Class(":pointerover")];
 
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_464: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_292, value: build_controls_macoscontrols_xaml_selector_value_0 }];
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_464: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_macoscontrols_xaml_property_293, value: build_controls_macoscontrols_xaml_selector_value_0 }];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_476`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_477`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_477_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_290, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_291, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_293, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(504.0_f64) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(504.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_289, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_5) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_6) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_290, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_5) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_6) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_476_value_7) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_477_value_7) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_478, parent: true, line: 173, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_479, parent: true, line: 173, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_452),
             line: 296,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundPointerOver") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_2),
@@ -45083,7 +45124,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTab
             line: 307,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundPressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_2),
@@ -45111,7 +45152,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTab
             line: 318,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundDisabled") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_2),
@@ -45148,7 +45189,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTab
             line: 333,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocused") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocused") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_453),
@@ -45175,7 +45216,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTab
             line: 343,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_294, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocusedPressed") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_295, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ComboBoxPlaceHolderForegroundFocusedPressed") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_453),
@@ -45268,66 +45309,66 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME: rt::ControlThemeTab
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_476_value_8) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_477_value_8) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_7(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_477, 165, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_478, 165, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 165, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_476` (#568).
-fn build_controls_macoscontrols_xaml_deferred_476_value_8() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_477` (#568).
+fn build_controls_macoscontrols_xaml_deferred_477_value_8() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_479`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_479_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_480`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_480_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ComboBox as ::ferroui_base::StaticType>::TYPE),
@@ -45347,18 +45388,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_465: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_466: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpandedGlyph")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_481`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_482`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_482_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(20.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_481_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_482_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_49, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_481_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_482, parent: true, line: 29, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_482_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_483, parent: true, line: 29, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_101),
@@ -45388,13 +45429,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_481_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_481` (#568).
-fn build_controls_macoscontrols_xaml_deferred_481_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_482` (#568).
+fn build_controls_macoscontrols_xaml_deferred_482_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_481` (#568).
-fn build_controls_macoscontrols_xaml_deferred_481_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_482` (#568).
+fn build_controls_macoscontrols_xaml_deferred_482_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
@@ -45417,24 +45458,24 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_432: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_295() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_296() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::HeaderedItemsControl::header_template_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_433: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_295, line: 71, position: 118 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_296, line: 71, position: 118 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_41, source: build_controls_macoscontrols_xaml_property_3, line: 71, position: 169 },
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_296() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_297() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TreeViewItem::is_expanded_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_434: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_296, line: 76, position: 56 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_55, source: build_controls_macoscontrols_xaml_property_297, line: 76, position: 56 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_195, source: build_controls_macoscontrols_xaml_property_71, line: 76, position: 97 },
 ];
 
@@ -45471,15 +45512,15 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_474: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_475: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":empty"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::ToggleButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ExpandCollapseChevron")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_483`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_483_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_484`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_484_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_483_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_484_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ListViewItemMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBackground") }),
@@ -45487,8 +45528,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_483_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TreeViewItemBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(28.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::CornerRadius([6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_483_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_485, parent: true, line: 65, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_484_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_486, parent: true, line: 65, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_467),
@@ -45697,25 +45738,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_483_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_483` (#568).
-fn build_controls_macoscontrols_xaml_deferred_483_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_484` (#568).
+fn build_controls_macoscontrols_xaml_deferred_484_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_483` (#568).
-fn build_controls_macoscontrols_xaml_deferred_483_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_484` (#568).
+fn build_controls_macoscontrols_xaml_deferred_484_value_1(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_484, 60, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_485, 60, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 60, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_486`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_486_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_487`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_487_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TreeViewItem as ::ferroui_base::StaticType>::TYPE),
@@ -45746,38 +45787,38 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_438: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_18, source: build_controls_macoscontrols_xaml_property_19, line: 60, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_487`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_487_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_488`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_488_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_487_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_487_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_487_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_488_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_488_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_488_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_488, parent: false, line: 47, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_489, parent: false, line: 47, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_487` (#568).
-fn build_controls_macoscontrols_xaml_deferred_487_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_488` (#568).
+fn build_controls_macoscontrols_xaml_deferred_488_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_487` (#568).
-fn build_controls_macoscontrols_xaml_deferred_487_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_488` (#568).
+fn build_controls_macoscontrols_xaml_deferred_488_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_487` (#568).
-fn build_controls_macoscontrols_xaml_deferred_487_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_488` (#568).
+fn build_controls_macoscontrols_xaml_deferred_488_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_489`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_489_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_490`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_490_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TreeView as ::ferroui_base::StaticType>::TYPE),
@@ -45791,12 +45832,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_476: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_477: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Not { argument: &[rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Class(":disabled")] }, rt::SelectorStep::Class(":pressed")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_490`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_490_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_491`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_491_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_491, parent: true, line: 24, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_492, parent: true, line: 24, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_476),
@@ -45920,8 +45961,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_444: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_28, source: build_controls_macoscontrols_xaml_property_28, line: 171, position: 21 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_492`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_492_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_493`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_493_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE),
@@ -45935,11 +45976,11 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_492_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_492_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_492_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_493_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_493_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_493, parent: true, line: 88, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_494, parent: true, line: 88, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_6),
@@ -46037,35 +46078,35 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_492_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_492` (#568).
-fn build_controls_macoscontrols_xaml_deferred_492_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_493` (#568).
+fn build_controls_macoscontrols_xaml_deferred_493_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Hidden)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_492` (#568).
-fn build_controls_macoscontrols_xaml_deferred_492_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_493` (#568).
+fn build_controls_macoscontrols_xaml_deferred_493_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Hidden)
-}
-
-/// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_297() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::AutoCompleteBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_298() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::AutoCompleteBox::placeholder_foreground_property())
+    rt::property(::ferroui_controls::AutoCompleteBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_299() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::AutoCompleteBox::placeholder_foreground_property())
+}
+
+/// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
+fn build_controls_macoscontrols_xaml_property_300() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::TemplatedControl::font_stretch_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_445: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_297, line: 249, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_149, source: build_controls_macoscontrols_xaml_property_298, line: 250, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_298, line: 249, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_149, source: build_controls_macoscontrols_xaml_property_299, line: 250, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_58, source: build_controls_macoscontrols_xaml_property_58, line: 251, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 252, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_4, source: build_controls_macoscontrols_xaml_property_4, line: 253, position: 20 },
@@ -46074,7 +46115,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_445: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_6, source: build_controls_macoscontrols_xaml_property_6, line: 256, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_7, source: build_controls_macoscontrols_xaml_property_7, line: 257, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_13, source: build_controls_macoscontrols_xaml_property_13, line: 258, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_299, source: build_controls_macoscontrols_xaml_property_299, line: 259, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_300, source: build_controls_macoscontrols_xaml_property_300, line: 259, position: 20 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -46084,35 +46125,35 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_446: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_300() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_301() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::clear_selection_on_lost_focus_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_301() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_302() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::clear_selection_on_lost_focus_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_302() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_303() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::max_length_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_303() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_304() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::max_length_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_304() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_305() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DataValidationErrors::errors_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_447: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_300, source: build_controls_macoscontrols_xaml_property_301, line: 267, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_302, source: build_controls_macoscontrols_xaml_property_303, line: 268, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_304, source: build_controls_macoscontrols_xaml_property_304, line: 269, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_301, source: build_controls_macoscontrols_xaml_property_302, line: 267, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_303, source: build_controls_macoscontrols_xaml_property_304, line: 268, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_305, source: build_controls_macoscontrols_xaml_property_305, line: 269, position: 20 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -46125,16 +46166,16 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_448: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_305() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_306() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::max_drop_down_height_property())
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_494`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_494_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_495`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_495_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_494_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_495_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBackground") }),
@@ -46142,22 +46183,22 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_494_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderThemeThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_298, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_299, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_305, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AutoSuggestListMaxHeight") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AutoSuggestListMaxHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("MacOSControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_495, parent: true, line: 246, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_496, parent: true, line: 246, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_494` (#568).
-fn build_controls_macoscontrols_xaml_deferred_494_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_495` (#568).
+fn build_controls_macoscontrols_xaml_deferred_495_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_496`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_496_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_497`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE),
@@ -46174,8 +46215,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_479: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_480: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":value"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::TextBlock as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ValueTextBlock")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_497`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_498`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_498_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46186,7 +46227,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("InfoBadgeForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("InfoBadgePadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_498, parent: true, line: 47, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_499, parent: true, line: 47, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_478),
@@ -46220,22 +46261,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_497_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_499`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_499_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
-    parent: true,
-    members: &[
-        rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultInfoBadgeStyle"), line: 86, position: 67 },
-    ],
-};
-
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_500`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_500_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultInfoBadgeStyle"), line: 88, position: 75 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemFillColorAttentionBrush") }),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultInfoBadgeStyle"), line: 86, position: 67 },
     ],
 };
 
@@ -46244,28 +46275,38 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_501_THEME: rt::ControlThemeTab
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("AttentionDotInfoBadgeStyle"), line: 91, position: 77 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultInfoBadgeStyle"), line: 88, position: 75 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("SystemFillColorAttentionBrush") }),
     ],
 };
-
-/// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_306() -> &'static ::ferroui_base::FerroProperty {
-    rt::property(::ferroui_controls::InfoBadge::icon_source_property())
-}
 
 /// The control theme built by `build_controls_macoscontrols_xaml_deferred_502`, interpreted by `rt::build_control_theme` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_502_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("AttentionDotInfoBadgeStyle"), line: 92, position: 76 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_502_value_0) }),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("AttentionDotInfoBadgeStyle"), line: 91, position: 77 },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_502` (#568).
-fn build_controls_macoscontrols_xaml_deferred_502_value_0(
+/// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
+fn build_controls_macoscontrols_xaml_property_307() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::InfoBadge::icon_source_property())
+}
+
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_503`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: true,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("AttentionDotInfoBadgeStyle"), line: 92, position: 76 },
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64]) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_307, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_503_value_0) }),
+    ],
+};
+
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_503` (#568).
+fn build_controls_macoscontrols_xaml_deferred_503_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
@@ -46273,8 +46314,8 @@ fn build_controls_macoscontrols_xaml_deferred_502_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&font_icon_source_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_503`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_504`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_504_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46283,8 +46324,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_503_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_504`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_504_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_505`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_505_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46292,19 +46333,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_504_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_505`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_505_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_506`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_506_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("InformationalDotInfoBadgeStyle"), line: 103, position: 80 },
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 4.0_f64, 0.0_f64, 2.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_505_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_307, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_506_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_505` (#568).
-fn build_controls_macoscontrols_xaml_deferred_505_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_506` (#568).
+fn build_controls_macoscontrols_xaml_deferred_506_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let font_icon_source_0 = ::ferroui_controls::FontIconSource::new();
@@ -46312,8 +46353,8 @@ fn build_controls_macoscontrols_xaml_deferred_505_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&font_icon_source_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_506`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_506_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_507`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_507_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46322,8 +46363,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_506_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_507`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_507_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_508`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_508_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46331,18 +46372,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_507_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_508`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_508_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_509`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_509_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("SuccessDotInfoBadgeStyle"), line: 114, position: 74 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_508_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_307, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_509_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_508` (#568).
-fn build_controls_macoscontrols_xaml_deferred_508_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_509` (#568).
+fn build_controls_macoscontrols_xaml_deferred_509_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
@@ -46350,8 +46391,8 @@ fn build_controls_macoscontrols_xaml_deferred_508_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_509`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_509_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_510`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_510_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46360,8 +46401,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_509_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_510`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_510_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_511`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_511_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46369,18 +46410,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_510_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_511`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_511_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_512`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_512_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("CautionDotInfoBadgeStyle"), line: 124, position: 74 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_511_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_307, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_512_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_511` (#568).
-fn build_controls_macoscontrols_xaml_deferred_511_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_512` (#568).
+fn build_controls_macoscontrols_xaml_deferred_512_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
@@ -46388,8 +46429,8 @@ fn build_controls_macoscontrols_xaml_deferred_511_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_512`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_512_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_513`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_513_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46398,8 +46439,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_512_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_513`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_513_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_514`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_514_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
@@ -46407,18 +46448,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_513_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_514`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_514_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_515`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_515_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::InfoBadge as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("CriticalDotInfoBadgeStyle"), line: 134, position: 75 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_306, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_514_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_307, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_515_value_0) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_514` (#568).
-fn build_controls_macoscontrols_xaml_deferred_514_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_515` (#568).
+fn build_controls_macoscontrols_xaml_deferred_515_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
@@ -46426,8 +46467,8 @@ fn build_controls_macoscontrols_xaml_deferred_514_value_0(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&symbol_icon_source_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_515`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_515_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_516`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RepeatButton as ::ferroui_base::StaticType>::TYPE),
@@ -46503,18 +46544,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_449: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_307() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_308() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumberBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_308() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_309() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NumberBox::text_alignment_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_450: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_307, line: 128, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_308, line: 128, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_6, source: build_controls_macoscontrols_xaml_property_6, line: 129, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_13, source: build_controls_macoscontrols_xaml_property_13, line: 130, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_7, source: build_controls_macoscontrols_xaml_property_7, line: 131, position: 20 },
@@ -46523,7 +46564,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_450: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_26, source: build_controls_macoscontrols_xaml_property_26, line: 134, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_19, source: build_controls_macoscontrols_xaml_property_19, line: 135, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 136, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_130, source: build_controls_macoscontrols_xaml_property_308, line: 137, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_130, source: build_controls_macoscontrols_xaml_property_309, line: 137, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_29, source: build_controls_macoscontrols_xaml_property_29, line: 138, position: 20 },
 ];
 
@@ -46534,19 +46575,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_451: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_309() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_310() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Popup::vertical_offset_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_310() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_311() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Popup::horizontal_offset_property())
 }
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_452: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_309, key: "NumberBoxPopupVerticalOffset", line: 146, position: 18 },
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_310, key: "NumberBoxPopupHorizonalOffset", line: 147, position: 18 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_310, key: "NumberBoxPopupVerticalOffset", line: 146, position: 18 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_311, key: "NumberBoxPopupHorizonalOffset", line: 147, position: 18 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -46591,8 +46632,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_490: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_491: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::RepeatButton as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PopupDownSpinButton")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_516`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_517`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_517_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NumberBox as ::ferroui_base::StaticType>::TYPE),
@@ -46603,7 +46644,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_517, parent: true, line: 109, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_518, parent: true, line: 109, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_481),
@@ -46653,7 +46694,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NumberBoxMinWidth") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisible") }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_265, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsVisible") }),
                     ],
                 },
             ],
@@ -46664,7 +46705,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME: rt::ControlThemeTab
             line: 252,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_264, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsPopup") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_265, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("SpinButtonsPopup") }),
             ],
         },
         rt::StyleMember::Style {
@@ -46742,12 +46783,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_456: &[rt::DynamicResourceRow
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_18, key: "AutoSuggestBoxInnerButtonMargin", line: 82, position: 27 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_518`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_518_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_519`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_519_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_519, parent: true, line: 72, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_520, parent: true, line: 72, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_92),
@@ -46789,13 +46830,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_457: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_311() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_312() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoSuggestBox::placeholder_text_property())
 }
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_458: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_311, line: 152, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_151, source: build_controls_macoscontrols_xaml_property_312, line: 152, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_58, source: build_controls_macoscontrols_xaml_property_58, line: 153, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_3, source: build_controls_macoscontrols_xaml_property_3, line: 154, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_4, source: build_controls_macoscontrols_xaml_property_4, line: 155, position: 20 },
@@ -46804,7 +46845,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_458: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_6, source: build_controls_macoscontrols_xaml_property_6, line: 158, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_7, source: build_controls_macoscontrols_xaml_property_7, line: 159, position: 20 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_13, source: build_controls_macoscontrols_xaml_property_13, line: 160, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_299, source: build_controls_macoscontrols_xaml_property_299, line: 161, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_300, source: build_controls_macoscontrols_xaml_property_300, line: 161, position: 20 },
 ];
 
 /// The template bindings of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -46837,12 +46878,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_462: &[rt::DynamicResourceRow
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_492: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("QueryButton"), rt::SelectorStep::Descendant, rt::SelectorStep::OfType(<::ferroui_controls::SymbolIcon as ::ferroui_base::ObjectType>::IDENTITY)];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_522`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_522_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_523`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_523_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::AutoSuggestBox as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_522_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_523_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBackground") }),
@@ -46852,7 +46893,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_522_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_523, parent: true, line: 139, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_524, parent: true, line: 139, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_492),
@@ -46865,25 +46906,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_522_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_522` (#568).
-fn build_controls_macoscontrols_xaml_deferred_522_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_523` (#568).
+fn build_controls_macoscontrols_xaml_deferred_523_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_312() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_313() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RadioButtonsPanel::column_spacing_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_313() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_314() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RadioButtonsPanel::row_spacing_property())
 }
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_463: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_312, key: "RadioButtonsColumnSpacing", line: 54, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_313, key: "RadioButtonsRowSpacing", line: 55, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_313, key: "RadioButtonsColumnSpacing", line: 54, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_314, key: "RadioButtonsRowSpacing", line: 55, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -46892,15 +46933,15 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_464: &[rt::DynamicResourceRow
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_18, key: "RadioButtonsTopHeaderMargin", line: 65, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_524`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_524_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_525`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_525_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RadioButtons as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_524_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_524_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_526, parent: true, line: 60, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_525_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_525_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_527, parent: true, line: 60, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_5),
@@ -46913,25 +46954,25 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_524_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_524` (#568).
-fn build_controls_macoscontrols_xaml_deferred_524_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_525` (#568).
+fn build_controls_macoscontrols_xaml_deferred_525_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_524` (#568).
-fn build_controls_macoscontrols_xaml_deferred_524_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_525` (#568).
+fn build_controls_macoscontrols_xaml_deferred_525_value_1(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     context.push_parent(rt::to_value(items_panel_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_525, 54, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_526, 54, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_527`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_527_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_528`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RadioButtons as ::ferroui_base::StaticType>::TYPE),
@@ -46984,7 +47025,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_471: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_314() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_315() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::automation::AutomationProperties::accessibility_view_property())
 }
 
@@ -47012,8 +47053,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_499: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_500: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Ellipse as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BadgingEllipse")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_528`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_529`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_529_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PersonPicture as ::ferroui_base::StaticType>::TYPE),
@@ -47023,17 +47064,17 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(96.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(96.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_528_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_314, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_528_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_529, parent: true, line: 54, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_529_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_315, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_529_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_530, parent: true, line: 54, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_493),
             line: 103,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_81, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_528_value_2) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_85, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_528_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_81, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_529_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_85, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_529_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -47042,7 +47083,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
             line: 108,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_32, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_528_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_32, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_529_value_4) }),
             ],
         },
         rt::StyleMember::Style {
@@ -47103,21 +47144,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_528` (#568).
-fn build_controls_macoscontrols_xaml_deferred_528_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_529` (#568).
+fn build_controls_macoscontrols_xaml_deferred_529_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 50, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_528` (#568).
-fn build_controls_macoscontrols_xaml_deferred_528_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_529` (#568).
+fn build_controls_macoscontrols_xaml_deferred_529_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::automation::AccessibilityView::Raw)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_528` (#568).
-fn build_controls_macoscontrols_xaml_deferred_528_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_529` (#568).
+fn build_controls_macoscontrols_xaml_deferred_529_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_0 = {
@@ -47133,8 +47174,8 @@ fn build_controls_macoscontrols_xaml_deferred_528_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_4)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_528` (#568).
-fn build_controls_macoscontrols_xaml_deferred_528_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_529` (#568).
+fn build_controls_macoscontrols_xaml_deferred_529_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_1 = {
@@ -47151,8 +47192,8 @@ fn build_controls_macoscontrols_xaml_deferred_528_value_3(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_5)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_528` (#568).
-fn build_controls_macoscontrols_xaml_deferred_528_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_529` (#568).
+fn build_controls_macoscontrols_xaml_deferred_529_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_2 = {
@@ -47169,8 +47210,8 @@ fn build_controls_macoscontrols_xaml_deferred_528_value_4(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_6)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_530`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_530_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_531`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_531_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PersonPicture as ::ferroui_base::StaticType>::TYPE),
@@ -47205,20 +47246,20 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_475: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 81, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_531`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_531_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_532`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_532_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultButtonStyle"), line: 52, position: 83 },
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_531_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_532_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(40.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(40.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_531_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_531_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_532_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_532_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "ControlCornerRadius", line: 58, position: 37 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_531_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_533, parent: false, line: 72, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_532_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_534, parent: false, line: 72, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -47300,28 +47341,28 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_531_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_531` (#568).
-fn build_controls_macoscontrols_xaml_deferred_531_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_532` (#568).
+fn build_controls_macoscontrols_xaml_deferred_532_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_531` (#568).
-fn build_controls_macoscontrols_xaml_deferred_531_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_532` (#568).
+fn build_controls_macoscontrols_xaml_deferred_532_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_531` (#568).
-fn build_controls_macoscontrols_xaml_deferred_531_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_532` (#568).
+fn build_controls_macoscontrols_xaml_deferred_532_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_531` (#568).
-fn build_controls_macoscontrols_xaml_deferred_531_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_532` (#568).
+fn build_controls_macoscontrols_xaml_deferred_532_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_532, 61, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_533, 61, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 61, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
@@ -47353,16 +47394,16 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_502: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_503: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentPresenter")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_534`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_534_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_535`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_535_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultButtonStyle"), line: 115, position: 80 },
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlNumberPanelButtonWidth", line: 116, position: 33 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(20.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_534_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_535, parent: false, line: 121, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_535_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_536, parent: false, line: 121, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_501),
@@ -47396,33 +47437,33 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_534_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_534` (#568).
-fn build_controls_macoscontrols_xaml_deferred_534_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_535` (#568).
+fn build_controls_macoscontrols_xaml_deferred_535_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_315() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_316() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::automation::AutomationProperties::landmark_type_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_316() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_317() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PagerControl::first_button_style_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_317() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_318() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PagerControl::previous_button_style_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_318() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_319() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PagerControl::next_button_style_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_319() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_320() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::PagerControl::last_button_style_property())
 }
 
@@ -47498,17 +47539,17 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_526: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_527: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("LastPageButton")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_536`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_536_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_537`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_537_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PagerControl as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_315, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_536_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_316, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 155, position: 41 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_317, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 156, position: 44 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_318, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 157, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_319, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 158, position: 40 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_537, parent: true, line: 161, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_316, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_537_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_317, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 155, position: 41 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_318, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 156, position: 44 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_319, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 157, position: 40 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PagerControlPageNavigationButtonStyle", line: 158, position: 40 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_538, parent: true, line: 161, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_504),
@@ -47747,8 +47788,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_536_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_536` (#568).
-fn build_controls_macoscontrols_xaml_deferred_536_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_537` (#568).
+fn build_controls_macoscontrols_xaml_deferred_537_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::automation::peers::AutomationLandmarkType::Navigation)
 }
 
@@ -47772,22 +47813,22 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_479: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_320() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_321() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::placeholder_foreground_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_321() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_322() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_322() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_323() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::text_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_323() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_324() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::text_wrapping_property())
 }
 
@@ -47795,10 +47836,10 @@ fn build_controls_macoscontrols_xaml_property_323() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_480: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_18, source: build_controls_macoscontrols_xaml_property_28, line: 110, position: 22 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_150, source: build_controls_macoscontrols_xaml_property_19, line: 111, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_80, source: build_controls_macoscontrols_xaml_property_320, line: 112, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_85, source: build_controls_macoscontrols_xaml_property_321, line: 113, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_152, source: build_controls_macoscontrols_xaml_property_322, line: 114, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_91, source: build_controls_macoscontrols_xaml_property_323, line: 115, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_80, source: build_controls_macoscontrols_xaml_property_321, line: 112, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_85, source: build_controls_macoscontrols_xaml_property_322, line: 113, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_152, source: build_controls_macoscontrols_xaml_property_323, line: 114, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_91, source: build_controls_macoscontrols_xaml_property_324, line: 115, position: 22 },
 ];
 
 /// The dynamic resources of a run of `Controls/MacOSControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -47808,12 +47849,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_481: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_324() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_325() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::caret_brush_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_325() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_326() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::selection_highlight_color_property())
 }
 
@@ -47826,8 +47867,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_529: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_530: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("HeaderContentPresenter")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_540`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_541`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_541_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE),
@@ -47835,28 +47876,28 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_324, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForegroundFocused") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_325, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_325, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForegroundFocused") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_326, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_321, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_323, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_540_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_540_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_540_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_324, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_541_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_541_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_541_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_192, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_153, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "WinUIRichEditBoxContextFlyout", line: 70, position: 38 } }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_541, parent: true, line: 73, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_542, parent: true, line: 73, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
             line: 126,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_321, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundPointerOver") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_65),
@@ -47884,7 +47925,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
             line: 136,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundFocused") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_321, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundFocused") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_65),
@@ -47913,7 +47954,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
             line: 147,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_320, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_321, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundDisabled") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_65),
@@ -47947,23 +47988,23 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_540` (#568).
-fn build_controls_macoscontrols_xaml_deferred_540_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_541` (#568).
+fn build_controls_macoscontrols_xaml_deferred_541_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::TextWrapping::Wrap)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_540` (#568).
-fn build_controls_macoscontrols_xaml_deferred_540_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_541` (#568).
+fn build_controls_macoscontrols_xaml_deferred_541_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_540` (#568).
-fn build_controls_macoscontrols_xaml_deferred_540_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_541` (#568).
+fn build_controls_macoscontrols_xaml_deferred_541_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_542`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_543`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_543_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::RichEditBox as ::ferroui_base::StaticType>::TYPE),
@@ -47983,8 +48024,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_483: &[rt::DynamicResourceRow
     rt::DynamicResourceRow { property: build_controls_macoscontrols_xaml_property_1, key: "ControlCornerRadius", line: 132, position: 19 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_543`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_543_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_544`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -47995,9 +48036,9 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_543_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_76, form: rt::SetterForm::Plain, value: rt::ThemeValue::Text("\u{e721}") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(36.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_543_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_544_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_543_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_544_value_1) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_92),
@@ -48034,18 +48075,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_543_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_543` (#568).
-fn build_controls_macoscontrols_xaml_deferred_543_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_544` (#568).
+fn build_controls_macoscontrols_xaml_deferred_544_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_543` (#568).
-fn build_controls_macoscontrols_xaml_deferred_543_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_544` (#568).
+fn build_controls_macoscontrols_xaml_deferred_544_value_1(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_544, 126, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_545, 126, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 126, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
@@ -48054,8 +48095,8 @@ fn build_controls_macoscontrols_xaml_deferred_543_value_1(
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_531: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":disabled"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Path as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Icon")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_545`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_545_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_546`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -48065,9 +48106,9 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_545_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewOverflowButtonHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewOverflowButtonWidth") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_545_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_545_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_546, parent: true, line: 168, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_546_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_546_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_547, parent: true, line: 168, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -48132,13 +48173,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_545_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_545` (#568).
-fn build_controls_macoscontrols_xaml_deferred_545_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_546` (#568).
+fn build_controls_macoscontrols_xaml_deferred_546_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_545` (#568).
-fn build_controls_macoscontrols_xaml_deferred_545_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_546` (#568).
+fn build_controls_macoscontrols_xaml_deferred_546_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
@@ -48181,12 +48222,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_488: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_326() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_327() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NavigationView::pane_toggle_button_style_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_327() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_328() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::NavigationView::compact_pane_length_property())
 }
 
@@ -48268,23 +48309,23 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_556: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_557: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":back-button-row-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BackButtonRowSpacer")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_547`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_548`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_548_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NavigationView as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_326, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PaneToggleButtonStyle", line: 203, position: 46 } }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_327, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "PaneToggleButtonStyle", line: 203, position: 46 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_327, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactPaneLength") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_328, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewCompactPaneLength") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_548, parent: true, line: 209, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_549, parent: true, line: 209, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_532),
             line: 460,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_0) }),
             ],
         },
         rt::StyleMember::Style {
@@ -48294,7 +48335,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_211, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(1_i32) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -48428,8 +48469,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
                     line: 520,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_547_value_2) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_3) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_548_value_2) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_3) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -48456,7 +48497,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
                     line: 530,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_4) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_4) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -48465,7 +48506,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
                     line: 533,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_5) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_5) }),
                     ],
                 },
             ],
@@ -48476,7 +48517,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
             line: 539,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_547_value_6) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_548_value_6) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_208, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewExpandedPaneBackground") }),
             ],
         },
@@ -48527,18 +48568,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_2(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_0 = {
@@ -48554,23 +48595,23 @@ fn build_controls_macoscontrols_xaml_deferred_547_value_2(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&provided_13)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_547` (#568).
-fn build_controls_macoscontrols_xaml_deferred_547_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_548` (#568).
+fn build_controls_macoscontrols_xaml_deferred_548_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
@@ -48680,12 +48721,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_576: &[rt::SelectorStep] = &[r
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_577: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Panel as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionIndicatorGrid")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_328() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_329() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::shapes::Rectangle::radius_x_property())
 }
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_329() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_330() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::shapes::Rectangle::radius_y_property())
 }
 
@@ -48693,7 +48734,7 @@ fn build_controls_macoscontrols_xaml_property_329() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_578: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentGrid")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_330() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_331() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::presenters::ContentPresenter::text_wrapping_property())
 }
 
@@ -48701,7 +48742,7 @@ fn build_controls_macoscontrols_xaml_property_330() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_579: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::primitives::Popup as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ChildrenFlyout")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_331() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_332() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::Popup::placement_property())
 }
 
@@ -48714,24 +48755,24 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_581: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_582: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":on-top-navigation-overflow")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_549`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_550`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_550_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NavigationViewItem as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "NavigationViewItemBorderThickness", line: 573, position: 40 } }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_549_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_550_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("NavigationViewItemMargin") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_550, parent: true, line: 583, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_551, parent: true, line: 583, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_558),
@@ -48922,7 +48963,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
             line: 769,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_549_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_550_value_4) }),
             ],
         },
         rt::StyleMember::Style {
@@ -48975,8 +49016,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_211, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(0_i32) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_212, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(4_i32) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_5) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_6) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_5) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_6) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 2.0_f64, 2.0_f64, 0.0_f64]) }),
                     ],
                 },
@@ -49014,8 +49055,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([16.0_f64, 0.0_f64, 16.0_f64, 4.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_7) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_8) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_7) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_8) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49026,8 +49067,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(3.0_f64) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_328, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(2.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_329, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(2.0_f64) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_330, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(2.0_f64) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49066,7 +49107,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_9) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_9) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49076,8 +49117,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemContentPresenterMargin") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_330, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_10) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_11) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_331, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_10) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_11) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49097,7 +49138,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_211, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(3_i32) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_12) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_12) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([-16.0_f64, 0.0_f64, 2.0_f64, 13.0_f64]) }),
                     ],
                 },
@@ -49107,7 +49148,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     line: 847,
                     position: 8,
                     members: &[
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_331, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_13) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_332, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_13) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49424,7 +49465,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(16.0_f64) }),
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_14) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_14) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49434,7 +49475,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemOnOverflowContentPresenterMargin") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_330, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_549_value_15) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_331, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_550_value_15) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -49504,89 +49545,89 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 575, 35)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_4(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_1 = rt::invoked(<dyn ::ferroui_base::media::ITransform>::__markup_parse(::std::string::String::from("rotate(180deg)")), 770, 42)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_1)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_5() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_5() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_6() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_6() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_7() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_7() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Bottom)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_8() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_8() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_9() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_9() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_10() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_10() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::TextWrapping::NoWrap)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_11() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_11() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_12() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_12() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_13() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_13() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::PlacementMode::BottomEdgeAlignedLeft)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_14() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_14() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_549` (#568).
-fn build_controls_macoscontrols_xaml_deferred_549_value_15() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_550` (#568).
+fn build_controls_macoscontrols_xaml_deferred_550_value_15() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::TextWrapping::NoWrap)
 }
 
@@ -49602,8 +49643,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_585: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_586: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":top-mode"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("InnerHeaderGrid")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_551`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_551_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_552`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_552_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NavigationViewItemHeader as ::ferroui_base::StaticType>::TYPE),
@@ -49611,9 +49652,9 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_551_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_45, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_551_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_314, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_551_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_552, parent: true, line: 1005, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_552_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_315, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_552_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_553, parent: true, line: 1005, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_583),
@@ -49652,13 +49693,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_551_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_551` (#568).
-fn build_controls_macoscontrols_xaml_deferred_551_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_552` (#568).
+fn build_controls_macoscontrols_xaml_deferred_552_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_551` (#568).
-fn build_controls_macoscontrols_xaml_deferred_551_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_552` (#568).
+fn build_controls_macoscontrols_xaml_deferred_552_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::automation::AccessibilityView::Raw)
 }
 
@@ -49675,16 +49716,16 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_587: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_588: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":vertical-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::shapes::Rectangle as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SeparatorLine")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_553`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_553_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_554`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_554_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::NavigationViewItemSeparator as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_45, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_314, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_553_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_554, parent: true, line: 1047, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_315, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_554_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_555, parent: true, line: 1047, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_587),
@@ -49703,20 +49744,20 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_553_THEME: rt::ControlThemeTab
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(24.0_f64) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemSeparatorWidth") }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemSeparatorMargin") }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_553_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_554_value_1) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_32, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TopNavigationViewItemSeparatorForeground") }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_553` (#568).
-fn build_controls_macoscontrols_xaml_deferred_553_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_554` (#568).
+fn build_controls_macoscontrols_xaml_deferred_554_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::automation::AccessibilityView::Raw)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_553` (#568).
-fn build_controls_macoscontrols_xaml_deferred_553_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_554` (#568).
+fn build_controls_macoscontrols_xaml_deferred_554_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
@@ -49814,15 +49855,15 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_608: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_609: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":compact"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_ContentPresenter")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_555`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_555_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_556`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_556_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TitleBar as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_555_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_556_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TitleBarForegroundBrush") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_555_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_556, parent: true, line: 49, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_556_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_557, parent: true, line: 49, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_589),
@@ -50009,30 +50050,30 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_555_THEME: rt::ControlThemeTab
             line: 225,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_555_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_556_value_2) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TitleBarCompactContentMargin") }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_555` (#568).
-fn build_controls_macoscontrols_xaml_deferred_555_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_556` (#568).
+fn build_controls_macoscontrols_xaml_deferred_556_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_555` (#568).
-fn build_controls_macoscontrols_xaml_deferred_555_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_556` (#568).
+fn build_controls_macoscontrols_xaml_deferred_556_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_555` (#568).
-fn build_controls_macoscontrols_xaml_deferred_555_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_556` (#568).
+fn build_controls_macoscontrols_xaml_deferred_556_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_557`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_557_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_558`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_558_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TitleBar as ::ferroui_base::StaticType>::TYPE),
@@ -50058,54 +50099,54 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_502: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_332() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_333() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::ListViewBase::is_swipe_enabled_property())
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_558`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_558_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_559`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_559_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListView as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_558_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_332, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_558_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_558_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_559_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_333, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_559_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_559_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_558_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_560, parent: false, line: 55, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_559_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_561, parent: false, line: 55, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_558` (#568).
-fn build_controls_macoscontrols_xaml_deferred_558_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_559` (#568).
+fn build_controls_macoscontrols_xaml_deferred_559_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_558` (#568).
-fn build_controls_macoscontrols_xaml_deferred_558_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_559` (#568).
+fn build_controls_macoscontrols_xaml_deferred_559_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_558` (#568).
-fn build_controls_macoscontrols_xaml_deferred_558_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_559` (#568).
+fn build_controls_macoscontrols_xaml_deferred_559_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_558` (#568).
-fn build_controls_macoscontrols_xaml_deferred_558_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_559` (#568).
+fn build_controls_macoscontrols_xaml_deferred_559_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_559, 50, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_560, 50, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_561`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_561_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_562`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_562_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListView as ::ferroui_base::StaticType>::TYPE),
@@ -50113,8 +50154,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_561_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_562`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_562_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_563`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_563_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ListViewItem as ::ferroui_base::StaticType>::TYPE),
@@ -50139,51 +50180,51 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_504: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_192, source: build_controls_macoscontrols_xaml_property_192, line: 71, position: 25 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_563`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_563_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_564`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_564_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::GridView as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 10.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_563_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_563_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_563_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_564_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_564_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_564_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_332, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_563_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_565, parent: false, line: 62, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_333, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_564_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_566, parent: false, line: 62, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_563` (#568).
-fn build_controls_macoscontrols_xaml_deferred_563_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_564` (#568).
+fn build_controls_macoscontrols_xaml_deferred_564_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_563` (#568).
-fn build_controls_macoscontrols_xaml_deferred_563_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_564` (#568).
+fn build_controls_macoscontrols_xaml_deferred_564_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_563` (#568).
-fn build_controls_macoscontrols_xaml_deferred_563_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_564` (#568).
+fn build_controls_macoscontrols_xaml_deferred_564_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_563` (#568).
-fn build_controls_macoscontrols_xaml_deferred_563_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_564` (#568).
+fn build_controls_macoscontrols_xaml_deferred_564_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_564, 57, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_565, 57, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_566`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_566_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_567`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_567_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::GridView as ::ferroui_base::StaticType>::TYPE),
@@ -50222,8 +50263,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_RESOURCES_508: &[rt::DynamicResourceRow
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_610: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("SelectionBorder")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_567`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_567_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_568`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_568_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::GridViewItem as ::ferroui_base::StaticType>::TYPE),
@@ -50231,14 +50272,14 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_567_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GridViewItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GridViewItemForeground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_567_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_567_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_567_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_568_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_568_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_568_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 4.0_f64, 4.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GridViewItemMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("GridViewItemMinHeight") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_567_value_3) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_569, parent: true, line: 114, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_54, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_568_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_570, parent: true, line: 114, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -50343,35 +50384,35 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_567_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_567` (#568).
-fn build_controls_macoscontrols_xaml_deferred_567_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_568` (#568).
+fn build_controls_macoscontrols_xaml_deferred_568_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Local)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_567` (#568).
-fn build_controls_macoscontrols_xaml_deferred_567_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_568` (#568).
+fn build_controls_macoscontrols_xaml_deferred_568_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_567` (#568).
-fn build_controls_macoscontrols_xaml_deferred_567_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_568` (#568).
+fn build_controls_macoscontrols_xaml_deferred_568_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_567` (#568).
-fn build_controls_macoscontrols_xaml_deferred_567_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_568` (#568).
+fn build_controls_macoscontrols_xaml_deferred_568_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let focus_adorner_template_0 = ::ferroui_markup_xaml::templates::FocusAdornerTemplate::__markup_new_0();
     context.push_parent(rt::to_value(focus_adorner_template_0.clone()));
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_568, 102, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_569, 102, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 102, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_570`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_570_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_571`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_571_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::GridViewItem as ::ferroui_base::StaticType>::TYPE),
@@ -50405,8 +50446,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_613: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_614: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":pressed"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::FontIcon as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("Arrow")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_575`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_575_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_576`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_576_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -50452,8 +50493,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_575_THEME: rt::ControlThemeTab
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_576`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_576_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_577`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_577_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE),
@@ -50507,31 +50548,31 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_511: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 141, position: 27 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_577`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_577_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_578`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_578_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotTitleFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotTitleThemeFontWeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotTitleFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_578, parent: false, line: 137, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_579, parent: false, line: 137, position: 10 }) }),
     ],
 };
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_579`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_579_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_580`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_580_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ContentControl as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_579_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_580_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextStyleLargeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotPortraitThemePadding") }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_579` (#568).
-fn build_controls_macoscontrols_xaml_deferred_579_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_580` (#568).
+fn build_controls_macoscontrols_xaml_deferred_580_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 149, 35)?;
@@ -50551,8 +50592,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_615: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_616: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":next-button-visible"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("NextButton")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_580`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_580_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_581`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_581_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Pivot as ::ferroui_base::StaticType>::TYPE),
@@ -50560,8 +50601,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_580_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_580_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_582, parent: true, line: 166, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_581_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_583, parent: true, line: 166, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_615),
@@ -50585,18 +50626,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_580_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_580` (#568).
-fn build_controls_macoscontrols_xaml_deferred_580_value_0(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_581` (#568).
+fn build_controls_macoscontrols_xaml_deferred_581_value_0(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_581, 161, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_582, 161, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_583`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_583_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_584`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_584_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::Pivot as ::ferroui_base::StaticType>::TYPE),
@@ -50618,33 +50659,33 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_514: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_12, line: 282, position: 29 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_584`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_584_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_585`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_585_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PivotItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotItemBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_18, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotItemMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Thickness([0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64]) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_584_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_584_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_585_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_585_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_585, parent: false, line: 277, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_586, parent: false, line: 277, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_584` (#568).
-fn build_controls_macoscontrols_xaml_deferred_584_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_585` (#568).
+fn build_controls_macoscontrols_xaml_deferred_585_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_584` (#568).
-fn build_controls_macoscontrols_xaml_deferred_584_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_585` (#568).
+fn build_controls_macoscontrols_xaml_deferred_585_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch)
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_586`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_586_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_587`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PivotItem as ::ferroui_base::StaticType>::TYPE),
@@ -50668,8 +50709,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_617: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_618: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":locked"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("ContentPresenter")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_587`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_588`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_588_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PivotHeaderItem as ::ferroui_base::StaticType>::TYPE),
@@ -50680,10 +50721,10 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_3, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotHeaderItemForegroundUnselected") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotHeaderItemMargin") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_75, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(48.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_587_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_588_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("PivotHeaderItemSelectedPipeCornerRadius") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_588, parent: true, line: 305, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_589, parent: true, line: 305, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -50750,7 +50791,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME: rt::ControlThemeTab
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_31, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(0.0_f64) }),
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_587_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_97, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_588_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -50775,13 +50816,13 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_587` (#568).
-fn build_controls_macoscontrols_xaml_deferred_587_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_588` (#568).
+fn build_controls_macoscontrols_xaml_deferred_588_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_587` (#568).
-fn build_controls_macoscontrols_xaml_deferred_587_value_1(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_588` (#568).
+fn build_controls_macoscontrols_xaml_deferred_588_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let translate_transform_0 = ::ferroui_base::media::TranslateTransform::new();
@@ -50790,8 +50831,8 @@ fn build_controls_macoscontrols_xaml_deferred_587_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&translate_transform_0)))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_589`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_589_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_590`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_590_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::PivotHeaderItem as ::ferroui_base::StaticType>::TYPE),
@@ -50813,19 +50854,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_517: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_80, source: build_controls_macoscontrols_xaml_property_3, line: 70, position: 24 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_590`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_590_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_591`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_591_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::CommandBarButton as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_590_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_590_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_48, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_591_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_591_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_590_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_13, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_591_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(68.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_58, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(::core::primitive::f64::NAN) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(40.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_591, parent: false, line: 50, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_592, parent: false, line: 50, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_613),
@@ -50838,18 +50879,18 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_590_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_590` (#568).
-fn build_controls_macoscontrols_xaml_deferred_590_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_591` (#568).
+fn build_controls_macoscontrols_xaml_deferred_591_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_590` (#568).
-fn build_controls_macoscontrols_xaml_deferred_590_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_591` (#568).
+fn build_controls_macoscontrols_xaml_deferred_591_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_590` (#568).
-fn build_controls_macoscontrols_xaml_deferred_590_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_591` (#568).
+fn build_controls_macoscontrols_xaml_deferred_591_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 44, 35)?;
@@ -50865,26 +50906,26 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_518: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_38, source: build_controls_macoscontrols_xaml_property_19, line: 101, position: 31 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_592`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_592_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_593`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_593_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: false,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SwipeControl as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_592_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_593_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(40.0_f64) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_50, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(88.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_593, parent: false, line: 91, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_594, parent: false, line: 91, position: 10 }) }),
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_592` (#568).
-fn build_controls_macoscontrols_xaml_deferred_592_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_593` (#568).
+fn build_controls_macoscontrols_xaml_deferred_593_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32))
 }
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_594`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_594_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_595`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_595_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SwipeControl as ::ferroui_base::StaticType>::TYPE),
@@ -50899,12 +50940,12 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_519: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_27, source: build_controls_macoscontrols_xaml_property_28, line: 82, position: 17 },
 ];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_595`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_595_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_596`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_596_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_596, parent: true, line: 78, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_597, parent: true, line: 78, position: 10 }) }),
     ],
 };
 
@@ -50921,16 +50962,16 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_619: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_620: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":single-bottom-border-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightBottomBorderLine")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_597`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_597_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_598`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_598_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabView as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_597_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_598_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewHeaderPadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_598, parent: true, line: 168, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_599, parent: true, line: 168, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_619),
@@ -50952,8 +50993,8 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_597_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_597` (#568).
-fn build_controls_macoscontrols_xaml_deferred_597_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_598` (#568).
+fn build_controls_macoscontrols_xaml_deferred_598_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
@@ -50979,21 +51020,21 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_621: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_622: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":right-bottom-border-line-short"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("RightBottomBorderLine")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_599`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_599_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_600`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_600_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabViewListView as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_599_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_57, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_600_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_30, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_599_value_1) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_332, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_599_value_2) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_599_value_3) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_201, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_600_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_333, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_77, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_600_value_2) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_78, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_600_value_3) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_103, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_194, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_599_value_4) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_601, parent: true, line: 253, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_71, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_600_value_4) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_602, parent: true, line: 253, position: 10 }) }),
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_621),
@@ -51015,32 +51056,32 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_599_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_599` (#568).
-fn build_controls_macoscontrols_xaml_deferred_599_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_600` (#568).
+fn build_controls_macoscontrols_xaml_deferred_600_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Top)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_599` (#568).
-fn build_controls_macoscontrols_xaml_deferred_599_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_600` (#568).
+fn build_controls_macoscontrols_xaml_deferred_600_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::input::KeyboardNavigationMode::Once)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_599` (#568).
-fn build_controls_macoscontrols_xaml_deferred_599_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_600` (#568).
+fn build_controls_macoscontrols_xaml_deferred_600_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Auto)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_599` (#568).
-fn build_controls_macoscontrols_xaml_deferred_599_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_600` (#568).
+fn build_controls_macoscontrols_xaml_deferred_600_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_controls::primitives::ScrollBarVisibility::Disabled)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_599` (#568).
-fn build_controls_macoscontrols_xaml_deferred_599_value_4(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_600` (#568).
+fn build_controls_macoscontrols_xaml_deferred_600_value_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_600, 248, 10)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_601, 248, 10)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&items_panel_template_0)))
 }
@@ -51053,7 +51094,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_523: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_333() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_334() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TabViewItem::header_template_property())
 }
 
@@ -51061,7 +51102,7 @@ fn build_controls_macoscontrols_xaml_property_333() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_BINDINGS_524: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_48, source: build_controls_macoscontrols_xaml_property_21, line: 373, position: 35 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_57, source: build_controls_macoscontrols_xaml_property_23, line: 374, position: 35 },
-    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_333, line: 375, position: 35 },
+    rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_11, source: build_controls_macoscontrols_xaml_property_334, line: 375, position: 35 },
     rt::TemplateBindingRow { target: build_controls_macoscontrols_xaml_property_56, source: build_controls_macoscontrols_xaml_property_13, line: 376, position: 35 },
 ];
 
@@ -51100,7 +51141,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_626: &[rt::SelectorStep] = &[r
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_627: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("TabSeparator")];
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
-fn build_controls_macoscontrols_xaml_property_334() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_macoscontrols_xaml_property_335() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_base::Visual::z_index_property())
 }
 
@@ -51131,19 +51172,19 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_635: &[rt::SelectorStep] = &[r
 /// A selector chain of `Controls/MacOSControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_636: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":no-bottom-border-line"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("BottomBorderLine")];
 
-/// The control theme built by `build_controls_macoscontrols_xaml_deferred_602`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_macoscontrols_xaml_deferred_603`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_603_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::TabViewItem as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewItemHeaderBackground") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_602_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_602_value_1) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_21, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_603_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_23, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_macoscontrols_xaml_deferred_603_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_42, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewItemMinHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("OverlayCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewItemBorderThickness") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewItemBorderBrush") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_603, parent: true, line: 309, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_macoscontrols_xaml_deferred_604, parent: true, line: 309, position: 10 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_0),
@@ -51258,7 +51299,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME: rt::ControlThemeTab
             line: 436,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_334, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(20_i32) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_335, form: rt::SetterForm::Plain, value: rt::ThemeValue::Int(20_i32) }),
                 rt::StyleMember::Style {
                     parent: false,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_MACOSCONTROLS_XAML_SELECTOR_628),
@@ -51296,7 +51337,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME: rt::ControlThemeTab
                     position: 8,
                     members: &[
                         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TabViewItemHeaderForegroundSelected") }),
-                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_56, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_602_value_2) }),
+                        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_56, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_603_value_2) }),
                     ],
                 },
                 rt::StyleMember::Style {
@@ -51442,7 +51483,7 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME: rt::ControlThemeTab
             line: 508,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_602_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_macoscontrols_xaml_property_41, form: rt::SetterForm::Parented, value: rt::ThemeValue::Computed(build_controls_macoscontrols_xaml_deferred_603_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -51475,26 +51516,26 @@ static BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME: rt::ControlThemeTab
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_602` (#568).
-fn build_controls_macoscontrols_xaml_deferred_602_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_603` (#568).
+fn build_controls_macoscontrols_xaml_deferred_603_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_602` (#568).
-fn build_controls_macoscontrols_xaml_deferred_602_value_1() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_603` (#568).
+fn build_controls_macoscontrols_xaml_deferred_603_value_1() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_602` (#568).
-fn build_controls_macoscontrols_xaml_deferred_602_value_2(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_603` (#568).
+fn build_controls_macoscontrols_xaml_deferred_603_value_2(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 453, 39)?;
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&value_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_602` (#568).
-fn build_controls_macoscontrols_xaml_deferred_602_value_3(
+/// A setter value of the control theme built by `build_controls_macoscontrols_xaml_deferred_603` (#568).
+fn build_controls_macoscontrols_xaml_deferred_603_value_3(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let path_0 = {
@@ -73462,17 +73503,26 @@ fn build_controls_macoscontrols_xaml_deferred_357(
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_357_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(675,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_358(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(21,4) ControlTheme
+    // Controls/MacOSControls.xaml(675,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_358_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(41,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_359(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(21,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_359_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(41,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_360(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73494,7 +73544,7 @@ fn build_controls_macoscontrols_xaml_deferred_359(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(48,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_360(
+fn build_controls_macoscontrols_xaml_deferred_361(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73618,7 +73668,7 @@ fn build_controls_macoscontrols_xaml_deferred_360(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(134,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_361(
+fn build_controls_macoscontrols_xaml_deferred_362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73642,7 +73692,7 @@ fn build_controls_macoscontrols_xaml_deferred_361(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(146,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_362(
+fn build_controls_macoscontrols_xaml_deferred_363(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73666,7 +73716,7 @@ fn build_controls_macoscontrols_xaml_deferred_362(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(158,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_363(
+fn build_controls_macoscontrols_xaml_deferred_364(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73690,7 +73740,7 @@ fn build_controls_macoscontrols_xaml_deferred_363(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(170,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_364(
+fn build_controls_macoscontrols_xaml_deferred_365(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73714,25 +73764,25 @@ fn build_controls_macoscontrols_xaml_deferred_364(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(177,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_365(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(177,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_365_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(25,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_366(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(25,4) ControlTheme
+    // Controls/MacOSControls.xaml(177,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_366_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(40,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(25,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_367(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(25,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_367_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(40,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_368(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73754,7 +73804,7 @@ fn build_controls_macoscontrols_xaml_deferred_367(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(47,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_368(
+fn build_controls_macoscontrols_xaml_deferred_369(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73799,16 +73849,16 @@ fn build_controls_macoscontrols_xaml_deferred_368(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(75,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_369(
+fn build_controls_macoscontrols_xaml_deferred_370(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(75,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_369_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_370_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(91,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_370(
+fn build_controls_macoscontrols_xaml_deferred_371(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -73830,7 +73880,7 @@ fn build_controls_macoscontrols_xaml_deferred_370(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(103,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_371(
+fn build_controls_macoscontrols_xaml_deferred_372(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74177,25 +74227,25 @@ fn build_controls_macoscontrols_xaml_deferred_371(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(332,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_372(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(332,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_372_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(336,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_373(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(336,4) ControlTheme
+    // Controls/MacOSControls.xaml(332,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_373_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(347,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(336,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_374(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(336,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_374_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(347,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_375(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74217,7 +74267,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(354,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_375(
+fn build_controls_macoscontrols_xaml_deferred_376(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74262,16 +74312,16 @@ fn build_controls_macoscontrols_xaml_deferred_375(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(384,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_376(
+fn build_controls_macoscontrols_xaml_deferred_377(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(384,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_376_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_377_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(400,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_377(
+fn build_controls_macoscontrols_xaml_deferred_378(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74293,7 +74343,7 @@ fn build_controls_macoscontrols_xaml_deferred_377(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(412,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_378(
+fn build_controls_macoscontrols_xaml_deferred_379(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74544,16 +74594,16 @@ fn build_controls_macoscontrols_xaml_deferred_378(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(13,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_379(
+fn build_controls_macoscontrols_xaml_deferred_380(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(13,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_379_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_380_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(27,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_380(
+fn build_controls_macoscontrols_xaml_deferred_381(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74577,7 +74627,7 @@ fn build_controls_macoscontrols_xaml_deferred_380(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(36,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_381(
+fn build_controls_macoscontrols_xaml_deferred_382(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -74937,25 +74987,25 @@ fn build_controls_macoscontrols_xaml_deferred_381(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(156,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_382(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(156,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_382_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_383(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(24,4) ControlTheme
+    // Controls/MacOSControls.xaml(156,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_383_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(29,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_384(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(24,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_384_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(29,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_385(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75021,16 +75071,16 @@ fn build_controls_macoscontrols_xaml_deferred_384(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(66,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_385(
+fn build_controls_macoscontrols_xaml_deferred_386(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(66,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_385_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_386_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(69,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_386(
+fn build_controls_macoscontrols_xaml_deferred_387(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75085,16 +75135,16 @@ fn build_controls_macoscontrols_xaml_deferred_386(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(82,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_387(
+fn build_controls_macoscontrols_xaml_deferred_388(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(82,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_387_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_388_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(85,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_388(
+fn build_controls_macoscontrols_xaml_deferred_389(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75149,16 +75199,16 @@ fn build_controls_macoscontrols_xaml_deferred_388(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(99,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_389(
+fn build_controls_macoscontrols_xaml_deferred_390(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(99,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_389_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_390_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(102,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_390(
+fn build_controls_macoscontrols_xaml_deferred_391(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75174,16 +75224,16 @@ fn build_controls_macoscontrols_xaml_deferred_390(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(107,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_391(
+fn build_controls_macoscontrols_xaml_deferred_392(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(107,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_391_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_392_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(116,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_392(
+fn build_controls_macoscontrols_xaml_deferred_393(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75205,7 +75255,7 @@ fn build_controls_macoscontrols_xaml_deferred_392(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(128,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_393(
+fn build_controls_macoscontrols_xaml_deferred_394(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75527,7 +75577,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(225,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_394(
+fn build_controls_macoscontrols_xaml_deferred_395(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -75849,52 +75899,52 @@ fn build_controls_macoscontrols_xaml_deferred_394(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(391,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_395(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(391,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_395_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_396(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(23,4) ControlTheme
+    // Controls/MacOSControls.xaml(391,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_396_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(38,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_397(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(38,4) ControlTheme
+    // Controls/MacOSControls.xaml(23,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_397_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(38,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_398(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(52,4) ControlTheme
+    // Controls/MacOSControls.xaml(38,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_398_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(83,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_399(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(83,4) ControlTheme
+    // Controls/MacOSControls.xaml(52,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_399_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(88,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(83,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_400(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(83,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_400_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(88,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_401(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76295,16 +76345,16 @@ fn build_controls_macoscontrols_xaml_deferred_400(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(228,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_401(
+fn build_controls_macoscontrols_xaml_deferred_402(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(228,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_401_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_402_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(233,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_402(
+fn build_controls_macoscontrols_xaml_deferred_403(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76466,16 +76516,16 @@ fn build_controls_macoscontrols_xaml_deferred_402(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(278,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_403(
+fn build_controls_macoscontrols_xaml_deferred_404(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(278,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_403_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_404_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(295,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_404(
+fn build_controls_macoscontrols_xaml_deferred_405(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76568,16 +76618,16 @@ fn build_controls_macoscontrols_xaml_deferred_404(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(30,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_405(
+fn build_controls_macoscontrols_xaml_deferred_406(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(30,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_405_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_406_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(41,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_406(
+fn build_controls_macoscontrols_xaml_deferred_407(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76599,7 +76649,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(52,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_407(
+fn build_controls_macoscontrols_xaml_deferred_408(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76778,16 +76828,16 @@ fn build_controls_macoscontrols_xaml_deferred_407(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(166,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_408(
+fn build_controls_macoscontrols_xaml_deferred_409(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(166,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_408_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_409_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(174,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_409(
+fn build_controls_macoscontrols_xaml_deferred_410(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -76966,34 +77016,34 @@ fn build_controls_macoscontrols_xaml_deferred_409(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(240,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_410(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(240,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_410_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(250,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_411(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(250,4) ControlTheme
+    // Controls/MacOSControls.xaml(240,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_411_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(259,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(250,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_412(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(259,4) ControlTheme
+    // Controls/MacOSControls.xaml(250,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_412_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(278,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(259,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_413(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(259,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_413_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(278,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_414(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77140,25 +77190,25 @@ fn build_controls_macoscontrols_xaml_deferred_413(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(373,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_414(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(373,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_414_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(59,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_415(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(59,4) ControlTheme
+    // Controls/MacOSControls.xaml(373,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_415_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(67,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(59,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_416(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(59,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_416_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(67,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_417(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77189,7 +77239,7 @@ fn build_controls_macoscontrols_xaml_deferred_416(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(85,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_417(
+fn build_controls_macoscontrols_xaml_deferred_418(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77238,34 +77288,34 @@ fn build_controls_macoscontrols_xaml_deferred_417(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(140,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_418(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(140,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_418_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(147,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_419(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(147,4) ControlTheme
+    // Controls/MacOSControls.xaml(140,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_419_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(153,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(147,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_420(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(153,4) ControlTheme
+    // Controls/MacOSControls.xaml(147,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_420_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(162,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(153,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_421(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(153,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_421_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(162,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_422(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77296,7 +77346,7 @@ fn build_controls_macoscontrols_xaml_deferred_421(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(177,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_422(
+fn build_controls_macoscontrols_xaml_deferred_423(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77350,34 +77400,34 @@ fn build_controls_macoscontrols_xaml_deferred_422(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(234,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_423(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(234,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_423_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(242,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_424(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(242,4) ControlTheme
+    // Controls/MacOSControls.xaml(234,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_424_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(251,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(242,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_425(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(251,4) ControlTheme
+    // Controls/MacOSControls.xaml(242,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_425_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(260,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(251,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_426(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(251,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_426_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(260,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_427(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77408,7 +77458,7 @@ fn build_controls_macoscontrols_xaml_deferred_426(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(280,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_427(
+fn build_controls_macoscontrols_xaml_deferred_428(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77452,16 +77502,16 @@ fn build_controls_macoscontrols_xaml_deferred_427(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(342,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_428(
+fn build_controls_macoscontrols_xaml_deferred_429(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(342,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_428_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_429_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(348,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_429(
+fn build_controls_macoscontrols_xaml_deferred_430(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77496,16 +77546,16 @@ fn build_controls_macoscontrols_xaml_deferred_429(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(358,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_430(
+fn build_controls_macoscontrols_xaml_deferred_431(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(358,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_430_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_431_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(367,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_431(
+fn build_controls_macoscontrols_xaml_deferred_432(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77592,7 +77642,7 @@ fn build_controls_macoscontrols_xaml_deferred_431(
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     context.push_parent(rt::to_value(items_panel_template_0.clone()));
     // Controls/MacOSControls.xaml(387,18) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_432, 387, 18)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_433, 387, 18)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
@@ -77623,7 +77673,7 @@ fn build_controls_macoscontrols_xaml_deferred_431(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(387,18)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_432(
+fn build_controls_macoscontrols_xaml_deferred_433(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77645,16 +77695,16 @@ fn build_controls_macoscontrols_xaml_deferred_432(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_433(
+fn build_controls_macoscontrols_xaml_deferred_434(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(18,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_433_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_434_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(24,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_434(
+fn build_controls_macoscontrols_xaml_deferred_435(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77710,25 +77760,25 @@ fn build_controls_macoscontrols_xaml_deferred_434(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(42,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_435(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(42,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_435_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_436(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(18,4) ControlTheme
+    // Controls/MacOSControls.xaml(42,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_436_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(37,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_437(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(18,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_437_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(37,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_438(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77814,25 +77864,25 @@ fn build_controls_macoscontrols_xaml_deferred_437(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(50,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_438(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(50,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_438_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_439(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(17,4) ControlTheme
+    // Controls/MacOSControls.xaml(50,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_439_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(31,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(17,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_440(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(17,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_440_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(31,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_441(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -77919,16 +77969,16 @@ fn build_controls_macoscontrols_xaml_deferred_440(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(44,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_441(
+fn build_controls_macoscontrols_xaml_deferred_442(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(44,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_441_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_442_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_442(
+fn build_controls_macoscontrols_xaml_deferred_443(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -77937,16 +77987,16 @@ fn build_controls_macoscontrols_xaml_deferred_442(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_443(
+fn build_controls_macoscontrols_xaml_deferred_444(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(24,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_443_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_444_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(35,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_444(
+fn build_controls_macoscontrols_xaml_deferred_445(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -78370,7 +78420,7 @@ fn build_controls_macoscontrols_xaml_deferred_444(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(241,12)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_445(
+fn build_controls_macoscontrols_xaml_deferred_446(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -78397,61 +78447,61 @@ fn build_controls_macoscontrols_xaml_deferred_445(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(246,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_446(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
-    // Controls/MacOSControls.xaml(246,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_446_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(250,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_447(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
-    // Controls/MacOSControls.xaml(250,4) ControlTheme
+    // Controls/MacOSControls.xaml(246,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_447_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(253,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(250,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_448(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
-    // Controls/MacOSControls.xaml(253,4) ControlTheme
+    // Controls/MacOSControls.xaml(250,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_448_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(259,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(253,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_449(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
-    // Controls/MacOSControls.xaml(259,4) ControlTheme
+    // Controls/MacOSControls.xaml(253,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_449_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(285,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(259,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_450(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
-    // Controls/MacOSControls.xaml(285,4) ControlTheme
+    // Controls/MacOSControls.xaml(259,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_450_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(285,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_451(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
+    // Controls/MacOSControls.xaml(285,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(18,4)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_452(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(18,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_451_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_452_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(29,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_452(
+fn build_controls_macoscontrols_xaml_deferred_453(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78473,7 +78523,7 @@ fn build_controls_macoscontrols_xaml_deferred_452(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(34,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_453(
+fn build_controls_macoscontrols_xaml_deferred_454(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78691,16 +78741,16 @@ fn build_controls_macoscontrols_xaml_deferred_453(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(80,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_454(
+fn build_controls_macoscontrols_xaml_deferred_455(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(80,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_454_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_455_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(88,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_455(
+fn build_controls_macoscontrols_xaml_deferred_456(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78745,25 +78795,25 @@ fn build_controls_macoscontrols_xaml_deferred_455(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(94,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_456(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(94,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_456_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_457(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(23,4) ControlTheme
+    // Controls/MacOSControls.xaml(94,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_457_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(33,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(23,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_458(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(23,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_458_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(33,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_459(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78856,25 +78906,25 @@ fn build_controls_macoscontrols_xaml_deferred_458(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(90,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_459(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(90,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_459_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_460(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(91,4) ControlTheme
+    // Controls/MacOSControls.xaml(90,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_460_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(105,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_461(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(91,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_461_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(105,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_462(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78896,7 +78946,7 @@ fn build_controls_macoscontrols_xaml_deferred_461(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(110,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_462(
+fn build_controls_macoscontrols_xaml_deferred_463(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -78967,16 +79017,16 @@ fn build_controls_macoscontrols_xaml_deferred_462(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(165,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_463(
+fn build_controls_macoscontrols_xaml_deferred_464(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(165,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_463_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_464_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(181,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_464(
+fn build_controls_macoscontrols_xaml_deferred_465(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79070,16 +79120,16 @@ fn build_controls_macoscontrols_xaml_deferred_464(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(31,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_465(
+fn build_controls_macoscontrols_xaml_deferred_466(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(31,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_465_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_466_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(46,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_466(
+fn build_controls_macoscontrols_xaml_deferred_467(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79092,7 +79142,7 @@ fn build_controls_macoscontrols_xaml_deferred_466(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(51,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_467(
+fn build_controls_macoscontrols_xaml_deferred_468(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79135,34 +79185,34 @@ fn build_controls_macoscontrols_xaml_deferred_467(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(77,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_468(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(77,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_468_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(16,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_469(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(16,4) ControlTheme
+    // Controls/MacOSControls.xaml(77,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_469_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(16,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_470(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(24,4) ControlTheme
+    // Controls/MacOSControls.xaml(16,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_470_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(35,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(24,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_471(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(24,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_471_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(35,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_472(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79184,7 +79234,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(40,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_472(
+fn build_controls_macoscontrols_xaml_deferred_473(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79284,25 +79334,25 @@ fn build_controls_macoscontrols_xaml_deferred_472(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(116,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_473(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(116,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_473_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(30,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_474(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(30,4) ControlTheme
+    // Controls/MacOSControls.xaml(116,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_474_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(33,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(30,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_475(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(30,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_475_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(33,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_476(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79481,16 +79531,16 @@ fn build_controls_macoscontrols_xaml_deferred_475(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(142,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_476(
+fn build_controls_macoscontrols_xaml_deferred_477(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(142,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_476_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_477_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(165,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_477(
+fn build_controls_macoscontrols_xaml_deferred_478(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79512,7 +79562,7 @@ fn build_controls_macoscontrols_xaml_deferred_477(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(173,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_478(
+fn build_controls_macoscontrols_xaml_deferred_479(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -79921,16 +79971,16 @@ fn build_controls_macoscontrols_xaml_deferred_478(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(393,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_479(
+fn build_controls_macoscontrols_xaml_deferred_480(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(393,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_479_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_480_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(19,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_480(
+fn build_controls_macoscontrols_xaml_deferred_481(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -79943,16 +79993,16 @@ fn build_controls_macoscontrols_xaml_deferred_480(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(20,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_481(
+fn build_controls_macoscontrols_xaml_deferred_482(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(20,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_481_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_482_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(29,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_482(
+fn build_controls_macoscontrols_xaml_deferred_483(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -80050,16 +80100,16 @@ fn build_controls_macoscontrols_xaml_deferred_482(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(46,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_483(
+fn build_controls_macoscontrols_xaml_deferred_484(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(46,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_483_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_484_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(60,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_484(
+fn build_controls_macoscontrols_xaml_deferred_485(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -80081,7 +80131,7 @@ fn build_controls_macoscontrols_xaml_deferred_484(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(65,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_485(
+fn build_controls_macoscontrols_xaml_deferred_486(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -80246,25 +80296,25 @@ fn build_controls_macoscontrols_xaml_deferred_485(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(154,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_486(
+fn build_controls_macoscontrols_xaml_deferred_487(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(154,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_486_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_487_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(38,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_487(
+fn build_controls_macoscontrols_xaml_deferred_488(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(38,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_487_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_488_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(47,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_488(
+fn build_controls_macoscontrols_xaml_deferred_489(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -80305,25 +80355,25 @@ fn build_controls_macoscontrols_xaml_deferred_488(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(67,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_489(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(67,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_489_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_490(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(21,4) ControlTheme
+    // Controls/MacOSControls.xaml(67,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_490_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(24,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(21,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_491(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(21,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_491_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(24,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_492(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -80385,16 +80435,16 @@ fn build_controls_macoscontrols_xaml_deferred_491(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(72,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_492(
+fn build_controls_macoscontrols_xaml_deferred_493(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(72,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_492_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_493_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(88,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_493(
+fn build_controls_macoscontrols_xaml_deferred_494(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -80726,16 +80776,16 @@ fn build_controls_macoscontrols_xaml_deferred_493(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(230,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_494(
+fn build_controls_macoscontrols_xaml_deferred_495(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(230,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_494_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_495_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(246,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_495(
+fn build_controls_macoscontrols_xaml_deferred_496(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -80884,25 +80934,25 @@ fn build_controls_macoscontrols_xaml_deferred_495(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(300,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_496(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(300,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_496_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(37,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_497(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(37,4) ControlTheme
+    // Controls/MacOSControls.xaml(300,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_497_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(47,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(37,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_498(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(37,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_498_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(47,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_499(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81013,169 +81063,169 @@ fn build_controls_macoscontrols_xaml_deferred_498(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(86,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_499(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(86,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_499_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(88,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_500(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(88,4) ControlTheme
+    // Controls/MacOSControls.xaml(86,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_500_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(88,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_501(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(91,4) ControlTheme
+    // Controls/MacOSControls.xaml(88,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_501_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(92,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(91,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_502(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(92,4) ControlTheme
+    // Controls/MacOSControls.xaml(91,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_502_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(99,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(92,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_503(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(99,4) ControlTheme
+    // Controls/MacOSControls.xaml(92,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_503_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(102,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(99,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_504(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(102,4) ControlTheme
+    // Controls/MacOSControls.xaml(99,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_504_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(103,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(102,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_505(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(103,4) ControlTheme
+    // Controls/MacOSControls.xaml(102,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_505_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(110,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(103,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_506(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(110,4) ControlTheme
+    // Controls/MacOSControls.xaml(103,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_506_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(113,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(110,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_507(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(113,4) ControlTheme
+    // Controls/MacOSControls.xaml(110,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_507_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(113,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_508(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(114,4) ControlTheme
+    // Controls/MacOSControls.xaml(113,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_508_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(120,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_509(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(120,4) ControlTheme
+    // Controls/MacOSControls.xaml(114,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_509_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(123,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(120,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_510(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(123,4) ControlTheme
+    // Controls/MacOSControls.xaml(120,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_510_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(124,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(123,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_511(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(124,4) ControlTheme
+    // Controls/MacOSControls.xaml(123,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_511_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(130,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(124,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_512(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(130,4) ControlTheme
+    // Controls/MacOSControls.xaml(124,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_512_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(133,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(130,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_513(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(133,4) ControlTheme
+    // Controls/MacOSControls.xaml(130,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_513_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(134,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(133,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_514(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(134,4) ControlTheme
+    // Controls/MacOSControls.xaml(133,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_514_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(70,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(134,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_515(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(70,4) ControlTheme
+    // Controls/MacOSControls.xaml(134,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_515_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(99,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(70,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_516(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(99,4) ControlTheme
+    // Controls/MacOSControls.xaml(70,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_516_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(109,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(99,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_517(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(99,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_517_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(109,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_518(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81643,16 +81693,16 @@ fn build_controls_macoscontrols_xaml_deferred_517(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(69,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_518(
+fn build_controls_macoscontrols_xaml_deferred_519(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(69,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_518_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_519_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(72,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_519(
+fn build_controls_macoscontrols_xaml_deferred_520(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81693,7 +81743,7 @@ fn build_controls_macoscontrols_xaml_deferred_519(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(109,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_520(
+fn build_controls_macoscontrols_xaml_deferred_521(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81702,14 +81752,14 @@ fn build_controls_macoscontrols_xaml_deferred_520(
     // Controls/MacOSControls.xaml(109,4) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::SymbolIcon as ::ferroui_base::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(110,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_521, 110, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_522, 110, 6)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_template_0))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(110,6)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_521(
+fn build_controls_macoscontrols_xaml_deferred_522(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81747,16 +81797,16 @@ fn build_controls_macoscontrols_xaml_deferred_521(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(123,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_522(
+fn build_controls_macoscontrols_xaml_deferred_523(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(123,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_522_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_523_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(139,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_523(
+fn build_controls_macoscontrols_xaml_deferred_524(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -81999,16 +82049,16 @@ fn build_controls_macoscontrols_xaml_deferred_523(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(49,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_524(
+fn build_controls_macoscontrols_xaml_deferred_525(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(49,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_524_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_525_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(54,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_525(
+fn build_controls_macoscontrols_xaml_deferred_526(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82024,7 +82074,7 @@ fn build_controls_macoscontrols_xaml_deferred_525(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(60,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_526(
+fn build_controls_macoscontrols_xaml_deferred_527(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82074,25 +82124,25 @@ fn build_controls_macoscontrols_xaml_deferred_526(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(78,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_527(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(78,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_527_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(43,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_528(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(43,4) ControlTheme
+    // Controls/MacOSControls.xaml(78,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_528_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(54,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(43,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_529(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(43,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_529_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(54,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_530(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82251,25 +82301,25 @@ fn build_controls_macoscontrols_xaml_deferred_529(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(136,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_530(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(136,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_530_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_531(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(52,4) ControlTheme
+    // Controls/MacOSControls.xaml(136,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_531_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(61,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_532(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(52,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_532_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(61,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_533(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82298,7 +82348,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(72,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_533(
+fn build_controls_macoscontrols_xaml_deferred_534(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82336,16 +82386,16 @@ fn build_controls_macoscontrols_xaml_deferred_533(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(115,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_534(
+fn build_controls_macoscontrols_xaml_deferred_535(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(115,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_534_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_535_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(121,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_535(
+fn build_controls_macoscontrols_xaml_deferred_536(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82375,16 +82425,16 @@ fn build_controls_macoscontrols_xaml_deferred_535(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(153,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_536(
+fn build_controls_macoscontrols_xaml_deferred_537(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(153,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_536_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_537_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(161,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_537(
+fn build_controls_macoscontrols_xaml_deferred_538(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82623,7 +82673,7 @@ fn build_controls_macoscontrols_xaml_deferred_537(
     // Controls/MacOSControls.xaml(202,16) ItemsPanel
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     // Controls/MacOSControls.xaml(203,18) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_538, 203, 18)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_539, 203, 18)?;
     ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_set_Content(&items_panel_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     items_control_0.set_value_with_priority(::ferroui_controls::ItemsControl::items_panel_property(), ::core::clone::Clone::clone(&items_panel_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::ITemplateOf<::std::option::Option<::ferroui_base::Ref<::ferroui_controls::Panel>>>>, priority_24);
@@ -82717,7 +82767,7 @@ fn build_controls_macoscontrols_xaml_deferred_537(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(203,18)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_538(
+fn build_controls_macoscontrols_xaml_deferred_539(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -82736,7 +82786,7 @@ fn build_controls_macoscontrols_xaml_deferred_538(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(28,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_539(
+fn build_controls_macoscontrols_xaml_deferred_540(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -83149,16 +83199,16 @@ fn build_controls_macoscontrols_xaml_deferred_539(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(52,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_540(
+fn build_controls_macoscontrols_xaml_deferred_541(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(52,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_540_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_541_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(73,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_541(
+fn build_controls_macoscontrols_xaml_deferred_542(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -83324,25 +83374,25 @@ fn build_controls_macoscontrols_xaml_deferred_541(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(161,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_542(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(161,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_542_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_543(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(114,4) ControlTheme
+    // Controls/MacOSControls.xaml(161,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_543_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(126,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_544(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(114,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_544_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(126,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_545(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -83373,16 +83423,16 @@ fn build_controls_macoscontrols_xaml_deferred_544(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(157,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_545(
+fn build_controls_macoscontrols_xaml_deferred_546(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(157,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_545_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_546_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(168,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_546(
+fn build_controls_macoscontrols_xaml_deferred_547(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -83435,16 +83485,16 @@ fn build_controls_macoscontrols_xaml_deferred_546(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(202,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_547(
+fn build_controls_macoscontrols_xaml_deferred_548(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(202,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_547_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_548_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(209,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_548(
+fn build_controls_macoscontrols_xaml_deferred_549(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -84656,16 +84706,16 @@ fn build_controls_macoscontrols_xaml_deferred_548(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(566,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_549(
+fn build_controls_macoscontrols_xaml_deferred_550(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(566,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_549_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_550_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(583,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_550(
+fn build_controls_macoscontrols_xaml_deferred_551(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85096,16 +85146,16 @@ fn build_controls_macoscontrols_xaml_deferred_550(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(996,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_551(
+fn build_controls_macoscontrols_xaml_deferred_552(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(996,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_551_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_552_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(1005,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_552(
+fn build_controls_macoscontrols_xaml_deferred_553(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85180,16 +85230,16 @@ fn build_controls_macoscontrols_xaml_deferred_552(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(1040,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_553(
+fn build_controls_macoscontrols_xaml_deferred_554(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(1040,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_553_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_554_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(1047,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_554(
+fn build_controls_macoscontrols_xaml_deferred_555(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85218,16 +85268,16 @@ fn build_controls_macoscontrols_xaml_deferred_554(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(43,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_555(
+fn build_controls_macoscontrols_xaml_deferred_556(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(43,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_555_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_556_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(49,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_556(
+fn build_controls_macoscontrols_xaml_deferred_557(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85636,25 +85686,25 @@ fn build_controls_macoscontrols_xaml_deferred_556(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(231,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_557(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(231,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_557_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(40,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_558(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(40,4) ControlTheme
+    // Controls/MacOSControls.xaml(231,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_558_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(50,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(40,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_559(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(40,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_559_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(50,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_560(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85670,7 +85720,7 @@ fn build_controls_macoscontrols_xaml_deferred_559(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(55,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_560(
+fn build_controls_macoscontrols_xaml_deferred_561(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85756,34 +85806,34 @@ fn build_controls_macoscontrols_xaml_deferred_560(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(80,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_561(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(80,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_561_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(82,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_562(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(82,4) ControlTheme
+    // Controls/MacOSControls.xaml(80,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_562_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(46,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(82,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_563(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(46,4) ControlTheme
+    // Controls/MacOSControls.xaml(82,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_563_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(57,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(46,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_564(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(46,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_564_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(57,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_565(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85799,7 +85849,7 @@ fn build_controls_macoscontrols_xaml_deferred_564(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(62,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_565(
+fn build_controls_macoscontrols_xaml_deferred_566(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85885,25 +85935,25 @@ fn build_controls_macoscontrols_xaml_deferred_565(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(87,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_566(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(87,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_566_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(89,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_567(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(89,4) ControlTheme
+    // Controls/MacOSControls.xaml(87,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_567_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(102,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(89,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_568(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(89,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_568_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(102,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_569(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -85934,7 +85984,7 @@ fn build_controls_macoscontrols_xaml_deferred_568(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(114,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_569(
+fn build_controls_macoscontrols_xaml_deferred_570(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86010,16 +86060,16 @@ fn build_controls_macoscontrols_xaml_deferred_569(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(174,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_570(
+fn build_controls_macoscontrols_xaml_deferred_571(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(174,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_570_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_571_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(57,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_571(
+fn build_controls_macoscontrols_xaml_deferred_572(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86028,14 +86078,14 @@ fn build_controls_macoscontrols_xaml_deferred_571(
     // Controls/MacOSControls.xaml(57,4) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(58,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_572, 58, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_573, 58, 6)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_template_0))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(58,6)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_572(
+fn build_controls_macoscontrols_xaml_deferred_573(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86085,7 +86135,7 @@ fn build_controls_macoscontrols_xaml_deferred_572(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(74,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_573(
+fn build_controls_macoscontrols_xaml_deferred_574(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86094,14 +86144,14 @@ fn build_controls_macoscontrols_xaml_deferred_573(
     // Controls/MacOSControls.xaml(74,4) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(75,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_574, 75, 6)?;
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_575, 75, 6)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_template_0))
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(75,6)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_574(
+fn build_controls_macoscontrols_xaml_deferred_575(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86151,34 +86201,34 @@ fn build_controls_macoscontrols_xaml_deferred_574(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(93,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_575(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(93,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_575_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(113,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_576(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(113,4) ControlTheme
+    // Controls/MacOSControls.xaml(93,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_576_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(131,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(113,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_577(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(131,4) ControlTheme
+    // Controls/MacOSControls.xaml(113,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_577_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(137,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(131,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_578(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(131,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_578_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(137,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_579(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86203,25 +86253,25 @@ fn build_controls_macoscontrols_xaml_deferred_578(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(148,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_579(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(148,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_579_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(154,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_580(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(154,4) ControlTheme
+    // Controls/MacOSControls.xaml(148,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_580_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(161,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(154,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_581(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(154,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_581_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(161,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_582(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86234,7 +86284,7 @@ fn build_controls_macoscontrols_xaml_deferred_581(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(166,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_582(
+fn build_controls_macoscontrols_xaml_deferred_583(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86628,25 +86678,25 @@ fn build_controls_macoscontrols_xaml_deferred_582(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(266,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_583(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(266,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_583_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(268,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_584(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(268,4) ControlTheme
+    // Controls/MacOSControls.xaml(266,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_584_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(277,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(268,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_585(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(268,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_585_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(277,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_586(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86682,25 +86732,25 @@ fn build_controls_macoscontrols_xaml_deferred_585(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(290,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_586(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(290,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_586_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(292,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_587(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(292,4) ControlTheme
+    // Controls/MacOSControls.xaml(290,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_587_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(305,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(292,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_588(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(292,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_588_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(305,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_589(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86806,25 +86856,25 @@ fn build_controls_macoscontrols_xaml_deferred_588(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(376,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_589(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(376,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_589_THEME)
-}
-
-/// Builds the deferred content at `Controls/MacOSControls.xaml(40,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_590(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(40,4) ControlTheme
+    // Controls/MacOSControls.xaml(376,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_590_THEME)
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(50,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(40,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_591(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
+    // Controls/MacOSControls.xaml(40,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_591_THEME)
+}
+
+/// Builds the deferred content at `Controls/MacOSControls.xaml(50,10)` (a template or a deferred resource).
+fn build_controls_macoscontrols_xaml_deferred_592(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -86931,16 +86981,16 @@ fn build_controls_macoscontrols_xaml_deferred_591(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(84,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_592(
+fn build_controls_macoscontrols_xaml_deferred_593(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(84,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_592_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_593_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(91,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_593(
+fn build_controls_macoscontrols_xaml_deferred_594(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
@@ -87024,25 +87074,25 @@ fn build_controls_macoscontrols_xaml_deferred_593(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(114,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_594(
+fn build_controls_macoscontrols_xaml_deferred_595(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     // Controls/MacOSControls.xaml(114,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_594_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_595_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(75,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_595(
+fn build_controls_macoscontrols_xaml_deferred_596(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(75,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_595_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_596_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(78,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_596(
+fn build_controls_macoscontrols_xaml_deferred_597(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -87473,16 +87523,16 @@ fn build_controls_macoscontrols_xaml_deferred_596(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(161,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_597(
+fn build_controls_macoscontrols_xaml_deferred_598(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(161,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_597_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_598_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(168,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_598(
+fn build_controls_macoscontrols_xaml_deferred_599(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -87751,16 +87801,16 @@ fn build_controls_macoscontrols_xaml_deferred_598(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(237,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_599(
+fn build_controls_macoscontrols_xaml_deferred_600(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(237,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_599_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_600_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(248,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_600(
+fn build_controls_macoscontrols_xaml_deferred_601(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -87776,7 +87826,7 @@ fn build_controls_macoscontrols_xaml_deferred_600(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(253,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_601(
+fn build_controls_macoscontrols_xaml_deferred_602(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -87913,16 +87963,16 @@ fn build_controls_macoscontrols_xaml_deferred_601(
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(298,4)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_602(
+fn build_controls_macoscontrols_xaml_deferred_603(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
     // Controls/MacOSControls.xaml(298,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_602_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DEFERRED_603_THEME)
 }
 
 /// Builds the deferred content at `Controls/MacOSControls.xaml(309,10)` (a template or a deferred resource).
-fn build_controls_macoscontrols_xaml_deferred_603(
+fn build_controls_macoscontrols_xaml_deferred_604(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_MACOSCONTROLS_XAML_XML_NAMESPACES_3 });
@@ -88958,7 +89008,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "TextBlock", "ThemeVariantScope", "Window"], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &["OverlayPopupHost"], &["PopupRoot"], &[], &["Button"], &["RepeatButton"], &["ToggleButton"], &["HyperlinkButton"], &["CheckBox"], &["RadioButton"], &["Thumb"], &["ScrollBar"], &["ScrollViewer"], &["TextBox"], &["ToolTip"], &["ProgressBar"], &["Separator"], &["PathIcon"], &["FontIcon"], &["SymbolIcon"], &["Label"], &["ItemsControl"], &["HeaderedContentControl"], &["GroupBox"], &["SelectableTextBlock"], &["TransitioningContentControl"], &["TextSelectionHandle"], &["DataValidationErrors"], &["GridSplitter"], &[], &["CalendarDayButton"], &["CalendarButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["WindowDrawnDecorations"], &["NotificationCard"], &["WindowNotificationManager"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["ContentDialog"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["SplitView"], &["ContentPage"], &["TabbedPage"], &["NavigationPage"], &["DrawerPage"], &["Carousel"], &["CarouselPage"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["DropDownButton"], &["SplitButton"], &["ToggleSwitch"], &["Slider"], &["MediaTransportControls"], &["CameraCaptureUI"], &["NumericUpDown"], &["ButtonSpinner"], &["Expander"], &["PipsPager"], &["RefreshContainer"], &["RefreshVisualizer"], &["FlyoutPresenter"], &[], &["MenuFlyoutPresenter"], &["ContextMenu"], &["MenuItem"], &["Menu"], &["ListBoxItem"], &["ListBox"], &["ComboBoxItem"], &["ComboBox"], &["TreeViewItem"], &["TreeView"], &["AutoCompleteBox"], &["InfoBar"], &["InfoBadge"], &["ProgressRing"], &["NumberBox"], &["AutoSuggestBox"], &["RadioButtons"], &["RatingControl"], &["PersonPicture"], &["PagerControl"], &["RichEditBox"], &["Frame"], &["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"], &["TitleBar"], &["ListView", "ListViewItem"], &["GridView", "GridViewItem"], &["Pivot", "PivotHeaderItem", "PivotItem"], &["SwipeControl"], &["TabView", "TabViewItem", "TabViewListView"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "TextBlock", "ThemeVariantScope", "Window"], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &["OverlayPopupHost"], &["PopupRoot"], &[], &["Button"], &["RepeatButton"], &["ToggleButton"], &["HyperlinkButton"], &["CheckBox"], &["RadioButton"], &["Thumb"], &["ScrollBar"], &["ScrollViewer"], &["TextBox"], &["ToolTip"], &["ProgressBar"], &["Separator"], &["PathIcon"], &["FontIcon"], &["SymbolIcon"], &["Label"], &["ItemsControl"], &["HeaderedContentControl"], &["GroupBox"], &["SelectableTextBlock"], &["TransitioningContentControl"], &["TextSelectionHandle"], &["DataValidationErrors"], &["GridSplitter"], &[], &["CalendarDayButton"], &["CalendarButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["WindowDrawnDecorations"], &["NotificationCard"], &["WindowNotificationManager"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["ContentDialog"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["SplitView"], &["ContentPage"], &["TabbedPage"], &["NavigationPage"], &["DrawerPage"], &["Carousel"], &["CarouselPage"], &["CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton"], &["DropDownButton"], &["SplitButton"], &["ToggleSwitch"], &["Slider"], &["MediaTransportControls"], &["CameraCaptureUI"], &["NumericUpDown"], &["ButtonSpinner"], &["Expander"], &["PipsPager"], &["RefreshContainer"], &["RefreshVisualizer"], &["FlyoutPresenter"], &[], &["MenuFlyoutPresenter"], &["ContextMenu"], &["MenuItem"], &["Menu"], &["ListBoxItem"], &["ListBox"], &["ComboBoxItem"], &["ComboBox"], &["TreeViewItem"], &["TreeView"], &["AutoCompleteBox"], &["InfoBar"], &["InfoBadge"], &["ProgressRing"], &["NumberBox"], &["AutoSuggestBox"], &["RadioButtons"], &["RatingControl"], &["PersonPicture"], &["PagerControl"], &["RichEditBox"], &["Frame"], &["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"], &["TitleBar"], &["ListView", "ListViewItem"], &["GridView", "GridViewItem"], &["Pivot", "PivotHeaderItem", "PivotItem"], &["SwipeControl"], &["TabView", "TabViewItem", "TabViewListView"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,

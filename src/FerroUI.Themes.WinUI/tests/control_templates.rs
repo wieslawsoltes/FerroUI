@@ -278,6 +278,7 @@ control_tests! {
     carousel_page => "CarouselPage";
     command_bar => "CommandBar";
     command_bar_button => "CommandBarButton";
+    command_bar_flyout_command_bar => "CommandBarFlyoutCommandBar";
     command_bar_separator => "CommandBarSeparator";
     command_bar_toggle_button => "CommandBarToggleButton";
     content_page => "ContentPage";

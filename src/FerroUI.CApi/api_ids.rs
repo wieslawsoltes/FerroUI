@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 2205112536965758931;
+pub(crate) const API_FINGERPRINT: i64 = -8914696489498182029;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 520] = [
+pub(crate) static TYPE_NAMES: [&str; 522] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -67,6 +67,8 @@ pub(crate) static TYPE_NAMES: [&str; 520] = [
     "ComboBoxItem",
     "CommandBar",
     "CommandBarButton",
+    "CommandBarFlyout",
+    "CommandBarFlyoutCommandBar",
     "CommandBarSeparator",
     "CommandBarToggleButton",
     "ConicGradientBrush",
@@ -532,7 +534,7 @@ pub(crate) static TYPE_NAMES: [&str; 520] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1080] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1081] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -559,6 +561,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1080] = [
     "AllowFocusOnInteraction",
     "AllowSpin",
     "AllowTapRangeSelection",
+    "AlwaysExpanded",
     "AlwaysShowHeader",
     "AlwaysUseFallback",
     "Amplitude",

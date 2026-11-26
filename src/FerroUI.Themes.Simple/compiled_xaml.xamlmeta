@@ -642,9 +642,9 @@
           "index": 68,
           "documents": ["Controls/CommandBar.xaml"],
           "keys": [],
-          "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
+          "type_keys": ["CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton"],
           "references": ["ThemeBackgroundBrush", "ThemeBorderLowBrush", "ThemeBorderMidBrush", "ThemeBorderThickness", "ThemeControlHighBrush", "ThemeControlMidBrush", "ThemeControlMidHighBrush"],
-          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
+          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarFlyoutCommandBar", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
         },
         {
           "name": "Controls/ContentPage.xaml",

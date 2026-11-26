@@ -479,6 +479,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
 | XamlUICommand | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
 | StandardUICommand | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| CommandBarFlyout | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
 | Flyout | 1 of 1 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
 | MenuFlyout | 6 ported, 1 partial: no SplitMenuFlyoutItem | partial | `menu_samples.rs` | `menu_samples_tests.rs` |
 | MenuBar | 3 of 3 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
@@ -587,4 +588,26 @@ find the `XamlUICommand` behind it.
 | `UIElement.AccessKey`. | `AutomationProperties.AccessKey`. | FerroUI's access keys are the underscores of the text; the automation property is what it exposes. |
 | `CanExecuteRequestedEventArgs.CommandTarget` and `ListCommandTarget` (`Feature_CommandingImprovements`). | Not ported. | An experimental feature of the source. |
 | `StandardUICommand` reports an error when it enters the tree with the kind `None`. | A command of the kind `None` describes nothing. | A command is not an element of the tree. |
+
+### 10.17 CommandBarFlyout (#1270)
+
+`src/FerroUI.Controls/command_bar_flyout/`: `CommandBarFlyout` from
+`controls/dev/CommandBarFlyout/CommandBarFlyout.cpp` and `CommandBarFlyoutCommandBar`
+(`primitives::CommandBarFlyoutCommandBar`, a `CommandBar`) from `CommandBarFlyoutCommandBar.cpp`.
+The flyout creates a flyout presenter without chrome around a new command bar with its primary and
+secondary commands, and changes of its lists reach the bar. In the standard show mode the bar
+opens once the popup is shown (the secondary commands are shown); in the transient mode it shows
+the primary commands until the "more" button opens it, which makes the flyout a standard one.
+`AlwaysExpanded` hides the "more" button and opens the bar. A click of a secondary command closes
+the flyout, unless the command has a flyout of its own. The bar closes with the flyout. The theme
+of the bar is in the WinUI theme and its derived themes (the setters of
+`DefaultCommandBarFlyoutCommandBarStyle` over the command bar's template) and in the Fluent and
+Simple themes (the setters that are not colors). The tests are in `command_bar_flyout_tests.rs` and
+the gallery page in `command_samples_tests.rs`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The template of `CommandBarFlyoutCommandBar` (`CommandBarFlyout_themeresources.xaml`): the secondary commands attached below the row, the expand, collapse, open and close animations and their template settings, the drop shadow. | The template of the theme's command bar with the style's setters; the secondary commands are the bar's overflow. | The command bar of FerroUI owns its overflow (section 6); the animations of the flyout are a follow-up. |
+| A secondary toggle button closes the flyout on `Checked` and `Unchecked`. | On its click (which toggles it). | A toggle button changed by code leaves the flyout open. |
+| The keyboard navigation of `CommandBarFlyoutCommandBar` between the row and the menu. | The command bar's own. | As above. |
 

@@ -275,7 +275,7 @@ fn implemented_controls_use_the_native_controls_namespace() {
 #[test]
 fn ui_commands_use_the_native_controls_namespace() {
     let result = migrate(
-        "<XamlUICommand Label='Run'><XamlUICommand.KeyboardAccelerators><KeyboardAccelerator Key='R' Modifiers='Control'/></XamlUICommand.KeyboardAccelerators></XamlUICommand><StandardUICommand Kind='Delete'/>",
+        "<XamlUICommand Label='Run'><XamlUICommand.KeyboardAccelerators><KeyboardAccelerator Key='R' Modifiers='Control'/></XamlUICommand.KeyboardAccelerators></XamlUICommand><StandardUICommand Kind='Delete'/><CommandBarFlyout/>",
     );
     assert!(!result.has_errors(), "{:?}", result.diagnostics);
     let doc = Document::parse(&result.xaml).unwrap();

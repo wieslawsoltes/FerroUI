@@ -329,4 +329,16 @@
       </ControlTemplate>
     </Setter>
   </ControlTheme>
+
+  <!-- Not from upstream: WinUI's CommandBarFlyoutCommandBar (docs/porting/winui-controls.md,
+       section 10.17), the command bar of a CommandBarFlyout: this theme's command bar with the
+       setters of WinUI's DefaultCommandBarFlyoutCommandBarStyle that are not colors. -->
+  <ControlTheme x:Key="{x:Type CommandBarFlyoutCommandBar}" TargetType="CommandBarFlyoutCommandBar"
+                BasedOn="{StaticResource {x:Type CommandBar}}">
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="DefaultLabelPosition" Value="Collapsed" />
+    <Setter Property="MaxWidth" Value="440" />
+    <Setter Property="IsDynamicOverflowEnabled" Value="True" />
+  </ControlTheme>
 </ResourceDictionary>
