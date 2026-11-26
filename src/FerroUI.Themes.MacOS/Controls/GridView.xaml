@@ -3,7 +3,7 @@
 <!--
   Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
   commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of GridView)
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit styles of GridView and GridViewHeaderItem)
     controls/dev/CommonStyles/GridViewItem_themeresources.xaml (DefaultGridViewItemStyle and the
     implicit style; the resources are Resources/GridViewItem_themeresources.xaml)
     dxaml/xcp/core/core/elements/ListViewBaseItemChrome.cpp (the chrome that
@@ -21,10 +21,18 @@
     GridViewItemCornerRadius in the background of the state, and the selection border
     (GridViewItemSelectedBorderThickness of GridViewItemSelectedBorderBrush and its pointer and
     pressed brushes) over the content while the item is selected; the disabled opacity is
-    ListViewItemDisabledThemeOpacity. The check mark of the selected item and the check box of the
-    multi-select mode (SelectionCheckMarkVisualEnabled, CheckMode, the Check and CheckBox brushes)
-    are left out, as in DefaultListViewItemStyle (LBI-6); the drag and placeholder brushes and the
-    reorder hint belong to drag and drop, which is not ported.
+    ListViewItemDisabledThemeOpacity. The check mark of the selected item
+    (SelectionCheckMarkVisualEnabled) is left out, as in DefaultListViewItemStyle (LBI-6); the drag
+    and placeholder brushes and the reorder hint belong to drag and drop, which is not ported.
+  - The check box of an item of a grid in Multiple (MultiSelectStates of the presenter, CheckMode
+    Overlay of ListViewBaseItemChrome.cpp) is the template of the :multiselect pseudo-class of
+    GridViewItem, with the values of the chrome (#1424); the other grids keep the template of
+    DefaultGridViewItemStyle.
+  - GridViewHeaderItem: the implicit style of generic.xaml, the header of a group that the
+    ItemsWrapGrid of a grouped source places before the items of the group (#1424). Its theme
+    resources (GridViewHeaderItemThemeFontSize, GridViewHeaderItemMinHeight,
+    GridViewHeaderItemBackground, GridViewHeaderItemDividerStroke) are their values, as for
+    ListViewHeaderItem; UseSystemFocusVisuals is left out: a header takes no focus.
   - The states of the presenter are pseudo-classes: :pointerover, :pressed, :selected, :disabled.
   - UseSystemFocusVisuals with its margin and brushes is the focus adorner, as in
     DefaultListViewItemStyle.
@@ -171,5 +179,136 @@
     </Style>
   </ControlTheme>
 
-  <ControlTheme x:Key="{x:Type GridViewItem}" TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}" />
+  <!-- GridViewItem: DefaultGridViewItemStyle, and the chrome of the multiple selection mode. -->
+  <ControlTheme x:Key="{x:Type GridViewItem}" TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
+    <!-- MultiSelectEnabled (the `:multiselect` pseudo-class the grid sets in Multiple): the check
+         box of the presenter (CheckMode Overlay, the rounded chrome): a square of 20 px
+         (s_multiSelectSquareSize) in the top right corner, at 1 px (s_innerSelectionBorderThickness)
+         plus GridViewItemSelectedBorderThickness (2 px) plus 1 px from the top and the right edge,
+         with the corner radius GridViewItemCheckBoxCornerRadius and a border of 1 px
+         (s_multiSelectRoundedSquareThickness) while unselected, and the check glyph E73E of 16 px
+         (s_checkMarkGlyphFontSize). The content does not move. Only grids in this mode use this
+         template. -->
+    <Style Selector="^:multiselect">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel x:Name="Root">
+            <Border x:Name="Backplate"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="{DynamicResource GridViewItemCornerRadius}"
+                    IsHitTestVisible="False"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              Margin="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <Border x:Name="SelectionBorder"
+                    BorderThickness="{DynamicResource GridViewItemSelectedBorderThickness}"
+                    BorderBrush="{DynamicResource GridViewItemSelectedBorderBrush}"
+                    CornerRadius="{DynamicResource GridViewItemCornerRadius}"
+                    IsHitTestVisible="False"
+                    IsVisible="False" />
+            <Border x:Name="MultiSelectSquare"
+                    Margin="0,4,4,0"
+                    MinWidth="20"
+                    Height="20"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    ClipToBounds="True"
+                    CornerRadius="{DynamicResource GridViewItemCheckBoxCornerRadius}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource GridViewItemCheckBoxBorderBrush}"
+                    Background="{DynamicResource GridViewItemCheckBoxBrush}"
+                    IsHitTestVisible="False">
+              <!-- E73E at 16 px: the ink of the glyph in the symbol font. -->
+              <Path x:Name="MultiSelectCheck"
+                    Data="{StaticResource GlyphGeometryE73E}"
+                    Fill="{DynamicResource GridViewItemCheckBrush}"
+                    Stretch="Uniform"
+                    Width="13"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FlowDirection="LeftToRight"
+                    Opacity="0" />
+            </Border>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <!-- The brushes of the check box (SetMultiSelectCheckBoxBackground, SetMultiSelectCheckBoxBorder,
+         SetMultiSelectCheckBoxForeground), in the order of their precedence. -->
+    <Style Selector="^:multiselect:selected">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxSelectedBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:pointerover /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxPointerOverBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemCheckBoxPointerOverBorderBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:selected:pointerover /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxSelectedPointerOverBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:pressed /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxPressedBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemCheckBoxPressedBorderBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:selected:pressed">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxSelectedPressedBrush}" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Fill" Value="{DynamicResource GridViewItemCheckPressedBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:disabled">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxDisabledBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemCheckBoxDisabledBorderBrush}" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Fill" Value="{DynamicResource GridViewItemCheckDisabledBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:selected:disabled /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemCheckBoxSelectedDisabledBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The header of a group: the implicit style of GridViewHeaderItem of generic.xaml. -->
+  <ControlTheme x:Key="{x:Type GridViewHeaderItem}" TargetType="GridViewHeaderItem">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+    <Setter Property="Padding" Value="12,8,12,0" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Margin="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Rectangle Stroke="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                     StrokeThickness="0.5"
+                     Height="1"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Stretch"
+                     Margin="12,8,12,0" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
 </ResourceDictionary>

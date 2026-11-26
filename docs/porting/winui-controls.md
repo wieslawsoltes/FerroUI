@@ -100,7 +100,8 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `ListViewHeaderItem` | WinUI's ListViewHeaderItem: its template is ported from generic.xaml into the WinUI theme and its derived themes | #1258 |
 | `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes; under the `:multiselect` pseudo-class (a list in `Multiple` with `IsMultiSelectCheckBoxEnabled`) it takes the template with the check box of WinUI's item chrome (`ListViewBaseItemChrome.cpp`) | LV-1 (#443), #1424 |
 | `GridView` | WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
-| `GridViewItem` | WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
+| `GridViewHeaderItem` | WinUI's GridViewHeaderItem: its template is ported from generic.xaml into the WinUI theme and its derived themes | #1424 |
+| `GridViewItem` | WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes; under the `:multiselect` pseudo-class (a grid in `Multiple` with `IsMultiSelectCheckBoxEnabled`) it takes the template with the overlay check box of WinUI's item chrome (`ListViewBaseItemChrome.cpp`) | LV-2 (#443), #1424 |
 | `Pivot` | WinUI's Pivot: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
@@ -122,6 +123,19 @@ The list view members of #1424 follow WinUI with these differences:
   `ListViewBaseItemChrome.cpp`), so only lists in `Multiple` create them.
 - `CollectionViewSource.ItemsPath` is a path string read with a reflection binding (WinUI's
   `PropertyPath`); the group is the header.
+- The groups of a grid view: the `ItemsWrapGrid` of a grouped source starts each group on a
+  new line with its `GridViewHeaderItem` and `GroupPadding` around it, as WinUI's
+  `WrappingLayoutStrategyImpl`: `GroupHeaderPlacement.Top` in rows and `Left` in columns are
+  the inline headers (before the items along the lines), the others the parallel ones (beside
+  the items, which move by the header). The panel does not virtualize (decision D5 of LV-2), so
+  every group has its header; a parallel header is as wide as the widest one, where WinUI
+  takes the first; `AreStickyGroupHeadersEnabled` is not ported for this panel. The headers are
+  children of the panel after the items and logical children of the grid.
+- The check boxes of a grid in `Multiple`: the template of the `:multiselect` pseudo-class of
+  `GridViewItem` has WinUI's overlay check box (`CheckMode` Overlay of the rounded chrome): a
+  square of 20 px in the top right corner, at the inner selection border (1 px) plus
+  `GridViewItemSelectedBorderThickness` plus 1 px from the edges, with the `GridViewItemCheck*`
+  brushes; the content does not move.
 
 The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
 `MediaTransportControls` and `CameraCaptureUI`) are listed in their respective

@@ -324,7 +324,7 @@ mod progress_ring_tests;
 mod list_view;
 pub use list_view::{
     ChoosingItemContainerEventArgs, CollectionViewGroup, CollectionViewSource, ContainerContentChangingEventArgs,
-    GridView, GridViewItem, GridViewItemTemplateSettings, GroupHeaderPlacement, GroupStyle, GroupedItemsView,
+    GridView, GridViewHeaderItem, GridViewItem, GridViewItemTemplateSettings, GroupHeaderPlacement, GroupStyle, GroupedItemsView,
     IncrementalLoadingTrigger, ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsWrapGrid,
     ItemsUpdatingScrollMode, ListView, ListViewBase, ListViewBaseHeaderItem, ListViewBaseItem, ListViewHeaderItem,
     ListViewItem, ListViewItemTemplateSettings, ListViewReorderMode, ListViewSelectionMode, ScrollIntoViewAlignment,

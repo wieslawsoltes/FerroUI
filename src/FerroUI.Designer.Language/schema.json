@@ -8305,6 +8305,18 @@
     ]
   },
   {
+    "name": "GridViewHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewHeaderItem",
+    "base": "ListViewBaseHeaderItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "GridViewItem",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::GridViewItem",
@@ -11487,6 +11499,23 @@
         "type_name": "i32",
         "documentation": "ItemsWrapGrid.MaximumRowsOrColumns: i32",
         "values": [],
+        "attached": false
+      },
+      "GroupPadding": {
+        "name": "GroupPadding",
+        "type_name": "Thickness",
+        "documentation": "ItemsWrapGrid.GroupPadding: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "GroupHeaderPlacement": {
+        "name": "GroupHeaderPlacement",
+        "type_name": "GroupHeaderPlacement",
+        "documentation": "ItemsWrapGrid.GroupHeaderPlacement: GroupHeaderPlacement",
+        "values": [
+          "Top",
+          "Left"
+        ],
         "attached": false
       }
     },

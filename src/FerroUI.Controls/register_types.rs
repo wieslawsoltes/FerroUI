@@ -278,6 +278,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // --- grid view (WinUI, docs/porting/winui-calculator-gaps.md, LV-2) ---
     crate::list_view::GridView,
     crate::list_view::GridViewItem,
+    crate::list_view::GridViewHeaderItem,
     crate::list_view::ItemsWrapGrid,
     crate::platform::MacOSProperties,
     crate::masked_text_box::MaskedTextBox,

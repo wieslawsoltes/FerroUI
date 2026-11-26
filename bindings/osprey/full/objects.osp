@@ -150,7 +150,8 @@ fn checkBox() = ferro_create(typeId: 44)
 fn circleEase() = ferro_create(typeId: 45)
 // collectionViewSource() -> int: creates a CollectionViewSource. The source of a grouped list
 // (WinUI's `CollectionViewSource`): with `IsSourceGrouped`, its [`view`](Self::view) is a
-// [`GroupedItemsView`] of the groups of `Source`; without, the source.
+// [`GroupedItemsView`] of the groups of `Source`, whose items are the value of `ItemsPath` of
+// each group when it is set; without, the source.
 fn collectionViewSource() = ferro_create(typeId: 49)
 // colorAnimation() -> int: creates a ColorAnimation. Animates a [`Color`] property (WinUI's
 // `ColorAnimation`), channel by channel. It animates from `From` (or the value the property
@@ -403,38 +404,43 @@ fn gridSplitter() = ferro_create(typeId: 138)
 // [`ListViewBase`] whose items panel is an [`ItemsWrapGrid`] in rows and whose containers are
 // [`GridViewItem`]s.
 fn gridView() = ferro_create(typeId: 139)
+// gridViewHeaderItem() -> int: creates a GridViewHeaderItem. The header of a group of a
+// [`GridView`] (WinUI's `GridViewHeaderItem`), which the [`ItemsWrapGrid`] of a grouped source
+// places before the items of each group. It is not an item: it has no index and cannot be
+// selected (#1424).
+fn gridViewHeaderItem() = ferro_create(typeId: 141)
 // gridViewItem() -> int: creates a GridViewItem. An item of a [`GridView`] (WinUI's
 // `GridViewItem`).
-fn gridViewItem() = ferro_create(typeId: 141)
+fn gridViewItem() = ferro_create(typeId: 142)
 // groupBox() -> int: creates a GroupBox. A headered content control that groups related
 // content.
-fn groupBox() = ferro_create(typeId: 143)
+fn groupBox() = ferro_create(typeId: 144)
 // groupStyle() -> int: creates a GroupStyle. How the headers of the groups of a list view look
 // (WinUI's `GroupStyle`).
-fn groupStyle() = ferro_create(typeId: 144)
+fn groupStyle() = ferro_create(typeId: 145)
 // headeredContentControl() -> int: creates a HeaderedContentControl. A [`ContentControl`] with
 // a header.
-fn headeredContentControl() = ferro_create(typeId: 145)
+fn headeredContentControl() = ferro_create(typeId: 146)
 // headeredItemsControl() -> int: creates a HeaderedItemsControl. Represents an
 // [`ItemsControl`] with a related header.
-fn headeredItemsControl() = ferro_create(typeId: 146)
+fn headeredItemsControl() = ferro_create(typeId: 147)
 // headeredSelectingItemsControl() -> int: creates a HeaderedSelectingItemsControl. Represents
 // a [`SelectingItemsControl`] with a related header.
-fn headeredSelectingItemsControl() = ferro_create(typeId: 147)
+fn headeredSelectingItemsControl() = ferro_create(typeId: 148)
 // hyperlink() -> int: creates a Hyperlink. An interactive span. Its host supplies hit
 // testing/focus and forwards pointer and keyboard gestures; invocation and URI launch use the
 // framework services.
-fn hyperlink() = ferro_create(typeId: 148)
+fn hyperlink() = ferro_create(typeId: 149)
 // hyperlinkButton() -> int: creates a HyperlinkButton. A button control that functions as a
 // navigateable hyperlink.
-fn hyperlinkButton() = ferro_create(typeId: 150)
+fn hyperlinkButton() = ferro_create(typeId: 151)
 // image() -> int: creates a Image. Displays an [`IImage`].
-fn image() = ferro_create(typeId: 153)
+fn image() = ferro_create(typeId: 154)
 // imageBrush() -> int: creates a ImageBrush. Paints an area with an image.
-fn imageBrush() = ferro_create(typeId: 155)
+fn imageBrush() = ferro_create(typeId: 156)
 // imageDrawing() -> int: creates a ImageDrawing. Draws an image within a region defined by a
 // [`Rect`].
-fn imageDrawing() = ferro_create(typeId: 156)
+fn imageDrawing() = ferro_create(typeId: 157)
 // infoBadge() -> int: creates a InfoBadge. A small badge that draws attention to an item
 // (WinUI's `InfoBadge`): a dot, an icon or a number. A [`value`](Self::value) of 0 or more is
 // shown as a number and takes precedence over the [`icon_source`](Self::icon_source); with the
@@ -448,12 +454,12 @@ fn imageDrawing() = ferro_create(typeId: 156)
 // (docs/porting/winui-controls.md, section 10.2): a value below -1 is coerced to -1 and
 // logged, where WinUI throws; whether `CornerRadius` is local is followed from the priority of
 // its changes.
-fn infoBadge() = ferro_create(typeId: 158)
+fn infoBadge() = ferro_create(typeId: 159)
 // infoBadgeTemplateSettings() -> int: creates a InfoBadgeTemplateSettings. The values the
 // template of an [`InfoBadge`](crate::InfoBadge) binds to: the corner radius of the badge
 // (half its height unless the badge has a local `CornerRadius`) and the icon element created
 // from its `IconSource`. Each badge has its own.
-fn infoBadgeTemplateSettings() = ferro_create(typeId: 159)
+fn infoBadgeTemplateSettings() = ferro_create(typeId: 160)
 // infoBar() -> int: creates a InfoBar. An inline message of the application (WinUI's
 // `InfoBar`): a title, a message, an action button and content, with the icon and the colours
 // of its [`severity`](Self::severity), shown while [`is_open`](Self::is_open) and closed by
@@ -471,7 +477,7 @@ fn infoBadgeTemplateSettings() = ferro_create(typeId: 159)
 // Automation notifications are not raised (the peer reports the title and the message as the
 // name and a live setting of the severity instead); the texts of the close button and the
 // severity icons are WinUI's English texts.
-fn infoBar() = ferro_create(typeId: 160)
+fn infoBar() = ferro_create(typeId: 161)
 // infoBarPanel() -> int: creates a InfoBarPanel. Lays out its children on one line when they
 // fit in its width, and below each other otherwise (`InfoBarPanel` of WinUI). One line: the
 // children side by side, each moved by its `HorizontalOrientationMargin` (the left margin of
@@ -482,43 +488,43 @@ fn infoBar() = ferro_create(typeId: 160)
 // width or a height (a collapsed one) is left out of both. One child, children wider than the
 // panel, or a child that would be taller on one line than the minimum height of the parent of
 // the panel (less the vertical margins of the panel) give the layout below each other.
-fn infoBarPanel() = ferro_create(typeId: 162)
+fn infoBarPanel() = ferro_create(typeId: 163)
 // infoBarTemplateSettings() -> int: creates a InfoBarTemplateSettings. The values the template
 // of an [`InfoBar`](crate::InfoBar) binds to: the icon element created from its `IconSource`
 // (`TemplateSettings.IconElement`, the child of the `UserIconBox` of the template). Each bar
 // has its own.
-fn infoBarTemplateSettings() = ferro_create(typeId: 163)
+fn infoBarTemplateSettings() = ferro_create(typeId: 164)
 // inlineUiContainer() -> int: creates a InlineUIContainer. `InlineUIContainer` - a wrapper for
 // embedding a control into text flow content.
-fn inlineUiContainer() = ferro_create(typeId: 165)
+fn inlineUiContainer() = ferro_create(typeId: 166)
 // inputElement() -> int: creates a InputElement. Implements input-related functionality for a
 // control. The pseudoclasses `:disabled`, `:focus`, `:focus-visible`, `:focus-within` and
 // `:pointerover` reflect the input state of the element.
-fn inputElement() = ferro_create(typeId: 166)
+fn inputElement() = ferro_create(typeId: 167)
 // inputPaneAwareDecorator() -> int: creates a InputPaneAwareDecorator. A control that
 // automatically adjusts the position or the height of its child based on the height of the
 // input pane to ensure the content is visible.
-fn inputPaneAwareDecorator() = ferro_create(typeId: 167)
+fn inputPaneAwareDecorator() = ferro_create(typeId: 168)
 // inputScope() -> int: creates a InputScope. An ordered, shared collection of input-method
 // hints. A newly constructed scope has no names, as in WinUI; that falls back to the host's
 // normal policy.
-fn inputScope() = ferro_create(typeId: 168)
+fn inputScope() = ferro_create(typeId: 169)
 // inputScopeName() -> int: creates a InputScopeName. One live input-scope hint. The name
 // remains mutable after insertion into one or more input scopes; each scope publishes a fresh
 // immutable snapshot.
-fn inputScopeName() = ferro_create(typeId: 169)
+fn inputScopeName() = ferro_create(typeId: 170)
 // interactive() -> int: creates a Interactive. Base class for objects that raise routed
 // events.
-fn interactive() = ferro_create(typeId: 170)
+fn interactive() = ferro_create(typeId: 171)
 // italic() -> int: creates a Italic. `Italic` element - markup helper for indicating
 // italicized content. Equivalent to a `Span` with the `FontStyle` property set to italic. Can
 // contain other inline elements.
-fn italic() = ferro_create(typeId: 176)
+fn italic() = ferro_create(typeId: 177)
 // itemsControl() -> int: creates a ItemsControl. Displays a collection of items.
-fn itemsControl() = ferro_create(typeId: 177)
+fn itemsControl() = ferro_create(typeId: 178)
 // itemsPresenter() -> int: creates a ItemsPresenter. Presents items inside an
 // [`ItemsControl`].
-fn itemsPresenter() = ferro_create(typeId: 179)
+fn itemsPresenter() = ferro_create(typeId: 180)
 // itemsStackPanel() -> int: creates a ItemsStackPanel. The virtualizing items panel of a list
 // view (WinUI's `ItemsStackPanel`): FerroUI's [`VirtualizingStackPanel`] (orientation, cache
 // length, recycling) with WinUI's visible and cache indexes, and the headers of a grouped
@@ -526,114 +532,119 @@ fn itemsPresenter() = ferro_create(typeId: 179)
 // the space of a header as an inset of the first item of its group, so the virtualization, the
 // size estimates and the scrolling of the base apply unchanged, and realizes only the headers
 // of the realized groups, and the pinned one.
-fn itemsStackPanel() = ferro_create(typeId: 180)
+fn itemsStackPanel() = ferro_create(typeId: 181)
 // itemsWrapGrid() -> int: creates a ItemsWrapGrid. The items panel of a grid view (WinUI's
 // `ItemsWrapGrid`): the items in cells of one size, in rows (`Orientation` horizontal) or
 // columns, wrapping at the edge of the panel or after
 // [`maximum_rows_or_columns`](Self::maximum_rows_or_columns) items. The cell is `ItemWidth` by
-// `ItemHeight`, or the size of the first item where they are not set, as in WinUI. Recorded
-// deviation (decision D5): it derives from FerroUI's [`WrapPanel`] and does not virtualize;
-// WinUI's panel is a modern collection panel that realizes the visible items only. The
-// grouping members (`GroupPadding`, `GroupHeaderPlacement`, `AreStickyGroupHeadersEnabled`)
-// are not ported: FerroUI's items controls have no groups.
-fn itemsWrapGrid() = ferro_create(typeId: 181)
+// `ItemHeight`, or the size of the first item where they are not set, as in WinUI. With a
+// grouped source ([`GroupedItemsView`]) each group starts a new line, with its
+// [`GridViewHeaderItem`] above the group ([`GroupHeaderPlacement::Top`]) or beside it
+// ([`GroupHeaderPlacement::Left`]) and [`group_padding`](Self::group_padding) around it
+// (WinUI's `WrappingLayoutStrategyImpl`: the inline and the parallel header strategies). The
+// headers are children of the panel after the items, and logical children of the list (#1424).
+// Recorded deviations (decision D5): it derives from FerroUI's [`WrapPanel`] and does not
+// virtualize; WinUI's panel is a modern collection panel that realizes the visible items only.
+// So every group has its header. A header beside its items is as wide as the widest of them,
+// where WinUI takes the size of the first. `AreStickyGroupHeadersEnabled` is not ported.
+fn itemsWrapGrid() = ferro_create(typeId: 182)
 // keyBinding() -> int: creates a KeyBinding. Binds a key gesture to a command.
-fn keyBinding() = ferro_create(typeId: 182)
+fn keyBinding() = ferro_create(typeId: 183)
 // keyFrame() -> int: creates a KeyFrame. Stores data regarding a specific key point and value
 // in an animation.
-fn keyFrame() = ferro_create(typeId: 183)
+fn keyFrame() = ferro_create(typeId: 184)
 // keySpline() -> int: creates a KeySpline. Determines how an animation is used based on a
 // cubic bezier curve. X1 and X2 must be between 0.0 and 1.0, inclusive.
-fn keySpline() = ferro_create(typeId: 184)
+fn keySpline() = ferro_create(typeId: 185)
 // label() -> int: creates a Label. Label control. Focuses its `Target` when the label is
 // activated: when it is clicked, or when its access key is pressed.
-fn label() = ferro_create(typeId: 185)
+fn label() = ferro_create(typeId: 186)
 // layoutTransformControl() -> int: creates a LayoutTransformControl. Control that implements
 // support for transformations as if applied by a layout transform.
-fn layoutTransformControl() = ferro_create(typeId: 190)
+fn layoutTransformControl() = ferro_create(typeId: 191)
 // layoutable() -> int: creates a Layoutable. Implements layout-related functionality for a
 // control.
-fn layoutable() = ferro_create(typeId: 191)
+fn layoutable() = ferro_create(typeId: 192)
 // lightDismissOverlayLayer() -> int: creates a LightDismissOverlayLayer. A layer that is used
 // to dismiss a popup when the user clicks outside (internal upstream).
-fn lightDismissOverlayLayer() = ferro_create(typeId: 192)
+fn lightDismissOverlayLayer() = ferro_create(typeId: 193)
 // line() -> int: creates a Line. Represents a straight line between two points.
-fn line() = ferro_create(typeId: 193)
+fn line() = ferro_create(typeId: 194)
 // lineBreak() -> int: creates a LineBreak. Information about a potential line break position
-fn lineBreak() = ferro_create(typeId: 194)
+fn lineBreak() = ferro_create(typeId: 195)
 // lineGeometry() -> int: creates a LineGeometry. Represents the geometry of a line.
-fn lineGeometry() = ferro_create(typeId: 195)
+fn lineGeometry() = ferro_create(typeId: 196)
 // lineSegment() -> int: creates a LineSegment. A line segment of a path figure.
-fn lineSegment() = ferro_create(typeId: 196)
+fn lineSegment() = ferro_create(typeId: 197)
 // linearColorKeyFrame() -> int: creates a LinearColorKeyFrame. Interpolates linearly from the
 // value before it.
-fn linearColorKeyFrame() = ferro_create(typeId: 197)
+fn linearColorKeyFrame() = ferro_create(typeId: 198)
 // linearDoubleKeyFrame() -> int: creates a LinearDoubleKeyFrame. Interpolates linearly from
 // the value before it.
-fn linearDoubleKeyFrame() = ferro_create(typeId: 198)
+fn linearDoubleKeyFrame() = ferro_create(typeId: 199)
 // linearGradientBrush() -> int: creates a LinearGradientBrush. A brush that draws with a
 // linear gradient.
-fn linearGradientBrush() = ferro_create(typeId: 199)
+fn linearGradientBrush() = ferro_create(typeId: 200)
 // linearPointKeyFrame() -> int: creates a LinearPointKeyFrame. Interpolates linearly from the
 // value before it.
-fn linearPointKeyFrame() = ferro_create(typeId: 200)
+fn linearPointKeyFrame() = ferro_create(typeId: 201)
 // listBox() -> int: creates a ListBox. An [`ItemsControl`] in which individual items can be
 // selected.
-fn listBox() = ferro_create(typeId: 201)
+fn listBox() = ferro_create(typeId: 202)
 // listBoxItem() -> int: creates a ListBoxItem. A selectable item in a `ListBox`.
-fn listBoxItem() = ferro_create(typeId: 203)
+fn listBoxItem() = ferro_create(typeId: 204)
 // listView() -> int: creates a ListView. A vertical list of items (WinUI's `ListView`): a
 // [`ListViewBase`] whose items panel is an [`ItemsStackPanel`] and whose containers are
 // [`ListViewItem`]s.
-fn listView() = ferro_create(typeId: 205)
+fn listView() = ferro_create(typeId: 206)
 // listViewHeaderItem() -> int: creates a ListViewHeaderItem. The header of a group of a
 // [`ListView`] (WinUI's `ListViewHeaderItem`). It is not an item: it has no index and cannot
 // be selected.
-fn listViewHeaderItem() = ferro_create(typeId: 212)
+fn listViewHeaderItem() = ferro_create(typeId: 213)
 // listViewItem() -> int: creates a ListViewItem. An item of a [`ListView`] (WinUI's
 // `ListViewItem`).
-fn listViewItem() = ferro_create(typeId: 213)
+fn listViewItem() = ferro_create(typeId: 214)
 // maskedTextBox() -> int: creates a MaskedTextBox. A text box that restricts its input with a
 // mask.
-fn maskedTextBox() = ferro_create(typeId: 215)
+fn maskedTextBox() = ferro_create(typeId: 216)
 // matrixTransform() -> int: creates a MatrixTransform. Transforms a visual according to a
 // [`Matrix`].
-fn matrixTransform() = ferro_create(typeId: 216)
+fn matrixTransform() = ferro_create(typeId: 217)
 // menu() -> int: creates a Menu. A top-level menu control.
-fn menu() = ferro_create(typeId: 217)
+fn menu() = ferro_create(typeId: 218)
 // menuFlyout() -> int: creates a MenuFlyout. A flyout that displays a menu.
-fn menuFlyout() = ferro_create(typeId: 219)
+fn menuFlyout() = ferro_create(typeId: 220)
 // menuFlyoutPresenter() -> int: creates a MenuFlyoutPresenter. The control that hosts the
 // items of a menu flyout.
-fn menuFlyoutPresenter() = ferro_create(typeId: 220)
+fn menuFlyoutPresenter() = ferro_create(typeId: 221)
 // menuItem() -> int: creates a MenuItem. A menu item control.
-fn menuItem() = ferro_create(typeId: 221)
+fn menuItem() = ferro_create(typeId: 222)
 // micaBackdrop() -> int: creates a MicaBackdrop. The Mica backdrop of a window (WinUI
 // `Microsoft.UI.Xaml.Media.MicaBackdrop`): a [`MicaController`] of its [`kind`](Self::kind)
 // for each target.
-fn micaBackdrop() = ferro_create(typeId: 223)
+fn micaBackdrop() = ferro_create(typeId: 224)
 // nativeControlHost() -> int: creates a NativeControlHost. Hosts a native control of the
 // platform inside the visual tree: the native control is created for the top-level the host is
 // attached to and follows the bounds and the visibility of the host.
-fn nativeControlHost() = ferro_create(typeId: 227)
+fn nativeControlHost() = ferro_create(typeId: 228)
 // nativeMenu() -> int: creates a NativeMenu. A menu that is shown by the platform: the menu of
 // a window or of the application, the menu of a tray icon or of the dock.
-fn nativeMenu() = ferro_create(typeId: 229)
+fn nativeMenu() = ferro_create(typeId: 230)
 // nativeMenuBar() -> int: creates a NativeMenuBar. Shows the native menu of the top-level it
 // is in when the platform does not export the menu.
-fn nativeMenuBar() = ferro_create(typeId: 230)
+fn nativeMenuBar() = ferro_create(typeId: 231)
 // nativeMenuBarPresenter() -> int: creates a NativeMenuBarPresenter.
-fn nativeMenuBarPresenter() = ferro_create(typeId: 232)
+fn nativeMenuBarPresenter() = ferro_create(typeId: 233)
 // nativeMenuItem() -> int: creates a NativeMenuItem. An item of a [`NativeMenu`].
-fn nativeMenuItem() = ferro_create(typeId: 233)
+fn nativeMenuItem() = ferro_create(typeId: 234)
 // nativeMenuItemPresenter() -> int: creates a NativeMenuItemPresenter.
-fn nativeMenuItemPresenter() = ferro_create(typeId: 235)
+fn nativeMenuItemPresenter() = ferro_create(typeId: 236)
 // nativeMenuItemSeparator() -> int: creates a NativeMenuItemSeparator. A separator between the
 // items of a native menu.
-fn nativeMenuItemSeparator() = ferro_create(typeId: 236)
+fn nativeMenuItemSeparator() = ferro_create(typeId: 237)
 // navigationPage() -> int: creates a NavigationPage. A navigation page that supports simple
 // stack-based navigation.
-fn navigationPage() = ferro_create(typeId: 237)
+fn navigationPage() = ferro_create(typeId: 238)
 // navigationView() -> int: creates a NavigationView. A navigation pane with menu items and a
 // content area (WinUI's `NavigationView`). The pane is at the left (`Left`, `LeftCompact`,
 // `LeftMinimal`, or chosen by the width in `Auto`: the display modes `Expanded`, `Compact` and
@@ -655,7 +666,7 @@ fn navigationPage() = ferro_create(typeId: 237)
 // section 10.4): the overflow of the top pane, the animations of the pane, the shadow of the
 // pane, the padding of the title bar, the shoulder navigation and the selectors of templates
 // and styles.
-fn navigationView() = ferro_create(typeId: 239)
+fn navigationView() = ferro_create(typeId: 240)
 // navigationViewItem() -> int: creates a NavigationViewItem. A selectable item of a
 // [`NavigationView`](crate::NavigationView), with an icon, an info badge and child items
 // (WinUI's `NavigationViewItem`). The template of the WinUI theme draws the item as WinUI's
@@ -669,7 +680,7 @@ fn navigationView() = ferro_create(typeId: 239)
 // compact pane, as WinUI moves its repeater into its flyout. The Fluent and Simple themes have
 // no template. The children are realized in a stack panel, not an `ItemsRepeater` (follow-up
 // F1); the containers of data items are reused across edits of the collections.
-fn navigationViewItem() = ferro_create(typeId: 241)
+fn navigationViewItem() = ferro_create(typeId: 242)
 // navigationViewItemHeader() -> int: creates a NavigationViewItemHeader. A heading of a group
 // of items of a [`NavigationView`](crate::NavigationView) (WinUI's
 // `NavigationViewItemHeader`). It is not focusable or enabled, as WinUI's style sets. The
@@ -677,23 +688,23 @@ fn navigationViewItem() = ferro_create(typeId: 241)
 // of a closed compact pane) and `:top-mode` (the top pane). The template of the WinUI theme
 // presents the content in the text block `HeaderText`; the part
 // `NavigationViewItemHeaderRootGrid` is indented by the depth of the header.
-fn navigationViewItemHeader() = ferro_create(typeId: 244)
+fn navigationViewItemHeader() = ferro_create(typeId: 245)
 // navigationViewItemSeparator() -> int: creates a NavigationViewItemSeparator. A line between
 // items of a [`NavigationView`](crate::NavigationView) (WinUI's
 // `NavigationViewItemSeparator`). It is not focusable or enabled, as WinUI's style sets. The
 // control sets WinUI's states as pseudo-classes: `:horizontal-line-compact` (a closed compact
 // pane) and `:vertical-line` (the top pane); the part `NavigationViewItemSeparatorRootGrid` is
 // indented by the depth of the separator.
-fn navigationViewItemSeparator() = ferro_create(typeId: 245)
+fn navigationViewItemSeparator() = ferro_create(typeId: 246)
 // navigationViewTemplateSettings() -> int: creates a NavigationViewTemplateSettings. The
 // values the template of a [`NavigationView`](crate::NavigationView) binds to
 // (`TemplateSettings`), which the navigation view sets. Each navigation view has its own.
 // WinUI's `Visibility` values are `bool`s here (`true` is `Visible`), as the `IsVisible` they
 // are bound to.
-fn navigationViewTemplateSettings() = ferro_create(typeId: 246)
+fn navigationViewTemplateSettings() = ferro_create(typeId: 247)
 // notificationCard() -> int: creates a NotificationCard. Control that represents and displays
 // a notification.
-fn notificationCard() = ferro_create(typeId: 248)
+fn notificationCard() = ferro_create(typeId: 249)
 // numberBox() -> int: creates a NumberBox. A text box for numbers (WinUI's `NumberBox`): a
 // value of type `f64`, NaN when the box is empty, with a range, steps, wrapping, expressions
 // and spin buttons. The text is committed when the box loses the focus, on Enter and before a
@@ -712,18 +723,18 @@ fn notificationCard() = ferro_create(typeId: 248)
 // (docs/porting/winui-controls.md, Input): `InputScope`, `SelectionFlyout`,
 // `SelectionHighlightColor`, `TextReadingOrder` and
 // `PreventKeyboardDisplayOnProgrammaticFocus`.
-fn numberBox() = ferro_create(typeId: 249)
+fn numberBox() = ferro_create(typeId: 250)
 // numericUpDown() -> int: creates a NumericUpDown. Control that represents a text box with
 // button spinners that allow incrementing and decrementing numeric values.
-fn numericUpDown() = ferro_create(typeId: 251)
+fn numericUpDown() = ferro_create(typeId: 252)
 // objectAnimationUsingKeyFrames() -> int: creates a ObjectAnimationUsingKeyFrames. Sets a
 // property of any type to the values of its `KeyFrames` (WinUI's
 // `ObjectAnimationUsingKeyFrames`; every key frame is discrete).
-fn objectAnimationUsingKeyFrames() = ferro_create(typeId: 253)
+fn objectAnimationUsingKeyFrames() = ferro_create(typeId: 254)
 // pageNavigationHost() -> int: creates a PageNavigationHost. Hosts a page as the root of a
 // top-level: forwards the safe-area padding and the system back navigation of the top-level to
 // the page.
-fn pageNavigationHost() = ferro_create(typeId: 259)
+fn pageNavigationHost() = ferro_create(typeId: 260)
 // pagerControl() -> int: creates a PagerControl. A control to move through the pages of a
 // paged content (WinUI's `PagerControl`): buttons to the first, previous, next and last page
 // around a combo box of the page numbers, a number box to type one, or a button for each page
@@ -742,35 +753,35 @@ fn pageNavigationHost() = ferro_create(typeId: 259)
 // horizontal stack panel, where WinUI has an `ItemsRepeater` with a `StackLayout`
 // (`ferroui-controls` cannot depend on the repeater crate); the indicator of the current page
 // moves without WinUI's `RepositionThemeTransition`.
-fn pagerControl() = ferro_create(typeId: 261)
+fn pagerControl() = ferro_create(typeId: 262)
 // pagerControlTemplateSettings() -> int: creates a PagerControlTemplateSettings. The values
 // the template of a [`PagerControl`](crate::PagerControl) binds to: the page numbers of its
 // combo box (`Pages`, 1 to the number of pages) and the buttons and ellipses of its number
 // panel (`NumberPanelItems`). Each pager has its own; the pager fills them.
-fn pagerControlTemplateSettings() = ferro_create(typeId: 263)
+fn pagerControlTemplateSettings() = ferro_create(typeId: 264)
 // panel() -> int: creates a Panel. Base class for controls that can contain multiple children.
 // Controls can be added to a panel by adding them to its `children` collection. All children
 // are layed out to fill the panel.
-fn panel() = ferro_create(typeId: 265)
+fn panel() = ferro_create(typeId: 266)
 // paragraph() -> int: creates a Paragraph. A paragraph of structured inline content, including
 // styled spans and embedded controls.
-fn paragraph() = ferro_create(typeId: 266)
+fn paragraph() = ferro_create(typeId: 267)
 // path() -> int: creates a Path. Draws a [`Geometry`].
-fn path() = ferro_create(typeId: 267)
+fn path() = ferro_create(typeId: 268)
 // pathFigure() -> int: creates a PathFigure. Represents a subsection of a geometry: a single
 // connected series of segments.
-fn pathFigure() = ferro_create(typeId: 268)
+fn pathFigure() = ferro_create(typeId: 269)
 // pathGeometry() -> int: creates a PathGeometry. Represents a complex shape that may be
 // composed of arcs, curves, ellipses, lines, and rectangles.
-fn pathGeometry() = ferro_create(typeId: 269)
+fn pathGeometry() = ferro_create(typeId: 270)
 // pathIcon() -> int: creates a PathIcon. Represents an icon that uses a vector path as its
 // content.
-fn pathIcon() = ferro_create(typeId: 270)
+fn pathIcon() = ferro_create(typeId: 271)
 // pathIconSource() -> int: creates a PathIconSource. The description of a [`PathIcon`]
 // (WinUI's `PathIconSource`): the icons are the path icons of FerroUI.
-fn pathIconSource() = ferro_create(typeId: 271)
+fn pathIconSource() = ferro_create(typeId: 272)
 // pen() -> int: creates a Pen. Describes how a stroke is drawn.
-fn pen() = ferro_create(typeId: 273)
+fn pen() = ferro_create(typeId: 274)
 // personPicture() -> int: creates a PersonPicture. A picture of a person or a group (WinUI's
 // `PersonPicture`): the profile picture, else the initials of the display name or of the
 // contact, else the glyph of a contact, in a circle, with a badge (a number, a glyph or an
@@ -786,18 +797,18 @@ fn pen() = ferro_create(typeId: 273)
 // pictures are images, so the picture of a contact is shown at once (WinUI opens and decodes a
 // stream reference asynchronously, at the size of the control); the pictures are image brush
 // sources (a bitmap), the type of the image brush that paints them.
-fn personPicture() = ferro_create(typeId: 274)
+fn personPicture() = ferro_create(typeId: 275)
 // personPictureTemplateSettings() -> int: creates a PersonPictureTemplateSettings. The values
 // the template of a [`PersonPicture`](crate::PersonPicture) binds to: the initials it shows
 // and the brush of its picture. Each picture has its own; the picture sets them.
-fn personPictureTemplateSettings() = ferro_create(typeId: 276)
+fn personPictureTemplateSettings() = ferro_create(typeId: 277)
 // pinchGestureRecognizer() -> int: creates a PinchGestureRecognizer. Recognizes the pinch
 // gesture: two contacts moving closer together or further apart, and rotating around each
 // other.
-fn pinchGestureRecognizer() = ferro_create(typeId: 278)
+fn pinchGestureRecognizer() = ferro_create(typeId: 279)
 // pipsPager() -> int: creates a PipsPager. Represents a control that lets the user navigate
 // through a paginated collection using a set of pips.
-fn pipsPager() = ferro_create(typeId: 279)
+fn pipsPager() = ferro_create(typeId: 280)
 // pivot() -> int: creates a Pivot. A control that shows one of its items at a time, under a
 // row of headers that the user taps, pans or flicks through (WinUI's `Pivot`). The items are
 // [`PivotItem`]s (other items get one as their container). The pivot keeps one item selected
@@ -812,7 +823,7 @@ fn pipsPager() = ferro_create(typeId: 279)
 // with the headers and the `PivotItemPresenter`. During a pan the layout element stays in the
 // viewport and the items follow the content through expression animations of their
 // `Translation`, on the compositor (WinUI's secondary content relationships).
-fn pivot() = ferro_create(typeId: 282)
+fn pivot() = ferro_create(typeId: 283)
 // pivotHeaderItem() -> int: creates a PivotHeaderItem. A header of a [`Pivot`] (WinUI's
 // `PivotHeaderItem`): the pivot makes one per item, its content bound to the item's header.
 // Its selection state is WinUI's: `Disabled`, `Selected`, `SelectedPointerOver`,
@@ -821,19 +832,19 @@ fn pivot() = ferro_create(typeId: 282)
 // `:selected`, `:pressed` and `:locked` (with `:pointerover` and `:disabled`), as the other
 // WinUI controls of the theme (decision D2), and a template with visual state groups gets the
 // state by name through the visual state manager.
-fn pivotHeaderItem() = ferro_create(typeId: 284)
+fn pivotHeaderItem() = ferro_create(typeId: 285)
 // pivotHeaderPanel() -> int: creates a PivotHeaderPanel. The panel of the headers of a
 // [`Pivot`] (WinUI's `PivotHeaderPanel`, a `Canvas`): the headers side by side, starting at
 // the header of the selected item at the current offset, so that the selected header comes
 // first and the headers before it follow at the end. The pivot moves the panel with the
 // parallax of its scroll viewer.
-fn pivotHeaderPanel() = ferro_create(typeId: 285)
+fn pivotHeaderPanel() = ferro_create(typeId: 286)
 // pivotItem() -> int: creates a PivotItem. An item of a [`Pivot`] (WinUI's `PivotItem`): a
 // content control with the [`header`](Self::header) the pivot shows for it. The pivot shows
 // one item at a time (and its neighbours while it is panned): the others are transparent, not
 // hit testable, and the root of their template is collapsed so that tabbing skips them
 // (WinUI's `SetContentVisibility`).
-fn pivotItem() = ferro_create(typeId: 286)
+fn pivotItem() = ferro_create(typeId: 287)
 // pivotPanel() -> int: creates a PivotPanel. The panel inside the scroll viewer of a [`Pivot`]
 // (WinUI's `PivotPanel`): as wide as [`PIVOT_PANEL_MULTIPLIER`] sections while the headers
 // wrap, with a regular snap point at every section, so that the scroll viewer pans one section
@@ -843,49 +854,49 @@ fn pivotItem() = ferro_create(typeId: 286)
 // the section the viewport rests on (the pivot's section offset), and the pivot's composition
 // expression keeps it in place during a pan (a recorded deviation: layout and hit testing stay
 // where the content is shown at rest).
-fn pivotPanel() = ferro_create(typeId: 288)
+fn pivotPanel() = ferro_create(typeId: 289)
 // pointAnimation() -> int: creates a PointAnimation. Animates a [`Point`] property (WinUI's
 // `PointAnimation`). It animates from `From` (or the value the property has when it begins) to
 // `To`, or by `By` from the start; with neither `To` nor `By` it animates back to the value of
 // the property without animations. `EasingFunction` eases the progress.
 // `EnableDependentAnimation` is accepted and has no effect: every property is animated on the
 // UI thread.
-fn pointAnimation() = ferro_create(typeId: 290)
+fn pointAnimation() = ferro_create(typeId: 291)
 // pointAnimationUsingKeyFrames() -> int: creates a PointAnimationUsingKeyFrames. Animates a
 // `Point` property through its `KeyFrames` (WinUI's `PointAnimationUsingKeyFrames`). Before
 // the first key frame the value goes from the value the property has when the animation
 // begins; after the last it holds the last value. With an automatic `Duration` the animation
 // lasts until its last key time. `EnableDependentAnimation` is accepted and has no effect.
-fn pointAnimationUsingKeyFrames() = ferro_create(typeId: 291)
+fn pointAnimationUsingKeyFrames() = ferro_create(typeId: 292)
 // polyBezierSegment() -> int: creates a PolyBezierSegment. Represents one or more cubic Bezier
 // curves: every three points define the two control points and the end point of one curve.
-fn polyBezierSegment() = ferro_create(typeId: 293)
+fn polyBezierSegment() = ferro_create(typeId: 294)
 // polyLineSegment() -> int: creates a PolyLineSegment. Represents a set of line segments
 // defined by a points collection with each point specifying the end point of a line segment.
-fn polyLineSegment() = ferro_create(typeId: 294)
+fn polyLineSegment() = ferro_create(typeId: 295)
 // polygon() -> int: creates a Polygon. Represents a closed figure made of straight lines
 // between points.
-fn polygon() = ferro_create(typeId: 295)
+fn polygon() = ferro_create(typeId: 296)
 // polyline() -> int: creates a Polyline. Represents an open figure made of straight lines
 // between points.
-fn polyline() = ferro_create(typeId: 296)
+fn polyline() = ferro_create(typeId: 297)
 // polylineGeometry() -> int: creates a PolylineGeometry. Represents the geometry of a polyline
 // or polygon.
-fn polylineGeometry() = ferro_create(typeId: 297)
+fn polylineGeometry() = ferro_create(typeId: 298)
 // popup() -> int: creates a Popup. Displays a popup window.
-fn popup() = ferro_create(typeId: 298)
+fn popup() = ferro_create(typeId: 299)
 // popupOverlayLayer() -> int: creates a PopupOverlayLayer. The surface that hosts the popups
 // shown inside their top-level (internal upstream).
-fn popupOverlayLayer() = ferro_create(typeId: 302)
+fn popupOverlayLayer() = ferro_create(typeId: 303)
 // powerEase() -> int: creates a PowerEase. The curve `t^Power` (WinUI's `PowerEase`).
-fn powerEase() = ferro_create(typeId: 305)
+fn powerEase() = ferro_create(typeId: 306)
 // progressBar() -> int: creates a ProgressBar. A control used to indicate the progress of an
 // operation.
-fn progressBar() = ferro_create(typeId: 307)
+fn progressBar() = ferro_create(typeId: 308)
 // progressBarTemplateSettings() -> int: creates a ProgressBarTemplateSettings. Provides
 // calculated values for use with the [`ProgressBar`]'s control theme or template. This class
 // is NOT intended for general use outside of control templates.
-fn progressBarTemplateSettings() = ferro_create(typeId: 309)
+fn progressBarTemplateSettings() = ferro_create(typeId: 310)
 // progressRing() -> int: creates a ProgressRing. A ring that shows that something is in
 // progress (WinUI's `ProgressRing`): a spinning arc while
 // [`is_indeterminate`](Self::is_indeterminate) (the default), the part of a ring of the
@@ -907,30 +918,30 @@ fn progressBarTemplateSettings() = ferro_create(typeId: 309)
 // `DeterminateSource` and `IndeterminateSource` (preview members of WinUI) are not ported. The
 // Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section
 // 5.1).
-fn progressRing() = ferro_create(typeId: 310)
+fn progressRing() = ferro_create(typeId: 311)
 // progressRingTemplateSettings() -> int: creates a ProgressRingTemplateSettings. The values of
 // the template of a [`ProgressRing`](crate::ProgressRing) that WinUI keeps for the templates
 // of the earlier ProgressRing of Windows (read-only): the diameter and the offset of its
 // ellipses and the side of the ring, from the actual width of the ring.
-fn progressRingTemplateSettings() = ferro_create(typeId: 312)
+fn progressRingTemplateSettings() = ferro_create(typeId: 313)
 // pullGestureRecognizer() -> int: creates a PullGestureRecognizer. Recognizes the pull
 // gesture: a drag from an edge of the target, as used by pull-to-refresh.
-fn pullGestureRecognizer() = ferro_create(typeId: 313)
+fn pullGestureRecognizer() = ferro_create(typeId: 314)
 // quadraticBezierSegment() -> int: creates a QuadraticBezierSegment. A quadratic Bezier curve
 // segment of a path figure.
-fn quadraticBezierSegment() = ferro_create(typeId: 314)
+fn quadraticBezierSegment() = ferro_create(typeId: 315)
 // quadraticEase() -> int: creates a QuadraticEase. The curve `t^2` (WinUI's `QuadraticEase`).
-fn quadraticEase() = ferro_create(typeId: 315)
+fn quadraticEase() = ferro_create(typeId: 316)
 // quarticEase() -> int: creates a QuarticEase. The curve `t^4` (WinUI's `QuarticEase`).
-fn quarticEase() = ferro_create(typeId: 316)
+fn quarticEase() = ferro_create(typeId: 317)
 // quinticEase() -> int: creates a QuinticEase. The curve `t^5` (WinUI's `QuinticEase`).
-fn quinticEase() = ferro_create(typeId: 317)
+fn quinticEase() = ferro_create(typeId: 318)
 // radialGradientBrush() -> int: creates a RadialGradientBrush. Paints an area with a radial
 // gradient.
-fn radialGradientBrush() = ferro_create(typeId: 318)
+fn radialGradientBrush() = ferro_create(typeId: 319)
 // radioButton() -> int: creates a RadioButton. Represents a button that allows a user to
 // select a single option from a group of options.
-fn radioButton() = ferro_create(typeId: 319)
+fn radioButton() = ferro_create(typeId: 320)
 // radioButtons() -> int: creates a RadioButtons. A group of radio buttons with one selection
 // (WinUI's `RadioButtons`). The items are shown as [`RadioButton`]s: an item that is a radio
 // button is its own container, and another item is the content of a radio button. The
@@ -951,7 +962,7 @@ fn radioButton() = ferro_create(typeId: 319)
 // container is not realized), which the group manager never does (WinUI's `Select` writes both
 // containers). Missing (docs/porting/winui-controls.md, Input): WinUI's element factories and
 // `DataTemplateSelector` as `ItemTemplate`.
-fn radioButtons() = ferro_create(typeId: 321)
+fn radioButtons() = ferro_create(typeId: 322)
 // radioButtonsPanel() -> int: creates a RadioButtonsPanel. Lays out the radio buttons of a
 // [`RadioButtons`] in columns of equal cells as large as the largest one, filling each column
 // from the top, with as many columns as the available width and the `MaxColumns` of the group
@@ -962,7 +973,7 @@ fn radioButtons() = ferro_create(typeId: 321)
 // `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing`. `MaxColumns` is read from the
 // group the panel is the items panel of (its templated parent); a panel of another control has
 // one column.
-fn radioButtonsPanel() = ferro_create(typeId: 323)
+fn radioButtonsPanel() = ferro_create(typeId: 324)
 // ratingControl() -> int: creates a RatingControl. A control to rate with stars (WinUI's
 // `RatingControl`): a value from 1 to `MaxRating`, or -1 while it is not set, a placeholder
 // value (a community rating) shown while it is not set, and a caption. The items are drawn
@@ -982,55 +993,55 @@ fn radioButtonsPanel() = ferro_create(typeId: 323)
 // (docs/porting/winui-controls.md, Input): the composition animations of the scale of the
 // items (the scale is set when the pointer moves), and the focus engagement of the gamepad
 // (`IsFocusEngagementEnabled`, GamepadA and GamepadB).
-fn ratingControl() = ferro_create(typeId: 326)
+fn ratingControl() = ferro_create(typeId: 327)
 // ratingItemFontInfo() -> int: creates a RatingItemFontInfo. The glyphs of the items of a
 // rating control in each state (WinUI's `RatingItemFontInfo`): an empty glyph of a state is
 // the glyph of the placeholder for the pointer over the placeholder, and `Glyph` otherwise.
-fn ratingItemFontInfo() = ferro_create(typeId: 328)
+fn ratingItemFontInfo() = ferro_create(typeId: 329)
 // ratingItemImageInfo() -> int: creates a RatingItemImageInfo. The images of the items of a
 // rating control in each state (WinUI's `RatingItemImageInfo`), with the fallbacks of the
 // glyphs.
-fn ratingItemImageInfo() = ferro_create(typeId: 329)
+fn ratingItemImageInfo() = ferro_create(typeId: 330)
 // ratingItemInfo() -> int: creates a RatingItemInfo. What the items of a
 // [`RatingControl`](crate::RatingControl) show: glyphs of a font ([`RatingItemFontInfo`]) or
 // images ([`RatingItemImageInfo`]) (WinUI's `RatingItemInfo`).
-fn ratingItemInfo() = ferro_create(typeId: 330)
+fn ratingItemInfo() = ferro_create(typeId: 331)
 // rectangle() -> int: creates a Rectangle. Represents a rectangle with optional rounded
 // corners.
-fn rectangle() = ferro_create(typeId: 331)
+fn rectangle() = ferro_create(typeId: 332)
 // rectangleGeometry() -> int: creates a RectangleGeometry. Represents the geometry of a
 // rectangle.
-fn rectangleGeometry() = ferro_create(typeId: 332)
+fn rectangleGeometry() = ferro_create(typeId: 333)
 // refreshContainer() -> int: creates a RefreshContainer. Represents a container control that
 // provides a [`RefreshVisualizer`] and pull-to-refresh functionality for scrollable content.
-fn refreshContainer() = ferro_create(typeId: 333)
+fn refreshContainer() = ferro_create(typeId: 334)
 // refreshVisualizer() -> int: creates a RefreshVisualizer. Shows the progress of a
 // pull-to-refresh interaction and of the refresh it starts.
-fn refreshVisualizer() = ferro_create(typeId: 335)
+fn refreshVisualizer() = ferro_create(typeId: 336)
 // relativePanel() -> int: creates a RelativePanel. A panel that arranges its children relative
 // to each other and to the panel itself.
-fn relativePanel() = ferro_create(typeId: 336)
+fn relativePanel() = ferro_create(typeId: 337)
 // repeatButton() -> int: creates a RepeatButton. Represents a control that raises its `Click`
 // event repeatedly when it is pressed and held.
-fn repeatButton() = ferro_create(typeId: 338)
+fn repeatButton() = ferro_create(typeId: 339)
 // resourceDictionary() -> int: creates a ResourceDictionary. An indexed dictionary of
 // resources.
-fn resourceDictionary() = ferro_create(typeId: 340)
+fn resourceDictionary() = ferro_create(typeId: 341)
 // revealBackgroundBrush() -> int: creates a RevealBackgroundBrush. The Reveal brush of
 // backgrounds (WinUI `Microsoft.UI.Xaml.Media.RevealBackgroundBrush`): lit by the hover and
 // press lights of the element whose Reveal state is set.
-fn revealBackgroundBrush() = ferro_create(typeId: 342)
+fn revealBackgroundBrush() = ferro_create(typeId: 343)
 // revealBorderBrush() -> int: creates a RevealBorderBrush. The Reveal brush of borders (WinUI
 // `Microsoft.UI.Xaml.Media.RevealBorderBrush`): lit by the border lights of the window near
 // the pointer.
-fn revealBorderBrush() = ferro_create(typeId: 343)
+fn revealBorderBrush() = ferro_create(typeId: 344)
 // revealBorderLight() -> int: creates a RevealBorderLight. A border light of Reveal (WinUI's
 // internal `RevealBorderLight`): a spot light above the pointer that lights the Reveal border
 // brushes near it; switched on while the pointer is over the window (250 ms).
 // [`RevealBrush`](super::RevealBrush) attaches four of them (normal and wide, for the light
 // and the dark theme) and an ambient light to the root of every window while a Reveal brush is
 // connected.
-fn revealBorderLight() = ferro_create(typeId: 344)
+fn revealBorderLight() = ferro_create(typeId: 345)
 // revealHoverLight() -> int: creates a RevealHoverLight. The hover light of Reveal (WinUI's
 // internal `RevealHoverLight`): a spot light 256 above the element under the pointer, whose
 // cone covers the element (`Clamp(Max(width, height) + 12, 16, 512)`), switched on while the
@@ -1039,64 +1050,64 @@ fn revealBorderLight() = ferro_create(typeId: 344)
 // quick press) or 1 to 1.5 s (a long one).
 // [`RevealBrush::set_state`](super::RevealBrush::set_state) adds a hover and a press light to
 // an element and drives them.
-fn revealHoverLight() = ferro_create(typeId: 346)
+fn revealHoverLight() = ferro_create(typeId: 347)
 // reversibleStackPanel() -> int: creates a ReversibleStackPanel. Implements a panel which lays
 // out its children horizontally or vertically and can reverse the order of its children.
-fn reversibleStackPanel() = ferro_create(typeId: 347)
+fn reversibleStackPanel() = ferro_create(typeId: 348)
 // richEditBox() -> int: creates a RichEditBox. A structured rich-text editor rendered by
 // FerroUI's text layout, drawing, and input APIs. The `Document` is shared with its persistent
 // presenter and remains editable independently of this control. Read-only and length policies
 // apply to user editing, clipboard, and IME; applications can replace the document directly.
 // Every user operation goes through the same transaction engine, including formatting and
 // accessible value changes.
-fn richEditBox() = ferro_create(typeId: 348)
+fn richEditBox() = ferro_create(typeId: 349)
 // richEditBoxTextPresenter() -> int: creates a RichEditBoxTextPresenter. Renders and scrolls
 // the owner's single rich document using FerroUI text layout. The presenter survives template
 // replacement. It formats the entire document at the viewport width, and translates every text
 // geometry operation by the same pixel scroll offset. It has no separate editing buffer or
 // undo history.
-fn richEditBoxTextPresenter() = ferro_create(typeId: 350)
+fn richEditBoxTextPresenter() = ferro_create(typeId: 351)
 // richTextBlock() -> int: creates a RichTextBlock. Displays paragraphs, nested spans,
 // hyperlinks and embedded controls. All text indices are UTF-16 code units, matching the
 // shaping and input-method contracts.
-fn richTextBlock() = ferro_create(typeId: 352)
+fn richTextBlock() = ferro_create(typeId: 353)
 // richTextBlockOverflow() -> int: creates a RichTextBlockOverflow. A continuation of another
 // rich-text view, with its own width and height. Link it with
 // `RichTextBlock::set_overflow_content_target`; the document and its shaped paragraph
 // continuation are shared through weak view references.
-fn richTextBlockOverflow() = ferro_create(typeId: 354)
+fn richTextBlockOverflow() = ferro_create(typeId: 355)
 // rotate3DTransform() -> int: creates a Rotate3DTransform. Non-affine 3D transformation for
 // rotating a visual around a definable axis.
-fn rotate3DTransform() = ferro_create(typeId: 355)
+fn rotate3DTransform() = ferro_create(typeId: 356)
 // rotateTransform() -> int: creates a RotateTransform. Rotates a visual.
-fn rotateTransform() = ferro_create(typeId: 356)
+fn rotateTransform() = ferro_create(typeId: 357)
 // rowDefinition() -> int: creates a RowDefinition. Holds a row definition for a `Grid`.
-fn rowDefinition() = ferro_create(typeId: 357)
+fn rowDefinition() = ferro_create(typeId: 358)
 // runElement() -> int: creates a Run. A terminal element in text flow hierarchy - contains a
 // uniformatted run of unicode characters.
-fn runElement() = ferro_create(typeId: 358)
+fn runElement() = ferro_create(typeId: 359)
 // scaleTransform() -> int: creates a ScaleTransform. Scale a visual.
-fn scaleTransform() = ferro_create(typeId: 360)
+fn scaleTransform() = ferro_create(typeId: 361)
 // scrollBar() -> int: creates a ScrollBar. A scrollbar control.
-fn scrollBar() = ferro_create(typeId: 361)
+fn scrollBar() = ferro_create(typeId: 362)
 // scrollContentPresenter() -> int: creates a ScrollContentPresenter. Presents a scrolling view
 // of content inside a [`ScrollViewer`].
-fn scrollContentPresenter() = ferro_create(typeId: 363)
+fn scrollContentPresenter() = ferro_create(typeId: 364)
 // scrollGestureRecognizer() -> int: creates a ScrollGestureRecognizer. Recognizes the scroll
 // gesture: a touch or pen drag, optionally followed by inertia.
-fn scrollGestureRecognizer() = ferro_create(typeId: 364)
+fn scrollGestureRecognizer() = ferro_create(typeId: 365)
 // scrollViewer() -> int: creates a ScrollViewer. A control which scrolls its content if the
 // content is bigger than the space available.
-fn scrollViewer() = ferro_create(typeId: 365)
+fn scrollViewer() = ferro_create(typeId: 366)
 // scrollablePullGestureRecognizer() -> int: creates a ScrollablePullGestureRecognizer.
 // Recognizes a pull on a scrollable target that is scrolled to the edge the pull starts from.
-fn scrollablePullGestureRecognizer() = ferro_create(typeId: 367)
+fn scrollablePullGestureRecognizer() = ferro_create(typeId: 368)
 // sector() -> int: creates a Sector. Represents a circular or elliptical sector (a pie-shaped
 // closed region of a circle or ellipse).
-fn sector() = ferro_create(typeId: 368)
+fn sector() = ferro_create(typeId: 369)
 // selectableTextBlock() -> int: creates a SelectableTextBlock. A control that displays a block
 // of formatted text whose content can be selected and copied.
-fn selectableTextBlock() = ferro_create(typeId: 369)
+fn selectableTextBlock() = ferro_create(typeId: 370)
 // selectingItemsControl() -> int: creates a SelectingItemsControl. An [`ItemsControl`] that
 // maintains a selection. [`SelectingItemsControl`] provides a base class for [`ItemsControl`]s
 // that maintain a selection (single or multiple). By default only its `selected_index` and
@@ -1107,47 +1118,47 @@ fn selectableTextBlock() = ferro_create(typeId: 369)
 // it does not react to user input; this must be handled in a derived class. It does, however,
 // respond to `is_selected_changed_event` events from items and updates the selection
 // accordingly.
-fn selectingItemsControl() = ferro_create(typeId: 370)
+fn selectingItemsControl() = ferro_create(typeId: 371)
 // selectionIndicator() -> int: creates a SelectionIndicator. A rectangle whose rounded caps
 // keep their size during composition scale animations. Layout, fill, stroke and styling remain
 // those of a normal Rectangle.
-fn selectionIndicator() = ferro_create(typeId: 373)
+fn selectionIndicator() = ferro_create(typeId: 374)
 // separator() -> int: creates a Separator. A separator control.
-fn separator() = ferro_create(typeId: 374)
+fn separator() = ferro_create(typeId: 375)
 // sineEase() -> int: creates a SineEase. A sine curve (WinUI's `SineEase`).
-fn sineEase() = ferro_create(typeId: 377)
+fn sineEase() = ferro_create(typeId: 378)
 // skewTransform() -> int: creates a SkewTransform. Skews a visual.
-fn skewTransform() = ferro_create(typeId: 378)
+fn skewTransform() = ferro_create(typeId: 379)
 // slider() -> int: creates a Slider. A control that lets the user select from a range of
 // values by moving a thumb control along a track.
-fn slider() = ferro_create(typeId: 379)
+fn slider() = ferro_create(typeId: 380)
 // solidColorBrush() -> int: creates a SolidColorBrush. Fills an area with a solid color.
-fn solidColorBrush() = ferro_create(typeId: 381)
+fn solidColorBrush() = ferro_create(typeId: 382)
 // span() -> int: creates a Span. Span element used for grouping other `Inline` elements.
-fn span() = ferro_create(typeId: 382)
+fn span() = ferro_create(typeId: 383)
 // splineColorKeyFrame() -> int: creates a SplineColorKeyFrame. Interpolates along a
 // `KeySpline` from the value before it (WinUI's `SplineColorKeyFrame`).
-fn splineColorKeyFrame() = ferro_create(typeId: 384)
+fn splineColorKeyFrame() = ferro_create(typeId: 385)
 // splineDoubleKeyFrame() -> int: creates a SplineDoubleKeyFrame. Interpolates along a
 // `KeySpline` from the value before it (WinUI's `SplineDoubleKeyFrame`).
-fn splineDoubleKeyFrame() = ferro_create(typeId: 385)
+fn splineDoubleKeyFrame() = ferro_create(typeId: 386)
 // splinePointKeyFrame() -> int: creates a SplinePointKeyFrame. Interpolates along a
 // `KeySpline` from the value before it (WinUI's `SplinePointKeyFrame`).
-fn splinePointKeyFrame() = ferro_create(typeId: 386)
+fn splinePointKeyFrame() = ferro_create(typeId: 387)
 // splitButton() -> int: creates a SplitButton. A button with primary and secondary parts that
 // can each be pressed separately. The primary part behaves like a [`Button`] and the secondary
 // part opens a flyout.
-fn splitButton() = ferro_create(typeId: 387)
+fn splitButton() = ferro_create(typeId: 388)
 // splitView() -> int: creates a SplitView. A control with two views: a collapsible pane and an
 // area for content.
-fn splitView() = ferro_create(typeId: 389)
+fn splitView() = ferro_create(typeId: 390)
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 391)
+fn stackPanel() = ferro_create(typeId: 392)
 // stateTrigger() -> int: creates a StateTrigger. A trigger that is active while its
 // [`is_active`](Self::is_active) is `true` (WinUI's `StateTrigger`): a state bound to a
 // condition of the application (`<StateTrigger IsActive="{Binding IsWide}"/>`).
-fn stateTrigger() = ferro_create(typeId: 392)
+fn stateTrigger() = ferro_create(typeId: 393)
 // storyboard() -> int: creates a Storyboard. A container of timelines that runs them together
 // and gives the animations their targets (WinUI's `Storyboard`). The children are animations
 // and storyboards. Each animation animates the property its `Storyboard.TargetProperty` names
@@ -1158,19 +1169,19 @@ fn stateTrigger() = ferro_create(typeId: 392)
 // storyboard of a visual state looks them up where the setters of the state do.
 // [`begin`](Self::begin) starts it on the global clock (without a global clock, its time stays
 // at zero until [`seek`](Self::seek) moves it); [`stop`](Self::stop) removes its values.
-fn storyboard() = ferro_create(typeId: 394)
+fn storyboard() = ferro_create(typeId: 395)
 // streamGeometry() -> int: creates a StreamGeometry. Represents the geometry of an arbitrarily
 // complex shape.
-fn streamGeometry() = ferro_create(typeId: 395)
+fn streamGeometry() = ferro_create(typeId: 396)
 // style() -> int: creates a Style. Defines a style.
-fn style() = ferro_create(typeId: 396)
+fn style() = ferro_create(typeId: 397)
 // styledElement() -> int: creates a StyledElement. Extends an [`Animatable`] with the
 // following features: - An inherited `DataContext`. - Implements the logical tree. - A
 // collection of class strings for custom styling. - Implements styling: tracks the frames
 // applied by styles and themes.
-fn styledElement() = ferro_create(typeId: 399)
+fn styledElement() = ferro_create(typeId: 400)
 // styles() -> int: creates a Styles. A style that consists of a number of child styles.
-fn styles() = ferro_create(typeId: 400)
+fn styles() = ferro_create(typeId: 401)
 // swipeControl() -> int: creates a SwipeControl. A container that reveals commands when its
 // content is swiped (WinUI's `SwipeControl`). [`left_items`](Self::left_items) and
 // [`right_items`](Self::right_items) open with a horizontal swipe,
@@ -1185,24 +1196,24 @@ fn styles() = ferro_create(typeId: 400)
 // expression animation of its `Translation`, on the compositor. The template parts are
 // `RootGrid`, `SwipeContentRoot`, `SwipeContentStackPanel`, `ContentRoot` and `InputEater`;
 // each item is a `CommandBarButton` with the theme's `SwipeItemStyle`.
-fn swipeControl() = ferro_create(typeId: 401)
+fn swipeControl() = ferro_create(typeId: 402)
 // swipeGestureRecognizer() -> int: creates a SwipeGestureRecognizer. A gesture recognizer that
 // detects swipe gestures and raises the swipe gesture event continuously as the pointer moves.
-fn swipeGestureRecognizer() = ferro_create(typeId: 402)
+fn swipeGestureRecognizer() = ferro_create(typeId: 403)
 // swipeItem() -> int: creates a SwipeItem. A command of a side of a [`SwipeControl`] (WinUI's
 // `SwipeItem`): drawn as a button with its [`text`](Self::text),
 // [`icon_source`](Self::icon_source), [`background`](Self::background) and
 // [`foreground`](Self::foreground); invoking it raises [`invoked`](Self::invoked), runs its
 // command and closes the control unless [`behavior_on_invoked`](Self::behavior_on_invoked) is
 // [`SwipeBehaviorOnInvoked::RemainOpen`].
-fn swipeItem() = ferro_create(typeId: 403)
+fn swipeItem() = ferro_create(typeId: 404)
 // swipeItems() -> int: creates a SwipeItems. The items of a side of a [`SwipeControl`] with
 // their [`mode`](Self::mode) (WinUI's `SwipeItems`, a vector of [`SwipeItem`]s). Execute items
 // have one item at most: [`try_add`](Self::try_add) and [`try_set_mode`](Self::try_set_mode)
 // refuse a change that breaks it (WinUI throws); [`add`](Self::add) logs and ignores such an
 // item. Items added to [`items`](Self::items) directly (as markup does) are not checked; a
 // swipe control uses the first item of execute items.
-fn swipeItems() = ferro_create(typeId: 404)
+fn swipeItems() = ferro_create(typeId: 405)
 // symbolIcon() -> int: creates a SymbolIcon. Represents an icon that uses a glyph of the
 // symbol font of the theme as its content (WinUI's `SymbolIcon`). The template of the theme
 // draws the glyph of [`symbol`](Self::symbol) ([`Symbol::glyph`]) in its text part
@@ -1214,82 +1225,82 @@ fn swipeItems() = ferro_create(typeId: 404)
 // (docs/porting/winui-controls.md, SymbolIcon): WinUI builds the text block in code
 // (`CSymbolIcon::ApplyTemplate`) with the font `Segoe Fluent Icons` written in; here the
 // template is the theme's and the font its resource.
-fn symbolIcon() = ferro_create(typeId: 405)
+fn symbolIcon() = ferro_create(typeId: 406)
 // symbolIconSource() -> int: creates a SymbolIconSource. The description of a [`SymbolIcon`]
 // (WinUI's `SymbolIconSource`).
-fn symbolIconSource() = ferro_create(typeId: 406)
+fn symbolIconSource() = ferro_create(typeId: 407)
 // tabControl() -> int: creates a TabControl. A tab control that displays a tab strip along
 // with the content of the selected tab.
-fn tabControl() = ferro_create(typeId: 409)
+fn tabControl() = ferro_create(typeId: 410)
 // tabItem() -> int: creates a TabItem. An item in a `TabControl`.
-fn tabItem() = ferro_create(typeId: 410)
+fn tabItem() = ferro_create(typeId: 411)
 // tabStrip() -> int: creates a TabStrip. A strip of tabs: a [`SelectingItemsControl`] that
 // always has a selected item.
-fn tabStrip() = ferro_create(typeId: 411)
+fn tabStrip() = ferro_create(typeId: 412)
 // tabStripItem() -> int: creates a TabStripItem. Represents a tab in a `TabStrip`.
-fn tabStripItem() = ferro_create(typeId: 412)
+fn tabStripItem() = ferro_create(typeId: 413)
 // tabbedPage() -> int: creates a TabbedPage. A page that displays its child pages through a
 // tab strip.
-fn tabbedPage() = ferro_create(typeId: 413)
+fn tabbedPage() = ferro_create(typeId: 414)
 // tableView() -> int: creates a TableView. A read-only tabular control that presents items in
 // configurable columns.
-fn tableView() = ferro_create(typeId: 415)
+fn tableView() = ferro_create(typeId: 416)
 // tableViewCell() -> int: creates a TableViewCell. Represents a single cell in a
 // [`TableViewRow`](crate::TableViewRow).
-fn tableViewCell() = ferro_create(typeId: 416)
+fn tableViewCell() = ferro_create(typeId: 417)
 // tableViewCellsPresenter() -> int: creates a TableViewCellsPresenter. Lays out the cells of a
 // [`TableViewRow`] according to the column definitions of the parent table view. The cells are
 // recycled alongside their owning row in a virtualizing stack panel, but are not virtualized
 // in a single row (i.e. there is no column virtualization).
-fn tableViewCellsPresenter() = ferro_create(typeId: 417)
+fn tableViewCellsPresenter() = ferro_create(typeId: 418)
 // tableViewColumn() -> int: creates a TableViewColumn. Defines a column in a [`TableView`].
-fn tableViewColumn() = ferro_create(typeId: 418)
+fn tableViewColumn() = ferro_create(typeId: 419)
 // tableViewColumnHeader() -> int: creates a TableViewColumnHeader. Represents the header of a
 // [`TableViewColumn`].
-fn tableViewColumnHeader() = ferro_create(typeId: 419)
+fn tableViewColumnHeader() = ferro_create(typeId: 420)
 // tableViewColumnHeadersPresenter() -> int: creates a TableViewColumnHeadersPresenter.
 // Displays the column headers for a [`TableView`]. Computes column widths (pixel and star) and
 // exposes them via the actual width of the columns so that the presenters of the cells can
 // align cells with the headers.
-fn tableViewColumnHeadersPresenter() = ferro_create(typeId: 420)
+fn tableViewColumnHeadersPresenter() = ferro_create(typeId: 421)
 // tableViewRow() -> int: creates a TableViewRow. A row container in a
 // [`TableView`](crate::TableView).
-fn tableViewRow() = ferro_create(typeId: 421)
+fn tableViewRow() = ferro_create(typeId: 422)
 // templatedControl() -> int: creates a TemplatedControl. A lookless control whose visual
 // appearance is defined by its `Template`.
-fn templatedControl() = ferro_create(typeId: 422)
+fn templatedControl() = ferro_create(typeId: 423)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 433)
+fn textBlock() = ferro_create(typeId: 434)
 // textBox() -> int: creates a TextBox. Represents a control that can be used to display or
 // edit unformatted text. Template parts: `PART_TextPresenter` (a [`TextPresenter`], required)
 // and `PART_ScrollViewer` (a [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every
 // text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code
 // unit index.
-fn textBox() = ferro_create(typeId: 435)
+fn textBox() = ferro_create(typeId: 436)
 // textDecoration() -> int: creates a TextDecoration. Represents a text decoration, which is a
 // visual ornamentation that is added to text (such as an underline).
-fn textDecoration() = ferro_create(typeId: 437)
+fn textDecoration() = ferro_create(typeId: 438)
 // textHighlighter() -> int: creates a TextHighlighter. Paints foreground and background over
 // its ranges without editing text. A null brush uses the view's
 // TextControlHighlighterForeground or TextControlHighlighterBackground theme resource. As in
 // WinUI, only solid color brushes are accepted. Mutable brushes and range changes invalidate
 // all observing collections; observers never retain this object.
-fn textHighlighter() = ferro_create(typeId: 439)
+fn textHighlighter() = ferro_create(typeId: 440)
 // textPresenter() -> int: creates a TextPresenter. The control that displays the text of a
 // text box: the text, the selection, the pre-edit text of an input method and the caret. Every
 // text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, the positions of
 // [`CharacterHit`]) is a UTF-16 code unit index.
-fn textPresenter() = ferro_create(typeId: 440)
+fn textPresenter() = ferro_create(typeId: 441)
 // textSelectionHandle() -> int: creates a TextSelectionHandle. A control that enables easy
 // control over text selection using touch based input.
-fn textSelectionHandle() = ferro_create(typeId: 441)
+fn textSelectionHandle() = ferro_create(typeId: 442)
 // textSelectionHandleCanvas() -> int: creates a TextSelectionHandleCanvas. The canvas of the
 // touch selection handles of a text presenter. It lives in the text selector layer of the top
 // level.
-fn textSelectionHandleCanvas() = ferro_create(typeId: 442)
+fn textSelectionHandleCanvas() = ferro_create(typeId: 443)
 // textSelectorLayer() -> int: creates a TextSelectorLayer. The surface that hosts the text
 // selection handles.
-fn textSelectorLayer() = ferro_create(typeId: 443)
+fn textSelectorLayer() = ferro_create(typeId: 444)
 // themeShadow() -> int: creates a ThemeShadow. The shadow of the theme (WinUI
 // `Microsoft.UI.Xaml.Media.ThemeShadow`): set as the `Shadow` of an element, the element casts
 // the shadow of its elevation, the Z of its `Translation`, as the controls of WinUI do under
@@ -1301,20 +1312,20 @@ fn textSelectorLayer() = ferro_create(typeId: 443)
 // (the root and the open popups by default) would fall on. WinUI 3 keeps the collection and
 // its validation but does not draw projected shadows, so the receivers do not change the
 // drawing here either.
-fn themeShadow() = ferro_create(typeId: 444)
+fn themeShadow() = ferro_create(typeId: 445)
 // themeVariantScope() -> int: creates a ThemeVariantScope. Decorator control that isolates a
 // subtree of controls with a locally defined [`ThemeVariant`].
-fn themeVariantScope() = ferro_create(typeId: 445)
+fn themeVariantScope() = ferro_create(typeId: 446)
 // thumb() -> int: creates a Thumb. A control that can be dragged by the user.
-fn thumb() = ferro_create(typeId: 448)
+fn thumb() = ferro_create(typeId: 449)
 // tickBar() -> int: creates a TickBar. An element that is used for drawing the ticks of a
 // [`Slider`](crate::Slider).
-fn tickBar() = ferro_create(typeId: 450)
+fn tickBar() = ferro_create(typeId: 451)
 // timePicker() -> int: creates a TimePicker. A control to allow the user to select a time.
-fn timePicker() = ferro_create(typeId: 452)
+fn timePicker() = ferro_create(typeId: 453)
 // timePickerPresenter() -> int: creates a TimePickerPresenter. Defines the presenter used for
 // selecting a time. Intended for use with [`TimePicker`] but can be used independently.
-fn timePickerPresenter() = ferro_create(typeId: 454)
+fn timePickerPresenter() = ferro_create(typeId: 455)
 // titleBar() -> int: creates a TitleBar. The title bar of a window (WinUI's `TitleBar`): a
 // back button, a pane toggle button, a left header, an icon, a title and a subtitle, content
 // (a search box, in WinUI Gallery) and a right header, drawn in the title bar of the window
@@ -1339,72 +1350,72 @@ fn timePickerPresenter() = ferro_create(typeId: 454)
 // input ([`WindowDecorationProperties`] roles, which take effect while the client area extends
 // into the decorations), and follows [`WindowBase::is_active`]. A title is the title of the
 // window while the bar shows it, as in WinUI.
-fn titleBar() = ferro_create(typeId: 456)
+fn titleBar() = ferro_create(typeId: 457)
 // titleBarTemplateSettings() -> int: creates a TitleBarTemplateSettings. The values the
 // template of a [`TitleBar`](crate::TitleBar) binds to: the icon element created from its
 // `IconSource`. Each title bar has its own.
-fn titleBarTemplateSettings() = ferro_create(typeId: 458)
+fn titleBarTemplateSettings() = ferro_create(typeId: 459)
 // toggleButton() -> int: creates a ToggleButton. Represents a control that a user can select
 // (check) or clear (uncheck). Base class for controls that can switch states.
-fn toggleButton() = ferro_create(typeId: 459)
+fn toggleButton() = ferro_create(typeId: 460)
 // toggleSplitButton() -> int: creates a ToggleSplitButton. A button with primary and secondary
 // parts that can each be pressed separately. The primary part behaves like a toggle button
 // with two states and the secondary part opens a flyout.
-fn toggleSplitButton() = ferro_create(typeId: 461)
+fn toggleSplitButton() = ferro_create(typeId: 462)
 // toggleSwitch() -> int: creates a ToggleSwitch. A toggle switch control.
-fn toggleSwitch() = ferro_create(typeId: 463)
+fn toggleSwitch() = ferro_create(typeId: 464)
 // toolTip() -> int: creates a ToolTip. A control which pops up a hint when a control is
 // hovered. You will probably not want to create a [`ToolTip`] control directly: if added to
 // the tree it will act as a simple [`ContentControl`] styled to look like a tooltip. To add a
 // tooltip to a control, use the `Tip` attached property ([`ToolTip::tip_property`]), assigning
 // the content that you want displayed.
-fn toolTip() = ferro_create(typeId: 464)
+fn toolTip() = ferro_create(typeId: 465)
 // track() -> int: creates a Track. A control that positions a [`Thumb`] and the buttons before
 // and after it along a range: the building block of scroll bars and sliders.
-fn track() = ferro_create(typeId: 469)
+fn track() = ferro_create(typeId: 470)
 // transformGroup() -> int: creates a TransformGroup. A transform that applies its child
 // transforms in order.
-fn transformGroup() = ferro_create(typeId: 472)
+fn transformGroup() = ferro_create(typeId: 473)
 // transitioningContentControl() -> int: creates a TransitioningContentControl. Displays the
 // content according to a data template, using a page transition to move between the old and
 // new content.
-fn transitioningContentControl() = ferro_create(typeId: 474)
+fn transitioningContentControl() = ferro_create(typeId: 475)
 // translateTransform() -> int: creates a TranslateTransform. Translates (moves) a visual.
-fn translateTransform() = ferro_create(typeId: 475)
+fn translateTransform() = ferro_create(typeId: 476)
 // trayIcon() -> int: creates a TrayIcon. An icon in the notification area of the platform.
-fn trayIcon() = ferro_create(typeId: 476)
+fn trayIcon() = ferro_create(typeId: 477)
 // treeView() -> int: creates a TreeView. Displays a hierarchical tree of data.
-fn treeView() = ferro_create(typeId: 477)
+fn treeView() = ferro_create(typeId: 478)
 // treeViewItem() -> int: creates a TreeViewItem. An item in a [`TreeView`].
-fn treeViewItem() = ferro_create(typeId: 479)
+fn treeViewItem() = ferro_create(typeId: 480)
 // underline() -> int: creates a Underline. `Underline` element - markup helper for indicating
 // underlined content. Equivalent to a `Span` with the `TextDecorations` property set to
 // underline. Can contain other inline elements.
-fn underline() = ferro_create(typeId: 481)
+fn underline() = ferro_create(typeId: 482)
 // uniformGrid() -> int: creates a UniformGrid. A panel which lays out its children in a grid
 // with all cells having the same size.
-fn uniformGrid() = ferro_create(typeId: 482)
+fn uniformGrid() = ferro_create(typeId: 483)
 // userControl() -> int: creates a UserControl. Provides the base class for defining a new
 // control that encapsulates related existing controls and provides its own logic.
-fn userControl() = ferro_create(typeId: 486)
+fn userControl() = ferro_create(typeId: 487)
 // viewbox() -> int: creates a Viewbox. A control used to scale a single child.
-fn viewbox() = ferro_create(typeId: 488)
+fn viewbox() = ferro_create(typeId: 489)
 // virtualizingCarouselPanel() -> int: creates a VirtualizingCarouselPanel. A panel used by
 // [`Carousel`] to display the current item.
-fn virtualizingCarouselPanel() = ferro_create(typeId: 490)
+fn virtualizingCarouselPanel() = ferro_create(typeId: 491)
 // virtualizingStackPanel() -> int: creates a VirtualizingStackPanel. Arranges and virtualizes
 // content on a single line that is oriented either horizontally or vertically.
-fn virtualizingStackPanel() = ferro_create(typeId: 492)
+fn virtualizingStackPanel() = ferro_create(typeId: 493)
 // visual() -> int: creates a Visual. Base class for controls that provides rendering and
 // related visual properties. The visual class represents elements that have a visual on-screen
 // representation and stores all the information needed for a renderer to render the control.
 // To traverse the visual tree, use the methods in the `visual_tree` module.
-fn visual() = ferro_create(typeId: 494)
+fn visual() = ferro_create(typeId: 495)
 // visualBrush() -> int: creates a VisualBrush. Paints an area with a [`Visual`].
-fn visualBrush() = ferro_create(typeId: 495)
+fn visualBrush() = ferro_create(typeId: 496)
 // visualLayerManager() -> int: creates a VisualLayerManager. A control that manages multiple
 // layers such as adorners, overlays, text selectors, and popups.
-fn visualLayerManager() = ferro_create(typeId: 496)
+fn visualLayerManager() = ferro_create(typeId: 497)
 // visualState() -> int: creates a VisualState. A visual state: the values its
 // [`setters`](Self::setters) set while it is the current state of its
 // [`VisualStateGroup`](super::VisualStateGroup). The [`storyboard`](Self::storyboard) of the
@@ -1416,14 +1427,14 @@ fn visualLayerManager() = ferro_create(typeId: 496)
 // (docs/porting/winui-calculator-gaps.md, section 5.5). Deviation
 // (docs/porting/winui-controls.md, VisualStateManager): `x:Name` names the state but does not
 // register it in the name scope, so `find_name` does not find it.
-fn visualState() = ferro_create(typeId: 497)
+fn visualState() = ferro_create(typeId: 498)
 // visualStateGroup() -> int: creates a VisualStateGroup. A group of mutually exclusive
 // [`VisualState`]s: at most one of them is the [`current_state`](Self::current_state) of the
 // group, null at first. The groups of an element are the attached
 // [`VisualStateManager::visual_state_groups_property`](super::VisualStateManager::visual_state_groups_property);
 // `VisualStateManager::go_to_state` changes the state of the group that has the state of the
 // name it is given.
-fn visualStateGroup() = ferro_create(typeId: 498)
+fn visualStateGroup() = ferro_create(typeId: 499)
 // visualStateManager() -> int: creates a VisualStateManager. Manages the visual states of
 // controls and the transitions between them. The visual states of an element are the
 // [`visual_state_groups_property`](Self::visual_state_groups_property) attached to the root of
@@ -1433,7 +1444,7 @@ fn visualStateGroup() = ferro_create(typeId: 498)
 // custom manager derives from this class, overrides
 // [`go_to_state_core`](VisualStateManagerImpl::go_to_state_core) and is set on the root with
 // [`set_custom_visual_state_manager`](Self::set_custom_visual_state_manager).
-fn visualStateManager() = ferro_create(typeId: 499)
+fn visualStateManager() = ferro_create(typeId: 500)
 // visualTransition() -> int: creates a VisualTransition. How a
 // [`VisualStateGroup`](super::VisualStateGroup) changes from one state to another when
 // `GoToState` is called with transitions (WinUI's `VisualTransition`). A transition applies
@@ -1443,9 +1454,9 @@ fn visualStateManager() = ferro_create(typeId: 499)
 // [`generated_easing_function`](Self::generated_easing_function), animations it generates from
 // the values of the old state to those of the new one; the setters and the storyboard of the
 // new state apply when they have completed.
-fn visualTransition() = ferro_create(typeId: 500)
+fn visualTransition() = ferro_create(typeId: 501)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 501)
+fn window() = ferro_create(typeId: 502)
 // windowDrawnDecorations() -> int: creates a WindowDrawnDecorations. Manages client-side
 // window decorations (app-drawn window frame). This is a logical element that holds the
 // decorations template and properties. The host of the top-level extracts the overlay,
@@ -1453,24 +1464,24 @@ fn window() = ferro_create(typeId: 501)
 // tree. Pseudo-classes: `:normal`, `:maximized`, `:fullscreen`, `:has-shadow`, `:has-border`,
 // `:has-titlebar`, `:has-maximize`, `:has-fullscreen`, `:has-minimize`, `:has-close`,
 // `:has-title`.
-fn windowDrawnDecorations() = ferro_create(typeId: 505)
+fn windowDrawnDecorations() = ferro_create(typeId: 506)
 // windowDrawnDecorationsContent() -> int: creates a WindowDrawnDecorationsContent. Holds the
 // template content for [`WindowDrawnDecorations`](super::WindowDrawnDecorations). Contains
 // three visual slots: underlay, overlay, and fullscreen popover.
-fn windowDrawnDecorationsContent() = ferro_create(typeId: 506)
+fn windowDrawnDecorationsContent() = ferro_create(typeId: 507)
 // windowNotificationManager() -> int: creates a WindowNotificationManager. An
 // [`INotificationManager`] that displays notifications in a window.
-fn windowNotificationManager() = ferro_create(typeId: 507)
+fn windowNotificationManager() = ferro_create(typeId: 508)
 // wrapPanel() -> int: creates a WrapPanel. Positions child elements in sequential position
 // from left to right, breaking content to the next line at the edge of the containing box.
 // Subsequent ordering happens sequentially from top to bottom or from right to left, depending
 // on the value of the `Orientation` property.
-fn wrapPanel() = ferro_create(typeId: 508)
+fn wrapPanel() = ferro_create(typeId: 509)
 // xamlAmbientLight() -> int: creates a XamlAmbientLight. The ambient light of Reveal (WinUI's
 // internal `XamlAmbientLight`), also usable on its own: an ambient composition light of its
 // [`color`](Self::color) that lights the targets of its id; the attached
 // [`is_target`](Self::is_target_property) makes an element or a brush a target.
-fn xamlAmbientLight() = ferro_create(typeId: 509)
+fn xamlAmbientLight() = ferro_create(typeId: 510)
 
 // ---- properties ----------------------------------------------------------------------------
 
@@ -4091,7 +4102,8 @@ fn gridRowSpan(object, value) = {
 // the read fails (`failure()` tells): a plain value, no Result.
 fn getGridRowSpan(object) = ferro_get_i64_or(object: object, property: 320, fallback: 0)
 // groupHeaderPlacement(object: int, value: GroupHeaderPlacement) -> int: sets
-// GroupHeaderPlacement (ItemsStackPanel). Defines the `GroupHeaderPlacement` property.
+// GroupHeaderPlacement (ItemsStackPanel, ItemsWrapGrid). Defines the `GroupHeaderPlacement`
+// property.
 fn groupHeaderPlacement(object, value) = {
     let _ = ferro_set_str(object: object, property: 321, text: groupHeaderPlacementName(value: value), length: -1)
     object
@@ -4105,14 +4117,14 @@ fn groupName(object, value) = {
 // getGroupName(object: int) -> string: reads GroupName (MenuItem, RadioButton); the fallback
 // of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getGroupName(object) = "${ferro_get_cstr_or(object: object, property: 322, fallback: "")}"
-// groupPadding(object: int, value: string) -> int: sets GroupPadding (ItemsStackPanel).
-// Defines the `GroupPadding` property: the space around each group.
+// groupPadding(object: int, value: string) -> int: sets GroupPadding (ItemsStackPanel,
+// ItemsWrapGrid). Defines the `GroupPadding` property: the space around each group.
 fn groupPadding(object, value) = {
     let _ = ferro_set_str(object: object, property: 323, text: value, length: -1)
     object
 }
-// getGroupPadding(object: int) -> string: reads GroupPadding (ItemsStackPanel); the fallback
-// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getGroupPadding(object: int) -> string: reads GroupPadding (ItemsStackPanel, ItemsWrapGrid);
+// the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getGroupPadding(object) = "${ferro_get_cstr_or(object: object, property: 323, fallback: "")}"
 // getHasBorder(object: int) -> bool: reads HasBorder (WindowDrawnDecorations); the fallback of
 // its kind when the read fails (`failure()` tells): a plain value, no Result.

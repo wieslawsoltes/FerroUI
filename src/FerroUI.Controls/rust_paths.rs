@@ -54,6 +54,7 @@ ferroui_base::ferro_rust_paths! {
         crate::Grid,
         crate::GridSplitter,
         crate::GridView,
+        crate::GridViewHeaderItem,
         crate::GridViewItem,
         crate::GroupBox,
         crate::GroupStyle,

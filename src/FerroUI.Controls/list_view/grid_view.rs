@@ -1,9 +1,9 @@
-//! WinUI's `GridView`, `GridViewItem` and `GridViewItemTemplateSettings`
+//! WinUI's `GridView`, `GridViewItem`, `GridViewItemTemplateSettings` and `GridViewHeaderItem`
 //! (`dxaml/xcp/dxaml/lib/GridView_Partial.cpp` and the item classes of microsoft-ui-xaml commit
 //! `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! NOTICE.md; docs/porting/winui-calculator-gaps.md, LV-2).
 
-use super::{ItemsWrapGrid, ListViewBase, ListViewBaseItem};
+use super::{ItemsWrapGrid, ListViewBase, ListViewBaseHeaderItem, ListViewBaseItem};
 use crate::generators::RecycleKey;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::{FuncTemplate, ITemplateOf};
@@ -141,5 +141,41 @@ impl GridViewItem {
     /// WinUI's `TemplateSettings`.
     pub fn template_settings(&self) -> GridViewItemTemplateSettings {
         GridViewItemTemplateSettings::default()
+    }
+}
+
+/// The header of a group of a [`GridView`] (WinUI's `GridViewHeaderItem`), which the
+/// [`ItemsWrapGrid`] of a grouped source places before the items of each group. It is not an
+/// item: it has no index and cannot be selected (#1424).
+#[repr(C)]
+pub struct GridViewHeaderItem {
+    base: ListViewBaseHeaderItem,
+}
+
+ferro_class!(GridViewHeaderItem: ListViewBaseHeaderItem);
+ferroui_base::ferro_class_info!(GridViewHeaderItem {
+    new: GridViewHeaderItem::new,
+    markup: { namespace: "FerroUI.Controls", content: Content },
+});
+ferro_impl_classes!(
+    GridViewHeaderItem: StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    TemplatedControlImpl,
+    ContentControlImpl,
+    FerroObjectImpl
+);
+
+impl GridViewHeaderItem {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct() -> Self {
+        Self { base: ListViewBaseHeaderItem::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
     }
 }

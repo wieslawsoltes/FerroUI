@@ -17,11 +17,11 @@ import ferroui::*
 fn button() = ferro_create(typeId: 28)
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 391)
+fn stackPanel() = ferro_create(typeId: 392)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 433)
+fn textBlock() = ferro_create(typeId: 434)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 501)
+fn window() = ferro_create(typeId: 502)
 
 // ---- properties ----------------------------------------------------------------------------
 
