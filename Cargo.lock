@@ -2533,7 +2533,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2567,6 +2569,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 
@@ -2788,6 +2791,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
@@ -3116,6 +3120,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
+ "ferroui-render3d",
 ]
 
 [[package]]
@@ -5233,6 +5238,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
