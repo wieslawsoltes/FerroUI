@@ -9,7 +9,7 @@ use crate::x11_exception::X11Error;
 use crate::x11_platform::FerroX11Platform;
 use ferroui_base::threading::{
     CancellationToken, DispatcherImplEvent, IControlledDispatcherImpl, IDispatcherImpl,
-    IDispatcherImplWithPendingInput, IDispatcherSignal,
+    IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
 };
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
@@ -21,6 +21,7 @@ use std::time::Instant;
 struct SignalState {
     signaled: bool,
     wakeup_requested: bool,
+    background_processing_requested: bool,
 }
 
 /// The part of the dispatcher implementation other threads reach: the
@@ -181,6 +182,7 @@ pub struct X11PlatformThreading {
     x11_events: Rc<X11EventDispatcher>,
     signaled: DispatcherImplEvent,
     timer: DispatcherImplEvent,
+    ready_for_background_processing: DispatcherImplEvent,
 }
 
 impl X11PlatformThreading {
@@ -198,6 +200,7 @@ impl X11PlatformThreading {
             x11_events,
             signaled: DispatcherImplEvent::new(),
             timer: DispatcherImplEvent::new(),
+            ready_for_background_processing: DispatcherImplEvent::new(),
         })
     }
 
@@ -211,6 +214,19 @@ impl X11PlatformThreading {
         }
 
         self.signaled.raise();
+    }
+
+    fn check_background_processing_requested(&self) -> bool {
+        {
+            let mut state = self.signal.lock.lock().unwrap_or_else(PoisonError::into_inner);
+            if !state.background_processing_requested {
+                return false;
+            }
+            state.background_processing_requested = false;
+        }
+
+        self.ready_for_background_processing.raise();
+        true
     }
 
     fn elapsed_milliseconds(&self) -> i64 {
@@ -257,6 +273,25 @@ impl IDispatcherImpl for X11PlatformThreading {
     fn as_controlled(&self) -> Option<&dyn IControlledDispatcherImpl> {
         Some(self)
     }
+
+    fn as_explicit_background_processing(&self) -> Option<&dyn IDispatcherImplWithExplicitBackgroundProcessing> {
+        Some(self)
+    }
+}
+
+impl IDispatcherImplWithExplicitBackgroundProcessing for X11PlatformThreading {
+    fn ready_for_background_processing(&self) -> &DispatcherImplEvent {
+        &self.ready_for_background_processing
+    }
+
+    fn request_background_processing(&self) {
+        let mut state = self.signal.lock.lock().unwrap_or_else(PoisonError::into_inner);
+        if state.background_processing_requested {
+            return;
+        }
+        state.background_processing_requested = true;
+        self.signal.wakeup_locked(&mut state);
+    }
 }
 
 impl IDispatcherImplWithPendingInput for X11PlatformThreading {
@@ -286,30 +321,45 @@ impl IControlledDispatcherImpl for X11PlatformThreading {
                 return;
             }
 
-            //Flush whatever requests were made to XServer
+            // Flush whatever requests were made to the server.
             self.x11_events.flush();
-            if !self.x11_events.is_pending() {
-                now = self.elapsed_milliseconds();
-                if self.next_timer.get().is_some_and(|next_timer| next_timer < now) {
-                    continue;
-                }
 
-                self.waiter.wait(wait_timeout(self.next_timer.get(), now));
-
-                self.waiter.drain();
-
-                self.signal.lock.lock().unwrap_or_else(PoisonError::into_inner).wakeup_requested = false;
-            }
+            self.check_signaled();
 
             if cancellation_token.is_cancelled() {
                 return;
             }
-            self.check_signaled();
+
             self.x11_events.dispatch_x11_events(&cancellation_token);
-            while queue.has_jobs() {
-                self.check_signaled();
-                queue.dispatch_next();
+
+            if cancellation_token.is_cancelled() {
+                return;
             }
+
+            if queue.has_jobs() {
+                queue.dispatch_next();
+                continue;
+            }
+
+            if self.check_background_processing_requested() {
+                continue;
+            }
+
+            // `is_pending` flushes the output buffer, so nothing is left unflushed before the wait.
+            if self.x11_events.is_pending() {
+                continue;
+            }
+
+            now = self.elapsed_milliseconds();
+            if self.next_timer.get().is_some_and(|next_timer| next_timer < now) {
+                continue;
+            }
+
+            self.waiter.wait(wait_timeout(self.next_timer.get(), now));
+
+            self.waiter.drain();
+
+            self.signal.lock.lock().unwrap_or_else(PoisonError::into_inner).wakeup_requested = false;
         }
     }
 }
