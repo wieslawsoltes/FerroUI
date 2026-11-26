@@ -1650,6 +1650,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-items-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-repeater",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-itemsview-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-items-view",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -2531,7 +2556,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2565,6 +2592,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 
@@ -2786,6 +2814,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
@@ -3114,6 +3143,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
+ "ferroui-render3d",
 ]
 
 [[package]]
@@ -5231,6 +5261,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
@@ -7971,6 +8002,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
+ "ferroui-controls-items-view",
  "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-desktop",

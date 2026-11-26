@@ -1130,7 +1130,7 @@
       "examples": []
     },
     "ProgressBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ProgressBar.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1144,9 +1144,13 @@
         {
           "path": "samples/WinUIGallery/status_samples_tests.rs",
           "name": "progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "progress_state_options_show_the_paused_and_the_error_state"
         }
       ],
-      "notes": "Both source examples use native ProgressBar: the indeterminate bar, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0). FerroUI's ProgressBar has no ShowPaused or ShowError, so the indeterminate bar's Progress state options (Running, Paused, Error) and the source's x:Bind of IsChecked.Value are not ported and the page is partial.",
+      "notes": "Both source examples use native ProgressBar: the indeterminate bar with its Progress state options (Running, Paused, Error), whose ShowPaused and ShowError are bound to the radio buttons as the source's x:Bind of IsChecked.Value is, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0).",
       "examples": []
     },
     "PullToRefresh": {
@@ -1787,7 +1791,7 @@
       "examples": []
     },
     "WrapPanel": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/WrapPanel.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1803,7 +1807,7 @@
           "name": "wrap_panel_options_set_the_orientation_spacing_and_padding"
         }
       ],
-      "notes": "Both source examples use native WrapPanel with the handlers of WrapPanelPage.xaml.cs in Rust (layout_samples.rs): the ten items of the first panel with OrientationGroup_SelectionChanged (the Tag of the selected option is the Orientation, and the host is 360 high for Vertical and 200 otherwise) and the ValueChanged handlers of the item spacing, line spacing and padding sliders, and the five fixed items and the accent-colored final item of the second panel. ThemeResource is DynamicResource and ControlCornerRadius is its value, 4; the sliders' Headers are composed, SnapsTo Ticks with StepFrequency 2 is IsSnapToTickEnabled with TickFrequency 2, and the ToggleSwitch's IsOn is IsChecked. FerroUI's WrapPanel has no Padding: the uniform padding of PaddingSlider_ValueChanged is the Padding of the host Border, the same layout. FerroUI's WrapPanel has no ItemsStretch, so the final item does not stretch to fill its line and StretchLastItemToggle_Toggled is not ported: the page is partial.",
+      "notes": "Both source examples use native WrapPanel with the handlers of WrapPanelPage.xaml.cs in Rust (layout_samples.rs): the ten items of the first panel with OrientationGroup_SelectionChanged (the Tag of the selected option is the Orientation, and the host is 360 high for Vertical and 200 otherwise) and the ValueChanged handlers of the item spacing, line spacing and padding sliders, and the five fixed items and the accent-colored final item of the second panel. ThemeResource is DynamicResource and ControlCornerRadius is its value, 4; the sliders' Headers are composed, SnapsTo Ticks with StepFrequency 2 is IsSnapToTickEnabled with TickFrequency 2, and the ToggleSwitch's IsOn is IsChecked. FerroUI's WrapPanel has no Padding: the uniform padding of PaddingSlider_ValueChanged is the Padding of the host Border, the same layout. The final item stretches with the native ItemsStretch and StretchLastItemToggle_Toggled.",
       "examples": []
     },
     "XamlResources": {
@@ -4090,17 +4094,85 @@
       ]
     },
     "ItemsView": {
-      "status": "pending",
-      "implementation": [],
-      "tests": [],
-      "notes": "G1 (#418) found no WinUI ItemsView on main: ferroui-controls-repeater has the ItemsRepeater, LinedFlowLayout and SelectionModel, but not ItemsView or ItemContainer (ferroui_controls::ItemsView in items_source.rs is an unrelated view of items). The three examples need its container selection modes, ItemInvoked and the ScrollView it hosts; the control is G2 work.",
-      "examples": []
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ItemsView.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/items_view_samples.rs",
+        "src/FerroUI.Controls.ItemsView/items_view.rs",
+        "src/FerroUI.Controls.ItemsView/item_container.rs",
+        "src/FerroUI.Controls.ItemsView/Themes/WinUI/ItemContainer.xaml",
+        "src/FerroUI.Controls.ItemsView/Themes/WinUI/ItemsView.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+          "name": "the_three_views_show_the_items_in_containers_of_their_theme"
+        }
+      ],
+      "notes": "All three source examples use the native ItemsView and ItemContainer of ferroui-controls-items-view with their control themes, included by the page, and the handlers of ItemsViewPage.xaml.cs in Rust (items_view_samples.rs): item invocation, the lined flow, uniform grid and stack layouts with their options, and the four selection modes. The items are the eight CustomDataObjects of list_samples.rs (the source's includeAllItems shows more). The ScrollView is a ScrollViewer, and a change of the lined flow layout follows its scroll to the top at once instead of when the view stops.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ItemsView/BasicItemsview.txt",
+          "source_sha256": "9812011bc70acc853203aaee63d3bbebb7623a4d425868ed654340bd2f03098f",
+          "status": "ported",
+          "notes": "The default stack layout, the image template and BasicItemsView_ItemInvoked.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_three_views_show_the_items_in_containers_of_their_theme"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsView/ItemsviewSwappableLayouts.txt",
+          "source_sha256": "993262daee79d51ae4c757031b31ab74572d2f5e870346926fbd96e1a869dcdd",
+          "status": "ported",
+          "notes": "The lined flow, uniform grid and stack layouts with the source's options.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_layout_options_swap_the_layout_and_its_settings"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsView/ItemsviewItemInvocationSelection.txt",
+          "source_sha256": "aa06f5ddbb39fa0f060838a9951c9d59c5b4fe0d4d326f3b8796b8fc7a4978ee",
+          "status": "ported",
+          "notes": "The four selection modes, IsItemInvokedEnabled and the outputs.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_selection_options_set_the_mode_and_report_the_selection"
+            }
+          ]
+        }
+      ]
     },
     "SystemBackdropElement": {
-      "status": "pending",
-      "implementation": [],
-      "tests": [],
-      "notes": "G1 (#418) found no SystemBackdropElement on main: the system backdrop of an element exists only inside the framework (ElementSystemBackdrop of the menu flyout presenter, crate-private). The catalog has no sample definition for the page; the element is G2 work.",
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SystemBackdropElement.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Controls/system_backdrop_element.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "system_backdrop_element_follows_the_backdrop_type_and_the_corner_radius"
+        }
+      ],
+      "notes": "The source example uses the native SystemBackdropElement with its acrylic, Mica and Mica Alt backdrops, BackdropTypeComboBox_SelectionChanged and CornerRadiusSlider_ValueChanged in Rust (materials_samples.rs). The backdrop is drawn in the app inside the element; Slider's Header is a text and StepFrequency is TickFrequency with IsSnapToTickEnabled.",
       "examples": []
     },
     "MediaPlayerElement": {
