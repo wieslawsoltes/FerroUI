@@ -41,17 +41,22 @@ wgpu = { workspace = true, optional = true }
 ferroui-opengl = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
-web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlTexture", "WebGlFramebuffer", "WebGlProgram", "WebGlShader", "WebGlUniformLocation", "WebGlVertexArrayObject"] }
+web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlBuffer", "WebGlTexture", "WebGlFramebuffer", "WebGlProgram", "WebGlShader", "WebGlUniformLocation", "WebGlVertexArrayObject"] }
 
 # The CPU mode is always built. An application states the GPU modes it uses: each brings its renderer
 # and `wgpu` (docs/porting/vello-backend.md, section 2).
+[build-dependencies]
+# The GLSL ES of the shader effects of the library for the WebGL2 route (feature `hybrid-webgl`),
+# translated from their WGSL at build time: the browser module carries no translator.
+ferroui-build = { workspace = true, optional = true, features = ["shader-effects"] }
+
 [features]
 default = []
 # The sparse-strips renderer with the strips drawn on the GPU (`vello_gpu`).
 hybrid = ["dep:vello_gpu", "vello_gpu/wgpu", "wgpu-device"]
 # The same renderer over the WebGL2 context of a canvas of a web page, without `wgpu` (`vello_gpu`
 # with its `webgl` feature): the hybrid mode of the browser platform (gpu_web_gl/).
-hybrid-webgl = ["dep:vello_gpu", "vello_gpu/webgl", "dep:ferroui-opengl", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys"]
+hybrid-webgl = ["dep:vello_gpu", "vello_gpu/webgl", "dep:ferroui-opengl", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys", "dep:ferroui-build"]
 # The compute renderer (`vello`).
 gpu = ["dep:vello", "wgpu-device"]
 # What both GPU modes need: `wgpu`, and on macOS the Metal contracts of the platform with the bindings

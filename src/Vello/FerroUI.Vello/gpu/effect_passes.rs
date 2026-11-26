@@ -45,7 +45,7 @@ pub(crate) use crate::effect_uniforms::LightingOutput;
 use crate::effect_uniforms::{self as blocks, MAX_LIGHTS};
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::media::effects::{
-    EffectImage, EffectImageWeak, ImmutableCustomEffect, ShaderUniformType, ShaderUniformValue, MAX_SHADER_CHILDREN,
+    EffectImage, EffectImageWeak, ImmutableCustomEffect, ShaderUniformType, MAX_SHADER_CHILDREN,
     SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING,
 };
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
@@ -1382,34 +1382,6 @@ pub(crate) struct ShaderArea {
     pub(crate) scale: f32,
 }
 
-/// Writes the uniforms of `effect` in `shader` into `block` at `offsets`
-/// (the layout of its module); `false` when they do not match it.
-fn fill_uniform_block(block: &mut [u8], offsets: &[u32], effect: &ImmutableCustomEffect, shader: ShaderArea) -> bool {
-    let mut index = 0;
-    let mut complete = true;
-    effect.for_each_shader_uniform(shader.size, shader.scale, &mut |_, value| {
-        let Some(&offset) = offsets.get(index) else {
-            complete = false;
-            return;
-        };
-        index += 1;
-        let at = offset as usize;
-        let mut put = |at: usize, bytes: [u8; 4]| match block.get_mut(at..at + 4) {
-            Some(slot) => slot.copy_from_slice(&bytes),
-            None => complete = false,
-        };
-        match value {
-            ShaderUniformValue::Int(value) => put(at, value.to_ne_bytes()),
-            other => {
-                for (component, value) in other.floats().iter().enumerate() {
-                    put(at + component * 4, value.to_ne_bytes());
-                }
-            }
-        }
-    });
-    complete && index == offsets.len()
-}
-
 /// The shader of `effect` over `content` (a texture of the pool holding the
 /// part `area` of the area of the effect, `shader`) into a texture of the
 /// pool of the same size: the program compiled once per device and type,
@@ -1455,7 +1427,8 @@ pub(crate) fn shader_effect_texture(
         let mut block = std::mem::take(&mut pipeline.block);
         block.clear();
         block.resize(module.size, 0);
-        let complete = fill_uniform_block(&mut block, &module.offsets, effect, shader);
+        let (size, scale) = (shader.size, shader.scale);
+        let complete = crate::effect_uniforms::fill_shader_uniforms(&mut block, &module.offsets, effect, size, scale);
         if complete {
             device.queue().write_buffer(&pipeline.uniforms, 0, &block);
         }

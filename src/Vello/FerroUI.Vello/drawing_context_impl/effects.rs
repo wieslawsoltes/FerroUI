@@ -173,10 +173,10 @@ struct ShaderEffectFrame {
     effect: ImmutableCustomEffect,
     /// The area of the effect in the pixels of the scene it was pushed in,
     /// in whole pixels (it may reach beyond that scene).
-    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
     area: kurbo::Rect,
     /// The size of the area (`layer_size`).
-    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
     size: [f32; 2],
     /// Device pixels per device independent pixel (`layer_scale`).
     scale: f32,
@@ -332,6 +332,15 @@ impl DrawingContextImpl {
         let mut scene = self.leave_scene(outer);
 
         if let Some(shader) = frame.shader {
+            if let Some(layer) = frame.web_gl {
+                #[cfg(feature = "hybrid-webgl")]
+                {
+                    self.end_web_gl_shader_effect(scene, layer, shader);
+                    return;
+                }
+                #[cfg(not(feature = "hybrid-webgl"))]
+                match layer {}
+            }
             self.end_shader_effect(scene, position, frame.device, shader);
             return;
         }
@@ -592,8 +601,27 @@ impl DrawingContextImpl {
                 bounds: None,
             };
             let outer = self.enter_device_scene(&layer);
-            self.begin_shader_content(outer, Some(layer), shader);
+            self.begin_shader_content(outer, Some(layer), None, shader);
             return true;
+        }
+
+        // On the WebGL2 context of the canvas: an effect of the library, whose program compiled.
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(gpu) = self.scene().web_gl_gpu() {
+            if self.sink_origin == Vec2::ZERO && gpu.prepare_shader(effect) {
+                let layer = WebGlLayer {
+                    gpu,
+                    x: visible.x0 as u32,
+                    y: visible.y0 as u32,
+                    width: visible.width() as u32,
+                    height: visible.height() as u32,
+                    bounds: Rect::new(visible.x0, visible.y0, visible.width(), visible.height()),
+                    transform: Affine::IDENTITY,
+                };
+                let outer = self.enter_web_gl_scene();
+                self.begin_shader_content(outer, None, Some(layer), shader);
+                return true;
+            }
         }
 
         // The content of the area as a whole when it is not too large, so
@@ -602,20 +630,26 @@ impl DrawingContextImpl {
             && area.height() <= f64::from(u16::MAX)
             && area.width() * area.height() <= MAX_REFERENCE_PIXELS;
         let outer = self.begin_cpu_area_scene(if fits { area } else { visible });
-        self.begin_shader_content(outer, None, shader);
+        self.begin_shader_content(outer, None, None, shader);
         true
     }
 
     /// Pushes the frame of a shader effect whose content is recorded into
     /// the scene that replaced `outer`.
-    fn begin_shader_content(&mut self, outer: OuterScene, device: Option<DeviceLayer>, shader: ShaderEffectFrame) {
+    fn begin_shader_content(
+        &mut self,
+        outer: OuterScene,
+        device: Option<DeviceLayer>,
+        web_gl: Option<WebGlLayer>,
+        shader: ShaderEffectFrame,
+    ) {
         self.sink().push_layer(BlendMode::default(), 1.0);
         self.effect_stack.push(EffectFrame {
             cropped: false,
             outer: Some(outer),
             luminance_to_alpha: false,
             device,
-            web_gl: None,
+            web_gl,
             shader: Some(shader),
         });
         self.save(SavedKind::Effect);
@@ -1168,6 +1202,44 @@ impl DrawingContextImpl {
             Ok(None) => {}
             Err(error) => crate::web_gl::log_render_failure(&error),
         }
+    }
+
+    /// Ends a shader effect drawn on the WebGL2 context: the content rendered and copied into a
+    /// texture of the pool, turned upright, the program of the effect, and the result painted over
+    /// the part of the area on the canvas with the opacity in effect. The content unchanged
+    /// should the pass fail.
+    fn end_web_gl_shader_effect(
+        &mut self,
+        scene: Box<dyn IVelloSceneSink>,
+        layer: WebGlLayer,
+        shader: ShaderEffectFrame,
+    ) {
+        self.current_opacity = shader.inherited_opacity;
+        // As a bitmap of the result would be drawn: with the opacity in effect.
+        let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
+        let Some(copied) = Self::render_web_gl_scene(scene, &layer) else {
+            return;
+        };
+        let area = (layer.width, layer.height);
+        let content = match layer.gpu.upright_texture(&copied, area) {
+            Ok(content) => content,
+            Err(error) => {
+                crate::web_gl::log_render_failure(&error);
+                self.paint_web_gl_layer(&layer, (copied, true), alpha, BlendMode::default());
+                return;
+            }
+        };
+        let origin = [(f64::from(layer.x) - shader.area.x0) as f32, (f64::from(layer.y) - shader.area.y0) as f32];
+        let result = layer.gpu.shader_effect_texture(&shader.effect, &content, area, origin, shader.size, shader.scale);
+        let texture = match result {
+            Ok(Some(texture)) => texture,
+            Ok(None) => content,
+            Err(error) => {
+                crate::web_gl::log_render_failure(&error);
+                content
+            }
+        };
+        self.paint_web_gl_layer(&layer, (texture, false), alpha, BlendMode::default());
     }
 
     /// Ends the source of a pixel operation drawn on the WebGL2 context: its scene rendered and

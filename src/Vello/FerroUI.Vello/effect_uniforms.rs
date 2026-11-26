@@ -8,10 +8,46 @@
 // Each route uses what it draws: a build with one of them, or neither, leaves the rest unused.
 #![cfg_attr(not(all(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
 
+use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformValue};
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
 use ferroui_base::platform::{LightingParameters, PixelOperation};
 use ferroui_base::rendering::composition::effects::BlendEffectMode;
 use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
+
+/// Writes the uniforms of the shader effect `effect` over an area of `size` device pixels at
+/// `scale` into `block` at `offsets` (the layout of its module); `false` when they do not match
+/// it. Without allocating: both routes call it each frame.
+pub(crate) fn fill_shader_uniforms(
+    block: &mut [u8],
+    offsets: &[u32],
+    effect: &ImmutableCustomEffect,
+    size: [f32; 2],
+    scale: f32,
+) -> bool {
+    let mut index = 0;
+    let mut complete = true;
+    effect.for_each_shader_uniform(size, scale, &mut |_, value| {
+        let Some(&offset) = offsets.get(index) else {
+            complete = false;
+            return;
+        };
+        index += 1;
+        let at = offset as usize;
+        let mut put = |at: usize, bytes: [u8; 4]| match block.get_mut(at..at + 4) {
+            Some(slot) => slot.copy_from_slice(&bytes),
+            None => complete = false,
+        };
+        match value {
+            ShaderUniformValue::Int(value) => put(at, value.to_ne_bytes()),
+            other => {
+                for (component, value) in other.floats().iter().enumerate() {
+                    put(at + component * 4, value.to_ne_bytes());
+                }
+            }
+        }
+    });
+    complete && index == offsets.len()
+}
 
 /// The most point and spot lights the lighting programs evaluate.
 pub(crate) const MAX_LIGHTS: usize = LightingParameters::MAX_LIGHTS;
