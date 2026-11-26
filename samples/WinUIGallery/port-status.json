@@ -4577,6 +4577,46 @@
           "notes": "Replace file? without a default button, and the result text of each button."
         }
       ]
+    },
+    "XamlUICommand": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/XamlUICommand.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "xaml_ui_command_gives_the_button_its_ui_and_writes_the_output"
+        }
+      ],
+      "notes": "The source example uses native XamlUICommand (WinUI's command of ferroui-controls) as a page resource with its label, SymbolIconSource, KeyboardAccelerator (Ctrl+D) and description, set as the Command of an AppBarButton (FerroUI's CommandBarButton), which takes the label, the icon, the accelerator as its HotKey and the description as its tool tip and help text; CustomXamlUICommand_ExecuteRequested of XamlUICommandPage.xaml.cs in Rust (command_samples.rs) writes the output, which a polite live region announces (the source's AnnounceActionForAccessibility).",
+      "examples": []
+    },
+    "StandardUICommand": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/StandardUICommand.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "standard_ui_command_deletes_the_item_of_the_parameter_or_the_selection"
+        }
+      ],
+      "notes": "The source example uses native StandardUICommand (Kind Delete) with the code behind of StandardUICommandPage.xaml.cs in Rust (command_samples.rs): ControlExample_Loaded creates the command with its ExecuteRequested handler (DeleteCommand_ExecuteRequested removes the item of the parameter, or else the selected item) and sets it on the Edit menu's item and on the 15 list items. WinUI's MenuBar, MenuBarItem and MenuFlyoutItem are FerroUI's Menu and MenuItems and the ListView is FerroUI's ListBox; each item has the execute SwipeItem of its SwipeControl, the AppBarButton (CommandBarButton) shown while a mouse or a pen is over the item (the HoveringStates) and the context menu of ListViewRight_ContainerContentChanging, which selects the item when it opens; each takes the command's label, icon, accelerator and description.",
+      "examples": []
     }
   }
 }

@@ -149,6 +149,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::SwipeMode as MarkupTyped>::MARKUP,
     <crate::SwipeBehaviorOnInvoked as MarkupTyped>::MARKUP,
     <crate::SwipeItemInvokedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's XamlUICommand and StandardUICommand (docs/porting/winui-controls.md, section 10.16).
+    <crate::StandardUICommandKind as MarkupTyped>::MARKUP,
+    <crate::ExecuteRequestedEventArgs as MarkupTyped>::MARKUP,
+    <crate::CanExecuteRequestedEventArgs as MarkupTyped>::MARKUP,
     // WinUI's EasingMode of the storyboard easing functions (docs/porting/winui-calculator-gaps.md).
     <crate::animation::EasingMode as MarkupTyped>::MARKUP,
 ];
@@ -188,6 +192,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<crate::PivotSlideInAnimationGroup>();
     ValueTypes::register_used::<crate::SwipeMode>();
     ValueTypes::register_used::<crate::SwipeBehaviorOnInvoked>();
+    ValueTypes::register_used::<crate::StandardUICommandKind>();
     ValueTypes::register_used::<crate::animation::EasingMode>();
     ValueTypes::register_used::<InfoBarCloseReason>();
     ValueTypes::register_used::<NumberBoxSpinButtonPlacementMode>();
@@ -301,6 +306,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for crate::PivotHeaderFocus
 impl ferroui_base::data::core::ValueTypeRegistration for crate::PivotSlideInAnimationGroup {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<crate::PivotSlideInAnimationGroup>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::StandardUICommandKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::StandardUICommandKind>();
     }
 }
 

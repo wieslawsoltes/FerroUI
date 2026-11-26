@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 31 |
+| pending | 29 |
 | partial | 16 |
-| ported | 79 |
+| ported | 81 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -158,7 +158,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | SplitButton | Basic input | ported | 2 |
 | SplitView | Layout | ported | 1 |
 | StackPanel | Layout | ported | 1 |
-| StandardUICommand | Menus & toolbars | pending | 1 |
+| StandardUICommand | Menus & toolbars | ported | 1 |
 | StoragePickers | System | pending | 5 |
 | SwipeControl | Menus & toolbars | pending | 5 |
 | SystemBackdropElement | Styles | ported | 0 |
@@ -187,7 +187,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | XamlCompInterop | Motion | pending | 5 |
 | XamlResources | Fundamentals | ported | 4 |
 | XamlStyles | Fundamentals | ported | 2 |
-| XamlUICommand | Menus & toolbars | pending | 1 |
+| XamlUICommand | Menus & toolbars | ported | 1 |
 
 ## Platform and external dependencies
 

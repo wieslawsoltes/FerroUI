@@ -1,0 +1,29 @@
+<!-- Ported from the pinned XamlUICommand example of WinUI Gallery (14061eea) and the code behind of
+     XamlUICommandPage.xaml.cs (command_samples.rs); see ../NOTICE.md. The command is WinUI's
+     XamlUICommand of ferroui-controls: the AppBarButton (FerroUI's CommandBarButton) takes its
+     label, icon, keyboard accelerator (the button's HotKey) and description (its tool tip and
+     help text). The output is a polite live region, which announces the text the source's
+     UIHelper.AnnounceActionForAccessibility raises. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <XamlUICommand x:Key="CustomXamlUICommand" Label="Custom XamlUICommand" Description="This is a custom command">
+      <XamlUICommand.IconSource>
+        <SymbolIconSource Symbol="Favorite" />
+      </XamlUICommand.IconSource>
+      <XamlUICommand.KeyboardAccelerators>
+        <KeyboardAccelerator Key="D" Modifiers="Control" />
+      </XamlUICommand.KeyboardAccelerators>
+    </XamlUICommand>
+  </StackPanel.Resources>
+  <StackPanel x:Name="rootGrid">
+    <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
+               Text="XamlUICommand allows the sharing of the UX associated with a command. In this instance we create a simple Custom Command with a label, icon, shortcut, and description. It's defined as a resource and could be used in many controls, like this AppBarButton. The button (and other controls) automatically gets all these UI properties, without the need to define the properties again." />
+    <RelativePanel>
+      <CommandBarButton x:Name="CustomButton" Command="{StaticResource CustomXamlUICommand}" />
+      <TextBlock x:Name="XamlUICommandOutput" Margin="8,0,0,0"
+                 RelativePanel.AlignVerticalCenterWith="CustomButton" RelativePanel.RightOf="CustomButton"
+                 AutomationProperties.LiveSetting="Polite" />
+    </RelativePanel>
+  </StackPanel>
+</StackPanel>

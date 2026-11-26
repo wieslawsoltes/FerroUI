@@ -29,6 +29,8 @@ mod clipboard_page;
 mod color_picker_page;
 mod combo_box_page;
 mod command_bar_page;
+mod standard_ui_command_page;
+mod xaml_ui_command_page;
 mod connected_animation_demo_page;
 mod container_query_page;
 mod content_demo_page;
@@ -191,6 +193,8 @@ pub use command_bar::{
     CommandBarTogglePage,
 };
 pub use command_bar_page::CommandBarPage;
+pub use standard_ui_command_page::StandardUICommandPage;
+pub use xaml_ui_command_page::XamlUICommandPage;
 pub use connected_animation_demo_page::ConnectedAnimationDemoPage;
 pub use container_query_page::ContainerQueryPage;
 pub use content_demo_page::ContentDemoPage;
@@ -404,6 +408,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ColorPickerPage::TYPE,
     ComboBoxPage::TYPE,
     CommandBarPage::TYPE,
+    StandardUICommandPage::TYPE,
+    XamlUICommandPage::TYPE,
     ConnectedAnimationDemoPage::TYPE,
     ContainerQueryPage::TYPE,
     ContentDemoPage::TYPE,
@@ -523,6 +529,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ColorPickerPage::XAML_CLASS,
     &ComboBoxPage::XAML_CLASS,
     &CommandBarPage::XAML_CLASS,
+    &StandardUICommandPage::XAML_CLASS,
+    &XamlUICommandPage::XAML_CLASS,
     &ConnectedAnimationDemoPage::XAML_CLASS,
     &ContainerQueryPage::XAML_CLASS,
     &ContentDemoPage::XAML_CLASS,

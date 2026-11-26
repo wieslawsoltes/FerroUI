@@ -126,6 +126,10 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ContextMenuPage.xaml", "ContextMenu", Icons::MENU, "Traditional right-click context menus");
             s.add("/Pages/FlyoutsPage.xaml", "Flyouts", Icons::FLYOUT, "Lightweight popups anchored to controls");
             s.add("/Pages/MenuPage.xaml", "Menu", Icons::MENU, "Menu bars with nested menu items");
+            // Not from upstream: XamlUICommand and StandardUICommand of WinUI (docs/porting/winui-controls.md,
+            // section 10.16).
+            s.add("/Pages/StandardUICommandPage.xaml", "StandardUICommand", Icons::TERMINAL, "Platform commands with their label, icon and shortcut");
+            s.add("/Pages/XamlUICommandPage.xaml", "XamlUICommand", Icons::TERMINAL, "A command that carries its label, icon, shortcut and description");
         }),
         section("Navigation & Pages", Icons::HAMBURGER_UNREAD, &mut unavailable, |s| {
             s.add("/Pages/CarouselDemoPage.xaml", "CarouselPage", Icons::SLIDES, "Swipeable page-based navigation");

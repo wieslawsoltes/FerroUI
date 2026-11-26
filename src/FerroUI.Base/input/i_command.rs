@@ -17,6 +17,13 @@ pub trait ICommand {
     /// Occurs when changes occur that affect whether or not the command
     /// should execute. Disposing the returned handle unsubscribes.
     fn can_execute_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable>;
+
+    /// The command as a value of its own type, for a command source that treats a kind of
+    /// command specially (WinUI's command sources take the label, icon and keyboard accelerators
+    /// of an `XamlUICommand`). `None`, the default, for a command that is not looked into.
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        None
+    }
 }
 
 impl PartialEq for dyn ICommand {

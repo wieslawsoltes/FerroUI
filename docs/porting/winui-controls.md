@@ -477,6 +477,8 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | AppBarToggleButton | 3 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
 | AppBarSeparator | 1 of 1 | ported | `Pages/AppBarSeparator.xaml` (no code-behind upstream) | `command_samples_tests.rs` |
 | CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| XamlUICommand | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| StandardUICommand | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
 | Flyout | 1 of 1 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
 | MenuFlyout | 6 ported, 1 partial: no SplitMenuFlyoutItem | partial | `menu_samples.rs` | `menu_samples_tests.rs` |
 | MenuBar | 3 of 3 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
@@ -553,3 +555,36 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.16 XamlUICommand and StandardUICommand (#1270)
+
+`src/FerroUI.Controls/ui_command/`: `XamlUICommand`, `ExecuteRequestedEventArgs` and
+`CanExecuteRequestedEventArgs` from `dxaml/xcp/dxaml/lib/XamlUICommand_Partial.cpp`,
+`StandardUICommand` and `StandardUICommandKind` from `StandardUICommand_Partial.cpp` with the
+English texts of `Microsoft.UI.Xaml.Common.rc`, `KeyboardAccelerator`, and the binding of a
+command's properties to its sources from `CommandingHelpers.cpp` and the `OnCommandChanged` of
+`ButtonBase_Partial.cpp`, `AppBarButtonHelpers.h`, `MenuFlyoutItem_Partial.cpp` and
+`SwipeItem.cpp`. A source takes the label (the content of a `Button`, the `Label` of a
+`CommandBarButton` or `CommandBarToggleButton`, the header of a `MenuItem`, the text of a
+`SwipeItem`), the icon (a new icon element of the `IconSource`; the icon source of a swipe item),
+the gesture of the first enabled accelerator as its `HotKey` (and a menu item's `InputGesture`),
+the access key and the description (`AutomationProperties.HelpText` and the tool tip) that it has
+not set; setting another command gives them back. The tests are in `ui_command_tests.rs`, the
+gallery pages XamlUICommand and StandardUICommand in `command_samples_tests.rs` and the importer
+mapping in `importer_tests.rs`.
+
+The sources reach the commanding code through a hook that the first `XamlUICommand` sets
+(`commanding_helpers::install`), so an application that creates none links none of it; the only
+cost to every command source is a read of a thread-local cell when its command changes. A command
+property holds the command as an `Rc<dyn ICommand>` (`XamlUICommand::as_command`, one value while
+a property holds it), and `ICommand::as_any` (a default method that returns `None`) lets a source
+find the `XamlUICommand` behind it.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| A source binds a property when its local value is unset (`ReadLocalValue`). | When its current value is unset or empty, whatever its priority. | The value store has no public test of the local value alone; a style that sets the label of a command source is not a case of the gallery or the tests. |
+| `UIElement.KeyboardAccelerators` of the source gets a copy of the command's accelerators, each bound to its original. | The gesture of the first enabled accelerator is set as the source's `HotKey`, read when the command is set. | FerroUI's controls are invoked by their `HotKey` (section 10.7); a later change of an accelerator is not seen by sources that already have the command. |
+| `UIElement.AccessKey`. | `AutomationProperties.AccessKey`. | FerroUI's access keys are the underscores of the text; the automation property is what it exposes. |
+| `CanExecuteRequestedEventArgs.CommandTarget` and `ListCommandTarget` (`Feature_CommandingImprovements`). | Not ported. | An experimental feature of the source. |
+| `StandardUICommand` reports an error when it enters the tree with the kind `None`. | A command of the kind `None` describes nothing. | A command is not an element of the tree. |
+

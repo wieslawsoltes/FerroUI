@@ -935,6 +935,7 @@ impl MenuItem {
             }
         }
         self.try_update_can_execute_with(new_command.as_ref(), self.command_parameter().as_ref());
+        crate::ui_command::command_changed(self, crate::ui_command::UICommandSource::MenuItem, new_command.as_ref());
     }
 
     fn on_access_key_pressed(sender: &MenuItem, e: &AccessKeyPressedEventArgs) {
