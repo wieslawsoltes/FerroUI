@@ -3,6 +3,7 @@ import { retainedCurveTrack } from '../webview/hostedCurves';
 import { CurveScale } from '../webview/timelineCurveScale';
 import { cubicEasing, easingPlot } from '../webview/easingCurve';
 import { stepPreviewRange, validPreviewRange } from '../src/timelinePreviewRange';
+import { TimeScrubber } from '../webview/timeScrubber';
 import { fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, stepTimelineFrame, timelinePercent, visibleTime, zoomTimeline } from '../webview/timelineViewport';
 
 export function verifyTimelineViewport(): void {
@@ -47,8 +48,32 @@ export function verifyTimelineViewport(): void {
     assert.equal(validPreviewRange({ ...range, end: .25 }, 1), false);
     assert.deepEqual(stepPreviewRange(range, .625, 1.25), { time: .375, completed: false });
     assert.deepEqual(stepPreviewRange({ ...range, loop: false }, .625, 1.25), { time: .75, completed: true });
+    verifyTimeScrubber();
     verifyHostedCurveTrack();
     console.log('Timeline viewport kept the zoom pivot, aligned authored key positions, and clamped both pan edges');
+}
+
+function verifyTimeScrubber(): void {
+    const input = new class extends EventTarget {
+        min = '0';
+        max = '0';
+        value = '0';
+        get valueAsNumber(): number { return Number(this.value); }
+    }();
+    const seeks: number[] = [];
+    const scrubber = new TimeScrubber(input as unknown as HTMLInputElement, time => seeks.push(time));
+    scrubber.show(.015, .059);
+    assert.equal(scrubber.seconds, .015, 'Retain an exact authored time between frames');
+    input.value = input.max;
+    input.dispatchEvent(new Event('input'));
+    assert.deepEqual(seeks, [.059], 'The end is a valid preview range boundary');
+    assert.equal(validPreviewRange({ start: 0, end: seeks[0], loop: true }, .059), true);
+
+    scrubber.show(.059, .105, .015, 60);
+    assert.equal(scrubber.seconds, .059, 'A different frame rate preserves the accepted time');
+    input.value = input.min;
+    input.dispatchEvent(new Event('input'));
+    assert.equal(seeks.at(-1), .015, 'The start of a zoomed clip is exact');
 }
 
 function verifyHostedCurveTrack(): void {
