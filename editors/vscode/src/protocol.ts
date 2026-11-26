@@ -283,7 +283,7 @@ export type DropTarget = { type: 'canvas'; snap?: CanvasSnapInput } & Point | { 
 export interface Placement { origin: DragOrigin; target: DropTarget }
 export interface DropHint { bounds: Bounds | null; description: string; snapLines?: SnapLine[] }
 export interface DragGesture { id: string; frame: FrameTarget; origin: DragOrigin }
-export type DragMessage = { type: 'beginDrag'; gesture: DragGesture } | { type: 'endDrag'; id: string }
+export type DragMessage = { type: 'beginDrag'; gesture: DragGesture } | { type: 'endDrag'; id: string; reason: 'release' | 'cancel' }
     | { type: 'drop'; id: string; frame: FrameTarget; target: DropTarget };
 export type DragUpdate = { type: 'drag'; gesture?: DragGesture };
 export type PlacementResult = { type: 'placement'; id: string; sequence: number; hint?: DropHint; error?: string };

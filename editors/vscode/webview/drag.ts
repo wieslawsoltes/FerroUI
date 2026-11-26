@@ -22,7 +22,7 @@ export class DragSource {
         root.addEventListener('pointerdown', event => {
             this.suppressClick = false;
             if (!event.isPrimary || event.button !== 0) return;
-            this.end();
+            this.cancel();
             const item = candidate(event);
             if (!item) return;
             if (event.pointerType === 'mouse') {
@@ -37,15 +37,15 @@ export class DragSource {
         const move = (event: PointerEvent) => {
             const press = this.press;
             if (!press || event.pointerId !== press.id) return;
-            if (!(event.buttons & 1)) { if (this.active) this.end(); return; }
+            if (!(event.buttons & 1)) { this.finish('release'); return; }
             this.startIfMoved(event);
         };
         window.addEventListener('pointermove', move);
         root.addEventListener('pointerleave', move);
-        window.addEventListener('pointerup', event => { if (event.isPrimary) this.end(); });
-        window.addEventListener('pointercancel', () => this.end());
-        window.addEventListener('blur', () => { if (!this.active) this.end(); });
-        window.addEventListener('keydown', event => { if (event.key === 'Escape') this.end(); });
+        window.addEventListener('pointerup', event => { if (event.isPrimary) this.finish('release'); });
+        window.addEventListener('pointercancel', () => this.cancel());
+        window.addEventListener('blur', () => { if (!this.active) this.clear(); });
+        window.addEventListener('keydown', event => { if (event.key === 'Escape') this.cancel(); });
         root.addEventListener('click', event => {
             if (this.suppressClick && event.detail) {
                 this.suppressClick = false;
@@ -67,10 +67,16 @@ export class DragSource {
         this.started(gesture);
     }
 
-    end(send = true): void {
-        if (this.active && send) this.send({ type: 'endDrag', id: this.active.id });
+    cancel(): void { this.finish('cancel'); }
+
+    clear(): void {
         this.press = this.active = undefined;
         document.body.classList.remove('drag-source');
+    }
+
+    private finish(reason: 'release' | 'cancel'): void {
+        if (this.active) this.send({ type: 'endDrag', id: this.active.id, reason });
+        this.clear();
     }
 }
 

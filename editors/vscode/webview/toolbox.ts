@@ -26,7 +26,7 @@ mode.addEventListener('click', () => { tiles = !tiles; vscode.setState({ tiles }
 search.addEventListener('input', render);
 window.addEventListener('message', ({ data }: MessageEvent<ToToolbox>) => {
     if (data.type === 'drag') {
-        if (!data.gesture) dragSource.end(false);
+        if (!data.gesture) dragSource.clear();
         return;
     }
     if (data.type === 'state') {

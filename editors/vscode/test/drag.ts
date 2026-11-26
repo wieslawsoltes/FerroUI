@@ -37,7 +37,7 @@ export async function verifyDrag(panel: DesignerPanel): Promise<void> {
 
         const first = await begin(asset);
         assert.ok((await panel.previewPlacement(first.frame, { origin: first.origin, target: point })).bounds);
-        await drag.receive(panel, { type: 'endDrag', id: first.id });
+        await drag.receive(panel, { type: 'endDrag', id: first.id, reason: 'release' });
         await drop(first, point);
         const inserted = panel.document.getText();
         assert.match(inserted, /Text="Text"/);
@@ -52,12 +52,18 @@ export async function verifyDrag(panel: DesignerPanel): Promise<void> {
         assert.ok(panel.document.getText().indexOf('saveButton') < panel.document.getText().indexOf('Workspace settings'));
         await undo();
 
-        const cancelled = await begin(asset);
-        await drag.receive(panel, { type: 'endDrag', id: cancelled.id });
+        const released = await begin(asset);
+        await drag.receive(panel, { type: 'endDrag', id: released.id, reason: 'release' });
         await delay(170);
-        await drag.receive(panel, { type: 'endDrag', id: cancelled.id });
+        await drag.receive(panel, { type: 'endDrag', id: released.id, reason: 'release' });
         await delay(130);
         assert.equal(active, undefined, 'Repeated release notifications do not extend a completed drag');
+        await drop(released, point);
+        assert.equal(panel.document.getText(), original);
+
+        const cancelled = await begin(asset);
+        await drag.receive(panel, { type: 'endDrag', id: cancelled.id, reason: 'cancel' });
+        assert.equal(active, undefined, 'Explicit cancellation retires the gesture immediately');
         await drop(cancelled, point);
         assert.equal(panel.document.getText(), original);
     } finally {

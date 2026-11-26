@@ -48,7 +48,7 @@ layout.addEventListener('click', () => {
 
 tree.addEventListener('pointerdown', () => {
     if (drag) {
-        vscode.postMessage({ type: 'endDrag', id: drag.id });
+        vscode.postMessage({ type: 'endDrag', id: drag.id, reason: 'cancel' });
         drag = undefined;
         clearMarker();
     }
@@ -57,7 +57,7 @@ tree.addEventListener('pointerdown', () => {
 window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
     if (data.type === 'drag') {
         drag = data.gesture;
-        if (!drag) { dragSource.end(false); clearMarker(); }
+        if (!drag) { dragSource.clear(); clearMarker(); }
         return;
     }
     if (data.type === 'state') {
@@ -137,7 +137,7 @@ tree.addEventListener('keydown', event => {
 
 tree.addEventListener('pointermove', event => {
     if (!(event.buttons & 1)) {
-        if (drag) vscode.postMessage({ type: 'endDrag', id: drag.id });
+        if (drag) vscode.postMessage({ type: 'endDrag', id: drag.id, reason: 'release' });
         clearMarker();
         return;
     }

@@ -30,14 +30,14 @@ export class CanvasDrag {
         }, send, gesture => this.setGesture(gesture));
         board.addEventListener('pointerdown', () => {
             if (this.gesture) {
-                send({ type: 'endDrag', id: this.gesture.id });
+                send({ type: 'endDrag', id: this.gesture.id, reason: 'cancel' });
                 this.gesture = undefined;
                 this.clearHint();
             }
         }, true);
         artboard.surface.addEventListener('pointermove', event => {
             if (!(event.buttons & 1)) {
-                if (this.gesture) send({ type: 'endDrag', id: this.gesture.id });
+                if (this.gesture) send({ type: 'endDrag', id: this.gesture.id, reason: 'release' });
                 this.clearHint();
                 return;
             }
@@ -72,7 +72,7 @@ export class CanvasDrag {
 
     setFrame(frame?: FrameTarget): void {
         this.frame = frame;
-        if (!frame) this.source.end();
+        if (!frame) this.source.cancel();
         this.clearHint();
     }
 
@@ -82,7 +82,7 @@ export class CanvasDrag {
             this.snapBasis = gesture ? this.captureSnap() : undefined;
         }
         this.gesture = gesture;
-        if (!gesture) this.source.end(false);
+        if (!gesture) this.source.clear();
     }
 
     show(result: PlacementResult): void {
@@ -99,7 +99,7 @@ export class CanvasDrag {
 
     private validateSnap(): boolean {
         if (!this.gesture || sameSnap(this.snapBasis, this.captureSnap())) return true;
-        this.send({ type: 'endDrag', id: this.gesture.id });
+        this.send({ type: 'endDrag', id: this.gesture.id, reason: 'cancel' });
         this.setGesture(undefined);
         return false;
     }

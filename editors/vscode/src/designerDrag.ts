@@ -36,8 +36,12 @@ export class DesignerDrag {
         const gesture = this.active;
         if (!gesture || gesture.id !== message.id || gesture.frame.session !== panel.session) return;
         if (message.type === 'endDrag') {
-            // Drop and dragend can arrive on different webview message queues.
-            this.ending ??= setTimeout(() => this.clear(), 250);
+            if (message.reason === 'cancel') {
+                this.clear();
+            } else {
+                // A release and its drop can arrive on different webview message queues.
+                this.ending ??= setTimeout(() => this.clear(), 250);
+            }
             return;
         }
         const valid = panel.canUse(message.frame) && message.frame.token === gesture.frame.token;

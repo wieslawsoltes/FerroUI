@@ -35,7 +35,7 @@ window.addEventListener('message', ({ data }: MessageEvent<ToAssets>) => {
     switch (data.type) {
         case 'drag':
             drag = data.gesture;
-            if (!drag) dragSource.end(false);
+            if (!drag) dragSource.clear();
             return;
         case 'thumbnail':
             if (data.id === selected?.id && data.uri?.startsWith('data:image/')) {
