@@ -202,6 +202,10 @@ and the scroll controller requests) are ported from the WinUI project directly
 (`controls/dev/ScrollView` and `controls/dev/ScrollPresenter`, at the same commit), under the
 same license.
 
+The files under `annotated_scroll_bar/` (WinUI's `AnnotatedScrollBar`, its label, its event
+arguments and its scrolling kind) are ported from the WinUI project directly
+(`controls/dev/AnnotatedScrollBar`, at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
