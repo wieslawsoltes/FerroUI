@@ -5,10 +5,12 @@
 use crate::automation::peers::{AutomationPeer, ControlAutomationPeer, NavigationViewAutomationPeer};
 use crate::automation::{AutomationProperties, SelectionPatternIdentifiers};
 use crate::items_source::{reference_equals, ItemsSource};
+use crate::navigation::NavigationTransitionInfo;
 use crate::navigation_view_events::*;
+use crate::navigation_view_top_overflow::primary_top_items;
 use crate::selection_indicator_animation::SelectionIndicatorAnimation;
 use crate::primitives::{
-    NavigationViewTemplateSettings, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
+    NavigationViewTemplateSettings, Popup, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
     TemplatedControlImplExt,
 };
 use crate::templates::{IControlTemplate, IDataTemplate};
@@ -76,6 +78,10 @@ struct Parts {
     left_footer: Option<Ref<StackPanel>>,
     top_menu: Option<Ref<StackPanel>>,
     top_footer: Option<Ref<StackPanel>>,
+    top_grid: Option<Ref<Control>>,
+    top_overflow_button: Option<Ref<Button>>,
+    top_overflow_popup: Option<Ref<Popup>>,
+    top_overflow: Option<Ref<StackPanel>>,
     left_pane_header: Option<Ref<ContentControl>>,
     top_pane_header: Option<Ref<ContentControl>>,
     left_pane_custom: Option<Ref<ContentControl>>,
@@ -100,7 +106,10 @@ impl Parts {
             subscription.dispose();
         }
         // The content of the application leaves the old parts before a new template takes it.
-        for host in [&self.left_menu, &self.left_footer, &self.top_menu, &self.top_footer].into_iter().flatten() {
+        for host in [&self.left_menu, &self.left_footer, &self.top_menu, &self.top_footer, &self.top_overflow]
+            .into_iter()
+            .flatten()
+        {
             host.children().clear();
         }
         for presenter in [
@@ -146,9 +155,14 @@ impl Parts {
 /// `:back-button-collapsed`, `:pane-collapsed`, and `:back-button-row-visible` for the row WinUI
 /// sizes in code). The Fluent and Simple themes have no template.
 ///
+/// The top-level items that do not fit in the top pane move to the overflow menu of
+/// `TopNavOverflowButton`, the popup `TopNavOverflowFlyout` with the host
+/// `TopNavMenuItemsOverflowHost` (`HandleTopNavigationMeasureOverride`): the items keep their order,
+/// the selected item stays in the pane, and an item selected in the menu moves into the pane.
+///
 /// The menu items are realized in stack panels, not in `ItemsRepeater`s with a hierarchical
 /// `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md, section 10.4): the
-/// overflow of the top pane, the animations of the pane, the
+/// animations of the pane, the
 /// shadow of the pane, the padding of the title bar, the shoulder navigation and the selectors of
 /// templates and styles.
 #[repr(C)]
@@ -187,6 +201,15 @@ pub struct NavigationView {
     updating_parts: Cell<bool>,
     update_pending: Cell<bool>,
     last_width: Cell<f64>,
+    /// For each top-level menu item, whether it is in the top pane rather than its overflow menu.
+    top_primary: RefCell<Vec<bool>>,
+    /// The widths of the top-level menu items, measured while they were in the top pane.
+    top_widths: RefCell<Vec<f64>>,
+    /// The recommended transitions of the next `SelectionChanged` and `ItemInvoked`.
+    selection_transition: Cell<NavigationTransitionInfo>,
+    invoke_transition: Cell<NavigationTransitionInfo>,
+    /// Whether the selection comes from an item of the overflow menu (`m_selectionChangeFromOverflowMenu`).
+    selection_from_overflow: Cell<bool>,
     selection_changed: HandlerList<dyn Fn(&NavigationViewSelectionChangedEventArgs)>,
     item_invoked: HandlerList<dyn Fn(&NavigationViewItemInvokedEventArgs)>,
     display_mode_changed: HandlerList<dyn Fn(&NavigationViewDisplayModeChangedEventArgs)>,
@@ -219,6 +242,10 @@ ferro_class_info!(NavigationView {
             TemplatePart("FooterMenuItemsHost", type(Ref<StackPanel>)),
             TemplatePart("TopNavMenuItemsHost", type(Ref<StackPanel>)),
             TemplatePart("TopFooterMenuItemsHost", type(Ref<StackPanel>)),
+            TemplatePart("TopNavGrid", type(Ref<Control>)),
+            TemplatePart("TopNavOverflowButton", type(Ref<Button>)),
+            TemplatePart("TopNavOverflowFlyout", type(Ref<Popup>)),
+            TemplatePart("TopNavMenuItemsOverflowHost", type(Ref<StackPanel>)),
             TemplatePart("PaneHeaderContentBorder", type(Ref<ContentControl>)),
             TemplatePart("PaneHeaderOnTopPane", type(Ref<ContentControl>)),
             TemplatePart("PaneCustomContentBorder", type(Ref<ContentControl>)),
@@ -490,6 +517,11 @@ impl NavigationView {
             updating_parts: Cell::new(false),
             update_pending: Cell::new(false),
             last_width: Cell::new(0.0),
+            top_primary: RefCell::new(Vec::new()),
+            top_widths: RefCell::new(Vec::new()),
+            selection_transition: Cell::new(NavigationTransitionInfo::Entrance),
+            invoke_transition: Cell::new(NavigationTransitionInfo::Entrance),
+            selection_from_overflow: Cell::new(false),
             selection_changed: HandlerList::new(),
             item_invoked: HandlerList::new(),
             display_mode_changed: HandlerList::new(),
@@ -830,6 +862,10 @@ impl FerroObjectImpl for NavigationView {
         } else if property == Self::selected_item_property().as_property() {
             let (old, next) = change.get_old_and_new_value::<Option<BoxedValue>>();
             this.selection_property_changed(old, next);
+            // SelectOverflowItem: a selected item of the overflow menu moves into the top pane.
+            if this.top_primary.borrow().contains(&false) {
+                this.invalidate_measure();
+            }
         } else if property == Self::is_pane_open_property().as_property() {
             this.pane_open_changed();
         } else if property == Self::pane_display_mode_property().as_property() {
@@ -909,6 +945,7 @@ impl LayoutableImpl for NavigationView {
         {
             this.update_adaptive_layout(available_size.width, false);
         }
+        this.update_top_overflow(available_size);
         Self::parent_measure_override(this, available_size)
     }
 
@@ -957,6 +994,10 @@ impl TemplatedControlImpl for NavigationView {
             left_footer: scope.find_as("FooterMenuItemsHost"),
             top_menu: scope.find_as("TopNavMenuItemsHost"),
             top_footer: scope.find_as("TopFooterMenuItemsHost"),
+            top_grid: scope.find_as("TopNavGrid"),
+            top_overflow_button: scope.find_as("TopNavOverflowButton"),
+            top_overflow_popup: scope.find_as("TopNavOverflowFlyout"),
+            top_overflow: scope.find_as("TopNavMenuItemsOverflowHost"),
             left_pane_header: scope.find_as("PaneHeaderContentBorder"),
             top_pane_header: scope.find_as("PaneHeaderOnTopPane"),
             left_pane_custom: scope.find_as("PaneCustomContentBorder"),
@@ -979,6 +1020,16 @@ impl TemplatedControlImpl for NavigationView {
                     } else {
                         owner.set_pane_open_internal(true);
                     }
+                }
+            });
+            parts.buttons.push((button.downgrade(), token));
+        }
+        // The Flyout of TopNavOverflowButton: a click opens the overflow menu, a second click closes it.
+        if let (Some(button), Some(popup)) = (&parts.top_overflow_button, &parts.top_overflow_popup) {
+            let weak = popup.downgrade();
+            let token = button.click(move |_, _| {
+                if let Some(popup) = weak.upgrade() {
+                    popup.set_is_open(!popup.is_open());
                 }
             });
             parts.buttons.push((button.downgrade(), token));
@@ -1281,6 +1332,111 @@ impl NavigationView {
         self.template_settings.set(NavigationViewTemplateSettings::open_pane_length_property(), length);
     }
 
+    /// `HandleTopNavigationMeasureOverride`: which top-level menu items fit in the top pane of
+    /// `available`, from their widths in the pane.
+    fn update_top_overflow(&self, available: Size) {
+        let parts = self.parts.borrow().clone();
+        let count = self.roots.borrow().iter().filter(|entry| !entry.footer).count();
+        let (Some(grid), Some(host), Some(_)) = (&parts.top_grid, &parts.top_menu, &parts.top_overflow) else {
+            return;
+        };
+        if !self.is_top_navigation_view() || !available.width.is_finite() || !grid.is_visible() {
+            self.set_top_primary(vec![true; count]);
+            return;
+        }
+        let primary = self.top_primary.borrow().clone();
+        if primary.len() != count {
+            // New items: all of them are measured in the pane first.
+            self.set_top_primary(vec![true; count]);
+        }
+        let primary = self.top_primary.borrow().clone();
+        grid.measure(Size::new(f64::INFINITY, available.height));
+        let widths = {
+            let mut widths = self.top_widths.borrow_mut();
+            widths.resize(count, f64::NAN);
+            let roots = self.roots.borrow();
+            for (index, entry) in roots.iter().filter(|entry| !entry.footer).enumerate() {
+                if primary[index] {
+                    widths[index] = entry.container.desired_size().width;
+                }
+            }
+            widths.clone()
+        };
+        if widths.iter().any(|width| width.is_nan()) {
+            return;
+        }
+        let overflowing = primary.contains(&false);
+        let button_width = parts.top_overflow_button.as_ref().map_or(0.0, |button| {
+            let margin = button.margin();
+            finite_length(button.width()) + margin.left + margin.right
+        });
+        // The width of the rest of the pane: its header, custom content, search box and footer.
+        let others = grid.desired_size().width
+            - host.desired_size().width
+            - if overflowing { button_width } else { 0.0 };
+        let next = primary_top_items(
+            &widths,
+            available.width - others.max(0.0),
+            button_width,
+            self.selected_top_index(),
+            overflowing,
+        );
+        self.set_top_primary(next);
+    }
+
+    fn set_top_primary(&self, value: Vec<bool>) {
+        if *self.top_primary.borrow() != value {
+            *self.top_primary.borrow_mut() = value;
+            self.update_parts();
+        }
+    }
+
+    /// The index among the top-level menu items of the selected item or of its top-level ancestor.
+    fn selected_top_index(&self) -> Option<usize> {
+        let selected = self.container_from_menu_item(&self.selected_item())?;
+        let entry = self.entries().into_iter().find(|entry| entry.container == selected)?;
+        let root = entry.ancestors.first().cloned().unwrap_or(entry.container);
+        self.roots.borrow().iter().filter(|entry| !entry.footer).position(|entry| entry.container == root)
+    }
+
+    /// Whether the top-level menu item `container` is in the overflow menu of the top pane.
+    pub(crate) fn is_in_top_overflow(&self, container: &Ref<NavigationViewItemBase>) -> bool {
+        let primary = self.top_primary.borrow();
+        self.roots
+            .borrow()
+            .iter()
+            .filter(|entry| !entry.footer)
+            .position(|entry| entry.container == *container)
+            .is_some_and(|index| primary.get(index) == Some(&false))
+    }
+
+    /// `GetRecommendedTransitionDirection` and `CreateNavigationTransitionInfo`: in the top pane, a
+    /// slide from the right to an item after the previous one (or from the overflow menu), from the
+    /// left to an item before it; otherwise, and for the settings item, `Entrance`.
+    fn recommended_transition(
+        &self,
+        previous: &Option<BoxedValue>,
+        next: &Option<BoxedValue>,
+        from_overflow: bool,
+    ) -> NavigationTransitionInfo {
+        if !self.is_top_navigation_view() {
+            return NavigationTransitionInfo::Entrance;
+        }
+        if from_overflow {
+            return NavigationTransitionInfo::SlideFromRight;
+        }
+        let entries = self.entries();
+        let position = |item: &Option<BoxedValue>| {
+            let container = self.container_from_menu_item(item)?;
+            entries.iter().position(|entry| entry.container == container)
+        };
+        match (position(previous), position(next)) {
+            (Some(previous), Some(next)) if previous < next => NavigationTransitionInfo::SlideFromRight,
+            (Some(previous), Some(next)) if previous > next => NavigationTransitionInfo::SlideFromLeft,
+            _ => NavigationTransitionInfo::Entrance,
+        }
+    }
+
     fn update_parts(&self) {
         if self.updating_parts.replace(true) {
             self.update_pending.set(true);
@@ -1354,28 +1510,53 @@ impl NavigationView {
 
         // UpdateRepeaterItemsSource and UpdateFooterRepeaterItemsSource: the containers in the hosts
         // of the pane in use; the settings item is the last footer item.
+        // The top-level menu items that do not fit in the top pane are in its overflow menu.
         let roots = self.roots.borrow().clone();
+        let primary = self.top_primary.borrow().clone();
+        let menu_count = roots.iter().filter(|entry| !entry.footer).count();
+        let overflowing = top && primary.len() == menu_count && primary.contains(&false);
+        let in_overflow = |index: usize| overflowing && !primary[index];
+        let mut hosts: Vec<(&Option<Ref<StackPanel>>, Vec<Ref<Control>>)> = Vec::new();
         for (left_host, top_host, footer) in
             [(&parts.left_menu, &parts.top_menu, false), (&parts.left_footer, &parts.top_footer, true)]
         {
-            let mut controls: Vec<Ref<Control>> =
-                roots.iter().filter(|entry| entry.footer == footer).map(|entry| entry.container.clone().upcast()).collect();
+            let mut controls = Vec::new();
+            let mut overflow = Vec::new();
+            for (index, entry) in roots.iter().filter(|entry| entry.footer == footer).enumerate() {
+                let control: Ref<Control> = entry.container.clone().upcast();
+                if !footer && in_overflow(index) {
+                    overflow.push(control);
+                } else {
+                    controls.push(control);
+                }
+            }
             if footer {
                 controls.push(self.settings_item().upcast());
+            } else {
+                hosts.push((&parts.top_overflow, overflow));
             }
             let (active, inactive) = if top { (top_host, left_host) } else { (left_host, top_host) };
-            if let Some(inactive) = inactive {
-                if inactive.children().count() > 0 {
-                    inactive.children().clear();
-                }
+            hosts.push((inactive, Vec::new()));
+            hosts.push((active, controls));
+        }
+        // A container leaves the host that holds it before another host takes it.
+        let changed: Vec<(&Ref<StackPanel>, Vec<Ref<Control>>)> = hosts
+            .into_iter()
+            .filter_map(|(host, controls)| host.as_ref().map(|host| (host, controls)))
+            .filter(|(host, controls)| host.children().snapshot().as_ref() != controls)
+            .collect();
+        for (host, _) in &changed {
+            host.children().clear();
+        }
+        for (host, controls) in changed {
+            for control in controls {
+                host.children().add(control);
             }
-            if let Some(active) = active {
-                if active.children().snapshot().as_ref() != &controls {
-                    active.children().clear();
-                    for control in controls {
-                        active.children().add(control);
-                    }
-                }
+        }
+        settings.set(NavigationViewTemplateSettings::overflow_button_visibility_property(), overflowing);
+        if !overflowing {
+            if let Some(popup) = parts.top_overflow_popup.as_ref().filter(|popup| popup.is_open()) {
+                popup.set_is_open(false);
             }
         }
 
@@ -1395,8 +1576,18 @@ impl NavigationView {
 
         // The state of the items in the pane.
         let mut themes = Vec::new();
+        let overflow_roots: Vec<Ref<NavigationViewItemBase>> = roots
+            .iter()
+            .filter(|entry| !entry.footer)
+            .enumerate()
+            .filter(|(index, _)| in_overflow(*index))
+            .map(|(_, entry)| entry.container.clone())
+            .collect();
         for entry in self.entries() {
-            entry.container.set_top_navigation(top && entry.ancestors.is_empty());
+            // The items of the overflow menu look like the items of a menu, not of the top pane.
+            let in_menu = overflow_roots.contains(&entry.container);
+            entry.container.set_top_navigation(top && entry.ancestors.is_empty() && !in_menu);
+            entry.container.set_top_overflow(in_menu);
             if entry.ancestors.is_empty() {
                 entry.container.set_navigation_context(compact_length, closed_compact, 0);
                 entry.container.set_pane_open(self.is_pane_open() && !top);
@@ -1681,6 +1872,9 @@ impl NavigationView {
                 }
             }
             *self.roots.borrow_mut() = roots;
+            // New items are measured in the top pane before any of them moves to the overflow menu.
+            self.top_primary.borrow_mut().clear();
+            self.top_widths.borrow_mut().clear();
             let entries = self.entries();
             *self.known_entries.borrow_mut() = entries.clone();
             let was_syncing = self.syncing_selection.replace(true);
@@ -2012,6 +2206,8 @@ impl NavigationView {
 
     /// `OnSelectedItemPropertyChanged`.
     fn selection_property_changed(&self, old: Option<BoxedValue>, next: Option<BoxedValue>) {
+        let from_overflow = self.selection_from_overflow.replace(false);
+        self.selection_transition.set(self.recommended_transition(&old, &next, from_overflow));
         let was_pending = self.pending_selection.replace(false);
         self.pending_selection_revision.set(self.pending_selection_revision.get().wrapping_add(1));
         if self.syncing_selection.get() {
@@ -2086,6 +2282,7 @@ impl NavigationView {
         let args = NavigationViewSelectionChangedEventArgs {
             selected_item_container: self.container_from_menu_item(&selected),
             is_settings_selected: self.is_settings_item(&selected),
+            recommended_navigation_transition_info: self.selection_transition.get(),
             selected_item: selected,
             identity: Rc::new(()),
         };
@@ -2109,6 +2306,7 @@ impl NavigationView {
             invoked_item: container.content(),
             invoked_item_container: Some(container.clone()),
             is_settings_invoked: self.is_settings_item(&data),
+            recommended_navigation_transition_info: self.invoke_transition.replace(NavigationTransitionInfo::Entrance),
             identity: Rc::new(()),
         };
         for (_, handler) in self.item_invoked.snapshot().iter() {
@@ -2128,7 +2326,14 @@ impl NavigationView {
             return;
         };
         let data = entry.data;
+        // The recommended transition: only an item that selects has one other than Entrance.
+        let root = entry.ancestors.first().cloned().unwrap_or_else(|| container.clone());
+        let from_overflow = self.is_top_navigation_view() && self.is_in_top_overflow(&root);
+        if item.selects_on_invoked() {
+            self.invoke_transition.set(self.recommended_transition(&self.selected_item(), &data, from_overflow));
+        }
         if item.selects_on_invoked() && !reference_equals(&self.selected_item(), &data) {
+            self.selection_from_overflow.set(from_overflow);
             *self.pending_invocation.borrow_mut() = Some(container.clone());
             self.set_current_value(Self::selected_item_property(), data);
             self.pending_invocation.borrow_mut().take();
@@ -2139,6 +2344,12 @@ impl NavigationView {
             item.set_is_expanded(!item.is_expanded());
         }
         self.close_after_item(item);
+        // CloseTopNavigationViewFlyout: an item invoked in the overflow menu closes it.
+        if !item.has_children_for_navigation() {
+            if let Some(popup) = self.parts.borrow().top_overflow_popup.clone().filter(|popup| popup.is_open()) {
+                popup.set_is_open(false);
+            }
+        }
         if item.selects_on_invoked() && !item.has_children_for_navigation() {
             if let Some(entry) = self.entries().into_iter().find(|entry| entry.container.ptr_eq(&item.to_ref())) {
                 if let Some(root) = entry.ancestors.first().and_then(|ancestor| ancestor.cast::<NavigationViewItem>()) {

@@ -1,0 +1,40 @@
+<!-- Ported from the pinned ScratchPad page of WinUI Gallery (14061eea) and the code behind of
+     ScratchPadPage.xaml.cs (scratch_pad_samples.rs); see ../NOTICE.md. ThemeResource becomes
+     DynamicResource and the bordered Grids are Borders. The source's IsSpellCheckEnabled="False"
+     is the editor's behaviour here: it does not check spelling. -->
+<Border xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Height="640"
+        Margin="0,12,0,0"
+        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="{DynamicResource OverlayCornerRadius}">
+  <Grid RowDefinitions="*,*">
+    <ScrollViewer x:Name="scratchPad"
+                  Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                  HorizontalScrollBarVisibility="Visible" />
+    <Border Grid.Row="1"
+            Padding="12"
+            Background="{DynamicResource ExpanderContentBackground}"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto" ColumnSpacing="12" RowSpacing="8">
+        <RichEditBox x:Name="textbox"
+                     AcceptsReturn="True"
+                     AutomationProperties.Name="XAML markup textbox"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        <StackPanel Grid.Column="1" MinWidth="168" HorizontalAlignment="Stretch" VerticalAlignment="Top" Spacing="8">
+          <Button x:Name="loadButton" HorizontalAlignment="Stretch" Content="Load"
+                  Theme="{DynamicResource AccentButtonStyle}" />
+          <Button x:Name="resetButton" HorizontalAlignment="Stretch" Content="Reset"
+                  ToolTip.Tip="Resets to the default scratch pad content" />
+        </StackPanel>
+        <TextBlock x:Name="loadStatus" Grid.Row="1" Grid.ColumnSpan="2" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+      </Grid>
+    </Border>
+  </Grid>
+</Border>

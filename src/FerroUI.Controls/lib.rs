@@ -230,7 +230,7 @@ mod user_control;
 pub use user_control::UserControl;
 pub use progress_bar::{ProgressBar, ProgressBarTemplateSettings};
 pub use separator::Separator;
-pub use slider::{Slider, SliderImpl, SliderImplExt, SliderVTable, TickPlacement};
+pub use slider::{Slider, SliderImpl, SliderImplExt, SliderSnapsTo, SliderVTable, TickPlacement};
 mod tick_bar;
 pub use tick_bar::{TickBar, TickBarPlacement, TickList};
 #[cfg(test)]
@@ -393,6 +393,7 @@ pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable
 mod navigation_view;
 mod navigation_view_events;
 mod navigation_view_item;
+mod navigation_view_top_overflow;
 pub use navigation_view::NavigationView;
 pub use navigation_view_events::{
     NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,
@@ -670,6 +671,18 @@ mod selection_mode;
 mod selection_indicator_animation;
 mod selection_indicator;
 pub use selection_indicator::SelectionIndicator;
+mod content_dialog;
+pub use content_dialog::{
+    ContentDialog, ContentDialogButton, ContentDialogButtonClickEventArgs, ContentDialogClosedEventArgs,
+    ContentDialogClosingEventArgs, ContentDialogDeferral, ContentDialogError, ContentDialogOperation,
+    ContentDialogResult,
+};
+#[cfg(test)]
+mod content_dialog_tests;
+mod selector_bar;
+pub use selector_bar::{SelectorBar, SelectorBarItem};
+#[cfg(test)]
+mod selector_bar_tests;
 mod tab_control;
 mod tab_item;
 mod tree_view;
@@ -678,7 +691,7 @@ mod virtualizing_panel;
 mod virtualizing_stack_panel;
 
 pub use assigned_binding::{AssignedBinding};
-pub use combo_box::{ComboBox};
+pub use combo_box::{ComboBox, ComboBoxTextSubmittedEventArgs};
 pub use combo_box_item::{ComboBoxItem};
 pub use container_clearing_event_args::{ContainerClearingEventArgs};
 pub use container_index_changed_event_args::{ContainerIndexChangedEventArgs};
@@ -878,7 +891,10 @@ pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, Dra
 
 // --- pipspager ---
 mod pips_pager;
-pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
+pub use pips_pager::{
+    PipsPager, PipsPagerButtonVisibility, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings,
+    PipsPagerWrapMode,
+};
 
 // --- connected-animation ---
 

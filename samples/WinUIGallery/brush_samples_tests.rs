@@ -1,14 +1,14 @@
 //! The RadialGradientBrush, IconElement, Spacing and Typography pages: the source's examples with
 //! their code behind (`brush_samples.rs`).
 
-use crate::brush_samples::{design_image_uri, is_monochrome, radial_brush, TYPE_RAMP};
+use crate::brush_samples::{design_image_uri, radial_brush, TYPE_RAMP};
 use crate::{examples, tests::start};
 use ferroui_base::media::GradientSpreadMethod;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Point, Ref, RelativeUnit};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Border, ComboBox, Control, Image, Slider, TextBlock};
+use ferroui_controls_icons::{BitmapIcon, ImageIcon};
 
 fn near(actual: Point, x: f64, y: f64) -> bool {
     (actual.x - x).abs() < 1e-9 && (actual.y - y).abs() < 1e-9
@@ -51,18 +51,15 @@ fn radial_gradient_brush_sliders_and_boxes_set_the_brush() {
 fn icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color() {
     let _application = start();
     let root = page("IconElement");
-    assert!(!is_monochrome(&root), "the markup's ShowAsMonochrome is False");
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 1.0);
+    let icon = root.get_control::<BitmapIcon>("SlicesIcon");
+    assert!(!icon.show_as_monochrome(), "the markup's ShowAsMonochrome is False");
+    // The test host decodes no images: the icons are there, whatever their bitmaps load to.
+    let _image_icon = root.get_control::<ImageIcon>("ImageExample1Icon");
     let check = root.get_control::<ToggleButton>("MonochromeButton");
     check.set_is_checked(Some(true));
-    assert!(is_monochrome(&root));
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 0.0);
-    assert!(root
-        .get_control::<Rectangle>("SlicesMonochrome")
-        .opacity_mask()
-        .is_some());
+    assert!(icon.show_as_monochrome());
     check.set_is_checked(Some(false));
-    assert!(!is_monochrome(&root));
+    assert!(!icon.show_as_monochrome());
     assert!(root.get_control::<TextBlock>("SvgUnavailable").text().is_some());
 }
 
@@ -89,7 +86,8 @@ fn spacing_page_shows_the_spacing_table_and_the_theme_images() {
 #[test]
 fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
     use ferroui_base::interactivity::RoutedEventArgs;
-    use ferroui_controls::{Button, Flyout, SelectableTextBlock};
+    use ferroui_controls::{Button, SelectableTextBlock};
+    use ferroui_controls_teaching_tip::TeachingTip;
     let _application = start();
     let root = page("Typography");
     assert!(design_image_uri("Typography", Some(&ThemeVariant::light())).ends_with("Typography.light.png"));
@@ -97,19 +95,12 @@ fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
     // The theme's image where the platform decodes it (the test platform may not).
     let decoded = crate::assets::load_bitmap(&design_image_uri("Typography", None)).is_ok();
     assert_eq!(root.get_control::<Image>("HeaderImage").source().is_some(), decoded);
-    // The five tips of ShowTypographyButtonClick1 to 5, the Flyouts of their buttons.
+    // The five tips of ShowTypographyButtonClick1 to 5.
     for (index, title) in ["Caption", "Body", "Body Strong", "Title", "Display"].into_iter().enumerate() {
-        let button = format!("ShowTypographyButton{}", index + 1);
-        let flyout = root
-            .get_control::<Button>(&button)
-            .flyout()
-            .and_then(|flyout| flyout.cast::<Flyout>())
-            .unwrap_or_else(|| panic!("{button} has the tip"));
-        let content = flyout.content().expect("the tip's content");
-        let text = Control::from_boxed(&content)
-            .and_then(|control| control.cast::<TextBlock>())
-            .expect("the tip's title");
-        assert_eq!(text.text().as_deref(), Some(title));
+        let button = root.get_control::<Button>(&format!("ShowTypographyButton{}", index + 1));
+        let tip = root.get_control::<TeachingTip>(&format!("ShowTypographyInfoTooltip{}", index + 1));
+        assert_eq!(tip.title().as_deref(), Some(title));
+        assert!(tip.target() == Some(button.upcast::<Control>()));
     }
     // The nine rows of the type ramp: the example and its resource name.
     for (example, resource, _, _) in TYPE_RAMP {
