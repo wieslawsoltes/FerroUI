@@ -1216,6 +1216,7 @@ ferroui_base::ferro_properties! { impl TextBox, also [
     TextBox::can_copy_property,
     TextBox::can_paste_property,
     TextBox::is_undo_enabled_property,
+    TextBox::is_spell_check_enabled_property,
     TextBox::undo_limit_property,
     TextBox::can_undo_property,
     TextBox::can_redo_property,
