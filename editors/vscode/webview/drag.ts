@@ -24,7 +24,15 @@ export class DragSource {
             if (!event.isPrimary || event.button !== 0) return;
             this.end();
             const item = candidate(event);
-            if (item) this.press = { ...item, id: event.pointerId, x: event.clientX, y: event.clientY };
+            if (!item) return;
+            if (event.pointerType === 'mouse') {
+                // A default mouse press can capture the pointer in the source webview.
+                event.preventDefault();
+                if (event.target instanceof Element) {
+                    event.target.closest<HTMLElement>('button, [tabindex]')?.focus({ preventScroll: true });
+                }
+            }
+            this.press = { ...item, id: event.pointerId, x: event.clientX, y: event.clientY };
         });
         const move = (event: PointerEvent) => {
             const press = this.press;
