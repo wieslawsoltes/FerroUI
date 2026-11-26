@@ -121,6 +121,11 @@ impl ShapedTextRun {
         self.ref_count.set(self.ref_count.get() + 1);
     }
 
+    /// The number of owners of the run.
+    pub(crate) fn reference_count(&self) -> i32 {
+        self.ref_count.get()
+    }
+
     /// Measures the number of characters that fit into available width.
     pub fn try_measure_characters(&self, available_width: f64) -> Option<i32> {
         let length = self.shaped_buffer.find_leading_char_count_within_width(available_width);

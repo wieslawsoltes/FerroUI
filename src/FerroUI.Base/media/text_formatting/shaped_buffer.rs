@@ -211,7 +211,7 @@ use crate::media::text_formatting::unicode::LineBreak;
 /// The break opportunities of a run's text, from the shared table of the text it was split from
 /// or found again from its start.
 pub(crate) enum RunLineBreaks<'a> {
-    Table { table: Rc<BreakTable>, index: usize, shift: usize },
+    Table { table: Rc<BreakTable>, index: usize, shift: usize, limit: usize, limit_reached: bool },
     Enumerator(crate::media::text_formatting::unicode::LineBreakEnumerator<'a>),
 }
 
@@ -220,8 +220,13 @@ impl RunLineBreaks<'_> {
     pub(crate) fn move_next(&mut self) -> Option<crate::media::text_formatting::unicode::LineBreak> {
         use crate::media::text_formatting::unicode::LineBreak;
         match self {
-            RunLineBreaks::Table { table, index, shift } => {
+            RunLineBreaks::Table { table, index, shift, limit, limit_reached } => {
                 let line_break = *table.breaks.get(*index)?;
+                // As the enumerator: a word that reaches past the limit has no opportunity in reach.
+                if line_break.position_measure() - *shift > *limit {
+                    *limit_reached = true;
+                    return None;
+                }
                 *index += 1;
                 Some(LineBreak::new(
                     line_break.position_measure() - *shift,
@@ -232,7 +237,21 @@ impl RunLineBreaks<'_> {
             RunLineBreaks::Enumerator(enumerator) => enumerator.move_next(),
         }
     }
+
+    /// Whether the search stopped at its limit: no opportunity is in reach of the line.
+    pub(crate) fn limit_reached(&self) -> bool {
+        match self {
+            RunLineBreaks::Table { limit_reached, .. } => *limit_reached,
+            RunLineBreaks::Enumerator(enumerator) => enumerator.limit_reached(),
+        }
+    }
 }
+
+/// How many characters past the fitting length are searched for a break opportunity. A word that
+/// overflows the line by more than this is broken at the fitting length, as a word that does not
+/// fit with `TextWrapping::Wrap`. Without it, each line of a long unbroken run split at a
+/// position that is not a break would scan all the text that remains.
+const MAX_BREAK_LOOKAHEAD: usize = 4096;
 
 #[cfg(test)]
 crate::ferro_thread_local! {
@@ -462,12 +481,14 @@ impl ShapedBuffer {
     /// and starts at one of its break opportunities (a line starts after the white space of the
     /// line before it, and no rule of UAX #14 looks back across it), found again from its start
     /// otherwise, as upstream finds them for every line.
-    pub(crate) fn line_breaks(&self) -> RunLineBreaks<'_> {
+    pub(crate) fn line_breaks(&self, measured_length: i32) -> RunLineBreaks<'_> {
         use crate::media::text_formatting::unicode::LineBreakEnumerator;
         #[cfg(test)]
         if !BREAK_TABLES.with(Cell::get) {
             return RunLineBreaks::Enumerator(LineBreakEnumerator::new(self.text.span()));
         }
+        let limit = (measured_length.max(0) as usize).saturating_add(MAX_BREAK_LOOKAHEAD);
+        let limit = if limit < self.text.len() { limit } else { usize::MAX };
         let start = self.text.offset_in_owner();
         let end = start + self.text.len();
         let table = self
@@ -485,13 +506,13 @@ impl ShapedBuffer {
         if table.end == end && table.start <= start {
             let shift = start - table.start;
             if shift == 0 {
-                return RunLineBreaks::Table { table, index: 0, shift: 0 };
+                return RunLineBreaks::Table { table, index: 0, shift: 0, limit, limit_reached: false };
             }
             if let Ok(found) = table.breaks.binary_search_by(|line_break| line_break.position_wrap().cmp(&shift)) {
-                return RunLineBreaks::Table { table, index: found + 1, shift };
+                return RunLineBreaks::Table { table, index: found + 1, shift, limit, limit_reached: false };
             }
         }
-        RunLineBreaks::Enumerator(LineBreakEnumerator::new(self.text.span()))
+        RunLineBreaks::Enumerator(LineBreakEnumerator::with_limit(self.text.span(), limit))
     }
 
     pub fn length(&self) -> usize {

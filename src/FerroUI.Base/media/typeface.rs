@@ -120,13 +120,14 @@ impl Typeface {
         let mut normalized_family_name_builder: Option<String> = None;
         let mut total_chars_removed = 0;
 
-        let mut tokenizer = SpanStringTokenizer::with_separator(normalized_family_name, ' ', None);
+        // Words are found by hand: real fonts have repeated or trailing whitespace in their family
+        // names (`Autoproject  GOST Type A`), which the tokenizer rejects.
+        let words = normalized_family_name
+            .split_whitespace()
+            .map(|word| (word.as_ptr() as usize - normalized_family_name.as_ptr() as usize, word));
 
         // Skip initial family name.
-        let _ = tokenizer.read_span();
-
-        // A malformed name ends the scan (upstream lets the format exception escape).
-        while let Ok(Some(token)) = tokenizer.try_read_span() {
+        for (token_index, token) in words.skip(1) {
             // Don't try to match numbers.
             if matches!(SpanStringTokenizer::new(token).try_read_int32(), Ok(Some(_))) {
                 continue;
@@ -148,7 +149,7 @@ impl Typeface {
             if matched {
                 // Carve out matched word from the normalized name.
                 let builder = normalized_family_name_builder.get_or_insert_with(|| normalized_family_name.to_owned());
-                let start = tokenizer.current_token_index().unwrap_or(0) - total_chars_removed;
+                let start = token_index - total_chars_removed;
                 builder.replace_range(start..start + token.len(), "");
                 total_chars_removed += token.len();
             }
@@ -224,6 +225,9 @@ mod tests {
             ("FontAwesome 6 Free Regular", "FontAwesome 6 Free", FontStyle::Normal, FontWeight::Normal),
             ("FontAwesome 6 Free Solid", "FontAwesome 6 Free", FontStyle::Normal, FontWeight::Solid),
             ("FontAwesome 6 Brands", "FontAwesome 6 Brands", FontStyle::Normal, FontWeight::Normal),
+            ("Autoproject  GOST Type A", "Autoproject  GOST Type A", FontStyle::Normal, FontWeight::Normal),
+            ("Hello  World  Bold", "Hello  World", FontStyle::Normal, FontWeight::Bold),
+            ("Hello World Italic  ", "Hello World", FontStyle::Italic, FontWeight::Normal),
         ] {
             let typeface = Typeface::from_name(input);
 

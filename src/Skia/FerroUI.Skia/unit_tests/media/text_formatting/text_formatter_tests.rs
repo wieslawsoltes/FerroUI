@@ -228,15 +228,16 @@ fn should_format_text_line_with_non_text_text_runs_right_to_left() {
 
     assert_eq!(14, text_line.length());
 
-    let first = text_runs[0].downcast_ref::<ShapedTextRun>();
+    // The paragraph end takes the paragraph level, so it is visually first in a right-to-left line.
+    let first = text_runs[0].downcast_ref::<TextEndOfParagraph>();
 
-    let last = text_runs[4].downcast_ref::<TextEndOfParagraph>();
+    let second = text_runs[1].downcast_ref::<ShapedTextRun>();
 
     assert!(first.is_some());
 
-    assert!(last.is_some());
+    assert!(second.is_some());
 
-    assert_eq!(ReadOnlyMemory::from_str("Hello"), first.unwrap().text());
+    assert_eq!(ReadOnlyMemory::from_str("Hello"), second.unwrap().text());
 }
 
 #[test]

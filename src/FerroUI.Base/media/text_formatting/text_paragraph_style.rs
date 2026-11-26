@@ -89,14 +89,12 @@ impl TextParagraphProperties for StyledParagraph {
     }
     fn text_decorations(&self) -> Option<&TextDecorationCollection> { self.defaults.text_decorations() }
     fn text_wrapping(&self) -> TextWrapping { self.defaults.text_wrapping() }
-    fn indent(&self) -> f64 { Self::style_indent(&self.style) }
+    // The indent of a style is applied by the layout, through the origin and width of the line,
+    // so the formatter sees only the indent of the defaults.
+    fn indent(&self) -> f64 { self.defaults.indent() }
     fn paragraph_indent(&self) -> f64 { self.defaults.paragraph_indent() }
     fn default_incremental_tab(&self) -> f64 { self.defaults.default_incremental_tab() }
     fn line_metrics_mode(&self) -> super::TextLineMetricsMode { self.defaults.line_metrics_mode() }
     fn tab_stops(&self) -> Option<&[super::TextTabStop]> { self.defaults.tab_stops() }
     fn tab_origin(&self) -> f64 { self.defaults.tab_origin() }
-}
-
-impl StyledParagraph {
-    fn style_indent(style: &TextParagraphStyle) -> f64 { TextParagraphStyle::nonnegative(style.indent) }
 }
