@@ -107,8 +107,9 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         assert.equal(source.revision, revision(Buffer.from(rust.getText())), 'The replacement inspector maps the saved RSX revision');
         await until(() => !processExists(pid));
         if (debug) {
-            await debug.repeatAttach();
+            // Continuing the replacement breakpoint identifies its current App Sessions target.
             await approve(updated);
+            await debug.repeatAttach();
             await detachAndInspect(debug, updated, replacement, 3);
             await approve(updated, false);
             await expectText(updated, 'SavedCount', 'Reviews saved: 4');
