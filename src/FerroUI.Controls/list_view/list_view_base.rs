@@ -4,7 +4,8 @@
 //! Microsoft Corporation, see NOTICE.md), on FerroUI's `SelectingItemsControl`
 //! (docs/porting/winui-calculator-gaps.md, section 6.2, LV-1).
 
-use super::{GroupStyle, GroupedItemsView};
+use super::list_view::PC_MULTISELECT;
+use super::{GroupStyle, GroupedItemsView, ListViewBaseItem};
 use ferroui_base::collections::FerroList;
 use crate::generators::RecycleKey;
 use crate::primitives::{
@@ -298,7 +299,8 @@ ferroui_base::ferro_properties! { impl ListViewBase {
     );
 
     ferro_property!(
-        /// Defines the `IsMultiSelectCheckBoxEnabled` property (the check boxes of `Multiple`).
+        /// Defines the `IsMultiSelectCheckBoxEnabled` property: whether the items show check boxes
+        /// with [`ListViewSelectionMode::Multiple`] (the `:multiselect` pseudo-class of the items).
         pub fn is_multi_select_check_box_enabled_property() -> StyledProperty<bool> {
             FerroProperty::register::<ListViewBase, _>("IsMultiSelectCheckBoxEnabled", true)
         }
@@ -378,6 +380,9 @@ impl FerroObjectImpl for ListViewBase {
                 // WinUI clears the selection when the mode becomes None.
                 this.selection().clear();
             }
+            this.update_check_boxes();
+        } else if change.property() == Self::is_multi_select_check_box_enabled_property().as_property() {
+            this.update_check_boxes();
         }
     }
 }
@@ -435,6 +440,10 @@ impl ItemsControlImpl for ListViewBase {
         index: i32,
     ) {
         Self::parent_container_for_item_prepared_override(this, container, item, index);
+        let shows = this.shows_check_boxes();
+        if (shows || container.classes().contains(PC_MULTISELECT)) && container.cast::<ListViewBaseItem>().is_some() {
+            container.pseudo_classes().set(PC_MULTISELECT, shows);
+        }
         this.raise_container_content_changing(container, item.clone(), index, false);
     }
 
@@ -511,6 +520,22 @@ impl ListViewBase {
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// Whether the items show the check boxes of `Multiple` (WinUI's `MultiSelectEnabled` state of
+    /// the items).
+    fn shows_check_boxes(&self) -> bool {
+        self.selection_mode() == ListViewSelectionMode::Multiple && self.is_multi_select_check_box_enabled()
+    }
+
+    /// Sets the `:multiselect` pseudo-class of the realized items.
+    fn update_check_boxes(&self) {
+        let shows = self.shows_check_boxes();
+        for container in self.get_realized_containers() {
+            if container.cast::<ListViewBaseItem>().is_some() {
+                container.pseudo_classes().set(PC_MULTISELECT, shows);
+            }
+        }
     }
 
     fn apply_selection_mode(&self, mode: ListViewSelectionMode) {

@@ -5,6 +5,7 @@
 
 use super::{ItemsStackPanel, ListViewBase};
 use crate::generators::RecycleKey;
+use crate::metadata::PseudoClassesAttribute;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::{FuncTemplate, ITemplateOf};
 use crate::{
@@ -129,7 +130,15 @@ impl ControlImpl for ListViewBaseItem {
     }
 }
 
+/// The pseudo-class of an item whose list shows the check boxes of
+/// [`ListViewSelectionMode::Multiple`](super::ListViewSelectionMode::Multiple) (WinUI's
+/// `MultiSelectStates`: `MultiSelectEnabled`).
+pub(crate) const PC_MULTISELECT: &str = ":multiselect";
+
 impl ListViewBaseItem {
+    /// The pseudoclasses set by the class: `:multiselect` while the list shows its check boxes.
+    pub const PSEUDO_CLASSES: PseudoClassesAttribute = PseudoClassesAttribute::new(&[PC_MULTISELECT]);
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self { base: ListBoxItem::construct() }

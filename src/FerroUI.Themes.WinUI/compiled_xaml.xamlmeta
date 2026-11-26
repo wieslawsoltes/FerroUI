@@ -1533,8 +1533,8 @@
           "documents": ["Controls/ListView.xaml"],
           "keys": ["DefaultListViewStyle"],
           "type_keys": ["ListView", "ListViewHeaderItem", "ListViewItem"],
-          "references": ["ContentControlThemeFontFamily", "DefaultListViewItemStyle", "DefaultListViewStyle", "SystemControlForegroundBaseLowBrush", "SystemControlTransparentBrush"],
-          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewHeaderItem", "ListViewItem", "Rectangle", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
+          "references": ["ContentControlThemeFontFamily", "DefaultListViewItemStyle", "DefaultListViewStyle", "GlyphGeometryE73E", "ListViewItemCheckBoxBorderBrush", "ListViewItemCheckBoxBrush", "ListViewItemCheckBoxCornerRadius", "ListViewItemCheckBoxDisabledBorderBrush", "ListViewItemCheckBoxDisabledBrush", "ListViewItemCheckBoxPointerOverBorderBrush", "ListViewItemCheckBoxPointerOverBrush", "ListViewItemCheckBoxPressedBorderBrush", "ListViewItemCheckBoxPressedBrush", "ListViewItemCheckBoxSelectedBrush", "ListViewItemCheckBoxSelectedDisabledBrush", "ListViewItemCheckBoxSelectedPointerOverBrush", "ListViewItemCheckBoxSelectedPressedBrush", "ListViewItemCheckBrush", "ListViewItemCheckDisabledBrush", "ListViewItemCheckPressedBrush", "ListViewItemCornerRadius", "SystemControlForegroundBaseLowBrush", "SystemControlTransparentBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewHeaderItem", "ListViewItem", "Panel", "Path", "Rectangle", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel", "Style"]
         },
         {
           "name": "Controls/GridView.xaml",
