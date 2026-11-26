@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2034746434256777622;
+pub(crate) const API_FINGERPRINT: i64 = -1904887529557804552;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 507] = [
+pub(crate) static TYPE_NAMES: [&str; 509] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -369,6 +369,8 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "ScrollBarAutomationPeer",
     "ScrollContentPresenter",
     "ScrollGestureRecognizer",
+    "ScrollPresenter",
+    "ScrollView",
     "ScrollViewer",
     "ScrollViewerAutomationPeer",
     "ScrollablePullGestureRecognizer",
@@ -519,7 +521,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -677,6 +679,10 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "CompactDrawerLength",
     "CompactModeThresholdWidth",
     "CompactPaneLength",
+    "ComputedHorizontalScrollBarVisibility",
+    "ComputedHorizontalScrollMode",
+    "ComputedVerticalScrollBarVisibility",
+    "ComputedVerticalScrollMode",
     "Contact",
     "Container.Name",
     "Container.Sizing",
@@ -687,6 +693,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "ContainerAnimationStartPosition",
     "ContainerWidth",
     "Content",
+    "ContentOrientation",
     "ContentOverlay",
     "ContentSource",
     "ContentTemplate",
@@ -859,9 +866,14 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "HideDelay",
     "HidePromptOnLeave",
     "HorizontalAlignment",
+    "HorizontalAnchorRatio",
     "HorizontalContentAlignment",
     "HorizontalOffset",
     "HorizontalOrientationPadding",
+    "HorizontalScrollBarVisibility",
+    "HorizontalScrollChainMode",
+    "HorizontalScrollMode",
+    "HorizontalScrollRailMode",
     "HorizontalSpacing",
     "HotKey",
     "HotKeyManager.HotKey",
@@ -871,6 +883,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "IconTemplate",
     "Id",
     "IgnoreThumbDrag",
+    "IgnoredInputKinds",
     "Image",
     "ImageSource",
     "IncreaseButton",
@@ -1520,9 +1533,14 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "Value",
     "ValueMemberBinding",
     "VerticalAlignment",
+    "VerticalAnchorRatio",
     "VerticalContentAlignment",
     "VerticalOffset",
     "VerticalOrientationPadding",
+    "VerticalScrollBarVisibility",
+    "VerticalScrollChainMode",
+    "VerticalScrollMode",
+    "VerticalScrollRailMode",
     "VerticalSpacing",
     "Viewbox",
     "Viewport",
@@ -1560,6 +1578,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "YearFormat",
     "YearVisible",
     "ZIndex",
+    "ZoomChainMode",
     "ZoomFactor",
     "ZoomMode",
 ];

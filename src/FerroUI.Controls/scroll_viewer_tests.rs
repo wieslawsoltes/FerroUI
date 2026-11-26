@@ -110,7 +110,7 @@ fn create_thumb_template(_control: &Ref<Thumb>, _scope: &NameScopeRef) -> Ref<Co
     border.upcast()
 }
 
-fn create_scroll_bar_template(scroll_bar: &Ref<ScrollBar>, scope: &NameScopeRef) -> Ref<Control> {
+pub(crate) fn create_scroll_bar_template(scroll_bar: &Ref<ScrollBar>, scope: &NameScopeRef) -> Ref<Control> {
     let thumb = Thumb::new();
     thumb.set_template(Some(FuncControlTemplate::for_type::<Thumb>(create_thumb_template)));
 

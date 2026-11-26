@@ -147,6 +147,20 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::SwipeItemInvokedEventArgs as MarkupTyped>::MARKUP,
     // WinUI's EasingMode of the storyboard easing functions (docs/porting/winui-calculator-gaps.md).
     <crate::animation::EasingMode as MarkupTyped>::MARKUP,
+    // WinUI's ScrollView and ScrollPresenter (docs/porting/winui-controls.md, section 10.12).
+    <crate::ScrollingScrollBarVisibility as MarkupTyped>::MARKUP,
+    <crate::ScrollingContentOrientation as MarkupTyped>::MARKUP,
+    <crate::ScrollingInteractionState as MarkupTyped>::MARKUP,
+    <crate::ScrollingScrollMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingZoomMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingChainMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingRailMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingInputKinds as MarkupTyped>::MARKUP,
+    <crate::ScrollingAnimationMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingSnapPointsMode as MarkupTyped>::MARKUP,
+    <crate::ScrollingScrollCompletedEventArgs as MarkupTyped>::MARKUP,
+    <crate::ScrollingZoomCompletedEventArgs as MarkupTyped>::MARKUP,
+    <crate::ScrollingScrollStartingEventArgs as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -188,6 +202,16 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<NumberBoxValidationMode>();
     ValueTypes::register_used::<AutoSuggestionBoxTextChangeReason>();
     ValueTypes::register_used::<crate::PagerControlDisplayMode>();
+    ValueTypes::register_used::<crate::ScrollingScrollBarVisibility>();
+    ValueTypes::register_used::<crate::ScrollingContentOrientation>();
+    ValueTypes::register_used::<crate::ScrollingInteractionState>();
+    ValueTypes::register_used::<crate::ScrollingScrollMode>();
+    ValueTypes::register_used::<crate::ScrollingZoomMode>();
+    ValueTypes::register_used::<crate::ScrollingChainMode>();
+    ValueTypes::register_used::<crate::ScrollingRailMode>();
+    ValueTypes::register_used::<crate::ScrollingInputKinds>();
+    ValueTypes::register_used::<crate::ScrollingAnimationMode>();
+    ValueTypes::register_used::<crate::ScrollingSnapPointsMode>();
     ValueTypes::register_used::<crate::PagerControlButtonVisibility>();
     ValueTypes::register_used::<crate::media::ApplicationTheme>();
     ValueTypes::register_used::<crate::media::RevealBrushState>();
@@ -371,3 +395,62 @@ impl ferroui_base::data::core::ValueTypeRegistration for GridLength {
     }
 }
 
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingScrollBarVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingScrollBarVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingContentOrientation {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingContentOrientation>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingInteractionState {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingInteractionState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingScrollMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingScrollMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingZoomMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingZoomMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingChainMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingChainMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingRailMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingRailMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingInputKinds {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingInputKinds>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingAnimationMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingAnimationMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingSnapPointsMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::ScrollingSnapPointsMode>();
+    }
+}

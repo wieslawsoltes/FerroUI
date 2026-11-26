@@ -142,16 +142,6 @@
       "reason": "ImageIcon: no FerroUI control."
     },
     {
-      "document": "controls/dev/ScrollView/ScrollView.xaml",
-      "key": "*",
-      "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer."
-    },
-    {
-      "document": "controls/dev/ScrollView/ScrollView_themeresources.xaml",
-      "key": "*",
-      "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer."
-    },
-    {
       "document": "*",
       "key": "re:(GridView|ListView)ItemCheckMode",
       "reason": "ListViewItemPresenterCheckMode: the check mode of WinUI's ListViewItemPresenter, a type FerroUI does not have."

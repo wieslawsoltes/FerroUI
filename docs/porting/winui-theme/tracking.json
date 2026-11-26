@@ -69674,8 +69674,8 @@
    "key": "DefaultScrollViewStyle",
    "kind": "Style",
    "target_type": "ScrollView",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69684,8 +69684,8 @@
    "key": "{ScrollView}",
    "kind": "Style",
    "target_type": "ScrollView",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69694,8 +69694,8 @@
    "key": "ScrollViewScrollBarsMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69704,8 +69704,8 @@
    "key": "ScrollViewScrollBarsNoTouchDuration",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69714,8 +69714,8 @@
    "key": "ScrollViewScrollBarsSeparatorContractDelay",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69724,8 +69724,8 @@
    "key": "ScrollViewScrollBarsSeparatorContractDelayDisabled",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69734,8 +69734,8 @@
    "key": "ScrollViewScrollBarsSeparatorContractDelayWithoutAnimation",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69744,8 +69744,8 @@
    "key": "ScrollViewScrollBarsSeparatorContractDuration",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69754,8 +69754,8 @@
    "key": "ScrollViewScrollBarsSeparatorDisplayDelayWithoutAnimation",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69764,8 +69764,8 @@
    "key": "ScrollViewScrollBarsSeparatorExpandDelay",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69774,8 +69774,8 @@
    "key": "ScrollViewScrollBarsSeparatorExpandDelayWithoutAnimation",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69784,8 +69784,8 @@
    "key": "ScrollViewScrollBarsSeparatorExpandDuration",
    "kind": "x:String",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69794,8 +69794,8 @@
    "key": "ScrollViewScrollBarsSeparatorBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69804,8 +69804,8 @@
    "key": "ScrollViewScrollBarsSeparatorBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69814,8 +69814,8 @@
    "key": "ScrollViewScrollBarsSeparatorBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90127,6 +90127,7 @@
   "Controls/RevealStyles.xaml",
   "Controls/RichEditBox.xaml",
   "Controls/ScrollBar.xaml",
+  "Controls/ScrollView.xaml",
   "Controls/ScrollViewer.xaml",
   "Controls/SelectableTextBlock.xaml",
   "Controls/Separator.xaml",
@@ -90218,6 +90219,7 @@
   "Resources/RevealBrush_themeresources.xaml",
   "Resources/RichEditBox_themeresources.xaml",
   "Resources/ScrollBar_themeresources.xaml",
+  "Resources/ScrollView_themeresources.xaml",
   "Resources/ScrollViewer_themeresources.xaml",
   "Resources/SelectorBar_themeresources.xaml",
   "Resources/Slider_themeresources.xaml",
@@ -90834,6 +90836,17 @@
    "status": "ported",
    "deviations": 0,
    "date": "2026-11-18"
+  },
+  {
+   "document": "ScrollView.xaml",
+   "themes": [
+    "{ScrollView}"
+   ],
+   "batch": "B6",
+   "winui": "ScrollView: {ScrollView} (ScrollView.xaml, DefaultScrollViewStyle; ScrollView_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md, section 10.12); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-26"
   },
   {
    "document": "NumericUpDown.xaml",
@@ -91607,20 +91620,6 @@
    "items": 0
   },
   {
-   "document": "controls/dev/ScrollView/ScrollView.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/ScrollView/ScrollView_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ScrollView (the ScrollPresenter based scroller): no FerroUI control; FerroUI's ScrollViewer is ported from WinUI's ScrollViewer.",
-   "items": 13
-  },
-  {
    "document": "*",
    "key": "re:(GridView|ListView)ItemCheckMode",
    "variant": null,
@@ -91893,6 +91892,10 @@
   },
   "SwipeControl": {
    "ferroui": "SwipeControl",
+   "batch": "B6"
+  },
+  "ScrollView": {
+   "ferroui": "ScrollView",
    "batch": "B6"
   },
   "InfoBar": {

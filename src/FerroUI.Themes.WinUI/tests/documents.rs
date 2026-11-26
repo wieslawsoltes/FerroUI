@@ -202,6 +202,7 @@ document_tests! {
     resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
     resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
     resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
+    resources_scroll_view_themeresources => "/Resources/ScrollView_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
@@ -249,6 +250,7 @@ document_tests! {
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
+    controls_scroll_view => "/Controls/ScrollView.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";

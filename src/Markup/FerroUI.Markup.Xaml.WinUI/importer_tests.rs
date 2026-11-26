@@ -1068,3 +1068,18 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
         &XBindings::get_for_root(&second).unwrap()
     ));
 }
+
+#[test]
+fn scroll_view_and_its_presenter_migrate_to_the_native_controls() {
+    let result = migrate(
+        "<ScrollView xmlns:primitives='using:Microsoft.UI.Xaml.Controls.Primitives' ContentOrientation='None' ZoomMode='Enabled'><primitives:ScrollPresenter/></ScrollView>",
+    );
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let view = document.descendants().find(|node| node.tag_name().name() == "ScrollView").unwrap();
+    assert_eq!(view.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
+    let presenter = document.descendants().find(|node| node.tag_name().name() == "ScrollPresenter").unwrap();
+    assert_eq!(presenter.tag_name().namespace(), Some("using:FerroUI.Controls.Primitives"));
+    assert_eq!(migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap().xaml, result.xaml);
+}
+
