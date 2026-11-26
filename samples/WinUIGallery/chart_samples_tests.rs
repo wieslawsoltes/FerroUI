@@ -1,39 +1,61 @@
-//! The Chart page: the seven source examples on the native CartesianChart, with the data of the
-//! source page, driven through their options as a user does. No WinUI visual-parity claim.
+//! The Chart page: the seven source examples on the native charts of `ferroui-controls-charts`,
+//! with the data of the source page, driven through their options as a user does. No WinUI
+//! visual-parity claim.
 
 use crate::chart_samples::{
-    self, ACTUALS, DAILY_VISITS, DAYS, FORECASTS, MONTHS, PROFITS, QUARTERLY_VISITORS, QUARTERS,
-    REGIONS, TARGETS, UNITS_SOLD,
+    self, ACTUALS, DAILY_VISITS, DAYS, FORECASTS, MONTHS, PROFITS, QUARTERLY_VISITORS, QUARTERS, REGIONS, TARGETS,
+    TEMPERATURE_READINGS, UNITS_SOLD,
 };
 use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
-use ferroui_base::media::Color;
-use ferroui_base::Ref;
+use ferroui_base::{Ref, Size};
 use ferroui_controls::{Button, CheckBox, ComboBox, Control, Grid, Slider, TextBlock, ToggleSwitch};
-use ferroui_controls_livecharts::{Axis, CartesianChart, ChartSeries, LegendPosition, SeriesKind};
+use ferroui_controls_charts::{
+    AreaSeries, BarOrientation, BarSeries, CartesianAxis, CartesianSeries, CategoryAxis, CategorySortKey, Chart,
+    DateTimeAxis, DateTimeIntervalType, GridLines, LineSeries, LinearAxis, MarkerShape, SampleValue, SortOrder,
+    StrokeDashStyle,
+};
+
+const SIZE: Size = Size::new(640.0, 320.0);
 
 fn page() -> Ref<Control> {
     examples::create(examples::find("Chart").unwrap()).unwrap()
 }
 
-fn chart(root: &Ref<Control>, name: &str) -> Ref<CartesianChart> {
-    root.get_control::<CartesianChart>(name)
+fn chart(root: &Ref<Control>, name: &str) -> Ref<Chart> {
+    root.get_control::<Chart>(name)
 }
 
-fn series(chart: &CartesianChart, index: usize) -> Ref<ChartSeries> {
-    chart.series().get(index)
+fn series(chart: &Chart, index: usize) -> Ref<CartesianSeries> {
+    chart.series().get(index).unwrap()
 }
 
-fn x_axis(chart: &CartesianChart) -> Ref<Axis> {
-    chart.x_axes().get(0)
+fn axis<T: ferroui_base::ObjectType>(chart: &Chart, index: usize) -> Ref<T> {
+    chart.axes().get(index).unwrap().cast::<T>().unwrap()
 }
 
-fn y_axis(chart: &CartesianChart) -> Ref<Axis> {
-    chart.y_axes().get(0)
+fn ys(series: &CartesianSeries) -> Vec<f64> {
+    let samples = series.y_values().unwrap();
+    samples
+        .snapshot()
+        .iter()
+        .map(|value| match value {
+            Some(SampleValue::Number(number)) => *number,
+            other => panic!("not a number: {other:?}"),
+        })
+        .collect()
 }
 
-fn ys(series: &ChartSeries) -> Vec<f64> {
-    series.values().to_vec().iter().map(|point| point.y()).collect()
+fn xs(series: &CartesianSeries) -> Vec<String> {
+    let samples = series.x_values().unwrap();
+    samples
+        .snapshot()
+        .iter()
+        .map(|value| match value {
+            Some(SampleValue::Category(text)) => text.clone(),
+            other => panic!("not a text: {other:?}"),
+        })
+        .collect()
 }
 
 fn strings(values: &[&str]) -> Vec<String> {
@@ -45,71 +67,64 @@ fn chart_page_loads_seven_examples_with_the_source_data() {
     let _application = start();
     let root = page();
     for index in 1..=7 {
-        assert!(root
-            .find_control::<Grid>(&format!("ChartExample{index}"))
-            .is_some());
+        assert!(root.find_control::<Grid>(&format!("ChartExample{index}")).is_some());
     }
     let basic = chart(&root, "BasicLineChart");
-    assert_eq!(basic.legend_position(), LegendPosition::Top);
-    assert_eq!(x_axis(&basic).labels(), strings(&MONTHS));
-    assert_eq!(y_axis(&basic).min_limit(), Some(0.0));
-    assert_eq!(series(&basic, 0).name(), "2025");
+    assert!(basic.show_legend());
+    assert_eq!(basic.legend_title(), "Profit");
+    assert_eq!(xs(&series(&basic, 0)), strings(&MONTHS));
+    assert_eq!(axis::<LinearAxis>(&basic, 1).minimum(), Some(0.0));
+    assert_eq!(series(&basic, 0).title(), "2025");
     assert_eq!(ys(&series(&basic, 0)), PROFITS.to_vec());
+    assert!(series(&basic, 0).cast::<LineSeries>().is_some());
 
     let bar = chart(&root, "BarChart");
-    assert_eq!(series(&bar, 0).kind(), SeriesKind::Column);
-    assert_eq!(series(&bar, 0).fill(), Some(Color::from_rgb(0x00, 0x78, 0xD4)));
-    assert_eq!(x_axis(&bar).labels(), strings(&REGIONS));
+    assert_eq!(series(&bar, 0).cast::<BarSeries>().unwrap().orientation(), BarOrientation::Vertical);
+    assert_eq!(xs(&series(&bar, 0)), strings(&REGIONS));
     assert_eq!(ys(&series(&bar, 0)), UNITS_SOLD.to_vec());
 
     let axes = chart(&root, "AxisOptionsChart");
-    assert_eq!(x_axis(&axes).labels(), strings(&QUARTERS));
+    assert_eq!(xs(&series(&axes, 0)), strings(&QUARTERS));
     assert_eq!(ys(&series(&axes, 0)), QUARTERLY_VISITORS.to_vec());
-    let visitors = y_axis(&axes);
-    assert_eq!((visitors.min_limit(), visitors.max_limit()), (Some(0.0), Some(100.0)));
-    assert_eq!(visitors.min_step(), 20.0);
-    assert!(visitors.force_step());
+    let visitors = axis::<LinearAxis>(&axes, 1);
+    assert_eq!((visitors.minimum(), visitors.maximum()), (Some(0.0), Some(100.0)));
+    assert_eq!(visitors.spacing(), Some(20.0));
+    assert!(visitors.axis_line_brush().is_some() && visitors.tick_brush().is_some());
+    assert!(visitors.grid_line_major_brush().is_some() && visitors.grid_line_minor_brush().is_some());
 
     let styled = chart(&root, "StyledSeriesChart");
+    assert_eq!(styled.legend_title(), "Monthly results");
     assert_eq!(styled.series().count(), 3);
-    assert_eq!(series(&styled, 0).kind(), SeriesKind::Area);
-    assert_eq!(series(&styled, 1).kind(), SeriesKind::Column);
-    assert_eq!(series(&styled, 2).kind(), SeriesKind::Line);
+    assert!(series(&styled, 0).cast::<AreaSeries>().is_some());
+    assert!(series(&styled, 1).cast::<BarSeries>().is_some());
+    assert!(series(&styled, 2).cast::<LineSeries>().is_some());
     assert_eq!(ys(&series(&styled, 0)), FORECASTS.to_vec());
     assert_eq!(ys(&series(&styled, 1)), ACTUALS.to_vec());
     assert_eq!(ys(&series(&styled, 2)), TARGETS.to_vec());
-    assert!(series(&styled, 1).data_labels());
-    // StrokeDashStyle="Dash" at a thickness of 2.
-    assert_eq!(series(&styled, 2).dashes(), vec![4.0, 4.0]);
+    assert!(series(&styled, 1).show_data_labels());
+    assert_eq!(series(&styled, 2).stroke_dash_style(), StrokeDashStyle::Dash);
+    assert_eq!(series(&styled, 2).marker_shape(), MarkerShape::Diamond);
+    assert!(series(&styled, 2).data_marker_brush().is_some());
 
     let markers = chart(&root, "LinesAndMarkersChart");
-    assert_eq!(x_axis(&markers).labels(), strings(&DAYS));
+    assert_eq!(xs(&series(&markers, 0)), strings(&DAYS));
     assert_eq!(ys(&series(&markers, 0)), DAILY_VISITS.to_vec());
-    assert!(series(&markers, 0).data_labels());
-    assert_eq!(series(&markers, 0).geometry_size(), 8.0);
+    assert!(series(&markers, 0).show_data_labels() && series(&markers, 0).show_data_markers());
+    // HighlightPeakVisits: Thursday, with its own label and marker.
+    assert_eq!(chart_samples::peak_index(), 3);
+    assert!(series(&markers, 0).data_marker_overrides().contains_key(&3));
+    let labels = markers.layout_snapshot(SIZE).data_labels;
+    assert!(labels.contains(&(0, 3, "Peak".to_owned())), "{labels:?}");
 
     // CreateTimeSeriesChart: the axes and the series are created by the page.
     let time = chart(&root, "TimeSeriesChart");
     assert_eq!(time.series().count(), 1);
-    assert_eq!(series(&time, 0).kind(), SeriesKind::Area);
-    let time_axis = x_axis(&time);
-    assert_eq!(time_axis.name(), "Date");
-    assert_eq!((time_axis.min_limit(), time_axis.max_limit()), (Some(0.0), Some(42.0)));
-    assert_eq!(time_axis.labels()[7], "August 3");
-    assert_eq!(
-        time_axis.custom_separators(),
-        vec![0.0, 7.0, 14.0, 21.0, 28.0, 35.0, 42.0]
-    );
-    let readings: Vec<(f64, f64)> = series(&time, 0)
-        .values()
-        .to_vec()
-        .iter()
-        .map(|point| (point.x(), point.y()))
-        .collect();
-    assert_eq!(
-        readings,
-        vec![(7.0, 72.0), (14.0, 76.0), (21.0, 74.0), (28.0, 79.0), (35.0, 77.0)]
-    );
+    assert!(series(&time, 0).cast::<AreaSeries>().is_some());
+    let time_axis = axis::<DateTimeAxis>(&time, 0);
+    assert_eq!(time_axis.label(), "Date");
+    assert_eq!(time_axis.interval_type(), DateTimeIntervalType::Week);
+    assert_eq!(time_axis.label_format(), "month day");
+    assert_eq!(ys(&series(&time, 0)), TEMPERATURE_READINGS.to_vec());
 
     assert_eq!(
         root.get_control::<TextBlock>("LiveSeriesSummary").text().as_deref(),
@@ -124,40 +139,33 @@ fn chart_legend_toggle_hides_and_shows_the_legend() {
     let basic = chart(&root, "BasicLineChart");
     let toggle = root.get_control::<ToggleSwitch>("LegendToggle");
     toggle.set_is_checked(Some(false));
-    assert_eq!(basic.legend_position(), LegendPosition::Hidden);
+    assert!(!basic.show_legend());
     toggle.set_is_checked(Some(true));
-    assert_eq!(basic.legend_position(), LegendPosition::Top);
+    assert!(basic.show_legend());
 }
 
 #[test]
 fn chart_bar_orientation_and_category_sort_reorder_the_series() {
-    assert_eq!(chart_samples::bar_order(false, false), vec![0, 1, 2, 3]);
-    assert_eq!(chart_samples::bar_order(false, true), vec![3, 2, 1, 0]);
-    assert_eq!(chart_samples::bar_order(true, false), vec![1, 0, 3, 2]);
-    assert_eq!(chart_samples::bar_order(true, true), vec![2, 3, 0, 1]);
-
     let _application = start();
     let root = page();
     let bar = chart(&root, "BarChart");
+    let bars = series(&bar, 0).cast::<BarSeries>().unwrap();
+    let categories = axis::<CategoryAxis>(&bar, 0);
+    let order = || categories.sorted_indices_by(4, |a, b| UNITS_SOLD[a].total_cmp(&UNITS_SOLD[b]));
+    assert_eq!(order(), vec![0, 1, 2, 3]);
+
     root.get_control::<ComboBox>("BarOrientationComboBox").set_selected_index(1);
-    assert_eq!(series(&bar, 0).kind(), SeriesKind::Row);
-    // The categories move to the vertical axis.
-    assert_eq!(y_axis(&bar).labels(), strings(&REGIONS));
-    assert_eq!(y_axis(&bar).name(), "Region");
-    assert!(x_axis(&bar).labels().is_empty());
-    assert_eq!(x_axis(&bar).min_limit(), Some(0.0));
+    assert_eq!(bars.orientation(), BarOrientation::Horizontal);
 
     root.get_control::<ComboBox>("SortKeyComboBox").set_selected_index(1);
-    assert_eq!(y_axis(&bar).labels(), strings(&["South", "North", "West", "East"]));
-    assert_eq!(ys(&series(&bar, 0)), vec![38.0, 42.0, 47.0, 51.0]);
+    assert_eq!(categories.sort_key(), CategorySortKey::Value);
+    assert_eq!(order(), vec![1, 0, 3, 2]);
     root.get_control::<ComboBox>("SortOrderComboBox").set_selected_index(1);
-    assert_eq!(y_axis(&bar).labels(), strings(&["East", "West", "North", "South"]));
-    assert_eq!(ys(&series(&bar, 0)), vec![51.0, 47.0, 42.0, 38.0]);
+    assert_eq!(categories.sort_order(), SortOrder::Descending);
+    assert_eq!(order(), vec![2, 3, 0, 1]);
 
     root.get_control::<ComboBox>("BarOrientationComboBox").set_selected_index(0);
-    assert_eq!(series(&bar, 0).kind(), SeriesKind::Column);
-    assert_eq!(x_axis(&bar).labels(), strings(&["East", "West", "North", "South"]));
-    assert!(y_axis(&bar).labels().is_empty());
+    assert_eq!(bars.orientation(), BarOrientation::Vertical);
 }
 
 #[test]
@@ -165,27 +173,31 @@ fn chart_axis_options_change_grid_lines_visibility_and_tick_labels() {
     let _application = start();
     let root = page();
     let axes = chart(&root, "AxisOptionsChart");
-    let (x, y) = (x_axis(&axes), y_axis(&axes));
+    let (x, y) = (axis::<CartesianAxis>(&axes, 0), axis::<CartesianAxis>(&axes, 1));
     let grid_lines = root.get_control::<ComboBox>("GridLinesComboBox");
     grid_lines.set_selected_index(0);
-    assert!(!y.show_separator_lines());
+    assert_eq!(y.grid_lines(), GridLines::None);
     grid_lines.set_selected_index(2);
-    assert!(y.show_separator_lines());
-    assert_eq!(y.custom_separators().len(), 11);
+    assert_eq!(y.grid_lines(), GridLines::Minor);
     grid_lines.set_selected_index(1);
-    assert!(y.show_separator_lines());
-    assert!(y.custom_separators().is_empty());
+    assert_eq!(y.grid_lines(), GridLines::Major);
 
-    root.get_control::<ToggleSwitch>("AxesVisibleToggle").set_is_checked(Some(false));
-    assert!(!x.visible() && !y.visible());
-    root.get_control::<ToggleSwitch>("AxesVisibleToggle").set_is_checked(Some(true));
-    assert!(x.visible() && y.visible());
+    let visible = root.get_control::<ToggleSwitch>("AxesVisibleToggle");
+    visible.set_is_checked(Some(false));
+    assert!(!x.is_visible() && !y.is_visible());
+    visible.set_is_checked(Some(true));
+    assert!(x.is_visible() && y.is_visible());
 
-    root.get_control::<ToggleSwitch>("TickLabelsToggle").set_is_checked(Some(false));
-    assert_eq!(x.labels_color().a, 0);
-    assert_eq!(y.labels_color().a, 0);
-    root.get_control::<ToggleSwitch>("TickLabelsToggle").set_is_checked(Some(true));
-    assert_eq!(y.labels_color(), Color::from_rgb(0x76, 0x76, 0x76));
+    let labels = root.get_control::<ToggleSwitch>("TickLabelsToggle");
+    labels.set_is_checked(Some(false));
+    assert!(!x.show_tick_labels() && !y.show_tick_labels());
+    labels.set_is_checked(Some(true));
+    assert!(x.show_tick_labels() && y.show_tick_labels());
+
+    let marks = root.get_control::<ToggleSwitch>("TickMarksToggle");
+    assert!(x.show_tick_marks() && y.show_tick_marks());
+    marks.set_is_checked(Some(false));
+    assert!(!x.show_tick_marks() && !y.show_tick_marks());
 }
 
 #[test]
@@ -193,76 +205,62 @@ fn chart_styled_series_check_boxes_hide_and_show_each_series() {
     let _application = start();
     let root = page();
     let styled = chart(&root, "StyledSeriesChart");
-    for (index, name) in ["ForecastCheckBox", "ActualCheckBox", "TargetCheckBox"]
-        .into_iter()
-        .enumerate()
-    {
+    for (index, name) in ["ForecastCheckBox", "ActualCheckBox", "TargetCheckBox"].into_iter().enumerate() {
         let check = root.get_control::<CheckBox>(name);
         check.set_is_checked(Some(false));
         for other in 0..3 {
-            assert_eq!(series(&styled, other).visible(), other != index, "{name}");
+            assert_eq!(series(&styled, other).is_visible(), other != index, "{name}");
         }
         check.set_is_checked(Some(true));
-        assert!(series(&styled, index).visible());
+        assert!(series(&styled, index).is_visible());
     }
 }
 
 #[test]
 fn chart_lines_and_markers_options_change_dash_thickness_markers_and_labels() {
-    assert!(chart_samples::dash_pattern(0, 2.0).is_empty());
-    assert_eq!(chart_samples::dash_pattern(3, 3.0), vec![6.0, 6.0, 3.0, 6.0]);
-
     let _application = start();
     let root = page();
     let visits = series(&chart(&root, "LinesAndMarkersChart"), 0);
-    root.get_control::<ComboBox>("DashStyleComboBox").set_selected_index(1);
-    assert_eq!(visits.dashes(), vec![4.0, 4.0]);
-    // The dash array follows the thickness.
+    let dash = root.get_control::<ComboBox>("DashStyleComboBox");
+    dash.set_selected_index(1);
+    assert_eq!(visits.stroke_dash_style(), StrokeDashStyle::Dash);
     root.get_control::<Slider>("StrokeThicknessSlider").set_range_value(5.0);
-    assert_eq!(visits.stroke_width(), 5.0);
-    assert_eq!(visits.dashes(), vec![10.0, 10.0]);
-    root.get_control::<ComboBox>("DashStyleComboBox").set_selected_index(2);
-    assert_eq!(visits.dashes(), vec![5.0, 10.0]);
-    root.get_control::<ComboBox>("DashStyleComboBox").set_selected_index(0);
-    assert!(visits.dashes().is_empty());
+    assert_eq!(visits.stroke_thickness(), 5.0);
+    dash.set_selected_index(2);
+    assert_eq!(visits.stroke_dash_style(), StrokeDashStyle::Dot);
+    dash.set_selected_index(0);
+    assert_eq!(visits.stroke_dash_style(), StrokeDashStyle::Solid);
+
+    root.get_control::<ComboBox>("MarkerShapeComboBox").set_selected_index(3);
+    assert_eq!(visits.marker_shape(), MarkerShape::Triangle);
 
     root.get_control::<ToggleSwitch>("DataMarkersToggle").set_is_checked(Some(false));
-    assert_eq!(visits.geometry_size(), 0.0);
-    assert!(visits.data_labels());
+    assert!(!visits.show_data_markers());
+    assert!(visits.show_data_labels());
     root.get_control::<ToggleSwitch>("DataLabelsToggle").set_is_checked(Some(false));
-    assert!(!visits.data_labels());
+    assert!(!visits.show_data_labels());
     root.get_control::<ToggleSwitch>("DataMarkersToggle").set_is_checked(Some(true));
-    assert_eq!(visits.geometry_size(), 8.0);
+    assert!(visits.show_data_markers());
 }
 
 #[test]
 fn chart_time_axis_follows_the_interval_and_the_label_format() {
-    assert_eq!(chart_samples::time_axis_label(0, 0), "July 27");
-    assert_eq!(chart_samples::time_axis_label(5, 1), "Aug 1");
-    assert_eq!(chart_samples::time_axis_label(42, 2), "9/7/2026");
-    assert_eq!(chart_samples::time_axis_separators(3), vec![5.0, 36.0]);
-    assert_eq!(chart_samples::time_axis_separators(1).len(), 43);
-    assert!(chart_samples::time_axis_separators(0).is_empty());
-
     let _application = start();
     let root = page();
-    let axis = x_axis(&chart(&root, "TimeSeriesChart"));
+    let time = axis::<DateTimeAxis>(&chart(&root, "TimeSeriesChart"), 0);
     root.get_control::<ComboBox>("IntervalTypeComboBox").set_selected_index(3);
-    assert_eq!(axis.custom_separators(), vec![5.0, 36.0]);
+    assert_eq!(time.interval_type(), DateTimeIntervalType::Month);
     root.get_control::<ComboBox>("LabelFormatComboBox").set_selected_index(1);
-    assert_eq!(axis.labels()[36], "Sep 1");
+    assert_eq!(time.label_format(), "month.abbreviated day");
     root.get_control::<ComboBox>("LabelFormatComboBox").set_selected_index(2);
-    assert_eq!(axis.labels()[7], "8/3/2026");
+    assert_eq!(time.label_format(), "shortdate");
     root.get_control::<ComboBox>("IntervalTypeComboBox").set_selected_index(0);
-    assert!(axis.custom_separators().is_empty());
+    assert_eq!(time.interval_type(), DateTimeIntervalType::Auto);
 }
 
 #[test]
 fn chart_live_series_adds_samples_and_keeps_the_eight_most_recent() {
-    assert_eq!(
-        chart_samples::next_response_times(&[1.0, 2.0], 3.0),
-        vec![1.0, 2.0, 3.0]
-    );
+    assert_eq!(chart_samples::next_response_times(&[1.0, 2.0], 3.0), vec![1.0, 2.0, 3.0]);
     assert_eq!(chart_samples::live_series_summary(&[184.0, 176.4]), "Latest: 176 ms (2 samples)");
 
     let _application = start();
@@ -274,19 +272,13 @@ fn chart_live_series_adds_samples_and_keeps_the_eight_most_recent() {
     let revision = live.revision();
     click();
     assert!(live.revision() > revision);
-    assert_eq!(
-        ys(&series(&live, 0)),
-        vec![184.0, 179.0, 173.0, 171.0, 168.0, 176.0]
-    );
+    assert_eq!(ys(&series(&live, 0)), vec![184.0, 179.0, 173.0, 171.0, 168.0, 176.0]);
     assert_eq!(summary.text().as_deref(), Some("Latest: 176 ms (6 samples)"));
     click();
     click();
-    assert_eq!(series(&live, 0).values().count(), 8);
+    assert_eq!(ys(&series(&live, 0)).len(), 8);
     click();
-    assert_eq!(
-        ys(&series(&live, 0)),
-        vec![179.0, 173.0, 171.0, 168.0, 176.0, 169.0, 181.0, 165.0]
-    );
+    assert_eq!(ys(&series(&live, 0)), vec![179.0, 173.0, 171.0, 168.0, 176.0, 169.0, 181.0, 165.0]);
     click();
     // The incoming values wrap around.
     click();
