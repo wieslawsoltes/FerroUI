@@ -55,10 +55,25 @@ pub enum NavigationViewSelectionFollowsFocus {
     Disabled = 0,
     Enabled = 1,
 }
+/// When the shoulder buttons of a gamepad move the selection between the items of the top pane
+/// (WinUI's `NavigationViewShoulderNavigationEnabled`, with its values).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum NavigationViewShoulderNavigationEnabled {
+    /// While `SelectionFollowsFocus` is `Enabled`.
+    #[default]
+    WhenSelectionFollowsFocus = 0,
+    Always = 1,
+    Never = 2,
+}
 ferro_markup_enum!(NavigationViewDisplayMode { Minimal, Compact, Expanded }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(NavigationViewPaneDisplayMode { Auto, Left, Top, LeftCompact, LeftMinimal }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(NavigationViewBackButtonVisible { Collapsed, Visible, Auto }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(NavigationViewSelectionFollowsFocus { Disabled, Enabled }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(
+    NavigationViewShoulderNavigationEnabled { WhenSelectionFollowsFocus, Always, Never },
+    { namespace: "FerroUI.Controls" }
+);
 
 /// The arguments of `NavigationView.DisplayModeChanged`.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -257,6 +272,7 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <NavigationViewPaneDisplayMode as MarkupTyped>::MARKUP,
     <NavigationViewBackButtonVisible as MarkupTyped>::MARKUP,
     <NavigationViewSelectionFollowsFocus as MarkupTyped>::MARKUP,
+    <NavigationViewShoulderNavigationEnabled as MarkupTyped>::MARKUP,
     <NavigationViewDisplayModeChangedEventArgs as MarkupTyped>::MARKUP,
     <NavigationViewPaneClosingEventArgs as MarkupTyped>::MARKUP,
     <NavigationViewBackRequestedEventArgs as MarkupTyped>::MARKUP,
@@ -273,6 +289,7 @@ pub(crate) fn register_value_type_table() {
     ValueTypes::register_used::<NavigationViewPaneDisplayMode>();
     ValueTypes::register_used::<NavigationViewBackButtonVisible>();
     ValueTypes::register_used::<NavigationViewSelectionFollowsFocus>();
+    ValueTypes::register_used::<NavigationViewShoulderNavigationEnabled>();
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewDisplayMode {
@@ -296,6 +313,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewBackButto
 impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewSelectionFollowsFocus {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<NavigationViewSelectionFollowsFocus>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for NavigationViewShoulderNavigationEnabled {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<NavigationViewShoulderNavigationEnabled>();
     }
 }
 

@@ -260,6 +260,7 @@ impl Migration<'_, '_> {
                             | "NavigationViewBackButtonVisible"
                             | "NavigationViewPaneDisplayMode"
                             | "NavigationViewSelectionFollowsFocus"
+                            | "NavigationViewShoulderNavigationEnabled"
                             | "NavigationViewDisplayModeChangedEventArgs"
                             | "NavigationViewSelectionChangedEventArgs"
                             | "NavigationViewItemInvokedEventArgs"

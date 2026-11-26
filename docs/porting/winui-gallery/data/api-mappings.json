@@ -254,6 +254,8 @@
         "IsPaneVisibleProperty": "is_pane_visible_property",
         "IsSettingsVisible": "is_settings_visible",
         "IsSettingsVisibleProperty": "is_settings_visible_property",
+        "IsTitleBarAutoPaddingEnabled": "is_title_bar_auto_padding_enabled",
+        "IsTitleBarAutoPaddingEnabledProperty": "is_title_bar_auto_padding_enabled_property",
         "ItemInvoked": "item_invoked",
         "MenuItemContainerStyle": "menu_item_container_style",
         "MenuItemContainerStyleProperty": "menu_item_container_style_property",
@@ -288,7 +290,9 @@
         "SelectionFollowsFocus": "selection_follows_focus",
         "SelectionFollowsFocusProperty": "selection_follows_focus_property",
         "SettingsItem": "settings_item",
-        "SettingsItemProperty": "settings_item_property"
+        "SettingsItemProperty": "settings_item_property",
+        "ShoulderNavigationEnabled": "shoulder_navigation_enabled",
+        "ShoulderNavigationEnabledProperty": "shoulder_navigation_enabled_property"
       },
       "notes": "Native ContentControl using existing SplitView, panels, presenters, popup and input services. Live menu/footer sources and templates retain model identity; selection, invocation, settings, hierarchy, adaptive modes, pane lifetime and back requests are explicit contracts. Header/MenuItemTemplate use native IDataTemplate; style properties use audited ControlTheme values. Top uses a horizontal layout without overflow redistribution. TemplateSettings, public NavigationViewItemPresenter, template/style selectors, title-bar auto padding, overflow/shoulder properties, recommended transition arguments, WinUI VSM/acrylic/motion, raw gamepad and Windows visual/accessibility acceptance remain absent or unverified.",
       "target": "FerroUI.Controls.NavigationView"
@@ -437,8 +441,18 @@
         "Disabled": "Disabled",
         "Enabled": "Enabled"
       },
-      "notes": "Pinned Disabled=0 and Enabled=1 values with native focus following; raw gamepad/shoulder input remains absent.",
+      "notes": "Pinned Disabled=0 and Enabled=1 values with native focus following; with ShoulderNavigationEnabled WhenSelectionFollowsFocus it also enables the shoulder navigation of the top pane.",
       "target": "FerroUI.Controls.NavigationViewSelectionFollowsFocus"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewShoulderNavigationEnabled": {
+      "kind": "implemented",
+      "members": {
+        "Always": "Always",
+        "Never": "Never",
+        "WhenSelectionFollowsFocus": "WhenSelectionFollowsFocus"
+      },
+      "notes": "Pinned WhenSelectionFollowsFocus=0, Always=1 and Never=2 values; the gamepad shoulder keys move the selection of the top pane (BumperNavigation).",
+      "target": "FerroUI.Controls.NavigationViewShoulderNavigationEnabled"
     },
     "Microsoft.UI.Xaml.Controls.NumberBox": {
       "kind": "implemented-subset",

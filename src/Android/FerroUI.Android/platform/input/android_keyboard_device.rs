@@ -24,6 +24,8 @@ pub(crate) mod keycode {
     pub const NUM_9: i32 = 16;
     pub const DPAD_UP: i32 = 19;
     pub const DPAD_DOWN: i32 = 20;
+    pub const BUTTON_L1: i32 = 102;
+    pub const BUTTON_R1: i32 = 103;
     pub const DPAD_LEFT: i32 = 21;
     pub const DPAD_RIGHT: i32 = 22;
     pub const DPAD_CENTER: i32 = 23;
@@ -349,6 +351,9 @@ impl AndroidKeyboardDevice {
             keycode::DPAD_UP => Key::Up,
             keycode::DPAD_RIGHT => Key::Right,
             keycode::DPAD_DOWN => Key::Down,
+            // The shoulder buttons of a gamepad (NavigationView's shoulder navigation).
+            keycode::BUTTON_L1 => Key::GamepadLeftShoulder,
+            keycode::BUTTON_R1 => Key::GamepadRightShoulder,
             _ => Key::None,
         }
     }
