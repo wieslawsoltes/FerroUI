@@ -17,6 +17,7 @@
 //! tests of the framebuffer, the viewport), and unbound otherwise.
 
 use super::frame_textures::VelloWebGlTexture;
+use super::shadow_programs as shadows;
 use crate::effect_uniforms as blocks;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext as Gl, WebGlProgram, WebGlShader, WebGlUniformLocation, WebGlVertexArrayObject};
@@ -461,14 +462,23 @@ pub(crate) enum LayerProgram {
     PixelOperation,
     /// The matrix convolution layers.
     Convolution,
+    /// The coverage of the box of a shadow (`shadow_programs.rs`).
+    ShadowCoverage,
+    /// One direction of the Gaussian of a shadow.
+    ShadowGaussian,
+    /// A shadow blurred at a reduced scale, scaled back.
+    ShadowScaleUp,
 }
 
 impl LayerProgram {
-    const ALL: [LayerProgram; 4] = [
+    const ALL: [LayerProgram; 7] = [
         LayerProgram::ColorMatrix,
         LayerProgram::LightMultiply,
         LayerProgram::PixelOperation,
         LayerProgram::Convolution,
+        LayerProgram::ShadowCoverage,
+        LayerProgram::ShadowGaussian,
+        LayerProgram::ShadowScaleUp,
     ];
 
     fn index(self) -> usize {
@@ -482,6 +492,9 @@ impl LayerProgram {
             LayerProgram::LightMultiply => "light multiply",
             LayerProgram::PixelOperation => "pixel operation",
             LayerProgram::Convolution => "convolution",
+            LayerProgram::ShadowCoverage => "shadow coverage",
+            LayerProgram::ShadowGaussian => "shadow Gaussian",
+            LayerProgram::ShadowScaleUp => "shadow scale up",
         }
     }
 
@@ -492,6 +505,9 @@ impl LayerProgram {
             LayerProgram::LightMultiply => LIGHT_MULTIPLY,
             LayerProgram::PixelOperation => PIXEL_OPERATION,
             LayerProgram::Convolution => CONVOLUTION,
+            LayerProgram::ShadowCoverage => shadows::COVERAGE,
+            LayerProgram::ShadowGaussian => shadows::GAUSSIAN,
+            LayerProgram::ShadowScaleUp => shadows::SCALE_UP,
         }
     }
 
@@ -499,6 +515,7 @@ impl LayerProgram {
     fn inputs(self) -> usize {
         match self {
             LayerProgram::PixelOperation => 2,
+            LayerProgram::ShadowCoverage => 0,
             _ => 1,
         }
     }
@@ -510,6 +527,9 @@ impl LayerProgram {
             LayerProgram::LightMultiply => blocks::LIGHTING_FLOATS,
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
+            LayerProgram::ShadowCoverage => shadows::COVERAGE_FLOATS,
+            LayerProgram::ShadowGaussian => shadows::GAUSSIAN_FLOATS,
+            LayerProgram::ShadowScaleUp => shadows::SCALE_UP_FLOATS,
         }
     }
 }
@@ -688,6 +708,6 @@ mod tests {
             assert_eq!(program.uniform_floats() % 4, 0);
         }
         let indices: Vec<usize> = LayerProgram::ALL.iter().map(|program| program.index()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3]);
+        assert_eq!(indices, vec![0, 1, 2, 3, 4, 5, 6]);
     }
 }

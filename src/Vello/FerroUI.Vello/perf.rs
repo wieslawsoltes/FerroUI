@@ -63,13 +63,16 @@ pub enum Phase {
     EffectAsImage,
     /// A box shadow that was blurred as an image (bytes: its pixels).
     ShadowAsImage,
+    /// A box shadow of a GPU mode that the CPU renderer drew (bytes: its pixels): what #1139
+    /// leaves of that route, a WebGL2 scene that is not the canvas.
+    ShadowOnCpu,
     /// A scene brush or tile brush drawn into an intermediate surface.
     BrushSurface,
     /// A drawing context that was created (a scene).
     Context,
 }
 
-const PHASES: [Phase; 17] = [
+const PHASES: [Phase; 18] = [
     Phase::Scene,
     Phase::Flatten,
     Phase::StrokeOutline,
@@ -85,6 +88,7 @@ const PHASES: [Phase; 17] = [
     Phase::SurfaceOnDevice,
     Phase::EffectAsImage,
     Phase::ShadowAsImage,
+    Phase::ShadowOnCpu,
     Phase::BrushSurface,
     Phase::Context,
 ];
@@ -107,6 +111,7 @@ impl Phase {
             Phase::SurfaceOnDevice => "surfaces on device",
             Phase::EffectAsImage => "effects as images",
             Phase::ShadowAsImage => "shadows as images",
+            Phase::ShadowOnCpu => "shadows on the CPU in a GPU mode",
             Phase::BrushSurface => "brush surfaces",
             Phase::Context => "drawing contexts",
         }
