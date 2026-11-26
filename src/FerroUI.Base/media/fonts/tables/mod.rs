@@ -47,15 +47,11 @@ pub use font_version::FontVersion;
 pub use head_table::{FontDirectionHint, GlyphDataFormat, HeadFlags, HeadTable, IndexToLocFormat, MacStyleFlags};
 pub use horizontal_header_table::HorizontalHeaderTable;
 pub use invalid_font_table_exception::InvalidFontTableError;
-#[allow(deprecated)]
-pub use invalid_font_table_exception::InvalidFontTableException;
 pub use known_name_ids::KnownNameIds;
 pub use loca_table::LocaTable;
 pub use maxp_table::MaxpTable;
 pub use meta_table::MetaTable;
 pub use missing_font_table_exception::MissingFontTableError;
-#[allow(deprecated)]
-pub use missing_font_table_exception::MissingFontTableException;
 pub use os2_table::{FontSelectionFlags, OS2Table};
 pub use panose::{
     Panose, PanoseArmStyle, PanoseContrast, PanoseFamilyKind, PanoseLetterform, PanoseMidline, PanoseProportion,

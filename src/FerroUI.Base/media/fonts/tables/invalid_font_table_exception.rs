@@ -9,10 +9,6 @@ pub struct InvalidFontTableError {
     table: String,
 }
 
-/// The name of [`InvalidFontTableError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `InvalidFontTableError`")]
-pub type InvalidFontTableException = InvalidFontTableError;
-
 impl InvalidFontTableError {
     /// Creates the error from the message that describes it and the table
     /// where it originated.

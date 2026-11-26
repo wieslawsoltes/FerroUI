@@ -9,10 +9,6 @@ pub struct ExpressionParseError {
     message: String,
 }
 
-/// The name of [`ExpressionParseError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `ExpressionParseError`")]
-pub type ExpressionParseException = ExpressionParseError;
-
 impl ExpressionParseError {
     /// Initializes a new instance of the [`ExpressionParseError`] type.
     ///

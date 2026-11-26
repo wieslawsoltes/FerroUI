@@ -278,12 +278,10 @@ impl CultureInfo {
     /// The comparer of the culture (C# `CompareInfo`): the rules the culture
     /// data provider has for the culture or for the nearest of its parents,
     /// and otherwise the built-in invariant rules.
-    #[allow(deprecated)] // the culture whose name is no locale is asked for by name
     pub fn compare_info(&self) -> CompareInfo {
         let rules = find_culture_data(
             self,
             |provider, locale| provider.get_compare_rules_by_locale(locale),
-            |provider, name| provider.get_compare_rules(name),
         );
         CompareInfo { name: Rc::from(self.name()), rules }
     }

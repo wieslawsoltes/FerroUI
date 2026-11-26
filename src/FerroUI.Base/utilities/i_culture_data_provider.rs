@@ -9,10 +9,8 @@
 //!
 //! The provider is keyed by [`Locale`] (C5 of #423, docs/idiomatic-rust-signatures.md
 //! section 3.4): the methods `..._by_locale` take the locale of a culture.
-//! The methods keyed by the name of a culture remain until the release after
-//! 0.5, deprecated: the default of each method keyed by locale asks the one
-//! keyed by name with the BCP-47 text of the locale, so a provider that
-//! implements the old methods keeps working.
+//! The methods keyed by the name of a culture, deprecated in 0.5.0, were
+//! removed in 0.7.0 (#625).
 
 use super::{CultureInfo, CultureTypes, DateTimeFormatInfo, Locale, NumberFormatInfo, TextInfo};
 use crate::{FerroLocator, LocatorExtensions};
@@ -33,106 +31,46 @@ use std::rc::Rc;
 pub trait ICultureDataProvider: 'static {
     /// The date and time conventions of `locale`, or `None` when the
     /// provider has no data for it (the parent locale is asked next).
-    ///
-    /// The default asks [`get_date_time_format`](Self::get_date_time_format)
-    /// with the BCP-47 text of the locale.
-    #[allow(deprecated)]
+    /// The default has no data.
     fn get_date_time_format_by_locale(&self, locale: &Locale) -> Option<Rc<DateTimeFormatInfo>> {
-        self.get_date_time_format(&locale.to_string())
+        let _ = locale;
+        None
     }
 
     // number format: owned by numeric agent
     /// The number conventions of `locale`, or `None` when the provider has
     /// no data for it (the parent locale is asked next).
-    ///
-    /// The default asks [`get_number_format`](Self::get_number_format) with
-    /// the BCP-47 text of the locale.
-    #[allow(deprecated)]
+    /// The default has no data.
     fn get_number_format_by_locale(&self, locale: &Locale) -> Option<Rc<NumberFormatInfo>> {
-        self.get_number_format(&locale.to_string())
+        let _ = locale;
+        None
     }
 
     // string comparison: added with the auto-complete box (see `compare_info.rs`)
     /// The culture-sensitive string comparison rules of `locale`, or `None`
     /// when the provider has no rules for it (the parent locale is asked
     /// next, and the built-in invariant rules are used last).
-    ///
-    /// The default asks [`get_compare_rules`](Self::get_compare_rules) with
-    /// the BCP-47 text of the locale.
-    #[allow(deprecated)]
+    /// The default has no rules.
     fn get_compare_rules_by_locale(&self, locale: &Locale) -> Option<Rc<dyn super::ICompareRules>> {
-        self.get_compare_rules(&locale.to_string())
+        let _ = locale;
+        None
     }
 
     // text conventions: added with the automation peer of the calendar (see `text_info.rs`)
     /// The text conventions (the list separator) of `locale`, or `None` when
     /// the provider has no data for it (the parent locale is asked next).
-    ///
-    /// The default asks [`get_text_info`](Self::get_text_info) with the
-    /// BCP-47 text of the locale.
-    #[allow(deprecated)]
+    /// The default has no data.
     fn get_text_info_by_locale(&self, locale: &Locale) -> Option<Rc<TextInfo>> {
-        self.get_text_info(&locale.to_string())
+        let _ = locale;
+        None
     }
 
     // enumeration: added with the numeric up-down page of the control catalog (see `CultureInfo::get_cultures`)
     /// The locales of the cultures of the given types the provider has data
     /// for, in the order they are listed in (the unknown locale `und`, the
     /// invariant culture, is not among them). A provider that does not
-    /// enumerate its cultures lists none.
-    ///
-    /// The default lists the locales of the names
-    /// [`get_culture_names`](Self::get_culture_names) lists; a name that is
-    /// not a BCP-47 language tag names no locale and is left out.
-    #[allow(deprecated)]
+    /// enumerate its cultures lists none, the default.
     fn get_locales(&self, types: CultureTypes) -> Vec<Locale> {
-        self.get_culture_names(types).iter().filter_map(|name| Locale::try_from_str(name).ok()).collect()
-    }
-
-    /// The date and time conventions of the culture named exactly
-    /// `culture_name` (a language tag such as `en-US`; never empty), or
-    /// `None` when the provider has no data for it (the parent culture is
-    /// asked next).
-    #[deprecated(since = "0.5.0", note = "implement `get_date_time_format_by_locale`, keyed by the locale of the culture")]
-    fn get_date_time_format(&self, culture_name: &str) -> Option<Rc<DateTimeFormatInfo>> {
-        let _ = culture_name;
-        None
-    }
-
-    /// The number conventions of the culture named exactly `culture_name`,
-    /// or `None` when the provider has no data for it (the parent culture is
-    /// asked next).
-    #[deprecated(since = "0.5.0", note = "implement `get_number_format_by_locale`, keyed by the locale of the culture")]
-    fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
-        let _ = culture_name;
-        None
-    }
-
-    /// The culture-sensitive string comparison rules of the culture named
-    /// exactly `culture_name`, or `None` when the provider has no rules for
-    /// it (the parent culture is asked next, and the built-in invariant
-    /// rules are used last).
-    #[deprecated(since = "0.5.0", note = "implement `get_compare_rules_by_locale`, keyed by the locale of the culture")]
-    fn get_compare_rules(&self, culture_name: &str) -> Option<Rc<dyn super::ICompareRules>> {
-        let _ = culture_name;
-        None
-    }
-
-    /// The text conventions (the list separator) of the culture named
-    /// exactly `culture_name`, or `None` when the provider has no data for
-    /// it (the parent culture is asked next).
-    #[deprecated(since = "0.5.0", note = "implement `get_text_info_by_locale`, keyed by the locale of the culture")]
-    fn get_text_info(&self, culture_name: &str) -> Option<Rc<TextInfo>> {
-        let _ = culture_name;
-        None
-    }
-
-    /// The names of the cultures of the given types the provider has data
-    /// for, in the order they are listed in (the invariant culture, whose
-    /// name is empty, is not among them). A provider that does not enumerate
-    /// its cultures lists none.
-    #[deprecated(since = "0.5.0", note = "implement `get_locales`, which lists the locales of the cultures")]
-    fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
         let _ = types;
         Vec::new()
     }
@@ -144,13 +82,11 @@ pub trait ICultureDataProvider: 'static {
 /// uses the invariant data).
 ///
 /// A culture whose name is not a BCP-47 language tag (`es-ES_tradnl`) has no
-/// locale: it and its parents are asked for by name (`by_name`, the
-/// deprecated methods) until a parent is the culture of a locale
-/// (`es-ES`), whose locale and its parents are asked for next.
+/// locale: the locale of its first parent that is the culture of a locale
+/// (`es-ES`) and the parents of that locale are asked for.
 pub(crate) fn find_culture_data<T: ?Sized>(
     culture: &CultureInfo,
     by_locale: impl Fn(&dyn ICultureDataProvider, &Locale) -> Option<Rc<T>>,
-    by_name: impl Fn(&dyn ICultureDataProvider, &str) -> Option<Rc<T>>,
 ) -> Option<Rc<T>> {
     if culture.is_invariant() {
         return None;
@@ -158,9 +94,6 @@ pub(crate) fn find_culture_data<T: ?Sized>(
     let provider = FerroLocator::current().get_service::<dyn ICultureDataProvider>()?;
     let mut current = culture.clone();
     while !current.is_locale() {
-        if let Some(data) = by_name(&*provider, current.name()) {
-            return Some(data);
-        }
         current = current.parent();
     }
     let mut locale = current.locale().clone();
@@ -217,8 +150,8 @@ mod tests {
         assert_eq!(asked("DE-at-u-nu-latn"), (vec!["de-AT-u-nu-latn".to_owned(), "de-AT".to_owned(), "de".to_owned()], ",".to_owned()));
         assert_eq!(asked("zh-TW"), (vec!["zh-TW".to_owned(), "zh-Hant".to_owned(), "zh".to_owned()], ".".to_owned()));
         assert_eq!(asked(""), (Vec::new(), ".".to_owned()));
-        // A culture whose name is no BCP-47 tag is asked for by name (the deprecated methods,
-        // which this provider does not have), then the locale of its first parent that is one.
+        // A culture whose name is no BCP-47 tag is asked for the locale of its first parent that
+        // is one.
         assert_eq!(asked("de-DE_phoneb"), (vec!["de-DE".to_owned(), "de".to_owned()], ",".to_owned()));
         // The conventions are shared, and attached ones are not asked for.
         let culture = CultureInfo::from_locale(locale!("de-CH"));
@@ -227,37 +160,5 @@ mod tests {
         let attached = culture.with_number_format(NumberFormatInfo::new());
         assert_eq!(attached.number_format().number_decimal_separator(), ".");
         assert!(provider.asked.borrow().is_empty());
-    }
-
-    /// A provider written against the names: the deprecated methods.
-    struct ByName;
-
-    #[allow(deprecated)]
-    impl ICultureDataProvider for ByName {
-        fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
-            matches!(culture_name, "pl-PL" | "es-ES_tradnl")
-                .then(|| Rc::new(NumberFormatInfo::new().with_number_decimal_separator(culture_name)))
-        }
-
-        fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
-            let _ = types;
-            vec!["pl-PL".to_owned(), "es-ES_tradnl".to_owned()]
-        }
-    }
-
-    #[test]
-    fn a_provider_keyed_by_name_keeps_working() {
-        let _scope = FerroLocator::enter_scope();
-        FerroLocator::current_mutable().bind::<dyn ICultureDataProvider>().to_constant(Rc::new(ByName));
-
-        // The methods keyed by locale ask the ones keyed by name with the text of the locale.
-        assert_eq!(CultureInfo::get_culture_info("PL-pl").number_format().number_decimal_separator(), "pl-PL");
-        assert_eq!(CultureInfo::from_locale(locale!("pl-PL-u-nu-latn")).number_format().number_decimal_separator(), "pl-PL");
-        // A culture whose name is no BCP-47 tag is asked for by its name.
-        assert_eq!(CultureInfo::get_culture_info("es-ES_tradnl").number_format().number_decimal_separator(), "es-ES_tradnl");
-        assert_eq!(CultureInfo::get_culture_info("pl").number_format().number_decimal_separator(), ".");
-        // The listed names that are no BCP-47 tags name no locale.
-        let names: Vec<_> = CultureInfo::get_cultures(CultureTypes::SPECIFIC_CULTURES).iter().map(|c| c.name().to_owned()).collect();
-        assert_eq!(names, ["pl-PL"]);
     }
 }

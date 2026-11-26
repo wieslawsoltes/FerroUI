@@ -9,10 +9,6 @@ pub struct MissingFontTableError {
     table: String,
 }
 
-/// The name of [`MissingFontTableError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `MissingFontTableError`")]
-pub type MissingFontTableException = MissingFontTableError;
-
 impl MissingFontTableError {
     /// Creates the error from the message that describes it and the table
     /// where it originated.

@@ -10,10 +10,6 @@ pub struct ExpressionParseError {
     position: i32,
 }
 
-/// The name of [`ExpressionParseError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `ExpressionParseError`")]
-pub type ExpressionParseException = ExpressionParseError;
-
 impl ExpressionParseError {
     /// Creates the error with a message and the position (in UTF-16 code
     /// units from the start of the expression) it was detected at.

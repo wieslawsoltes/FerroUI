@@ -8,7 +8,6 @@ use std::thread::{self, ThreadId};
 
 use super::dispatcher_operation::LocalCallback;
 use super::dispatcher_priority_queue::DispatcherPriorityQueue;
-use super::ferro_synchronization_context::PriorityContexts;
 use super::i_dispatcher_impl::{DetachedDispatcherImpl, DetachedDispatcherSignal};
 use super::{
     DispatcherFrame, DispatcherPriority, DispatcherTimer, DispatcherUnhandledExceptionEventArgs,
@@ -35,8 +34,6 @@ pub(crate) struct DispatcherLocal {
     timer_token: Cell<u64>,
     signaled_token: Cell<u64>,
     background_token: Cell<Option<u64>>,
-    /// The per-priority synchronization contexts, created on demand.
-    pub(crate) priority_contexts: PriorityContexts,
     /// The per-priority schedules of the tasks ([`Dispatcher::task_schedule`]), created on demand,
     /// so that the schedule of a priority is one object (the current schedule of its jobs).
     pub(crate) schedules: RefCell<Vec<Option<Arc<dyn Schedule>>>>,
@@ -71,7 +68,6 @@ impl DispatcherLocal {
             timer_token: Cell::new(0),
             signaled_token: Cell::new(0),
             background_token: Cell::new(None),
-            priority_contexts: PriorityContexts::default(),
             schedules: RefCell::new(Vec::new()),
             tasks: RefCell::new(BTreeMap::new()),
             tasks_pruned_at: Cell::new(0),
@@ -158,9 +154,7 @@ static NEXT_DISPATCHER_ID: AtomicU64 = AtomicU64::new(1);
 /// [`spawn`](Self::spawn) run a future on the dispatcher thread, polling it
 /// from jobs queued at a fixed priority, and give its
 /// `ferroui_system::task::JoinHandle`; [`start_local`](Self::start_local)
-/// polls it for the first time inside the call. The deprecated
-/// `invoke_async_task` and `DispatcherTaskScheduler` do the same and give a
-/// `DispatcherTask`.
+/// polls it for the first time inside the call.
 /// [`resume`](Self::resume), [`yield_now`](Self::yield_now) and
 /// [`await_with_priority`](Self::await_with_priority) change the priority at
 /// which an `async` block continues. No async runtime is involved.

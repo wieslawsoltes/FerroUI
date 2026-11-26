@@ -150,8 +150,7 @@ impl Dispatcher {
     /// Runs the future that `create` makes on this dispatcher, and gives its handle; callable from
     /// any thread. `create` is `Send` and runs in a job posted at `priority`; the future it makes
     /// need not be `Send`, never leaves the dispatcher thread, and is polled for the first time
-    /// inside that job, then from jobs of the same priority (what the deprecated
-    /// `invoke_async_task_with_priority` does, with a `JoinHandle`). A panic of
+    /// inside that job, then from jobs of the same priority. A panic of
     /// `create` faults the task like a panic of the future; the task is canceled when the
     /// dispatcher shuts down before the job runs.
     pub fn spawn_with_priority<C, F>(&self, create: C, priority: DispatcherPriority) -> JoinHandle<F::Output>
@@ -186,8 +185,6 @@ impl Dispatcher {
     /// [`JoinError::Panicked`](ferroui_system::task::JoinError::Panicked), an abort or the
     /// shutdown of the dispatcher is [`JoinError::Canceled`](ferroui_system::task::JoinError::Canceled),
     /// and dropping the handle detaches the task.
-    ///
-    /// What `DispatcherTaskScheduler::start_local` (deprecated) did, with a `JoinHandle`.
     ///
     /// # Panics
     /// When called from a thread other than the dispatcher thread.

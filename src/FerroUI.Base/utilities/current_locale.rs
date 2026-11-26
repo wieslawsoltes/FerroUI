@@ -84,38 +84,6 @@ impl CultureInfo {
         let locale = culture.locale().clone();
         CURRENT.with(|current| *current.borrow_mut() = Ambient { locale, formatting: culture });
     }
-
-    /// The culture used by the current thread.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `ferroui_base::utilities::current_locale` for the language of the thread, or `CultureInfo::current_formatting` for the culture it formats with"
-    )]
-    pub fn current_culture() -> CultureInfo {
-        Self::current_formatting()
-    }
-
-    /// Sets the culture used by the current thread.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `ferroui_base::utilities::set_current_locale`, or `CultureInfo::set_current_formatting` for a culture with attached conventions"
-    )]
-    pub fn set_current_culture(culture: CultureInfo) {
-        Self::set_current_formatting(culture);
-    }
-
-    /// The user interface culture used by the current thread: the culture of
-    /// [`current_ui_locale`].
-    #[deprecated(since = "0.5.0", note = "use `ferroui_base::utilities::current_ui_locale`")]
-    pub fn current_ui_culture() -> CultureInfo {
-        CultureInfo::from(&current_ui_locale())
-    }
-
-    /// Sets the user interface culture used by the current thread: its locale, the unknown
-    /// locale `und` for a culture whose name is not a BCP-47 language tag.
-    #[deprecated(since = "0.5.0", note = "use `ferroui_base::utilities::set_current_ui_locale`")]
-    pub fn set_current_ui_culture(culture: CultureInfo) {
-        set_current_ui_locale(culture.locale().clone());
-    }
 }
 
 #[cfg(test)]
@@ -182,23 +150,5 @@ mod tests {
         CultureInfo::set_current_formatting(CultureInfo::get_culture_info("es-ES_tradnl"));
         assert_eq!(current_locale(), Locale::UNKNOWN);
         assert_eq!(CultureInfo::current_formatting().name(), "es-ES_tradnl");
-    }
-
-    #[test]
-    #[allow(deprecated)]
-    fn the_deprecated_current_cultures_are_the_ambient_locales() {
-        let _restore = restore();
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info("de-DE"));
-        assert_eq!(current_locale(), locale!("de-DE"));
-        assert_eq!(CultureInfo::current_culture(), CultureInfo::get_culture_info("de-DE"));
-        set_current_locale(locale!("fr-FR"));
-        assert_eq!(CultureInfo::current_culture().name(), "fr-FR");
-
-        CultureInfo::set_current_ui_culture(CultureInfo::get_culture_info("ko-KR"));
-        assert_eq!(current_ui_locale(), locale!("ko-KR"));
-        assert_eq!(CultureInfo::current_ui_culture().name(), "ko-KR");
-        CultureInfo::set_current_ui_culture(CultureInfo::invariant_culture());
-        assert_eq!(current_ui_locale(), Locale::UNKNOWN);
-        assert!(CultureInfo::current_ui_culture().is_invariant());
     }
 }

@@ -28,7 +28,7 @@ use ferroui_reactive::{IDisposable, IObservable, IObserver, Notification, Observ
 use ferroui_reactive_testing::{
     assert_messages, assert_subscriptions, new_error, ticks_to_duration, ColdObservable, HotObservable, ReactiveTest as RT, Recorded, TestScheduler,
 };
-use ferroui_system::task::{block_on, Flatten, Shared, SharedSender};
+use ferroui_system::task::{block_on, Canceled, Flatten, Shared, SharedSender};
 use ferroui_system::threading::tasks::run;
 use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
@@ -2097,6 +2097,11 @@ impl TaskSource {
     fn set_exception(&self, error: ObservableError) {
         assert!(self.try_set_exception(error), "An attempt was made to transition a task to a final state when it had already completed.");
     }
+
+    /// `SetCanceled`.
+    fn set_canceled(&self) {
+        assert!(self.try_set_canceled(), "An attempt was made to transition a task to a final state when it had already completed.");
+    }
 }
 
 /// `n` completion sources (`new TaskCompletionSource<int>[n]`).
@@ -2106,23 +2111,6 @@ fn completion_sources(n: usize) -> Vec<TaskSource> {
 
 /// A selector of the task of a completion source (`x => tcss[x].Task`).
 fn task_of(tcss: &[TaskSource]) -> impl Fn(i32) -> SourceTask + 'static {
-    let tcss = tcss.to_vec();
-    move |x| tcss[x as usize].task()
-}
-
-/// `n` completion sources of the deprecated `Task` (`new TaskCompletionSource<int>[n]`), for the
-/// tests that check the task a cancellation names.
-#[allow(deprecated)]
-fn named_completion_sources(n: usize) -> Vec<ferroui_system::threading::tasks::TaskCompletionSource<i32>> {
-    (0..n).map(|_| ferroui_system::threading::tasks::TaskCompletionSource::new()).collect()
-}
-
-/// A selector of the task of a completion source of [`named_completion_sources`]
-/// (`x => tcss[x].Task`).
-#[allow(deprecated)]
-fn named_task_of(
-    tcss: &[ferroui_system::threading::tasks::TaskCompletionSource<i32>],
-) -> impl Fn(i32) -> ferroui_system::threading::tasks::Task<i32> + 'static {
     let tcss = tcss.to_vec();
     move |x| tcss[x as usize].task()
 }
@@ -2164,10 +2152,9 @@ fn same_error(a: &ObservableError, b: &ObservableError) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
 }
 
-/// `err is TaskCanceledException tcException && tcException.Task == task`.
-#[allow(deprecated)]
-fn is_cancellation_of(error: &ObservableError, task: &ferroui_system::threading::tasks::Task<i32>) -> bool {
-    error.downcast_ref::<ferroui_system::threading::tasks::TaskCanceledError>().is_some_and(|canceled| canceled.task_id == Some(task.id()))
+/// `err is TaskCanceledException` (the error names no task here).
+fn is_cancellation(error: &ObservableError) -> bool {
+    Canceled::is_cancellation(error)
 }
 
 /// The values of a sequence whose tasks run on worker threads (`ToEnumerable()`), or its error.
@@ -2310,11 +2297,10 @@ fn simple_faulted_sync_case(indexed: bool) {
     assert!(same_error(&ex, &received.error().unwrap()));
 }
 
-#[allow(deprecated)]
 fn simple_canceled_async_case(indexed: bool) {
-    let tcss = named_completion_sources(3);
+    let tcss = completion_sources(3);
 
-    let res = many_async(Observable::range(0, 3), indexed, named_task_of(&tcss));
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
 
     let (received, _) = receive(&res);
 
@@ -2323,23 +2309,22 @@ fn simple_canceled_async_case(indexed: bool) {
     assert!(received.error().is_some() || received.completed.get());
 
     assert!(received.values.borrow().is_empty());
-    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+    assert!(is_cancellation(&received.error().unwrap()));
 }
 
-#[allow(deprecated)]
 fn simple_canceled_sync_case(indexed: bool) {
-    let tcss = named_completion_sources(3);
+    let tcss = completion_sources(3);
 
     tcss[1].set_canceled();
 
-    let res = many_async(Observable::range(0, 3), indexed, named_task_of(&tcss));
+    let res = many_async(Observable::range(0, 3), indexed, task_of(&tcss));
 
     let (received, _) = receive(&res);
 
     assert!(received.error().is_some() || received.completed.get());
 
     assert!(received.values.borrow().is_empty());
-    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+    assert!(is_cancellation(&received.error().unwrap()));
 }
 
 fn simple_inner_complete_before_outer_case(indexed: bool) {
@@ -2623,11 +2608,10 @@ fn with_result_selector_faulted_sync_case(indexed: bool) {
     assert!(same_error(&ex, &received.error().unwrap()));
 }
 
-#[allow(deprecated)]
 fn with_result_selector_canceled_async_case(indexed: bool) {
-    let tcss = named_completion_sources(3);
+    let tcss = completion_sources(3);
 
-    let res = many_async_with(Observable::range(0, 3), indexed, named_task_of(&tcss), |x, y| x + y);
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
 
     let (received, _) = receive(&res);
 
@@ -2636,23 +2620,22 @@ fn with_result_selector_canceled_async_case(indexed: bool) {
     assert!(received.error().is_some() || received.completed.get());
 
     assert!(received.values.borrow().is_empty());
-    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+    assert!(is_cancellation(&received.error().unwrap()));
 }
 
-#[allow(deprecated)]
 fn with_result_selector_canceled_sync_case(indexed: bool) {
-    let tcss = named_completion_sources(3);
+    let tcss = completion_sources(3);
 
     tcss[1].set_canceled();
 
-    let res = many_async_with(Observable::range(0, 3), indexed, named_task_of(&tcss), |x, y| x + y);
+    let res = many_async_with(Observable::range(0, 3), indexed, task_of(&tcss), |x, y| x + y);
 
     let (received, _) = receive(&res);
 
     assert!(received.error().is_some() || received.completed.get());
 
     assert!(received.values.borrow().is_empty());
-    assert!(is_cancellation_of(&received.error().unwrap(), &tcss[1].task()));
+    assert!(is_cancellation(&received.error().unwrap()));
 }
 
 fn with_result_selector_inner_complete_before_outer_case(indexed: bool) {

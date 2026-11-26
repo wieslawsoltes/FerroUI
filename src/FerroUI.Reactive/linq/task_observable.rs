@@ -46,16 +46,9 @@ fn emit_task_result<T>(result: Result<T, ObservableError>, observer: &Rc<dyn IOb
     }
 }
 
-/// The `Shared` of a deprecated `Task`, which is used as it is (its continuations, and the
-/// cancellation error that names it, are those of that task).
-#[allow(deprecated)]
-fn deprecated_task_shared<T: 'static>(slot: &mut dyn Any) -> Option<Shared<Result<T, ObservableError>>> {
-    slot.downcast_mut::<Option<ferroui_system::threading::tasks::Task<T>>>().and_then(Option::take).map(Shared::from)
-}
-
 /// A future as the [`Shared`] of the task that runs it: a [`Flatten`] is the `Shared` it awaits,
 /// used as it is (as upstream uses the task a function returns, so that the continuations run on
-/// that task's end), as is a deprecated `Task`; another future runs as a task of the current thread
+/// that task's end); another future runs as a task of the current thread
 /// (`ferroui_system::task::spawn_local`), whose outcome is shared.
 pub(crate) fn future_to_shared<T: Clone + 'static, Fut: Future<Output = Result<T, ObservableError>> + 'static>(future: Fut) -> Shared<Result<T, ObservableError>> {
     let mut slot = Some(future);
@@ -63,9 +56,6 @@ pub(crate) fn future_to_shared<T: Clone + 'static, Fut: Future<Output = Result<T
         if let Some(flatten) = flatten.take() {
             return flatten.into_shared();
         }
-    }
-    if let Some(shared) = deprecated_task_shared::<T>(&mut slot) {
-        return shared;
     }
     spawn_shared(slot.take().expect("the future is in its slot"))
 }

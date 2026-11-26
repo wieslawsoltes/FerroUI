@@ -49,8 +49,6 @@ pub use i_platform_gpu::{
     IPlatformGraphics, IPlatformGraphicsContext, IPlatformGraphicsReadyStateFeature,
     PlatformGraphicsContextLostError,
 };
-#[allow(deprecated)]
-pub use i_platform_gpu::PlatformGraphicsContextLostException;
 pub use i_platform_render_interface::{IPlatformRenderInterface, IPlatformRenderInterfaceContext};
 pub use i_platform_render_interface_region::IPlatformRenderInterfaceRegion;
 pub use i_platform_threading_interface::{IPlatformThreadingInterface, PlatformTimerHandle};

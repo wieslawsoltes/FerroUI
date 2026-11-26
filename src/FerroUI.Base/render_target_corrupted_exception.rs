@@ -9,10 +9,6 @@ pub struct RenderTargetCorruptedError {
     inner_exception: Option<Rc<dyn Error>>,
 }
 
-/// The name of [`RenderTargetCorruptedError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `RenderTargetCorruptedError`")]
-pub type RenderTargetCorruptedException = RenderTargetCorruptedError;
-
 impl RenderTargetCorruptedError {
     /// Creates the exception without a message.
     pub fn new() -> Self {

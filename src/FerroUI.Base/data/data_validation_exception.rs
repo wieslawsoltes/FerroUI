@@ -10,10 +10,6 @@ pub struct DataValidationError {
     message: String,
 }
 
-/// The name of [`DataValidationError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `DataValidationError`")]
-pub type DataValidationException = DataValidationError;
-
 impl DataValidationError {
     /// Creates the error from the data received from the validation source.
     pub fn new(error_data: Option<BoxedValue>) -> Self {

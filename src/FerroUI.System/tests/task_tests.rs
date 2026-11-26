@@ -1,158 +1,31 @@
-//! Tests of `threading::tasks`: tasks, completion sources, and futures run on their thread. The
-//! types and functions they test are deprecated since 0.5.0 (wrappers over `crate::task`, step A7
-//! of phase C4 of #423) and keep their behaviour; `run` gives a `Shared` of its result.
-#![allow(deprecated)]
+//! Tests of `threading::tasks`: `run` (`Task.Run`), whose outcome ends on the thread that started
+//! it, and the wakes and local callbacks that other threads send to a thread. The tasks,
+//! completion sources and wrappers over `crate::task` that the module had were deprecated in 0.5.0
+//! and removed in 0.7.0 (#625), with their tests.
 
-use crate::threading::tasks::{block_on, run, run_pending_wakes, set_thread_poster, Task, TaskCanceledError, TaskCompletionSource, TaskStatus, ThreadPoster};
+use crate::task::{block_on, run_pending, set_thread_schedule, Schedule};
+use crate::threading::tasks::run;
 use crate::ObservableError;
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
-#[derive(Debug)]
-struct TestError(&'static str);
+/// A schedule that keeps the work it is given, for the test to run.
+struct Posted(Arc<Mutex<Vec<Box<dyn FnOnce() + Send>>>>);
 
-impl std::fmt::Display for TestError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.0)
+impl Schedule for Posted {
+    fn schedule(&self, poll: Box<dyn FnOnce() + Send>) {
+        self.0.lock().unwrap().push(poll);
     }
 }
 
-impl std::error::Error for TestError {}
-
-fn error(text: &'static str) -> ObservableError {
-    Rc::new(TestError(text))
-}
-
 #[test]
-fn completed_tasks() {
-    let ok = Task::from_result(42);
-    assert_eq!(ok.status(), TaskStatus::RanToCompletion);
-    assert!(ok.is_completed() && ok.is_completed_successfully());
-    assert_eq!(ok.result().unwrap(), 42);
-
-    let ex = error("ex");
-    let faulted = Task::<i32>::from_exception(ex.clone());
-    assert!(faulted.is_faulted());
-    assert!(Rc::ptr_eq(&faulted.exception().unwrap(), &ex));
-    assert!(Rc::ptr_eq(&faulted.result().unwrap_err(), &ex));
-
-    let canceled = Task::<i32>::from_canceled();
-    assert!(canceled.is_canceled());
-    assert!(canceled.exception().is_none());
-    assert!(TaskCanceledError::is_cancellation(&canceled.result().unwrap_err()));
-}
-
-#[test]
-fn a_cancellation_error_cancels() {
-    let task = Task::<i32>::from_exception(Rc::new(TaskCanceledError::default()));
-    assert_eq!(task.status(), TaskStatus::Canceled);
-    let task = Task::<i32>::from_exception(Rc::new(crate::task::Canceled));
-    assert_eq!(task.status(), TaskStatus::Canceled);
-}
-
-#[test]
-fn completion_source_runs_continuations_synchronously_in_order() {
-    let source = TaskCompletionSource::new();
-    let task = source.task();
-    assert_eq!(task.status(), TaskStatus::WaitingForActivation);
-
-    let log = Rc::new(RefCell::new(Vec::new()));
-    for n in 0..3 {
-        let log = log.clone();
-        task.continue_with(move |t| log.borrow_mut().push((n, t.result().unwrap())));
-    }
-    assert!(log.borrow().is_empty());
-
-    source.set_result(7);
-    assert_eq!(*log.borrow(), vec![(0, 7), (1, 7), (2, 7)]);
-
-    // A continuation of an ended task runs at once.
-    let log2 = log.clone();
-    task.continue_with(move |t| log2.borrow_mut().push((3, t.result().unwrap())));
-    assert_eq!(log.borrow().last(), Some(&(3, 7)));
-}
-
-#[test]
-fn completion_source_ends_once() {
-    let source = TaskCompletionSource::new();
-    assert!(source.try_set_result(1));
-    assert!(!source.try_set_result(2));
-    assert!(!source.try_set_exception(error("ex")));
-    assert!(!source.try_set_canceled());
-    assert_eq!(source.task().result().unwrap(), 1);
-    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.set_result(3))).is_err());
-}
-
-#[test]
-#[should_panic]
-fn result_of_a_running_task_panics() {
-    let source = TaskCompletionSource::<i32>::new();
-    let _ = source.task().result();
-}
-
-#[test]
-fn spawn_local_runs_until_the_first_await() {
-    let source = TaskCompletionSource::new();
-    let steps = Rc::new(Cell::new(0));
-    let (task_of_source, s) = (source.task(), steps.clone());
-    let task = Task::spawn_local(async move {
-        s.set(1);
-        let value = task_of_source.await?;
-        s.set(2);
-        Ok(value * 2)
-    });
-    assert_eq!(steps.get(), 1);
-    assert_eq!(task.status(), TaskStatus::Running);
-
-    // Ending the awaited task polls the future again, on the spot.
-    source.set_result(21);
-    assert_eq!(steps.get(), 2);
-    assert_eq!(task.result().unwrap(), 42);
-}
-
-#[test]
-fn spawn_local_propagates_errors_and_cancellations() {
-    let ex = error("ex");
-    let source = TaskCompletionSource::<i32>::new();
-    let awaited = source.task();
-    let task = Task::spawn_local(async move { awaited.await });
-    source.set_exception(ex.clone());
-    assert!(task.is_faulted());
-    assert!(Rc::ptr_eq(&task.exception().unwrap(), &ex));
-
-    let source = TaskCompletionSource::<i32>::new();
-    let awaited = source.task();
-    let task = Task::spawn_local(async move { awaited.await });
-    source.set_canceled();
-    assert!(task.is_canceled());
-}
-
-#[test]
-fn a_wake_from_inside_the_poll_polls_again_after_it() {
-    // The future wakes itself while it is polled: the executor polls it again once the poll returns.
-    let polls = Rc::new(Cell::new(0));
-    let p = polls.clone();
-    let task = Task::spawn_local(std::future::poll_fn(move |context| {
-        p.set(p.get() + 1);
-        if p.get() < 3 {
-            context.waker().wake_by_ref();
-            std::task::Poll::Pending
-        } else {
-            std::task::Poll::Ready(Ok(p.get()))
-        }
-    }));
-    assert_eq!(task.result().unwrap(), 3);
-    assert_eq!(polls.get(), 3);
-}
-
-#[test]
-fn a_wake_from_another_thread_waits_for_run_pending_wakes() {
+fn a_wake_from_another_thread_waits_for_run_pending() {
     let task = run(|| Ok(5));
-    // Without a poster the wake waits in the queue of the thread.
+    // Without a schedule the wake waits in the queue of the thread.
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
     while !task.is_finished() {
-        run_pending_wakes();
+        run_pending();
         assert!(std::time::Instant::now() < deadline, "the work did not come back");
         std::thread::yield_now();
     }
@@ -160,11 +33,9 @@ fn a_wake_from_another_thread_waits_for_run_pending_wakes() {
 }
 
 #[test]
-fn a_wake_from_another_thread_goes_through_the_poster() {
+fn a_wake_from_another_thread_goes_through_the_schedule_of_the_thread() {
     let posted: Arc<Mutex<Vec<Box<dyn FnOnce() + Send>>>> = Arc::new(Mutex::new(Vec::new()));
-    let queue = posted.clone();
-    let poster: ThreadPoster = Arc::new(move |work| queue.lock().unwrap().push(work));
-    set_thread_poster(Some(poster));
+    set_thread_schedule(Some(Arc::new(Posted(posted.clone()))));
 
     // The work waits until `run` has polled the task once, so that its end comes as a wake from
     // the other thread; without the gate, work that ends before that poll completes the task with
@@ -185,7 +56,7 @@ fn a_wake_from_another_thread_goes_through_the_poster() {
         assert!(std::time::Instant::now() < deadline, "nothing was posted");
         std::thread::yield_now();
     }
-    set_thread_poster(None);
+    set_thread_schedule(None);
     assert_eq!(task.result().unwrap().unwrap(), "done");
 }
 
@@ -203,24 +74,9 @@ fn block_on_waits_for_work_of_other_threads() {
     let value = block_on(async {
         let a = run(|| Ok(20)).flatten().await?;
         let b = run(|| Ok(22)).flatten().await?;
-        Ok(a + b)
+        Ok::<_, ObservableError>(a + b)
     });
     assert_eq!(value.unwrap(), 42);
-}
-
-#[test]
-fn a_removed_continuation_does_not_run() {
-    let source = TaskCompletionSource::new();
-    let task = source.task();
-    let ran = Rc::new(Cell::new(0));
-    let (a, b) = (ran.clone(), ran.clone());
-    let first = task.continue_with(move |_| a.set(a.get() + 1)).unwrap();
-    task.continue_with(move |_| b.set(b.get() + 10));
-    assert!(task.remove_continuation(first));
-    assert!(!task.remove_continuation(first));
-    source.set_result(());
-    assert_eq!(ran.get(), 10);
-    assert!(Task::from_result(()).continue_with(|_| {}).is_none());
 }
 
 #[test]
@@ -255,51 +111,6 @@ fn register_local_runs_on_the_thread_that_registered() {
     let remote = source.clone();
     std::thread::spawn(move || remote.cancel()).join().unwrap();
     assert_eq!(ran.get(), 2);
-    assert!(run_pending_wakes());
+    assert!(run_pending());
     assert_eq!(ran.get(), 12);
-}
-
-#[test]
-fn a_panic_in_a_spawned_future_faults_its_task_and_the_other_awaiters_still_resume() {
-    // F2 of docs/idiomatic-rust-async.md: the panic used to leave through `set_result`, with the
-    // task left running and the awaiters that were not woken yet never woken.
-    let source = TaskCompletionSource::<i32>::new();
-    let awaited = source.task();
-    let panicking = Task::spawn_local(async move {
-        let value = awaited.await?;
-        if value > 0 {
-            panic!("boom");
-        }
-        Ok(value)
-    });
-    let awaited = source.task();
-    let resumed = Rc::new(Cell::new(0));
-    let r = resumed.clone();
-    let after = Task::spawn_local(async move {
-        let value = awaited.await?;
-        r.set(value);
-        Ok(value)
-    });
-
-    // The panic does not leave through the call that woke the future.
-    source.set_result(5);
-    assert!(panicking.is_faulted());
-    let error = panicking.exception().unwrap();
-    assert!(error.downcast_ref::<crate::threading::tasks::TaskWorkError>().is_some());
-    assert_eq!(error.to_string(), "boom");
-    assert_eq!(resumed.get(), 5);
-    assert_eq!(after.result().unwrap(), 5);
-}
-
-#[test]
-fn a_panic_after_the_task_has_ended_goes_on_from_the_call_that_polled_it() {
-    // A continuation that the end of the task runs, inside the poll of its future, panics: the
-    // task has its outcome already, so the panic leaves through the call that woke the future.
-    let source = TaskCompletionSource::<i32>::new();
-    let awaited = source.task();
-    let task = Task::spawn_local(async move { awaited.await });
-    let _ = task.continue_with(|_| panic!("in a continuation"));
-    let woke = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.set_result(1)));
-    assert!(woke.is_err());
-    assert_eq!(task.result().unwrap(), 1);
 }

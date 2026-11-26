@@ -1,8 +1,3 @@
-// The deprecated `DispatcherTask`, `DispatcherTaskScheduler`, `invoke_async_task*` and
-// `to_task_scheduler*` (step A6 of phase C4 of #423) are tested here, with the ordering suite
-// (a child module) that keeps them unchanged.
-#![allow(deprecated)]
-
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -15,12 +10,10 @@ use std::thread::{self, ThreadId};
 use std::time::{Duration, Instant};
 
 use super::dispatcher_tests_exception::{message_of, DispatcherTests};
-// `FerroSynchronizationContext` is deprecated since 0.5.0: the tests that use it are its tests.
-#[allow(deprecated)]
 use super::{
     CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherImplEvent, DispatcherOperation,
-    DispatcherInvokeError, DispatcherOperationStatus, DispatcherPriority, DispatcherTask, DispatcherTaskScheduler,
-    DispatcherTimer, FerroSynchronizationContext, IControlledDispatcherImpl, IDispatcher, IDispatcherImpl,
+    DispatcherInvokeError, DispatcherOperationStatus, DispatcherPriority, DispatcherTimer, IControlledDispatcherImpl,
+    IDispatcher, IDispatcherImpl,
     IDispatcherImplWithExplicitBackgroundProcessing, IDispatcherImplWithPendingInput, IDispatcherSignal,
 };
 use crate::platform::ManagedDispatcherImpl;
@@ -1437,16 +1430,12 @@ fn push_frame_requires_a_controlled_implementation() {
 }
 
 #[test]
-#[allow(deprecated)]
 fn handles_are_thread_safe() {
     fn assert_send_sync<T: Send + Sync>() {}
     assert_send_sync::<Dispatcher>();
     assert_send_sync::<DispatcherFrame>();
     assert_send_sync::<DispatcherOperation<i32>>();
     assert_send_sync::<CancellationToken>();
-    assert_send_sync::<DispatcherTask<i32>>();
-    assert_send_sync::<FerroSynchronizationContext>();
-    assert_send_sync::<DispatcherTaskScheduler>();
 }
 
 #[test]
@@ -1571,7 +1560,6 @@ fn dispatcher_operations_have_context_with_proper_priority() {
     }
     disp.main_loop(&CancellationToken::none());
 
-    disp.send_local(dump_current_priority.clone(), Some(DispatcherPriority::SEND));
     disp.invoke_local_with_priority(dump_current_priority.clone(), DispatcherPriority::SEND).unwrap();
     let dump = dump_current_priority.clone();
     let one = disp
@@ -1592,7 +1580,6 @@ fn dispatcher_operations_have_context_with_proper_priority() {
             DispatcherPriority::LOADED,
             DispatcherPriority::INPUT,
             DispatcherPriority::BACKGROUND,
-            DispatcherPriority::SEND,
             DispatcherPriority::SEND,
             DispatcherPriority::SEND,
         ]
@@ -1628,31 +1615,32 @@ fn dispatcher_invoke_async_unwraps_tasks() {
         let stage = async_method_stage.clone();
         async move {
             let ui_thread = Dispatcher::ui_thread();
-            ui_thread.invoke_async_task_local(async_method.clone()).await.unwrap();
+            let method = async_method.clone();
+            ui_thread.spawn_local(async move { method().await }).await.unwrap();
             assert_eq!(stage.get(), 2);
-            assert_eq!(ui_thread.invoke_async_task(async_method_with_result).await, Ok(1));
+            assert_eq!(ui_thread.spawn(async_method_with_result).await.ok(), Some(1));
             stage.set(0);
 
+            let method = async_method.clone();
             ui_thread
-                .invoke_async_task_local_with_priority(async_method.clone(), DispatcherPriority::DEFAULT)
+                .spawn_local_with_priority(async move { method().await }, DispatcherPriority::DEFAULT)
                 .await
                 .unwrap();
             assert_eq!(stage.get(), 2);
             assert_eq!(
-                ui_thread.invoke_async_task_with_priority(async_method_with_result, DispatcherPriority::DEFAULT).await,
-                Ok(1)
+                ui_thread.spawn_with_priority(async_method_with_result, DispatcherPriority::DEFAULT).await.ok(),
+                Some(1)
             );
 
             Dispatcher::ui_thread().exit_all_frames();
         }
     };
 
-    let t = Dispatcher::ui_thread().to_task_scheduler().spawn_local(test);
-    assert!(!t.is_completed());
+    let mut t = Dispatcher::ui_thread().spawn_local(test);
+    assert!(!t.is_finished());
     let cts = cancel_after(Duration::from_secs(3));
     Dispatcher::ui_thread().main_loop(&cts);
-    assert!(t.is_completed_successfully());
-    t.result().unwrap();
+    assert_eq!(outcome_of(&mut t).as_deref(), Some("()"));
 }
 
 #[test]
@@ -1665,7 +1653,7 @@ fn dispatcher_resume_continues_on_current_thread() {
 
     let d = dispatcher.clone();
     let stop = token_source.clone();
-    let workload = dispatcher.invoke_async_task_local(move || async move {
+    let mut workload = dispatcher.spawn_local_with_priority(async move {
         assert!(d.check_access());
         assert_eq!(current_priority(), DispatcherPriority::DEFAULT);
 
@@ -1681,13 +1669,13 @@ fn dispatcher_resume_continues_on_current_thread() {
         assert_eq!(current_priority(), DispatcherPriority::RENDER);
 
         stop.cancel();
-    });
+    }, DispatcherPriority::DEFAULT);
 
     let timeout = cancel_after(Duration::from_secs(5));
     let stop = token_source.clone();
     timeout.register(move || stop.cancel()).detach();
     dispatcher.main_loop(&token_source);
-    assert!(workload.is_completed_successfully());
+    assert_eq!(outcome_of(&mut workload).as_deref(), Some("()"));
 }
 
 #[test]
@@ -1702,7 +1690,7 @@ fn dispatcher_yield_continues_on_current_thread_in_a_task() {
     let d = dispatcher.clone();
     let stop = token_source.clone();
     let o = order.clone();
-    let workload = dispatcher.invoke_async_task_local(move || async move {
+    let mut workload = dispatcher.spawn_local_with_priority(async move {
         assert!(d.check_access());
         // Queued behind the yield in arrival order, but with a higher priority.
         d.post_local(add(&o, "posted"), DispatcherPriority::NORMAL);
@@ -1713,10 +1701,10 @@ fn dispatcher_yield_continues_on_current_thread_in_a_task() {
         assert_eq!(current_priority(), DispatcherPriority::BACKGROUND);
 
         stop.cancel();
-    });
+    }, DispatcherPriority::DEFAULT);
 
     dispatcher.main_loop(&token_source);
-    assert!(workload.is_completed_successfully());
+    assert_eq!(outcome_of(&mut workload).as_deref(), Some("()"));
     assert_eq!(names(&order), ["posted", "resumed"]);
 }
 
@@ -1730,8 +1718,8 @@ fn await_with_priority_runs_on_current_thread() {
 
     let d = dispatcher.clone();
     let stop = token_source.clone();
-    let workload = dispatcher.invoke_async_task_local_with_priority(
-        move || async move {
+    let mut workload = dispatcher.spawn_local_with_priority(
+        async move {
             assert!(d.check_access());
             assert_eq!(current_priority(), DispatcherPriority::BACKGROUND);
             let task_without_result = async {
@@ -1767,9 +1755,11 @@ fn await_with_priority_runs_on_current_thread() {
     let stop = token_source.clone();
     timeout.register(move || stop.cancel()).detach();
     dispatcher.main_loop(&token_source);
-    assert!(workload.is_completed_successfully());
     // A result that is not `Send` is read on the dispatcher thread.
-    assert_ne!(*workload.result().unwrap(), thread::current().id());
+    let Poll::Ready(Ok(thread_id)) = poll_once(&mut workload, &CountingWaker::new()) else {
+        panic!("the workload has not completed");
+    };
+    assert_ne!(*thread_id, thread::current().id());
 }
 
 #[test]
@@ -1777,247 +1767,55 @@ fn dispatcher_can_act_as_task_scheduler() {
     let _t = DispatcherTests::new();
     let impl_ = SimpleDispatcherImpl::new(SimpleKind::Simple);
     Dispatcher::initialize_ui_thread_dispatcher(impl_.clone());
-    let scheduler = Dispatcher::ui_thread().to_task_scheduler();
-    assert_eq!(scheduler.priority(), DispatcherPriority::DEFAULT);
+    let dispatcher = Dispatcher::ui_thread();
 
     // Scheduled from another thread, as a continuation of work done there.
-    let continuation = thread::spawn(move || scheduler.spawn(async { thread::current().id() })).join().unwrap();
+    let mut continuation =
+        thread::spawn(move || dispatcher.spawn(|| async { thread::current().id() })).join().unwrap();
     assert!(impl_.asked_for_signal());
-    assert!(!continuation.is_completed());
+    assert!(!continuation.is_finished());
     impl_.execute_signal();
-    assert_eq!(continuation.result(), Ok(Dispatcher::ui_thread().thread()));
+    assert_eq!(outcome_of(&mut continuation), Some(format!("{:?}", Dispatcher::ui_thread().thread())));
 }
 
 #[test]
-fn task_scheduler_takes_the_priority_of_the_current_context() {
-    let t = DispatcherTests::new();
-    let seen = Rc::new(RefCell::new(Vec::new()));
-    let d = t.ui_thread.clone();
-    let s = seen.clone();
-    t.ui_thread.post_local(
-        move || {
-            let scheduler = d.to_task_scheduler();
-            s.borrow_mut().push(scheduler.priority());
-            let s = s.clone();
-            // Queued, not run inline.
-            let task = scheduler.spawn_local(async move {
-                s.borrow_mut().push(current_priority());
-                Rc::new(1)
-            });
-            assert!(!task.is_completed());
-        },
-        DispatcherPriority::RENDER,
-    );
-    t.ui_thread.run_jobs(None);
-    assert_eq!(*seen.borrow(), [DispatcherPriority::RENDER, DispatcherPriority::RENDER]);
-
-    assert_eq!(
-        t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::INPUT).priority(),
-        DispatcherPriority::INPUT
-    );
-    assert!(Arc::ptr_eq(t.ui_thread.to_task_scheduler().dispatcher(), &t.ui_thread));
-}
-
-#[test]
-#[allow(deprecated)]
-fn synchronization_context_ensure_and_install() {
-    let t = DispatcherTests::new();
-    assert!(FerroSynchronizationContext::current().is_none());
-
-    // The per-priority contexts are cached.
-    let normal = t.ui_thread.get_context_with_priority(DispatcherPriority::NORMAL);
-    assert!(Arc::ptr_eq(&normal, &t.ui_thread.get_context_with_priority(DispatcherPriority::NORMAL)));
-    assert!(Arc::ptr_eq(normal.dispatcher(), &t.ui_thread));
-
-    {
-        let restore = FerroSynchronizationContext::ensure(DispatcherPriority::INPUT);
-        assert_eq!(current_priority(), DispatcherPriority::INPUT);
-        {
-            // Same priority: nothing to change, nothing to restore.
-            let _same = FerroSynchronizationContext::ensure(DispatcherPriority::INPUT);
-            let _nested = FerroSynchronizationContext::ensure_with_dispatcher(&t.ui_thread, DispatcherPriority::RENDER);
-            assert_eq!(current_priority(), DispatcherPriority::RENDER);
-        }
-        assert_eq!(current_priority(), DispatcherPriority::INPUT);
-        restore.dispose();
-        assert!(FerroSynchronizationContext::current().is_none());
-        // Disposing twice (and dropping afterwards) changes nothing.
-        FerroSynchronizationContext::set_current(Some(normal.clone()));
-        restore.dispose();
-    }
-    assert!(Arc::ptr_eq(&FerroSynchronizationContext::current().unwrap(), &normal));
-    FerroSynchronizationContext::set_current(None);
-
-    assert!(FerroSynchronizationContext::auto_install());
-    FerroSynchronizationContext::install_if_needed();
-    assert!(Arc::ptr_eq(&FerroSynchronizationContext::current().unwrap(), &normal));
-    let own = FerroSynchronizationContext::with_priority(DispatcherPriority::LOADED);
-    FerroSynchronizationContext::set_current(Some(own.clone()));
-    FerroSynchronizationContext::install_if_needed();
-    assert!(Arc::ptr_eq(&FerroSynchronizationContext::current().unwrap(), &own));
-    assert_eq!(FerroSynchronizationContext::new().priority(), DispatcherPriority::DEFAULT);
-    FerroSynchronizationContext::set_current(None);
-}
-
-#[test]
-#[allow(deprecated)]
-fn synchronization_context_post_and_send() {
-    let t = DispatcherTests::new();
-    let context = t.ui_thread.get_context_with_priority(DispatcherPriority::BACKGROUND);
-    let seen = Rc::new(RefCell::new(Vec::new()));
-
-    let s = seen.clone();
-    context.post_local(move || s.borrow_mut().push(("post", current_priority())));
-    let s = seen.clone();
-    // Same thread: runs right away, at send priority.
-    context.send_local(move || s.borrow_mut().push(("send", current_priority())));
-    let on_thread = Arc::new(AtomicBool::new(false));
-    let o = on_thread.clone();
-    context.send(move || o.store(true, Ordering::SeqCst));
-    assert!(on_thread.load(Ordering::SeqCst));
-    assert_eq!(*seen.borrow(), [("send", DispatcherPriority::SEND)]);
-    t.ui_thread.run_jobs(None);
-    assert_eq!(*seen.borrow(), [("send", DispatcherPriority::SEND), ("post", DispatcherPriority::BACKGROUND)]);
-
-    // From another thread `send` queues at the context's priority and waits.
-    let ui_thread_id = thread::current().id();
-    let done = CancellationToken::new();
-    let finish = done.clone();
-    let c = context.clone();
-    let posted = Arc::new(Mutex::new(None));
-    let p = posted.clone();
-    let worker = thread::spawn(move || {
-        let ran = Arc::new(Mutex::new(None));
-        let r = ran.clone();
-        c.send(move || *r.lock().unwrap() = Some((thread::current().id(), current_priority())));
-        // `send` has returned, so its job has run. Read what it recorded
-        // before posting: the posted job runs on the dispatcher thread
-        // concurrently with the rest of this closure.
-        let sent = *ran.lock().unwrap();
-        c.post(move || {
-            *p.lock().unwrap() = Some((thread::current().id(), current_priority()));
-            finish.cancel();
-        });
-        sent
-    });
-    let timeout = cancel_after(Duration::from_secs(10));
-    let stop = timeout.clone();
-    done.register(move || stop.cancel()).detach();
-    t.ui_thread.main_loop(&timeout);
-    assert_eq!(worker.join().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
-    assert_eq!(*posted.lock().unwrap(), Some((ui_thread_id, DispatcherPriority::BACKGROUND)));
-}
-
-#[test]
-#[allow(deprecated)]
-fn send_reports_panics_to_the_unhandled_exception_handlers() {
-    let t = DispatcherTests::new();
-    let handled = Rc::new(Cell::new(0));
-    let h = handled.clone();
-    t.ui_thread.unhandled_exception(move |args| {
-        h.set(h.get() + 1);
-        args.set_handled(true);
-    });
-    let context = t.ui_thread.get_context_with_priority(DispatcherPriority::NORMAL);
-    context.send_local(|| panic!("inline"));
-    assert_eq!(handled.get(), 1);
-    t.ui_thread.send_local(|| panic!("queued"), Some(DispatcherPriority::NORMAL));
-    assert_eq!(handled.get(), 2);
-}
-
-#[test]
-#[allow(deprecated)]
 fn disable_processing_keeps_the_current_context() {
     // The context half of the reference test: there the helper that replaces
     // the pumping wait of the runtime is swapped in unless a dispatcher
     // context is current. Blocking never pumps here, so all that is left to
-    // check is that the current context is left alone.
+    // check is that the current priority (the context of the reference) is
+    // left alone.
     let t = DispatcherTests::new();
-    assert!(FerroSynchronizationContext::current().is_none());
+    assert!(Dispatcher::current_priority().is_none());
     let disabled = t.ui_thread.disable_processing();
-    assert!(FerroSynchronizationContext::current().is_none());
+    assert!(Dispatcher::current_priority().is_none());
     disabled.dispose();
 
-    let context = FerroSynchronizationContext::with_dispatcher(&t.ui_thread, DispatcherPriority::DEFAULT);
-    FerroSynchronizationContext::set_current(Some(context.clone()));
+    Dispatcher::set_current_priority(Some(DispatcherPriority::DEFAULT));
     let disabled = t.ui_thread.disable_processing();
-    assert!(Arc::ptr_eq(&FerroSynchronizationContext::current().unwrap(), &context));
+    assert_eq!(Dispatcher::current_priority(), Some(DispatcherPriority::DEFAULT));
     disabled.dispose();
-    assert!(Arc::ptr_eq(&FerroSynchronizationContext::current().unwrap(), &context));
-    FerroSynchronizationContext::set_current(None);
+    assert_eq!(Dispatcher::current_priority(), Some(DispatcherPriority::DEFAULT));
+    Dispatcher::set_current_priority(None);
 }
 
 #[test]
-fn invoke_async_task_outcomes() {
-    let t = DispatcherTests::new();
-
-    // The callback panics before producing a future.
-    let from_callback = t.ui_thread.invoke_async_task(|| -> std::future::Ready<i32> { panic!("callback") });
-    // The future panics.
-    let from_future = t.ui_thread.invoke_async_task(|| async {
-        if true {
-            panic!("future");
-        }
-        1
-    });
-    // The first poll happens inside the operation that ran the callback.
-    let order = Rc::new(RefCell::new(Vec::new()));
-    let o = order.clone();
-    let d = t.ui_thread.clone();
-    let stuck = t.ui_thread.invoke_async_task_local(move || {
-        o.borrow_mut().push("callback".to_string());
-        d.post_local(add(&o, "posted"), DispatcherPriority::SEND);
-        async move {
-            o.borrow_mut().push("first poll".to_string());
-            std::future::pending::<()>().await;
-        }
-    });
-    assert!(!from_callback.is_completed());
-
-    t.ui_thread.run_jobs(None);
-    assert_eq!(names(&order), ["callback", "first poll", "posted"]);
-
-    assert!(from_callback.is_faulted());
-    let c = from_callback.clone();
-    let result = catch_unwind(AssertUnwindSafe(|| c.wait()));
-    assert_eq!(message_of(&*result.unwrap_err()), Some("callback"));
-    assert!(from_future.is_faulted());
-    let result = catch_unwind(AssertUnwindSafe(|| from_future.result()));
-    assert_eq!(message_of(&*result.unwrap_err()), Some("future"));
-
-    // Waiting for a running task on the dispatcher thread cannot work.
-    assert!(!stuck.is_completed());
-    let s = stuck.clone();
-    let result = catch_unwind(AssertUnwindSafe(|| s.wait()));
-    assert_eq!(message_of(&*result.unwrap_err()), Some("Synchronous wait is only supported on non-UI threads"));
-
-    // Shutting the dispatcher down cancels what is still running...
-    t.ui_thread.invoke_shutdown();
-    assert!(stuck.is_canceled());
-    assert_eq!(stuck.wait(), Err(Canceled));
-    // ...and what can no longer start.
-    let late = t.ui_thread.invoke_async_task(|| async { 1 });
-    assert!(late.is_canceled());
-    assert_eq!(late.result(), Err(Canceled));
-    assert!(t.ui_thread.try_local().unwrap().tasks.borrow().is_empty());
-}
-
-#[test]
-fn invoke_async_task_from_another_thread() {
+fn spawn_from_another_thread() {
     let t = DispatcherTests::new();
     let dispatcher = t.ui_thread.clone();
     let ui_thread_id = thread::current().id();
     let done = CancellationToken::new();
     let finish = done.clone();
     let worker = thread::spawn(move || {
-        let task = dispatcher.invoke_async_task(|| async {
+        let task = dispatcher.spawn(|| async {
             // Not `Send`: the future lives on the dispatcher thread.
             let on_thread = Rc::new(thread::current().id());
             delay(Duration::from_millis(5)).await;
             Dispatcher::yield_now().await;
             (*on_thread, thread::current().id())
         });
-        let result = task.result();
+        // The worker waits for the handle, which the dispatcher thread completes.
+        let result = ferroui_system::task::block_on(task).ok();
         finish.cancel();
         result
     });
@@ -2026,15 +1824,15 @@ fn invoke_async_task_from_another_thread() {
     let stop = timeout.clone();
     done.register(move || stop.cancel()).detach();
     t.ui_thread.main_loop(&timeout);
-    assert_eq!(worker.join().unwrap(), Ok((ui_thread_id, ui_thread_id)));
+    assert_eq!(worker.join().unwrap(), Some((ui_thread_id, ui_thread_id)));
 }
 
 #[test]
-fn dispatcher_task_is_a_future_for_other_executors() {
+fn a_task_handle_is_a_future_for_other_executors() {
     let t = DispatcherTests::new();
     let waker = CountingWaker::new();
     let (sender, receiver) = oneshot();
-    let mut task = t.ui_thread.invoke_async_task(move || receiver);
+    let mut task = t.ui_thread.spawn(move || receiver);
     assert!(poll_once(&mut task, &waker).is_pending());
     t.ui_thread.run_jobs(None);
     assert!(poll_once(&mut task, &waker).is_pending());
@@ -2045,7 +1843,7 @@ fn dispatcher_task_is_a_future_for_other_executors() {
     assert!(poll_once(&mut task, &waker).is_pending());
     t.ui_thread.run_jobs(None);
     assert_eq!(waker.wakes.load(Ordering::SeqCst), 1);
-    assert_eq!(poll_once(&mut task, &waker), Poll::Ready(Ok(11)));
+    assert!(matches!(poll_once(&mut task, &waker), Poll::Ready(Ok(11))));
 }
 
 // ---------------------------------------------------------------------------
@@ -2074,8 +1872,8 @@ fn a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump()
     let order = Rc::new(RefCell::new(Vec::new()));
     let d = t.ui_thread.clone();
     let o = order.clone();
-    let task = t.ui_thread.invoke_async_task_local_with_priority(
-        move || async move {
+    let mut task = t.ui_thread.spawn_local_with_priority(
+        async move {
             let mut first = d.invoke_async_local_with_priority(|| 1, DispatcherPriority::NORMAL);
             // Registers the waker of the task with `first`, and goes on in the same poll.
             std::future::poll_fn(|cx| {
@@ -2098,8 +1896,7 @@ fn a_task_whose_poll_pumps_the_queue_resumes_after_a_wake_that_ran_in_the_pump()
 
     t.ui_thread.run_jobs(None);
     assert_eq!(names(&order), ["invoked", "first: Completed", "resumed with 2"]);
-    assert!(task.is_completed_successfully());
-    assert_eq!(task.result(), Ok(2));
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("2"));
 }
 
 #[test]
@@ -2264,14 +2061,14 @@ fn invoke_shutdown_inside_a_task_ends_it_canceled_after_its_poll() {
     let d = t.ui_thread.clone();
     let after = Rc::new(Cell::new(false));
     let a = after.clone();
-    let task = t.ui_thread.invoke_async_task_local(move || async move {
+    let mut task = t.ui_thread.spawn_local(async move {
         d.invoke_shutdown();
         a.set(true);
         std::future::pending::<()>().await;
     });
     t.ui_thread.run_jobs(None);
     assert!(after.get());
-    assert!(task.is_canceled());
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("canceled"));
 }
 
 #[test]
@@ -2638,86 +2435,6 @@ fn start_local_polls_the_future_inside_the_call_then_from_jobs_of_its_priority()
     let mut aborted = t.ui_thread.start_local(std::future::pending::<()>());
     aborted.abort();
     assert_eq!(outcome_of(&mut aborted).as_deref(), Some("canceled"));
-}
-
-#[test]
-fn a_join_handle_converts_into_a_dispatcher_task_that_keeps_its_contract() {
-    let t = DispatcherTests::new();
-
-    // The task of a handle that has ended is complete at once...
-    let done: DispatcherTask<i32> = t.ui_thread.start_local(async { 1 }).into();
-    assert!(done.is_completed_successfully());
-    assert_eq!(done.result(), Ok(1));
-
-    // ...the one of a running task completes in a job of the dispatcher...
-    let later: DispatcherTask<i32> = t
-        .ui_thread
-        .spawn_local(async {
-            Dispatcher::yield_now().await;
-            2
-        })
-        .into();
-    assert!(!later.is_completed());
-    t.ui_thread.run_jobs(None);
-    assert_eq!(later.result(), Ok(2));
-
-    // ...a panic faults it and is raised again when it is observed...
-    let failed: DispatcherTask<()> = t
-        .ui_thread
-        .spawn_local(async {
-            panic!("converted");
-        })
-        .into();
-    t.ui_thread.run_jobs(None);
-    assert!(failed.is_faulted());
-    let raised = catch_unwind(AssertUnwindSafe(|| failed.result()));
-    assert_eq!(message_of(&*raised.unwrap_err()), Some("converted"));
-
-    // ...and an aborted task cancels it.
-    let aborted = t.ui_thread.spawn_local(std::future::pending::<()>());
-    let abort = aborted.abort_handle();
-    let canceled: DispatcherTask<()> = aborted.into();
-    abort.abort();
-    t.ui_thread.run_jobs(None);
-    assert!(canceled.is_canceled());
-}
-
-#[test]
-fn a_dispatcher_task_converts_into_a_join_handle_with_its_panic_as_a_value() {
-    let t = DispatcherTests::new();
-
-    let mut done: JoinHandle<i32> = t.ui_thread.invoke_async_task(|| async { 3 }).into();
-    assert!(!done.is_finished());
-    t.ui_thread.run_jobs(None);
-    assert_eq!(outcome_of(&mut done).as_deref(), Some("3"));
-
-    // The panic that the `DispatcherTask` raises again is the outcome of the handle.
-    let mut failed: JoinHandle<()> = t
-        .ui_thread
-        .invoke_async_task(|| async {
-            panic!("raised");
-        })
-        .into();
-    t.ui_thread.run_jobs(None);
-    assert_eq!(outcome_of(&mut failed).as_deref(), Some("the task panicked: raised"));
-
-    // A cancellation, while the handle waits or before it is made, ends it canceled.
-    let inner = t.ui_thread.spawn_local(std::future::pending::<()>());
-    let abort = inner.abort_handle();
-    let task: DispatcherTask<()> = inner.into();
-    let mut canceled: JoinHandle<()> = task.into();
-    abort.abort();
-    t.ui_thread.run_jobs(None);
-    assert_eq!(outcome_of(&mut canceled).as_deref(), Some("canceled"));
-
-    let inner = t.ui_thread.spawn_local(std::future::pending::<()>());
-    let abort = inner.abort_handle();
-    let task: DispatcherTask<()> = inner.into();
-    abort.abort();
-    t.ui_thread.run_jobs(None);
-    assert!(task.is_canceled());
-    let mut early: JoinHandle<()> = task.into();
-    assert_eq!(outcome_of(&mut early).as_deref(), Some("canceled"));
 }
 
 // The ordering guarantees that phase C4 of #423 keeps (docs/idiomatic-rust-async.md); a child

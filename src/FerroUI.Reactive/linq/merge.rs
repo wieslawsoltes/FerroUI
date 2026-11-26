@@ -50,16 +50,6 @@ impl<T: Clone + 'static> ObservableSource<T> for ferroui_system::task::Flatten<T
     }
 }
 
-/// A deprecated `Task` is the sequence of its outcome, as its `Shared` is: kept so that sequences
-/// of tasks keep working while the type is deprecated.
-#[allow(deprecated)]
-impl<T: Clone + 'static> ObservableSource<T> for ferroui_system::threading::tasks::Task<T> {
-    fn subscribe_source(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
-        let shared: ferroui_system::task::Shared<Result<T, ObservableError>> = self.clone().into();
-        crate::linq::task_observable::task_to_observable(shared, None).subscribe(observer)
-    }
-}
-
 /// The sink of `Merge` (`Merge<TSource>.Observables._` and, with a limit of concurrent inner
 /// subscriptions, `Merge<TSource>.ObservablesMaxConcurrency._`): it subscribes to each inner
 /// sequence as it arrives (or queues it while the limit is reached), and ends when the outer

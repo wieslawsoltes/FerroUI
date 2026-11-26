@@ -9,10 +9,6 @@ pub struct BindingChainError {
     expression_error_point: Option<String>,
 }
 
-/// The name of [`BindingChainError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `BindingChainError`")]
-pub type BindingChainException = BindingChainError;
-
 impl BindingChainError {
     pub fn new() -> Self {
         Self::default()

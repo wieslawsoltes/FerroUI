@@ -324,18 +324,6 @@ fn end_task(task: &LocalTask, failure: Option<Failure>) {
     }
 }
 
-/// Adds a task to the table of the current thread and polls it, or queues its first poll.
-/// `on_failure` is told when the task ends without the output of its future: an abort, a panic.
-/// Without a schedule the task goes to the queue of the thread, or to the schedule of the work
-/// that spawns it ([`local_route`]).
-pub(crate) fn spawn_task(future: LocalFuture, schedule: Option<Arc<dyn Schedule>>, first_poll: FirstPoll, on_failure: OnFailure) -> Arc<Header> {
-    let route = match schedule {
-        Some(schedule) => Route::Schedule(schedule),
-        None => local_route(),
-    };
-    spawn_routed(future, route, first_poll, on_failure)
-}
-
 /// Where the wakes of a task spawned on the current thread without a schedule go: the schedule of
 /// the work that spawns it when there is one ([`current_schedule`]: a dispatcher job), the queue of
 /// the thread otherwise.
@@ -700,11 +688,6 @@ impl LocalCallback {
     /// The part that crosses threads.
     pub(crate) fn handle(&self) -> LocalCallbackHandle {
         LocalCallbackHandle { id: self.id, thread: self.thread, inbox: self.inbox.clone() }
-    }
-
-    /// Forgets the callback unless it ran; on the thread of the callback only.
-    pub(crate) fn remove(&self) {
-        forget_callback(self.id);
     }
 }
 

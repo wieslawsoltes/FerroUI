@@ -61,15 +61,6 @@ fn add_of_an_existing_key_panics() {
 }
 
 #[test]
-#[allow(deprecated)]
-fn the_former_name_is_the_same_type() {
-    let mut map: crate::collections::generic::Dictionary<i32, &str> = SlotOrderMap::new();
-    map.add(1, "a");
-    let map: SlotOrderMap<i32, &str> = map;
-    assert_eq!(keys(&map), vec![1]);
-}
-
-#[test]
 fn into_iter_gives_the_entries_in_the_order_of_enumeration() {
     let mut d = SlotOrderMap::new();
     for key in 1..=4 {

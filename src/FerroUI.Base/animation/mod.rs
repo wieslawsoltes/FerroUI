@@ -91,8 +91,6 @@ pub use playback_behavior::PlaybackBehavior;
 pub use playback_direction::PlaybackDirection;
 pub use spring::Spring;
 pub use time_span::{NegativeDurationError, SignedDuration};
-#[allow(deprecated)]
-pub use time_span::{NegativeTimeSpanError, TimeSpan};
 pub use transition::{apply_transition, Transition};
 pub use transition_base::{TransitionBase, TransitionBaseImpl, TransitionBaseImplExt, TransitionBaseVTable};
 pub use transition_instance::TransitionInstance;

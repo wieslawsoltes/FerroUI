@@ -30,12 +30,10 @@
     "ferroui-base": {
       "AggregateException": 1,
       "AutoResetEvent": 1,
-      "BindingChainException": 1,
       "CompareInfo": 1,
       "CompareOptions": 1,
       "CompositeDisposable": 1,
       "CultureInfo": 1,
-      "DataValidationException": 1,
       "DateTime": 1,
       "DateTimeFormatInfo": 1,
       "DateTimeKind": 1,
@@ -48,31 +46,23 @@
       "Disposable": 1,
       "Encoding": 1,
       "EventHandler": 1,
-      "ExpressionParseException": 2,
-      "FerroInternalException": 1,
       "GregorianCalendar": 1,
       "IServiceProvider": 1,
-      "InvalidFontTableException": 1,
       "KeyValuePair": 1,
       "Matrix3x2": 2,
       "Matrix4x4": 2,
-      "MissingFontTableException": 1,
       "Monitor": 1,
       "Nullable": 1,
       "NumberFormatInfo": 1,
       "NumberStyles": 2,
-      "PlatformGraphicsContextLostException": 1,
       "Quaternion": 1,
       "ReadOnlyMemory": 1,
-      "RenderTargetCorruptedException": 1,
-      "RenderTargetNotReadyException": 1,
       "SerialDisposable": 1,
       "Span": 1,
       "StringComparison": 1,
       "Task": 1,
-      "TaskStatus": 2,
+      "TaskStatus": 1,
       "TextInfo": 1,
-      "TimeSpan": 1,
       "TimeZoneInfo": 1,
       "Uri": 1,
       "UriKind": 1,
@@ -89,7 +79,6 @@
     },
     "ferroui-controls": {
       "Calendar": 1,
-      "ElementNotEnabledException": 1,
       "Span": 2
     },
     "ferroui-controls-treedatagrid": {
@@ -112,8 +101,7 @@
       "Comparer": 4,
       "EqualityComparer": 1,
       "IAsyncDisposable": 1,
-      "IList": 1,
-      "SortException": 1
+      "IList": 1
     },
     "ferroui-dynamic-data-tests": {
       "Comparer": 9,
@@ -126,25 +114,13 @@
       "TaskCompletionSource": 1
     },
     "ferroui-headless-vnc": {
-      "Version": 1,
-      "VncException": 1
+      "Version": 1
     },
     "ferroui-integration-tests-appium": {
       "Disposable": 1
     },
     "ferroui-markup": {
       "Version": 1
-    },
-    "ferroui-markup-xaml": {
-      "XamlLoadException": 1
-    },
-    "ferroui-markup-xaml-loader": {
-      "XamlBindingsTransformException": 1,
-      "XamlDataContextException": 1,
-      "XamlMemberException": 1,
-      "XamlPropertyPathException": 1,
-      "XamlSelectorsTransformException": 1,
-      "XamlStyleTransformException": 1
     },
     "ferroui-markup-xaml-tests": {
       "NullReferenceException": 1
@@ -154,9 +130,6 @@
     },
     "ferroui-microcom": {
       "Guid": 1
-    },
-    "ferroui-opengl": {
-      "OpenGlException": 1
     },
     "ferroui-protranslate": {
       "Converter": 1
@@ -170,16 +143,11 @@
       "Comparer": 6,
       "CompositeDisposable": 1,
       "Disposable": 1,
-      "InvalidCastException": 1,
       "MultipleAssignmentDisposable": 1,
       "PriorityQueue": 1,
       "RefCountDisposable": 1,
       "SerialDisposable": 1,
-      "SingleAssignmentDisposable": 1,
-      "TimeoutException": 1
-    },
-    "ferroui-reactive-testing": {
-      "TestException": 1
+      "SingleAssignmentDisposable": 1
     },
     "ferroui-reactive-tests": {
       "ArgumentException": 1,
@@ -190,12 +158,7 @@
     "ferroui-reactiveui": {
       "Comparer": 1,
       "Convert": 1,
-      "EventHandler": 1,
-      "PanicException": 1,
-      "TargetInvocationException": 1,
-      "UnhandledErrorException": 1,
-      "UnhandledInteractionException": 1,
-      "ViewLocatorNotFoundException": 1
+      "EventHandler": 1
     },
     "ferroui-reactiveui-testing-tests": {
       "InvalidOperationException": 1
@@ -206,11 +169,9 @@
     },
     "ferroui-remote-protocol": {
       "BinaryReader": 1,
-      "BsonException": 1,
       "DateTime": 1,
       "Delegate": 1,
       "Dictionary": 1,
-      "Guid": 1,
       "Queue": 1,
       "Regex": 1,
       "RegexOptions": 1,
@@ -227,8 +188,6 @@
     "ferroui-splat": {
       "BooleanDisposable": 1,
       "Comparer": 1,
-      "Guid": 1,
-      "LoggingException": 1,
       "WriteNoTypeWithException": 1,
       "WriteWithTypeAndException": 1
     },
@@ -237,17 +196,10 @@
     },
     "ferroui-system": {
       "CancellationToken": 1,
-      "CancellationTokenRegistration": 1,
-      "CancellationTokenSource": 1,
-      "Dictionary": 1,
       "IDisposable": 1,
       "IObservable": 1,
       "IObserver": 1,
-      "IProgress": 1,
-      "SynchronizationContext": 1,
-      "Task": 1,
-      "TaskCompletionSource": 1,
-      "TaskStatus": 1
+      "IProgress": 1
     },
     "ferroui-treedatagrid-core": {
       "Comparison": 1,
@@ -257,16 +209,9 @@
       "Random": 1
     },
     "ferroui-vulkan": {
-      "Version": 1,
-      "VulkanException": 1
+      "Version": 1
     },
     "ferroui-wayland": {
-      "FerroWaylandException": 1,
-      "FerroWaylandFlushException": 1,
-      "FerroWaylandNetworkException": 1,
-      "FerroWaylandPollException": 1,
-      "FerroWaylandProtocolErrorException": 1,
-      "FerroWaylandReadException": 1,
       "Task": 1
     },
     "ferroui-win32": {
@@ -283,9 +228,7 @@
     "ferroui-x11": {
       "EventHandler": 1,
       "GC": 1,
-      "TaskCompletionSource": 1,
-      "Version": 1,
-      "X11Exception": 1
+      "Version": 1
     },
     "ferroui-xaml-interactivity": {
       "EventHandler": 1
