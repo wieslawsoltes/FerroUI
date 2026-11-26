@@ -501,3 +501,67 @@ fn control_of_a_property_of_an_interface_type_bound_to_content_is_presented_as_t
     assert!(presenter.child().is_none());
     assert!(border.parent().is_none());
 }
+
+
+/// Chooses a Panel for "panel" and a Border otherwise, in the container form, and records the
+/// container it is asked with.
+struct ContentSelector {
+    containers: std::cell::RefCell<Vec<Option<Ref<Control>>>>,
+}
+
+impl crate::templates::IDataTemplateSelector for ContentSelector {
+    fn select_template(&self, _item: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>> {
+        None
+    }
+
+    fn select_template_with_container(
+        &self,
+        item: Option<&BoxedValue>,
+        container: Option<&Ref<Control>>,
+    ) -> Option<Rc<dyn IDataTemplate>> {
+        self.containers.borrow_mut().push(container.cloned());
+        let panel = item.and_then(|item| item.downcast_ref::<String>()).is_some_and(|item| item == "panel");
+        Some(if panel {
+            FuncDataTemplate::for_type::<String>(|_, _| Some(Panel::new().upcast()), false)
+        } else {
+            FuncDataTemplate::for_type::<String>(|_, _| Some(Border::new().upcast()), false)
+        })
+    }
+}
+
+#[test]
+fn content_template_selector_selects_the_template_of_data_content_with_the_control_as_container() {
+    let _scope = test_scope();
+    let target = ContentControl::new();
+    let selector = Rc::new(ContentSelector { containers: Default::default() });
+    target.set_template(get_template());
+    target.set_content_template_selector(Some(selector.clone()));
+    target.set_content(boxed_str("panel"));
+    target.apply_template();
+    let presenter = target.presenter().unwrap();
+    presenter.update_child();
+    assert!(presenter.child().unwrap().is::<Panel>());
+    assert_eq!(selector.containers.borrow().last().cloned().flatten(), Some(target.clone().upcast::<Control>()));
+
+    target.set_content(boxed_str("other"));
+    presenter.update_child();
+    assert!(presenter.child().unwrap().is::<Border>());
+
+    // A content template wins, and a control as content is not given to the selector.
+    let calls = selector.containers.borrow().len();
+    target.set_content_template(Some(FuncDataTemplate::for_type::<String>(|_, _| Some(Panel::new().upcast()), false)));
+    presenter.update_child();
+    assert!(presenter.child().unwrap().is::<Panel>());
+    target.set_content_template(None);
+    let child = Border::new();
+    target.set_content(Some(Control::boxed(&child)));
+    presenter.update_child();
+    assert_eq!(selector.containers.borrow().len(), calls);
+
+    // Removing the selector updates the presenter.
+    target.set_content(boxed_str("panel"));
+    presenter.update_child();
+    assert!(presenter.child().unwrap().is::<Panel>());
+    target.set_content_template_selector(None);
+    assert!(!presenter.child().unwrap().is::<Panel>());
+}

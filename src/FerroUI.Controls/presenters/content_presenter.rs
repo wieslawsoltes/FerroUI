@@ -2,7 +2,7 @@ use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_
 use super::as_content_presenter_host;
 use crate::documents::TextElement;
 use crate::metadata::PseudoClassesAttribute;
-use crate::templates::{FuncDataTemplate, IDataTemplate};
+use crate::templates::{select_data_template, FuncDataTemplate, IDataTemplate, IDataTemplateSelector};
 use crate::{Border, ContentControl, Control, ControlImpl, Decorator, TextBlock};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
@@ -77,7 +77,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         match change.property().name() {
-            "Content" | "ContentTemplate" => this.content_changed(change),
+            "Content" | "ContentTemplate" | "ContentTemplateSelector" => this.content_changed(change),
             "TemplatedParent" => this.templated_parent_changed(change),
             "UseLayoutRounding" | "BorderThickness" => this.layout_thickness.set(None),
             _ => {}
@@ -266,6 +266,13 @@ ferroui_base::ferro_properties! { impl ContentPresenter {
         /// Defines the `ContentTemplate` property.
         pub fn content_template_property() -> StyledProperty<Option<Rc<dyn IDataTemplate>>> {
             ContentControl::content_template_property().add_owner::<ContentPresenter>()
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `ContentTemplateSelector` property.
+        pub fn content_template_selector_property() -> StyledProperty<Option<Rc<dyn IDataTemplateSelector>>> {
+            ContentControl::content_template_selector_property().add_owner::<ContentPresenter>()
         }
     );
 
@@ -526,6 +533,36 @@ impl ContentPresenter {
         self.set_value(Self::content_template_property(), value)
     }
 
+    /// The selector of the template of data content without a content template.
+    pub fn content_template_selector(&self) -> Option<Rc<dyn IDataTemplateSelector>> {
+        self.get_value(Self::content_template_selector_property())
+    }
+
+    pub fn set_content_template_selector(&self, value: Option<Rc<dyn IDataTemplateSelector>>) {
+        self.set_value(Self::content_template_selector_property(), value)
+    }
+
+    /// The template `ContentTemplateSelector` chooses for data content: the selector of the
+    /// presenter, else the one of the content control it presents for, which is the container
+    /// it is asked with (WinUI's `ContentControl` passes itself). Read only when there is no
+    /// content template and the content is not a control.
+    fn selected_content_template(&self, content: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>> {
+        let content = content?;
+        if Control::from_boxed(content).is_some() {
+            return None;
+        }
+        let owner = self.templated_parent().and_then(|parent| parent.cast::<ContentControl>());
+        let selector = match self.content_template_selector() {
+            Some(selector) => selector,
+            None => owner.as_ref()?.content_template_selector()?,
+        };
+        let container: Ref<Control> = match owner {
+            Some(owner) => owner.upcast(),
+            None => self.to_ref().upcast(),
+        };
+        select_data_template(&*selector, Some(content), Some(&container))
+    }
+
     /// The horizontal alignment of the content within the border the
     /// control.
     pub fn horizontal_content_alignment(&self) -> HorizontalAlignment {
@@ -608,7 +645,7 @@ impl ContentPresenter {
     }
 
     fn update_child_with(&self, content: Option<BoxedValue>) {
-        let content_template = self.content_template();
+        let content_template = self.content_template().or_else(|| self.selected_content_template(content.as_ref()));
         let old_child = self.child();
         let new_child = self.create_child(content.as_ref(), old_child.as_ref(), content_template.as_ref());
 

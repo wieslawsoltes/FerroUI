@@ -1190,3 +1190,122 @@ fn items_panel_template_creates_the_panel() {
 
     assert!(target.items_panel_root().unwrap().is::<Canvas>());
 }
+
+
+/// Chooses a Canvas for "canvas" and a Border for every other string, by item or by container,
+/// and records the containers it is asked with.
+struct TestSelector {
+    by_container: bool,
+    containers: RefCell<Vec<Option<Ref<Control>>>>,
+}
+
+impl crate::templates::IDataTemplateSelector for TestSelector {
+    fn select_template(&self, item: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>> {
+        if self.by_container {
+            return None;
+        }
+        Some(selected_template(item))
+    }
+
+    fn select_template_with_container(
+        &self,
+        item: Option<&BoxedValue>,
+        container: Option<&Ref<Control>>,
+    ) -> Option<Rc<dyn IDataTemplate>> {
+        self.containers.borrow_mut().push(container.cloned());
+        self.by_container.then(|| selected_template(item))
+    }
+}
+
+fn selected_template(item: Option<&BoxedValue>) -> Rc<dyn IDataTemplate> {
+    if item.and_then(|item| item.downcast_ref::<String>()).is_some_and(|item| item == "canvas") {
+        FuncDataTemplate::for_type::<String>(|_, _| Some(Canvas::new().upcast()), false)
+    } else {
+        FuncDataTemplate::for_type::<String>(|_, _| Some(Border::new().upcast()), false)
+    }
+}
+
+#[test]
+fn item_template_selector_selects_by_item_and_by_container() {
+    for by_container in [false, true] {
+        let selector = Rc::new(TestSelector { by_container, containers: RefCell::new(Vec::new()) });
+        let target = create_target(|o| {
+            o.items_source = strs(&["canvas", "other"]);
+            o.no_layout = true;
+        });
+        target.set_item_template_selector(Some(selector.clone()));
+        target.root.execute_initial_layout_pass();
+        assert!(get_container(&target, 0).child().unwrap().is::<Canvas>(), "{by_container}");
+        assert!(get_container(&target, 1).child().unwrap().is::<Border>(), "{by_container}");
+        // The container is the one that shows the item.
+        let containers = selector.containers.borrow();
+        assert_eq!(containers.len(), 2);
+        assert_eq!(containers[0].as_ref(), Some(&get_container(&target, 0).upcast::<Control>()));
+    }
+}
+
+#[test]
+fn item_template_wins_over_item_template_selector_and_the_selector_can_change() {
+    let selector = Rc::new(TestSelector { by_container: false, containers: RefCell::new(Vec::new()) });
+    let target = create_target(|o| {
+        o.items_source = strs(&["other"]);
+        o.item_template = canvas_template();
+        o.no_layout = true;
+    });
+    target.set_item_template_selector(Some(selector.clone()));
+    target.root.execute_initial_layout_pass();
+    assert!(get_container(&target, 0).child().unwrap().is::<Canvas>());
+    assert!(selector.containers.borrow().is_empty(), "a control with a template does not ask its selector");
+
+    target.set_item_template(None);
+    layout(&target);
+    assert!(get_container(&target, 0).child().unwrap().is::<Border>());
+
+    target.set_item_template_selector(None);
+    layout(&target);
+    assert!(!get_container(&target, 0).child().unwrap().is::<Border>());
+}
+
+#[test]
+fn a_data_template_selector_subclass_selects_through_its_core_methods() {
+    use crate::templates::{DataTemplateSelector, DataTemplateSelectorImpl, IDataTemplateSelector};
+
+    #[repr(C)]
+    struct CanvasSelector {
+        base: DataTemplateSelector,
+    }
+    ferro_class!(CanvasSelector: DataTemplateSelector);
+    impl FerroObjectImpl for CanvasSelector {}
+    impl DataTemplateSelectorImpl for CanvasSelector {
+        fn select_template_core_with_container(
+            _this: &Self,
+            item: Option<&BoxedValue>,
+            container: Option<&Ref<Control>>,
+        ) -> Option<Rc<dyn IDataTemplate>> {
+            container?;
+            Some(selected_template(item))
+        }
+    }
+
+    let _scope = start();
+    let base = DataTemplateSelector::new();
+    assert!(base.select_template(None).is_none());
+    assert!(base.select_template_with_container(None, None).is_none());
+
+    let selector = instantiate(CanvasSelector { base: DataTemplateSelector::construct() });
+    let handle: Rc<dyn IDataTemplateSelector> = selector.as_data_template_selector();
+    let item: BoxedValue = Rc::new("canvas".to_string());
+    assert!(handle.select_template(Some(&item)).is_none());
+    let container: Ref<Control> = Control::new();
+    assert!(handle.select_template_with_container(Some(&item), Some(&container)).is_some());
+    // Two handles of one selector are the same selector.
+    assert!(*handle == *selector.as_data_template_selector());
+
+    let target = create_target(|o| {
+        o.items_source = strs(&["canvas"]);
+        o.no_layout = true;
+    });
+    target.set_item_template_selector(Some(handle));
+    target.root.execute_initial_layout_pass();
+    assert!(get_container(&target, 0).child().unwrap().is::<Canvas>());
+}

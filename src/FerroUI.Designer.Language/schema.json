@@ -4120,6 +4120,13 @@
         "values": [],
         "attached": false
       },
+      "ContentTemplateSelector": {
+        "name": "ContentTemplateSelector",
+        "type_name": "Option<Rc<dyn IDataTemplateSelector>>",
+        "documentation": "ContentControl.ContentTemplateSelector: Option<Rc<dyn IDataTemplateSelector>>",
+        "values": [],
+        "attached": false
+      },
       "HorizontalContentAlignment": {
         "name": "HorizontalContentAlignment",
         "type_name": "HorizontalAlignment",
@@ -4555,6 +4562,13 @@
         "name": "ContentTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
         "documentation": "ContentPresenter.ContentTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "ContentTemplateSelector": {
+        "name": "ContentTemplateSelector",
+        "type_name": "Option<Rc<dyn IDataTemplateSelector>>",
+        "documentation": "ContentPresenter.ContentTemplateSelector: Option<Rc<dyn IDataTemplateSelector>>",
         "values": [],
         "attached": false
       },
@@ -5279,6 +5293,18 @@
     "namespace_aliases": [
       "using:FerroUI.Markup.Xaml.Templates",
       "clr-namespace:FerroUI.Markup.Xaml.Templates;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "DataTemplateSelector",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::templates::DataTemplateSelector",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Templates",
+      "clr-namespace:FerroUI.Controls.Templates;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -11252,6 +11278,13 @@
         "values": [],
         "attached": false
       },
+      "ItemTemplateSelector": {
+        "name": "ItemTemplateSelector",
+        "type_name": "Option<Rc<dyn IDataTemplateSelector>>",
+        "documentation": "ItemsControl.ItemTemplateSelector: Option<Rc<dyn IDataTemplateSelector>>",
+        "values": [],
+        "attached": false
+      },
       "DisplayMemberBinding": {
         "name": "DisplayMemberBinding",
         "type_name": "Option<AssignedBinding>",
@@ -14430,6 +14463,13 @@
         "name": "MenuItemTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
         "documentation": "NavigationView.MenuItemTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "MenuItemTemplateSelector": {
+        "name": "MenuItemTemplateSelector",
+        "type_name": "Option<Rc<dyn IDataTemplateSelector>>",
+        "documentation": "NavigationView.MenuItemTemplateSelector: Option<Rc<dyn IDataTemplateSelector>>",
         "values": [],
         "attached": false
       },

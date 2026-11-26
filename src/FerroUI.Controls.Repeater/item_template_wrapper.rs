@@ -6,43 +6,17 @@ use super::element_factory::{
     IElementFactory,
 };
 use super::recycle_pool::RecyclePool;
-use ferroui_controls::templates::{FuncDataTemplate, IDataTemplate};
+pub use ferroui_controls::templates::{IDataTemplateSelector, TemplateSelectionError};
+use ferroui_controls::templates::{DataTemplateSelector, FuncDataTemplate, IDataTemplate};
 use ferroui_controls::Control;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::{BoxedValue, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Selects a template based on data and, optionally, the requesting container.
-/// The second overload is consulted only when the first returns no template.
-pub trait IDataTemplateSelector {
-    fn select_template(&self, item: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>>;
-    fn select_template_with_container(
-        &self,
-        item: Option<&BoxedValue>,
-        container: Option<&Ref<Control>>,
-    ) -> Option<Rc<dyn IDataTemplate>>;
-    /// Fallible selectors retain their own error when the item or container
-    /// overload fails. Returning no template is the only container fallback.
-    fn try_select_template(
-        &self,
-        item: Option<&BoxedValue>,
-    ) -> Result<Option<Rc<dyn IDataTemplate>>, ElementFactoryError> {
-        Ok(self.select_template(item))
-    }
-    fn try_select_template_with_container(
-        &self,
-        item: Option<&BoxedValue>,
-        container: Option<&Ref<Control>>,
-    ) -> Result<Option<Rc<dyn IDataTemplate>>, ElementFactoryError> {
-        Ok(self.select_template_with_container(item, container))
-    }
-}
-impl PartialEq for dyn IDataTemplateSelector {
-    fn eq(&self, other: &Self) -> bool {
-        std::ptr::addr_eq(self as *const Self, other as *const Self)
-    }
-}
+// The selector of a template is the one of `ferroui-controls` (`IDataTemplateSelector`): the
+// wrapper asks it for the item, then for the item without a container. The first overload is
+// consulted alone when it returns a template, and a fallible selector keeps its own error.
 
 /// Adapts FerroUI data templates and recycling templates to the element-factory
 /// contract while retaining template-specific pools across repeaters.
@@ -114,7 +88,7 @@ impl IElementFactory for ItemTemplateWrapper {
                     // Source retries with a null container and replaces only
                     // its invalid-argument error with the null-template error.
                     match selector.try_select_template_with_container(data.as_ref(), None) {
-                        Err(ElementFactoryError::InvalidArgument(_)) => None,
+                        Err(TemplateSelectionError::InvalidArgument(_)) => None,
                         result => result?,
                     }
                 }
@@ -204,6 +178,9 @@ pub fn factory_from_template(
     }
     if let Some(selector) = item.downcast_ref::<Rc<dyn IDataTemplateSelector>>() {
         return Ok(Some(ItemTemplateWrapper::with_selector(selector.clone())));
+    }
+    if let Some(selector) = ValueTypes::as_object(&**item).and_then(|object| object.cast::<DataTemplateSelector>()) {
+        return Ok(Some(ItemTemplateWrapper::with_selector(selector.as_data_template_selector())));
     }
     Err(ElementFactoryError::InvalidTemplate)
 }

@@ -2,6 +2,7 @@
 //! controls and for data.
 
 mod data_template_extensions;
+mod data_template_selector;
 mod data_templates;
 mod func_control_template;
 mod func_data_template;
@@ -19,6 +20,11 @@ mod i_typed_data_template;
 mod template_extensions;
 mod template_result;
 
+pub use data_template_selector::{
+    select_data_template, DataTemplateSelector, DataTemplateSelectorImpl, IDataTemplateSelector,
+    TemplateSelectionError,
+};
+pub(crate) use data_template_selector::selector_template;
 pub use data_templates::DataTemplates;
 pub use func_control_template::FuncControlTemplate;
 pub use func_data_template::FuncDataTemplate;

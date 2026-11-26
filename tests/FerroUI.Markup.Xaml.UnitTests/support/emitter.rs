@@ -16,6 +16,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty,
     InitializationError, Ref, StyledElementImpl, StyledElementImplExt, StyledProperty, TypeInfo, VisualImpl,
 };
+use ferroui_controls::templates::{DataTemplateSelector, DataTemplateSelectorImpl, IDataTemplate};
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_markup_xaml::converters::{ITypeDescriptorContext, TypeConverter};
 use ferroui_markup_xaml::{ServiceProviderExtensions, XamlLoadError};
@@ -445,8 +446,78 @@ ferro_markup_type!(class Desk {
     notify_property_changed: Desk,
 });
 
+// --- The template selector of the corpus -------------------------------------
+
+/// A `DataTemplateSelector` written as WinUI applications write one: a subclass with a
+/// template property per choice. `SelectTemplateCore(item)` chooses `ItemTemplate`;
+/// `SelectTemplateCore(item, container)` chooses `ContainerTemplate` when it is given a
+/// container, and records the name of the class of each container it is asked with.
+#[repr(C)]
+pub struct PickSelector {
+    base: DataTemplateSelector,
+    item_template: std::cell::RefCell<Option<Rc<dyn IDataTemplate>>>,
+    container_template: std::cell::RefCell<Option<Rc<dyn IDataTemplate>>>,
+    containers: std::cell::RefCell<Vec<String>>,
+}
+
+ferro_class!(PickSelector: DataTemplateSelector);
+ferro_class_info!(PickSelector {
+    new: PickSelector::new,
+    markup: {
+        namespace: "FerroUI.Markup.Xaml.UnitTests",
+        properties: [
+            ItemTemplate: Option<Rc<dyn IDataTemplate>> {
+                get: |this: &Ref<PickSelector>| this.item_template.borrow().clone(),
+                set: |this: &Ref<PickSelector>, value: Option<Rc<dyn IDataTemplate>>| {
+                    *this.item_template.borrow_mut() = value
+                }
+            },
+            ContainerTemplate: Option<Rc<dyn IDataTemplate>> {
+                get: |this: &Ref<PickSelector>| this.container_template.borrow().clone(),
+                set: |this: &Ref<PickSelector>, value: Option<Rc<dyn IDataTemplate>>| {
+                    *this.container_template.borrow_mut() = value
+                }
+            },
+        ],
+    },
+});
+
+impl FerroObjectImpl for PickSelector {}
+
+impl DataTemplateSelectorImpl for PickSelector {
+    fn select_template_core(this: &Self, _item: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>> {
+        this.item_template.borrow().clone()
+    }
+
+    fn select_template_core_with_container(
+        this: &Self,
+        _item: Option<&BoxedValue>,
+        container: Option<&Ref<Control>>,
+    ) -> Option<Rc<dyn IDataTemplate>> {
+        let container = container?;
+        this.containers.borrow_mut().push(container.get_type().name().to_string());
+        this.container_template.borrow().clone()
+    }
+}
+
+impl PickSelector {
+    pub fn new() -> Ref<Self> {
+        instantiate(Self {
+            base: DataTemplateSelector::construct(),
+            item_template: Default::default(),
+            container_template: Default::default(),
+            containers: Default::default(),
+        })
+    }
+
+    /// The names of the classes of the containers the selector was asked with, in order.
+    pub fn containers(&self) -> Vec<String> {
+        self.containers.borrow().clone()
+    }
+}
+
 pub(crate) const MODULE: TypeModule = TypeModule {
-    types: &[FailingEndInit::TYPE, Captioned::TYPE, Linked::TYPE],
+    types: &[FailingEndInit::TYPE, Captioned::TYPE, Linked::TYPE, PickSelector::TYPE],
     markup_types: &[
         <Caption as MarkupTyped>::MARKUP,
         <CaptionConverter as MarkupTyped>::MARKUP,
@@ -472,6 +543,7 @@ pub(crate) const RUST_PATHS: &[(&TypeInfo, &str)] = &[
     (FailingEndInit::TYPE, "ferroui_markup_xaml_tests::support::emitter::FailingEndInit"),
     (Captioned::TYPE, "ferroui_markup_xaml_tests::support::emitter::Captioned"),
     (Linked::TYPE, "ferroui_markup_xaml_tests::support::emitter::Linked"),
+    (PickSelector::TYPE, "ferroui_markup_xaml_tests::support::emitter::PickSelector"),
     // The classes of the class documents of the corpus.
     (MyButton::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyButton"),
     (MyHost::TYPE, "ferroui_markup_xaml_tests::support::xaml::event_tests::MyHost"),

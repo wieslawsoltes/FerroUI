@@ -5232,6 +5232,253 @@ fn build_method_command_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `template_selectors.xaml`.
+static BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/template_selectors.xaml"), namespaces: XML_NAMESPACES_3 };
+
+/// Generated from `template_selectors.xaml`.
+pub fn build_template_selectors_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    // template_selectors.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    rt::push_parent(&context, &stack_panel_0);
+    let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>()));
+    if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 2)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 1, 2)?, count_0.wrapping_add(2_i32));
+    }
+    // template_selectors.xaml(4,6) Resources (resource)
+    let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_template_selectors_xaml_deferred_0, 4, 6)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 4, 6)?, rt::string_object("ByItem"), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 6)?;
+    // template_selectors.xaml(7,6) Resources (resource)
+    let dictionary_1 = ::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_template_selectors_xaml_deferred_2, 7, 6)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 7, 6)?, rt::string_object("ByContainer"), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 7, 6)?;
+    // template_selectors.xaml(12,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // template_selectors.xaml(12,4) ContentPresenter
+    let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
+    content_presenter_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &content_presenter_0);
+    // template_selectors.xaml(12,21) ContentTemplateSelector (setter chosen at run time)
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ByItem"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::presenters::ContentPresenter::content_template_selector_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 12, 21)?;
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    rt::assign_resource_value(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_selector_property(), value_0, &rt::ResourceChoice { name: "ContentTemplateSelector", member: "FerroUI.Controls.Presenters.ContentPresenter.set_ContentTemplateSelector", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IDataTemplateSelector as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 12, position: 21 }, ::core::option::Option::None)?;
+    // template_selectors.xaml(12,71) Content
+    content_presenter_0.set_value(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::string_object("presented"));
+    rt::pop_parent_end_init(&context, &content_presenter_0, 12, 4)?;
+    // template_selectors.xaml(13,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // template_selectors.xaml(13,4) ContentControl
+    let content_control_0 = ::ferroui_controls::ContentControl::new();
+    content_control_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &content_control_0);
+    // template_selectors.xaml(13,19) ContentTemplateSelector (setter chosen at run time)
+    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ByContainer"));
+    let provided_1 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ContentControl::content_template_selector_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 13, 19)?;
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_1);
+    rt::assign_resource_value(content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_template_selector_property(), value_1, &rt::ResourceChoice { name: "ContentTemplateSelector", member: "FerroUI.Controls.ContentControl.set_ContentTemplateSelector", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IDataTemplateSelector as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 13, position: 19 }, ::core::option::Option::None)?;
+    // template_selectors.xaml(13,74) Content
+    content_control_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::string_object("content"));
+    // template_selectors.xaml(14,31) Template
+    let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
+    // template_selectors.xaml(14,48) Content
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_5, 14, 48)?;
+    ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
+    content_control_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
+    rt::pop_parent_end_init(&context, &content_control_0, 13, 4)?;
+    // template_selectors.xaml(16,4) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // template_selectors.xaml(16,4) ItemsControl
+    let items_control_0 = ::ferroui_controls::ItemsControl::new();
+    items_control_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&items_control_0).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &items_control_0);
+    // template_selectors.xaml(16,17) ItemTemplateSelector (setter chosen at run time)
+    let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ByItem"));
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_template_selector_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 16, 17)?;
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
+    rt::assign_resource_value(items_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_selector_property(), value_2, &rt::ResourceChoice { name: "ItemTemplateSelector", member: "FerroUI.Controls.ItemsControl.set_ItemTemplateSelector", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IDataTemplateSelector as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 16, position: 17 }, ::core::option::Option::None)?;
+    // template_selectors.xaml(17,29) Template
+    let control_template_1 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
+    // template_selectors.xaml(17,46) Content
+    let deferred_3 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_6, 17, 46)?;
+    ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_3)));
+    items_control_0.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_1) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
+    rt::pop_parent_end_init(&context, &items_control_0, 16, 4)?;
+    // template_selectors.xaml(19,4) Children
+    let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // template_selectors.xaml(19,4) ItemsControl
+    let items_control_1 = ::ferroui_controls::ItemsControl::new();
+    items_control_1.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&items_control_1).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &items_control_1);
+    // template_selectors.xaml(19,17) ItemTemplateSelector (setter chosen at run time)
+    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ByContainer"));
+    let provided_3 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::ItemsControl::item_template_selector_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 19, 17)?;
+    let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
+    rt::assign_resource_value(items_control_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_selector_property(), value_3, &rt::ResourceChoice { name: "ItemTemplateSelector", member: "FerroUI.Controls.ItemsControl.set_ItemTemplateSelector", index: 0, unset: true, instance: rt::ValueHandle::Markup(<dyn ::ferroui_controls::templates::IDataTemplateSelector as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: true, line: 19, position: 17 }, ::core::option::Option::None)?;
+    // template_selectors.xaml(20,29) Template
+    let control_template_2 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
+    // template_selectors.xaml(20,46) Content
+    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_7, 20, 46)?;
+    ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_2, rt::to_object(::core::clone::Clone::clone(&deferred_4)));
+    items_control_1.set_value(::ferroui_controls::primitives::TemplatedControl::template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&control_template_2) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IControlTemplate>));
+    rt::pop_parent_end_init(&context, &items_control_1, 19, 4)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+/// Builds the deferred content at `template_selectors.xaml(4,6)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    // template_selectors.xaml(4,6) PickSelector
+    let pick_selector_0 = ::ferroui_markup_xaml_tests::support::emitter::PickSelector::new();
+    // template_selectors.xaml(5,37) ItemTemplate
+    let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
+    // template_selectors.xaml(5,51) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_1, 5, 51)?;
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
+    ::ferroui_markup_xaml_tests::support::emitter::PickSelector::__markup_set_ItemTemplate(&pick_selector_0, ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
+    ::core::result::Result::Ok(rt::to_value(pick_selector_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(5,51)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_1(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    // template_selectors.xaml(5,51) Canvas
+    let canvas_0 = ::ferroui_controls::Canvas::new();
+    rt::set_intermediate_root(&context, &canvas_0);
+    canvas_0.begin_init();
+    rt::end_init(&canvas_0, 5, 51)?;
+    ::core::result::Result::Ok(rt::to_value(canvas_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(7,6)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_2(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    // template_selectors.xaml(7,6) PickSelector
+    let pick_selector_0 = ::ferroui_markup_xaml_tests::support::emitter::PickSelector::new();
+    // template_selectors.xaml(8,37) ItemTemplate
+    let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
+    // template_selectors.xaml(8,51) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_3, 8, 51)?;
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
+    ::ferroui_markup_xaml_tests::support::emitter::PickSelector::__markup_set_ItemTemplate(&pick_selector_0, ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
+    // template_selectors.xaml(9,42) ContainerTemplate
+    let data_template_1 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
+    // template_selectors.xaml(9,56) Content
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_template_selectors_xaml_deferred_4, 9, 56)?;
+    ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
+    ::ferroui_markup_xaml_tests::support::emitter::PickSelector::__markup_set_ContainerTemplate(&pick_selector_0, ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_1) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>));
+    ::core::result::Result::Ok(rt::to_value(pick_selector_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(8,51)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_3(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    // template_selectors.xaml(8,51) Canvas
+    let canvas_0 = ::ferroui_controls::Canvas::new();
+    rt::set_intermediate_root(&context, &canvas_0);
+    canvas_0.begin_init();
+    rt::end_init(&canvas_0, 8, 51)?;
+    ::core::result::Result::Ok(rt::to_value(canvas_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(9,56)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_4(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    // template_selectors.xaml(9,56) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    rt::set_intermediate_root(&context, &border_0);
+    border_0.begin_init();
+    rt::end_init(&border_0, 9, 56)?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(14,48)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_5(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
+    // template_selectors.xaml(14,48) ContentPresenter
+    let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
+    rt::set_intermediate_root(&context, &content_presenter_0);
+    content_presenter_0.begin_init();
+    // template_selectors.xaml(14,65) Name
+    rt::name_element(name_scope.as_ref(), &content_presenter_0, &content_presenter_0, "PART_ContentPresenter", 14, 65)?;
+    // template_selectors.xaml(14,94) Content (setter chosen at run time)
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
+    let provided_0 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    if value_0.is_some() {
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 14, 94)?;
+    } else {
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 14, 94)?, priority_0);
+    }
+    rt::end_init(&content_presenter_0, 14, 48)?;
+    ::core::result::Result::Ok(rt::to_value(content_presenter_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(17,46)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_6(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
+    // template_selectors.xaml(17,46) ItemsPresenter
+    let items_presenter_0 = ::ferroui_controls::presenters::ItemsPresenter::new();
+    rt::set_intermediate_root(&context, &items_presenter_0);
+    items_presenter_0.begin_init();
+    // template_selectors.xaml(17,61) Name
+    rt::name_element(name_scope.as_ref(), &items_presenter_0, &items_presenter_0, "PART_ItemsPresenter", 17, 61)?;
+    rt::end_init(&items_presenter_0, 17, 46)?;
+    ::core::result::Result::Ok(rt::to_value(items_presenter_0.clone()))
+}
+
+/// Builds the deferred content at `template_selectors.xaml(20,46)` (a template or a deferred resource).
+fn build_template_selectors_xaml_deferred_7(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_TEMPLATE_SELECTORS_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
+    // template_selectors.xaml(20,46) ItemsPresenter
+    let items_presenter_0 = ::ferroui_controls::presenters::ItemsPresenter::new();
+    rt::set_intermediate_root(&context, &items_presenter_0);
+    items_presenter_0.begin_init();
+    // template_selectors.xaml(20,61) Name
+    rt::name_element(name_scope.as_ref(), &items_presenter_0, &items_presenter_0, "PART_ItemsPresenter", 20, 61)?;
+    rt::end_init(&items_presenter_0, 20, 46)?;
+    ::core::result::Result::Ok(rt::to_value(items_presenter_0.clone()))
+}
+
+fn build_template_selectors_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_template_selectors_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The base URI and the XML namespaces of `container_query.xaml`.
 static BUILD_CONTAINER_QUERY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/container_query.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5842,6 +6089,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("compiled_binding_unnamed_types.xaml", build_compiled_binding_unnamed_types_xaml_untyped as BuildDocument),
     ("runtime_lists.xaml", build_runtime_lists_xaml_untyped as BuildDocument),
     ("method_command.xaml", build_method_command_xaml_untyped as BuildDocument),
+    ("template_selectors.xaml", build_template_selectors_xaml_untyped as BuildDocument),
     ("container_query.xaml", build_container_query_xaml_untyped as BuildDocument),
     ("static_resource_element.xaml", build_static_resource_element_xaml_untyped as BuildDocument),
     ("runtime_list_of_references.xaml", build_runtime_list_of_references_xaml_untyped as BuildDocument),

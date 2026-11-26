@@ -1,8 +1,10 @@
 //! The eight original NavigationView examples and their page handlers.
 //!
-//! Category selection keeps the original model identity. A native FuncDataTemplate
-//! dispatches the Gallery's Category/Header/Separator models; it is an explicit
-//! adaptation of its custom DataTemplateSelector and x:Bind expressions. The
+//! Category selection keeps the original model identity. The Gallery's
+//! `MenuItemTemplateSelector` is a `DataTemplateSelector` here too, set as the
+//! `MenuItemTemplateSelector` of the NavigationView: its item template for a category
+//! and its header and separator templates made in code (the x:Bind of the item
+//! template is Rust code that reads the category). The
 //! adaptive trigger reads the host's client width, or the sample bounds when
 //! there is no host. The samples 7 and 9 navigate with the recommended transition of the
 //! selection, as the source's handlers do.
@@ -19,7 +21,9 @@ use ferroui_base::{
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::navigation::NavigationError;
 use ferroui_controls::primitives::{TemplatedControlImpl, ToggleButton};
-use ferroui_controls::templates::FuncDataTemplate;
+use ferroui_controls::templates::{
+    DataTemplateSelector, DataTemplateSelectorImpl, FuncDataTemplate, IDataTemplate,
+};
 use ferroui_controls::{
     AutoSuggestBox, CheckBox, ContentControlImpl, Control, ControlImpl, Frame, FramePage,
     FramePageImpl, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
@@ -105,6 +109,70 @@ pub(crate) enum CategoryEntry {
     Separator,
 }
 
+/// `MenuItemTemplateSelector` of the source: `ItemTemplate` for a category, and the header and
+/// separator templates it creates in code.
+#[repr(C)]
+struct MenuItemTemplateSelector {
+    base: DataTemplateSelector,
+    item_template: Rc<dyn IDataTemplate>,
+    header_template: Rc<dyn IDataTemplate>,
+    separator_template: Rc<dyn IDataTemplate>,
+}
+
+ferro_class!(MenuItemTemplateSelector: DataTemplateSelector);
+
+impl FerroObjectImpl for MenuItemTemplateSelector {}
+
+impl DataTemplateSelectorImpl for MenuItemTemplateSelector {
+    /// `SelectTemplateCore(item)`: a separator, a header, or else a category.
+    fn select_template_core(this: &Self, item: Option<&BoxedValue>) -> Option<Rc<dyn IDataTemplate>> {
+        Some(match item.and_then(|item| item.downcast_ref::<CategoryEntry>()) {
+            Some(CategoryEntry::Separator) => this.separator_template.clone(),
+            Some(CategoryEntry::Header(_)) => this.header_template.clone(),
+            _ => this.item_template.clone(),
+        })
+    }
+}
+
+impl MenuItemTemplateSelector {
+    fn new() -> Ref<Self> {
+        // The DataTemplate of the source: a NavigationViewItem with the name, the tooltip and the
+        // glyph of the category.
+        let item_template = FuncDataTemplate::for_type::<CategoryEntry>(
+            |entry, _| {
+                let CategoryEntry::Category { name, glyph, tooltip } = entry else {
+                    return None;
+                };
+                let item = NavigationViewItem::new();
+                item.set_content(Some(Rc::new(name.to_string())));
+                item.set_icon(Some(SymbolIcon::with_symbol(*glyph).upcast()));
+                ToolTip::set_tip(&item, Some(Rc::new(tooltip.to_string())));
+                Some(item.upcast())
+            },
+            false,
+        );
+        let header_template = FuncDataTemplate::for_type::<CategoryEntry>(
+            |entry, _| {
+                let CategoryEntry::Header(name) = entry else {
+                    return None;
+                };
+                let header = NavigationViewItemHeader::new();
+                header.set_content(Some(Rc::new(name.to_string())));
+                Some(header.upcast())
+            },
+            false,
+        );
+        let separator_template =
+            FuncDataTemplate::for_type::<CategoryEntry>(|_, _| Some(NavigationViewItemSeparator::new().upcast()), false);
+        instantiate(Self {
+            base: DataTemplateSelector::construct(),
+            item_template,
+            header_template,
+            separator_template,
+        })
+    }
+}
+
 fn categories(nav: &NavigationView) {
     let items = Rc::new(FerroList::<BoxedValue>::new());
     for item in [
@@ -133,28 +201,7 @@ fn categories(nav: &NavigationView) {
     ] {
         items.add(Rc::new(item));
     }
-    nav.set_menu_item_template(Some(FuncDataTemplate::for_type::<CategoryEntry>(
-        |entry, _| match entry {
-            CategoryEntry::Category {
-                name,
-                glyph,
-                tooltip,
-            } => {
-                let item = NavigationViewItem::new();
-                item.set_content(Some(Rc::new(name.to_string())));
-                item.set_icon(Some(SymbolIcon::with_symbol(*glyph).upcast()));
-                ToolTip::set_tip(&item, Some(Rc::new(tooltip.to_string())));
-                Some(item.upcast())
-            }
-            CategoryEntry::Header(name) => {
-                let item = NavigationViewItemHeader::new();
-                item.set_content(Some(Rc::new(name.to_string())));
-                Some(item.upcast())
-            }
-            CategoryEntry::Separator => Some(NavigationViewItemSeparator::new().upcast()),
-        },
-        false,
-    )));
+    nav.set_menu_item_template_selector(Some(MenuItemTemplateSelector::new().as_data_template_selector()));
     nav.set_menu_items_source(Some(items.into()));
 }
 

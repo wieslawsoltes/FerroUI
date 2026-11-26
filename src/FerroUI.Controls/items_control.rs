@@ -8,7 +8,9 @@ use crate::primitives::{
     HeaderedContentControl, HeaderedItemsControl, HeaderedSelectingItemsControl, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
     TemplatedControlImplExt,
 };
-use crate::templates::{FuncDataTemplate, FuncTemplate, IDataTemplate, ITemplateOf};
+use crate::templates::{
+    select_data_template, FuncDataTemplate, FuncTemplate, IDataTemplate, IDataTemplateSelector, ITemplateOf,
+};
 use crate::{
     Canvas, ContainerClearingEventArgs, ContainerIndexChangedEventArgs, ContainerPreparedEventArgs, ContentControl,
     Control, ControlImpl, ItemCollection, ItemsSourceView, Panel, StackPanel, TextBlock, VirtualizingPanel, WrapPanel,
@@ -134,6 +136,8 @@ impl FerroObjectImpl for ItemsControl {
                 panic!("Cannot set both DisplayMemberBinding and ItemTemplate.");
             }
             this.refresh_containers();
+        } else if change.property() == Self::item_template_selector_property().as_property() {
+            this.refresh_containers();
         } else if change.property() == Self::display_member_binding_property().as_property() {
             if change.get_new_value::<Option<AssignedBinding>>().is_some() && this.item_template().is_some() {
                 panic!("Cannot set both DisplayMemberBinding and ItemTemplate.");
@@ -244,7 +248,11 @@ impl ItemsControlImpl for ItemsControl {
             return;
         }
 
-        let item_template = this.get_effective_item_template();
+        // The selector is read only for a control without a template of its own.
+        let item_template = this.get_effective_item_template().or_else(|| {
+            let selector = this.item_template_selector()?;
+            select_data_template(&*selector, item.as_ref(), Some(container))
+        });
 
         if let Some(hcc) = container.downcast_ref::<HeaderedContentControl>() {
             Self::set_if_unset(hcc, ContentControl::content_property(), item.clone());
@@ -397,6 +405,14 @@ ferroui_base::ferro_properties! { impl ItemsControl {
     );
 
     ferro_property!(
+        /// Defines the `ItemTemplateSelector` property: WinUI's selector of the template of an
+        /// item, consulted for the items that have no [`ItemTemplate`](Self::item_template_property).
+        pub fn item_template_selector_property() -> StyledProperty<Option<Rc<dyn IDataTemplateSelector>>> {
+            FerroProperty::register::<ItemsControl, _>("ItemTemplateSelector", None)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `DisplayMemberBinding` property.
         pub fn display_member_binding_property() -> StyledProperty<Option<AssignedBinding>> {
             FerroProperty::register::<ItemsControl, _>("DisplayMemberBinding", None)
@@ -532,6 +548,15 @@ impl ItemsControl {
 
     pub fn set_item_template(&self, value: Option<Rc<dyn IDataTemplate>>) {
         self.set_value(Self::item_template_property(), value)
+    }
+
+    /// The selector of the template of an item without an item template.
+    pub fn item_template_selector(&self) -> Option<Rc<dyn IDataTemplateSelector>> {
+        self.get_value(Self::item_template_selector_property())
+    }
+
+    pub fn set_item_template_selector(&self, value: Option<Rc<dyn IDataTemplateSelector>>) {
+        self.set_value(Self::item_template_selector_property(), value)
     }
 
     /// Gets the items presenter control.

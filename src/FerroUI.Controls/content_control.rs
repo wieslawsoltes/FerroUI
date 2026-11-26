@@ -2,7 +2,9 @@ use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_
 use crate::metadata::{PseudoClassesAttribute, TemplatePartAttribute};
 use crate::presenters::{register_content_presenter_host, ContentPresenter, IContentPresenterHost};
 use crate::primitives::{TemplatedControl, TemplatedControlImpl};
-use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate, IDataTemplate};
+use crate::templates::{
+    FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate, IDataTemplate, IDataTemplateSelector,
+};
 use crate::{Control, ControlImpl};
 use ferroui_base::collections::FerroList;
 use ferroui_base::data::TemplateBinding;
@@ -57,6 +59,11 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentControl {
 
         if change.property() == Self::content_property().as_property() {
             this.content_changed(change);
+        } else if change.property() == Self::content_template_selector_property().as_property() {
+            // The presenter reads the selector of the control it presents for.
+            if let Some(presenter) = this.presenter.borrow().clone() {
+                presenter.update_child();
+            }
         }
     }
 } }
@@ -141,6 +148,15 @@ ferroui_base::ferro_properties! { impl ContentControl {
     );
 
     ferro_property!(
+        /// Defines the `ContentTemplateSelector` property: WinUI's selector of the template of
+        /// data content, consulted when there is no
+        /// [`ContentTemplate`](Self::content_template_property).
+        pub fn content_template_selector_property() -> StyledProperty<Option<Rc<dyn IDataTemplateSelector>>> {
+            FerroProperty::register::<ContentControl, _>("ContentTemplateSelector", None)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `HorizontalContentAlignment` property.
         pub fn horizontal_content_alignment_property() -> StyledProperty<HorizontalAlignment> {
             FerroProperty::register::<ContentControl, _>("HorizontalContentAlignment", HorizontalAlignment::Stretch)
@@ -208,6 +224,15 @@ impl ContentControl {
 
     pub fn set_content_template(&self, value: Option<Rc<dyn IDataTemplate>>) {
         self.set_value(Self::content_template_property(), value)
+    }
+
+    /// The selector of the template of data content without a content template.
+    pub fn content_template_selector(&self) -> Option<Rc<dyn IDataTemplateSelector>> {
+        self.get_value(Self::content_template_selector_property())
+    }
+
+    pub fn set_content_template_selector(&self, value: Option<Rc<dyn IDataTemplateSelector>>) {
+        self.set_value(Self::content_template_selector_property(), value)
     }
 
     /// The presenter from the control's template.
