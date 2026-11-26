@@ -98,7 +98,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
 | `ListView` | WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-1 (#443) |
 | `ListViewHeaderItem` | WinUI's ListViewHeaderItem: its template is ported from generic.xaml into the WinUI theme and its derived themes | #1258 |
-| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes | LV-1 (#443) |
+| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes; under the `:multiselect` pseudo-class (a list in `Multiple` with `IsMultiSelectCheckBoxEnabled`) it takes the template with the check box of WinUI's item chrome (`ListViewBaseItemChrome.cpp`) | LV-1 (#443), #1424 |
 | `GridView` | WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
 | `GridViewItem` | WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
 | `Pivot` | WinUI's Pivot: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
@@ -107,6 +107,21 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
+
+The list view members of #1424 follow WinUI with these differences:
+
+- `ItemsStackPanel.ItemsUpdatingScrollMode`: WinUI's panel moves its window during the measure
+  of a change (`ModernCollectionBasePanel_ViewportManagement_Partial.cpp`); FerroUI's panel
+  records the first visible item (or, with `KeepLastItemInView` at the end, the end of the list)
+  when the items change and corrects the scroll offset after the layout pass, by the distance
+  the scroll anchoring of the scroll viewer left. With `KeepScrollOffset` its items are no
+  anchor candidates. A list whose items do not change pays nothing.
+- The check boxes of `Multiple`: WinUI's `ListViewItemPresenter` draws them as chrome; the
+  themes draw them with elements in the template of the `:multiselect` pseudo-class of
+  `ListViewItem` (MultiSelectSquare and MultiSelectCheck, with the sizes of
+  `ListViewBaseItemChrome.cpp`), so only lists in `Multiple` create them.
+- `CollectionViewSource.ItemsPath` is a path string read with a reflection binding (WinUI's
+  `PropertyPath`); the group is the header.
 
 The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
 `MediaTransportControls` and `CameraCaptureUI`) are listed in their respective
@@ -480,7 +495,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CalendarDatePicker | 1 of 1 | ported | `Pages/CalendarDatePicker.xaml` (no code-behind upstream) | `date_samples_tests.rs` |
 | CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
-| ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
+| ListView | 10 of 10 on ListView: grouping and sticky headers (#1258), `TextBlock.IsTextTrimmed`, `ItemsUpdatingScrollMode` and the check boxes of `Multiple` (#1424) | ported | `list_samples.rs` | `list_samples_tests.rs` |
 | TreeView | 3 ported, 1 partial: no drag and drop of the items | partial | `tree_samples.rs` | `tree_samples_tests.rs` |
 | SplitView | 1 of 1 | ported | `split_view_samples.rs` | `split_view_samples_tests.rs`, `x_bind_tests.rs` |
 | ScrollViewer | 1 of 1 | ported | `scroll_samples.rs` | `scroll_samples_tests.rs` |

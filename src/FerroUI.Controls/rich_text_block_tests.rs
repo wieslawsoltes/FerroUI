@@ -632,3 +632,41 @@ fn rich_collapsed_source_ranges_and_geometry_follow_retained_prefixes_and_suffix
         assert_eq!(view.visible_text_ranges(), vec![0..length]);
     }
 }
+
+/// `RichTextBlock.IsTextTrimmed` and `IsTextTrimmedChanged`, as `TextBlock`'s (#1424): the event
+/// and the property change are raised when the layout flips the value, not on every measure;
+/// clipped text without trimming is not trimmed.
+#[test]
+fn rich_is_text_trimmed_changed_is_raised_on_each_change() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let view = rich("alpha beta gamma delta epsilon");
+    view.set_text_wrapping(TextWrapping::NoWrap);
+    view.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    let events = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counter = events.clone();
+    view.add_handler(RichTextBlock::is_text_trimmed_changed_event(), move |_, _| {
+        counter.set(counter.get() + 1);
+    });
+    let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counter = changes.clone();
+    view.property_changed(move |change| {
+        if change.property() == RichTextBlock::is_text_trimmed_property().as_property() {
+            counter.set(counter.get() + 1);
+        }
+    });
+
+    measure(&view, 65.0, 100.0);
+    assert!(view.is_text_trimmed());
+    assert_eq!((events.get(), changes.get()), (1, 1));
+    measure(&view, 66.0, 100.0);
+    assert_eq!((events.get(), changes.get()), (1, 1), "still trimmed: nothing is raised");
+    measure(&view, 1000.0, 100.0);
+    assert!(!view.is_text_trimmed());
+    assert_eq!((events.get(), changes.get()), (2, 2));
+
+    let clipped = rich("alpha beta gamma delta epsilon");
+    clipped.set_text_wrapping(TextWrapping::NoWrap);
+    measure(&clipped, 65.0, 100.0);
+    assert!(!clipped.is_text_trimmed(), "without trimming the text is clipped, not trimmed");
+}
