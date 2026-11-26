@@ -27,6 +27,7 @@ mod android_platform;
 mod android_runtime_platform;
 mod application_lifetime;
 mod cursor_factory;
+mod android_access_role_helper;
 mod explore_by_touch_helper;
 mod ferro_access_helper;
 mod i_activity_result_handler;
