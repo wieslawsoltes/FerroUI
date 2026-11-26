@@ -334,6 +334,10 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
         true
     }
 
+    fn supports_open_gl(&self) -> bool {
+        cfg!(ferro_skia_ganesh_gl)
+    }
+
     fn default_alpha_format(&self) -> AlphaFormat {
         AlphaFormat::Premul
     }

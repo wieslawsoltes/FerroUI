@@ -1,0 +1,13 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.ContentDialogPage"
+             xmlns="https://github.com/ferroui"
+             Header="ContentDialog">
+    <StackPanel Orientation="Vertical" Spacing="8">
+        <TextBlock Classes="h2">A modal dialog over the content of its window</TextBlock>
+        <Separator Margin="0 16"/>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button x:Name="ShowDialog" Content="Show dialog"/>
+            <TextBlock x:Name="DialogResult" VerticalAlignment="Center"/>
+        </StackPanel>
+    </StackPanel>
+</ContentPage>
