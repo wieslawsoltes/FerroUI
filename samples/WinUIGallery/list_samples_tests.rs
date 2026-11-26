@@ -7,7 +7,7 @@ use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::{Button, ComboBox, Control, ListBox, SelectionMode, TextBlock, TextBox};
+use ferroui_controls::{Button, ComboBox, Control, ListView, ListViewSelectionMode, TextBlock, TextBox};
 use std::rc::Rc;
 
 fn page() -> Ref<Control> {
@@ -15,7 +15,7 @@ fn page() -> Ref<Control> {
 }
 
 fn items(root: &Ref<Control>, name: &str) -> Vec<BoxedValue> {
-    root.get_control::<ListBox>(name)
+    root.get_control::<ListView>(name)
         .items_source()
         .unwrap_or_else(|| panic!("{name} has items"))
         .to_vec()
@@ -99,21 +99,20 @@ fn list_view_lists_get_the_contacts_and_items_of_on_navigated_to() {
 fn list_view_selection_mode_option_sets_the_mode_of_the_list() {
     let _application = start();
     let root = page();
-    let list = root.get_control::<ListBox>("Control2");
+    let list = root.get_control::<ListView>("Control2");
     let combo_box = root.get_control::<ComboBox>("SelectionModeComboBox");
     assert_eq!(combo_box.selected_index(), 1);
     combo_box.set_selected_index(2);
-    assert_eq!(list.selection_mode(), SelectionMode::MULTIPLE | SelectionMode::TOGGLE);
+    assert_eq!(list.selection_mode(), ListViewSelectionMode::Multiple);
     combo_box.set_selected_index(3);
-    assert_eq!(list.selection_mode(), SelectionMode::MULTIPLE);
+    assert_eq!(list.selection_mode(), ListViewSelectionMode::Extended);
     list.set_selected_index(0);
     combo_box.set_selected_index(0);
-    assert_eq!(list.selection_mode(), SelectionMode::SINGLE);
-    assert!(list.classes().contains("selection-none"));
+    assert_eq!(list.selection_mode(), ListViewSelectionMode::None);
     assert_eq!(list.selected_index(), -1, "None clears the selection");
     combo_box.set_selected_index(1);
-    assert!(!list.classes().contains("selection-none"));
-    assert_eq!(selection_mode("Extended"), Some(SelectionMode::MULTIPLE));
+    assert_eq!(list.selection_mode(), ListViewSelectionMode::Single);
+    assert_eq!(selection_mode("Extended"), Some(ListViewSelectionMode::Extended));
     assert_eq!(selection_mode("Other"), None);
 }
 
@@ -147,23 +146,47 @@ fn list_view_drop_moves_contacts_between_and_within_the_lists() {
     assert_eq!(first_names[2], "Santa Claus");
 }
 
+/// The key of a group of the grouped list.
+fn key_of(group: &Option<BoxedValue>) -> Option<String> {
+    group.as_ref()?.downcast_ref::<Rc<GroupInfoList>>().map(|group| group.key.clone())
+}
+
+#[cfg(feature = "theme")]
 #[test]
 fn list_view_grouped_list_shows_each_header_before_its_contacts() {
-    let _application = start();
+    use ferroui_controls::{GroupedItemsView, ItemsStackPanel, ListViewHeaderItem, ToggleSwitch, Window};
+    let _application = crate::tests::start_winui();
     let root = page();
+    let list = root.get_control::<ListView>("GroupedListViewCtrl");
+    // The items are the contacts only: the headers take no index.
     let items = items(&root, "GroupedListViewCtrl");
-    assert_eq!(items.len(), 27 + 11);
-    let keys: Vec<_> = items
-        .iter()
-        .filter_map(|item| item.downcast_ref::<Rc<GroupInfoList>>().map(|group| group.key.clone()))
+    assert_eq!(items.len(), 27);
+    assert_eq!(names(&items[0..4]), ["Victoria Burke", "Ana Bowman", "Madison Butler", "Graham Barnes"]);
+    let source = list.items_source().unwrap();
+    let view = source.downcast_ref::<GroupedItemsView>().expect("the view of ContactsCVS");
+    let keys: Vec<String> = (0..view.group_count())
+        .filter_map(|index| key_of(&view.group_at(index)?.group()))
         .collect();
     assert_eq!(keys, ["B", "C", "D", "H", "I", "L", "M", "P", "R", "T", "W"]);
-    assert!(items[0].downcast_ref::<Rc<GroupInfoList>>().is_some());
-    assert_eq!(
-        names(&items[1..5]),
-        ["Victoria Burke", "Ana Bowman", "Madison Butler", "Graham Barnes"]
-    );
-    assert!(items[5].downcast_ref::<Rc<GroupInfoList>>().is_some());
+    // In a window the panel shows the header of the first group above its contacts, and the
+    // toggle makes the headers sticky.
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let panel = list.items_panel_root().and_then(|panel| panel.cast::<ItemsStackPanel>());
+    let panel = panel.expect("an ItemsStackPanel");
+    let first = panel
+        .children()
+        .to_vec()
+        .into_iter()
+        .filter_map(|child| child.cast::<ListViewHeaderItem>())
+        .find(|header| key_of(&header.content()).as_deref() == Some("B"))
+        .expect("the header of B");
+    assert!(first.bounds().bottom() <= panel.container_from_index(0).unwrap().bounds().y);
+    assert!(!panel.are_sticky_group_headers_enabled());
+    root.get_control::<ToggleSwitch>("StickySwitch").set_is_checked(Some(true));
+    assert!(panel.are_sticky_group_headers_enabled());
 }
 
 #[test]
@@ -215,11 +238,8 @@ fn list_view_messages_are_sent_and_received_with_their_alignment() {
             ("Message 3".to_string(), HorizontalAlignment::Right),
         ]
     );
-    let list = root.get_control::<ListBox>("InvertedListView");
-    assert!(
-        list.classes().contains("selection-none"),
-        "the source's SelectionMode None"
-    );
+    let list = root.get_control::<ListView>("InvertedListView");
+    assert_eq!(list.selection_mode(), ListViewSelectionMode::None, "the source's SelectionMode None");
 }
 
 #[test]
@@ -238,7 +258,7 @@ fn list_view_context_menu_delete_removes_the_contact() {
 #[cfg(feature = "theme")]
 #[test]
 fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
-    use ferroui_controls::{MenuItem, NumberBox, ScrollViewer, Window};
+    use ferroui_controls::{MenuItem, NumberBox, Window};
     let _application = crate::tests::start_winui();
     let root = page();
     let window = Window::new();
@@ -248,7 +268,7 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
     window.show();
     window.update_layout();
     // The Delete item of the first contact's context menu.
-    let list = root.get_control::<ListBox>("ContextMenuList");
+    let list = root.get_control::<ListView>("ContextMenuList");
     let container = list.container_from_index(0).expect("the first contact is realized");
     let content = container
         .get_visual_descendants()
@@ -271,17 +291,14 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
         .raise_event(&RoutedEventArgs::with_event(&MenuItem::click_event()));
     assert_eq!(names(&items(&root, "ContextMenuList")).len(), 26);
     // ScrollIntoView with the Leading alignment puts the item at the top of the viewport.
-    let scroll = root.get_control::<ListBox>("ScrollIntoViewListView");
+    let scroll = root.get_control::<ListView>("ScrollIntoViewListView");
     root.get_control::<NumberBox>("ScrollIndexNumberBox")
         .set_numeric_value(100.0);
     root.get_control::<ComboBox>("ScrollAlignmentComboBox")
         .set_selected_index(1);
     click(&root, "ScrollIntoViewButton");
     window.update_layout();
-    let viewer = scroll
-        .scroll()
-        .and_then(|scroll| scroll.cast::<ScrollViewer>())
-        .unwrap();
+    let viewer = scroll.scroll_viewer().unwrap();
     assert!(viewer.offset().y > 0.0);
     let item = scroll.container_from_index(100).expect("the item is realized");
     let top = item
@@ -290,11 +307,8 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
         .y;
     assert!(top.abs() < 1.0, "the item's top is at the viewport's top: {top}");
     // Save, scroll away, restore.
-    let restore = root.get_control::<ListBox>("RestoreScrollListView");
-    let restore_viewer = restore
-        .scroll()
-        .and_then(|scroll| scroll.cast::<ScrollViewer>())
-        .unwrap();
+    let restore = root.get_control::<ListView>("RestoreScrollListView");
+    let restore_viewer = restore.scroll_viewer().unwrap();
     restore.scroll_into_view(20);
     window.update_layout();
     let saved = restore_viewer.offset().y;
