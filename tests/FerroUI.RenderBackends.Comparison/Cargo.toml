@@ -37,6 +37,7 @@ ferroui-metal = { workspace = true, features = ["offscreen", "scene3d"] }
 [dev-dependencies]
 ferroui-controls.workspace = true
 ferroui-headless.workspace = true
+ferroui-svg.workspace = true
 ferroui-themes-fluent.workspace = true
 # The codec tests write the GIF files they give to both backends.
 gif.workspace = true

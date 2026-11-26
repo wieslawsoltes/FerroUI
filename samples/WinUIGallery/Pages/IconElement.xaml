@@ -2,7 +2,8 @@
      of IconElementPage.xaml.cs (brush_samples.rs); see ../NOTICE.md. FerroUI has no BitmapIcon or
      ImageIcon: the bitmap icon is an Image of the source's Slices.png with, for ShowAsMonochrome, a
      rectangle of the foreground brush masked by the bitmap over it; the PNG image icon is an Image.
-     FerroUI decodes no SVG and the remote SVG of the source is not loaded: that button says so.
+     An SVG is read only from the assets of the application, so the button of the remote SVG of
+     the source shows the SVG asset of the gallery, drawn as vectors by {SvgImage}.
      BodyTextBlockStyle is the default text. The glyphs need the source's icon fonts. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
@@ -43,8 +44,8 @@
   <StackPanel x:Name="Example4" Spacing="8">
     <TextBlock Text="A ImageIcon using a SVG image in a button" FontSize="18" />
     <Button x:Name="ImageExample2" AutomationProperties.Name="ImageExample2">
-      <TextBlock x:Name="SvgUnavailable" TextWrapping="Wrap"
-                 Text="SVG images are not decoded: the remote libre-camera-panorama.svg is not shown." />
+      <Image x:Name="ImageExample2Icon" Width="96" Stretch="Uniform"
+             Source="{SvgImage ferres://WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg}" />
     </Button>
   </StackPanel>
 

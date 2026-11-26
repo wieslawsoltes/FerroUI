@@ -111,6 +111,8 @@ mod effect_pass_tests;
 mod effect_route_tests;
 #[cfg(test)]
 mod shadow_route_tests;
+#[cfg(all(test, any(feature = "hybrid", feature = "gpu")))]
+mod svg_route_tests;
 #[cfg(test)]
 mod fragment_tests;
 #[cfg(test)]

@@ -47,10 +47,8 @@ fn image_page_preserves_all_six_compositions_and_marks_unavailable_decoders() {
         let image = root.get_control::<Image>(name);
         assert_eq!((image.width(), image.height()), (164.0, 164.0));
     }
-    assert!(root.get_control::<Image>("SvgImage").source().is_none());
-    let svg = root.get_control::<TextBlock>("SvgImageDiagnostic");
-    assert!(svg.is_visible());
-    assert!(svg.text().unwrap().contains("MirrorPCConsent.svg"));
+    let svg = root.get_control::<Image>("SvgImage").source().expect("the SVG image");
+    assert_eq!((svg.size().width, svg.size().height), (328.0, 164.0));
     for name in ["GifAutoPreview", "GifPausedPreview", "GifManualPreview"] {
         assert_eq!(root.get_control::<Image>(name).height(), 40.0);
     }
