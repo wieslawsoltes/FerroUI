@@ -218,14 +218,15 @@ fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapsho
             fragment.insert_str(declaration_offset, &declarations);
             let (mut patches, insert_offset, fragment_offset) =
                 insertion_patches(&old.source, parent, &old.ast, &children, index, &fragment)?;
+            let removal = super::insertion::move_removal_span(&old.source, &old.ast, node);
             patches.push(TextPatch {
-                span: node.span,
+                span: removal,
                 replacement: String::new(),
             });
             // Pins are represented in old-source insertion coordinates here and
             // adjusted below after both deletion and insertion are applied.
-            let deletion_delta = if node.span.end <= insert_offset {
-                node.span.len()
+            let deletion_delta = if removal.end <= insert_offset {
+                removal.len()
             } else {
                 0
             };

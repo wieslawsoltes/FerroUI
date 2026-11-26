@@ -315,6 +315,10 @@ search is forwarded through hierarchical expanders, including custom template te
 `DesignerWorkspace::collapse_outline()` collapses unrelated branches and retains the selected
 ancestor paths without touching source or undo history.
 
+Moving XAML controls in Outline or the canvas removes the vacated lines for standalone
+elements and uses the destination's indentation. The source edit preserves neighboring
+comments, blank lines, and whitespace-sensitive content. Undo restores the entire move.
+
 `canvas_focused()` and `set_canvas_focused(bool)` provide the temporary canvas-focused workspace.
 The side widths, prior timeline visibility/height, source draft and panel modes survive the
 round trip. The toolbar command and Ctrl+Shift+F / Cmd+Shift+F share this API.
