@@ -14,6 +14,7 @@ fn shapes(items: &[Item]) -> usize {
         .map(|item| match item {
             Item::Shape(_) => 1,
             Item::Group(group) => shapes(&group.children),
+            Item::Image(_) | Item::Text(_) => 0,
         })
         .sum()
 }
@@ -22,6 +23,7 @@ fn first_shape(items: &[Item]) -> Option<&crate::document::Shape> {
     items.iter().find_map(|item| match item {
         Item::Shape(shape) => Some(shape),
         Item::Group(group) => first_shape(&group.children),
+        Item::Image(_) | Item::Text(_) => None,
     })
 }
 
@@ -208,12 +210,11 @@ fn what_is_not_drawn_is_reported_once_and_what_changes_nothing_is_not() {
     let document = SvgDocument::parse(&svg(body)).unwrap();
     let features = document.unsupported_features();
     for expected in [
-        "element <filter>", "element <text>", "element <image>",
-        "property mix-blend-mode", "external reference",
+        "element <filter>", "property mix-blend-mode", "external reference",
     ] {
         assert_eq!(features.iter().filter(|feature| *feature == expected).count(), 1, "{expected} in {features:?}");
     }
-    for silent in ["element <style>", "element <mask>", "element <pattern>", "property mask", "property filter", "property paint-order", "element <title>", "element <desc>", "element <metadata>", "element <thing>", "property fill"] {
+    for silent in ["element <text>", "element <image>", "element <style>", "element <mask>", "element <pattern>", "property mask", "property filter", "property paint-order", "element <title>", "element <desc>", "element <metadata>", "element <thing>", "property fill"] {
         assert!(!features.iter().any(|feature| feature == silent), "{silent} in {features:?}");
     }
     assert!(SvgDocument::parse(&svg(r#"<rect width="1" height="1" fill="red"/>"#)).unwrap().unsupported_features().is_empty());
@@ -300,6 +301,89 @@ fn a_marker_inside_itself_ends() {
         <path d="M 0 0 L 5 5" stroke="red" marker-end="url(#m)"/>"##;
     let document = SvgDocument::parse(&svg(body)).unwrap();
     assert_eq!(shapes(&document.root.children), 2);
+}
+
+fn first_text(items: &[Item]) -> Option<&crate::document::TextBlock> {
+    items.iter().find_map(|item| match item {
+        Item::Text(text) => Some(text),
+        Item::Group(group) => first_text(&group.children),
+        _ => None,
+    })
+}
+
+fn first_image(items: &[Item]) -> Option<&crate::document::Image> {
+    items.iter().find_map(|item| match item {
+        Item::Image(image) => Some(image),
+        Item::Group(group) => first_image(&group.children),
+        _ => None,
+    })
+}
+
+#[test]
+fn text_is_read_into_runs_with_its_positions_and_fonts() {
+    let body = r##"<text x="10" y="20" font-size="12" font-family="'Segoe UI', sans-serif" text-anchor="middle" fill="red">
+        Hello <tspan font-weight="bold" dx="2">world</tspan> </text>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    let text = first_text(&document.root.children).expect("a text");
+    let words: Vec<&str> = text.runs.iter().map(|run| run.text.as_str()).collect();
+    assert_eq!(words, ["Hello ", "world"]);
+    let first = &text.runs[0];
+    assert_eq!((first.position.x, first.position.y), (Some(10.0), Some(20.0)));
+    assert_eq!(first.position.anchor, crate::text_layout::TextAnchor::Middle);
+    assert_eq!((first.size, first.family.as_deref()), (12.0, Some("Segoe UI")));
+    let second = &text.runs[1];
+    assert_eq!((second.position.dx, second.weight, second.size), (2.0, 700, 12.0));
+    assert!(second.fill.is_some());
+    assert!(text.estimated_bounds().is_some());
+    assert_eq!(document.unsupported_features(), &[] as &[String]);
+}
+
+#[test]
+fn what_text_does_not_apply_is_reported() {
+    let body = r##"<text x="1 2 3" y="5" rotate="10" letter-spacing="2">abc<textPath>no</textPath></text>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    for expected in ["list of positions in x of text", "property rotate of text", "property letter-spacing", "element <textPath>"] {
+        assert!(document.unsupported_features().iter().any(|feature| feature == expected), "{expected}");
+    }
+}
+
+#[test]
+fn a_document_of_too_much_text_stops_at_the_limit() {
+    let text = "a".repeat(100_001);
+    assert_eq!(SvgDocument::parse(&svg(&format!("<text>{text}</text>"))).err(), Some(SvgError::LimitExceeded("text")));
+}
+
+/// A `data:` URL of the header of a PNG of the size, which is what the decoder reads.
+fn png_url(width: u32, height: u32) -> String {
+    let mut bytes = b"\x89PNG\r\n\x1a\n\0\0\0\x0dIHDR".to_vec();
+    bytes.extend_from_slice(&width.to_be_bytes());
+    bytes.extend_from_slice(&height.to_be_bytes());
+    format!("data:image/png;base64,{}", crate::render_tests::base64(&bytes))
+}
+
+#[test]
+fn an_embedded_image_takes_its_place_and_its_aspect() {
+    let body = format!(r##"<image x="5" y="6" width="40" href="{}" preserveAspectRatio="xMinYMin slice"/>"##, png_url(20, 10));
+    let document = SvgDocument::parse(&svg(&body)).unwrap();
+    let image = first_image(&document.root.children).expect("an image");
+    assert_eq!(image.target, Rect::new(5.0, 6.0, 40.0, 20.0), "the height follows the aspect of the image");
+    assert_eq!((image.size.width, image.size.height), (20.0, 10.0));
+    assert_eq!(image.aspect, "xMinYMin slice");
+    assert_eq!(document.unsupported_features(), &[] as &[String], "a data URL is not an external reference");
+}
+
+#[test]
+fn embedded_images_stop_at_the_pixel_limit_before_they_are_decoded() {
+    let body = format!(r##"<image href="{}"/>"##, png_url(10_000, 10_000));
+    assert_eq!(SvgDocument::parse(&svg(&body)).err(), Some(SvgError::LimitExceeded("image pixels")));
+}
+
+#[test]
+fn an_image_of_another_kind_is_reported_and_not_drawn() {
+    let body = r##"<image href="data:image/svg+xml;base64,PHN2Zy8+" width="10" height="10"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert!(first_image(&document.root.children).is_none());
+    assert!(document.unsupported_features().iter().any(|feature| feature == "embedded image of type image/svg+xml"));
 }
 
 #[test]

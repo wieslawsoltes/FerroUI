@@ -178,6 +178,81 @@ fn an_alpha_mask_reads_the_alpha_of_its_content() {
     assert!(near(pixels.at(48, 32), [0, 0, 0, 0], 3), "{:?}", pixels.at(48, 32));
 }
 
+/// Base64, for the `data:` URLs of the tests.
+pub(crate) fn base64(bytes: &[u8]) -> String {
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut text = String::new();
+    for chunk in bytes.chunks(3) {
+        let group = u32::from(chunk[0]) << 16 | u32::from(*chunk.get(1).unwrap_or(&0)) << 8 | u32::from(*chunk.get(2).unwrap_or(&0));
+        for index in 0..4 {
+            if index <= chunk.len() {
+                text.push(ALPHABET[(group >> (18 - 6 * index) & 63) as usize] as char);
+            } else {
+                text.push('=');
+            }
+        }
+    }
+    text
+}
+
+fn crc32(data: &[u8]) -> u32 {
+    let mut crc = 0xffff_ffffu32;
+    for byte in data {
+        crc ^= u32::from(*byte);
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 { 0xedb8_8320 ^ (crc >> 1) } else { crc >> 1 };
+        }
+    }
+    !crc
+}
+
+/// A PNG of one colour, its pixel data in a stored deflate block.
+fn png(width: u32, height: u32, rgba: [u8; 4]) -> Vec<u8> {
+    let mut raw = Vec::new();
+    for _ in 0..height {
+        raw.push(0);
+        for _ in 0..width {
+            raw.extend_from_slice(&rgba);
+        }
+    }
+    let (mut a, mut b) = (1u32, 0u32);
+    for byte in &raw {
+        a = (a + u32::from(*byte)) % 65_521;
+        b = (b + a) % 65_521;
+    }
+    let length = raw.len() as u16;
+    let mut zlib = vec![0x78, 0x01, 0x01];
+    zlib.extend_from_slice(&length.to_le_bytes());
+    zlib.extend_from_slice(&(!length).to_le_bytes());
+    zlib.extend_from_slice(&raw);
+    zlib.extend_from_slice(&(b << 16 | a).to_be_bytes());
+
+    let mut header = Vec::new();
+    header.extend_from_slice(&width.to_be_bytes());
+    header.extend_from_slice(&height.to_be_bytes());
+    header.extend_from_slice(&[8, 6, 0, 0, 0]);
+    let mut bytes = b"\x89PNG\r\n\x1a\n".to_vec();
+    for (kind, data) in [(b"IHDR", header), (b"IDAT", zlib), (b"IEND", Vec::new())] {
+        bytes.extend_from_slice(&(data.len() as u32).to_be_bytes());
+        let mut body = kind.to_vec();
+        body.extend_from_slice(&data);
+        bytes.extend_from_slice(&body);
+        bytes.extend_from_slice(&crc32(&body).to_be_bytes());
+    }
+    bytes
+}
+
+#[test]
+fn an_embedded_png_is_drawn_into_its_place_in_every_rendering_mode() {
+    let url = format!("data:image/png;base64,{}", base64(&png(2, 2, [255, 0, 0, 255])));
+    let text = format!(r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><image x="16" y="16" width="32" height="32" href="{url}"/></svg>"##);
+    for mode in modes() {
+        let pixels = render(text.as_bytes(), mode, 64, 64);
+        assert!(near(pixels.at(32, 32), [255, 0, 0, 255], 3), "{mode:?}: {:?}", pixels.at(32, 32));
+        assert!(near(pixels.at(4, 4), [0, 0, 0, 0], 3), "{mode:?}: {:?}", pixels.at(4, 4));
+    }
+}
+
 #[test]
 fn a_dash_array_is_in_user_units() {
     let pixels = cpu(r##"<line x1="0" y1="32" x2="64" y2="32" stroke="#ff0000" stroke-width="4" stroke-dasharray="8 8"/>"##);

@@ -131,3 +131,101 @@ fn no_mask_or_pattern_of_a_document_reaches_a_scene_of_the_cpu_renderer() {
     }
     assert!(failures.is_empty(), "{failures:#?}");
 }
+
+fn crc32(data: &[u8]) -> u32 {
+    let mut crc = 0xffff_ffffu32;
+    for byte in data {
+        crc ^= u32::from(*byte);
+        for _ in 0..8 {
+            crc = if crc & 1 != 0 { 0xedb8_8320 ^ (crc >> 1) } else { crc >> 1 };
+        }
+    }
+    !crc
+}
+
+fn base64(bytes: &[u8]) -> String {
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut text = String::new();
+    for chunk in bytes.chunks(3) {
+        let group = u32::from(chunk[0]) << 16 | u32::from(*chunk.get(1).unwrap_or(&0)) << 8 | u32::from(*chunk.get(2).unwrap_or(&0));
+        for index in 0..4 {
+            if index <= chunk.len() {
+                text.push(ALPHABET[(group >> (18 - 6 * index) & 63) as usize] as char);
+            } else {
+                text.push('=');
+            }
+        }
+    }
+    text
+}
+
+/// A red PNG of 2 by 2 pixels, its data in a stored deflate block.
+fn red_png() -> Vec<u8> {
+    let mut raw = Vec::new();
+    for _ in 0..2 {
+        raw.push(0);
+        raw.extend_from_slice(&[255, 0, 0, 255, 255, 0, 0, 255]);
+    }
+    let (mut a, mut b) = (1u32, 0u32);
+    for byte in &raw {
+        a = (a + u32::from(*byte)) % 65_521;
+        b = (b + a) % 65_521;
+    }
+    let length = raw.len() as u16;
+    let mut zlib = vec![0x78, 0x01, 0x01];
+    zlib.extend_from_slice(&length.to_le_bytes());
+    zlib.extend_from_slice(&(!length).to_le_bytes());
+    zlib.extend_from_slice(&raw);
+    zlib.extend_from_slice(&(b << 16 | a).to_be_bytes());
+    let header = [0, 0, 0, 2, 0, 0, 0, 2, 8, 6, 0, 0, 0].to_vec();
+    let mut bytes = b"\x89PNG\r\n\x1a\n".to_vec();
+    for (kind, data) in [(b"IHDR", header), (b"IDAT", zlib), (b"IEND", Vec::new())] {
+        bytes.extend_from_slice(&(data.len() as u32).to_be_bytes());
+        let mut body = kind.to_vec();
+        body.extend_from_slice(&data);
+        bytes.extend_from_slice(&body);
+        bytes.extend_from_slice(&crc32(&body).to_be_bytes());
+    }
+    bytes
+}
+
+#[test]
+fn no_embedded_image_or_text_of_a_document_reaches_a_scene_of_the_cpu_renderer() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let image = format!(
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><image x="16" y="16" width="32" height="32" href="data:image/png;base64,{}"/></svg>"##,
+        base64(&red_png())
+    );
+    let text = r##"<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><text x="4" y="44" font-size="40" font-weight="bold" fill="#ff0000">Hi</text></svg>"##;
+    let mut failures = Vec::new();
+    for mode in device_modes(&device) {
+        crate::unit_tests::register_test_assets();
+        let scope = FerroLocator::enter_scope();
+        crate::VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(mode));
+        ferroui_harfbuzz::HarfBuzzPlatform::initialize();
+        for (name, document) in [("embedded image", image.as_str()), ("text", text)] {
+            let before = cpu_scenes_made();
+            let pixels = draw(&device, mode, document);
+            let made = cpu_scenes_made() - before;
+            if made > 0 {
+                failures.push(format!("{mode:?}, {name}: {made} CPU scenes were made"));
+            }
+            let red = pixels.chunks_exact(4).filter(|pixel| near([pixel[0], pixel[1], pixel[2], pixel[3]], [255, 0, 0, 255])).count();
+            if red == 0 {
+                failures.push(format!("{mode:?}, {name}: nothing red was drawn"));
+            }
+            if name == "embedded image" && !near(at(&pixels, (32, 32)), [255, 0, 0, 255]) {
+                failures.push(format!("{mode:?}, {name}: {:?} in the middle", at(&pixels, (32, 32))));
+            }
+            println!("{mode:?}, {name}: {made} CPU scenes, {red} red pixels");
+        }
+        scope.dispose();
+    }
+    assert!(failures.is_empty(), "{failures:#?}");
+}

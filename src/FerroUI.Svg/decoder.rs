@@ -2,7 +2,12 @@
 
 use crate::color::parse_color;
 use crate::css::{declarations, Cascade};
-use crate::document::{Gradient, GradientKind, Group, Item, Mask, Paint, Pattern, Shape, Stroke, SvgDocument, SvgError, SvgLimits};
+use crate::embedded_image::{decode_data_url, EmbeddedError};
+use crate::text_layout::{
+    collapse_white_space, font_family_names, parse_anchor, parse_font_size, parse_font_weight, RunPosition, TextAnchor,
+    DEFAULT_FONT_SIZE,
+};
+use crate::document::{Gradient, GradientKind, Group, Image, Item, Mask, Paint, Pattern, TextBlock, TextRun, Shape, Stroke, SvgDocument, SvgError, SvgLimits};
 use crate::numbers::{length, number_list, opacity};
 use crate::path::{self, OutOfSegments};
 use crate::transform::parse_transform;
@@ -39,7 +44,7 @@ const MOST_REPORTED: usize = 256;
 /// The elements the decoder reads, and those that draw nothing by their nature.
 const KNOWN_ELEMENTS: &[&str] = &[
     "svg", "g", "a", "switch", "use", "symbol", "defs", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
-    "linearGradient", "radialGradient", "stop", "clipPath", "pattern", "marker", "mask", "title", "desc", "metadata", "style",
+    "linearGradient", "radialGradient", "stop", "clipPath", "pattern", "marker", "mask", "image", "text", "tspan", "title", "desc", "metadata", "style",
 ];
 
 /// The properties the decoder reads in a `style` attribute.
@@ -47,7 +52,7 @@ const KNOWN_PROPERTIES: &[&str] = &[
     "color", "fill", "fill-opacity", "fill-rule", "clip-rule", "clip-path", "stroke", "stroke-opacity", "stroke-width",
     "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset", "visibility",
     "display", "opacity", "stop-color", "stop-opacity", "marker", "marker-start", "marker-mid", "marker-end",
-    "mask", "mask-type",
+    "mask", "mask-type", "font-family", "font-size", "font-weight", "font-style", "text-anchor",
 ];
 
 /// The presentation attributes that change the picture and that the decoder does not apply, with
@@ -63,7 +68,19 @@ const UNSUPPORTED_ATTRIBUTES: &[(&str, &str)] = &[
     ("overflow", "hidden"),
     ("color-interpolation", "sRGB"),
     ("shape-rendering", "auto"),
+    ("letter-spacing", "normal"),
+    ("word-spacing", "normal"),
+    ("text-decoration", "none"),
+    ("dominant-baseline", "auto"),
+    ("alignment-baseline", "auto"),
+    ("baseline-shift", "0"),
+    ("writing-mode", "horizontal-tb"),
+    ("font-variant", "normal"),
+    ("font-stretch", "normal"),
 ];
+
+/// The most characters of the text of a document.
+const MOST_TEXT_CHARS: usize = 100_000;
 
 pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, SvgError> {
     if bytes.len() > limits.max_bytes {
@@ -110,6 +127,8 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
         pattern_stack: Vec::new(),
         marker_stack: Vec::new(),
         mask_stack: Vec::new(),
+        image_pixels: limits.max_image_pixels,
+        text_chars: MOST_TEXT_CHARS,
         unsupported: &mut unsupported,
         viewport: view_box.map_or(Size::new(width, height), |view_box| Size::new(view_box.width, view_box.height)),
     };
@@ -163,7 +182,11 @@ fn unsupported_features(document: &Document<'_>, cascade: &Cascade, found: &mut 
             }
         }
         let reference = node.attribute((XLINK_NAMESPACE, "href")).or_else(|| node.attribute("href"));
-        if reference.is_some_and(|reference| !reference.trim_start().starts_with('#')) {
+        let is_inside = |reference: &str| {
+            let reference = reference.trim_start();
+            reference.starts_with('#') || reference.get(..5).is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"))
+        };
+        if reference.is_some_and(|reference| !is_inside(reference)) {
             found.insert("external reference".to_owned());
         }
     }
@@ -282,6 +305,11 @@ struct Style {
     is_visible: bool,
     /// The ids of the markers at the start, the middle vertices and the end.
     markers: [Option<String>; 3],
+    font_family: Option<String>,
+    font_size: f64,
+    font_weight: i32,
+    is_italic: bool,
+    anchor: TextAnchor,
 }
 
 impl Default for Style {
@@ -302,6 +330,11 @@ impl Default for Style {
             dash_offset: "0".to_owned(),
             is_visible: true,
             markers: [None, None, None],
+            font_family: None,
+            font_size: DEFAULT_FONT_SIZE,
+            font_weight: 400,
+            is_italic: false,
+            anchor: TextAnchor::Start,
         }
     }
 }
@@ -371,6 +404,23 @@ impl Style {
             Some("hidden" | "collapse") => self.is_visible = false,
             _ => {}
         }
+        if let Some(family) = get("font-family") {
+            self.font_family = font_family_names(family);
+        }
+        if let Some(size) = get("font-size").and_then(|text| parse_font_size(text, self.font_size)) {
+            self.font_size = size;
+        }
+        if let Some(weight) = get("font-weight").and_then(|text| parse_font_weight(text, self.font_weight)) {
+            self.font_weight = weight;
+        }
+        match get("font-style") {
+            Some("italic" | "oblique") => self.is_italic = true,
+            Some("normal") => self.is_italic = false,
+            _ => {}
+        }
+        if let Some(anchor) = get("text-anchor").and_then(parse_anchor) {
+            self.anchor = anchor;
+        }
         // The shorthand exists only in CSS.
         if let Some(value) = cascade.from_css(node, "marker").filter(|value| *value != "inherit") {
             let id = url_reference(value).map(str::to_owned);
@@ -402,6 +452,10 @@ struct Decoder<'a, 'input> {
     pattern_stack: Vec<NodeId>,
     marker_stack: Vec<NodeId>,
     mask_stack: Vec<NodeId>,
+    /// The pixels of embedded images still allowed.
+    image_pixels: u64,
+    /// The characters of text still allowed.
+    text_chars: usize,
     unsupported: &'a mut BTreeSet<String>,
     viewport: Size,
 }
@@ -468,6 +522,8 @@ impl<'a, 'input> Decoder<'a, 'input> {
             },
             "svg" => self.nested_viewport(node, node, &style, depth)?,
             "use" => self.use_element(node, &style, depth)?,
+            "image" => self.image_item(node, &style)?,
+            "text" => self.text_item(node, &style, depth)?,
             "path" | "rect" | "circle" | "ellipse" | "line" | "polyline" | "polygon" => {
                 self.shape_item(node, &style, depth)?
             }
@@ -521,6 +577,161 @@ impl<'a, 'input> Decoder<'a, 'input> {
         group.clip = clip;
         group.mask = mask;
         Ok(Some(Item::Group(group)))
+    }
+
+    /// Lists `feature` among what is not drawn, up to the most a document lists.
+    fn note(&mut self, feature: String) {
+        if self.unsupported.len() < MOST_UNSUPPORTED {
+            self.unsupported.insert(feature);
+        }
+    }
+
+    /// An `image` of a `data:` URL. Another reference draws nothing and is reported.
+    fn image_item(&mut self, node: Node<'a, 'input>, style: &Style) -> Result<Option<Item>, SvgError> {
+        if !style.is_visible {
+            return Ok(None);
+        }
+        let Some(reference) = node.attribute((XLINK_NAMESPACE, "href")).or_else(|| node.attribute("href")) else {
+            return Ok(None);
+        };
+        let data = match decode_data_url(reference) {
+            Ok(data) => data,
+            // Reported as an external reference, or a reference inside the document.
+            Err(EmbeddedError::NotData) => {
+                if reference.trim_start().starts_with('#') {
+                    self.note("image of an element of the document".to_owned());
+                }
+                return Ok(None);
+            }
+            Err(EmbeddedError::UnsupportedType(kind)) => {
+                self.note(format!("embedded image of type {kind}"));
+                return Ok(None);
+            }
+            Err(EmbeddedError::UnsupportedEncoding) => {
+                self.note("embedded image that is not in base64".to_owned());
+                return Ok(None);
+            }
+            Err(EmbeddedError::Invalid) => {
+                self.note("embedded image that is not a valid PNG or JPEG".to_owned());
+                return Ok(None);
+            }
+        };
+        let pixels = u64::from(data.width) * u64::from(data.height);
+        self.image_pixels = self.image_pixels.checked_sub(pixels).ok_or(SvgError::LimitExceeded("image pixels"))?;
+        let size = Size::new(f64::from(data.width), f64::from(data.height));
+        let (width, height) = match (self.x(node, "width").filter(|w| *w > 0.0), self.y(node, "height").filter(|h| *h > 0.0)) {
+            (Some(width), Some(height)) => (width, height),
+            (Some(width), None) => (width, width * size.height / size.width),
+            (None, Some(height)) => (height * size.width / size.height, height),
+            (None, None) => (size.width, size.height),
+        };
+        if !(width.is_finite() && height.is_finite()) {
+            return Ok(None);
+        }
+        let target = Rect::new(self.x(node, "x").unwrap_or(0.0), self.y(node, "y").unwrap_or(0.0), width, height);
+        let aspect = node.attribute("preserveAspectRatio").unwrap_or("").to_owned();
+        Ok(Some(Item::Image(Image { bytes: data.bytes.into(), size, target, aspect })))
+    }
+
+    /// The first length of an attribute that may be a list; the others are reported.
+    fn first_length(&mut self, node: Node<'a, 'input>, name: &str, reference: f64) -> Option<f64> {
+        let text = node.attribute(name)?;
+        let mut parts = text.split(|c: char| c == ',' || c.is_ascii_whitespace()).filter(|part| !part.is_empty());
+        let first = parts.next()?;
+        if parts.next().is_some() {
+            self.note(format!("list of positions in {name} of text"));
+        }
+        length(first, reference)
+    }
+
+    fn text_item(&mut self, node: Node<'a, 'input>, style: &Style, depth: usize) -> Result<Option<Item>, SvgError> {
+        let mut runs = Vec::new();
+        let mut after_space = true;
+        self.text_runs(node, style, &mut runs, &mut after_space, depth)?;
+        // The text does not end with a space either; a run left empty by that goes.
+        while let Some(last) = runs.last_mut() {
+            if last.text.ends_with(' ') {
+                last.text.pop();
+            }
+            if !last.text.is_empty() {
+                break;
+            }
+            runs.pop();
+        }
+        if runs.iter().all(|run| run.text.is_empty() || (run.fill.is_none() && run.stroke.is_none())) {
+            return Ok(None);
+        }
+        Ok(Some(Item::Text(TextBlock { runs })))
+    }
+
+    /// The runs of the text of `node` and its `tspan` elements, in order.
+    fn text_runs(
+        &mut self,
+        node: Node<'a, 'input>,
+        style: &Style,
+        runs: &mut Vec<TextRun>,
+        after_space: &mut bool,
+        depth: usize,
+    ) -> Result<(), SvgError> {
+        for name in ["rotate", "textLength", "lengthAdjust"] {
+            if node.attribute(name).is_some() {
+                self.note(format!("property {name} of text"));
+            }
+        }
+        let (width, height) = (self.viewport.width, self.viewport.height);
+        let position = RunPosition {
+            x: self.first_length(node, "x", width),
+            y: self.first_length(node, "y", height),
+            dx: self.first_length(node, "dx", width).unwrap_or(0.0),
+            dy: self.first_length(node, "dy", height).unwrap_or(0.0),
+            anchor: style.anchor,
+        };
+        let moves = position.x.is_some() || position.y.is_some() || position.dx != 0.0 || position.dy != 0.0;
+        // The position of the element applies to its first character, wherever that is.
+        let mut position = Some(position);
+        for child in node.children() {
+            if child.is_text() {
+                let text = collapse_white_space(child.text().unwrap_or(""), after_space);
+                // White space that collapsed away: the position waits for the next character.
+                if text.is_empty() {
+                    continue;
+                }
+                self.text_chars =
+                    self.text_chars.checked_sub(text.chars().count()).ok_or(SvgError::LimitExceeded("text"))?;
+                let at = position.take().unwrap_or(RunPosition { anchor: style.anchor, ..RunPosition::default() });
+                runs.push(self.text_run(text, at, style)?);
+            } else if child.is_element() && is_svg(child) {
+                self.count(depth + 1)?;
+                if !matches!(child.tag_name().name(), "tspan" | "a") || self.cascade.get(child, "display") == Some("none") {
+                    continue;
+                }
+                if let Some(at) = position.take().filter(|_| moves) {
+                    runs.push(self.text_run(String::new(), at, style)?);
+                }
+                let mut inner = style.clone();
+                inner.apply(child, self.cascade);
+                self.text_runs(child, &inner, runs, after_space, depth + 1)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn text_run(&mut self, text: String, position: RunPosition, style: &Style) -> Result<TextRun, SvgError> {
+        let (fill, stroke) = if style.is_visible && !text.is_empty() {
+            (self.resolve(&style.fill, style)?.map(|paint| paint.with_opacity(style.fill_opacity)), self.stroke(style)?)
+        } else {
+            (None, None)
+        };
+        Ok(TextRun {
+            text,
+            position,
+            family: style.font_family.clone(),
+            size: style.font_size,
+            weight: style.font_weight,
+            is_italic: style.is_italic,
+            fill,
+            stroke,
+        })
     }
 
     /// The `mask` of `id` for an element with `bounds`. A reference that finds none, or a mask

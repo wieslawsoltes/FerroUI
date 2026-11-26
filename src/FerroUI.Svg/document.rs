@@ -6,12 +6,18 @@ use ferroui_base::media::immutable::{
     ImmutableSolidColorBrush, ImmutableTransform,
 };
 use ferroui_base::media::effects::ImmutableLuminanceToAlphaEffect;
-use ferroui_base::media::imaging::BitmapBlendingMode;
+use ferroui_base::media::imaging::{Bitmap, BitmapBlendingMode};
 use ferroui_base::media::{
-    AlignmentX, AlignmentY, Color, DrawingBrush, DrawingGroup, DrawingImage, GeometryDrawing, GradientSpreadMethod, IBrush,
-    IDashStyle, IImmutableBrush, IPen, MatrixTransform, PathCommand, Pen, PenLineCap, PenLineJoin, RectangleGeometry, Stretch,
-    StreamGeometry, TileMode,
+    AlignmentX, AlignmentY, Color, DrawingBrush, DrawingGroup, DrawingImage, FlowDirection, FontFamily, FontManager,
+    FontStretch, FontStyle, FontWeight, FormattedText, GeometryDrawing, GradientSpreadMethod, IBrush, IDashStyle, IImage,
+    IImmutableBrush, IPen, ImageDrawing, MatrixTransform, PathCommand, Pen, PenLineCap, PenLineJoin, RectangleGeometry,
+    Stretch, StreamGeometry, TileMode, Typeface,
 };
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::IFontManagerImpl;
+use ferroui_base::utilities::current_locale;
+use ferroui_base::{FerroLocator, LocatorExtensions};
+use crate::text_layout::{place_runs, RunPosition};
 use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeRect, RelativeScalar, RelativeUnit, Size};
 use std::fmt;
 use std::rc::Rc;
@@ -30,6 +36,9 @@ pub struct SvgLimits {
     pub max_path_segments: usize,
     /// The largest width or height of the image, in device independent pixels.
     pub max_dimension: f64,
+    /// The most pixels of all the embedded images together, read from their headers before
+    /// they are decoded.
+    pub max_image_pixels: u64,
 }
 
 impl Default for SvgLimits {
@@ -40,6 +49,7 @@ impl Default for SvgLimits {
             max_depth: 64,
             max_path_segments: 2_000_000,
             max_dimension: 16_384.0,
+            max_image_pixels: 64 * 1024 * 1024,
         }
     }
 }
@@ -153,6 +163,51 @@ impl Group {
 pub(crate) enum Item {
     Group(Group),
     Shape(Shape),
+    Image(Image),
+    Text(TextBlock),
+}
+
+/// An embedded PNG or JPEG, decoded when the document is drawn.
+pub(crate) struct Image {
+    pub(crate) bytes: Rc<[u8]>,
+    /// The size in pixels, from the header.
+    pub(crate) size: Size,
+    pub(crate) target: Rect,
+    /// The `preserveAspectRatio` of the image.
+    pub(crate) aspect: String,
+}
+
+/// The runs of a `text` element, shaped when the document is drawn.
+pub(crate) struct TextBlock {
+    pub(crate) runs: Vec<TextRun>,
+}
+
+pub(crate) struct TextRun {
+    pub(crate) text: String,
+    pub(crate) position: RunPosition,
+    /// The families to look up; `None` for the default font.
+    pub(crate) family: Option<String>,
+    pub(crate) size: f64,
+    pub(crate) weight: i32,
+    pub(crate) is_italic: bool,
+    pub(crate) fill: Option<Paint>,
+    pub(crate) stroke: Option<Stroke>,
+}
+
+impl TextBlock {
+    /// A box for what needs the bounding box of the text before it is shaped (a clip, a mask or a
+    /// paint in its bounding box units): about half an em per character, from the baseline up.
+    pub(crate) fn estimated_bounds(&self) -> Option<Rect> {
+        let width = |run: &TextRun| 0.55 * run.size * run.text.chars().count() as f64;
+        let positions: Vec<RunPosition> = self.runs.iter().map(|run| run.position).collect();
+        let places = place_runs(&positions, |index| width(&self.runs[index]));
+        self.runs
+            .iter()
+            .zip(places)
+            .filter(|(run, _)| !run.text.is_empty())
+            .map(|(run, (x, y))| Rect::new(x, y - 0.8 * run.size, width(run), run.size))
+            .reduce(|left, right| left.union(right))
+    }
 }
 
 impl Item {
@@ -160,6 +215,8 @@ impl Item {
     pub(crate) fn bounds(&self) -> Option<Rect> {
         match self {
             Item::Shape(shape) => Some(shape.bounds),
+            Item::Image(image) => Some(image.target),
+            Item::Text(text) => text.estimated_bounds(),
             Item::Group(group) => {
                 let inner = bounds_of(&group.children)?;
                 Some(inner.transform_to_aabb(group.transform))
@@ -419,6 +476,16 @@ fn group_drawing(group: &Group) -> Ref<DrawingGroup> {
                     children.add(shape.upcast());
                 }
             }
+            Item::Image(image) => {
+                if let Some(image) = image_drawing(image) {
+                    children.add(image.upcast());
+                }
+            }
+            Item::Text(text) => {
+                if let Some(text) = text_drawing(text) {
+                    children.add(text.upcast());
+                }
+            }
         }
     }
     // The mask is in the coordinates of the content, so it is read before the transform.
@@ -433,6 +500,86 @@ fn group_drawing(group: &Group) -> Ref<DrawingGroup> {
         return in_layer(drawing, group.opacity);
     }
     drawing
+}
+
+/// Logs, once in the life of the process, what could not be drawn although the document was
+/// decoded: an image the platform does not decode, text without a font backend.
+fn report_draw_problem(problem: String) {
+    for problem in crate::decoder::newly_reported(&[problem]) {
+        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::VISUAL) {
+            logger.log(None, &format!("SVG: the {problem} is not drawn; the picture differs from the document."));
+        }
+    }
+}
+
+/// The image decoded by the platform and drawn into its place by the backend, as a texture of the
+/// GPU where the backend draws on one.
+fn image_drawing(image: &Image) -> Option<Ref<DrawingGroup>> {
+    let bitmap = match Bitmap::from_stream(&mut std::io::Cursor::new(&image.bytes[..])) {
+        Ok(bitmap) => bitmap,
+        Err(error) => {
+            report_draw_problem(format!("embedded image that the platform does not decode ({error})"));
+            return None;
+        }
+    };
+    let source = Rect::new(0.0, 0.0, image.size.width, image.size.height);
+    let picture = ImageDrawing::new();
+    picture.set_image_source(Some(Rc::new(bitmap) as Rc<dyn IImage>));
+    picture.set_rect(source);
+    let placed = DrawingGroup::new();
+    placed.set_transform(MatrixTransform::with_matrix(crate::decoder::view_transform(source, &image.aspect, image.target)));
+    placed.children().add(picture.upcast());
+    // With `slice` the image overflows its place, which cuts it.
+    let drawing = DrawingGroup::new();
+    drawing.set_clip_geometry(RectangleGeometry::with_rect(image.target));
+    drawing.children().add(placed.upcast());
+    Some(drawing)
+}
+
+/// The runs shaped by the font manager and drawn as the geometry of their glyphs, so that a
+/// gradient, a pattern or a stroke paints text as it paints a path.
+fn text_drawing(block: &TextBlock) -> Option<Ref<DrawingGroup>> {
+    let locator = FerroLocator::current();
+    if locator.get_service::<FontManager>().is_none() && locator.get_service::<dyn IFontManagerImpl>().is_none() {
+        report_draw_problem("text, for want of a font backend,".to_owned());
+        return None;
+    }
+    let formatted: Vec<Option<FormattedText>> = block
+        .runs
+        .iter()
+        .map(|run| {
+            if run.text.is_empty() {
+                return None;
+            }
+            let family = run.family.as_deref().and_then(|names| FontFamily::parse(names).ok()).unwrap_or_default();
+            let style = if run.is_italic { FontStyle::Italic } else { FontStyle::Normal };
+            let typeface = Typeface::with_style(family, style, FontWeight(run.weight), FontStretch::Normal);
+            // A line draws its glyphs only with a foreground; the outlines are what is kept of them.
+            let foreground: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Color::from_argb(255, 0, 0, 0)));
+            Some(FormattedText::new(&run.text, current_locale(), FlowDirection::LeftToRight, typeface, run.size, Some(foreground)))
+        })
+        .collect();
+    let positions: Vec<RunPosition> = block.runs.iter().map(|run| run.position).collect();
+    let places = place_runs(&positions, |index| {
+        formatted[index].as_ref().map_or(0.0, |text| text.width_including_trailing_whitespace())
+    });
+    let drawing = DrawingGroup::new();
+    for ((run, text), (x, y)) in block.runs.iter().zip(&formatted).zip(places) {
+        let Some(text) = text else { continue };
+        let Some(geometry) = text.build_geometry(Point::new(x, y - text.baseline())) else { continue };
+        let bounds = geometry.bounds();
+        let fill = run.fill.as_ref().and_then(|paint| brush(paint, bounds));
+        let stroke = run.stroke.as_ref().and_then(|stroke| pen(stroke, bounds));
+        if fill.is_none() && stroke.is_none() {
+            continue;
+        }
+        let glyphs = GeometryDrawing::new();
+        glyphs.set_geometry(geometry);
+        glyphs.set_brush(fill);
+        glyphs.set_pen(stroke);
+        drawing.children().add(glyphs.upcast());
+    }
+    Some(drawing)
 }
 
 /// `content` composed as one layer at `opacity`, as SVG asks of a group: what overlaps inside it

@@ -27,10 +27,12 @@ mod color;
 mod css;
 mod decoder;
 mod document;
+mod embedded_image;
 mod numbers;
 mod path;
 mod register_types;
 mod svg_image_extension;
+mod text_layout;
 mod transform;
 
 #[cfg(test)]
