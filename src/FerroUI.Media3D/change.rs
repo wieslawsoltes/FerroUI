@@ -27,6 +27,10 @@ pub enum Scene3DChange {
     Record,
     /// The camera or the viewport.
     Camera,
+    /// What a material samples has new pixels (a frame of a video in its slot, step D7): the
+    /// compiled scene is the same, so no generation is bumped and the snapshot is kept. The scene
+    /// is only drawn again.
+    Output,
 }
 
 /// The changes of a child as its owner sees them: unchanged.

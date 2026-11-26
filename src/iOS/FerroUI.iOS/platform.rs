@@ -333,7 +333,12 @@ mod uikit {
             opts: &IosPlatformOptions,
         ) -> (Arc<dyn IPlatformGraphics>, Option<Arc<EaglPlatformGraphics>>, IosRenderingMode) {
             let graphics = initialize_graphics_with(opts, |rendering_mode| match rendering_mode {
-                IosRenderingMode::OpenGl if cfg!(feature = "quartz-metal") => None,
+                IosRenderingMode::OpenGl
+                    if cfg!(feature = "quartz-metal")
+                        || !ferroui_base::platform::render_interface_supports_open_gl() =>
+                {
+                    None
+                }
                 IosRenderingMode::OpenGl => EaglPlatformGraphics::try_create().map(|eagl_graphics| {
                     let graphics: Arc<dyn IPlatformGraphics> = eagl_graphics.clone();
                     (graphics, Some(eagl_graphics), rendering_mode)
