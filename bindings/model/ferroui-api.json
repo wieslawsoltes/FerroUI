@@ -2,7 +2,7 @@
  "format": 1,
  "generated_by": "scripts/generate_api_model.py",
  "abi_version": 1,
- "fingerprint": 4048855936424894037,
+ "fingerprint": 3635999352226567406,
  "naming": "Names are the names of the framework; `words` are their words in lower case, for each backend to apply the casing of its language.",
  "abi": {
   "functions": [
@@ -3752,7 +3752,7 @@
     "Source"
    ],
    "events": [],
-   "doc": "The source of a grouped list (WinUI's `CollectionViewSource`): with `IsSourceGrouped`, its [`view`](Self::view) is a [`GroupedItemsView`] of the groups of `Source`; without, the source."
+   "doc": "The source of a grouped list (WinUI's `CollectionViewSource`): with `IsSourceGrouped`, its [`view`](Self::view) is a [`GroupedItemsView`] of the groups of `Source`, whose items are the value of `ItemsPath` of each group when it is set; without, the source."
   },
   {
    "id": 50,
@@ -5721,6 +5721,25 @@
   },
   {
    "id": 141,
+   "name": "GridViewHeaderItem",
+   "words": [
+    "grid",
+    "view",
+    "header",
+    "item"
+   ],
+   "base": "ListViewBaseHeaderItem",
+   "rust_path": "ferroui_controls::GridViewHeaderItem",
+   "entry": "ferro_type_grid_view_header_item",
+   "creatable": true,
+   "control": true,
+   "children": "content",
+   "properties": [],
+   "events": [],
+   "doc": "The header of a group of a [`GridView`] (WinUI's `GridViewHeaderItem`), which the [`ItemsWrapGrid`] of a grouped source places before the items of each group. It is not an item: it has no index and cannot be selected (#1424)."
+  },
+  {
+   "id": 142,
    "name": "GridViewItem",
    "words": [
     "grid",
@@ -5738,7 +5757,7 @@
    "doc": "An item of a [`GridView`] (WinUI's `GridViewItem`)."
   },
   {
-   "id": 142,
+   "id": 143,
    "name": "GridViewItemAutomationPeer",
    "words": [
     "grid",
@@ -5758,7 +5777,7 @@
    "doc": "The automation peer of a [`GridViewItem`](crate::GridViewItem) (WinUI's `GridViewItemAutomationPeer`)."
   },
   {
-   "id": 143,
+   "id": 144,
    "name": "GroupBox",
    "words": [
     "group",
@@ -5775,7 +5794,7 @@
    "doc": "A headered content control that groups related content."
   },
   {
-   "id": 144,
+   "id": 145,
    "name": "GroupStyle",
    "words": [
     "group",
@@ -5796,7 +5815,7 @@
    "doc": "How the headers of the groups of a list view look (WinUI's `GroupStyle`)."
   },
   {
-   "id": 145,
+   "id": 146,
    "name": "HeaderedContentControl",
    "words": [
     "headered",
@@ -5817,7 +5836,7 @@
    "doc": "A [`ContentControl`] with a header."
   },
   {
-   "id": 146,
+   "id": 147,
    "name": "HeaderedItemsControl",
    "words": [
     "headered",
@@ -5838,7 +5857,7 @@
    "doc": "Represents an [`ItemsControl`] with a related header."
   },
   {
-   "id": 147,
+   "id": 148,
    "name": "HeaderedSelectingItemsControl",
    "words": [
     "headered",
@@ -5860,7 +5879,7 @@
    "doc": "Represents a [`SelectingItemsControl`] with a related header."
   },
   {
-   "id": 148,
+   "id": 149,
    "name": "Hyperlink",
    "words": [
     "hyperlink"
@@ -5884,7 +5903,7 @@
    "doc": "An interactive span. Its host supplies hit testing/focus and forwards pointer and keyboard gestures; invocation and URI launch use the framework services."
   },
   {
-   "id": 149,
+   "id": 150,
    "name": "HyperlinkAutomationPeer",
    "words": [
     "hyperlink",
@@ -5902,7 +5921,7 @@
    "doc": "Accessibility for a nonvisual hyperlink in a rich document. The owner/name, Invoke and geometry contracts follow WinUI's HyperlinkAutomationPeer; the TextChild projection uses FerroUI's shared live document range service."
   },
   {
-   "id": 150,
+   "id": 151,
    "name": "HyperlinkButton",
    "words": [
     "hyperlink",
@@ -5922,7 +5941,7 @@
    "doc": "A button control that functions as a navigateable hyperlink."
   },
   {
-   "id": 151,
+   "id": 152,
    "name": "IconElement",
    "words": [
     "icon",
@@ -5939,7 +5958,7 @@
    "doc": "Represents the base class for an icon UI element."
   },
   {
-   "id": 152,
+   "id": 153,
    "name": "IconSource",
    "words": [
     "icon",
@@ -5958,7 +5977,7 @@
    "doc": "The base class of the descriptions of an icon that can be shared (WinUI's `IconSource`): each [`create_icon_element`](Self::create_icon_element) creates a new icon element, and a later change of a property of the source is set on every element it created that is still alive. The source holds its elements weakly and does not subscribe to them, so neither keeps the other alive. This class is abstract: it creates no element ([`create_icon_element`] is `None`, as WinUI's base returns no element); the derived sources create theirs. [`create_icon_element`]: Self::create_icon_element"
   },
   {
-   "id": 153,
+   "id": 154,
    "name": "Image",
    "words": [
     "image"
@@ -5979,7 +5998,7 @@
    "doc": "Displays an [`IImage`]."
   },
   {
-   "id": 154,
+   "id": 155,
    "name": "ImageAutomationPeer",
    "words": [
     "image",
@@ -5997,7 +6016,7 @@
    "doc": "An automation peer which represents an image."
   },
   {
-   "id": 155,
+   "id": 156,
    "name": "ImageBrush",
    "words": [
     "image",
@@ -6016,7 +6035,7 @@
    "doc": "Paints an area with an image."
   },
   {
-   "id": 156,
+   "id": 157,
    "name": "ImageDrawing",
    "words": [
     "image",
@@ -6036,7 +6055,7 @@
    "doc": "Draws an image within a region defined by a [`Rect`]."
   },
   {
-   "id": 157,
+   "id": 158,
    "name": "ImmutableGeometry",
    "words": [
     "immutable",
@@ -6053,7 +6072,7 @@
    "doc": "A geometry with a fixed platform implementation."
   },
   {
-   "id": 158,
+   "id": 159,
    "name": "InfoBadge",
    "words": [
     "info",
@@ -6074,7 +6093,7 @@
    "doc": "A small badge that draws attention to an item (WinUI's `InfoBadge`): a dot, an icon or a number. A [`value`](Self::value) of 0 or more is shown as a number and takes precedence over the [`icon_source`](Self::icon_source); with the value -1 (the default) the badge shows the icon of its icon source, and a dot without one. The control sets the states of WinUI as pseudo-classes, which the control theme of the WinUI theme (`src/FerroUI.Themes.WinUI/Controls/InfoBadge.xaml`) styles: `:dot`, `:icon`, `:font-icon` (an icon of a [`FontIconSource`]) and `:value` (DisplayKindStates). The template binds the number to [`value`](Self::value) and the icon and the corner radius to the [`template_settings`](Self::template_settings). The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Differences from WinUI (docs/porting/winui-controls.md, section 10.2): a value below -1 is coerced to -1 and logged, where WinUI throws; whether `CornerRadius` is local is followed from the priority of its changes."
   },
   {
-   "id": 159,
+   "id": 160,
    "name": "InfoBadgeTemplateSettings",
    "words": [
     "info",
@@ -6096,7 +6115,7 @@
    "doc": "The values the template of an [`InfoBadge`](crate::InfoBadge) binds to: the corner radius of the badge (half its height unless the badge has a local `CornerRadius`) and the icon element created from its `IconSource`. Each badge has its own."
   },
   {
-   "id": 160,
+   "id": 161,
    "name": "InfoBar",
    "words": [
     "info",
@@ -6126,7 +6145,7 @@
    "doc": "An inline message of the application (WinUI's `InfoBar`): a title, a message, an action button and content, with the icon and the colours of its [`severity`](Self::severity), shown while [`is_open`](Self::is_open) and closed by its close button or by the application. The control sets the states of WinUI as pseudo-classes, which the control theme of the WinUI theme (`src/FerroUI.Themes.WinUI/Controls/InfoBar.xaml`) styles: `:informational`, `:success`, `:warning`, `:error` (SeverityLevels), `:standard-icon-visible`, `:user-icon-visible` (IconStates; neither is NoIconVisible), `:close-button-collapsed`, `:open` (InfoBarVisible; its absence is InfoBarCollapsed), `:foreground-set` (a `Foreground` set on the bar itself) and `:no-banner-content` (no title, message or action button). The template parts it looks up are the button `CloseButton` and the severity icon `StandardIcon`; the content is presented by `PART_ContentPresenter` (WinUI's `ContentArea`). The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Differences from WinUI (docs/porting/winui-controls.md, section 10.2): the bar is a [`ContentControl`]; UI Automation notifications are not raised (the peer reports the title and the message as the name and a live setting of the severity instead); the texts of the close button and the severity icons are WinUI's English texts."
   },
   {
-   "id": 161,
+   "id": 162,
    "name": "InfoBarAutomationPeer",
    "words": [
     "info",
@@ -6145,7 +6164,7 @@
    "doc": "The automation peer of an [`InfoBar`]: a status bar, as in WinUI. WinUI raises UI Automation notifications when the bar opens and closes (`RaiseNotificationEvent` with the text of the severity, the title and the message), which FerroUI's automation has no counterpart of. The peer exposes the bar instead: its name is the title and the message of the bar when the application gives it none, it raises a change of the name when they change, and its live setting is assertive for warnings and errors and polite otherwise when the application sets none (WinUI's processing of the notifications, `GetProcessingForSeverity`)."
   },
   {
-   "id": 162,
+   "id": 163,
    "name": "InfoBarPanel",
    "words": [
     "info",
@@ -6168,7 +6187,7 @@
    "doc": "Lays out its children on one line when they fit in its width, and below each other otherwise (`InfoBarPanel` of WinUI). One line: the children side by side, each moved by its `HorizontalOrientationMargin` (the left margin of the first and the right margin of the last left out), the last one given the rest of the width, the panel padded by `HorizontalOrientationPadding`. Below each other: each child moved by its `VerticalOrientationMargin` (the top margin of the first and the bottom margin of the last left out), the panel padded by `VerticalOrientationPadding`. A child without a width or a height (a collapsed one) is left out of both. One child, children wider than the panel, or a child that would be taller on one line than the minimum height of the parent of the panel (less the vertical margins of the panel) give the layout below each other."
   },
   {
-   "id": 163,
+   "id": 164,
    "name": "InfoBarTemplateSettings",
    "words": [
     "info",
@@ -6189,7 +6208,7 @@
    "doc": "The values the template of an [`InfoBar`](crate::InfoBar) binds to: the icon element created from its `IconSource` (`TemplateSettings.IconElement`, the child of the `UserIconBox` of the template). Each bar has its own."
   },
   {
-   "id": 164,
+   "id": 165,
    "name": "Inline",
    "words": [
     "inline"
@@ -6208,7 +6227,7 @@
    "doc": "`Inline` is the base class for inline text elements. This class is abstract."
   },
   {
-   "id": 165,
+   "id": 166,
    "name": "InlineUIContainer",
    "words": [
     "inline",
@@ -6228,7 +6247,7 @@
    "doc": "`InlineUIContainer` - a wrapper for embedding a control into text flow content."
   },
   {
-   "id": 166,
+   "id": 167,
    "name": "InputElement",
    "words": [
     "input",
@@ -6292,7 +6311,7 @@
    "doc": "Implements input-related functionality for a control. The pseudoclasses `:disabled`, `:focus`, `:focus-visible`, `:focus-within` and `:pointerover` reflect the input state of the element."
   },
   {
-   "id": 167,
+   "id": 168,
    "name": "InputPaneAwareDecorator",
    "words": [
     "input",
@@ -6313,7 +6332,7 @@
    "doc": "A control that automatically adjusts the position or the height of its child based on the height of the input pane to ensure the content is visible."
   },
   {
-   "id": 168,
+   "id": 169,
    "name": "InputScope",
    "words": [
     "input",
@@ -6330,7 +6349,7 @@
    "doc": "An ordered, shared collection of input-method hints. A newly constructed scope has no names, as in WinUI; that falls back to the host's normal policy."
   },
   {
-   "id": 169,
+   "id": 170,
    "name": "InputScopeName",
    "words": [
     "input",
@@ -6350,7 +6369,7 @@
    "doc": "One live input-scope hint. The name remains mutable after insertion into one or more input scopes; each scope publishes a fresh immutable snapshot."
   },
   {
-   "id": 170,
+   "id": 171,
    "name": "Interactive",
    "words": [
     "interactive"
@@ -6366,7 +6385,7 @@
    "doc": "Base class for objects that raise routed events."
   },
   {
-   "id": 171,
+   "id": 172,
    "name": "InteractiveBurningFlameEffect",
    "words": [
     "interactive",
@@ -6385,7 +6404,7 @@
    "doc": "The burning flame as an interactive effect class (Effector's `BurningFlameShaderEffect`, the burn-away button): a press ignites the flame where it is (the height clamped to 0.18..0.92 of the host) at full strength, a drag while pressed moves the ignition, and after the release the flame burns down over 2.6 seconds; the phase of its waves and its strength advance on the frames of the animation clock ([`advance`](Self::advance)). It takes handled events: the host of the burn-away button is a button, whose own handler handles the press. Its value is a [`BurningFlameShaderEffect`]."
   },
   {
-   "id": 172,
+   "id": 173,
    "name": "InteractivePointerSpotlightEffect",
    "words": [
     "interactive",
@@ -6404,7 +6423,7 @@
    "doc": "The pointer spotlight as an interactive effect class (Effector's `PointerSpotlightShaderEffect`): the light follows the pointer over the host, and the host captures the pointer while it is pressed. Its value is a [`PointerSpotlightShaderEffect`]: the radius, the strengths and the colour are set on it ([`set_value`](Self::set_value), [`update`](Self::update)), the pointer state is the class's."
   },
   {
-   "id": 173,
+   "id": 174,
    "name": "InteractiveReactiveGridEffect",
    "words": [
     "interactive",
@@ -6423,7 +6442,7 @@
    "doc": "The reactive grid as an interactive effect class (Effector's `ReactiveGridShaderEffect`): the halo follows the pointer over the host, and the host captures the pointer while it is pressed. Its value is a [`ReactiveGridShaderEffect`]."
   },
   {
-   "id": 174,
+   "id": 175,
    "name": "InteractiveWaterRippleEffect",
    "words": [
     "interactive",
@@ -6442,7 +6461,7 @@
    "doc": "The water ripple as an interactive effect class (Effector's `WaterRippleShaderEffect`): a press makes a strong ripple where it is and captures the pointer, a drag makes weaker ones along the way (at least about a tenth of the host apart), the release one more; the ripples age on the frames of the animation clock until they are gone ([`advance`](Self::advance)). Its value is a [`WaterRippleShaderEffect`]."
   },
   {
-   "id": 175,
+   "id": 176,
    "name": "InteropAutomationPeer",
    "words": [
     "interop",
@@ -6460,7 +6479,7 @@
    "doc": "Represents the root of a native control automation tree hosted by a [`NativeControlHost`](crate::NativeControlHost). This peer should be special-cased in the platform backend, as it represents a native control and hence none of the standard automation peer methods are applicable. Internal in the reference: for the framework and the platform backends."
   },
   {
-   "id": 176,
+   "id": 177,
    "name": "Italic",
    "words": [
     "italic"
@@ -6476,7 +6495,7 @@
    "doc": "`Italic` element - markup helper for indicating italicized content. Equivalent to a `Span` with the `FontStyle` property set to italic. Can contain other inline elements."
   },
   {
-   "id": 177,
+   "id": 178,
    "name": "ItemsControl",
    "words": [
     "items",
@@ -6500,7 +6519,7 @@
    "doc": "Displays a collection of items."
   },
   {
-   "id": 178,
+   "id": 179,
    "name": "ItemsControlAutomationPeer",
    "words": [
     "items",
@@ -6519,7 +6538,7 @@
    "doc": "An automation peer which represents an [`ItemsControl`]."
   },
   {
-   "id": 179,
+   "id": 180,
    "name": "ItemsPresenter",
    "words": [
     "items",
@@ -6538,7 +6557,7 @@
    "doc": "Presents items inside an [`ItemsControl`]."
   },
   {
-   "id": 180,
+   "id": 181,
    "name": "ItemsStackPanel",
    "words": [
     "items",
@@ -6561,7 +6580,7 @@
    "doc": "The virtualizing items panel of a list view (WinUI's `ItemsStackPanel`): FerroUI's [`VirtualizingStackPanel`] (orientation, cache length, recycling) with WinUI's visible and cache indexes, and the headers of a grouped source ([`GroupedItemsView`]) (#1258). An index stays the index of an item. The panel keeps the space of a header as an inset of the first item of its group, so the virtualization, the size estimates and the scrolling of the base apply unchanged, and realizes only the headers of the realized groups, and the pinned one."
   },
   {
-   "id": 181,
+   "id": 182,
    "name": "ItemsWrapGrid",
    "words": [
     "items",
@@ -6575,13 +6594,15 @@
    "control": true,
    "children": "children",
    "properties": [
+    "GroupHeaderPlacement",
+    "GroupPadding",
     "MaximumRowsOrColumns"
    ],
    "events": [],
-   "doc": "The items panel of a grid view (WinUI's `ItemsWrapGrid`): the items in cells of one size, in rows (`Orientation` horizontal) or columns, wrapping at the edge of the panel or after [`maximum_rows_or_columns`](Self::maximum_rows_or_columns) items. The cell is `ItemWidth` by `ItemHeight`, or the size of the first item where they are not set, as in WinUI. Recorded deviation (decision D5): it derives from FerroUI's [`WrapPanel`] and does not virtualize; WinUI's panel is a modern collection panel that realizes the visible items only. The grouping members (`GroupPadding`, `GroupHeaderPlacement`, `AreStickyGroupHeadersEnabled`) are not ported: FerroUI's items controls have no groups."
+   "doc": "The items panel of a grid view (WinUI's `ItemsWrapGrid`): the items in cells of one size, in rows (`Orientation` horizontal) or columns, wrapping at the edge of the panel or after [`maximum_rows_or_columns`](Self::maximum_rows_or_columns) items. The cell is `ItemWidth` by `ItemHeight`, or the size of the first item where they are not set, as in WinUI. With a grouped source ([`GroupedItemsView`]) each group starts a new line, with its [`GridViewHeaderItem`] above the group ([`GroupHeaderPlacement::Top`]) or beside it ([`GroupHeaderPlacement::Left`]) and [`group_padding`](Self::group_padding) around it (WinUI's `WrappingLayoutStrategyImpl`: the inline and the parallel header strategies). The headers are children of the panel after the items, and logical children of the list (#1424). Recorded deviations (decision D5): it derives from FerroUI's [`WrapPanel`] and does not virtualize; WinUI's panel is a modern collection panel that realizes the visible items only. So every group has its header. A header beside its items is as wide as the widest of them, where WinUI takes the size of the first. `AreStickyGroupHeadersEnabled` is not ported."
   },
   {
-   "id": 182,
+   "id": 183,
    "name": "KeyBinding",
    "words": [
     "key",
@@ -6602,7 +6623,7 @@
    "doc": "Binds a key gesture to a command."
   },
   {
-   "id": 183,
+   "id": 184,
    "name": "KeyFrame",
    "words": [
     "key",
@@ -6619,7 +6640,7 @@
    "doc": "Stores data regarding a specific key point and value in an animation."
   },
   {
-   "id": 184,
+   "id": 185,
    "name": "KeySpline",
    "words": [
     "key",
@@ -6636,7 +6657,7 @@
    "doc": "Determines how an animation is used based on a cubic bezier curve. X1 and X2 must be between 0.0 and 1.0, inclusive."
   },
   {
-   "id": 185,
+   "id": 186,
    "name": "Label",
    "words": [
     "label"
@@ -6654,7 +6675,7 @@
    "doc": "Label control. Focuses its `Target` when the label is activated: when it is clicked, or when its access key is pressed."
   },
   {
-   "id": 186,
+   "id": 187,
    "name": "LabelAutomationPeer",
    "words": [
     "label",
@@ -6672,7 +6693,7 @@
    "doc": "An automation peer which represents a [`Label`]."
   },
   {
-   "id": 187,
+   "id": 188,
    "name": "LayerWrapper",
    "words": [
     "layer",
@@ -6689,7 +6710,7 @@
    "doc": ""
   },
   {
-   "id": 188,
+   "id": 189,
    "name": "LayoutTestControl",
    "words": [
     "layout",
@@ -6707,7 +6728,7 @@
    "doc": "A decorator that records whether it has been measured and arranged, and whose measure and arrange can be replaced."
   },
   {
-   "id": 189,
+   "id": 190,
    "name": "LayoutTestRoot",
    "words": [
     "layout",
@@ -6725,7 +6746,7 @@
    "doc": "A test root that records whether it has been measured and arranged, and whose measure and arrange can be replaced."
   },
   {
-   "id": 190,
+   "id": 191,
    "name": "LayoutTransformControl",
    "words": [
     "layout",
@@ -6746,7 +6767,7 @@
    "doc": "Control that implements support for transformations as if applied by a layout transform."
   },
   {
-   "id": 191,
+   "id": 192,
    "name": "Layoutable",
    "words": [
     "layoutable"
@@ -6774,7 +6795,7 @@
    "doc": "Implements layout-related functionality for a control."
   },
   {
-   "id": 192,
+   "id": 193,
    "name": "LightDismissOverlayLayer",
    "words": [
     "light",
@@ -6793,7 +6814,7 @@
    "doc": "A layer that is used to dismiss a popup when the user clicks outside (internal upstream)."
   },
   {
-   "id": 193,
+   "id": 194,
    "name": "Line",
    "words": [
     "line"
@@ -6812,7 +6833,7 @@
    "doc": "Represents a straight line between two points."
   },
   {
-   "id": 194,
+   "id": 195,
    "name": "LineBreak",
    "words": [
     "line",
@@ -6829,7 +6850,7 @@
    "doc": "Information about a potential line break position"
   },
   {
-   "id": 195,
+   "id": 196,
    "name": "LineGeometry",
    "words": [
     "line",
@@ -6849,7 +6870,7 @@
    "doc": "Represents the geometry of a line."
   },
   {
-   "id": 196,
+   "id": 197,
    "name": "LineSegment",
    "words": [
     "line",
@@ -6868,7 +6889,7 @@
    "doc": "A line segment of a path figure."
   },
   {
-   "id": 197,
+   "id": 198,
    "name": "LinearColorKeyFrame",
    "words": [
     "linear",
@@ -6887,7 +6908,7 @@
    "doc": "Interpolates linearly from the value before it."
   },
   {
-   "id": 198,
+   "id": 199,
    "name": "LinearDoubleKeyFrame",
    "words": [
     "linear",
@@ -6906,7 +6927,7 @@
    "doc": "Interpolates linearly from the value before it."
   },
   {
-   "id": 199,
+   "id": 200,
    "name": "LinearGradientBrush",
    "words": [
     "linear",
@@ -6927,7 +6948,7 @@
    "doc": "A brush that draws with a linear gradient."
   },
   {
-   "id": 200,
+   "id": 201,
    "name": "LinearPointKeyFrame",
    "words": [
     "linear",
@@ -6946,7 +6967,7 @@
    "doc": "Interpolates linearly from the value before it."
   },
   {
-   "id": 201,
+   "id": 202,
    "name": "ListBox",
    "words": [
     "list",
@@ -6965,7 +6986,7 @@
    "doc": "An [`ItemsControl`] in which individual items can be selected."
   },
   {
-   "id": 202,
+   "id": 203,
    "name": "ListBoxAutomationPeer",
    "words": [
     "list",
@@ -6984,7 +7005,7 @@
    "doc": "An automation peer which represents a [`ListBox`]."
   },
   {
-   "id": 203,
+   "id": 204,
    "name": "ListBoxItem",
    "words": [
     "list",
@@ -7004,7 +7025,7 @@
    "doc": "A selectable item in a `ListBox`."
   },
   {
-   "id": 204,
+   "id": 205,
    "name": "ListItemAutomationPeer",
    "words": [
     "list",
@@ -7023,7 +7044,7 @@
    "doc": "An automation peer which represents a selectable item of a list (a `ListBoxItem`, a `TabItem`)."
   },
   {
-   "id": 205,
+   "id": 206,
    "name": "ListView",
    "words": [
     "list",
@@ -7040,7 +7061,7 @@
    "doc": "A vertical list of items (WinUI's `ListView`): a [`ListViewBase`] whose items panel is an [`ItemsStackPanel`] and whose containers are [`ListViewItem`]s."
   },
   {
-   "id": 206,
+   "id": 207,
    "name": "ListViewAutomationPeer",
    "words": [
     "list",
@@ -7059,7 +7080,7 @@
    "doc": "The automation peer of a [`ListView`]."
   },
   {
-   "id": 207,
+   "id": 208,
    "name": "ListViewBase",
    "words": [
     "list",
@@ -7094,7 +7115,7 @@
    "doc": "The base of [`ListView`](super::ListView) and `GridView` (WinUI's `ListViewBase`): a selecting items control with WinUI's selection modes, item clicks, header and footer, selected ranges and container events. [`selection_mode`](Self::selection_mode) is WinUI's [`ListViewSelectionMode`], a property of its own that sets the selection flags of the base (`None` keeps the input from selecting). With [`is_item_click_enabled`](Self::is_item_click_enabled) a tap or Enter on an item raises [`item_click`](Self::item_click) (WinUI's `OnItemClick`); with `None` it is the only effect. The template part is `ScrollViewer`."
   },
   {
-   "id": 208,
+   "id": 209,
    "name": "ListViewBaseAutomationPeer",
    "words": [
     "list",
@@ -7114,7 +7135,7 @@
    "doc": "The automation peer of a [`ListViewBase`]: a List with the Selection pattern."
   },
   {
-   "id": 209,
+   "id": 210,
    "name": "ListViewBaseHeaderItem",
    "words": [
     "list",
@@ -7134,7 +7155,7 @@
    "doc": "The base of the headers of the groups of a list view (WinUI's `ListViewBaseHeaderItem`)."
   },
   {
-   "id": 210,
+   "id": 211,
    "name": "ListViewBaseItem",
    "words": [
     "list",
@@ -7153,7 +7174,7 @@
    "doc": "The base of the items of a list view (WinUI's `ListViewBaseItem : SelectorItem`). FerroUI's `SelectorItem` is [`ListBoxItem`]; deriving from it keeps the keyed list item themes of the WinUI theme applicable and reuses its selection (decision D4)."
   },
   {
-   "id": 211,
+   "id": 212,
    "name": "ListViewBaseItemAutomationPeer",
    "words": [
     "list",
@@ -7174,7 +7195,7 @@
    "doc": "The automation peer of a [`ListViewBaseItem`]: a ListItem with SelectionItem, and Invoke while its list raises item clicks."
   },
   {
-   "id": 212,
+   "id": 213,
    "name": "ListViewHeaderItem",
    "words": [
     "list",
@@ -7193,7 +7214,7 @@
    "doc": "The header of a group of a [`ListView`] (WinUI's `ListViewHeaderItem`). It is not an item: it has no index and cannot be selected."
   },
   {
-   "id": 213,
+   "id": 214,
    "name": "ListViewItem",
    "words": [
     "list",
@@ -7211,7 +7232,7 @@
    "doc": "An item of a [`ListView`] (WinUI's `ListViewItem`)."
   },
   {
-   "id": 214,
+   "id": 215,
    "name": "ListViewItemAutomationPeer",
    "words": [
     "list",
@@ -7231,7 +7252,7 @@
    "doc": "The automation peer of a [`ListViewItem`]."
   },
   {
-   "id": 215,
+   "id": 216,
    "name": "MaskedTextBox",
    "words": [
     "masked",
@@ -7259,7 +7280,7 @@
    "doc": "A text box that restricts its input with a mask."
   },
   {
-   "id": 216,
+   "id": 217,
    "name": "MatrixTransform",
    "words": [
     "matrix",
@@ -7278,7 +7299,7 @@
    "doc": "Transforms a visual according to a [`Matrix`]."
   },
   {
-   "id": 217,
+   "id": 218,
    "name": "Menu",
    "words": [
     "menu"
@@ -7294,7 +7315,7 @@
    "doc": "A top-level menu control."
   },
   {
-   "id": 218,
+   "id": 219,
    "name": "MenuBase",
    "words": [
     "menu",
@@ -7316,7 +7337,7 @@
    "doc": "Base class for menu controls."
   },
   {
-   "id": 219,
+   "id": 220,
    "name": "MenuFlyout",
    "words": [
     "menu",
@@ -7338,7 +7359,7 @@
    "doc": "A flyout that displays a menu."
   },
   {
-   "id": 220,
+   "id": 221,
    "name": "MenuFlyoutPresenter",
    "words": [
     "menu",
@@ -7356,7 +7377,7 @@
    "doc": "The control that hosts the items of a menu flyout."
   },
   {
-   "id": 221,
+   "id": 222,
    "name": "MenuItem",
    "words": [
     "menu",
@@ -7389,7 +7410,7 @@
    "doc": "A menu item control."
   },
   {
-   "id": 222,
+   "id": 223,
    "name": "MenuItemAutomationPeer",
    "words": [
     "menu",
@@ -7408,7 +7429,7 @@
    "doc": "An automation peer which represents a [`MenuItem`]."
   },
   {
-   "id": 223,
+   "id": 224,
    "name": "MicaBackdrop",
    "words": [
     "mica",
@@ -7427,7 +7448,7 @@
    "doc": "The Mica backdrop of a window (WinUI `Microsoft.UI.Xaml.Media.MicaBackdrop`): a [`MicaController`] of its [`kind`](Self::kind) for each target."
   },
   {
-   "id": 224,
+   "id": 225,
    "name": "MockHostParent",
    "words": [
     "mock",
@@ -7445,7 +7466,7 @@
    "doc": ""
   },
   {
-   "id": 225,
+   "id": 226,
    "name": "MockParent",
    "words": [
     "mock",
@@ -7462,7 +7483,7 @@
    "doc": ""
   },
   {
-   "id": 226,
+   "id": 227,
    "name": "MultiPage",
    "words": [
     "multi",
@@ -7483,7 +7504,7 @@
    "doc": "Abstract base class for pages that host a collection of child pages."
   },
   {
-   "id": 227,
+   "id": 228,
    "name": "NativeControlHost",
    "words": [
     "native",
@@ -7501,7 +7522,7 @@
    "doc": "Hosts a native control of the platform inside the visual tree: the native control is created for the top-level the host is attached to and follows the bounds and the visibility of the host."
   },
   {
-   "id": 228,
+   "id": 229,
    "name": "NativeControlHostPeer",
    "words": [
     "native",
@@ -7520,7 +7541,7 @@
    "doc": "An automation peer which represents a [`NativeControlHost`] (internal in the reference)."
   },
   {
-   "id": 229,
+   "id": 230,
    "name": "NativeMenu",
    "words": [
     "native",
@@ -7539,7 +7560,7 @@
    "doc": "A menu that is shown by the platform: the menu of a window or of the application, the menu of a tray icon or of the dock."
   },
   {
-   "id": 230,
+   "id": 231,
    "name": "NativeMenuBar",
    "words": [
     "native",
@@ -7557,7 +7578,7 @@
    "doc": "Shows the native menu of the top-level it is in when the platform does not export the menu."
   },
   {
-   "id": 231,
+   "id": 232,
    "name": "NativeMenuBarAutomationPeer",
    "words": [
     "native",
@@ -7577,7 +7598,7 @@
    "doc": "An automation peer which represents a [`NativeMenuBar`]."
   },
   {
-   "id": 232,
+   "id": 233,
    "name": "NativeMenuBarPresenter",
    "words": [
     "native",
@@ -7596,7 +7617,7 @@
    "doc": ""
   },
   {
-   "id": 233,
+   "id": 234,
    "name": "NativeMenuItem",
    "words": [
     "native",
@@ -7626,7 +7647,7 @@
    "doc": "An item of a [`NativeMenu`]."
   },
   {
-   "id": 234,
+   "id": 235,
    "name": "NativeMenuItemBase",
    "words": [
     "native",
@@ -7647,7 +7668,7 @@
    "doc": "The base class of the items of a [`NativeMenu`]."
   },
   {
-   "id": 235,
+   "id": 236,
    "name": "NativeMenuItemPresenter",
    "words": [
     "native",
@@ -7666,7 +7687,7 @@
    "doc": ""
   },
   {
-   "id": 236,
+   "id": 237,
    "name": "NativeMenuItemSeparator",
    "words": [
     "native",
@@ -7685,7 +7706,7 @@
    "doc": "A separator between the items of a native menu."
   },
   {
-   "id": 237,
+   "id": 238,
    "name": "NavigationPage",
    "words": [
     "navigation",
@@ -7722,7 +7743,7 @@
    "doc": "A navigation page that supports simple stack-based navigation."
   },
   {
-   "id": 238,
+   "id": 239,
    "name": "NavigationPageAutomationPeer",
    "words": [
     "navigation",
@@ -7741,7 +7762,7 @@
    "doc": "An automation peer which represents a [`NavigationPage`]."
   },
   {
-   "id": 239,
+   "id": 240,
    "name": "NavigationView",
    "words": [
     "navigation",
@@ -7791,7 +7812,7 @@
    "doc": "A navigation pane with menu items and a content area (WinUI's `NavigationView`). The pane is at the left (`Left`, `LeftCompact`, `LeftMinimal`, or chosen by the width in `Auto`: the display modes `Expanded`, `Compact` and `Minimal`) or at the top (`Top`). The template of the WinUI theme is WinUI's (`NavigationView.xaml`): the control finds WinUI's parts (`RootSplitView`, `TogglePaneButton`, `NavigationViewBackButton`, `NavigationViewCloseButton`, `PaneAutoSuggestButton`, `PaneTitleTextBlock`, `PaneTitleHolder`, `PaneTitlePresenter`, `PaneTitleOnTopPane`, `MenuItemsHost`, `FooterMenuItemsHost`, `TopNavMenuItemsHost`, `TopFooterMenuItemsHost`, the content controls of the pane header, custom content, footer and auto suggest box of the left and the top pane, `ContentLeftPadding`), sets their contents and the values of [`template_settings`](Self::template_settings) as WinUI's code does, and sets WinUI's visual states as pseudo-classes (`:compact`, `:expanded`, `:minimal`, `:top-navigation-minimal`, `:minimal-with-back-button`, `:toggle-pane-button-visible`, `:header-collapsed`, `:auto-suggest-box-collapsed`, `:closed-compact`, `:list-size-compact`, `:pane-not-overlaying`, `:back-button-collapsed`, `:pane-collapsed`, and `:back-button-row-visible` for the row WinUI sizes in code). The Fluent and Simple themes have no template. The menu items are realized in stack panels, not in `ItemsRepeater`s with a hierarchical `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md, section 10.4): the overflow of the top pane, the animations of the pane, the shadow of the pane, the padding of the title bar, the shoulder navigation and the selectors of templates and styles."
   },
   {
-   "id": 240,
+   "id": 241,
    "name": "NavigationViewAutomationPeer",
    "words": [
     "navigation",
@@ -7810,7 +7831,7 @@
    "doc": "The automation peer of a [`NavigationView`]: the selection pattern over its realized containers, as WinUI's peer. The peer holds its owner weakly."
   },
   {
-   "id": 241,
+   "id": 242,
    "name": "NavigationViewItem",
    "words": [
     "navigation",
@@ -7838,7 +7859,7 @@
    "doc": "A selectable item of a [`NavigationView`](crate::NavigationView), with an icon, an info badge and child items (WinUI's `NavigationViewItem`). The template of the WinUI theme draws the item as WinUI's item presenter does (`NavigationViewItemPresenter` and its styles for the left and the top pane, folded into the template of the item). The item sets the states of WinUI as pseudo-classes: `:selected`, `:pressed`, `:on-top-navigation-primary`, `:icon-collapsed`, `:icon-only`, `:content-only`, `:info-badge-collapsed`, `:chevron-visible-open`, `:chevron-visible-closed` and `:closed-compact-and-top-level-item`. The child items are hosted in the template part `NavigationViewItemMenuItemsHost`, below the item, or in the popup `ChildrenFlyout` when the item is in the top pane or at the top level of a closed compact pane, as WinUI moves its repeater into its flyout. The Fluent and Simple themes have no template. The children are realized in a stack panel, not an `ItemsRepeater` (follow-up F1); the containers of data items are reused across edits of the collections."
   },
   {
-   "id": 242,
+   "id": 243,
    "name": "NavigationViewItemAutomationPeer",
    "words": [
     "navigation",
@@ -7858,7 +7879,7 @@
    "doc": "The automation peer of a [`NavigationViewItem`]: a list item (a tab item in the top pane) with the selection item pattern and, for an item with children, the expand and collapse pattern; like WinUI's peer at the pin it has no invoke pattern."
   },
   {
-   "id": 243,
+   "id": 244,
    "name": "NavigationViewItemBase",
    "words": [
     "navigation",
@@ -7879,7 +7900,7 @@
    "doc": "The base of the items of a [`NavigationView`](crate::NavigationView): their content and selection (WinUI's `NavigationViewItemBase`). As in WinUI, it cannot be created in markup."
   },
   {
-   "id": 244,
+   "id": 245,
    "name": "NavigationViewItemHeader",
    "words": [
     "navigation",
@@ -7898,7 +7919,7 @@
    "doc": "A heading of a group of items of a [`NavigationView`](crate::NavigationView) (WinUI's `NavigationViewItemHeader`). It is not focusable or enabled, as WinUI's style sets. The control sets WinUI's states as pseudo-classes: `:header-text-collapsed` (a top level header of a closed compact pane) and `:top-mode` (the top pane). The template of the WinUI theme presents the content in the text block `HeaderText`; the part `NavigationViewItemHeaderRootGrid` is indented by the depth of the header."
   },
   {
-   "id": 245,
+   "id": 246,
    "name": "NavigationViewItemSeparator",
    "words": [
     "navigation",
@@ -7917,7 +7938,7 @@
    "doc": "A line between items of a [`NavigationView`](crate::NavigationView) (WinUI's `NavigationViewItemSeparator`). It is not focusable or enabled, as WinUI's style sets. The control sets WinUI's states as pseudo-classes: `:horizontal-line-compact` (a closed compact pane) and `:vertical-line` (the top pane); the part `NavigationViewItemSeparatorRootGrid` is indented by the depth of the separator."
   },
   {
-   "id": 246,
+   "id": 247,
    "name": "NavigationViewTemplateSettings",
    "words": [
     "navigation",
@@ -7947,7 +7968,7 @@
    "doc": "The values the template of a [`NavigationView`](crate::NavigationView) binds to (`TemplateSettings`), which the navigation view sets. Each navigation view has its own. WinUI's `Visibility` values are `bool`s here (`true` is `Visible`), as the `IsVisible` they are bound to."
   },
   {
-   "id": 247,
+   "id": 248,
    "name": "NoneAutomationPeer",
    "words": [
     "none",
@@ -7965,7 +7986,7 @@
    "doc": "An automation peer which represents an element that is exposed to automation as non- interactive or as not contributing to the logical structure of the application."
   },
   {
-   "id": 248,
+   "id": 249,
    "name": "NotificationCard",
    "words": [
     "notification",
@@ -7989,7 +8010,7 @@
    "doc": "Control that represents and displays a notification."
   },
   {
-   "id": 249,
+   "id": 250,
    "name": "NumberBox",
    "words": [
     "number",
@@ -8023,7 +8044,7 @@
    "doc": "A text box for numbers (WinUI's `NumberBox`): a value of type `f64`, NaN when the box is empty, with a range, steps, wrapping, expressions and spin buttons. The text is committed when the box loses the focus, on Enter and before a step: it is parsed with the [`NumberFormatter`](Self::number_formatter_property), or evaluated as an expression (`utils::number_expression`) when [`AcceptsExpression`](Self::accepts_expression_property) is set. Up and Down (and the spin buttons and the mouse wheel) step by `SmallChange`, PageUp and PageDown by `LargeChange`; Escape restores the text of the value. The template is the control theme of the WinUI theme (`Controls/NumberBox.xaml`, from WinUI's `NumberBox.xaml`), with WinUI's parts: the text box `InputBox`, the spin buttons `UpSpinButton` and `DownSpinButton`, the popup `UpDownPopup` with `PopupUpSpinButton` and `PopupDownSpinButton`, and `HeaderContentPresenter`. The control sets WinUI's visual states as pseudo-classes: `:spinbuttonsvisible` and `:spinbuttonspopup` (SpinButtonStates; neither is SpinButtonsCollapsed), `:upspinbuttondisabled` and `:downspinbuttondisabled`. The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Missing (docs/porting/winui-controls.md, Input): `InputScope`, `SelectionFlyout`, `SelectionHighlightColor`, `TextReadingOrder` and `PreventKeyboardDisplayOnProgrammaticFocus`."
   },
   {
-   "id": 250,
+   "id": 251,
    "name": "NumberBoxAutomationPeer",
    "words": [
     "number",
@@ -8042,7 +8063,7 @@
    "doc": "An automation peer which represents a [`NumberBox`]: a spinner with the range value pattern, named by its header when it has no name. Deviation (docs/porting/winui-controls.md, Input): WinUI's peer raises the change of `Value` only; this one also raises the changes of `Minimum`, `Maximum`, `SmallChange` and `LargeChange` (the identifiers of W1), as the range peers of the framework do."
   },
   {
-   "id": 251,
+   "id": 252,
    "name": "NumericUpDown",
    "words": [
     "numeric",
@@ -8087,7 +8108,7 @@
    "doc": "Control that represents a text box with button spinners that allow incrementing and decrementing numeric values."
   },
   {
-   "id": 252,
+   "id": 253,
    "name": "NumericUpDownAutomationPeer",
    "words": [
     "numeric",
@@ -8107,7 +8128,7 @@
    "doc": "An automation peer which represents a [`NumericUpDown`]."
   },
   {
-   "id": 253,
+   "id": 254,
    "name": "ObjectAnimationUsingKeyFrames",
    "words": [
     "object",
@@ -8127,7 +8148,7 @@
    "doc": "Sets a property of any type to the values of its `KeyFrames` (WinUI's `ObjectAnimationUsingKeyFrames`; every key frame is discrete)."
   },
   {
-   "id": 254,
+   "id": 255,
    "name": "ObjectKeyFrame",
    "words": [
     "object",
@@ -8148,7 +8169,7 @@
    "doc": "The base class of the key frames of an object animation (WinUI's `ObjectKeyFrame`): a `Value` of any type, set at a `KeyTime`. A value written as text in markup (`Value=\"False\"`) is converted to the type of the animated property when the animation begins."
   },
   {
-   "id": 255,
+   "id": 256,
    "name": "OffscreenTopLevel",
    "words": [
     "offscreen",
@@ -8166,7 +8187,7 @@
    "doc": "A top-level over an offscreen implementation: laid out and rendered without a window of the platform."
   },
   {
-   "id": 256,
+   "id": 257,
    "name": "OverlayLayer",
    "words": [
     "overlay",
@@ -8183,7 +8204,7 @@
    "doc": "Represents a surface for showing overlays. Overlays are displayed on top of other elements, but behind popups."
   },
   {
-   "id": 257,
+   "id": 258,
    "name": "OverlayPopupHost",
    "words": [
     "overlay",
@@ -8203,7 +8224,7 @@
    "doc": "The popup host that shows a popup inside its top-level, on the popup overlay layer."
   },
   {
-   "id": 258,
+   "id": 259,
    "name": "Page",
    "words": [
     "page"
@@ -8230,7 +8251,7 @@
    "doc": "Abstract base class for all page types."
   },
   {
-   "id": 259,
+   "id": 260,
    "name": "PageNavigationHost",
    "words": [
     "page",
@@ -8250,7 +8271,7 @@
    "doc": "Hosts a page as the root of a top-level: forwards the safe-area padding and the system back navigation of the top-level to the page."
   },
   {
-   "id": 260,
+   "id": 261,
    "name": "PageStackEntry",
    "words": [
     "page",
@@ -8268,7 +8289,7 @@
    "doc": "An entry of the journal of a [`Frame`]: the type of a page and the parameter of its navigation. The parameter is kept as it is (by identity), as in WinUI. Missing (docs/porting/winui-controls.md, section 10.4): `NavigationTransitionInfo`, FerroUI's frame has no navigation transitions."
   },
   {
-   "id": 261,
+   "id": 262,
    "name": "PagerControl",
    "words": [
     "pager",
@@ -8306,7 +8327,7 @@
    "doc": "A control to move through the pages of a paged content (WinUI's `PagerControl`): buttons to the first, previous, next and last page around a combo box of the page numbers, a number box to type one, or a button for each page (`DisplayMode`). `NumberOfPages` is -1 while the number of pages is not known; `SelectedPageIndex` is the index of the page, from 0, kept in the range of the pages, and its changes raise `SelectedIndexChanged`. The template is the control theme of the WinUI theme (`Controls/PagerControl.xaml`, from WinUI's `PagerControl.xaml`), with WinUI's parts `FirstPageButton`, `PreviousPageButton`, `NextPageButton`, `LastPageButton`, `ComboBoxDisplay`, `NumberBoxDisplay`, `NumberPanelItemsRepeater` and `NumberPanelCurrentPageIndicator`. The control sets WinUI's visual states as pseudo-classes: `:numberbox`, `:combobox` and `:numberpanel` (the display mode), `:infinite` (InfiniteItems), and for each button `:<button>collapsed`, `:<button>hidden` and `:<button>disabled` (`:firstcollapsed`, `:nexthidden`, ...). The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Differences (docs/porting/winui-controls.md, G2): the number panel is an items control whose panel is a horizontal stack panel, where WinUI has an `ItemsRepeater` with a `StackLayout` (`ferroui-controls` cannot depend on the repeater crate); the indicator of the current page moves without WinUI's `RepositionThemeTransition`."
   },
   {
-   "id": 262,
+   "id": 263,
    "name": "PagerControlAutomationPeer",
    "words": [
     "pager",
@@ -8325,7 +8346,7 @@
    "doc": "The automation peer of a [`PagerControl`]: a menu with the selection pattern, as in WinUI. The selection is empty, as WinUI's `GetSelection` returns it: the number panel mixes buttons and ellipses, so the index of an element is not the index of a page. A change of the selected page invalidates the selection pattern (WinUI's `SelectionPatternOnInvalidated`), which FerroUI's automation reports as a change of its `Selection` property."
   },
   {
-   "id": 263,
+   "id": 264,
    "name": "PagerControlTemplateSettings",
    "words": [
     "pager",
@@ -8347,7 +8368,7 @@
    "doc": "The values the template of a [`PagerControl`](crate::PagerControl) binds to: the page numbers of its combo box (`Pages`, 1 to the number of pages) and the buttons and ellipses of its number panel (`NumberPanelItems`). Each pager has its own; the pager fills them."
   },
   {
-   "id": 264,
+   "id": 265,
    "name": "Painted",
    "words": [
     "painted"
@@ -8363,7 +8384,7 @@
    "doc": ""
   },
   {
-   "id": 265,
+   "id": 266,
    "name": "Panel",
    "words": [
     "panel"
@@ -8381,7 +8402,7 @@
    "doc": "Base class for controls that can contain multiple children. Controls can be added to a panel by adding them to its `children` collection. All children are layed out to fill the panel."
   },
   {
-   "id": 266,
+   "id": 267,
    "name": "Paragraph",
    "words": [
     "paragraph"
@@ -8405,7 +8426,7 @@
    "doc": "A paragraph of structured inline content, including styled spans and embedded controls."
   },
   {
-   "id": 267,
+   "id": 268,
    "name": "Path",
    "words": [
     "path"
@@ -8423,7 +8444,7 @@
    "doc": "Draws a [`Geometry`]."
   },
   {
-   "id": 268,
+   "id": 269,
    "name": "PathFigure",
    "words": [
     "path",
@@ -8445,7 +8466,7 @@
    "doc": "Represents a subsection of a geometry: a single connected series of segments."
   },
   {
-   "id": 269,
+   "id": 270,
    "name": "PathGeometry",
    "words": [
     "path",
@@ -8465,7 +8486,7 @@
    "doc": "Represents a complex shape that may be composed of arcs, curves, ellipses, lines, and rectangles."
   },
   {
-   "id": 270,
+   "id": 271,
    "name": "PathIcon",
    "words": [
     "path",
@@ -8484,7 +8505,7 @@
    "doc": "Represents an icon that uses a vector path as its content."
   },
   {
-   "id": 271,
+   "id": 272,
    "name": "PathIconSource",
    "words": [
     "path",
@@ -8504,7 +8525,7 @@
    "doc": "The description of a [`PathIcon`] (WinUI's `PathIconSource`): the icons are the path icons of FerroUI."
   },
   {
-   "id": 272,
+   "id": 273,
    "name": "PathSegment",
    "words": [
     "path",
@@ -8523,7 +8544,7 @@
    "doc": "Represents a segment of a [`PathFigure`](crate::media::PathFigure)."
   },
   {
-   "id": 273,
+   "id": 274,
    "name": "Pen",
    "words": [
     "pen"
@@ -8546,7 +8567,7 @@
    "doc": "Describes how a stroke is drawn."
   },
   {
-   "id": 274,
+   "id": 275,
    "name": "PersonPicture",
    "words": [
     "person",
@@ -8575,7 +8596,7 @@
    "doc": "A picture of a person or a group (WinUI's `PersonPicture`): the profile picture, else the initials of the display name or of the contact, else the glyph of a contact, in a circle, with a badge (a number, a glyph or an image) at its top right. The template is the control theme of the WinUI theme (`Controls/PersonPicture.xaml`, from WinUI's `PersonPicture.xaml`), with WinUI's parts `InitialsTextBlock`, `BadgeNumberTextBlock`, `BadgeGlyphIcon`, `BadgingEllipse` and `BadgingBackgroundEllipse`. The control sets WinUI's visual states as pseudo-classes: `:photo`, `:nophotoorinitials` and `:group` (CommonStates; Initials sets none), `:badge` and `:badgeimage` (BadgeStates). It keeps itself a circle: a change of its size sets its width and height to the smaller of them, as WinUI's does. The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Differences (docs/porting/winui-controls.md, section 10.10): the contact is FerroUI's [`Contact`], whose pictures are images, so the picture of a contact is shown at once (WinUI opens and decodes a stream reference asynchronously, at the size of the control); the pictures are image brush sources (a bitmap), the type of the image brush that paints them."
   },
   {
-   "id": 275,
+   "id": 276,
    "name": "PersonPictureAutomationPeer",
    "words": [
     "person",
@@ -8594,7 +8615,7 @@
    "doc": "The automation peer of a [`PersonPicture`]: text, whose name is the automation name the picture sets (the person and the badge), as in WinUI."
   },
   {
-   "id": 276,
+   "id": 277,
    "name": "PersonPictureTemplateSettings",
    "words": [
     "person",
@@ -8616,7 +8637,7 @@
    "doc": "The values the template of a [`PersonPicture`](crate::PersonPicture) binds to: the initials it shows and the brush of its picture. Each picture has its own; the picture sets them."
   },
   {
-   "id": 277,
+   "id": 278,
    "name": "PickerPresenterBase",
    "words": [
     "picker",
@@ -8634,7 +8655,7 @@
    "doc": "Defines the base class for the date and time picker presenters."
   },
   {
-   "id": 278,
+   "id": 279,
    "name": "PinchGestureRecognizer",
    "words": [
     "pinch",
@@ -8652,7 +8673,7 @@
    "doc": "Recognizes the pinch gesture: two contacts moving closer together or further apart, and rotating around each other."
   },
   {
-   "id": 279,
+   "id": 280,
    "name": "PipsPager",
    "words": [
     "pips",
@@ -8681,7 +8702,7 @@
    "doc": "Represents a control that lets the user navigate through a paginated collection using a set of pips."
   },
   {
-   "id": 280,
+   "id": 281,
    "name": "PipsPagerAutomationPeer",
    "words": [
     "pips",
@@ -8700,7 +8721,7 @@
    "doc": "An automation peer for [`PipsPager`]."
   },
   {
-   "id": 281,
+   "id": 282,
    "name": "PipsPagerTemplateSettings",
    "words": [
     "pips",
@@ -8721,7 +8742,7 @@
    "doc": "Provides calculated values for use with the control theme or template of the [`PipsPager`](crate::PipsPager)."
   },
   {
-   "id": 282,
+   "id": 283,
    "name": "Pivot",
    "words": [
     "pivot"
@@ -8749,7 +8770,7 @@
    "doc": "A control that shows one of its items at a time, under a row of headers that the user taps, pans or flicks through (WinUI's `Pivot`). The items are [`PivotItem`]s (other items get one as their container). The pivot keeps one item selected while it has items ([`SelectionMode::ALWAYS_SELECTED`]); setting [`selected_index`](SelectingItemsControl::selected_index) flies the current item out and the new one in, a pan of the content moves to the neighbour past a quarter of the width. With [`is_header_items_carousel_enabled`](Self::is_header_items_carousel_enabled) (the default) the headers and the items wrap around. [`is_locked`](Self::is_locked) keeps the selected item. The structure is WinUI's (decision D8): the items are in a `ScrollViewer` (template part `ScrollViewer`) whose content is a [`PivotPanel`] (`Panel`) a thousand sections wide, kept near its middle by the pivot's state machine; the panel holds the `PivotLayoutElement` with the headers and the `PivotItemPresenter`. During a pan the layout element stays in the viewport and the items follow the content through expression animations of their `Translation`, on the compositor (WinUI's secondary content relationships)."
   },
   {
-   "id": 283,
+   "id": 284,
    "name": "PivotAutomationPeer",
    "words": [
     "pivot",
@@ -8767,7 +8788,7 @@
    "doc": "The automation peer of a [`Pivot`]: a Tab with the Selection pattern."
   },
   {
-   "id": 284,
+   "id": 285,
    "name": "PivotHeaderItem",
    "words": [
     "pivot",
@@ -8785,7 +8806,7 @@
    "doc": "A header of a [`Pivot`] (WinUI's `PivotHeaderItem`): the pivot makes one per item, its content bound to the item's header. Its selection state is WinUI's: `Disabled`, `Selected`, `SelectedPointerOver`, `SelectedPressed`, `Unselected`, `UnselectedPointerOver`, `UnselectedPressed` and `UnselectedLocked` (the pivot is locked). The states are shown through the pseudo-classes `:selected`, `:pressed` and `:locked` (with `:pointerover` and `:disabled`), as the other WinUI controls of the theme (decision D2), and a template with visual state groups gets the state by name through the visual state manager."
   },
   {
-   "id": 285,
+   "id": 286,
    "name": "PivotHeaderPanel",
    "words": [
     "pivot",
@@ -8803,7 +8824,7 @@
    "doc": "The panel of the headers of a [`Pivot`] (WinUI's `PivotHeaderPanel`, a `Canvas`): the headers side by side, starting at the header of the selected item at the current offset, so that the selected header comes first and the headers before it follow at the end. The pivot moves the panel with the parallax of its scroll viewer."
   },
   {
-   "id": 286,
+   "id": 287,
    "name": "PivotItem",
    "words": [
     "pivot",
@@ -8822,7 +8843,7 @@
    "doc": "An item of a [`Pivot`] (WinUI's `PivotItem`): a content control with the [`header`](Self::header) the pivot shows for it. The pivot shows one item at a time (and its neighbours while it is panned): the others are transparent, not hit testable, and the root of their template is collapsed so that tabbing skips them (WinUI's `SetContentVisibility`)."
   },
   {
-   "id": 287,
+   "id": 288,
    "name": "PivotItemAutomationPeer",
    "words": [
     "pivot",
@@ -8841,7 +8862,7 @@
    "doc": "The automation peer of a [`PivotItem`]: a TabItem with the SelectionItem pattern."
   },
   {
-   "id": 288,
+   "id": 289,
    "name": "PivotPanel",
    "words": [
     "pivot",
@@ -8861,7 +8882,7 @@
    "doc": "The panel inside the scroll viewer of a [`Pivot`] (WinUI's `PivotPanel`): as wide as [`PIVOT_PANEL_MULTIPLIER`] sections while the headers wrap, with a regular snap point at every section, so that the scroll viewer pans one section at a time. Its child named `PivotLayoutElement` (the headers and the items) is measured and arranged one section wide. WinUI arranges it at the start of the panel and keeps it in the viewport with a secondary content relationship of the scroll viewer; here it is arranged at the section the viewport rests on (the pivot's section offset), and the pivot's composition expression keeps it in place during a pan (a recorded deviation: layout and hit testing stay where the content is shown at rest)."
   },
   {
-   "id": 289,
+   "id": 290,
    "name": "PlatformGeometry",
    "words": [
     "platform",
@@ -8878,7 +8899,7 @@
    "doc": "A geometry that wraps a platform implementation."
   },
   {
-   "id": 290,
+   "id": 291,
    "name": "PointAnimation",
    "words": [
     "point",
@@ -8901,7 +8922,7 @@
    "doc": "Animates a [`Point`] property (WinUI's `PointAnimation`). It animates from `From` (or the value the property has when it begins) to `To`, or by `By` from the start; with neither `To` nor `By` it animates back to the value of the property without animations. `EasingFunction` eases the progress. `EnableDependentAnimation` is accepted and has no effect: every property is animated on the UI thread."
   },
   {
-   "id": 291,
+   "id": 292,
    "name": "PointAnimationUsingKeyFrames",
    "words": [
     "point",
@@ -8923,7 +8944,7 @@
    "doc": "Animates a `Point` property through its `KeyFrames` (WinUI's `PointAnimationUsingKeyFrames`). Before the first key frame the value goes from the value the property has when the animation begins; after the last it holds the last value. With an automatic `Duration` the animation lasts until its last key time. `EnableDependentAnimation` is accepted and has no effect."
   },
   {
-   "id": 292,
+   "id": 293,
    "name": "PointKeyFrame",
    "words": [
     "point",
@@ -8944,7 +8965,7 @@
    "doc": "The base class of the key frames of a `Point` property (WinUI's `PointKeyFrame`): a `Value` reached at a `KeyTime`."
   },
   {
-   "id": 293,
+   "id": 294,
    "name": "PolyBezierSegment",
    "words": [
     "poly",
@@ -8964,7 +8985,7 @@
    "doc": "Represents one or more cubic Bezier curves: every three points define the two control points and the end point of one curve."
   },
   {
-   "id": 294,
+   "id": 295,
    "name": "PolyLineSegment",
    "words": [
     "poly",
@@ -8984,7 +9005,7 @@
    "doc": "Represents a set of line segments defined by a points collection with each point specifying the end point of a line segment."
   },
   {
-   "id": 295,
+   "id": 296,
    "name": "Polygon",
    "words": [
     "polygon"
@@ -9003,7 +9024,7 @@
    "doc": "Represents a closed figure made of straight lines between points."
   },
   {
-   "id": 296,
+   "id": 297,
    "name": "Polyline",
    "words": [
     "polyline"
@@ -9022,7 +9043,7 @@
    "doc": "Represents an open figure made of straight lines between points."
   },
   {
-   "id": 297,
+   "id": 298,
    "name": "PolylineGeometry",
    "words": [
     "polyline",
@@ -9042,7 +9063,7 @@
    "doc": "Represents the geometry of a polyline or polygon."
   },
   {
-   "id": 298,
+   "id": 299,
    "name": "Popup",
    "words": [
     "popup"
@@ -9079,7 +9100,7 @@
    "doc": "Displays a popup window."
   },
   {
-   "id": 299,
+   "id": 300,
    "name": "PopupAutomationPeer",
    "words": [
     "popup",
@@ -9097,7 +9118,7 @@
    "doc": "An automation peer which represents a [`Popup`]."
   },
   {
-   "id": 300,
+   "id": 301,
    "name": "PopupFlyoutBase",
    "words": [
     "popup",
@@ -9126,7 +9147,7 @@
    "doc": "The base class of flyouts that are shown in a [`Popup`]. This class is abstract: only its subclasses can be created."
   },
   {
-   "id": 301,
+   "id": 302,
    "name": "PopupItemsControl",
    "words": [
     "popup",
@@ -9144,7 +9165,7 @@
    "doc": ""
   },
   {
-   "id": 302,
+   "id": 303,
    "name": "PopupOverlayLayer",
    "words": [
     "popup",
@@ -9162,7 +9183,7 @@
    "doc": "The surface that hosts the popups shown inside their top-level (internal upstream)."
   },
   {
-   "id": 303,
+   "id": 304,
    "name": "PopupRoot",
    "words": [
     "popup",
@@ -9182,7 +9203,7 @@
    "doc": "The root window of a [`Popup`]."
   },
   {
-   "id": 304,
+   "id": 305,
    "name": "PopupRootAutomationPeer",
    "words": [
     "popup",
@@ -9201,7 +9222,7 @@
    "doc": "An automation peer which represents a [`PopupRoot`]."
   },
   {
-   "id": 305,
+   "id": 306,
    "name": "PowerEase",
    "words": [
     "power",
@@ -9220,7 +9241,7 @@
    "doc": "The curve `t^Power` (WinUI's `PowerEase`)."
   },
   {
-   "id": 306,
+   "id": 307,
    "name": "PreviewAdorner",
    "words": [
     "preview",
@@ -9237,7 +9258,7 @@
    "doc": ""
   },
   {
-   "id": 307,
+   "id": 308,
    "name": "ProgressBar",
    "words": [
     "progress",
@@ -9260,7 +9281,7 @@
    "doc": "A control used to indicate the progress of an operation."
   },
   {
-   "id": 308,
+   "id": 309,
    "name": "ProgressBarAutomationPeer",
    "words": [
     "progress",
@@ -9279,7 +9300,7 @@
    "doc": "An automation peer which represents a progress bar."
   },
   {
-   "id": 309,
+   "id": 310,
    "name": "ProgressBarTemplateSettings",
    "words": [
     "progress",
@@ -9307,7 +9328,7 @@
    "doc": "Provides calculated values for use with the [`ProgressBar`]'s control theme or template. This class is NOT intended for general use outside of control templates."
   },
   {
-   "id": 310,
+   "id": 311,
    "name": "ProgressRing",
    "words": [
     "progress",
@@ -9331,7 +9352,7 @@
    "doc": "A ring that shows that something is in progress (WinUI's `ProgressRing`): a spinning arc while [`is_indeterminate`](Self::is_indeterminate) (the default), the part of a ring of the [`value`](Self::value) between [`minimum`](Self::minimum) and [`maximum`](Self::maximum) otherwise, and nothing while not [`is_active`](Self::is_active). As in WinUI, `Value`, `Minimum` and `Maximum` are properties of the ring (not of `RangeBase`), coerced as `ProgressRing.cpp` coerces them: the bound set last wins, and a value outside the range is moved into it. The control sets the states of WinUI as pseudo-classes, which the control theme of the WinUI theme (`src/FerroUI.Themes.WinUI/Controls/ProgressRing.xaml`) styles: `:active` (Active), `:determinate-active` (DeterminateActive) and `:inactive` (Inactive). WinUI draws the ring with an `AnimatedVisualPlayer` and the Lottie compositions of its animated visuals, which the code plays. FerroUI has no player: the template draws the ring with `Arc` shapes, and the control moves the arc of the template part `PART_Indicator` as the code of WinUI plays the compositions: the indeterminate composition loops over two seconds (the arc grows to half the ring and shrinks while it turns 900 degrees), and a determinate change plays the determinate composition from the old to the new value (two seconds for the whole ring), a decrease at once. The clock is the ring's `Clock`, or the global clock; the motion stops while the ring is inactive, hidden or out of the visual tree. `DeterminateSource` and `IndeterminateSource` (preview members of WinUI) are not ported. The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1)."
   },
   {
-   "id": 311,
+   "id": 312,
    "name": "ProgressRingAutomationPeer",
    "words": [
     "progress",
@@ -9350,7 +9371,7 @@
    "doc": "The automation peer of a [`ProgressRing`]: a progress bar with the range value pattern while the ring is determinate, as in WinUI. The name of an active indeterminate ring starts with \"Busy\"."
   },
   {
-   "id": 312,
+   "id": 313,
    "name": "ProgressRingTemplateSettings",
    "words": [
     "progress",
@@ -9373,7 +9394,7 @@
    "doc": "The values of the template of a [`ProgressRing`](crate::ProgressRing) that WinUI keeps for the templates of the earlier ProgressRing of Windows (read-only): the diameter and the offset of its ellipses and the side of the ring, from the actual width of the ring."
   },
   {
-   "id": 313,
+   "id": 314,
    "name": "PullGestureRecognizer",
    "words": [
     "pull",
@@ -9393,7 +9414,7 @@
    "doc": "Recognizes the pull gesture: a drag from an edge of the target, as used by pull-to-refresh."
   },
   {
-   "id": 314,
+   "id": 315,
    "name": "QuadraticBezierSegment",
    "words": [
     "quadratic",
@@ -9414,7 +9435,7 @@
    "doc": "A quadratic Bezier curve segment of a path figure."
   },
   {
-   "id": 315,
+   "id": 316,
    "name": "QuadraticEase",
    "words": [
     "quadratic",
@@ -9431,7 +9452,7 @@
    "doc": "The curve `t^2` (WinUI's `QuadraticEase`)."
   },
   {
-   "id": 316,
+   "id": 317,
    "name": "QuarticEase",
    "words": [
     "quartic",
@@ -9448,7 +9469,7 @@
    "doc": "The curve `t^4` (WinUI's `QuarticEase`)."
   },
   {
-   "id": 317,
+   "id": 318,
    "name": "QuinticEase",
    "words": [
     "quintic",
@@ -9465,7 +9486,7 @@
    "doc": "The curve `t^5` (WinUI's `QuinticEase`)."
   },
   {
-   "id": 318,
+   "id": 319,
    "name": "RadialGradientBrush",
    "words": [
     "radial",
@@ -9488,7 +9509,7 @@
    "doc": "Paints an area with a radial gradient."
   },
   {
-   "id": 319,
+   "id": 320,
    "name": "RadioButton",
    "words": [
     "radio",
@@ -9507,7 +9528,7 @@
    "doc": "Represents a button that allows a user to select a single option from a group of options."
   },
   {
-   "id": 320,
+   "id": 321,
    "name": "RadioButtonAutomationPeer",
    "words": [
     "radio",
@@ -9526,7 +9547,7 @@
    "doc": "An automation peer which represents a [`RadioButton`]."
   },
   {
-   "id": 321,
+   "id": 322,
    "name": "RadioButtons",
    "words": [
     "radio",
@@ -9545,7 +9566,7 @@
    "doc": "A group of radio buttons with one selection (WinUI's `RadioButtons`). The items are shown as [`RadioButton`]s: an item that is a radio button is its own container, and another item is the content of a radio button. The selection is the selection of the items control (`SelectedIndex`, `SelectedItem`, `SelectionChanged`), kept with the checked state of the containers. The arrow keys move the focus and the selection within the group without wrapping, Tab enters the group at the selected button, and Ctrl with an arrow key moves the focus only. The template is the control theme of the WinUI theme (`Controls/RadioButtons.xaml`, from WinUI's `RadioButtons.xaml`), with the parts `PART_HeaderPresenter` and `PART_ItemsPresenter` (WinUI's `HeaderContentPresenter` and the `ItemsRepeater` `InnerRepeater`); the theme sets the items panel, a [`RadioButtonsPanel`](crate::primitives::RadioButtonsPanel) with the spacing of the resources `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing`. The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). The exclusive check is the radio button group manager's: the containers are the logical children of the group and have no group name, so checking one unchecks the others. The group itself only checks the container of a new selection, and unchecks the container of the old one when no container is checked instead (a cleared selection, or one whose container is not realized), which the group manager never does (WinUI's `Select` writes both containers). Missing (docs/porting/winui-controls.md, Input): WinUI's element factories and `DataTemplateSelector` as `ItemTemplate`."
   },
   {
-   "id": 322,
+   "id": 323,
    "name": "RadioButtonsAutomationPeer",
    "words": [
     "radio",
@@ -9564,7 +9585,7 @@
    "doc": "An automation peer which represents a [`RadioButtons`]: a group named by its header when it has no name. Deviation (docs/porting/winui-controls.md, Input): WinUI's peer is a plain group; this one is the peer of a selecting items control, with the selection pattern of the group."
   },
   {
-   "id": 323,
+   "id": 324,
    "name": "RadioButtonsPanel",
    "words": [
     "radio",
@@ -9585,7 +9606,7 @@
    "doc": "Lays out the radio buttons of a [`RadioButtons`] in columns of equal cells as large as the largest one, filling each column from the top, with as many columns as the available width and the `MaxColumns` of the group allow (WinUI's `ColumnMajorUniformToLargestGridLayout`). Deviation (docs/porting/winui-controls.md, Input): WinUI lays the buttons out with a layout of an `ItemsRepeater`; FerroUI's `RadioButtons` is an items control, and this panel is its items panel, set by the control theme of the WinUI theme with the spacing of the resources `RadioButtonsColumnSpacing` and `RadioButtonsRowSpacing`. `MaxColumns` is read from the group the panel is the items panel of (its templated parent); a panel of another control has one column."
   },
   {
-   "id": 324,
+   "id": 325,
    "name": "RangeBase",
    "words": [
     "range",
@@ -9610,7 +9631,7 @@
    "doc": "Base class for controls that display a value within a range. This class is abstract: only its subclasses can be created."
   },
   {
-   "id": 325,
+   "id": 326,
    "name": "RangeBaseAutomationPeer",
    "words": [
     "range",
@@ -9629,7 +9650,7 @@
    "doc": "The base class of the automation peers which represent a [`RangeBase`]."
   },
   {
-   "id": 326,
+   "id": 327,
    "name": "RatingControl",
    "words": [
     "rating",
@@ -9655,7 +9676,7 @@
    "doc": "A control to rate with stars (WinUI's `RatingControl`): a value from 1 to `MaxRating`, or -1 while it is not set, a placeholder value (a community rating) shown while it is not set, and a caption. The items are drawn twice, in the background stack panel in the unset state and in the foreground stack panel clipped to the value, from the glyphs of a [`RatingItemFontInfo`] (the stars E735 and E734 of the symbol font by default, in the font of the control) or the images of a [`RatingItemImageInfo`]. A click or a tap sets the rating under the pointer, and clears it when it is the rating (with `IsClearEnabled`); the arrow keys, Home and End change it. Only the changes of the user raise `ValueChanged`. The template is the control theme of the WinUI theme (`Controls/RatingControl.xaml`, from WinUI's `RatingControl.xaml`), with WinUI's parts `RatingBackgroundStackPanel` and `RatingForegroundStackPanel`; the items take their size from the `FontSize` of the stack panels (`RatingControlFontSizeForRendering`) and their brushes from the theme. The control sets WinUI's visual states (CommonStates) as the pseudo-classes `:placeholder`, `:pointeroverplaceholder`, `:pointeroverunselected`, `:set` and `:pointeroverset` (Disabled is `:disabled`). The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). Missing (docs/porting/winui-controls.md, Input): the composition animations of the scale of the items (the scale is set when the pointer moves), and the focus engagement of the gamepad (`IsFocusEngagementEnabled`, GamepadA and GamepadB)."
   },
   {
-   "id": 327,
+   "id": 328,
    "name": "RatingControlAutomationPeer",
    "words": [
     "rating",
@@ -9674,7 +9695,7 @@
    "doc": "An automation peer which represents a [`RatingControl`]: a slider with the value pattern (the text of the rating) and the range value pattern (0 to `MaxRating`; an unset rating is 0), named by the caption when it has no name."
   },
   {
-   "id": 328,
+   "id": 329,
    "name": "RatingItemFontInfo",
    "words": [
     "rating",
@@ -9700,7 +9721,7 @@
    "doc": "The glyphs of the items of a rating control in each state (WinUI's `RatingItemFontInfo`): an empty glyph of a state is the glyph of the placeholder for the pointer over the placeholder, and `Glyph` otherwise."
   },
   {
-   "id": 329,
+   "id": 330,
    "name": "RatingItemImageInfo",
    "words": [
     "rating",
@@ -9726,7 +9747,7 @@
    "doc": "The images of the items of a rating control in each state (WinUI's `RatingItemImageInfo`), with the fallbacks of the glyphs."
   },
   {
-   "id": 330,
+   "id": 331,
    "name": "RatingItemInfo",
    "words": [
     "rating",
@@ -9744,7 +9765,7 @@
    "doc": "What the items of a [`RatingControl`](crate::RatingControl) show: glyphs of a font ([`RatingItemFontInfo`]) or images ([`RatingItemImageInfo`]) (WinUI's `RatingItemInfo`)."
   },
   {
-   "id": 331,
+   "id": 332,
    "name": "Rectangle",
    "words": [
     "rectangle"
@@ -9763,7 +9784,7 @@
    "doc": "Represents a rectangle with optional rounded corners."
   },
   {
-   "id": 332,
+   "id": 333,
    "name": "RectangleGeometry",
    "words": [
     "rectangle",
@@ -9784,7 +9805,7 @@
    "doc": "Represents the geometry of a rectangle."
   },
   {
-   "id": 333,
+   "id": 334,
    "name": "RefreshContainer",
    "words": [
     "refresh",
@@ -9807,7 +9828,7 @@
    "doc": "Represents a container control that provides a [`RefreshVisualizer`] and pull-to-refresh functionality for scrollable content."
   },
   {
-   "id": 334,
+   "id": 335,
    "name": "RefreshInfoProvider",
    "words": [
     "refresh",
@@ -9834,7 +9855,7 @@
    "doc": "What a refresh visualizer needs to know about the interaction that drives it: whether the user is pulling, and how far."
   },
   {
-   "id": 335,
+   "id": 336,
    "name": "RefreshVisualizer",
    "words": [
     "refresh",
@@ -9856,7 +9877,7 @@
    "doc": "Shows the progress of a pull-to-refresh interaction and of the refresh it starts."
   },
   {
-   "id": 336,
+   "id": 337,
    "name": "RelativePanel",
    "words": [
     "relative",
@@ -9890,7 +9911,7 @@
    "doc": "A panel that arranges its children relative to each other and to the panel itself."
   },
   {
-   "id": 337,
+   "id": 338,
    "name": "RemoteWidget",
    "words": [
     "remote",
@@ -9907,7 +9928,7 @@
    "doc": "Shows the frames received from a connection of the remote protocol. (Internal upstream; public here for the crates the upstream assembly is visible to.)"
   },
   {
-   "id": 338,
+   "id": 339,
    "name": "RepeatButton",
    "words": [
     "repeat",
@@ -9927,7 +9948,7 @@
    "doc": "Represents a control that raises its `Click` event repeatedly when it is pressed and held."
   },
   {
-   "id": 339,
+   "id": 340,
    "name": "ResizeGripLayer",
    "words": [
     "resize",
@@ -9945,7 +9966,7 @@
    "doc": ""
   },
   {
-   "id": 340,
+   "id": 341,
    "name": "ResourceDictionary",
    "words": [
     "resource",
@@ -9962,7 +9983,7 @@
    "doc": "An indexed dictionary of resources."
   },
   {
-   "id": 341,
+   "id": 342,
    "name": "ResourceProvider",
    "words": [
     "resource",
@@ -9979,7 +10000,7 @@
    "doc": "Base implementation for resource providers."
   },
   {
-   "id": 342,
+   "id": 343,
    "name": "RevealBackgroundBrush",
    "words": [
     "reveal",
@@ -9997,7 +10018,7 @@
    "doc": "The Reveal brush of backgrounds (WinUI `Microsoft.UI.Xaml.Media.RevealBackgroundBrush`): lit by the hover and press lights of the element whose Reveal state is set."
   },
   {
-   "id": 343,
+   "id": 344,
    "name": "RevealBorderBrush",
    "words": [
     "reveal",
@@ -10015,7 +10036,7 @@
    "doc": "The Reveal brush of borders (WinUI `Microsoft.UI.Xaml.Media.RevealBorderBrush`): lit by the border lights of the window near the pointer."
   },
   {
-   "id": 344,
+   "id": 345,
    "name": "RevealBorderLight",
    "words": [
     "reveal",
@@ -10033,7 +10054,7 @@
    "doc": "A border light of Reveal (WinUI's internal `RevealBorderLight`): a spot light above the pointer that lights the Reveal border brushes near it; switched on while the pointer is over the window (250 ms). [`RevealBrush`](super::RevealBrush) attaches four of them (normal and wide, for the light and the dark theme) and an ambient light to the root of every window while a Reveal brush is connected."
   },
   {
-   "id": 345,
+   "id": 346,
    "name": "RevealBrush",
    "words": [
     "reveal",
@@ -10056,7 +10077,7 @@
    "doc": "The base of the Reveal brushes (WinUI `Microsoft.UI.Xaml.Media.RevealBrush`): a brush lit by the Reveal lights near the pointer. A [`RevealBackgroundBrush`] is lit by the hover and press lights the element whose [`state`](Self::state_property) is set holds; a [`RevealBorderBrush`] by the border lights of the window. In fallback mode ([`always_use_fallback`](Self::always_use_fallback), or when the [`MaterialPolicy`] disables materials) the brush is its [`fallback_color`](XamlCompositionBrushBase::fallback_color)."
   },
   {
-   "id": 346,
+   "id": 347,
    "name": "RevealHoverLight",
    "words": [
     "reveal",
@@ -10074,7 +10095,7 @@
    "doc": "The hover light of Reveal (WinUI's internal `RevealHoverLight`): a spot light 256 above the element under the pointer, whose cone covers the element (`Clamp(Max(width, height) + 12, 16, 512)`), switched on while the pointer is over the element. As a press light ([`RevealHoverLight::new_press_light`]) it is a narrower light (47.25) that flares when the element is pressed and fades out over 0.2 s (a quick press) or 1 to 1.5 s (a long one). [`RevealBrush::set_state`](super::RevealBrush::set_state) adds a hover and a press light to an element and drives them."
   },
   {
-   "id": 347,
+   "id": 348,
    "name": "ReversibleStackPanel",
    "words": [
     "reversible",
@@ -10094,7 +10115,7 @@
    "doc": "Implements a panel which lays out its children horizontally or vertically and can reverse the order of its children."
   },
   {
-   "id": 348,
+   "id": 349,
    "name": "RichEditBox",
    "words": [
     "rich",
@@ -10172,7 +10193,7 @@
    "doc": "A structured rich-text editor rendered by FerroUI's text layout, drawing, and input APIs. The `Document` is shared with its persistent presenter and remains editable independently of this control. Read-only and length policies apply to user editing, clipboard, and IME; applications can replace the document directly. Every user operation goes through the same transaction engine, including formatting and accessible value changes."
   },
   {
-   "id": 349,
+   "id": 350,
    "name": "RichEditBoxAutomationPeer",
    "words": [
     "rich",
@@ -10192,7 +10213,7 @@
    "doc": "Accessibility projection of the rich editor using the framework's existing provider ABI."
   },
   {
-   "id": 350,
+   "id": 351,
    "name": "RichEditBoxTextPresenter",
    "words": [
     "rich",
@@ -10212,7 +10233,7 @@
    "doc": "Renders and scrolls the owner's single rich document using FerroUI text layout. The presenter survives template replacement. It formats the entire document at the viewport width, and translates every text geometry operation by the same pixel scroll offset. It has no separate editing buffer or undo history."
   },
   {
-   "id": 351,
+   "id": 352,
    "name": "RichEditBoxTextPresenterAutomationPeer",
    "words": [
     "rich",
@@ -10234,7 +10255,7 @@
    "doc": "The editor's layout presenter is a raw automation leaf. The owning editor exposes its document, hyperlinks and embedded controls through one Text provider; enumerating those controls here would duplicate them and replace their document parent (including an enclosing hyperlink)."
   },
   {
-   "id": 352,
+   "id": 353,
    "name": "RichTextBlock",
    "words": [
     "rich",
@@ -10289,7 +10310,7 @@
    "doc": "Displays paragraphs, nested spans, hyperlinks and embedded controls. All text indices are UTF-16 code units, matching the shaping and input-method contracts."
   },
   {
-   "id": 353,
+   "id": 354,
    "name": "RichTextBlockAutomationPeer",
    "words": [
     "rich",
@@ -10309,7 +10330,7 @@
    "doc": "Accessibility projection of the rich view, with live document ranges, selection, effective formatting, embedded children, and shaped geometry."
   },
   {
-   "id": 354,
+   "id": 355,
    "name": "RichTextBlockOverflow",
    "words": [
     "rich",
@@ -10330,7 +10351,7 @@
    "doc": "A continuation of another rich-text view, with its own width and height. Link it with `RichTextBlock::set_overflow_content_target`; the document and its shaped paragraph continuation are shared through weak view references."
   },
   {
-   "id": 355,
+   "id": 356,
    "name": "Rotate3DTransform",
    "words": [
     "rotate3",
@@ -10356,7 +10377,7 @@
    "doc": "Non-affine 3D transformation for rotating a visual around a definable axis."
   },
   {
-   "id": 356,
+   "id": 357,
    "name": "RotateTransform",
    "words": [
     "rotate",
@@ -10377,7 +10398,7 @@
    "doc": "Rotates a visual."
   },
   {
-   "id": 357,
+   "id": 358,
    "name": "RowDefinition",
    "words": [
     "row",
@@ -10398,7 +10419,7 @@
    "doc": "Holds a row definition for a `Grid`."
   },
   {
-   "id": 358,
+   "id": 359,
    "name": "Run",
    "words": [
     "run"
@@ -10416,7 +10437,7 @@
    "doc": "A terminal element in text flow hierarchy - contains a uniformatted run of unicode characters."
   },
   {
-   "id": 359,
+   "id": 360,
    "name": "SampleApplication",
    "words": [
     "sample",
@@ -10433,7 +10454,7 @@
    "doc": ""
   },
   {
-   "id": 360,
+   "id": 361,
    "name": "ScaleTransform",
    "words": [
     "scale",
@@ -10453,7 +10474,7 @@
    "doc": "Scale a visual."
   },
   {
-   "id": 361,
+   "id": 362,
    "name": "ScrollBar",
    "words": [
     "scroll",
@@ -10478,7 +10499,7 @@
    "doc": "A scrollbar control."
   },
   {
-   "id": 362,
+   "id": 363,
    "name": "ScrollBarAutomationPeer",
    "words": [
     "scroll",
@@ -10497,7 +10518,7 @@
    "doc": "An automation peer which represents a [`ScrollBar`]."
   },
   {
-   "id": 363,
+   "id": 364,
    "name": "ScrollContentPresenter",
    "words": [
     "scroll",
@@ -10526,7 +10547,7 @@
    "doc": "Presents a scrolling view of content inside a [`ScrollViewer`]."
   },
   {
-   "id": 364,
+   "id": 365,
    "name": "ScrollGestureRecognizer",
    "words": [
     "scroll",
@@ -10552,7 +10573,7 @@
    "doc": "Recognizes the scroll gesture: a touch or pen drag, optionally followed by inertia."
   },
   {
-   "id": 365,
+   "id": 366,
    "name": "ScrollViewer",
    "words": [
     "scroll",
@@ -10594,7 +10615,7 @@
    "doc": "A control which scrolls its content if the content is bigger than the space available."
   },
   {
-   "id": 366,
+   "id": 367,
    "name": "ScrollViewerAutomationPeer",
    "words": [
     "scroll",
@@ -10613,7 +10634,7 @@
    "doc": "An automation peer which represents a [`ScrollViewer`]."
   },
   {
-   "id": 367,
+   "id": 368,
    "name": "ScrollablePullGestureRecognizer",
    "words": [
     "scrollable",
@@ -10634,7 +10655,7 @@
    "doc": "Recognizes a pull on a scrollable target that is scrolled to the edge the pull starts from."
   },
   {
-   "id": 368,
+   "id": 369,
    "name": "Sector",
    "words": [
     "sector"
@@ -10653,7 +10674,7 @@
    "doc": "Represents a circular or elliptical sector (a pie-shaped closed region of a circle or ellipse)."
   },
   {
-   "id": 369,
+   "id": 370,
    "name": "SelectableTextBlock",
    "words": [
     "selectable",
@@ -10680,7 +10701,7 @@
    "doc": "A control that displays a block of formatted text whose content can be selected and copied."
   },
   {
-   "id": 370,
+   "id": 371,
    "name": "SelectingItemsControl",
    "words": [
     "selecting",
@@ -10713,7 +10734,7 @@
    "doc": "An [`ItemsControl`] that maintains a selection. [`SelectingItemsControl`] provides a base class for [`ItemsControl`]s that maintain a selection (single or multiple). By default only its `selected_index` and `selected_item` properties are visible; the current multiple `selection` and `selected_items` together with the `selection_mode` properties are protected, however a derived class can expose these if it wishes to support multiple selection. [`SelectingItemsControl`] maintains a selection respecting the current `selection_mode` but it does not react to user input; this must be handled in a derived class. It does, however, respond to `is_selected_changed_event` events from items and updates the selection accordingly."
   },
   {
-   "id": 371,
+   "id": 372,
    "name": "SelectingItemsControlAutomationPeer",
    "words": [
     "selecting",
@@ -10733,7 +10754,7 @@
    "doc": "An automation peer which represents a [`SelectingItemsControl`]."
   },
   {
-   "id": 372,
+   "id": 373,
    "name": "SelectingMultiPage",
    "words": [
     "selecting",
@@ -10756,7 +10777,7 @@
    "doc": "Base class for multi-page controls with index-based selection. This class is abstract: its abstract member panics unless overridden."
   },
   {
-   "id": 373,
+   "id": 374,
    "name": "SelectionIndicator",
    "words": [
     "selection",
@@ -10773,7 +10794,7 @@
    "doc": "A rectangle whose rounded caps keep their size during composition scale animations. Layout, fill, stroke and styling remain those of a normal Rectangle."
   },
   {
-   "id": 374,
+   "id": 375,
    "name": "Separator",
    "words": [
     "separator"
@@ -10789,7 +10810,7 @@
    "doc": "A separator control."
   },
   {
-   "id": 375,
+   "id": 376,
    "name": "Shadow",
    "words": [
     "shadow"
@@ -10805,7 +10826,7 @@
    "doc": "The base class of the shadows an element can cast (WinUI `Microsoft.UI.Xaml.Media.Shadow`). [`ThemeShadow`] is the one shadow."
   },
   {
-   "id": 376,
+   "id": 377,
    "name": "Shape",
    "words": [
     "shape"
@@ -10831,7 +10852,7 @@
    "doc": "Provides a base class for shape elements, such as `Ellipse`, `Polygon` and `Rectangle`."
   },
   {
-   "id": 377,
+   "id": 378,
    "name": "SineEase",
    "words": [
     "sine",
@@ -10848,7 +10869,7 @@
    "doc": "A sine curve (WinUI's `SineEase`)."
   },
   {
-   "id": 378,
+   "id": 379,
    "name": "SkewTransform",
    "words": [
     "skew",
@@ -10868,7 +10889,7 @@
    "doc": "Skews a visual."
   },
   {
-   "id": 379,
+   "id": 380,
    "name": "Slider",
    "words": [
     "slider"
@@ -10891,7 +10912,7 @@
    "doc": "A control that lets the user select from a range of values by moving a thumb control along a track."
   },
   {
-   "id": 380,
+   "id": 381,
    "name": "SliderAutomationPeer",
    "words": [
     "slider",
@@ -10909,7 +10930,7 @@
    "doc": "An automation peer which represents a [`Slider`]."
   },
   {
-   "id": 381,
+   "id": 382,
    "name": "SolidColorBrush",
    "words": [
     "solid",
@@ -10929,7 +10950,7 @@
    "doc": "Fills an area with a solid color."
   },
   {
-   "id": 382,
+   "id": 383,
    "name": "Span",
    "words": [
     "span"
@@ -10947,7 +10968,7 @@
    "doc": "Span element used for grouping other `Inline` elements."
   },
   {
-   "id": 383,
+   "id": 384,
    "name": "Spinner",
    "words": [
     "spinner"
@@ -10967,7 +10988,7 @@
    "doc": "Base class for controls that represents controls that can spin. The class is abstract: it has no `new`."
   },
   {
-   "id": 384,
+   "id": 385,
    "name": "SplineColorKeyFrame",
    "words": [
     "spline",
@@ -10988,7 +11009,7 @@
    "doc": "Interpolates along a `KeySpline` from the value before it (WinUI's `SplineColorKeyFrame`)."
   },
   {
-   "id": 385,
+   "id": 386,
    "name": "SplineDoubleKeyFrame",
    "words": [
     "spline",
@@ -11009,7 +11030,7 @@
    "doc": "Interpolates along a `KeySpline` from the value before it (WinUI's `SplineDoubleKeyFrame`)."
   },
   {
-   "id": 386,
+   "id": 387,
    "name": "SplinePointKeyFrame",
    "words": [
     "spline",
@@ -11030,7 +11051,7 @@
    "doc": "Interpolates along a `KeySpline` from the value before it (WinUI's `SplinePointKeyFrame`)."
   },
   {
-   "id": 387,
+   "id": 388,
    "name": "SplitButton",
    "words": [
     "split",
@@ -11054,7 +11075,7 @@
    "doc": "A button with primary and secondary parts that can each be pressed separately. The primary part behaves like a [`Button`] and the secondary part opens a flyout."
   },
   {
-   "id": 388,
+   "id": 389,
    "name": "SplitButtonAutomationPeer",
    "words": [
     "split",
@@ -11073,7 +11094,7 @@
    "doc": "An automation peer which represents a [`SplitButton`]."
   },
   {
-   "id": 389,
+   "id": 390,
    "name": "SplitView",
    "words": [
     "split",
@@ -11106,7 +11127,7 @@
    "doc": "A control with two views: a collapsible pane and an area for content."
   },
   {
-   "id": 390,
+   "id": 391,
    "name": "SplitViewTemplateSettings",
    "words": [
     "split",
@@ -11130,7 +11151,7 @@
    "doc": "Provides calculated values for use with the control theme or template of the [`SplitView`](crate::SplitView). This class is NOT intended for general use outside of control templates."
   },
   {
-   "id": 391,
+   "id": 392,
    "name": "StackPanel",
    "words": [
     "stack",
@@ -11155,7 +11176,7 @@
    "doc": "A panel which lays out its children horizontally or vertically."
   },
   {
-   "id": 392,
+   "id": 393,
    "name": "StateTrigger",
    "words": [
     "state",
@@ -11174,7 +11195,7 @@
    "doc": "A trigger that is active while its [`is_active`](Self::is_active) is `true` (WinUI's `StateTrigger`): a state bound to a condition of the application (`<StateTrigger IsActive=\"{Binding IsWide}\"/>`)."
   },
   {
-   "id": 393,
+   "id": 394,
    "name": "StateTriggerBase",
    "words": [
     "state",
@@ -11192,7 +11213,7 @@
    "doc": "The base class of the triggers of a [`VisualState`](super::VisualState): while a trigger of a state is active, the state is a candidate to be the current state of its group (docs/porting/winui-calculator-gaps.md, section 5.7). **The extension point of custom triggers.** A trigger of an application derives from this class and calls [`set_active`](Self::set_active) when its condition changes (WinUI's protected `SetActive`; it is public in Rust, which has no protected members, and is meant for the derived trigger only): ```ignore #[repr(C)] pub struct ControlSizeTrigger { base: StateTriggerBase, /* ... */ } ferro_class!(ControlSizeTrigger: StateTriggerBase); // ... on a size change of the source: trigger.set_active(size.width >= trigger.min_width()); ``` Among the states of a group whose triggers are active, a [`StateTrigger`] or a custom trigger wins over an [`AdaptiveTrigger`]; among adaptive triggers the larger `MinWindowWidth` wins, then the larger `MinWindowHeight`; then the first in the order of the source."
   },
   {
-   "id": 394,
+   "id": 395,
    "name": "Storyboard",
    "words": [
     "storyboard"
@@ -11211,7 +11232,7 @@
    "doc": "A container of timelines that runs them together and gives the animations their targets (WinUI's `Storyboard`). The children are animations and storyboards. Each animation animates the property its `Storyboard.TargetProperty` names on the object its `Storyboard.TargetName` names (both attached properties, inherited from the storyboards around it), or on the object [`set_target`](Self::set_target) gave it. Names are looked up when the storyboard begins: in the elements of the template, or the name scope of the document, of the element given to [`set_target_scope`](Self::set_target_scope); the storyboard of a visual state looks them up where the setters of the state do. [`begin`](Self::begin) starts it on the global clock (without a global clock, its time stays at zero until [`seek`](Self::seek) moves it); [`stop`](Self::stop) removes its values."
   },
   {
-   "id": 395,
+   "id": 396,
    "name": "StreamGeometry",
    "words": [
     "stream",
@@ -11228,7 +11249,7 @@
    "doc": "Represents the geometry of an arbitrarily complex shape."
   },
   {
-   "id": 396,
+   "id": 397,
    "name": "Style",
    "words": [
     "style"
@@ -11244,7 +11265,7 @@
    "doc": "Defines a style."
   },
   {
-   "id": 397,
+   "id": 398,
    "name": "StyleBase",
    "words": [
     "style",
@@ -11261,7 +11282,7 @@
    "doc": "Base class for [`Style`](super::Style), [`ControlTheme`](super::ControlTheme) and [`ContainerQuery`](super::ContainerQuery)."
   },
   {
-   "id": 398,
+   "id": 399,
    "name": "StyledAsClass1",
    "words": [
     "styled",
@@ -11279,7 +11300,7 @@
    "doc": "A control derived from [`Class1`] that is styled as a [`Class1`]."
   },
   {
-   "id": 399,
+   "id": 400,
    "name": "StyledElement",
    "words": [
     "styled",
@@ -11304,7 +11325,7 @@
    "doc": "Extends an [`Animatable`] with the following features: - An inherited `DataContext`. - Implements the logical tree. - A collection of class strings for custom styling. - Implements styling: tracks the frames applied by styles and themes."
   },
   {
-   "id": 400,
+   "id": 401,
    "name": "Styles",
    "words": [
     "styles"
@@ -11320,7 +11341,7 @@
    "doc": "A style that consists of a number of child styles."
   },
   {
-   "id": 401,
+   "id": 402,
    "name": "SwipeControl",
    "words": [
     "swipe",
@@ -11342,7 +11363,7 @@
    "doc": "A container that reveals commands when its content is swiped (WinUI's `SwipeControl`). [`left_items`](Self::left_items) and [`right_items`](Self::right_items) open with a horizontal swipe, [`top_items`](Self::top_items) and [`bottom_items`](Self::bottom_items) with a vertical one (a control has items of one direction). [`SwipeMode::Reveal`] items stay open for the user to invoke one; [`SwipeMode::Execute`] items invoke their single item when the swipe passes the threshold. One swipe control is open at a time; [`close`](Self::close) closes it. The interaction is WinUI's: an `InteractionTracker` with a `VisualInteractionSource` (on the nearest `ListBoxItem` within five parents, else the control), redirected for touch and pen (decision D7: no mouse drag), with the resting values of WinUI's `ConfigurePositionInertiaRestingValues`; the content follows the tracker through an expression animation of its `Translation`, on the compositor. The template parts are `RootGrid`, `SwipeContentRoot`, `SwipeContentStackPanel`, `ContentRoot` and `InputEater`; each item is a `CommandBarButton` with the theme's `SwipeItemStyle`."
   },
   {
-   "id": 402,
+   "id": 403,
    "name": "SwipeGestureRecognizer",
    "words": [
     "swipe",
@@ -11366,7 +11387,7 @@
    "doc": "A gesture recognizer that detects swipe gestures and raises the swipe gesture event continuously as the pointer moves."
   },
   {
-   "id": 403,
+   "id": 404,
    "name": "SwipeItem",
    "words": [
     "swipe",
@@ -11391,7 +11412,7 @@
    "doc": "A command of a side of a [`SwipeControl`] (WinUI's `SwipeItem`): drawn as a button with its [`text`](Self::text), [`icon_source`](Self::icon_source), [`background`](Self::background) and [`foreground`](Self::foreground); invoking it raises [`invoked`](Self::invoked), runs its command and closes the control unless [`behavior_on_invoked`](Self::behavior_on_invoked) is [`SwipeBehaviorOnInvoked::RemainOpen`]."
   },
   {
-   "id": 404,
+   "id": 405,
    "name": "SwipeItems",
    "words": [
     "swipe",
@@ -11410,7 +11431,7 @@
    "doc": "The items of a side of a [`SwipeControl`] with their [`mode`](Self::mode) (WinUI's `SwipeItems`, a vector of [`SwipeItem`]s). Execute items have one item at most: [`try_add`](Self::try_add) and [`try_set_mode`](Self::try_set_mode) refuse a change that breaks it (WinUI throws); [`add`](Self::add) logs and ignores such an item. Items added to [`items`](Self::items) directly (as markup does) are not checked; a swipe control uses the first item of execute items."
   },
   {
-   "id": 405,
+   "id": 406,
    "name": "SymbolIcon",
    "words": [
     "symbol",
@@ -11429,7 +11450,7 @@
    "doc": "Represents an icon that uses a glyph of the symbol font of the theme as its content (WinUI's `SymbolIcon`). The template of the theme draws the glyph of [`symbol`](Self::symbol) ([`Symbol::glyph`]) in its text part `PART_Text`, with the font of the theme resource `SymbolThemeFontFamily` (Segoe Fluent Icons in the WinUI theme), 20 pixels, normal style and weight; the foreground is the icon's. The font is not bundled: off Windows an application supplies a symbol font with the same code points and sets `SymbolThemeFontFamily` to it (docs/porting/winui-controls.md, section 5.2). The WinUI theme has the template; the Fluent and Simple themes have none. Deviation (docs/porting/winui-controls.md, SymbolIcon): WinUI builds the text block in code (`CSymbolIcon::ApplyTemplate`) with the font `Segoe Fluent Icons` written in; here the template is the theme's and the font its resource."
   },
   {
-   "id": 406,
+   "id": 407,
    "name": "SymbolIconSource",
    "words": [
     "symbol",
@@ -11449,7 +11470,7 @@
    "doc": "The description of a [`SymbolIcon`] (WinUI's `SymbolIconSource`)."
   },
   {
-   "id": 407,
+   "id": 408,
    "name": "SystemBackdrop",
    "words": [
     "system",
@@ -11466,7 +11487,7 @@
    "doc": "The base of the system backdrops of the object model (WinUI `Microsoft.UI.Xaml.Media.SystemBackdrop`): set on a window ([`TopLevel::system_backdrop`](crate::TopLevel::system_backdrop)), it is connected to the window as its target ([`on_target_connected`](SystemBackdropImpl::on_target_connected)) and keeps a default configuration of the target up to date: the theme of the window, the high contrast setting of the platform and whether the window is active."
   },
   {
-   "id": 408,
+   "id": 409,
    "name": "SystemBackdropHostBrush",
    "words": [
     "system",
@@ -11485,7 +11506,7 @@
    "doc": ""
   },
   {
-   "id": 409,
+   "id": 410,
    "name": "TabControl",
    "words": [
     "tab",
@@ -11511,7 +11532,7 @@
    "doc": "A tab control that displays a tab strip along with the content of the selected tab."
   },
   {
-   "id": 410,
+   "id": 411,
    "name": "TabItem",
    "words": [
     "tab",
@@ -11534,7 +11555,7 @@
    "doc": "An item in a `TabControl`."
   },
   {
-   "id": 411,
+   "id": 412,
    "name": "TabStrip",
    "words": [
     "tab",
@@ -11551,7 +11572,7 @@
    "doc": "A strip of tabs: a [`SelectingItemsControl`] that always has a selected item."
   },
   {
-   "id": 412,
+   "id": 413,
    "name": "TabStripItem",
    "words": [
     "tab",
@@ -11569,7 +11590,7 @@
    "doc": "Represents a tab in a `TabStrip`."
   },
   {
-   "id": 413,
+   "id": 414,
    "name": "TabbedPage",
    "words": [
     "tabbed",
@@ -11593,7 +11614,7 @@
    "doc": "A page that displays its child pages through a tab strip."
   },
   {
-   "id": 414,
+   "id": 415,
    "name": "TabbedPageAutomationPeer",
    "words": [
     "tabbed",
@@ -11612,7 +11633,7 @@
    "doc": "An automation peer which represents a [`TabbedPage`]."
   },
   {
-   "id": 415,
+   "id": 416,
    "name": "TableView",
    "words": [
     "table",
@@ -11632,7 +11653,7 @@
    "doc": "A read-only tabular control that presents items in configurable columns."
   },
   {
-   "id": 416,
+   "id": 417,
    "name": "TableViewCell",
    "words": [
     "table",
@@ -11652,7 +11673,7 @@
    "doc": "Represents a single cell in a [`TableViewRow`](crate::TableViewRow)."
   },
   {
-   "id": 417,
+   "id": 418,
    "name": "TableViewCellsPresenter",
    "words": [
     "table",
@@ -11671,7 +11692,7 @@
    "doc": "Lays out the cells of a [`TableViewRow`] according to the column definitions of the parent table view. The cells are recycled alongside their owning row in a virtualizing stack panel, but are not virtualized in a single row (i.e. there is no column virtualization)."
   },
   {
-   "id": 418,
+   "id": 419,
    "name": "TableViewColumn",
    "words": [
     "table",
@@ -11703,7 +11724,7 @@
    "doc": "Defines a column in a [`TableView`]."
   },
   {
-   "id": 419,
+   "id": 420,
    "name": "TableViewColumnHeader",
    "words": [
     "table",
@@ -11724,7 +11745,7 @@
    "doc": "Represents the header of a [`TableViewColumn`]."
   },
   {
-   "id": 420,
+   "id": 421,
    "name": "TableViewColumnHeadersPresenter",
    "words": [
     "table",
@@ -11744,7 +11765,7 @@
    "doc": "Displays the column headers for a [`TableView`]. Computes column widths (pixel and star) and exposes them via the actual width of the columns so that the presenters of the cells can align cells with the headers."
   },
   {
-   "id": 421,
+   "id": 422,
    "name": "TableViewRow",
    "words": [
     "table",
@@ -11762,7 +11783,7 @@
    "doc": "A row container in a [`TableView`](crate::TableView)."
   },
   {
-   "id": 422,
+   "id": 423,
    "name": "TemplatedControl",
    "words": [
     "templated",
@@ -11798,7 +11819,7 @@
    "doc": "A lookless control whose visual appearance is defined by its `Template`."
   },
   {
-   "id": 423,
+   "id": 424,
    "name": "TestCanvas",
    "words": [
     "test",
@@ -11815,7 +11836,7 @@
    "doc": ""
   },
   {
-   "id": 424,
+   "id": 425,
    "name": "TestContainer",
    "words": [
     "test",
@@ -11832,7 +11853,7 @@
    "doc": ""
   },
   {
-   "id": 425,
+   "id": 426,
    "name": "TestControl",
    "words": [
     "test",
@@ -11849,7 +11870,7 @@
    "doc": ""
   },
   {
-   "id": 426,
+   "id": 427,
    "name": "TestGeometry",
    "words": [
     "test",
@@ -11868,7 +11889,7 @@
    "doc": ""
   },
   {
-   "id": 427,
+   "id": 428,
    "name": "TestLayoutable",
    "words": [
     "test",
@@ -11885,7 +11906,7 @@
    "doc": ""
   },
   {
-   "id": 428,
+   "id": 429,
    "name": "TestPanel",
    "words": [
     "test",
@@ -11902,7 +11923,7 @@
    "doc": "A panel: provides the index of its logical children."
   },
   {
-   "id": 429,
+   "id": 430,
    "name": "TestRoot",
    "words": [
     "test",
@@ -11919,7 +11940,7 @@
    "doc": "A logical root."
   },
   {
-   "id": 430,
+   "id": 431,
    "name": "TestScrollable",
    "words": [
     "test",
@@ -11936,7 +11957,7 @@
    "doc": "A control that scrolls logically, with settable scroll state."
   },
   {
-   "id": 431,
+   "id": 432,
    "name": "TestSelector",
    "words": [
     "test",
@@ -11953,7 +11974,7 @@
    "doc": ""
   },
   {
-   "id": 432,
+   "id": 433,
    "name": "TestSelectorWithContainers",
    "words": [
     "test",
@@ -11972,7 +11993,7 @@
    "doc": ""
   },
   {
-   "id": 433,
+   "id": 434,
    "name": "TextBlock",
    "words": [
     "text",
@@ -12015,7 +12036,7 @@
    "doc": "A control that displays a block of text."
   },
   {
-   "id": 434,
+   "id": 435,
    "name": "TextBlockAutomationPeer",
    "words": [
     "text",
@@ -12034,7 +12055,7 @@
    "doc": "An automation peer which represents a [`TextBlock`]."
   },
   {
-   "id": 435,
+   "id": 436,
    "name": "TextBox",
    "words": [
     "text",
@@ -12096,7 +12117,7 @@
    "doc": "Represents a control that can be used to display or edit unformatted text. Template parts: `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index."
   },
   {
-   "id": 436,
+   "id": 437,
    "name": "TextBoxAutomationPeer",
    "words": [
     "text",
@@ -12115,7 +12136,7 @@
    "doc": "An automation peer which represents a [`TextBox`]."
   },
   {
-   "id": 437,
+   "id": 438,
    "name": "TextDecoration",
    "words": [
     "text",
@@ -12142,7 +12163,7 @@
    "doc": "Represents a text decoration, which is a visual ornamentation that is added to text (such as an underline)."
   },
   {
-   "id": 438,
+   "id": 439,
    "name": "TextElement",
    "words": [
     "text",
@@ -12170,7 +12191,7 @@
    "doc": "`TextElement` is the base class for content in text based controls. It also defines the inherited font and foreground attached properties used by every control that displays text. This class is abstract."
   },
   {
-   "id": 439,
+   "id": 440,
    "name": "TextHighlighter",
    "words": [
     "text",
@@ -12190,7 +12211,7 @@
    "doc": "Paints foreground and background over its ranges without editing text. A null brush uses the view's TextControlHighlighterForeground or TextControlHighlighterBackground theme resource. As in WinUI, only solid color brushes are accepted. Mutable brushes and range changes invalidate all observing collections; observers never retain this object."
   },
   {
-   "id": 440,
+   "id": 441,
    "name": "TextPresenter",
    "words": [
     "text",
@@ -12228,7 +12249,7 @@
    "doc": "The control that displays the text of a text box: the text, the selection, the pre-edit text of an input method and the caret. Every text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, the positions of [`CharacterHit`]) is a UTF-16 code unit index."
   },
   {
-   "id": 441,
+   "id": 442,
    "name": "TextSelectionHandle",
    "words": [
     "text",
@@ -12246,7 +12267,7 @@
    "doc": "A control that enables easy control over text selection using touch based input."
   },
   {
-   "id": 442,
+   "id": 443,
    "name": "TextSelectionHandleCanvas",
    "words": [
     "text",
@@ -12265,7 +12286,7 @@
    "doc": "The canvas of the touch selection handles of a text presenter. It lives in the text selector layer of the top level."
   },
   {
-   "id": 443,
+   "id": 444,
    "name": "TextSelectorLayer",
    "words": [
     "text",
@@ -12283,7 +12304,7 @@
    "doc": "The surface that hosts the text selection handles."
   },
   {
-   "id": 444,
+   "id": 445,
    "name": "ThemeShadow",
    "words": [
     "theme",
@@ -12300,7 +12321,7 @@
    "doc": "The shadow of the theme (WinUI `Microsoft.UI.Xaml.Media.ThemeShadow`): set as the `Shadow` of an element, the element casts the shadow of its elevation, the Z of its `Translation`, as the controls of WinUI do under their popups (32 for a flyout, 16 for a tool tip, 128 for a content dialog). WinUI 3 draws every theme shadow as a drop shadow ([`is_drop_shadow_mode`](Self::is_drop_shadow_mode)): an ambient and a directional shadow around the element, the darker in the dark theme, none in a high contrast theme. A `ThemeShadow` can be shared by several elements; it has no appearance of its own. [`receivers`](Self::receivers) are the elements the projected shadows of WinUI (the root and the open popups by default) would fall on. WinUI 3 keeps the collection and its validation but does not draw projected shadows, so the receivers do not change the drawing here either."
   },
   {
-   "id": 445,
+   "id": 446,
    "name": "ThemeVariantScope",
    "words": [
     "theme",
@@ -12318,7 +12339,7 @@
    "doc": "Decorator control that isolates a subtree of controls with a locally defined [`ThemeVariant`]."
   },
   {
-   "id": 446,
+   "id": 447,
    "name": "ThemedControl",
    "words": [
     "themed",
@@ -12335,7 +12356,7 @@
    "doc": ""
   },
   {
-   "id": 447,
+   "id": 448,
    "name": "ThemedControl2",
    "words": [
     "themed",
@@ -12352,7 +12373,7 @@
    "doc": ""
   },
   {
-   "id": 448,
+   "id": 449,
    "name": "Thumb",
    "words": [
     "thumb"
@@ -12372,7 +12393,7 @@
    "doc": "A control that can be dragged by the user."
   },
   {
-   "id": 449,
+   "id": 450,
    "name": "ThumbAutomationPeer",
    "words": [
     "thumb",
@@ -12390,7 +12411,7 @@
    "doc": "An automation peer which represents a [`Thumb`]."
   },
   {
-   "id": 450,
+   "id": 451,
    "name": "TickBar",
    "words": [
     "tick",
@@ -12417,7 +12438,7 @@
    "doc": "An element that is used for drawing the ticks of a [`Slider`](crate::Slider)."
   },
   {
-   "id": 451,
+   "id": 452,
    "name": "TileBrush",
    "words": [
     "tile",
@@ -12441,7 +12462,7 @@
    "doc": "Base class for brushes which display repeating images."
   },
   {
-   "id": 452,
+   "id": 453,
    "name": "TimePicker",
    "words": [
     "time",
@@ -12465,7 +12486,7 @@
    "doc": "A control to allow the user to select a time."
   },
   {
-   "id": 453,
+   "id": 454,
    "name": "TimePickerAutomationPeer",
    "words": [
     "time",
@@ -12484,7 +12505,7 @@
    "doc": "An automation peer which represents a [`TimePicker`]."
   },
   {
-   "id": 454,
+   "id": 455,
    "name": "TimePickerPresenter",
    "words": [
     "time",
@@ -12508,7 +12529,7 @@
    "doc": "Defines the presenter used for selecting a time. Intended for use with [`TimePicker`] but can be used independently."
   },
   {
-   "id": 455,
+   "id": 456,
    "name": "Timeline",
    "words": [
     "timeline"
@@ -12531,7 +12552,7 @@
    "doc": "The base class of the storyboard family: the timing of a [`Storyboard`](super::Storyboard) and of the animations it holds. `BeginTime` (`None`: never starts), `Duration`, `AutoReverse`, `RepeatBehavior`, `SpeedRatio` and `FillBehavior` have WinUI's meaning and defaults; the times of a timeline are relative to its parent storyboard."
   },
   {
-   "id": 456,
+   "id": 457,
    "name": "TitleBar",
    "words": [
     "title",
@@ -12561,7 +12582,7 @@
    "doc": "The title bar of a window (WinUI's `TitleBar`): a back button, a pane toggle button, a left header, an icon, a title and a subtitle, content (a search box, in WinUI Gallery) and a right header, drawn in the title bar of the window when the client area extends into it. The control sets the states of WinUI as pseudo-classes, which the control theme of the WinUI theme (`src/FerroUI.Themes.WinUI/Controls/TitleBar.xaml`) styles: `:back-button-visible`, `:pane-toggle-button-visible`, `:left-header-visible`, `:icon-visible`, `:title-text-visible`, `:subtitle-text-visible`, `:content-visible`, `:right-header-visible` (the Visible states of their groups; their absence is Collapsed), `:deactivated` (the Deactivated states: the window is not active), `:expanded-height` (HeightGroup: content or a header), `:compact` (DisplayModeGroup: the content no longer fits beside the title) and `:negative-inset-spacing` (LeftHeaderSpacingGroup). The template parts are WinUI's: `LeftPaddingColumn` and `RightPaddingColumn` (borders in FerroUI, a column definition has no name), `PART_BackButton`, `PART_PaneToggleButton`, `PART_Icon`, `PART_LeftHeaderPresenter`, `PART_ContentPresenterGrid`, `PART_ContentPresenter` and `PART_RightHeaderPresenter`. The Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section 5.1). The window: WinUI's `AppWindow` gives the insets of the caption buttons, the drag regions and the activation. The port takes the insets from [`Window::caption_button_insets`] (the traffic lights of macOS at the left, the caption buttons the toolkit draws at the right), marks the title bar as the drag region of the window and its back button, pane toggle button, headers and the interactive controls of its content as elements that take the input ([`WindowDecorationProperties`] roles, which take effect while the client area extends into the decorations), and follows [`WindowBase::is_active`]. A title is the title of the window while the bar shows it, as in WinUI."
   },
   {
-   "id": 457,
+   "id": 458,
    "name": "TitleBarAutomationPeer",
    "words": [
     "title",
@@ -12580,7 +12601,7 @@
    "doc": "The automation peer of a [`TitleBar`]: a title bar whose name is its title when the application gives it none, as in WinUI."
   },
   {
-   "id": 458,
+   "id": 459,
    "name": "TitleBarTemplateSettings",
    "words": [
     "title",
@@ -12601,7 +12622,7 @@
    "doc": "The values the template of a [`TitleBar`](crate::TitleBar) binds to: the icon element created from its `IconSource`. Each title bar has its own."
   },
   {
-   "id": 459,
+   "id": 460,
    "name": "ToggleButton",
    "words": [
     "toggle",
@@ -12623,7 +12644,7 @@
    "doc": "Represents a control that a user can select (check) or clear (uncheck). Base class for controls that can switch states."
   },
   {
-   "id": 460,
+   "id": 461,
    "name": "ToggleButtonAutomationPeer",
    "words": [
     "toggle",
@@ -12642,7 +12663,7 @@
    "doc": "An automation peer which represents a [`ToggleButton`]."
   },
   {
-   "id": 461,
+   "id": 462,
    "name": "ToggleSplitButton",
    "words": [
     "toggle",
@@ -12664,7 +12685,7 @@
    "doc": "A button with primary and secondary parts that can each be pressed separately. The primary part behaves like a toggle button with two states and the secondary part opens a flyout."
   },
   {
-   "id": 462,
+   "id": 463,
    "name": "ToggleSplitButtonAutomationPeer",
    "words": [
     "toggle",
@@ -12684,7 +12705,7 @@
    "doc": "An automation peer which represents a [`ToggleSplitButton`]."
   },
   {
-   "id": 463,
+   "id": 464,
    "name": "ToggleSwitch",
    "words": [
     "toggle",
@@ -12707,7 +12728,7 @@
    "doc": "A toggle switch control."
   },
   {
-   "id": 464,
+   "id": 465,
    "name": "ToolTip",
    "words": [
     "tool",
@@ -12740,7 +12761,7 @@
    "doc": "A control which pops up a hint when a control is hovered. You will probably not want to create a [`ToolTip`] control directly: if added to the tree it will act as a simple [`ContentControl`] styled to look like a tooltip. To add a tooltip to a control, use the `Tip` attached property ([`ToolTip::tip_property`]), assigning the content that you want displayed."
   },
   {
-   "id": 465,
+   "id": 466,
    "name": "ToolTipAutomationPeer",
    "words": [
     "tool",
@@ -12759,7 +12780,7 @@
    "doc": "An automation peer which represents a [`ToolTip`]."
   },
   {
-   "id": 466,
+   "id": 467,
    "name": "TopLevel",
    "words": [
     "top",
@@ -12787,7 +12808,7 @@
    "doc": "Base class for top-level widgets. This class acts as a base for top level widget. It handles scheduling layout, styling and rendering as well as tracking the widget's [`client_size`](TopLevel::client_size)."
   },
   {
-   "id": 467,
+   "id": 468,
    "name": "TopLevelHost",
    "words": [
     "top",
@@ -12805,7 +12826,7 @@
    "doc": "Hosts the top-level and, when enabled, the drawn decoration layers (underlay, overlay, fullscreen popover). Serves as the visual root of the presentation source."
   },
   {
-   "id": 468,
+   "id": 469,
    "name": "TopLevelHostAutomationPeer",
    "words": [
     "top",
@@ -12825,7 +12846,7 @@
    "doc": ""
   },
   {
-   "id": 469,
+   "id": 470,
    "name": "Track",
    "words": [
     "track"
@@ -12853,7 +12874,7 @@
    "doc": "A control that positions a [`Thumb`] and the buttons before and after it along a range: the building block of scroll bars and sliders."
   },
   {
-   "id": 470,
+   "id": 471,
    "name": "TrackingPage",
    "words": [
     "tracking",
@@ -12870,7 +12891,7 @@
    "doc": ""
   },
   {
-   "id": 471,
+   "id": 472,
    "name": "Transform",
    "words": [
     "transform"
@@ -12886,7 +12907,7 @@
    "doc": "Represents a transform on a visual or brush. Abstract base class of the mutable transforms."
   },
   {
-   "id": 472,
+   "id": 473,
    "name": "TransformGroup",
    "words": [
     "transform",
@@ -12905,7 +12926,7 @@
    "doc": "A transform that applies its child transforms in order."
   },
   {
-   "id": 473,
+   "id": 474,
    "name": "TransitionBase",
    "words": [
     "transition",
@@ -12927,7 +12948,7 @@
    "doc": "Defines how a property should be animated using a transition."
   },
   {
-   "id": 474,
+   "id": 475,
    "name": "TransitioningContentControl",
    "words": [
     "transitioning",
@@ -12950,7 +12971,7 @@
    "doc": "Displays the content according to a data template, using a page transition to move between the old and new content."
   },
   {
-   "id": 475,
+   "id": 476,
    "name": "TranslateTransform",
    "words": [
     "translate",
@@ -12970,7 +12991,7 @@
    "doc": "Translates (moves) a visual."
   },
   {
-   "id": 476,
+   "id": 477,
    "name": "TrayIcon",
    "words": [
     "tray",
@@ -12995,7 +13016,7 @@
    "doc": "An icon in the notification area of the platform."
   },
   {
-   "id": 477,
+   "id": 478,
    "name": "TreeView",
    "words": [
     "tree",
@@ -13017,7 +13038,7 @@
    "doc": "Displays a hierarchical tree of data."
   },
   {
-   "id": 478,
+   "id": 479,
    "name": "TreeViewAutomationPeer",
    "words": [
     "tree",
@@ -13036,7 +13057,7 @@
    "doc": "An automation peer which represents a [`TreeView`]."
   },
   {
-   "id": 479,
+   "id": 480,
    "name": "TreeViewItem",
    "words": [
     "tree",
@@ -13061,7 +13082,7 @@
    "doc": "An item in a [`TreeView`]."
   },
   {
-   "id": 480,
+   "id": 481,
    "name": "TreeViewItemAutomationPeer",
    "words": [
     "tree",
@@ -13081,7 +13102,7 @@
    "doc": "An automation peer which represents a [`TreeViewItem`]."
   },
   {
-   "id": 481,
+   "id": 482,
    "name": "Underline",
    "words": [
     "underline"
@@ -13097,7 +13118,7 @@
    "doc": "`Underline` element - markup helper for indicating underlined content. Equivalent to a `Span` with the `TextDecorations` property set to underline. Can contain other inline elements."
   },
   {
-   "id": 482,
+   "id": 483,
    "name": "UniformGrid",
    "words": [
     "uniform",
@@ -13120,7 +13141,7 @@
    "doc": "A panel which lays out its children in a grid with all cells having the same size."
   },
   {
-   "id": 483,
+   "id": 484,
    "name": "UnitTestApplication",
    "words": [
     "unit",
@@ -13138,7 +13159,7 @@
    "doc": "The application of unit tests: it registers the services of a [`TestServices`] instead of those of a real application."
   },
   {
-   "id": 484,
+   "id": 485,
    "name": "UnrealizedElementAutomationPeer",
    "words": [
     "unrealized",
@@ -13157,7 +13178,7 @@
    "doc": "An automation peer which represents an unrealized element."
   },
   {
-   "id": 485,
+   "id": 486,
    "name": "UnrealizedSelectionPeer",
    "words": [
     "unrealized",
@@ -13175,7 +13196,7 @@
    "doc": ""
   },
   {
-   "id": 486,
+   "id": 487,
    "name": "UserControl",
    "words": [
     "user",
@@ -13192,7 +13213,7 @@
    "doc": "Provides the base class for defining a new control that encapsulates related existing controls and provides its own logic."
   },
   {
-   "id": 487,
+   "id": 488,
    "name": "UserControlAutomationPeer",
    "words": [
     "user",
@@ -13211,7 +13232,7 @@
    "doc": "An automation peer which represents a [`UserControl`]."
   },
   {
-   "id": 488,
+   "id": 489,
    "name": "Viewbox",
    "words": [
     "viewbox"
@@ -13231,7 +13252,7 @@
    "doc": "A control used to scale a single child."
   },
   {
-   "id": 489,
+   "id": 490,
    "name": "ViewboxContainer",
    "words": [
     "viewbox",
@@ -13248,7 +13269,7 @@
    "doc": ""
   },
   {
-   "id": 490,
+   "id": 491,
    "name": "VirtualizingCarouselPanel",
    "words": [
     "virtualizing",
@@ -13266,7 +13287,7 @@
    "doc": "A panel used by [`Carousel`] to display the current item."
   },
   {
-   "id": 491,
+   "id": 492,
    "name": "VirtualizingPanel",
    "words": [
     "virtualizing",
@@ -13283,7 +13304,7 @@
    "doc": "Base class for panels that can be used to virtualize items for an [`ItemsControl`]. Panels should implement the abstract members of this class to provide virtualization of items in an [`ItemsControl`]. Derived panels can manage scrolling by implementing the logical scrollable contract or by listening to the effective viewport changed event. The methods on the [`ItemContainerGenerator`] should be used to create, prepare and clear containers for items. This class is abstract: its abstract members panic unless overridden."
   },
   {
-   "id": 492,
+   "id": 493,
    "name": "VirtualizingStackPanel",
    "words": [
     "virtualizing",
@@ -13309,7 +13330,7 @@
    "doc": "Arranges and virtualizes content on a single line that is oriented either horizontally or vertically."
   },
   {
-   "id": 493,
+   "id": 494,
    "name": "VisibilityChangingCommandBarButton",
    "words": [
     "visibility",
@@ -13329,7 +13350,7 @@
    "doc": ""
   },
   {
-   "id": 494,
+   "id": 495,
    "name": "Visual",
    "words": [
     "visual"
@@ -13362,7 +13383,7 @@
    "doc": "Base class for controls that provides rendering and related visual properties. The visual class represents elements that have a visual on-screen representation and stores all the information needed for a renderer to render the control. To traverse the visual tree, use the methods in the `visual_tree` module."
   },
   {
-   "id": 495,
+   "id": 496,
    "name": "VisualBrush",
    "words": [
     "visual",
@@ -13381,7 +13402,7 @@
    "doc": "Paints an area with a [`Visual`]."
   },
   {
-   "id": 496,
+   "id": 497,
    "name": "VisualLayerManager",
    "words": [
     "visual",
@@ -13399,7 +13420,7 @@
    "doc": "A control that manages multiple layers such as adorners, overlays, text selectors, and popups."
   },
   {
-   "id": 497,
+   "id": 498,
    "name": "VisualState",
    "words": [
     "visual",
@@ -13416,7 +13437,7 @@
    "doc": "A visual state: the values its [`setters`](Self::setters) set while it is the current state of its [`VisualStateGroup`](super::VisualStateGroup). The [`storyboard`](Self::storyboard) of the state runs while it is the current state; the storyboard of the state it leaves stops (its values are removed). The setters are setters with a [`target`](ferroui_base::styling::Setter::target): markup writes `<Setter Target=\"Element.Property\" Value=\"...\"/>`. They are applied at animation priority, above local values and styles, and removed when the group leaves the state (docs/porting/winui-calculator-gaps.md, section 5.5). Deviation (docs/porting/winui-controls.md, VisualStateManager): `x:Name` names the state but does not register it in the name scope, so `find_name` does not find it."
   },
   {
-   "id": 498,
+   "id": 499,
    "name": "VisualStateGroup",
    "words": [
     "visual",
@@ -13434,7 +13455,7 @@
    "doc": "A group of mutually exclusive [`VisualState`]s: at most one of them is the [`current_state`](Self::current_state) of the group, null at first. The groups of an element are the attached [`VisualStateManager::visual_state_groups_property`](super::VisualStateManager::visual_state_groups_property); `VisualStateManager::go_to_state` changes the state of the group that has the state of the name it is given."
   },
   {
-   "id": 499,
+   "id": 500,
    "name": "VisualStateManager",
    "words": [
     "visual",
@@ -13455,7 +13476,7 @@
    "doc": "Manages the visual states of controls and the transitions between them. The visual states of an element are the [`visual_state_groups_property`](Self::visual_state_groups_property) attached to the root of its visual states: for a templated control the root of its template, for a user control (or any content control, or content page) whose template has none, the control that is its content. [`go_to_state`](Self::go_to_state) makes a state the current state of its group. A custom manager derives from this class, overrides [`go_to_state_core`](VisualStateManagerImpl::go_to_state_core) and is set on the root with [`set_custom_visual_state_manager`](Self::set_custom_visual_state_manager)."
   },
   {
-   "id": 500,
+   "id": 501,
    "name": "VisualTransition",
    "words": [
     "visual",
@@ -13472,7 +13493,7 @@
    "doc": "How a [`VisualStateGroup`](super::VisualStateGroup) changes from one state to another when `GoToState` is called with transitions (WinUI's `VisualTransition`). A transition applies from the state named [`from`](Self::from) (empty: any) to the state named [`to`](Self::to) (empty: any). It runs its [`storyboard`](Self::storyboard) and, over [`generated_duration`](Self::generated_duration) eased by [`generated_easing_function`](Self::generated_easing_function), animations it generates from the values of the old state to those of the new one; the setters and the storyboard of the new state apply when they have completed."
   },
   {
-   "id": 501,
+   "id": 502,
    "name": "Window",
    "words": [
     "window"
@@ -13510,7 +13531,7 @@
    "doc": "A top-level window."
   },
   {
-   "id": 502,
+   "id": 503,
    "name": "WindowAutomationPeer",
    "words": [
     "window",
@@ -13528,7 +13549,7 @@
    "doc": "An automation peer which represents a [`Window`]."
   },
   {
-   "id": 503,
+   "id": 504,
    "name": "WindowBase",
    "words": [
     "window",
@@ -13549,7 +13570,7 @@
    "doc": "Base class for top-level windows. This class acts as a base for top level windows such as `Window` and `PopupRoot`. It handles scheduling layout, styling and rendering as well as tracking the window client size and window activation."
   },
   {
-   "id": 504,
+   "id": 505,
    "name": "WindowBaseAutomationPeer",
    "words": [
     "window",
@@ -13568,7 +13589,7 @@
    "doc": "An automation peer which represents a [`WindowBase`]: the root of an automation tree."
   },
   {
-   "id": 505,
+   "id": 506,
    "name": "WindowDrawnDecorations",
    "words": [
     "window",
@@ -13599,7 +13620,7 @@
    "doc": "Manages client-side window decorations (app-drawn window frame). This is a logical element that holds the decorations template and properties. The host of the top-level extracts the overlay, underlay and popover visuals from the template content and inserts them into its own visual tree. Pseudo-classes: `:normal`, `:maximized`, `:fullscreen`, `:has-shadow`, `:has-border`, `:has-titlebar`, `:has-maximize`, `:has-fullscreen`, `:has-minimize`, `:has-close`, `:has-title`."
   },
   {
-   "id": 506,
+   "id": 507,
    "name": "WindowDrawnDecorationsContent",
    "words": [
     "window",
@@ -13618,7 +13639,7 @@
    "doc": "Holds the template content for [`WindowDrawnDecorations`](super::WindowDrawnDecorations). Contains three visual slots: underlay, overlay, and fullscreen popover."
   },
   {
-   "id": 507,
+   "id": 508,
    "name": "WindowNotificationManager",
    "words": [
     "window",
@@ -13639,7 +13660,7 @@
    "doc": "An [`INotificationManager`] that displays notifications in a window."
   },
   {
-   "id": 508,
+   "id": 509,
    "name": "WrapPanel",
    "words": [
     "wrap",
@@ -13663,7 +13684,7 @@
    "doc": "Positions child elements in sequential position from left to right, breaking content to the next line at the edge of the containing box. Subsequent ordering happens sequentially from top to bottom or from right to left, depending on the value of the `Orientation` property."
   },
   {
-   "id": 509,
+   "id": 510,
    "name": "XamlAmbientLight",
    "words": [
     "xaml",
@@ -13684,7 +13705,7 @@
    "doc": "The ambient light of Reveal (WinUI's internal `XamlAmbientLight`), also usable on its own: an ambient composition light of its [`color`](Self::color) that lights the targets of its id; the attached [`is_target`](Self::is_target_property) makes an element or a brush a target."
   },
   {
-   "id": 510,
+   "id": 511,
    "name": "XamlCompositionBrushBase",
    "words": [
     "xaml",
@@ -13705,7 +13726,7 @@
    "doc": "A brush that paints an area with a composition brush (WinUI `Microsoft.UI.Xaml.Media.XamlCompositionBrushBase`). A subclass creates its [`composition_brush`](Self::composition_brush) when the brush is first used in a window that has a compositor (`OnConnected`) and releases it when no element of such a window uses it any more (`OnDisconnected`). The compositor paints the composition brush inside the shape the brush fills, as the brushes of WinUI's composition are painted; where no composition brush is set, and where the brush is drawn without a compositor (an image of a visual drawn by the immediate renderer), the area is filled with [`fallback_color`](Self::fallback_color)."
   },
   {
-   "id": 511,
+   "id": 512,
    "name": "XamlLight",
    "words": [
     "xaml",
@@ -23212,6 +23233,19 @@
      "default": "GroupHeaderPlacement::Top",
      "read_only": false,
      "doc": "Defines the `GroupHeaderPlacement` property."
+    },
+    {
+     "owner": "ItemsWrapGrid",
+     "kind": "styled",
+     "value": {
+      "rust": "GroupHeaderPlacement",
+      "nullable": false,
+      "kind": "enum",
+      "enum": "GroupHeaderPlacement"
+     },
+     "default": "GroupHeaderPlacement::Top",
+     "read_only": false,
+     "doc": "Defines the `GroupHeaderPlacement` property."
     }
    ]
   },
@@ -23259,6 +23293,18 @@
    "declarations": [
     {
      "owner": "ItemsStackPanel",
+     "kind": "styled",
+     "value": {
+      "rust": "Thickness",
+      "nullable": false,
+      "kind": "parsed"
+     },
+     "default": "Thickness::default()",
+     "read_only": false,
+     "doc": "Defines the `GroupPadding` property: the space around each group."
+    },
+    {
+     "owner": "ItemsWrapGrid",
      "kind": "styled",
      "value": {
       "rust": "Thickness",

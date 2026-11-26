@@ -621,6 +621,19 @@ pub fn grid_view() -> El<ferroui_controls::GridView> {
     El::new()
 }
 
+pub use ferroui_controls::GridViewHeaderItem;
+
+impl ViewClass for ferroui_controls::GridViewHeaderItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::GridViewHeaderItem>::new()
+    }
+}
+
+/// Starts an element of [`GridViewHeaderItem`](ferroui_controls::GridViewHeaderItem).
+pub fn grid_view_header_item() -> El<ferroui_controls::GridViewHeaderItem> {
+    El::new()
+}
+
 pub use ferroui_controls::GridViewItem;
 
 impl ViewClass for ferroui_controls::GridViewItem {
@@ -5238,6 +5251,16 @@ pub trait ItemsWrapGridProps: ElementBuilder {
     /// Sets [`ItemsWrapGrid::maximum_rows_or_columns_property`](ferroui_controls::ItemsWrapGrid::maximum_rows_or_columns_property).
     fn maximum_rows_or_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ItemsWrapGrid>::maximum_rows_or_columns_property(), value)
+    }
+
+    /// Sets [`ItemsWrapGrid::group_padding_property`](ferroui_controls::ItemsWrapGrid::group_padding_property).
+    fn group_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsWrapGrid>::group_padding_property(), value)
+    }
+
+    /// Sets [`ItemsWrapGrid::group_header_placement_property`](ferroui_controls::ItemsWrapGrid::group_header_placement_property).
+    fn group_header_placement<M>(self, value: impl IntoProp<ferroui_controls::GroupHeaderPlacement, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsWrapGrid>::group_header_placement_property(), value)
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ItemsWrapGrid>> ItemsWrapGridProps for El<T> {}

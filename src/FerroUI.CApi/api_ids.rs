@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 4048855936424894037;
+pub(crate) const API_FINGERPRINT: i64 = 3635999352226567406;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 511] = [
+pub(crate) static TYPE_NAMES: [&str; 512] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -149,6 +149,7 @@ pub(crate) static TYPE_NAMES: [&str; 511] = [
     "GridSplitter",
     "GridView",
     "GridViewAutomationPeer",
+    "GridViewHeaderItem",
     "GridViewItem",
     "GridViewItemAutomationPeer",
     "GroupBox",
