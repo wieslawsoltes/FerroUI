@@ -60,8 +60,7 @@ impl IFeatureUsageTrackingSession for DefaultFeatureUsageTrackingSession {
     }
 }
 
-/// The references are [`Uuid`]s (upstream's `Guid`); since 0.5, where they were the deprecated
-/// `ferroui_splat::Guid`.
+/// The references are [`Uuid`]s (upstream's `Guid`).
 impl IFeatureUsageTrackingSessionOf<Uuid> for DefaultFeatureUsageTrackingSession {
     fn feature_reference(&self) -> Uuid {
         self.feature_reference
