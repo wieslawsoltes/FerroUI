@@ -59,6 +59,7 @@ mod info_bar_page;
 mod grid_view_page;
 mod list_view_page;
 mod pivot_page;
+mod tab_view_page;
 mod navigation_view_page;
 mod auto_suggest_box_page;
 mod rich_edit_box_page;
@@ -223,6 +224,7 @@ pub use info_bar_page::InfoBarPage;
 pub use grid_view_page::GridViewPage;
 pub use list_view_page::ListViewPage;
 pub use pivot_page::PivotPage;
+pub use tab_view_page::TabViewPage;
 pub use progress_ring_page::ProgressRingPage;
 pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
@@ -338,6 +340,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ListViewPage::TYPE,
     GridViewPage::TYPE,
     PivotPage::TYPE,
+    TabViewPage::TYPE,
     ProgressRingPage::TYPE,
     NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
@@ -451,6 +454,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ListViewPage::XAML_CLASS,
     &GridViewPage::XAML_CLASS,
     &PivotPage::XAML_CLASS,
+    &TabViewPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,
