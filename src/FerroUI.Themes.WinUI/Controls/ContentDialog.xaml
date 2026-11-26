@@ -1,0 +1,174 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/ContentDialog_themeresources.xaml (DefaultContentDialogStyle and the
+    implicit style of ContentDialog; its resources are Resources/ContentDialog_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The visual states are pseudo-classes the control sets: :showing, :full-size, the
+    ButtonsVisibilityStates and the DefaultButtonStates.
+  - The transitions of DialogShowingStates are played by the control on BackgroundElement.
+  - Grids with a padding or a border are Borders. CommandSpace's five columns are a UniformGrid of
+    the visible buttons; a single button takes the second of two columns, as in the source.
+  - The button style properties and DialogBorderStates have no counterpart.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultContentDialogStyle" TargetType="ContentDialog">
+    <Setter Property="Foreground" Value="{DynamicResource ContentDialogForeground}" />
+    <Setter Property="Background" Value="{DynamicResource ContentDialogBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ContentDialogBorderWidth}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ContentDialogBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot" IsVisible="False">
+          <Rectangle x:Name="SmokeLayerBackground" Fill="{DynamicResource ContentDialogSmokeFill}" />
+          <Border x:Name="BackgroundElement"
+                  Background="{TemplateBinding Background}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  ClipToBounds="True"
+                  MinWidth="{DynamicResource ContentDialogMinWidth}"
+                  MaxWidth="{DynamicResource ContentDialogMaxWidth}"
+                  MinHeight="{DynamicResource ContentDialogMinHeight}"
+                  MaxHeight="{DynamicResource ContentDialogMaxHeight}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  RenderTransformOrigin="50%,50%"
+                  KeyboardNavigation.TabNavigation="Cycle">
+            <Grid x:Name="DialogSpace" RowDefinitions="*,Auto">
+              <ScrollViewer x:Name="ContentScrollViewer"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Disabled"
+                            IsTabStop="False">
+                <Border Background="{DynamicResource ContentDialogTopOverlay}"
+                        Padding="{DynamicResource ContentDialogPadding}"
+                        BorderThickness="{DynamicResource ContentDialogSeparatorThickness}"
+                        BorderBrush="{DynamicResource ContentDialogSeparatorBorderBrush}">
+                  <Grid RowDefinitions="Auto,*">
+                    <ContentPresenter x:Name="Title"
+                                      Margin="{DynamicResource ContentDialogTitleMargin}"
+                                      Content="{TemplateBinding Title}"
+                                      ContentTemplate="{TemplateBinding TitleTemplate}"
+                                      FontSize="20"
+                                      FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+                                      FontWeight="SemiBold"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      TextWrapping="Wrap"
+                                      MaxLines="2" />
+                    <ContentPresenter x:Name="Content"
+                                      Grid.Row="1"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      FontSize="{DynamicResource ControlContentThemeFontSize}"
+                                      FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      TextWrapping="Wrap" />
+                  </Grid>
+                </Border>
+              </ScrollViewer>
+              <Border x:Name="CommandSpace"
+                      Grid.Row="1"
+                      VerticalAlignment="Bottom"
+                      Padding="{DynamicResource ContentDialogPadding}"
+                      Background="{TemplateBinding Background}">
+                <UniformGrid x:Name="CommandGrid" Rows="1" Columns="3" ColumnSpacing="8">
+                  <Button x:Name="PrimaryButton"
+                          Content="{TemplateBinding PrimaryButtonText}"
+                          IsEnabled="{TemplateBinding IsPrimaryButtonEnabled}"
+                          HorizontalAlignment="Stretch" />
+                  <Button x:Name="SecondaryButton"
+                          Content="{TemplateBinding SecondaryButtonText}"
+                          IsEnabled="{TemplateBinding IsSecondaryButtonEnabled}"
+                          HorizontalAlignment="Stretch" />
+                  <Button x:Name="CloseButton"
+                          Content="{TemplateBinding CloseButtonText}"
+                          HorizontalAlignment="Stretch" />
+                </UniformGrid>
+              </Border>
+            </Grid>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:showing /template/ Grid#LayoutRoot">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:full-size /template/ Border#BackgroundElement">
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- ButtonsVisibilityStates. -->
+    <Style Selector="^:none-visible /template/ Border#CommandSpace">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:primary-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+      <Setter Property="FirstColumn" Value="1" />
+    </Style>
+    <Style Selector="^:secondary-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+      <Setter Property="FirstColumn" Value="1" />
+    </Style>
+    <Style Selector="^:close-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+      <Setter Property="FirstColumn" Value="1" />
+    </Style>
+    <Style Selector="^:primary-secondary-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+    </Style>
+    <Style Selector="^:primary-close-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+    </Style>
+    <Style Selector="^:secondary-close-visible /template/ UniformGrid#CommandGrid">
+      <Setter Property="Columns" Value="2" />
+    </Style>
+    <Style Selector="^:secondary-visible /template/ Button#PrimaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:close-visible /template/ Button#PrimaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:secondary-close-visible /template/ Button#PrimaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:primary-visible /template/ Button#SecondaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:close-visible /template/ Button#SecondaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:primary-close-visible /template/ Button#SecondaryButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:primary-visible /template/ Button#CloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:secondary-visible /template/ Button#CloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:primary-secondary-visible /template/ Button#CloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- DefaultButtonStates. -->
+    <Style Selector="^:primary-default /template/ Button#PrimaryButton">
+      <Setter Property="Theme" Value="{StaticResource AccentButtonStyle}" />
+    </Style>
+    <Style Selector="^:secondary-default /template/ Button#SecondaryButton">
+      <Setter Property="Theme" Value="{StaticResource AccentButtonStyle}" />
+    </Style>
+    <Style Selector="^:close-default /template/ Button#CloseButton">
+      <Setter Property="Theme" Value="{StaticResource AccentButtonStyle}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ContentDialog}" TargetType="ContentDialog" BasedOn="{StaticResource DefaultContentDialogStyle}" />
+</ResourceDictionary>
