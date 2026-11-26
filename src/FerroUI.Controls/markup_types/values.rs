@@ -182,6 +182,8 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<crate::IncrementalLoadingTrigger>();
     ValueTypes::register_used::<crate::ItemsUpdatingScrollMode>();
     ValueTypes::register_used::<crate::GroupHeaderPlacement>();
+    ValueTypes::register_used::<crate::TabViewWidthMode>();
+    ValueTypes::register_used::<crate::TabViewCloseButtonOverlayMode>();
     ValueTypes::register_used::<crate::PivotHeaderFocusVisualPlacement>();
     ValueTypes::register_used::<crate::PivotSlideInAnimationGroup>();
     ValueTypes::register_used::<crate::SwipeMode>();
@@ -275,6 +277,18 @@ impl ferroui_base::data::core::ValueTypeRegistration for crate::ItemsUpdatingScr
 impl ferroui_base::data::core::ValueTypeRegistration for crate::GroupHeaderPlacement {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<crate::GroupHeaderPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::TabViewWidthMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::TabViewWidthMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::TabViewCloseButtonOverlayMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::TabViewCloseButtonOverlayMode>();
     }
 }
 
