@@ -10,8 +10,10 @@
 
 use crate::items_source::{IItemsList, ItemsChangedEventArgs, ItemsChangedHandler};
 use crate::templates::IDataTemplate;
-use crate::ItemsSource;
+use crate::utils::BindingEvaluator;
+use crate::{AssignedBinding, ItemsSource};
 use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::ReflectionBinding;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObject, FerroObjectImpl,
@@ -55,6 +57,8 @@ impl PartialEq for CollectionViewGroup {
 pub struct GroupedItemsView {
     this: Weak<GroupedItemsView>,
     source: Option<ItemsSource>,
+    /// The property path of the items of each group of `source` (WinUI's `ItemsPath`).
+    items_path: Option<Rc<str>>,
     groups: RefCell<Vec<Rc<CollectionViewGroup>>>,
     /// The flat index of the first item of each group, and the count of all items at the end.
     starts: RefCell<Vec<usize>>,
@@ -67,20 +71,34 @@ pub struct GroupedItemsView {
 impl GroupedItemsView {
     /// A view of `groups`, which does not change.
     pub fn new(groups: Vec<Rc<CollectionViewGroup>>) -> Rc<Self> {
-        Self::create(None, groups)
+        Self::create(None, None, groups)
     }
 
     /// A view of the groups of `source`: each item is a [`CollectionViewGroup`], or a list that is
     /// both the header and the items of its group. The view follows the changes of `source`.
     pub fn from_source(source: ItemsSource) -> Rc<Self> {
-        let groups = Self::read_groups(&source);
-        Self::create(Some(source), groups)
+        let groups = Self::read_groups(&source, None);
+        Self::create(Some(source), None, groups)
     }
 
-    fn create(source: Option<ItemsSource>, groups: Vec<Rc<CollectionViewGroup>>) -> Rc<Self> {
+    /// A view of the groups of `source` whose items are the value of the property path
+    /// `items_path` of each group (WinUI's `CollectionViewSource.ItemsPath`); the group is the
+    /// header. An empty path reads the groups as [`from_source`](Self::from_source) does.
+    pub fn from_source_with_items_path(source: ItemsSource, items_path: &str) -> Rc<Self> {
+        let items_path: Option<Rc<str>> = (!items_path.is_empty()).then(|| items_path.into());
+        let groups = Self::read_groups(&source, items_path.as_deref());
+        Self::create(Some(source), items_path, groups)
+    }
+
+    fn create(
+        source: Option<ItemsSource>,
+        items_path: Option<Rc<str>>,
+        groups: Vec<Rc<CollectionViewGroup>>,
+    ) -> Rc<Self> {
         let view = Rc::new_cyclic(|this| Self {
             this: this.clone(),
             source,
+            items_path,
             groups: RefCell::new(groups),
             starts: RefCell::new(Vec::new()),
             handlers: RefCell::new(Vec::new()),
@@ -92,8 +110,36 @@ impl GroupedItemsView {
         view
     }
 
-    fn read_groups(source: &ItemsSource) -> Vec<Rc<CollectionViewGroup>> {
-        source.iter().filter_map(|item| Self::group_of_item(item)).collect()
+    fn read_groups(source: &ItemsSource, items_path: Option<&str>) -> Vec<Rc<CollectionViewGroup>> {
+        let Some(path) = items_path else {
+            return source.iter().filter_map(|item| Self::group_of_item(item)).collect();
+        };
+        // One evaluator of the path for all groups.
+        let evaluator = BindingEvaluator::new();
+        evaluator.update_binding(&AssignedBinding::new(ReflectionBinding::new(path)));
+        let groups = source.iter().filter_map(|item| Self::group_at_path(&evaluator, item)).collect();
+        evaluator.dispose();
+        groups
+    }
+
+    /// The group of `item` whose items are the value of the path of `evaluator`; a group without
+    /// a list at the path has no items.
+    fn group_at_path(evaluator: &BindingEvaluator, item: Option<BoxedValue>) -> Option<Rc<CollectionViewGroup>> {
+        let value = item?;
+        let items = evaluator.evaluate(&Some(value.clone())).and_then(|items| Self::items_of_value(&items));
+        Some(CollectionViewGroup::new(Some(value), items.unwrap_or_else(|| ItemsSource::from_items([]))))
+    }
+
+    /// The list `value` holds, if any.
+    fn items_of_value(value: &BoxedValue) -> Option<ItemsSource> {
+        if let Some(items) = value.downcast_ref::<ItemsSource>() {
+            return Some(items.clone());
+        }
+        if let Some(items) = value.downcast_ref::<Option<ItemsSource>>() {
+            return items.clone();
+        }
+        let converted = ValueTypes::try_convert_registered(value, ValueType::of::<ItemsSource>())?;
+        converted.downcast_ref::<ItemsSource>().cloned()
     }
 
     fn group_of_item(item: Option<BoxedValue>) -> Option<Rc<CollectionViewGroup>> {
@@ -201,7 +247,7 @@ impl GroupedItemsView {
 
     fn reload(&self) {
         let Some(source) = &self.source else { return };
-        let groups = Self::read_groups(source);
+        let groups = Self::read_groups(source, self.items_path.as_deref());
         for (items, token) in self.subscriptions.borrow_mut().drain(..) {
             items.list().remove_collection_changed(token);
         }
@@ -282,7 +328,8 @@ impl IItemsList for GroupedItemsView {
 }
 
 /// The source of a grouped list (WinUI's `CollectionViewSource`): with `IsSourceGrouped`, its
-/// [`view`](Self::view) is a [`GroupedItemsView`] of the groups of `Source`; without, the source.
+/// [`view`](Self::view) is a [`GroupedItemsView`] of the groups of `Source`, whose items are the
+/// value of `ItemsPath` of each group when it is set; without, the source.
 #[repr(C)]
 pub struct CollectionViewSource {
     base: FerroObject,
@@ -309,12 +356,22 @@ ferroui_base::ferro_properties! { impl CollectionViewSource {
             FerroProperty::register::<CollectionViewSource, _>("IsSourceGrouped", false)
         }
     );
+
+    ferro_property!(
+        /// Defines the `ItemsPath` property: the property path of the items of each group of a
+        /// grouped source (WinUI's `PropertyPath`, as a path string); empty, each group is its
+        /// own list of items.
+        pub fn items_path_property() -> StyledProperty<String> {
+            FerroProperty::register::<CollectionViewSource, _>("ItemsPath", String::new())
+        }
+    );
 } }
 
 impl FerroObjectImpl for CollectionViewSource {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         if change.property() == Self::source_property().as_property()
             || change.property() == Self::is_source_grouped_property().as_property()
+            || change.property() == Self::items_path_property().as_property()
         {
             *this.view.borrow_mut() = None;
         }
@@ -347,6 +404,14 @@ impl CollectionViewSource {
         self.set_value(Self::is_source_grouped_property(), value)
     }
 
+    pub fn items_path(&self) -> String {
+        self.get_value(Self::items_path_property())
+    }
+
+    pub fn set_items_path(&self, value: impl Into<String>) {
+        self.set_value(Self::items_path_property(), value.into())
+    }
+
     /// The items a list view shows (WinUI's `View`).
     pub fn view(&self) -> Option<ItemsSource> {
         if let Some(view) = self.view.borrow().as_ref() {
@@ -354,7 +419,7 @@ impl CollectionViewSource {
         }
         let source = self.source()?;
         let view = match self.is_source_grouped() {
-            true => ItemsSource::new(GroupedItemsView::from_source(source)),
+            true => ItemsSource::new(GroupedItemsView::from_source_with_items_path(source, &self.items_path())),
             false => source,
         };
         *self.view.borrow_mut() = Some(view.clone());

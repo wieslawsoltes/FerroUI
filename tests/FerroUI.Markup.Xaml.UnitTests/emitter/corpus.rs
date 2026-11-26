@@ -147,6 +147,8 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("items_source_indexer.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Note'>\n  <TextBlock Text='{CompiledBinding Words[1]}'/>\n  <Border Tag='{CompiledBinding Words[0]}'/>\n</StackPanel>\n"),
     ("scoped_namespace_types.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><Border xmlns:p="clr-namespace:FerroUI.Media;assembly=FerroUI.Base" Tag="{x:Type p:SolidColorBrush}"/><Border Tag="{x:Type p:Button}"/></StackPanel>"#),
     ("scoped_namespace_bindings.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:p="clr-namespace:Wrong.Scope"><TextBlock xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls" Grid.Row="7" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/><TextBlock xmlns:p='clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls' Grid.Row='9' Text='{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}'/><Button><Button.Template><ControlTemplate xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><TextBlock Name="PART_Value" Grid.Row="11" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/></ControlTemplate></Button.Template></Button></StackPanel>"#),
+    ("list_view_items_updating_scroll_mode.xaml", "<ItemsStackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' ItemsUpdatingScrollMode='KeepLastItemInView'></ItemsStackPanel>"),
+    ("collection_view_source_items_path.xaml", "<CollectionViewSource xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' IsSourceGrouped='True' ItemsPath='Items'></CollectionViewSource>"),
 ];
 
 /// The documents that must be eligible for emission.
@@ -282,6 +284,8 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "items_source_indexer.xaml",
     "scoped_namespace_types.xaml",
     "scoped_namespace_bindings.xaml",
+    "list_view_items_updating_scroll_mode.xaml",
+    "collection_view_source_items_path.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

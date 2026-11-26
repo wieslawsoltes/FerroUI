@@ -5715,6 +5715,58 @@ fn build_scoped_namespace_bindings_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `list_view_items_updating_scroll_mode.xaml`.
+static BUILD_LIST_VIEW_ITEMS_UPDATING_SCROLL_MODE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/list_view_items_updating_scroll_mode.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `list_view_items_updating_scroll_mode.xaml`.
+pub fn build_list_view_items_updating_scroll_mode_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsStackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    // list_view_items_updating_scroll_mode.xaml(1,2) ItemsStackPanel
+    let items_stack_panel_0 = ::ferroui_controls::ItemsStackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_LIST_VIEW_ITEMS_UPDATING_SCROLL_MODE_XAML_DOCUMENT, rt::to_value(items_stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    items_stack_panel_0.begin_init();
+    // list_view_items_updating_scroll_mode.xaml(1,2) ItemsUpdatingScrollMode
+    items_stack_panel_0.set_value(::ferroui_controls::ItemsStackPanel::items_updating_scroll_mode_property(), ::ferroui_controls::ItemsUpdatingScrollMode::KeepLastItemInView);
+    rt::end_init(&items_stack_panel_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&items_stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(items_stack_panel_0)
+}
+
+fn build_list_view_items_updating_scroll_mode_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_list_view_items_updating_scroll_mode_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `collection_view_source_items_path.xaml`.
+static BUILD_COLLECTION_VIEW_SOURCE_ITEMS_PATH_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/collection_view_source_items_path.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `collection_view_source_items_path.xaml`.
+pub fn build_collection_view_source_items_path_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::CollectionViewSource>, ::ferroui_markup_xaml::XamlLoadError> {
+    // collection_view_source_items_path.xaml(1,2) CollectionViewSource
+    let collection_view_source_0 = ::ferroui_controls::CollectionViewSource::new();
+    let context = rt::populate_context(service_provider, &BUILD_COLLECTION_VIEW_SOURCE_ITEMS_PATH_XAML_DOCUMENT, rt::to_value(collection_view_source_0.clone()));
+    let name_scope = context.name_scope_field();
+    // collection_view_source_items_path.xaml(1,2) IsSourceGrouped
+    collection_view_source_0.set_value(::ferroui_controls::CollectionViewSource::is_source_grouped_property(), ::core::clone::Clone::clone(&true));
+    // collection_view_source_items_path.xaml(1,136) ItemsPath
+    collection_view_source_0.set_value(::ferroui_controls::CollectionViewSource::items_path_property(), ::std::string::String::from("Items"));
+    rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(collection_view_source_0)
+}
+
+fn build_collection_view_source_items_path_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_collection_view_source_items_path_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5848,6 +5900,8 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("items_source_indexer.xaml", build_items_source_indexer_xaml_untyped as BuildDocument),
     ("scoped_namespace_types.xaml", build_scoped_namespace_types_xaml_untyped as BuildDocument),
     ("scoped_namespace_bindings.xaml", build_scoped_namespace_bindings_xaml_untyped as BuildDocument),
+    ("list_view_items_updating_scroll_mode.xaml", build_list_view_items_updating_scroll_mode_xaml_untyped as BuildDocument),
+    ("collection_view_source_items_path.xaml", build_collection_view_source_items_path_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI
