@@ -311,6 +311,7 @@ control_tests! {
     split_button => "SplitButton";
     swipe_control => "SwipeControl";
     scroll_view => "ScrollView";
+    annotated_scroll_bar => "AnnotatedScrollBar";
     toggle_switch => "ToggleSwitch";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";
@@ -1280,5 +1281,75 @@ fn the_scroll_view_gets_its_presenter_and_bars_from_the_theme() {
     window.update_layout();
     assert_eq!(view.vertical_offset(), 120.0);
     assert_eq!(vertical.value(), 120.0);
+}
+
+/// WinUI's AnnotatedScrollBar (`Controls/AnnotatedScrollBar.xaml`; docs/porting/winui-controls.md,
+/// section 10.13) gets its parts from the theme and drives the presenter of a scroll view: its
+/// thumb follows the offset, a press on the rail scrolls to the offset under it.
+#[test]
+fn the_annotated_scroll_bar_gets_its_parts_from_the_theme_and_drives_a_presenter() {
+    use ferroui_controls::{AnnotatedScrollBar, ScrollView, ScrollingAnimationMode, ScrollingScrollOptions};
+
+    let _app = start_themed_application();
+    let view = ScrollView::new();
+    view.set_height(100.0);
+    let content = Border::new();
+    content.set_height(1100.0);
+    view.set_content(Some(content.upcast()));
+    let bar = AnnotatedScrollBar::new();
+    bar.set_height(232.0);
+    let grid = ferroui_controls::Grid::new();
+    grid.set_column_definitions(ferroui_controls::ColumnDefinitions::parse("*,Auto").unwrap());
+    grid.children().add(view.clone());
+    ferroui_controls::Grid::set_column(&bar.clone().upcast(), 1);
+    grid.children().add(bar.clone());
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&grid)));
+    window.show();
+    window.update_layout();
+    let presenter = view.scroll_presenter().expect("the presenter of the view");
+    presenter.set_vertical_scroll_controller(Some(bar.scroll_controller()));
+    window.update_layout();
+
+    for name in [
+        "PART_RootGrid",
+        "PART_VerticalIncrementRepeatButton",
+        "PART_VerticalGrid",
+        "PART_LabelsGrid",
+        "PART_ToolTipRail",
+        "PART_VerticalThumbGhost",
+        "PART_VerticalThumb",
+        "PART_VerticalDecrementRepeatButton",
+    ] {
+        assert!(
+            bar.get_template_descendants().into_iter().any(|element| element.name().as_deref() == Some(name)),
+            "the part {name} of the bar"
+        );
+    }
+    // The detail label is the tip of the rail: a tooltip around PART_TooltipContentPresenter.
+    let rail = bar
+        .get_template_descendants()
+        .into_iter()
+        .find(|element| element.name().as_deref() == Some("PART_ToolTipRail"))
+        .and_then(|element| element.cast::<Control>())
+        .expect("the rail");
+    let tip = ferroui_controls::ToolTip::get_tip(&rail).and_then(|tip| Control::from_boxed(&tip)).expect("a tip");
+    let tip = tip.cast::<ferroui_controls::ToolTip>().expect("a tooltip");
+    let presenter_name = tip.content().as_ref().and_then(Control::from_boxed).and_then(|content| content.name());
+    assert_eq!(presenter_name.as_deref(), Some("PART_TooltipContentPresenter"));
+    assert!(!ferroui_controls::ToolTip::get_service_enabled(&rail));
+    assert!(bar.scroll_controller().can_scroll());
+    let thumb = bar
+        .get_template_descendants()
+        .into_iter()
+        .find(|element| element.name().as_deref() == Some("PART_VerticalThumb"))
+        .expect("the thumb");
+    let thumb_y = || thumb.render_transform().map(|transform| transform.value().m32).unwrap_or(-1.0);
+    assert_eq!(thumb_y(), 0.0);
+    view.scroll_to_with(0.0, 500.0, ScrollingScrollOptions::new(ScrollingAnimationMode::Disabled));
+    window.update_layout();
+    assert_eq!(view.vertical_offset(), 500.0);
+    // The rail between the buttons less the thumb, over the 1000 px the view scrolls.
+    assert!(thumb_y() > 0.0, "the thumb follows the offset: {}", thumb_y());
 }
 

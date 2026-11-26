@@ -67,16 +67,6 @@
       "reason": "TwoPaneView: no FerroUI control."
     },
     {
-      "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",
-      "key": "*",
-      "reason": "AnnotatedScrollBar: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar_themeresources.xaml",
-      "key": "*",
-      "reason": "AnnotatedScrollBar: no FerroUI control."
-    },
-    {
       "document": "controls/dev/ItemsView/ItemsView.xaml",
       "key": "*",
       "reason": "ItemsView: no FerroUI control (FerroUI's ListBox is ported from WinUI's ListBox)."
