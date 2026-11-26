@@ -88,6 +88,7 @@ pub(crate) struct PointerDeviceInfo {
     known: KnownValuatorAtoms,
 
     pub pressure_xi_valuator_class_info: Option<XIValuatorClassInfo>,
+    is_pen: bool,
     pub touch_major_xi_valuator_class_info: Option<XIValuatorClassInfo>,
     pub touch_minor_xi_valuator_class_info: Option<XIValuatorClassInfo>,
     pub tilt_x_xi_valuator_class_info: Option<XIValuatorClassInfo>,
@@ -127,6 +128,7 @@ impl PointerDeviceInfo {
 
     fn update_known_valuator(&mut self) {
         self.pressure_xi_valuator_class_info = None;
+        self.is_pen = false;
         self.touch_major_xi_valuator_class_info = None;
         self.touch_minor_xi_valuator_class_info = None;
 
@@ -134,6 +136,7 @@ impl PointerDeviceInfo {
             let label = xi_valuator_class_info.label;
             if label == self.known.pressure || label == self.known.pressure_pen {
                 self.pressure_xi_valuator_class_info = Some(*xi_valuator_class_info);
+                self.is_pen |= label == self.known.pressure_pen;
             } else if label == self.known.touch_major {
                 self.touch_major_xi_valuator_class_info = Some(*xi_valuator_class_info);
             } else if label == self.known.touch_minor {
@@ -164,8 +167,10 @@ impl PointerDeviceInfo {
         self.update_known_valuator();
     }
 
-    pub(crate) fn has_pressure_valuator(&self) -> bool {
-        self.pressure_xi_valuator_class_info.is_some()
+    /// Whether the current slave device is a pen, that is, reports the pen pressure axis. A
+    /// touchpad driver can report a pressure axis of its own and stays a mouse.
+    pub(crate) fn is_pen(&self) -> bool {
+        self.is_pen
     }
 
     pub(crate) fn is_eraser(&self) -> bool {
@@ -479,7 +484,7 @@ pub(crate) fn translate_device_event(
         event_modifiers |= RawInputModifiers::PEN_ERASER;
     }
 
-    let pen = pointer_device.has_pressure_valuator();
+    let pen = pointer_device.is_pen();
 
     if ev.type_ == XiEventType::XI_Motion {
         let mut scroll_delta = Vector::default();
@@ -949,7 +954,7 @@ mod tests {
             ],
             known(),
         );
-        assert!(device.has_pressure_valuator());
+        assert!(device.is_pen());
         let ev = parsed(xi2::XI_Motion, 0, 0, 0, &[0], &[0b0001_1111], &[100.0, 200.0, 512.0, 12.0, -7.0]);
         let inputs = translate_device_event(&mut device, true, true, &ev, &no_screen);
         match &inputs[..] {
