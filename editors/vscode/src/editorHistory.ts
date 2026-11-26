@@ -1,6 +1,13 @@
 import * as vscode from 'vscode';
 
 let historyQueue = Promise.resolve();
+let windowBlur = 0;
+let refreshedBlur = 0;
+
+export function watchEditorHistoryFocus(): vscode.Disposable {
+    if (!vscode.window.state.focused) windowBlur++;
+    return vscode.window.onDidChangeWindowState(({ focused }) => { if (!focused) windowBlur++; });
+}
 
 export function runEditorHistory(
     document: vscode.TextDocument,
@@ -35,16 +42,22 @@ async function dispatchEditorHistory(
 ): Promise<boolean> {
     signal.throwIfAborted();
     requireCurrent();
+    const viewColumn = sourceColumn(document);
+    await focusHistoryWindow(requireCurrent, signal);
+    const blur = windowBlur;
+    if (refreshedBlur !== blur) await refreshVisibleEditorFocus(document, requireCurrent, signal);
     const editor = await vscode.window.showTextDocument(document, {
-        viewColumn: sourceColumn(document), preserveFocus: false, preview: false,
+        viewColumn, preserveFocus: false, preview: false,
     });
     signal.throwIfAborted();
     requireCurrent();
+    if (!vscode.window.state.focused || windowBlur !== blur) throw historyFocusError();
     const active = vscode.window.tabGroups.activeTabGroup.activeTab?.input;
     if (document.isClosed || vscode.window.activeTextEditor !== editor
         || !(active instanceof vscode.TabInputText) || active.uri.toString() !== document.uri.toString()) {
         throw new Error('The authored editor lost focus.');
     }
+    refreshedBlur = blur;
     const version = document.version;
     let changed!: () => void;
     const update = new Promise<void>(resolve => { changed = resolve; });
@@ -74,6 +87,49 @@ async function dispatchEditorHistory(
         clearTimeout(timeout);
         signal.removeEventListener('abort', changed);
     }
+}
+
+async function focusHistoryWindow(requireCurrent: () => void, signal: AbortSignal): Promise<void> {
+    if (vscode.window.state.focused) return;
+    const focusWindow = 'workbench.action.focusWindow';
+    const commands = await vscode.commands.getCommands(true);
+    signal.throwIfAborted();
+    requireCurrent();
+    if (!vscode.window.state.focused && commands.includes(focusWindow)) {
+        await vscode.commands.executeCommand(focusWindow);
+        if (!vscode.window.state.focused && !signal.aborted) {
+            await new Promise<void>(resolve => {
+                const listener = vscode.window.onDidChangeWindowState(({ focused }) => { if (focused) finish(); });
+                const timeout = setTimeout(finish, 1_000);
+                signal.addEventListener('abort', finish, { once: true });
+                function finish(): void {
+                    listener.dispose();
+                    clearTimeout(timeout);
+                    signal.removeEventListener('abort', finish);
+                    resolve();
+                }
+            });
+        }
+    }
+    signal.throwIfAborted();
+    if (!vscode.window.state.focused) throw historyFocusError();
+}
+
+async function refreshVisibleEditorFocus(document: vscode.TextDocument, requireCurrent: () => void, signal: AbortSignal): Promise<void> {
+    // A native app can take OS focus while VS Code changes groups. Refocus each visible
+    // text editor once so its input context receives a blur when the source takes focus.
+    for (const editor of vscode.window.visibleTextEditors) {
+        if (editor.document === document) continue;
+        const tab = vscode.window.tabGroups.all.find(group => group.viewColumn === editor.viewColumn)?.activeTab;
+        if (!(tab?.input instanceof vscode.TabInputText) || tab.input.uri.toString() !== editor.document.uri.toString()) continue;
+        signal.throwIfAborted();
+        requireCurrent();
+        await vscode.window.showTextDocument(editor.document, { viewColumn: editor.viewColumn, preserveFocus: false, preview: tab.isPreview });
+    }
+}
+
+function historyFocusError(): Error {
+    return new Error('Focus the VS Code window and retry the source history request.');
 }
 
 export function sourceColumn(document: vscode.TextDocument): vscode.ViewColumn | undefined {

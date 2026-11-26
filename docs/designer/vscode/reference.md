@@ -70,6 +70,8 @@ For example, ask an agent to open the current design, inspect its animation prog
 
 Read the new buffer revision, frame token, stage epoch, or connection generation after the corresponding change. Text locations are UTF-16. A stale source edit is rejected. Re-read the current state before retrying the edit. The advertised tool schemas specify which identity each tool needs.
 
+If a running app has focus, an Undo or Redo request uses **Focus Window** when the installed VS Code provides that command. If the tool asks for focus, switch back to the VS Code window and retry with the current buffer version.
+
 ### Create a project with MCP
 
 1. Call `ferroui_project_templates` to choose `desktopRsx` or `desktopXaml`. The catalog reports the published FerroUI version and minimum Rust version used by the starter.

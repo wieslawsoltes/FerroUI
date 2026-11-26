@@ -14,6 +14,7 @@ import { DesignerWorkbench } from './designerWorkbench';
 import { DictionaryExtraction } from './dictionaryExtraction';
 import type { DictionaryRequest } from './dictionaryProtocol';
 import { DiagnosticsView } from './diagnosticsView';
+import { watchEditorHistoryFocus } from './editorHistory';
 import { EventHandlers } from './eventHandlers';
 import type { HandlerRequest } from './eventHandlerProtocol';
 import { HotReload } from './hotReload';
@@ -105,6 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     };
     context.subscriptions.push(
         designHandoff,
+        watchEditorHistoryFocus(),
         projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, collaboration, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, appSessions, reload, runtimes, mcp, languageOutput, previewOutput,
         simulatorSessions, iosDeviceSessions, androidSessions, browserSessions, reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),

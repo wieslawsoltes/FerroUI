@@ -139,6 +139,8 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         assert.equal(document.getText(), original);
         console.log('VS Code MCP focused, typed, scrolled, and refreshed the native App Preview while rejecting stale requests');
 
+        const history = async (action: 'undo' | 'redo') =>
+            content(await invoke('designer_history', { session, expected_version: document.version, action }));
         content(await invoke('designer_source', { session, expected_version: document.version, source: motion }));
         try {
             await image(refreshed);
@@ -148,8 +150,12 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
             await verifyTimelineTimingMcp({ invoke, content }, session, document, true);
             await verifyLayoutPlayback({ invoke, content }, session, generation);
         } finally {
-            content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+            await history('undo');
         }
+        assert.equal(document.getText(), original);
+        await history('redo');
+        assert.equal(document.getText(), motion);
+        await history('undo');
         assert.equal(document.getText(), original);
     } finally {
         try {
