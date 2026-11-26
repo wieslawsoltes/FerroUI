@@ -1,6 +1,6 @@
 use super::*;
 use ferroui_base::input::LocalBoxFuture;
-use ferroui_base::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties};
+use ferroui_base::platform::storage::{IStorageFolder, IStorageItem, StorageItemProperties, StorageWriteCallback};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::UriRef;
 use std::future::{Future, poll_fn, ready};
@@ -158,9 +158,12 @@ impl IStorageFile for TestFile {
     fn open_write_async(&self) -> LocalBoxFuture<io::Result<Box<dyn Write>>> {
         panic!("The editor must use the platform commit operation")
     }
-    fn write_with_async(&self, write: Box<dyn FnOnce(&mut dyn Write) -> io::Result<()>>) -> LocalBoxFuture<io::Result<()>> {
+    fn write_committed_async(
+        &self,
+        write: StorageWriteCallback,
+    ) -> Result<LocalBoxFuture<io::Result<()>>, StorageWriteCallback> {
         let file = self.write.clone();
-        Box::pin(async move {
+        Ok(Box::pin(async move {
             let mut output = Vec::new();
             write(&mut output)?;
             file.borrow_mut().staged.push(output.clone());
@@ -172,7 +175,7 @@ impl IStorageFile for TestFile {
                 }
                 Poll::Ready(outcome)
             }).await
-        })
+        }))
     }
 }
 
