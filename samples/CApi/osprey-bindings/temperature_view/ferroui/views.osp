@@ -134,7 +134,8 @@ fn horizontalAlignment(value) = AttrText { attrTextProperty: 339, attrTextValue:
 // ContentPresenter, DrawerPage, NumericUpDown, TabControl, TableViewColumn, TextBox).
 fn horizontalContentAlignment(value) = AttrText { attrTextProperty: 340, attrTextValue: horizontalAlignmentName(value: value) }
 // icon(value: string) -> Attr<M>: sets Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window).
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TabStripItem, TrayIcon,
+// Window).
 fn icon(value) = AttrText { attrTextProperty: 346, attrTextValue: value }
 // inlines(value: string) -> Attr<M>: sets Inlines (Span, TextBlock).
 fn inlines(value) = AttrText { attrTextProperty: 369, attrTextValue: value }
@@ -175,13 +176,15 @@ fn maxHeight(value) = AttrNumber { attrNumberProperty: 522, attrNumberValue: val
 fn maxLength(value) = AttrInteger { attrIntegerProperty: 524, attrIntegerValue: value }
 // maxLines(value: int) -> Attr<M>: sets MaxLines (ContentPresenter, RichTextBlock, TextBox).
 fn maxLines(value) = AttrInteger { attrIntegerProperty: 525, attrIntegerValue: value }
-// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable).
+// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn maxWidth(value) = AttrNumber { attrNumberProperty: 530, attrNumberValue: value }
 // minHeight(value: float) -> Attr<M>: sets MinHeight (Layoutable, RowDefinition).
 fn minHeight(value) = AttrNumber { attrNumberProperty: 541, attrNumberValue: value }
 // minLines(value: int) -> Attr<M>: sets MinLines (TextBox).
 fn minLines(value) = AttrInteger { attrIntegerProperty: 542, attrIntegerValue: value }
-// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable).
+// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn minWidth(value) = AttrNumber { attrNumberProperty: 543, attrNumberValue: value }
 // name(value: string) -> Attr<M>: sets Name (Application, StyledElement).
 fn name(value) = AttrText { attrTextProperty: 558, attrTextValue: value }
@@ -303,7 +306,7 @@ fn transparencyLevelHint(value) = AttrText { attrTextProperty: 940, attrTextValu
 // undoLimit(value: int) -> Attr<M>: sets UndoLimit (RichEditBox, TextBox).
 fn undoLimit(value) = AttrInteger { attrIntegerProperty: 987, attrIntegerValue: value }
 // useFloatingPlaceholder(value: bool) -> Attr<M>: sets UseFloatingPlaceholder
-// (CalendarDatePicker, TextBox).
+// (AutoCompleteBox, CalendarDatePicker, TextBox).
 fn useFloatingPlaceholder(value) = AttrBool { attrBoolProperty: 991, attrBoolValue: value }
 // useLayoutRounding(value: bool) -> Attr<M>: sets UseLayoutRounding (Layoutable).
 fn useLayoutRounding(value) = AttrBool { attrBoolProperty: 992, attrBoolValue: value }

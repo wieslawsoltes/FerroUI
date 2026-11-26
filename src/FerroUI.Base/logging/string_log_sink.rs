@@ -10,6 +10,7 @@ pub struct StringLogSink {
     logger: Box<dyn Fn(&str) + Send + Sync>,
     level: LogEventLevel,
     areas: Option<Vec<String>>,
+    area_verbosity: Option<Box<dyn Fn(&str) -> LogEventLevel + Send + Sync>>,
 }
 
 impl StringLogSink {
@@ -22,6 +23,21 @@ impl StringLogSink {
             logger: Box::new(logger),
             level: minimum_level,
             areas: if areas.is_empty() { None } else { Some(areas.iter().map(|area| area.to_string()).collect()) },
+            area_verbosity: None,
+        }
+    }
+
+    /// Creates a sink that passes events to `logger` when their level is at least the one
+    /// `area_verbosity` returns for their area.
+    pub fn with_area_verbosity(
+        logger: impl Fn(&str) + Send + Sync + 'static,
+        area_verbosity: impl Fn(&str) -> LogEventLevel + Send + Sync + 'static,
+    ) -> Self {
+        Self {
+            logger: Box::new(logger),
+            level: LogEventLevel::Verbose,
+            areas: None,
+            area_verbosity: Some(Box::new(area_verbosity)),
         }
     }
 
@@ -94,6 +110,9 @@ impl StringLogSink {
 
 impl ILogSink for StringLogSink {
     fn is_enabled(&self, level: LogEventLevel, area: &str) -> bool {
+        if let Some(area_verbosity) = &self.area_verbosity {
+            return level >= area_verbosity(area);
+        }
         level >= self.level && self.areas.as_ref().is_none_or(|areas| areas.iter().any(|a| a == area))
     }
 
@@ -129,6 +148,17 @@ mod tests {
         let lines = Arc::new(Mutex::new(Vec::new()));
         let l = lines.clone();
         (StringLogSink::new(move |line| l.lock().unwrap().push(line.to_string()), level, areas), lines)
+    }
+
+    #[test]
+    fn area_verbosity_decides_per_area() {
+        let sink = StringLogSink::with_area_verbosity(
+            |_| {},
+            |area| if area == LogArea::BINDING { LogEventLevel::Debug } else { LogEventLevel::Error },
+        );
+        assert!(sink.is_enabled(LogEventLevel::Debug, LogArea::BINDING));
+        assert!(!sink.is_enabled(LogEventLevel::Warning, LogArea::LAYOUT));
+        assert!(sink.is_enabled(LogEventLevel::Error, LogArea::LAYOUT));
     }
 
     #[test]

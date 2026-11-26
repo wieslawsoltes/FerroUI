@@ -264,6 +264,16 @@ impl TopLevelImpl for Window {
 
             this.set_width(client_size.width);
             this.set_height(client_size.height);
+        } else if this.shown.get() && !this.can_handle_resized.get() {
+            // Show is in progress: the platform may have constrained the requested size. An
+            // explicit width or height is updated before any layout pass, otherwise the content
+            // would be measured with the requested size and arranged with the actual one.
+            if !this.width().is_nan() {
+                this.set_width(client_size.width);
+            }
+            if !this.height().is_nan() {
+                this.set_height(client_size.height);
+            }
         }
 
         Self::parent_handle_resized(this, client_size, reason);

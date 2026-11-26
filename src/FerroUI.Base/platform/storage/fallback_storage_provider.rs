@@ -5,39 +5,109 @@ use super::{
 };
 use crate::input::LocalBoxFuture;
 use url::Url;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
+use std::task::{Poll, Waker};
 
 /// Creates a storage provider, or resolves to `None` when the provider is
 /// not available.
 pub type StorageProviderFactory = Rc<dyn Fn() -> LocalBoxFuture<Option<Rc<dyn IStorageProvider>>>>;
 
+/// One factory: not started, running (with the tasks waiting for it), or finished.
+enum Slot {
+    Empty,
+    Running(Vec<Waker>),
+    Done(Option<Rc<dyn IStorageProvider>>),
+}
+
+type Slots = Rc<RefCell<Vec<Slot>>>;
+
+/// Gives a slot back when its factory future is dropped before it finished, so that the next
+/// caller can run the factory again and the callers waiting on it are not left behind.
+struct ReleaseOnDrop<'a> {
+    slots: &'a Slots,
+    index: usize,
+}
+
+impl Drop for ReleaseOnDrop<'_> {
+    fn drop(&mut self) {
+        let mut slots = self.slots.borrow_mut();
+        if let Some(slot @ Slot::Running(_)) = slots.get_mut(self.index) {
+            if let Slot::Running(wakers) = std::mem::replace(slot, Slot::Empty) {
+                wakers.into_iter().for_each(Waker::wake);
+            }
+        }
+    }
+}
+
 struct State {
     factories: RefCell<Rc<[StorageProviderFactory]>>,
-    providers: RefCell<Vec<Rc<dyn IStorageProvider>>>,
-    next_provider_factory: Cell<usize>,
+    slots: RefCell<Slots>,
+}
+
+fn empty_slots(count: usize) -> Slots {
+    Rc::new(RefCell::new((0..count).map(|_| Slot::Empty).collect()))
 }
 
 impl State {
-    /// The provider at `index` of the sequence of available providers: the
-    /// ones created so far, followed by the ones the remaining factories
-    /// create. `None` once the factories are exhausted.
-    async fn get_provider(&self, index: usize) -> Option<Rc<dyn IStorageProvider>> {
+    /// The provider of factory `index`. Each factory runs once: concurrent callers wait for the
+    /// same run instead of starting it again and skipping the providers after it.
+    async fn provider_of(
+        factory: &StorageProviderFactory,
+        slots: &Slots,
+        index: usize,
+    ) -> Option<Rc<dyn IStorageProvider>> {
         loop {
-            if let Some(p) = self.providers.borrow().get(index) {
-                return Some(p.clone());
+            {
+                let mut all = slots.borrow_mut();
+                match &all[index] {
+                    Slot::Done(provider) => return provider.clone(),
+                    Slot::Empty => {
+                        all[index] = Slot::Running(Vec::new());
+                        break;
+                    }
+                    Slot::Running(_) => {}
+                }
             }
 
-            let factory = {
-                let factories = self.factories.borrow();
-                factories.get(self.next_provider_factory.get())?.clone()
-            };
-            let p = factory().await;
-            self.next_provider_factory.set(self.next_provider_factory.get() + 1);
-            if let Some(p) = p {
-                self.providers.borrow_mut().push(p);
+            std::future::poll_fn(|cx| match &mut slots.borrow_mut()[index] {
+                Slot::Running(wakers) => {
+                    wakers.push(cx.waker().clone());
+                    Poll::Pending
+                }
+                _ => Poll::Ready(()),
+            })
+            .await;
+        }
+
+        let release = ReleaseOnDrop { slots, index };
+        let provider = factory().await;
+        std::mem::forget(release);
+
+        let previous = std::mem::replace(&mut slots.borrow_mut()[index], Slot::Done(provider.clone()));
+        if let Slot::Running(wakers) = previous {
+            wakers.into_iter().for_each(Waker::wake);
+        }
+        provider
+    }
+
+    /// The provider at `index` of the sequence of available providers: the factories are asked
+    /// in order, and the ones that give no provider are skipped.
+    async fn get_provider(&self, index: usize) -> Option<Rc<dyn IStorageProvider>> {
+        // Both are captured, so that a reset during the search does not mix two factory lists.
+        let factories = self.factories.borrow().clone();
+        let slots = self.slots.borrow().clone();
+
+        let mut available = 0;
+        for (factory_index, factory) in factories.iter().enumerate() {
+            if let Some(provider) = Self::provider_of(factory, &slots, factory_index).await {
+                if available == index {
+                    return Some(provider);
+                }
+                available += 1;
             }
         }
+        None
     }
 
     async fn get_for(&self, filter: fn(&dyn IStorageProvider) -> bool) -> std::io::Result<Rc<dyn IStorageProvider>> {
@@ -81,18 +151,16 @@ impl FallbackStorageProvider {
     pub fn new(factories: Vec<StorageProviderFactory>) -> Self {
         Self {
             state: Rc::new(State {
+                slots: RefCell::new(empty_slots(factories.len())),
                 factories: RefCell::new(factories.into()),
-                providers: RefCell::new(Vec::new()),
-                next_provider_factory: Cell::new(0),
             }),
         }
     }
 
     /// Replaces the factories and forgets the providers created so far.
     pub fn reset(&self, factories: Vec<StorageProviderFactory>) {
+        *self.state.slots.borrow_mut() = empty_slots(factories.len());
         *self.state.factories.borrow_mut() = factories.into();
-        self.state.providers.borrow_mut().clear();
-        self.state.next_provider_factory.set(0);
     }
 }
 

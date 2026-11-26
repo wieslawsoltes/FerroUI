@@ -120,7 +120,8 @@ fn horizontalContentAlignment(value) = AttrText { attrTextProperty: 340, attrTex
 // hotKey(value: string) -> Attr<M>: sets HotKey (Button, MenuItem, SplitButton).
 fn hotKey(value) = AttrText { attrTextProperty: 344, attrTextValue: value }
 // icon(value: string) -> Attr<M>: sets Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window).
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TabStripItem, TrayIcon,
+// Window).
 fn icon(value) = AttrText { attrTextProperty: 346, attrTextValue: value }
 // inlines(value: string) -> Attr<M>: sets Inlines (Span, TextBlock).
 fn inlines(value) = AttrText { attrTextProperty: 369, attrTextValue: value }
@@ -147,11 +148,13 @@ fn letterSpacing(value) = AttrNumber { attrNumberProperty: 503, attrNumberValue:
 fn margin(value) = AttrText { attrTextProperty: 513, attrTextValue: value }
 // maxHeight(value: float) -> Attr<M>: sets MaxHeight (Layoutable, RowDefinition).
 fn maxHeight(value) = AttrNumber { attrNumberProperty: 522, attrNumberValue: value }
-// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable).
+// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn maxWidth(value) = AttrNumber { attrNumberProperty: 530, attrNumberValue: value }
 // minHeight(value: float) -> Attr<M>: sets MinHeight (Layoutable, RowDefinition).
 fn minHeight(value) = AttrNumber { attrNumberProperty: 541, attrNumberValue: value }
-// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable).
+// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn minWidth(value) = AttrNumber { attrNumberProperty: 543, attrNumberValue: value }
 // name(value: string) -> Attr<M>: sets Name (Application, StyledElement).
 fn name(value) = AttrText { attrTextProperty: 558, attrTextValue: value }

@@ -356,3 +356,69 @@ fn picker_options_share_the_common_options() {
     assert!(a == a.clone());
     assert!(SaveFilePickerResult::default() == SaveFilePickerResult::default());
 }
+
+/// A factory that is pending until `gate` opens, and counts its runs.
+fn gated_factory(gate: Rc<Cell<bool>>, runs: Rc<Cell<i32>>, known: Option<&'static str>) -> StorageProviderFactory {
+    Rc::new(move || {
+        runs.set(runs.get() + 1);
+        let gate = gate.clone();
+        Box::pin(async move {
+            std::future::poll_fn(|_| if gate.get() { Poll::Ready(()) } else { Poll::Pending }).await;
+            Some(TestProvider::new(true, known) as Rc<dyn IStorageProvider>)
+        })
+    })
+}
+
+#[test]
+fn fallback_provider_concurrent_callers_share_one_run_of_each_factory() {
+    let (gate, first_runs, second_runs) = (Rc::new(Cell::new(false)), Rc::new(Cell::new(0)), Rc::new(Cell::new(0)));
+    let provider = FallbackStorageProvider::new(vec![
+        gated_factory(gate.clone(), first_runs.clone(), None),
+        gated_factory(gate.clone(), second_runs.clone(), Some("file:///known/")),
+    ]);
+    let known = Url::parse("file:///known/").unwrap();
+
+    let mut a = provider.try_get_folder_from_path_async(&known);
+    let mut b = provider.try_get_folder_from_path_async(&known);
+    let mut cx = Context::from_waker(Waker::noop());
+    assert!(a.as_mut().poll(&mut cx).is_pending());
+    assert!(b.as_mut().poll(&mut cx).is_pending());
+
+    gate.set(true);
+
+    let (mut a_found, mut b_found) = (None, None);
+    for _ in 0..8 {
+        if a_found.is_none() {
+            if let Poll::Ready(value) = a.as_mut().poll(&mut cx) {
+                a_found = Some(value.is_some());
+            }
+        }
+        if b_found.is_none() {
+            if let Poll::Ready(value) = b.as_mut().poll(&mut cx) {
+                b_found = Some(value.is_some());
+            }
+        }
+    }
+
+    assert_eq!((a_found, b_found), (Some(true), Some(true)));
+    assert_eq!((first_runs.get(), second_runs.get()), (1, 1));
+}
+
+#[test]
+fn fallback_provider_a_dropped_caller_gives_its_factory_back() {
+    let (gate, runs) = (Rc::new(Cell::new(false)), Rc::new(Cell::new(0)));
+    let provider =
+        FallbackStorageProvider::new(vec![gated_factory(gate.clone(), runs.clone(), Some("file:///known/"))]);
+    let known = Url::parse("file:///known/").unwrap();
+    let mut cx = Context::from_waker(Waker::noop());
+
+    {
+        let mut first = provider.try_get_folder_from_path_async(&known);
+        assert!(first.as_mut().poll(&mut cx).is_pending());
+    }
+
+    gate.set(true);
+
+    assert!(ready(provider.try_get_folder_from_path_async(&known)).is_some());
+    assert_eq!(runs.get(), 2);
+}

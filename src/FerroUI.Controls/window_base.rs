@@ -137,6 +137,13 @@ impl LayoutableImpl for WindowBase {
 
     fn arrange_core(this: &Self, final_rect: Rect) {
         let constraint = this.arrange_set_bounds(final_rect.size());
+
+        // Setting the bounds may give another size than the one requested, which invalidates the
+        // measure: measure again, so the content is not arranged with a size it was not measured with.
+        if !this.is_measure_valid() {
+            this.measure(this.previous_measure().unwrap_or(final_rect.size()));
+        }
+
         let arrange_size = this.arrange_override(constraint);
         this.set_bounds(Rect::from_position_size(final_rect.position(), arrange_size));
     }

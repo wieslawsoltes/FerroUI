@@ -415,7 +415,9 @@ impl dyn IPopupPositioner {
 
         if position_request.placement() == PlacementMode::Pointer {
             // We need a better way for tracking the last pointer position
-            let position = top_level.point_to_client(top_level.last_pointer_position().unwrap_or_default());
+            let position = position_request
+                .pointer_position()
+                .unwrap_or_else(|| top_level.point_to_client(top_level.last_pointer_position().unwrap_or_default()));
 
             positioner_parameters.anchor_rectangle = Rect::from_position_size(position, Size::new(1.0, 1.0));
             positioner_parameters.set_anchor(PopupAnchor::TOP_LEFT);

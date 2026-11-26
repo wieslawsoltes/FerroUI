@@ -16,6 +16,32 @@ impl AppBuilder {
         self.clone()
     }
 
+    /// Logs framework events to the diagnostic trace output of the process, with a minimum level
+    /// per area. `verbosity` returns the minimum level to log for an area; well-known areas are
+    /// listed in [`LogArea`](ferroui_base::logging::LogArea).
+    pub fn log_to_trace_with_verbosity(
+        &self,
+        verbosity: impl Fn(&str) -> LogEventLevel + Send + Sync + 'static,
+    ) -> AppBuilder {
+        self.log_to_delegate_with_verbosity(
+            |line| {
+                // Tracing must never fail the caller.
+                let _ = writeln!(std::io::stderr(), "{line}");
+            },
+            verbosity,
+        )
+    }
+
+    /// Logs framework events to a custom callback, with a minimum level per area.
+    pub fn log_to_delegate_with_verbosity(
+        &self,
+        log_callback: impl Fn(&str) + Send + Sync + 'static,
+        verbosity: impl Fn(&str) -> LogEventLevel + Send + Sync + 'static,
+    ) -> AppBuilder {
+        Logger::set_sink(Some(Arc::new(StringLogSink::with_area_verbosity(log_callback, verbosity))));
+        self.clone()
+    }
+
     /// Logs framework events to a writer.
     ///
     /// `writer` is the writer that is used for log events, one line per

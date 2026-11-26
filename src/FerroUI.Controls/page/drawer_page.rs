@@ -9,7 +9,7 @@ use crate::presenters::ContentPresenter;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt, ToggleButton};
 use crate::templates::IDataTemplate;
 use crate::{
-    Border, ContentControl, Control, ControlImpl, ControlImplExt, SplitView, SplitViewDisplayMode,
+    Decorator, ContentControl, Control, ControlImpl, ControlImplExt, SplitView, SplitViewDisplayMode,
     SplitViewPanePlacement,
 };
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -48,9 +48,9 @@ pub struct DrawerPage {
     drawer_header_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     drawer_footer_presenter: RefCell<Option<Ref<ContentPresenter>>>,
     split_view: RefCell<Option<Ref<SplitView>>>,
-    top_bar: RefCell<Option<Ref<Border>>>,
+    top_bar: RefCell<Option<Ref<Decorator>>>,
     pane_button: RefCell<Option<Ref<ToggleButton>>>,
-    backdrop: RefCell<Option<Ref<Border>>>,
+    backdrop: RefCell<Option<Ref<Decorator>>>,
     /// The pointer pressed handler of the backdrop, while it is attached.
     backdrop_pointer_pressed: Cell<Option<RoutedEventHandlerToken>>,
     swipe_start_point: Cell<Point>,
@@ -85,10 +85,10 @@ ferro_class_info!(DrawerPage {
             TemplatePart("PART_DrawerFooter", type(Ref<ContentPresenter>)),
             TemplatePart("PART_ContentPresenter", type(Ref<ContentPresenter>)),
             TemplatePart("PART_SplitView", type(Ref<SplitView>)),
-            TemplatePart("PART_TopBar", type(Ref<Border>)),
+            TemplatePart("PART_TopBar", type(Ref<Decorator>)),
             TemplatePart("PART_PaneButton", type(Ref<ToggleButton>)),
             TemplatePart("PART_CompactPaneToggle", type(Ref<ToggleButton>)),
-            TemplatePart("PART_Backdrop", type(Ref<Border>)),
+            TemplatePart("PART_Backdrop", type(Ref<Decorator>)),
             PseudoClasses(":placement-right", ":placement-top", ":placement-bottom", ":detail-is-navpage"),
         ],
     },
@@ -286,9 +286,9 @@ impl TemplatedControlImpl for DrawerPage {
         *this.drawer_header_presenter.borrow_mut() = name_scope.find_as::<ContentPresenter>("PART_DrawerHeader");
         *this.drawer_footer_presenter.borrow_mut() = name_scope.find_as::<ContentPresenter>("PART_DrawerFooter");
         *this.split_view.borrow_mut() = name_scope.find_as::<SplitView>("PART_SplitView");
-        *this.top_bar.borrow_mut() = name_scope.find_as::<Border>("PART_TopBar");
+        *this.top_bar.borrow_mut() = name_scope.find_as::<Decorator>("PART_TopBar");
         *this.pane_button.borrow_mut() = name_scope.find_as::<ToggleButton>("PART_PaneButton");
-        *this.backdrop.borrow_mut() = name_scope.find_as::<Border>("PART_Backdrop");
+        *this.backdrop.borrow_mut() = name_scope.find_as::<Decorator>("PART_Backdrop");
 
         let backdrop = this.backdrop.borrow().clone();
         if let Some(backdrop) = backdrop {

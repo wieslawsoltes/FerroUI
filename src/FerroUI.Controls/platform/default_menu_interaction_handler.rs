@@ -37,6 +37,7 @@ struct MenuHandlers {
     pointer_released: RoutedEventHandlerToken,
     access_key: RoutedEventHandlerToken,
     menu_opened: RoutedEventHandlerToken,
+    menu_closed: RoutedEventHandlerToken,
     pointer_entered_item: RoutedEventHandlerToken,
     pointer_exited_item: RoutedEventHandlerToken,
     pointer_moved: RoutedEventHandlerToken,
@@ -118,6 +119,8 @@ pub struct DefaultMenuInteractionHandler {
     window_deactivated: RefCell<Option<Subscription>>,
     top_level_lost_platform_focus: RefCell<Option<Subscription>>,
     group_manager: RefCell<Option<Rc<RadioButtonGroupManager>>>,
+    /// How many times the menu has closed, so that a delayed action can tell it was reopened.
+    close_count: Cell<u32>,
 }
 
 impl IMenuInteractionHandler for DefaultMenuInteractionHandler {
@@ -178,6 +181,7 @@ impl DefaultMenuInteractionHandler {
             window_deactivated: RefCell::new(None),
             top_level_lost_platform_focus: RefCell::new(None),
             group_manager: RefCell::new(None),
+            close_count: Cell::new(0),
         })
     }
 
@@ -407,14 +411,11 @@ impl DefaultMenuInteractionHandler {
             } else if !item.has_sub_menu() {
                 parent.set_selected_item(None);
             } else if !item.is_pointer_over_sub_menu() {
-                (self.delay_run)(
-                    Box::new(move || {
-                        if !item.is_pointer_over_sub_menu() {
-                            item.set_is_sub_menu_open(false);
-                        }
-                    }),
-                    Self::menu_show_delay(),
-                );
+                self.delay_run_while_open(move || {
+                    if !item.is_pointer_over_sub_menu() {
+                        item.set_is_sub_menu_open(false);
+                    }
+                });
             }
         }
     }
@@ -548,6 +549,7 @@ impl DefaultMenuInteractionHandler {
                 }
             }),
             menu_opened: element.add_handler(MenuBase::opened_event(), handler!(|this, e| this.menu_opened(e))),
+            menu_closed: element.add_handler(MenuBase::closed_event(), handler!(|this, e| this.menu_closed(e))),
             pointer_entered_item: element
                 .add_handler(MenuItem::pointer_entered_item_event(), handler!(|this, e| this.pointer_entered(e))),
             pointer_exited_item: element
@@ -622,6 +624,7 @@ impl DefaultMenuInteractionHandler {
             element.remove_handler(InputElement::pointer_released_event(), handlers.pointer_released);
             element.remove_handler(AccessKeyHandler::access_key_event(), handlers.access_key);
             element.remove_handler(MenuBase::opened_event(), handlers.menu_opened);
+            element.remove_handler(MenuBase::closed_event(), handlers.menu_closed);
             element.remove_handler(MenuItem::pointer_entered_item_event(), handlers.pointer_entered_item);
             element.remove_handler(MenuItem::pointer_exited_item_event(), handlers.pointer_exited_item);
             element.remove_handler(InputElement::pointer_moved_event(), handlers.pointer_moved);
@@ -704,7 +707,7 @@ impl DefaultMenuInteractionHandler {
             }
         };
 
-        (self.delay_run)(Box::new(execute), Self::menu_show_delay());
+        self.delay_run_while_open(execute);
     }
 
     pub(crate) fn key_down_item(&self, item: Option<Rc<dyn IMenuItem>>, e: &KeyEventArgs) {
@@ -839,7 +842,33 @@ impl DefaultMenuInteractionHandler {
             }
         };
 
-        (self.delay_run)(Box::new(execute), Self::menu_show_delay());
+        self.delay_run_while_open(execute);
+    }
+
+    /// Runs `action` after the menu show delay, unless the menu has closed in the meantime. The
+    /// earlier timer cannot simply be stopped, as the delay function can be supplied from outside.
+    fn delay_run_while_open(&self, action: impl Fn() + 'static) {
+        let close_count = self.close_count.get();
+        let weak = self.this.clone();
+
+        (self.delay_run)(
+            Box::new(move || {
+                if weak.upgrade().is_some_and(|this| this.close_count.get() == close_count) {
+                    action();
+                }
+            }),
+            Self::menu_show_delay(),
+        );
+    }
+
+    fn menu_closed(&self, e: &RoutedEventArgs) {
+        let is_menu = self.menu().is_some_and(|menu| {
+            e.source().is_some_and(|source| source.ptr_eq(&menu.element()))
+        });
+
+        if is_menu {
+            self.close_count.set(self.close_count.get() + 1);
+        }
     }
 
     pub(crate) fn select_item_and_ancestors(&self, item: &Rc<dyn IMenuItem>) {

@@ -30,8 +30,8 @@
    "area": "controls",
    "class": "port",
    "note": "Window content measured again when the platform constrains the size.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "d9311668349b0c192c5486f3218a6f8feaaf0317",
@@ -40,8 +40,8 @@
    "area": "controls",
    "class": "port",
    "note": "TabbedPage leaves arrow keys to a focused child.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "edc20c924d1e29ccfdc2c37cc77bc3614ed297b6",
@@ -122,10 +122,8 @@
    "pr": 22496,
    "date": "2026-10-19",
    "area": "threading",
-   "class": "port",
-   "note": "Dispatcher clock stays continuous when the implementation is replaced.",
-   "part": "controls",
-   "state": "planned"
+   "class": "already",
+   "note": "`Dispatcher::replace_implementation` already moves the due times of the queue and of every timer by the difference of the two clocks."
   },
   {
    "hash": "ee85f0604a7d4ffdc0f6783da840674cff32668c",
@@ -162,8 +160,8 @@
    "area": "controls",
    "class": "port",
    "note": "Per-area log verbosity for `log_to_trace` and `log_to_delegate`.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "ba4fedb31ee682f1cf245a0400a942a74ea8dfb2",
@@ -219,7 +217,7 @@
    "class": "port",
    "note": "Indexer bindings refresh on `Item[]` and `Item[key]`.",
    "part": "data",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "06c2072375c83d17718d2dfc49a394669c6d86c7",
@@ -293,9 +291,9 @@
    "date": "2026-10-21",
    "area": "text",
    "class": "port",
-   "note": "Paragraph end in bidirectional lines (rule L1).",
+   "note": "Paragraph end at the paragraph level (rule L1); runs report their direction from the bidi level; hit testing and the line break read the logical end of the line.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "88a7967b3e5fba20518e2f9f8d5e47958943ae76",
@@ -305,7 +303,7 @@
    "class": "port",
    "note": "`Typeface` tolerates repeated whitespace in family names.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "4573d1f752ea5a4be8d174ec960d18c403f7fb54",
@@ -352,10 +350,8 @@
    "pr": 22433,
    "date": "2026-10-21",
    "area": "text",
-   "class": "port",
-   "note": "`TextLayout::hit_test_point` inside test for multi-line and aligned text.",
-   "part": "text",
-   "state": "planned"
+   "class": "already",
+   "note": "`TextLayout::hit_test_point` already passes a point relative to the line origin and subtracts `start`; upstream's cases are added as tests in `text_layout_tests.rs`."
   },
   {
    "hash": "26b4ed5b35bad7313686e58e4c4c5484429f2419",
@@ -432,8 +428,8 @@
    "area": "controls",
    "class": "port",
    "note": "Keyboard works inside the date, time and calendar picker popups.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "d8f2fc7b9fec9bf2f0896efa5f942cc66b32546f",
@@ -441,9 +437,9 @@
    "date": "2026-10-22",
    "area": "text",
    "class": "port",
-   "note": "Line break search limited to the reach of the current line. Removes quadratic work on long unbroken runs.",
+   "note": "Bounded lookahead (4096) on the enumerator and on the break table of a run, so a long unbroken run does not rescan the rest of the text per line.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "e4452b5bdb90ccbc7045ae91b43ca22a9fe7ef2b",
@@ -498,8 +494,8 @@
    "area": "controls",
    "class": "port",
    "note": "A delayed submenu action no longer closes a reopened menu.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "c1e4fab24c38be5d74aba5a8ec1ac9f04bfd5baf",
@@ -516,8 +512,8 @@
    "area": "controls",
    "class": "port",
    "note": "PipsPager sizing and scroll reset.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "b88f813a95b80739603d9778368f5afbee16b127",
@@ -554,8 +550,8 @@
    "area": "platform",
    "class": "port",
    "note": "`FallbackStorageProvider` under concurrent calls.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "6b6c573a03599510b568033757f59c908f7328a7",
@@ -564,8 +560,8 @@
    "area": "controls",
    "class": "port",
    "note": "ColorPicker fixes.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "99086ac183b36b60ab04de525bf604e493e18615",
@@ -574,8 +570,8 @@
    "area": "controls",
    "class": "port",
    "note": "AutoCompleteBox keeps focus when an item is picked.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "fb506057eab820e7068d2f4c1ca643335ba7a07d",
@@ -652,10 +648,8 @@
    "pr": 22545,
    "date": "2026-10-27",
    "area": "text",
-   "class": "port",
-   "note": "Bidi W2 in one forward pass.",
-   "part": "text",
-   "state": "planned"
+   "class": "already",
+   "note": "`bidi_algorithm.rs` already resolves W2 in one forward pass."
   },
   {
    "hash": "f3eca207d04693ec60bcb40c13818d4d0e0b0131",
@@ -672,8 +666,8 @@
    "area": "controls",
    "class": "port",
    "note": "DrawerPage and NavigationPage template parts relaxed to Decorator.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "7e8b76db3c6a9392347e85f51197dd2e3b4cb66c",
@@ -850,8 +844,8 @@
    "area": "controls",
    "class": "port",
    "note": "Popup with pointer placement resizes with its content.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "eae84c140368f18e234fe9211044e8b0a2b6f1eb",
@@ -923,9 +917,9 @@
    "date": "2026-10-30",
    "area": "controls",
    "class": "port",
-   "note": "`TabStripItem.Icon` and the icon in the tab themes.",
-   "part": "controls",
-   "state": "planned"
+   "note": "`TabStripItem.Icon` and `IconTemplate`; icon presenter in the Fluent tab templates (two more elements per tab: start-up check owed).",
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "5b36bbe0ad5630dc1571aa2ebdb943b98111444b",
@@ -998,8 +992,8 @@
    "area": "controls",
    "class": "port",
    "note": "TableViewColumn minimum and maximum widths.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "c4d24e9dab0310935664d0d3479ca7775b229228",
@@ -1153,9 +1147,9 @@
    "date": "2026-11-10",
    "area": "text",
    "class": "port",
-   "note": "Wrap opportunities between text runs.",
+   "note": "Wrap opportunity between shaped runs, decided from a window of both runs. The per-run break tables stay, so multi-run lines do not fall back to the enumerator.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "bdeeeef0a7f38cef7a280837f597d3f9d7a0fca8",
@@ -1321,9 +1315,9 @@
    "date": "2026-11-13",
    "area": "text",
    "class": "port",
-   "note": "Collapsed lines own the runs they split; check against `dispose` in the Rust text line.",
+   "note": "`TextLineImpl::collapse` gives the collapsed line its own references and keeps the source line valid after a split; the layout releases the replaced line.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "a4f832f5d67f46ee031a9a9c440a4c4c802434fe",
@@ -1360,8 +1354,8 @@
    "area": "controls",
    "class": "port",
    "note": "Tab strip stays reachable with Tab.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "ab36f90feb89dfa53cbde45839b77fd0d44d608c",
@@ -1447,7 +1441,7 @@
    "class": "port",
    "note": "Runs of different scripts shaped in separate buffers.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "9d6cb1ea625b9f1db888f0c46e631f7f2d14bd28",
@@ -1477,7 +1471,7 @@
    "class": "port",
    "note": "TwoWay binding does not write a just-published value back.",
    "part": "data",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "8035f14fd356beb7d7e7d8243dc8ce98dfc27551",
@@ -1506,8 +1500,8 @@
    "area": "controls",
    "class": "port",
    "note": "`AutoCompleteBox.UseFloatingPlaceholder`.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "9f6a652216f2de72448265f0ac7aea74862e16d7",
@@ -1534,8 +1528,8 @@
    "area": "platform",
    "class": "port",
    "note": "Assembly resolved by exact name.",
-   "part": "controls",
-   "state": "planned"
+   "part": "controls2",
+   "state": "done"
   },
   {
    "hash": "75497e363451e05882adcc5491d293531bb0d47c",
@@ -1653,9 +1647,9 @@
    "date": "2026-11-19",
    "area": "text",
    "class": "port",
-   "note": "Paragraph and first-line indents.",
+   "note": "`ParagraphIndent` and first-line `Indent` honoured by the formatter, beside the paragraph styles of `TextLayout`.",
    "part": "text",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "debc815ba9dff30a283135b1764e5fdfb609bb91",

@@ -7,7 +7,7 @@ use super::{
 use crate::automation::AutomationProperties;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
-use crate::{Border, Button, Control, ControlImpl, Panel, PathIcon, SizeChangedEventArgs, ToolTip};
+use crate::{Decorator, Button, Control, ControlImpl, Panel, PathIcon, SizeChangedEventArgs, ToolTip};
 use ferroui_base::animation::IPageTransition;
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
@@ -59,8 +59,8 @@ pub struct NavigationPage {
     /// `None` stands for a completed task.
     last_page_transition_task: RefCell<Option<JoinHandle<()>>>,
     current_modal_transition: RefCell<Option<Rc<CancellationToken>>>,
-    nav_bar: RefCell<Option<(Ref<Border>, RoutedEventHandlerToken)>>,
-    nav_bar_shadow: RefCell<Option<Ref<Border>>>,
+    nav_bar: RefCell<Option<(Ref<Decorator>, RoutedEventHandlerToken)>>,
+    nav_bar_shadow: RefCell<Option<Ref<Decorator>>>,
     is_pop: Cell<bool>,
     has_had_first_page: Cell<bool>,
     effective_bar_layout_behavior: Cell<BarLayoutBehavior>,
@@ -114,7 +114,7 @@ ferro_class_info!(NavigationPage {
         content: Content,
         property_attributes: [Content: [DependsOn("PageTemplate")]],
         attributes: [
-            TemplatePart("PART_NavigationBar", type(Ref<Border>)),
+            TemplatePart("PART_NavigationBar", type(Ref<Decorator>)),
             TemplatePart("PART_BackButton", type(Ref<Button>)),
             TemplatePart("PART_ContentHost", type(Ref<Panel>)),
             TemplatePart("PART_PagePresenter", type(Ref<ContentPresenter>)),
@@ -125,7 +125,7 @@ ferro_class_info!(NavigationPage {
             TemplatePart("PART_BottomCommandBar", type(Ref<ContentPresenter>)),
             TemplatePart("PART_ModalBackPresenter", type(Ref<ContentPresenter>)),
             TemplatePart("PART_ModalPresenter", type(Ref<ContentPresenter>)),
-            TemplatePart("PART_NavBarShadow", type(Ref<Border>)),
+            TemplatePart("PART_NavBarShadow", type(Ref<Decorator>)),
             PseudoClasses(":nav-bar-inset", ":nav-bar-compact"),
         ],
     },
@@ -283,7 +283,7 @@ impl TemplatedControlImpl for NavigationPage {
         if let Some((nav_bar, token)) = previous_nav_bar {
             nav_bar.remove_handler(Control::size_changed_event(), token);
         }
-        let nav_bar = e.name_scope().get_as::<Border>("PART_NavigationBar");
+        let nav_bar = e.name_scope().get_as::<Decorator>("PART_NavigationBar");
         let weak = this.to_ref().downgrade();
         let token = nav_bar.size_changed(move |_, e| {
             if let Some(this) = weak.upgrade() {
@@ -291,7 +291,7 @@ impl TemplatedControlImpl for NavigationPage {
             }
         });
         *this.nav_bar.borrow_mut() = Some((nav_bar, token));
-        *this.nav_bar_shadow.borrow_mut() = e.name_scope().find_as::<Border>("PART_NavBarShadow");
+        *this.nav_bar_shadow.borrow_mut() = e.name_scope().find_as::<Decorator>("PART_NavBarShadow");
         *this.top_command_bar_presenter.borrow_mut() = e.name_scope().find_as::<ContentPresenter>("PART_TopCommandBar");
         this.update_top_command_bar_max_width();
 
@@ -1657,7 +1657,7 @@ impl NavigationPage {
         }
     }
 
-    fn nav_bar(&self) -> Option<Ref<Border>> {
+    fn nav_bar(&self) -> Option<Ref<Decorator>> {
         self.nav_bar.borrow().as_ref().map(|(nav_bar, _)| nav_bar.clone())
     }
 
