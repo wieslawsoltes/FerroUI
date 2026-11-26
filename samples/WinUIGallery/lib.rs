@@ -75,7 +75,8 @@ mod custom_controls_tests;
 #[cfg(test)]
 mod feedback_samples_tests;
 
-#[cfg(test)]
+// The Color page is tested on the WinUI theme, which the `theme` feature brings.
+#[cfg(all(test, feature = "theme"))]
 mod color_samples_tests;
 #[cfg(test)]
 mod navigation_view_samples_tests;
