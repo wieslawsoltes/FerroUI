@@ -19018,6 +19018,12 @@
         "type_name": "RefreshRequestedEventArgs",
         "documentation": "RefreshVisualizer.RefreshRequested routed event",
         "event": true
+      },
+      "RefreshStateChanged": {
+        "name": "RefreshStateChanged",
+        "type_name": "RefreshStateChangedEventArgs",
+        "documentation": "RefreshVisualizer.RefreshStateChanged routed event",
+        "event": true
       }
     },
     "namespace_aliases": [

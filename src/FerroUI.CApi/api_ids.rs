@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2034746434256777622;
+pub(crate) const API_FINGERPRINT: i64 = -491037708418828803;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 507] = [
@@ -519,7 +519,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1043] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -1328,6 +1328,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "Springiness",
     "StartAngle",
     "StartPoint",
+    "State",
     "StaysOpenOnClick",
     "Storyboard.TargetName",
     "Storyboard.TargetProperty",
@@ -1565,7 +1566,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
 ];
 
 /// The routed events, by event ID.
-pub(crate) static EVENT_NAMES: [&str; 96] = [
+pub(crate) static EVENT_NAMES: [&str; 97] = [
     "AccessKey",
     "AccessKeyPressed",
     "BackRequested",
@@ -1631,6 +1632,7 @@ pub(crate) static EVENT_NAMES: [&str; 96] = [
     "RefreshCompleted",
     "RefreshRequested",
     "RefreshStarted",
+    "RefreshStateChanged",
     "RequestBringIntoView",
     "RightTapped",
     "ScrollChanged",
