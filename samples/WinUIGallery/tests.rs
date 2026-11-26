@@ -714,10 +714,17 @@ fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() 
         text("FilesStatusText").as_deref(),
         Some("StorageItems format is not available in the clipboard.")
     );
-    // The ContentChanged monitor: FerroUI's clipboard raises no ContentChanged.
-    root.get_control::<ToggleSwitch>("ContentChangedToggle")
-        .set_is_checked(Some(true));
-    assert!(text("OtherOperationsStatusText").unwrap().contains("ContentChanged"));
+    // The ContentChanged monitor: the test clipboard does not observe other applications, so the
+    // monitor reports this application's own changes.
+    let monitor = root.get_control::<ToggleSwitch>("ContentChangedToggle");
+    monitor.set_is_checked(Some(true));
+    assert!(text("OtherOperationsStatusText")
+        .unwrap()
+        .starts_with("Monitoring the clipboard changes of this application"));
+    click("CopyText");
+    assert_eq!(text("OtherOperationsStatusText").as_deref(), Some("Clipboard content changed."));
+    monitor.set_is_checked(Some(false));
+    assert_eq!(text("OtherOperationsStatusText").as_deref(), Some("Stopped monitoring clipboard changes."));
     window.close();
 }
 

@@ -12,9 +12,10 @@ use crate::selections::selection_helper::{create_event_window, TaskCompletionSou
 use crate::x11_platform::FerroX11Platform;
 use crate::x11_structs::XEventName;
 use crate::xlib::{self, Atom, PropertyMode, XEvent, XID};
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{AsyncDataTransferExtensions, DataFormat, IAsyncDataTransfer, LocalBoxFuture};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::utilities::HandlerList;
 use std::cell::{Cell, RefCell};
 use std::future::ready;
 use std::rc::{Rc, Weak};
@@ -30,6 +31,10 @@ pub struct X11ClipboardImpl {
     #[allow(deprecated)]
     store_atom_tcs: RefCell<Option<Rc<TaskCompletionSource<()>>>>,
     handle: Cell<XID>,
+    /// The handlers of the changes of the owner of the selection, and the number of the
+    /// `XFixesSelectionNotify` event while there is one.
+    content_changed: HandlerList<dyn Fn()>,
+    selection_notify: Cell<Option<i32>>,
 }
 
 impl X11ClipboardImpl {
@@ -40,6 +45,8 @@ impl X11ClipboardImpl {
             selection,
             store_atom_tcs: RefCell::new(None),
             handle: Cell::new(0),
+            content_changed: HandlerList::new(),
+            selection_notify: Cell::new(None),
         });
 
         let weak = Rc::downgrade(&this);
@@ -69,6 +76,14 @@ impl X11ClipboardImpl {
 
     fn on_event(&self, evt: &mut XEvent) {
         let event_type = xlib::event_type(evt);
+
+        if Some(event_type) == self.selection_notify.get() {
+            // The selection has a new owner: another application, or this one, changed it.
+            for (_, handler) in self.content_changed.snapshot().iter() {
+                handler();
+            }
+            return;
+        }
 
         if event_type == XEventName::SelectionClear as i32 {
             // We might have already regained the clipboard ownership by the time a SelectionClear message arrives.
@@ -214,6 +229,29 @@ impl X11ClipboardImpl {
     }
 }
 
+impl IClipboardChangeImpl for X11ClipboardImpl {
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let first = self.content_changed.is_empty();
+        let token = self.content_changed.add(handler);
+        let display = self.provider.display();
+        if first {
+            if let Some(base) = xlib::x_fixes_event_base(display) {
+                self.selection_notify.set(Some(base));
+                xlib::x_fixes_select_selection_input(display, self.handle.get(), self.selection, true);
+            }
+        }
+        let weak = self.weak_self.clone();
+        Subscription::new(Disposable::create(move || {
+            let Some(this) = weak.upgrade() else { return };
+            this.content_changed.remove(token);
+            if this.content_changed.is_empty() && this.selection_notify.take().is_some() {
+                let display = this.provider.display();
+                xlib::x_fixes_select_selection_input(display, this.handle.get(), this.selection, false);
+            }
+        }))
+    }
+}
+
 impl IClipboardImpl for X11ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         let Some(this) = self.weak_self.upgrade() else {
@@ -237,6 +275,11 @@ impl IClipboardImpl for X11ClipboardImpl {
 
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
         Some(self)
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
+        // The changes of other applications reach the clipboard through XFixes.
+        self.provider.info().has_x_fixes().then_some(self as &dyn IClipboardChangeImpl)
     }
 }
 

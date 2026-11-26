@@ -4067,6 +4067,19 @@ mod native {
         unsafe { dx::CloseClipboard() != 0 }
     }
 
+    /// Asks the system to post `WM_CLIPBOARDUPDATE` to `hwnd` after each change of the
+    /// clipboard.
+    pub fn add_clipboard_format_listener(hwnd: isize) -> bool {
+        // SAFETY: a window of the calling thread.
+        unsafe { dx::AddClipboardFormatListener(h(hwnd)) != 0 }
+    }
+
+    /// Stops [`add_clipboard_format_listener`].
+    pub fn remove_clipboard_format_listener(hwnd: isize) -> bool {
+        // SAFETY: a window of the calling thread.
+        unsafe { dx::RemoveClipboardFormatListener(h(hwnd)) != 0 }
+    }
+
     /// Empties the clipboard, which the caller has open.
     pub fn empty_clipboard() -> bool {
         // SAFETY: no arguments.

@@ -98,6 +98,14 @@ extern "C" {
     #[wasm_bindgen(js_namespace = InputHelper, js_name = isClipboardFormatSupported)]
     pub fn is_clipboard_format_supported(format: &str) -> bool;
 
+    /// Whether the page has the `clipboardchange` event of the Clipboard API.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = isClipboardChangeSupported)]
+    pub fn is_clipboard_change_supported(global_this: &JsObject) -> bool;
+
+    /// Starts or stops calling [`on_clipboard_change`] for `clipboardchange`.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = listenToClipboardChanges)]
+    pub fn listen_to_clipboard_changes(global_this: &JsObject, listen: bool);
+
     /// Creates the list of items written to the clipboard.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = createWriteableClipboardSource)]
     pub fn create_writeable_clipboard_source() -> JsObject;
@@ -552,6 +560,12 @@ pub fn on_wheel(
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
         top_level.input_handler().on_wheel(offset_x, offset_y, delta_x, delta_y, delta_mode, modifier);
     }
+}
+
+/// The page's clipboard changed (`clipboardchange`).
+#[wasm_bindgen(js_name = InputHelper_OnClipboardChange)]
+pub fn on_clipboard_change() {
+    crate::clipboard_impl::on_clipboard_change();
 }
 
 /// A drag operation of the page entered, moved over, left or dropped on the

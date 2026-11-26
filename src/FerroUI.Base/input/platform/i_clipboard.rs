@@ -1,5 +1,6 @@
 use super::ClipboardError;
 use crate::input::{IAsyncDataTransfer, LocalBoxFuture};
+use crate::reactive::Subscription;
 use std::rc::Rc;
 
 /// Represents the system clipboard.
@@ -47,4 +48,21 @@ pub trait IClipboard {
     fn try_get_in_process_data_async(
         &self,
     ) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>>;
+
+    /// Occurs when the content of the clipboard changes (WinUI's `Clipboard.ContentChanged`),
+    /// until the subscription is dropped. The handler reads nothing: the application asks for the
+    /// data when it wants it.
+    ///
+    /// A change made by another application is reported where
+    /// [`is_content_changed_supported`](Self::is_content_changed_supported) is true; a change
+    /// this clipboard makes is reported on every platform.
+    fn content_changed(&self, _handler: Rc<dyn Fn()>) -> Subscription {
+        Subscription::new(crate::reactive::Disposable::empty())
+    }
+
+    /// Whether [`content_changed`](Self::content_changed) reports the changes of other
+    /// applications on this platform.
+    fn is_content_changed_supported(&self) -> bool {
+        false
+    }
 }

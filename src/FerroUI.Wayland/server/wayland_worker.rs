@@ -18,6 +18,8 @@
 //! print the same messages to the error stream, and a probe that finds the
 //! log area enabled says so there (`TRACE_AREA`).
 
+use crate::clipboard::ClipboardChanges;
+use crate::server::wayland_marshallers::UiThreadRef;
 use super::cross_thread_result::{cross_thread_result, CrossThreadResult};
 use super::interop::wakeup_fd::WakeupFd;
 use super::interop::wayland_connection::{DispatchResult, WaylandConnection};
@@ -95,6 +97,8 @@ pub struct WaylandWorker {
     render_timer: Arc<WaylandRenderTimer>,
     thread: Mutex<Option<ThreadId>>,
     server_compositor: Mutex<Option<Arc<LockedServerCompositor>>>,
+    /// The clipboard of the UI thread while it listens for changes of the selection.
+    clipboard_observer: Mutex<Option<UiThreadRef<ClipboardChanges>>>,
 }
 
 impl WaylandWorker {
@@ -125,8 +129,22 @@ impl WaylandWorker {
                 render_timer,
                 thread: Mutex::new(None),
                 server_compositor: Mutex::new(None),
+                clipboard_observer: Mutex::new(None),
             }
         }))
+    }
+
+    /// The clipboard that listens for changes of the selection, `None` when none does.
+    pub(crate) fn set_clipboard_observer(&self, observer: Option<UiThreadRef<ClipboardChanges>>) {
+        *self.clipboard_observer.lock().unwrap_or_else(PoisonError::into_inner) = observer;
+    }
+
+    /// Tells the listening clipboard, on its thread, that the selection changed (on the worker).
+    pub(crate) fn notify_selection_changed(&self) {
+        let observer = self.clipboard_observer.lock().unwrap_or_else(PoisonError::into_inner).clone();
+        if let Some(observer) = observer {
+            observer.post(|changes| changes.raise());
+        }
     }
 
     pub fn platform_graphics(&self) -> &Arc<WaylandPlatformGraphics> {

@@ -349,6 +349,10 @@ impl Win32Platform {
             }
         }
 
+        if msg == WindowsMessage::WM_CLIPBOARDUPDATE {
+            crate::clipboard_impl::on_clipboard_update();
+        }
+
         if msg == WindowsMessage::WM_DISPLAYCHANGE {
             let screen = self.screen.borrow().clone();
             if let Some(screen) = screen {
