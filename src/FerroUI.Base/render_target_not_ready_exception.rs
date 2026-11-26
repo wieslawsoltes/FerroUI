@@ -9,10 +9,6 @@ pub struct RenderTargetNotReadyError {
     inner_exception: Option<Rc<dyn Error>>,
 }
 
-/// The name of [`RenderTargetNotReadyError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `RenderTargetNotReadyError`")]
-pub type RenderTargetNotReadyException = RenderTargetNotReadyError;
-
 impl RenderTargetNotReadyError {
     /// Creates the exception without a message.
     pub fn new() -> Self {

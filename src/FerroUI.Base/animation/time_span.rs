@@ -6,8 +6,8 @@
 //! rejected when an animation runs rather than when it is declared. A
 //! [`std::time::Duration`] cannot hold any of that, so the animation API uses
 //! [`SignedDuration`] and converts from and to `Duration` at its edges. It is
-//! the markup type `System.TimeSpan`; the Rust name `TimeSpan` remains for one
-//! release as a deprecated alias (C5 of #423, docs/idiomatic-rust-signatures.md).
+//! the markup type `System.TimeSpan` (C5 of #423, docs/idiomatic-rust-signatures.md; the
+//! deprecated Rust alias `TimeSpan` was removed in 0.7.0, #625).
 
 use crate::utilities::FormatError;
 use std::fmt;
@@ -20,14 +20,6 @@ use std::time::Duration;
 pub struct SignedDuration {
     ticks: i64,
 }
-
-/// The former name of [`SignedDuration`].
-#[deprecated(since = "0.5.0", note = "use `SignedDuration`")]
-pub type TimeSpan = SignedDuration;
-
-/// The former name of [`NegativeDurationError`].
-#[deprecated(since = "0.5.0", note = "use `NegativeDurationError`")]
-pub type NegativeTimeSpanError = NegativeDurationError;
 
 impl SignedDuration {
     /// The number of ticks in one millisecond.
@@ -272,7 +264,7 @@ impl SignedDuration {
         self.ticks as f64 / Self::TICKS_PER_MINUTE as f64
     }
 
-    /// The absolute value of the interval. Panics for [`TimeSpan::MIN_VALUE`].
+    /// The absolute value of the interval. Panics for [`SignedDuration::MIN_VALUE`].
     pub fn duration(self) -> SignedDuration {
         SignedDuration { ticks: self.ticks.checked_abs().expect("TimeSpan overflowed because the duration is too long.") }
     }
@@ -413,12 +405,12 @@ impl SignedDuration {
 
 impl From<Duration> for SignedDuration {
     /// Converts a duration, truncating to whole ticks and saturating at
-    /// [`TimeSpan::MAX_VALUE`].
+    /// [`SignedDuration::MAX_VALUE`].
     ///
     /// A tick is 100 nanoseconds, so the nanoseconds of the duration below
     /// a whole tick are dropped (149 ns is one tick, 99 ns is zero). A
-    /// duration longer than [`TimeSpan::MAX_VALUE`] (about 29,227 years)
-    /// gives [`TimeSpan::MAX_VALUE`].
+    /// duration longer than [`SignedDuration::MAX_VALUE`] (about 29,227 years)
+    /// gives [`SignedDuration::MAX_VALUE`].
     fn from(value: Duration) -> Self {
         let ticks = value.as_nanos() / 100;
         SignedDuration { ticks: i64::try_from(ticks).unwrap_or(i64::MAX) }
@@ -429,9 +421,9 @@ impl TryFrom<SignedDuration> for Duration {
     type Error = NegativeDurationError;
 
     /// Converts a non-negative interval exactly: each tick is 100
-    /// nanoseconds, and every non-negative [`TimeSpan`] up to
-    /// [`TimeSpan::MAX_VALUE`] fits in a [`Duration`]. A negative interval is
-    /// an error ([`TimeSpan::to_duration`] gives `None` for it).
+    /// nanoseconds, and every non-negative [`SignedDuration`] up to
+    /// [`SignedDuration::MAX_VALUE`] fits in a [`Duration`]. A negative interval is
+    /// an error ([`SignedDuration::to_duration`] gives `None` for it).
     fn try_from(value: SignedDuration) -> Result<Self, Self::Error> {
         value.to_duration().ok_or(NegativeDurationError { value })
     }

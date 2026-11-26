@@ -23,8 +23,6 @@ pub use expression_evaluation_context::{
     IExpressionParameterCollection,
 };
 pub use expression_parse_exception::ExpressionParseError;
-#[allow(deprecated)]
-pub use expression_parse_exception::ExpressionParseException;
 pub use expression_parser::ExpressionParser;
 pub use expression_tracked_values::{ExpressionObjectKey, ExpressionTrackedObjects, ExpressionTrackedObjectsPool};
 pub use expression_variant::{ExpressionVariant, ExpressionVariantValue, VariantType};

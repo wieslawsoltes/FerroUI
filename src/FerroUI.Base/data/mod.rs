@@ -29,8 +29,6 @@ mod update_source_trigger;
 
 pub use binding_base::BindingBase;
 pub use binding_chain_exception::BindingChainError;
-#[allow(deprecated)]
-pub use binding_chain_exception::BindingChainException;
 pub use binding_expression_base::BindingExpressionBase;
 pub use binding_mode::BindingMode;
 pub use binding_notification::{AggregateError, BindingErrorType, BindingNotification};
@@ -45,8 +43,6 @@ pub use compiled_binding_path::{
 };
 pub use culture_info_ietf_language_tag_converter::CultureInfoIetfLanguageTagConverter;
 pub use data_validation_exception::{AggregateException, DataValidationError};
-#[allow(deprecated)]
-pub use data_validation_exception::DataValidationException;
 pub use indexer_binding::IndexerBinding;
 pub use indexer_descriptor::IndexerDescriptor;
 #[cfg(all(debug_assertions, feature = "hot-reload"))]

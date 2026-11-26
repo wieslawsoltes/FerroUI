@@ -10,10 +10,6 @@ pub struct FerroInternalError {
     message: String,
 }
 
-/// The name of [`FerroInternalError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `FerroInternalError`")]
-pub type FerroInternalException = FerroInternalError;
-
 impl FerroInternalError {
     /// Creates the exception with the given message.
     pub fn new(message: impl Into<String>) -> Self {
