@@ -105,6 +105,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
 | `ScrollView` | WinUI's ScrollView: its template is converted from WinUI's ScrollView.xaml into the WinUI theme and its derived themes | #1268 |
+| `AnnotatedScrollBar` | WinUI's AnnotatedScrollBar: its template is converted from WinUI's AnnotatedScrollBar.xaml into the WinUI theme and its derived themes | #1268 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
@@ -572,4 +573,28 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The chain modes chain per axis and for the zoom; the rail modes keep a pan on its axis; the anchor ratios place the anchor. | Chaining is off only when both axes are `Never`; the rail modes and the anchor ratios are kept without effect (the scroll viewer anchors at the top left). | The scroll viewer has one `IsScrollChainingEnabled`. |
 | `ExpressionAnimationSources`, the snap points collections, `BringingIntoView`, `AnchorRequested`, `CanContentRenderOutsideBounds`. | Left out. | No user in the gallery; follow-ups. |
 | The ScrollingIndicatorStates of the template (mouse and touch indicators) and the delays of ScrollBarsSeparatorStates. | The bars show while they are visible; the separator shows when both bars do. | As the scroll viewer of the WinUI theme (its translation notes). |
+
+### 10.13 AnnotatedScrollBar (#1268)
+
+`src/FerroUI.Controls/annotated_scroll_bar/` (`AnnotatedScrollBar`, `AnnotatedScrollBarLabel`,
+`AnnotatedScrollBarScrollingEventArgs`, `AnnotatedScrollBarDetailLabelRequestedEventArgs` and
+`AnnotatedScrollBarScrollingEventKind`) ports `controls/dev/AnnotatedScrollBar/` at the pin. The
+names are WinUI's; the template is `Controls/AnnotatedScrollBar.xaml` of the WinUI theme, from
+WinUI's `AnnotatedScrollBar.xaml`, with its parts `PART_VerticalIncrementRepeatButton`,
+`PART_VerticalGrid`, `PART_LabelsGrid`, `PART_ToolTipRail`, `PART_TooltipContentPresenter`,
+`PART_VerticalThumbGhost`, `PART_VerticalThumb` and `PART_VerticalDecrementRepeatButton`; its
+resources are converted from `AnnotatedScrollBar_themeresources.xaml`. The bar scrolls a view
+through `ScrollController`, which a `ScrollPresenter` takes as its `VerticalScrollController`
+(section 10.12): a press or a drag on the rail requests a scroll to the offset under the pointer,
+the buttons add a velocity of `SmallChange` (a scroll by it when animations are off), and the
+handlers of `Scrolling` can cancel each request.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The bar is its own `IScrollController`. | `ScrollController()` returns a controller that refers to the bar weakly (the same one each time). | A presenter keeps its controllers; the bar is a framework object. |
+| `PanningInfo` moves the thumb with the interaction tracker (`PanningElementOffsetMultiplier`). | `SetValues` moves the thumb with a `TranslateTransform` by the offset times the factor of the rail; `PanningInfo` is left out (section 10.12). | The thumb follows the view without a layout pass; the rail handles the pointer itself, as in WinUI for the mouse. |
+| `CanScrollChanged` and `IsScrollingWithMouseChanged`. | Left out, as for every scroll controller here (section 10.12). | The presenter reads `CanScroll` and `IsScrollingWithMouse`. |
+| `Labels` is an `IVector` set in the constructor; `LabelTemplate` and `DetailLabelTemplate` are `IElementFactory`. | `Labels` is a `FerroList<AnnotatedScrollBarLabel>` created when first read; the templates are data templates (`IDataTemplate`, a selector included). | The collection and template types of FerroUI. |
+| The detail label is the `ToolTip` of `PART_ToolTipRail`, opened at a `PlacementRect`. | The tip of `PART_ToolTipRail` (`ToolTip.Tip`, the service off), opened with `ToolTip.IsOpen` above the rail with the offsets of WinUI's placement rectangle. | FerroUI's tooltips are attached; the position is WinUI's. |
+| `QueueLayoutLabels` waits on a thread-pool timer. | A one-shot dispatcher timer of the same wait. | The UI thread lays the labels out in both. |
 

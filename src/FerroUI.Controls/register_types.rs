@@ -315,6 +315,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::repeat_button::RepeatButton,
     crate::row_definition::RowDefinition,
     crate::scroll_view::ScrollView,
+    crate::annotated_scroll_bar::AnnotatedScrollBar,
     crate::scroll_viewer::ScrollViewer,
     crate::selectable_text_block::SelectableTextBlock,
     crate::separator::Separator,
