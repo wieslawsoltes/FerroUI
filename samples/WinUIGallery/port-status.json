@@ -410,7 +410,7 @@
       ]
     },
     "Clipboard": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Clipboard.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -430,7 +430,7 @@
           "name": "clipboard_sample_reports_missing_service_and_platform_failure"
         }
       ],
-      "notes": "All six source examples with the handlers of ClipboardPage.xaml.cs in Rust (platform_samples.rs), over the window's clipboard service (TopLevel.Clipboard, asynchronous): CopyText_Click with the editor's text of the constructor and its confirmation, hidden again after two seconds (the page's VisualStateManager states are the confirmation's visibility); PasteText_Click; CopyImage_Click and PasteImage_Click with the source's rainier.jpg; CopyFiles_Click with the files of the window's storage provider and PasteFiles_Click; CopyWithOptions_Click; ShowFormats_Click and ClearClipboard_Click; and ContentChangedToggle_Toggled. The announcements of UIHelper.AnnounceActionForAccessibility are polite live regions; the ToggleSwitches' Headers are their Content and IsOn is IsChecked. IsHistoryEnabled, IsRoamingEnabled and the history and roaming options of CopyWithOptions_Click are the clipboard's (#1264): Windows has them, and elsewhere history and roaming are No and the options do nothing. Its data transfer has no RequestedOperation (the pasted files' operation is not shown). The monitor switch subscribes to the clipboard's ContentChanged (#1264), which reports the changes of other applications on Windows, macOS, iOS, X11, Wayland and in browsers with the clipboardchange event, and this application's own changes everywhere.",
+      "notes": "All six source examples with the handlers of ClipboardPage.xaml.cs in Rust (platform_samples.rs), over the window's clipboard service (TopLevel.Clipboard, asynchronous): CopyText_Click with the editor's text of the constructor and its confirmation, hidden again after two seconds (the page's VisualStateManager states are the confirmation's visibility); PasteText_Click; CopyImage_Click and PasteImage_Click with the source's rainier.jpg; CopyFiles_Click with the files of the window's storage provider and PasteFiles_Click; CopyWithOptions_Click; ShowFormats_Click and ClearClipboard_Click; and ContentChangedToggle_Toggled. The announcements of UIHelper.AnnounceActionForAccessibility are polite live regions; the ToggleSwitches' Headers are their Content and IsOn is IsChecked. IsHistoryEnabled, IsRoamingEnabled and the history and roaming options of CopyWithOptions_Click are the clipboard's (#1264): Windows has them, and elsewhere history and roaming are No and the options do nothing. The pasted files show their RequestedOperation (#1264), which Windows and the file managers of Linux keep. The monitor switch subscribes to the clipboard's ContentChanged (#1264), which reports the changes of other applications on Windows, macOS, iOS, X11, Wayland and in browsers with the clipboardchange event, and this application's own changes everywhere.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/Clipboard/CopyTextClipboard.txt",
