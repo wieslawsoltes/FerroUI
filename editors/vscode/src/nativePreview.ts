@@ -15,6 +15,7 @@ import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, Hos
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource, HostedWorkspaceFrame, HostedWorkspaceSources } from './hostedProtocol';
 import type { NativePaletteRequest } from './hostedPaletteProtocol';
 import type { NativeStyleRequest } from './hostedStylesProtocol';
+import type { KeyboardFocus, KeyboardInput } from './previewKeyboardProtocol';
 import type { TransitionEdit, TransitionList, TransitionOwner } from './propertyTransitionProtocol';
 import type { NativeTemplateRequest } from './hostedTemplates';
 import type { StateGroupEdit } from './stateGroupProtocol';
@@ -45,7 +46,7 @@ export class NativePreview implements vscode.Disposable {
     canvasGuides?: GuideCatalog;
     capabilities: {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedPalette?: boolean; hostedStyles?: boolean;
-        hostedTemplates?: boolean;
+        hostedTemplates?: boolean; hostedKeyboard?: boolean;
         hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean;
         hostedPropertyTransitions?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; stagePointerInput?: boolean; prototypeEditing?: boolean; prototypeNativePlayer?: boolean; prototypeTransitions?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean; publishedAssets?: boolean;
@@ -207,6 +208,10 @@ export class NativePreview implements vscode.Disposable {
         return this.send('hostedTemplates', { ...frame, ...request });
     }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
+    hostedKeyboard({ revision, sequence }: HostedAnimationFrame, input: KeyboardInput): Promise<KeyboardFocus | null> {
+        if (!this.capabilities.hostedKeyboard) throw new Error('Update the FerroUI preview helper to use App Preview keyboard input.');
+        return this.send('hostedKeyboard', { revision, sequence, input }, 12_000);
+    }
     sampleHostedAnimation(request: HostedAnimationRequest): Promise<HostedAnimationSample> {
         return this.send('hostedAnimate', request, 12_000);
     }

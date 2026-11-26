@@ -5,7 +5,7 @@ import type { AppRuntime } from '../src/runtimeTargets';
 import { openRuntimeTree, runtimeNodeLabel } from '../src/runtimeTree';
 import { create, element, iconButton } from './dom';
 import { PreviewBitmap } from './previewBitmap';
-import { RuntimeKeyboard } from './runtimeKeyboard';
+import { QueuedPreviewKeyboard } from './queuedPreviewKeyboard';
 import { RuntimeTree } from './runtimeTree';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
@@ -48,7 +48,7 @@ const send = (message: FromRuntime) => {
     if (debuggerPaused && 'token' in message) showProblem(continueAppMessage);
     else vscode.postMessage(message);
 };
-const keyboard = new RuntimeKeyboard(surface, interactMode, send, showProblem);
+const keyboard = new QueuedPreviewKeyboard(surface, interactMode, send, showProblem);
 element('runtime-keyboard').append(keyboard.button);
 const changeView = (change: RuntimeViewChange) => {
     if (currentGeneration !== undefined) send({ type: 'presentation', generation: currentGeneration, change });

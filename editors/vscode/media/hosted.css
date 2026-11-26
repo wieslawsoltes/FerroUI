@@ -51,6 +51,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 }
 #hosted-status { flex: none; margin-block: 5px; }
 .hosted-canvas {
+    position: relative;
     flex: 1;
     overflow: auto;
     min-block-size: 0;

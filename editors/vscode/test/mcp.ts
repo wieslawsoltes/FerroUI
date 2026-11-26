@@ -101,7 +101,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         if (process.platform !== 'darwin') {
             assert.deepEqual(content(await invoke('ferroui_ios_simulator_targets')), { supported: false, devices: [], apps: [] });
         }
-        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'timeline_set_viewport', 'timeline_track_action', 'timeline_set_work_area', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
+        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'timeline_set_viewport', 'timeline_track_action', 'timeline_set_work_area', 'image', 'input', 'keyboard', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
             'palette', 'palette_edit_draft', 'palette_edit',
@@ -141,6 +141,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             expected_revision: 1 })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_hosted_input', { session: 1, expected_generation: 1,
             expected_revision: 1, expected_sequence: 1, input: { type: 'text', text: 'Draft' } })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_hosted_keyboard', { session: 1, expected_generation: 1,
+            expected_revision: 1, expected_sequence: 1, input: { kind: 'focus' } })).content[0]?.text ?? '', /allowWrites/);
         const guideWrite = { session: 1, expected_revision: 0, expected_epoch: 0, edit: { action: 'clear' } };
         assert.match((await invoke('designer_canvas_guides_edit', guideWrite)).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_stage_input', { session: 1, stage: 1, expected_epoch: 0,

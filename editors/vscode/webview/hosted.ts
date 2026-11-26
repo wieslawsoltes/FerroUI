@@ -4,6 +4,7 @@ import { HostedAnimationView } from './hostedAnimations';
 import { HostedPaletteView } from './hostedPalette';
 import { HostedStylesView } from './hostedStyles';
 import { PreviewBitmap } from './previewBitmap';
+import { QueuedPreviewKeyboard } from './queuedPreviewKeyboard';
 
 declare function acquireVsCodeApi(): {
     postMessage(message: FromHosted): void;
@@ -19,6 +20,10 @@ const styles = new HostedStylesView(message => vscode.postMessage(message));
 const canvas = element<HTMLCanvasElement>('hosted-image');
 const presenter = new PreviewBitmap(canvas);
 const status = element('hosted-status');
+const refresh = element('hosted-refresh');
+const keyboard = new QueuedPreviewKeyboard(element('hosted-canvas'), refresh, message => vscode.postMessage(message),
+    message => { status.textContent = message; });
+element('hosted-keyboard').append(keyboard.button);
 const input = element<HTMLFormElement>('hosted-input');
 const text = element<HTMLInputElement>('hosted-text');
 const send = input.querySelector<HTMLButtonElement>('button[type=submit]')!;
@@ -32,6 +37,8 @@ let staged: HostedFrame | undefined;
 let interactive = false;
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
+    if (data.type === 'keyboardResult') { keyboard.receive(data); return; }
+    if (data.type === 'releaseKeyboard') { keyboard.leave(); return; }
     if (data.type === 'animations') { animations.update(data.state, data.version, data.layout); return; }
     if (data.type === 'animationGraphMode') { animations.setGraphMode(data.mode); return; }
     if (data.type === 'timelineLayout') { animations.setTimelineLayout(data.layout); return; }
@@ -54,6 +61,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         palettes.setReady(interactive ? revision : undefined);
         styles.setReady(interactive ? revision : undefined);
         fixtureRevision = revision;
+        updateKeyboard();
         updateTemplates();
         fixtureLabel.hidden = !available.length;
         if (available.length !== availableFixtures.length || available.some((name, index) => name !== availableFixtures[index])) {
@@ -74,12 +82,18 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     presenter.present(frame.image.png, bitmap);
     current = frame;
     canvas.hidden = false;
-    input.hidden = false;
+    input.hidden = Boolean(frame.keyboardAvailable);
     animations.rendered(current);
     palettes.rendered(current);
     styles.rendered(current);
+    updateKeyboard();
     updateTemplates();
 });
+
+function updateKeyboard(): void {
+    const scope = current?.keyboardAvailable ? current.revision : undefined;
+    keyboard.follow(scope, 'App Preview', interactive && scope === fixtureRevision);
+}
 
 function updateTemplates(): void {
     templates.hidden = !current?.templatesAvailable;
@@ -110,7 +124,7 @@ input.onsubmit = event => {
         text.value = '';
     }
 };
-element('hosted-refresh').onclick = () => vscode.postMessage({ type: 'refresh' });
+refresh.onclick = () => vscode.postMessage({ type: 'refresh' });
 templates.onclick = () => {
     if (current && !templates.disabled) {
         const { revision, sequence } = current;

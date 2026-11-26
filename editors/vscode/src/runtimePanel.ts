@@ -2,13 +2,13 @@ import * as vscode from 'vscode';
 import { validate } from './agentSchema';
 import { continueAppMessage } from './debuggerPause';
 import type { HotReload } from './hotReload';
-import { keyboardInputSchema, type KeyboardFocus } from './previewKeyboardProtocol';
+import { keyboardInputSchema, type KeyboardFocus, type PreviewKeyboardRequest } from './previewKeyboardProtocol';
 import { errorMessage } from './protocol';
 import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeInspection, showLivePropertyTrace, showLiveTemplates } from './runtimeInspection';
 import { runtimeViewChangeSchema } from './runtimeMcpCatalog';
-import type { FromRuntime, RuntimeFrame, RuntimeInspectionResult, RuntimeKeyboardRequest, RuntimeNode, RuntimePresentation, RuntimeProperty,
+import type { FromRuntime, RuntimeFrame, RuntimeInspectionResult, RuntimeNode, RuntimePresentation, RuntimeProperty,
     RuntimeSelection, RuntimeViewChange, RuntimeViewSnapshot, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import type { AppRuntime } from './runtimeTargets';
@@ -386,7 +386,7 @@ export class RuntimePanel implements vscode.Disposable {
         }
     }
 
-    private async keyboard({ scope, request, input }: RuntimeKeyboardRequest): Promise<void> {
+    private async keyboard({ scope, request, input }: PreviewKeyboardRequest): Promise<void> {
         const client = this.client;
         const root = this.frame?.root.node_id;
         const version = this.inputVersion;

@@ -1,5 +1,5 @@
 import type { Bounds } from './protocol';
-import type { KeyboardFocus, KeyboardInput } from './previewKeyboardProtocol';
+import type { PreviewKeyboardRequest, PreviewKeyboardResult } from './previewKeyboardProtocol';
 import type { AppRuntime } from './runtimeTargets';
 
 export interface RuntimeNode {
@@ -101,16 +101,6 @@ export interface RuntimeFrame {
     keyboardScope?: number;
 }
 
-export interface RuntimeKeyboardRequest {
-    type: 'keyboard';
-    scope: number;
-    request: number;
-    input: KeyboardInput;
-}
-
-export type RuntimeKeyboardResult = { type: 'keyboardResult'; scope: number; request: number }
-    & ({ focus: KeyboardFocus | null } | { error: string });
-
 export type ToRuntime =
     | { type: 'state'; target?: AppRuntime; targets: { runtime: AppRuntime; label: string }[];
         generation?: number; status: string; windows: RuntimeNode[]; root?: number; debuggerPaused: boolean }
@@ -118,7 +108,7 @@ export type ToRuntime =
     | { type: 'invalidateFrame' | 'clearSelection' | 'releaseKeyboard' }
     | { type: 'frame'; frame: RuntimeFrame }
     | { type: 'inspection'; token: number; revision: number; inspection: RuntimeInspectionResult }
-    | RuntimeKeyboardResult
+    | PreviewKeyboardResult
     | { type: 'problem'; message: string };
 
 type RuntimeFrameAction =
@@ -135,5 +125,5 @@ export type FromRuntime =
     | { type: 'ready' | 'start' | 'attach' }
     | { type: 'target'; target: AppRuntime }
     | { type: 'presentation'; generation: number; change: RuntimeViewChange }
-    | RuntimeKeyboardRequest
+    | PreviewKeyboardRequest
     | (RuntimeFrameAction & { token: number });

@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { HostedAnimationAction, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { HostedGesture } from '../src/hostedProtocol';
+import type { KeyboardFocus, KeyboardInput } from '../src/previewKeyboardProtocol';
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
 import { verifyHostedTrackMcp } from './timelineTrackMcp';
@@ -14,8 +15,11 @@ const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:Tod
     Width="380" Height="280" Background="#F2F6FB">
     <Grid Margin="20" RowDefinitions="40,44,46,*">
         <TextBlock Text="Order note" FontSize="25" Foreground="#162C4A"/>
-        <TextBox Grid.Row="1" Name="Note" FontSize="17"/>
-        <app:PreviewBadge Grid.Row="2" Text="{Binding #Note.Text}" FontSize="16" Foreground="#194779"/>
+        <TextBox Grid.Row="1" Name="Note" AutomationProperties.Name="Order note" FontSize="17"/>
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+            <app:PreviewBadge Text="{Binding #Note.Text}" FontSize="16" Foreground="#194779"/>
+            <ToggleButton Grid.Column="1" Name="Reviewed" Content="Reviewed"/>
+        </Grid>
         <ScrollViewer Grid.Row="3">
             <StackPanel Spacing="8">
                 <Border Background="#E2EAF6" Padding="12"><TextBlock Text="Order received"/></Border>
@@ -59,6 +63,7 @@ interface Capture {
     generation: number;
     revision: number;
     sequence: number;
+    keyboardAvailable: boolean;
     pixels: string;
 }
 
@@ -97,6 +102,23 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         const input = ({ generation, revision, sequence }: Capture, gesture: HostedGesture) =>
             invoke('designer_hosted_input', { session, expected_generation: generation,
                 expected_revision: revision, expected_sequence: sequence, input: gesture });
+        const keyboard = ({ generation, revision, sequence }: Capture, input: KeyboardInput) =>
+            invoke('designer_hosted_keyboard', { session, expected_generation: generation,
+                expected_revision: revision, expected_sequence: sequence, input });
+        const press = async (gesture: KeyboardInput) => {
+            let accepted: { before: Capture; focus: KeyboardFocus | null } | undefined;
+            await until(async () => {
+                const before = await image();
+                const result = await keyboard(before, gesture);
+                if (result.isError && /frame changed/i.test(result.content[0]?.text ?? '')) return false;
+                const reply = content<{ generation: number; frame: { revision: number; sequence: number }; focus: KeyboardFocus | null }>(result);
+                assert.equal(reply.generation, generation);
+                assert.deepEqual(reply.frame, { revision: before.revision, sequence: before.sequence });
+                accepted = { before, focus: reply.focus };
+                return true;
+            });
+            return accepted!;
+        };
         const deliver = async (gesture: HostedGesture): Promise<Capture> => {
             let accepted: Capture | undefined;
             await until(async () => {
@@ -113,15 +135,24 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
             return accepted!;
         };
         const start = await image();
+        assert.equal(start.keyboardAvailable, true);
+        assert.match((await keyboard({ ...start, generation: generation + 1 }, { kind: 'focus' })).content[0]?.text ?? '', /current application preview generation/);
+        assert.deepEqual((await press({ kind: 'focus' })).focus, { name: 'Order note', role: 'Edit' });
+        assert.deepEqual((await press({ kind: 'key', key: 'Tab' })).focus, { name: 'Reviewed', role: 'Button' });
+        const toggled = await press({ kind: 'key', key: 'Space' });
+        const afterToggle = await image(toggled.before);
+        assert.deepEqual((await press({ kind: 'key', key: 'Shift+Tab' })).focus, { name: 'Order note', role: 'Edit' });
+        const keyboardText = await image((await press({ kind: 'text', text: 'Prêt 🌿' })).before);
+        assert.notEqual(afterToggle.pixels, keyboardText.pixels);
+        assert.match((await keyboard(start, { kind: 'key', key: 'Tab' })).content[0]?.text ?? '', /frame changed/i);
         const click = { type: 'click', x: .34, y: .30 } as const;
         const rejected = await input({ ...start, generation: generation + 1 }, click);
         assert.match(rejected.content[0]?.text ?? '', /current application preview generation/);
-        const outside = await input(start, { ...click, x: 1.25 });
+        const outside = await input(await image(), { ...click, x: 1.25 });
         assert.match(outside.content[0]?.text ?? '', /matching input form/);
         assert.match((await input({ ...start, revision: start.revision + 1 }, click)).content[0]?.text ?? '', /frame changed/i);
-        const clicked = await deliver(click);
-        const focused = await image(clicked);
-        assert.match((await input(clicked, click)).content[0]?.text ?? '', /frame changed/i);
+        await deliver(click);
+        const focused = await image();
         const typed = await image(await deliver({ type: 'text', text: 'Leave at reception' }));
         assert.notEqual(typed.pixels, focused.pixels);
         const scrolled = await image(await deliver({ type: 'scroll', x: .60, y: .78, delta: -8 }));
@@ -135,9 +166,10 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         const refreshed = await image();
         assert.equal(refreshed.revision, updated.revision);
         assert.match((await input(scrolled, click)).content[0]?.text ?? '', /frame changed/i);
+        assert.match((await keyboard(scrolled, { kind: 'key', key: 'Enter' })).content[0]?.text ?? '', /frame changed/i);
         assert.equal(document.version, version);
         assert.equal(document.getText(), original);
-        console.log('VS Code MCP focused, typed, scrolled, and refreshed the native App Preview while rejecting stale requests');
+        console.log('VS Code MCP traversed native App Preview focus, activated a button, typed Unicode, scrolled, refreshed, and rejected stale input');
 
         const history = async (action: 'undo' | 'redo') =>
             content(await invoke('designer_history', { session, expected_version: document.version, action }));

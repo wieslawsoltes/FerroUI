@@ -351,6 +351,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     ${tool('hosted-styles-button', 'symbol-property', 'App Preview Styles & Themes', 'popovertarget="hosted-styles" aria-controls="hosted-styles" aria-haspopup="dialog" aria-expanded="false" hidden')}
     ${tool('hosted-templates-button', 'symbol-snippet', 'App Preview Templates', 'aria-haspopup="listbox" hidden disabled')}
     ${tool('hosted-palette-button', 'symbol-color', 'App Preview palette', 'popovertarget="hosted-palette" aria-controls="hosted-palette" aria-haspopup="dialog" aria-expanded="false" hidden')}
+    <div id="hosted-keyboard" class="tool-group"></div>
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
     ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
 </header>
@@ -444,11 +445,11 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
 </section>
 ${keyframeEditorHtml(false)}
 <p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
-<main class="hosted-canvas preview-surface" aria-label="Application artboard"><canvas id="hosted-image" role="img" aria-label="App-hosted FerroUI design" hidden></canvas></main>
+<main id="hosted-canvas" class="hosted-canvas preview-surface" aria-label="Application artboard"><canvas id="hosted-image" role="img" aria-label="App-hosted FerroUI design" hidden></canvas></main>
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
-</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range', 'hosted-key-lanes', 'styles']);
+</form>`, ['timeline-curve', 'keyframe-editor', 'timeline-clips', 'timeline-range', 'hosted-key-lanes', 'styles', 'preview-keyboard']);
 }
 
 export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {

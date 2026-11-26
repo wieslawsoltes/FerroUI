@@ -1,15 +1,14 @@
-import type { KeyboardInput } from '../src/previewKeyboardProtocol';
-import type { RuntimeKeyboardRequest, RuntimeKeyboardResult } from '../src/runtimeProtocol';
+import type { KeyboardInput, PreviewKeyboardRequest, PreviewKeyboardResult } from '../src/previewKeyboardProtocol';
 import { PreviewKeyboard } from './previewKeyboard';
 
-export class RuntimeKeyboard {
+export class QueuedPreviewKeyboard {
     private readonly capture: PreviewKeyboard;
     private readonly queued: KeyboardInput[] = [];
     private scope?: number;
     private request = 0;
     private pending?: number;
 
-    constructor(surface: HTMLElement, returnTo: HTMLElement, private readonly send: (request: RuntimeKeyboardRequest) => void,
+    constructor(surface: HTMLElement, returnTo: HTMLElement, private readonly send: (request: PreviewKeyboardRequest) => void,
         private readonly report: (message: string) => void) {
         this.capture = new PreviewKeyboard(surface, surface, 0, returnTo, input => this.enqueue(input), { onExit: () => {
             this.queued.length = 0;
@@ -33,7 +32,7 @@ export class RuntimeKeyboard {
         if (changed) this.capture.leave(true);
     }
 
-    receive(result: RuntimeKeyboardResult): void {
+    receive(result: PreviewKeyboardResult): void {
         if (result.request !== this.pending || result.scope !== this.scope) return;
         this.pending = undefined;
         if ('error' in result) {

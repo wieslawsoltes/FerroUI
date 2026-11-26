@@ -33,6 +33,7 @@ import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
 import type { HostedGesture } from './hostedProtocol';
+import type { KeyboardInput } from './previewKeyboardProtocol';
 import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
 import { filterOutline } from './outlineFilter';
@@ -151,7 +152,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_frame?: number;
     debug_configuration?: string;
     debug?: boolean;
-    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput | HostedGesture;
+    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput | HostedGesture | KeyboardInput;
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
@@ -384,6 +385,9 @@ export class AgentTools {
             case 'designer_hosted_input':
                 return this.hosted.input(document.uri, args.expected_generation,
                     { revision: args.expected_revision, sequence: args.expected_sequence }, args.input as HostedGesture, signal);
+            case 'designer_hosted_keyboard':
+                return this.hosted.keyboard(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.input as KeyboardInput, signal);
             case 'designer_hosted_palette':
                 return this.hosted.palette(document.uri, (args.arguments as { target?: HostedPaletteTarget } | undefined)?.target, signal);
             case 'designer_hosted_palette_edit_draft':

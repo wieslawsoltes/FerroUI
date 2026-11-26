@@ -36,6 +36,7 @@ import { verifyHostedModuleColors } from './hostedModuleColors';
 import { verifyHostedRustTemplates } from './hostedRustTemplates';
 import { verifyHostedTreeTemplates } from './hostedTreeTemplates';
 import { reviewStateSource } from './rsxStatesMcp';
+import { until } from './wait';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
     const app = process.env.FERROUI_TEST_HOSTED_APP;
@@ -112,6 +113,21 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         assert.equal(review.fixture, 'Interactive review');
         assert.notEqual(review.image.png, one.image.png);
         assert.deepEqual(review.animations?.programs ?? [], []);
+        assert.equal(review.keyboardAvailable, true);
+        assert.deepEqual(await preview.hostedKeyboard(review, { kind: 'focus' }), { name: 'Queued', role: 'Button' });
+        assert.deepEqual(await preview.hostedKeyboard(review, { kind: 'key', key: 'Tab' }), { name: 'Ready', role: 'Button' });
+        let focused = review;
+        await until(async () => {
+            const frame = await preview.hostedFrame();
+            if (!frame || frame.sequence <= review.sequence) return false;
+            focused = frame;
+            return true;
+        });
+        await preview.hostedKeyboard(focused, { kind: 'key', key: 'Enter' });
+        await until(async () => {
+            const frame = await preview.hostedFrame();
+            return Boolean(frame && frame.sequence > focused.sequence && frame.image.png !== focused.image.png);
+        });
         await verifyHostedStateRoutes(preview, reviewSource);
         await verifyHostedClips(preview, update);
         await verifyHostedKeyframeGroups(preview, update);

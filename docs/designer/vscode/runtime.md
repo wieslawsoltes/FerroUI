@@ -36,6 +36,14 @@ Open **Visual state actions** to edit groups, setters, and transitions in XAML o
 
 Use **App Preview Property Transitions** to edit a source-backed XAML or mapped Rust collection with properties and transition classes from the running app. Click inside the accepted native frame to trigger changes on its controls. [Edit and test a transition](motion.md#edit-property-transitions-in-app-preview)
 
+### Use the keyboard in App Preview
+
+1. Open an XAML view or a registered Rust fixture in App Preview. With a current preview helper and app built with keyboard support, choose the keyboard icon labeled **Keyboard input for App Preview**.
+2. Use Tab and Shift+Tab to follow the mounted view’s focus order. Type or paste into the focused field. Enter and Space activate controls that handle those keys. The capture announces the focused control’s name and role.
+3. Press Escape to return to the toolbar. Switching editors or replacing the source or fixture ends capture. Pause the Timeline if it is driving the preview.
+
+Apps built with an earlier preview protocol offer **Send Text** below the frame. Click the native field before using that input.
+
 ### Interact with App Preview from an agent
 
 1. Enable `ferroui.mcp.allowWrites` in User Settings. In a trusted workspace, open the design and its App Preview with
@@ -50,6 +58,11 @@ Use **App Preview Property Transitions** to edit a source-backed XAML or mapped 
 
 These gestures use the app’s native input path and keep the authored source buffer intact.
 [MCP reference](reference.md#drive-an-editor-workflow)
+
+When the image reports `keyboardAvailable`, pass its generation, revision, and sequence to `designer_hosted_keyboard`.
+Use `input: { "kind": "focus" }` to enter the native focus order. Send `{ "kind": "key", "key": "Tab" }`,
+`"Shift+Tab"`, `"Enter"`, or another supported native key gesture. To type, pass `{ "kind": "text", "text": "Review draft" }`.
+The reply includes the frame that accepted the input and the current native focus name and role. Read the current image before sending the next gesture.
 
 ![App Preview shows the entered order note in the field and its bound badge, with the order list scrolled beside the XAML source.](../images/vscode-app-preview-agent-input.png)
 

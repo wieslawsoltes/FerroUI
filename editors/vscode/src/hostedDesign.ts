@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import * as path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
+import { validate } from './agentSchema';
 import { availableGraphModes, isAnimationGraphMode, type AnimationGraphMode } from './animationGraph';
 import type { BuiltProject } from './builtProjects';
 import { inCargoBuildSlot } from './cargoBuildGate';
@@ -28,6 +29,7 @@ import { editHostedStateRoute } from './hostedStateRoutes';
 import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import { NativePreview } from './nativePreview';
+import { keyboardInputSchema, type KeyboardInput, type PreviewKeyboardRequest } from './previewKeyboardProtocol';
 import { errorMessage, type Language, type Range } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
@@ -166,13 +168,20 @@ export class HostedDesign implements vscode.Disposable {
         const frame = session.currentFrame;
         if (!frame) throw new Error('Wait for the current application preview.');
         const { image: { png, width, height }, revision, sequence } = frame;
-        return { mimeType: 'image/png', data: png, width, height, revision, sequence, generation: session.generation, uri: uri.toString() };
+        return { mimeType: 'image/png', data: png, width, height, revision, sequence, generation: session.generation,
+            keyboardAvailable: frame.keyboardAvailable === true, uri: uri.toString() };
     }
 
     input(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, gesture: HostedGesture, signal: AbortSignal) {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.input(frame, gesture, signal);
+    }
+
+    keyboard(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, input: KeyboardInput, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.keyboard(frame.revision, input, signal, frame.sequence);
     }
 
     async palette(uri: vscode.Uri, target: HostedPaletteTarget | undefined, signal: AbortSignal) {
@@ -440,6 +449,7 @@ class HostedSession {
                 if (language === 'rust' && event.textEditor === editor) this.updateRustCaret(event.selections[0]?.active);
             }),
             panel.onDidChangeViewState(() => {
+                if (!panel.active) this.post({ type: 'releaseKeyboard' });
                 if (panel.visible) this.showTimelineDisplay();
                 this.schedule(0);
             }),
@@ -625,6 +635,23 @@ class HostedSession {
         const event = gesture.type === 'text' ? { ...gesture, x: .5, y: .5 } : gesture;
         await client.hostedInput({ ...event, ...frame });
         return { generation: this.generation, frame };
+    }
+
+    async keyboard(revision: number, input: KeyboardInput, signal: AbortSignal, sequence?: number) {
+        await this.polling;
+        signal.throwIfAborted();
+        const current = this.currentFrame;
+        if (!current || current.revision !== revision || (sequence !== undefined && current.sequence !== sequence)) {
+            throw new Error('The application preview frame changed. Read the current frame before sending keyboard input.');
+        }
+        const frame = { revision, sequence: current.sequence };
+        return this.withAcceptedFrame(frame, signal, async (client, ensure) => {
+            if (sequence === undefined && !this.panel.active) throw new Error('Focus the application preview to send keyboard input.');
+            if (!current.keyboardAvailable) throw new Error('Rebuild the application and preview helper with App Preview keyboard support.');
+            const focus = await client.hostedKeyboard(frame, input);
+            ensure();
+            return { generation: this.generation, frame, focus };
+        });
     }
 
     paletteFrame(): HostedAnimationFrame {
@@ -992,6 +1019,7 @@ class HostedSession {
             return;
         }
         if (message.type === 'refresh') { this.refresh(); return; }
+        if (message.type === 'keyboard') { await this.receiveKeyboard(message); return; }
         if (message.type === 'palette') {
             await this.receivePalette(message);
             return;
@@ -1101,6 +1129,18 @@ class HostedSession {
             const { revision, sequence, ...gesture } = message;
             await this.input({ revision, sequence }, gesture, this.lifetime.signal);
         } catch (error) { this.report(errorMessage(error)); }
+    }
+
+    private async receiveKeyboard({ scope, request, input }: PreviewKeyboardRequest): Promise<void> {
+        if (!this.panel.active || !Number.isSafeInteger(request) || request < 1) return;
+        const reply = { type: 'keyboardResult', scope, request } as const;
+        try {
+            validate(keyboardInputSchema, input);
+            const { focus } = await this.keyboard(scope, input, this.lifetime.signal);
+            if (this.panel.active) this.post({ ...reply, focus });
+        } catch (error) {
+            if (this.panel.active) this.post({ ...reply, error: errorMessage(error) });
+        }
     }
 
     private async receivePalette({ frame, request, command }: FromHostedPalette): Promise<void> {

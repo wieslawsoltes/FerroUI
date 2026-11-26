@@ -236,9 +236,12 @@ export const agentCatalog = {
     designer_hosted_timeline_set_work_area: tool('Configure the visible App Preview work area for the next Play. Use the scope and program from work_area and the generation, revision and frame sequence from designer_hosted_timeline_view.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), work_area: timelineWorkAreaSchema },
         ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'work_area'], true, false),
-    designer_hosted_image: tool('Capture the current App Preview frame as PNG with its app generation, source revision, and frame sequence.', session, ['session']),
+    designer_hosted_image: tool('Capture the current App Preview frame as PNG with its app generation, source revision, frame sequence, and keyboard availability.', session, ['session']),
     designer_hosted_input: tool('Interact with the current App Preview. Click or scroll at normalized x and y, or send text to the focused native control. Pass the current app generation, revision, and frame sequence.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), input: hostedGesture },
+        ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'input'], true, false),
+    designer_hosted_keyboard: tool('Focus the first available control in App Preview, send a native key gesture such as Tab or Enter, or send text. Returns the focused control name and role. Read the current generation, revision, and sequence from designer_hosted_image.',
+        { ...frame, expected_generation: integer(1), expected_sequence: integer(1), input: keyboardInputSchema },
         ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'input'], true, false),
     designer_hosted_animation: tool('Control native clips or a Rust state route on the app’s elapsed clock. Play range takes start, end and loop. Marker actions set, remove, or seek by name. Omit program for the shared elapsed ruler. Use the current app generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
