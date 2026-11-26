@@ -173,7 +173,9 @@ When a debugger opened by FerroUI stops at a breakpoint, Live App keeps its last
 
 Continue before sending another inspector request through Live App or the editor MCP bridge. An input action that triggered the breakpoint can finish after Continue. If its request expires during a longer pause, check the app before repeating it. [Continue a paused debugger with MCP](reference.md#continue-a-paused-debugger-with-mcp)
 
-![VS Code stopped in the Rust approval callback. Live App retains the native window, and App Sessions marks only Release Review as paused.](../images/vscode-native-debugger-pause.png)
+![App Sessions highlights Continue Paused App while VS Code shows the Rust breakpoint and Live App retains its native frame.](../images/vscode-app-session-continue.png)
+
+An independent session keeps its frame and inspector while another app stops. [Paused and running sessions side by side](../images/vscode-native-debugger-pause.png)
 
 ### Run an app on an iOS simulator
 
