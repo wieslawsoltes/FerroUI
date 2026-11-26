@@ -142,7 +142,7 @@ impl RangeBaseAutomationPeer {
 
     /// Sets the value of the control (the range value provider contract).
     pub fn set_value(&self, value: f64) -> Result<(), AutomationError> {
-        self.owner().set_range_value(value);
+        self.owner().set_current_value(RangeBase::value_property(), value);
         Ok(())
     }
 }

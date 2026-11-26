@@ -101,13 +101,13 @@ impl ExpanderAutomationPeer {
 
     /// Collapses the expander (the expand and collapse provider contract).
     pub fn collapse(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_expanded(false);
+        self.owner().set_current_value(Expander::is_expanded_property(), false);
         Ok(())
     }
 
     /// Expands the expander (the expand and collapse provider contract).
     pub fn expand(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_expanded(true);
+        self.owner().set_current_value(Expander::is_expanded_property(), true);
         Ok(())
     }
 

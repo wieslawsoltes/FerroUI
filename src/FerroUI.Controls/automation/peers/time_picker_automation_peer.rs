@@ -77,7 +77,7 @@ impl TimePickerAutomationPeer {
     /// provider contract).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
         if let Some(result) = value.and_then(|value| SignedDuration::parse(value).ok()) {
-            self.owner().set_selected_time(Some(result));
+            self.owner().set_current_value(TimePicker::selected_time_property(), Some(result));
         }
 
         Ok(())

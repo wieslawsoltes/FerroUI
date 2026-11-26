@@ -1,7 +1,7 @@
 use super::{
     AutomationControlType, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::{ContentControl, TextBlock};
+use crate::{ContentControl, Control, TextBlock};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{ferro_class, FerroObjectImpl, Ref};
 
@@ -39,6 +39,9 @@ impl AutomationPeerImpl for ContentControlAutomationPeer {
 
             if !is_null_or_white_space(&child_name) {
                 child_name
+            } else if let Some(content) = owner.content().as_ref().and_then(Control::from_boxed) {
+                // A control displays as its type name, so use the first text it shows instead.
+                first_text(&content)
             } else {
                 owner.content().map(|content| ValueTypes::to_display_string(Some(&content)))
             }
@@ -59,6 +62,14 @@ impl AutomationPeerImpl for ContentControlAutomationPeer {
     fn is_control_element_core(_this: &Self) -> bool {
         false
     }
+}
+
+fn first_text(content: &Ref<Control>) -> Option<String> {
+    content
+        .get_self_and_logical_descendants()
+        .into_iter()
+        .filter_map(|logical| logical.cast::<TextBlock>())
+        .find_map(|text_block| text_block.text().filter(|text| !text.chars().all(char::is_whitespace)))
 }
 
 fn is_null_or_white_space(value: &Option<String>) -> bool {

@@ -158,7 +158,7 @@ impl RadioButtonAutomationPeer {
             return Err(AutomationError::invalid_operation_with("Element is disabled thus it cannot be selected"));
         }
 
-        self.radio_button().set_is_checked(Some(true));
+        self.radio_button().set_current_value(crate::primitives::ToggleButton::is_checked_property(), Some(true));
         Ok(())
     }
 }
