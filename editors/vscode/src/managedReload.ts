@@ -85,7 +85,7 @@ export class ManagedReload {
 
     async detachDebugger(generation: number | undefined): Promise<void> {
         this.requireProcess(generation);
-        await this.debugger.detach();
+        await this.debugger.detachFromRunningApp();
     }
 
     continueDebugger(generation: number, signal?: AbortSignal): Promise<void> {

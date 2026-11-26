@@ -12,6 +12,7 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
     const point = new vscode.SourceBreakpoint(new vscode.Location(source.uri, new vscode.Position(line, 0)));
     const tracker = trackNativeDebugger(configuration);
     let session: vscode.DebugSession | undefined;
+    let inspectedApp: RuntimeSummary | undefined;
     vscode.debug.addBreakpoints([point]);
 
     const attached = () => {
@@ -40,6 +41,7 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
                 assert.ok(resumed, 'The FerroUI command continued the paused application');
                 assert.equal(resumed.pid, current.configuration.pid);
                 assert.equal(resumed.debuggerPaused, false);
+                inspectedApp = resumed;
             } catch (error) {
                 await current.customRequest('continue', { threadId }).then(undefined, () => {});
                 throw error;
@@ -49,9 +51,14 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
         },
         async detach() {
             const current = attached();
-            await vscode.debug.stopDebugging(current);
-            await until(() => !tracker.sessions.has(current.id));
-            return tracker.disconnectStatus(current);
+            assert.ok(inspectedApp && inspectedApp.pid === current.configuration.pid, 'Detach the accepted App Sessions target');
+            await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', inspectedApp.runtime);
+            await until(() => !tracker.sessions.has(current.id)).catch(error => {
+                throw new Error(`LLDB did not detach from PID ${current.configuration.pid}. ${JSON.stringify(tracker.disconnectStatus(current))}`, { cause: error });
+            });
+            const status = tracker.disconnectStatus(current);
+            assert.equal(status.disconnect?.terminateDebuggee, false);
+            return status;
         },
         async close() {
             vscode.debug.removeBreakpoints([point]);

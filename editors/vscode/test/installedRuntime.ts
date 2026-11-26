@@ -111,6 +111,7 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
             const disconnect = await debug.detach();
             await expectDetachedRuntime(updated, replacement, disconnect);
             assert.equal(await runningPid(), replacement);
+            if (process.platform === 'win32') assert.equal(disconnect.disconnect?.success, true, JSON.stringify(disconnect));
             console.log('Installed LLDB verified Rust breakpoints, retained failed candidates, followed the new PID and detached from the live app.');
         }
         assert.ok(liveTab());

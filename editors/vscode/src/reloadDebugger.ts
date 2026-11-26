@@ -20,6 +20,7 @@ export class ReloadDebugger implements vscode.Disposable {
     private active?: vscode.DebugSession;
     private readonly pause = new DebuggerPause();
     private transition = Promise.resolve();
+    private disconnecting?: Promise<void>;
     private readonly instance = randomUUID();
     private closing?: Promise<void>;
 
@@ -56,6 +57,7 @@ export class ReloadDebugger implements vscode.Disposable {
     }
 
     prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
+        if (this.disconnecting) throw new Error('Wait for the debugger to detach.');
         this.detach();
         this.attachment = { id: randomUUID(), folder, configuration };
     }
@@ -80,6 +82,7 @@ export class ReloadDebugger implements vscode.Disposable {
     }
 
     continueStopped(signal?: AbortSignal): Promise<void> {
+        if (this.disconnecting) return Promise.reject(new Error('Wait for the debugger to detach.'));
         if (!this.status.paused) return Promise.reject(new Error(noStoppedDebugger));
         return this.pause.continueStopped(signal);
     }
@@ -100,7 +103,7 @@ export class ReloadDebugger implements vscode.Disposable {
 
     private async activate(target: number, configuration: vscode.DebugConfiguration | undefined, generation: number): Promise<void> {
         const attached = this.attachment;
-        if (!attached || this.follows(generation)) return;
+        if (!attached || this.disconnecting || this.follows(generation)) return;
         const old = this.active;
         const replacement = { ...attached, id: randomUUID(), generation, configuration: configuration ?? attached.configuration };
         this.attachment = replacement;
@@ -143,6 +146,25 @@ export class ReloadDebugger implements vscode.Disposable {
         return this.transition;
     }
 
+    detachFromRunningApp(host: NodeJS.Platform = process.platform): Promise<void> {
+        if (this.disconnecting) return this.disconnecting;
+        const session = this.active;
+        if (host !== 'win32' || session?.type !== 'lldb-dap' || session.configuration.request !== 'attach') return this.detach();
+
+        const step = this.transition.then(async () => {
+            if (this.active?.id !== session.id) return;
+            await acknowledgeDetach(session);
+            if (this.active?.id === session.id) {
+                this.attachment = undefined;
+                this.clearActive();
+                await this.stop(session);
+            }
+        });
+        this.disconnecting = step.finally(() => { this.disconnecting = undefined; });
+        this.transition = this.disconnecting.catch(() => undefined);
+        return this.disconnecting;
+    }
+
     detachForReplacement(): Promise<void> {
         const attachment = this.attachment;
         this.detach();
@@ -176,4 +198,18 @@ export class ReloadDebugger implements vscode.Disposable {
     }
 
     dispose(): void { void this.close(); }
+}
+
+async function acknowledgeDetach(session: vscode.DebugSession): Promise<void> {
+    // The workbench stops the adapter after two seconds. Native Windows LLDB
+    // can wait longer for DebugActiveProcessStop. Let it release the process first.
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+        await Promise.race([
+            session.customRequest('disconnect', { terminateDebuggee: false }),
+            new Promise<never>((_, reject) => {
+                timeout = setTimeout(() => reject(new Error('LLDB did not acknowledge the detach request.')), 15_000);
+            }),
+        ]);
+    } finally { clearTimeout(timeout); }
 }

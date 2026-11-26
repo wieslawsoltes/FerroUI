@@ -8,6 +8,7 @@ interface AttachAttempt {
     detail: string;
     error?: string;
     breakpoint?: string;
+    disconnectRequest?: number;
     disconnect?: { terminateDebuggee?: boolean; success?: boolean; error?: string };
     exitCode?: number;
 }
@@ -40,7 +41,8 @@ export function trackNativeDebugger(configuration: string) {
                         const file = message.arguments?.source?.path;
                         attempt.breakpoint = file ? `VS Code requested breakpoints in ${file}` : 'VS Code requested source breakpoints';
                     }
-                    if (message.type === 'request' && message.command === 'disconnect') {
+                    if (message.type === 'request' && message.command === 'disconnect' && attempt.disconnectRequest === undefined) {
+                        attempt.disconnectRequest = message.seq;
                         attempt.disconnect = { terminateDebuggee: message.arguments?.terminateDebuggee };
                     }
                 },
@@ -57,7 +59,7 @@ export function trackNativeDebugger(configuration: string) {
                     }
                     if (message.event === 'breakpoint' && message.body?.breakpoint?.verified) verified.add(session.id);
                     if (message.event === 'stopped' && message.body?.reason === 'breakpoint') hits.set(session.id, message.body.threadId);
-                    if (message.type === 'response' && message.command === 'disconnect') {
+                    if (message.type === 'response' && message.command === 'disconnect' && message.request_seq === attempt.disconnectRequest) {
                         attempt.disconnect = { ...attempt.disconnect, success: message.success, error: message.message };
                     }
                     if (message.event === 'exited') attempt.exitCode = message.body?.exitCode;

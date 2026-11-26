@@ -305,6 +305,8 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 
 Use the current session ID and generation for the target. These debugger actions require `ferroui.mcp.allowWrites` and leave the running app and its inspector available. Choose **Detach Debugger from This App** in App Sessions for the same action from the workbench.
 
+For managed Windows LLDB DAP sessions, the tool waits for the adapter to acknowledge disconnect. A timeout reports an error. Read the current session status before retrying.
+
 | App | Detach action |
 | --- | --- |
 | Managed Cargo or registered Rust patches | Read `ferroui_reload_status` with `app_session`. Call `ferroui_reload_control` with `action: "detach_debug"`, that `app_session`, and its `process_generation` as `expected_process_generation`. Use the process generation even for an app without an inspector. |

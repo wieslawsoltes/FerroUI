@@ -58,7 +58,7 @@ Set `FERROUI_TEST_INSTALLED_LLDB_DAP` to the host’s `lldb-dap` executable to r
 
 The runner uses a canonical temporary workspace path for the editor and Cargo. On Linux, the debugger fixture resolves symbols locally. If debugger startup fails, the runner starts a fresh app to verify native reload and reports the original debugger failure. [LLDB symbol settings](https://lldb.llvm.org/use/settings.html#symbols)
 
-After disconnect, the fixture checks that the same process and its inspector still respond. A failure reports the adapter’s disconnect response, process state, and any connection error.
+The fixture uses **Detach Debugger from This App** on the accepted App Sessions target. On Windows, it verifies the adapter’s acknowledgement of a non-terminating disconnect. After detach, it checks that the same process and inspector still respond. A failure reports the adapter’s response, process state, and any connection error.
 
 Set `FERROUI_TEST_HOSTED_APP` to Todo Workbench built with `app-preview,hot-reload,mcp` to also exercise native App Preview through the bundled helper. Use `FERROUI_TEST_HOSTED_SOURCE` to point at its matching Todo Workbench source directory if the app was built from another checkout. FerroUI’s installed-package CI runs both native checks on macOS, Linux, and Windows. [Todo Workbench](../../../samples/TodoWorkbench/README.md)
 
