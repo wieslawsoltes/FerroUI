@@ -195,6 +195,13 @@ with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
 directly (`controls/dev/NavigationView` with the English texts of its
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
 
+The files under `scroll_view/`, `primitives/scroll_presenter.rs` and
+`primitives/i_scroll_controller.rs` (WinUI's `ScrollView`, `ScrollBarController`,
+`ScrollPresenter`, `IScrollController`, the scrolling enumerations, options and event arguments,
+and the scroll controller requests) are ported from the WinUI project directly
+(`controls/dev/ScrollView` and `controls/dev/ScrollPresenter`, at the same commit), under the
+same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
