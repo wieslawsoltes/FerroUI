@@ -42,12 +42,13 @@ export class AppSessions implements vscode.Disposable {
             }
             this.changed.fire();
         };
-        const command = (name: string, action: (session: RuntimeSummary) => unknown) =>
+        const command = (name: string, action: (session: RuntimeSummary, expectedGeneration?: number) => unknown) =>
             vscode.commands.registerCommand(`ferroui.appSessions.${name}`, (item?: AppItem | AppRuntime) => {
-                const runtime = typeof item === 'string' ? item : item?.session.runtime;
+                const shown = typeof item === 'string' ? undefined : item?.session;
+                const runtime = typeof item === 'string' ? item : shown?.runtime;
                 if (!runtime) return;
                 const current = this.connections.describe(runtime);
-                if (current) return action(current);
+                if (current) return action(current, shown?.debuggerGeneration);
                 void vscode.window.showInformationMessage('This FerroUI app session has ended.');
             });
         const managed = (name: string) => command(name, session => session.app_session
@@ -59,8 +60,8 @@ export class AppSessions implements vscode.Disposable {
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
             managed('select'),
-            command('debug', session => this.debug(session)),
-            command('detachDebug', session => this.debug(session, true)),
+            command('debug', (session, generation) => this.debug(session, generation)),
+            command('detachDebug', (session, generation) => this.debug(session, generation, true)),
             vscode.commands.registerCommand('ferroui.appSessions.continueDebug', (item?: AppItem) => this.continueFromWorkbench(item?.session)),
             command('rebuild', session => {
                 if (session.simulator?.development) return this.simulators.rebuild(session.runtime);
@@ -94,11 +95,14 @@ export class AppSessions implements vscode.Disposable {
         return this.panels.control(runtime, generation, revision, change, signal);
     }
 
-    private async debug(session: RuntimeSummary, detach = false): Promise<void> {
+    private async debug(session: RuntimeSummary, expectedGeneration: number | undefined, detach = false): Promise<void> {
         try {
+            if (expectedGeneration !== undefined && expectedGeneration !== session.debuggerGeneration) {
+                throw new Error('The app changed. Choose its current App Sessions row to control the debugger.');
+            }
             if (session.app_session) {
-                if (detach) await this.reload.detachDebugger(session.app_session);
-                else await vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session);
+                if (detach) await this.reload.detachDebugger(session.app_session, session.debuggerGeneration);
+                else await this.reload.attachDebugger(session.app_session, session.debuggerGeneration);
             } else if (session.generation !== null) {
                 const options = { interactive: !detach, detach };
                 if (session.browser) await this.browser.debug(session.runtime, session.generation, options);
@@ -167,6 +171,7 @@ export class AppSessions implements vscode.Disposable {
         } else {
             item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         }
+        if (session.debuggerAttached) item.contextValue += '-debugging';
         if (session.debuggerPaused && session.debuggerGeneration !== undefined) item.contextValue += '-paused';
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;

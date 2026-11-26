@@ -70,12 +70,7 @@ export class HotReload implements vscode.Disposable {
                 if (run) run.showOutput();
                 else this.output.show(true);
             })),
-            vscode.commands.registerCommand('ferroui.hotReload.debug', (id?: string) => this.interactive(async () => {
-                const run = this.require(id);
-                const generation = run.processGeneration;
-                const configuration = await selectDebugConfiguration(run.folder);
-                if (configuration && this.live.get(run.id) === run) await run.attach(configuration, generation);
-            })),
+            vscode.commands.registerCommand('ferroui.hotReload.debug', (id?: string) => this.attachDebugger(id)),
             vscode.commands.registerCommand('ferroui.hotReload.processId', () => {
                 const pid = this.require().pid;
                 if (!pid) throw new Error('Wait for the selected FerroUI application to start.');
@@ -135,18 +130,27 @@ export class HotReload implements vscode.Disposable {
             case 'show_output': run.showOutput(); break;
             case 'detach_debug': await run.detachDebugger(expectedProcessGeneration); break;
             case 'attach_debug': {
+                const generation = expectedProcessGeneration ?? run.processGeneration;
                 const configuration = await selectDebugConfiguration(run.folder, { interactive: false, name: debugConfiguration });
                 signal.throwIfAborted();
-                if (configuration) await run.attach(configuration, expectedProcessGeneration);
+                if (configuration) await run.attach(configuration, generation);
                 break;
             }
         }
         return run.state;
     }
 
-    detachDebugger(session: string): Promise<void> {
-        const run = this.require(session);
-        return run.detachDebugger(run.processGeneration);
+    attachDebugger(session?: string, generation?: number): Promise<void> {
+        return this.interactive(async () => {
+            const run = this.require(session);
+            const expectedGeneration = generation ?? run.processGeneration;
+            const configuration = await selectDebugConfiguration(run.folder);
+            if (configuration && this.live.get(run.id) === run) await run.attach(configuration, expectedGeneration);
+        });
+    }
+
+    detachDebugger(session: string, generation: number | undefined): Promise<void> {
+        return this.require(session).detachDebugger(generation);
     }
 
     private find(id?: string): ManagedReload | undefined {

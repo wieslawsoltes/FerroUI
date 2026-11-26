@@ -65,6 +65,9 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
                 if (inspectedApp && inspectedApp.pid === resumed.pid) {
                     assert.equal(resumed.generation, inspectedApp.generation, 'Debugger reattach keeps the inspector generation');
                     assert.equal(resumed.debuggerGeneration, inspectedApp.debuggerGeneration, 'Debugger reattach keeps the process generation');
+                } else if (inspectedApp) {
+                    await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', { session: inspectedApp });
+                    assert.equal(attached().id, current.id, 'A retired App Sessions row leaves the replacement debugger attached');
                 }
                 inspectedApp = resumed;
             } catch (error) {
