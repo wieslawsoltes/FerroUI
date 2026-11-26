@@ -557,6 +557,7 @@ impl DatePicker {
         };
 
         presenter.set_date(self.selected_date().unwrap_or_else(DateTimeOffset::now));
+        presenter.reset_selection();
 
         popup.set_placement(PlacementMode::AnchorAndGravity);
         popup.set_placement_anchor(PopupAnchor::BOTTOM);

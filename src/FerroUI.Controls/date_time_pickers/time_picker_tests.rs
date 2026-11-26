@@ -698,9 +698,9 @@ fn window_popup_accept_updates_selected_time_and_closes() {
     assert!(target.popup.host().is_none());
 }
 
-/// Additional test (not a port): in a window, dismissing the presenter
-/// after selecting other values leaves the selected time unchanged and
-/// closes the popup.
+/// Additional test (not a port): canceling and reopening the same presenter
+/// restores every native selector. Accepting without another edit keeps the
+/// committed time rather than publishing the dismissed selection.
 #[test]
 fn window_popup_dismiss_leaves_selected_time_unchanged() {
     let _app = start_with(TestServices::styled_window());
@@ -708,15 +708,29 @@ fn window_popup_dismiss_leaves_selected_time_unchanged() {
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.time_picker.selected_time_changed(move |_| counter.set(counter.get() + 1)).detach();
+    target
+        .time_picker
+        .selected_time_changed(move |_| counter.set(counter.get() + 1))
+        .detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);
     assert!(target.popup.is_open());
 
+    let hour_selector = target.part::<DateTimePickerPanel>("PART_HourSelector");
+    let minute_selector = target.part::<DateTimePickerPanel>("PART_MinuteSelector");
     let second_selector = target.part::<DateTimePickerPanel>("PART_SecondSelector");
+    hour_selector.scroll_down(2);
+    minute_selector.scroll_up(3);
     second_selector.scroll_down(4);
-    assert_eq!(34, second_selector.selected_value());
+    assert_eq!(
+        (12, 17, 34),
+        (
+            hour_selector.selected_value(),
+            minute_selector.selected_value(),
+            second_selector.selected_value()
+        )
+    );
 
     target.part::<Button>("PART_DismissButton").perform_click();
     Dispatcher::ui_thread().run_jobs(None);
@@ -724,6 +738,56 @@ fn window_popup_dismiss_leaves_selected_time_unchanged() {
     assert_eq!(Some(selected), target.time_picker.selected_time());
     assert_eq!(selected, target.presenter.time());
     assert_eq!(0, changes.get());
+    assert!(!target.popup.is_open());
+    assert!(target.popup.host().is_none());
+
+    target.flyout_button.perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(target.popup.is_open());
+    let reopened = target
+        .popup
+        .child()
+        .and_then(|child| child.cast::<TimePickerPresenter>())
+        .unwrap();
+    assert!(
+        Ref::ptr_eq(&target.presenter, &reopened),
+        "reopening retains the native presenter"
+    );
+    for (name, panel) in [
+        ("PART_HourSelector", &hour_selector),
+        ("PART_MinuteSelector", &minute_selector),
+        ("PART_SecondSelector", &second_selector),
+    ] {
+        assert!(
+            Ref::ptr_eq(panel, &target.part::<DateTimePickerPanel>(name)),
+            "reopening retains {name}"
+        );
+    }
+    assert_eq!(
+        (10, 20, 30),
+        (
+            hour_selector.selected_value(),
+            minute_selector.selected_value(),
+            second_selector.selected_value()
+        )
+    );
+    assert_eq!(Some(selected), target.time_picker.selected_time());
+    assert_eq!(selected, target.presenter.time());
+    assert_eq!(
+        0,
+        changes.get(),
+        "reinitializing a transaction does not commit a value"
+    );
+
+    target.part::<Button>("PART_AcceptButton").perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(Some(selected), target.time_picker.selected_time());
+    assert_eq!(selected, target.presenter.time());
+    assert_eq!(
+        0,
+        changes.get(),
+        "accepting an unchanged transaction does not publish a different time"
+    );
     assert!(!target.popup.is_open());
     assert!(target.popup.host().is_none());
 }

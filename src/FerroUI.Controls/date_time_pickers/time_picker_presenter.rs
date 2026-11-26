@@ -362,6 +362,13 @@ impl TimePickerPresenter {
         self.set_value(Self::time_property(), value)
     }
 
+    /// Starts a new picker transaction even when the committed Time has not
+    /// changed since dismissal. Keep clock, increment and seconds handling in
+    /// the native selector initialization path.
+    pub(super) fn reset_selection(&self) {
+        self.init_picker();
+    }
+
     fn items(&self) -> Option<TemplateItems> {
         self.template_items.borrow().clone()
     }

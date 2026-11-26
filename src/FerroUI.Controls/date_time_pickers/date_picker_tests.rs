@@ -797,27 +797,48 @@ fn window_popup_accept_updates_selected_date_and_closes() {
     assert!(target.popup.host().is_none());
 }
 
-/// Additional test (not a port): in a window, dismissing the presenter
-/// after selecting other values leaves the selected date unchanged and
-/// closes the popup.
+/// Additional test (not a port): cancellation starts a fresh transaction on
+/// the retained presenter. Reopening and accepting without another edit must
+/// preserve the committed date, including its time and offset.
 #[test]
 fn window_popup_dismiss_leaves_selected_date_unchanged() {
     let _app = start(TestServices::styled_window());
-    let selected = date(2000, 10, 10);
+    let selected = DateTimeOffset::new(2024, 1, 31, 13, 14, 15, SignedDuration::from_hms(5, 30, 0));
     let target = WindowTarget::show(selected);
     let changes = Rc::new(Cell::new(0));
     let counter = changes.clone();
-    target.date_picker.selected_date_changed(move |_| counter.set(counter.get() + 1)).detach();
+    target
+        .date_picker
+        .selected_date_changed(move |_| counter.set(counter.get() + 1))
+        .detach();
 
     target.flyout_button.perform_click();
     Dispatcher::ui_thread().run_jobs(None);
     assert!(target.popup.is_open());
 
+    let month_selector = target.part::<DateTimePickerPanel>("PART_MonthSelector");
     let day_selector = target.part::<DateTimePickerPanel>("PART_DaySelector");
     let year_selector = target.part::<DateTimePickerPanel>("PART_YearSelector");
-    day_selector.scroll_up(1);
-    year_selector.scroll_down(1);
-    assert_eq!((9, 2001), (day_selector.selected_value(), year_selector.selected_value()));
+    month_selector.scroll_down(1);
+    assert_eq!(
+        (2, 29),
+        (
+            month_selector.selected_value(),
+            day_selector.selected_value()
+        )
+    );
+    assert_eq!(29, day_selector.maximum_value());
+    year_selector.scroll_up(1);
+    assert_eq!(
+        (28, 2023),
+        (
+            day_selector.selected_value(),
+            year_selector.selected_value()
+        )
+    );
+    assert_eq!(28, day_selector.maximum_value());
+    assert_eq!(Some(selected), target.date_picker.selected_date());
+    assert_eq!(selected, target.presenter.date());
 
     target.part::<Button>("PART_DismissButton").perform_click();
     Dispatcher::ui_thread().run_jobs(None);
@@ -831,9 +852,57 @@ fn window_popup_dismiss_leaves_selected_date_unchanged() {
     Dispatcher::ui_thread().run_jobs(None);
     assert!(target.popup.is_open());
     assert_eq!(selected, target.presenter.date());
-    // The date of the presenter did not change, so the selectors are not
-    // initialized again and still show the dismissed selection: the picker
-    // only re-initializes on a change of the date or of a format, as the
-    // reference code does (read from the code, not run against it).
-    assert_eq!((9, 2001), (day_selector.selected_value(), year_selector.selected_value()));
+    let reopened = target
+        .popup
+        .child()
+        .and_then(|child| child.cast::<DatePickerPresenter>())
+        .unwrap();
+    assert!(
+        Ref::ptr_eq(&target.presenter, &reopened),
+        "reopening retains the native presenter"
+    );
+    for (name, panel) in [
+        ("PART_MonthSelector", &month_selector),
+        ("PART_DaySelector", &day_selector),
+        ("PART_YearSelector", &year_selector),
+    ] {
+        assert!(
+            Ref::ptr_eq(panel, &target.part::<DateTimePickerPanel>(name)),
+            "reopening retains {name}"
+        );
+    }
+    assert_eq!(
+        (1, 31, 2024),
+        (
+            month_selector.selected_value(),
+            day_selector.selected_value(),
+            year_selector.selected_value()
+        )
+    );
+    assert_eq!(
+        31,
+        day_selector.maximum_value(),
+        "the committed month restores its full day range"
+    );
+    assert_eq!(Some(selected), target.date_picker.selected_date());
+    assert_eq!(
+        0,
+        changes.get(),
+        "reinitializing a transaction does not commit a value"
+    );
+
+    // Checking only the visible panels would miss a stale private sync_date.
+    target.part::<Button>("PART_AcceptButton").perform_click();
+    Dispatcher::ui_thread().run_jobs(None);
+    let accepted = target.date_picker.selected_date().unwrap();
+    assert_eq!(selected.date_time(), accepted.date_time());
+    assert_eq!(selected.offset(), accepted.offset());
+    assert_eq!(selected, target.presenter.date());
+    assert_eq!(
+        0,
+        changes.get(),
+        "accepting an unchanged transaction does not publish a different date"
+    );
+    assert!(!target.popup.is_open());
+    assert!(target.popup.host().is_none());
 }
