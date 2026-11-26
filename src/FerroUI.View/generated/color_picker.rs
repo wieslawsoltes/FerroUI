@@ -96,6 +96,26 @@ pub trait ColorPickerProps: ElementBuilder {
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorPicker>::vertical_content_alignment_property(), value)
     }
+
+    /// Sets [`ColorPicker::display_mode_property`](ferroui_controls_color_picker::ColorPicker::display_mode_property).
+    fn display_mode<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorPickerDisplayMode, M>) -> Self {
+        self.prop(<ferroui_controls_color_picker::ColorPicker>::display_mode_property(), value)
+    }
+
+    /// Sets [`ColorPicker::is_more_button_visible_property`](ferroui_controls_color_picker::ColorPicker::is_more_button_visible_property).
+    fn is_more_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls_color_picker::ColorPicker>::is_more_button_visible_property(), value)
+    }
+
+    /// Sets [`ColorPicker::is_alpha_slider_visible_property`](ferroui_controls_color_picker::ColorPicker::is_alpha_slider_visible_property).
+    fn is_alpha_slider_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls_color_picker::ColorPicker>::is_alpha_slider_visible_property(), value)
+    }
+
+    /// Sets [`ColorPicker::is_alpha_text_input_visible_property`](ferroui_controls_color_picker::ColorPicker::is_alpha_text_input_visible_property).
+    fn is_alpha_text_input_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls_color_picker::ColorPicker>::is_alpha_text_input_visible_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls_color_picker::ColorPicker>> ColorPickerProps for El<T> {}
 

@@ -17,6 +17,7 @@ ferroui_base::ferro_rust_paths! {
         crate::AlphaComponentPosition,
         crate::ColorComponent,
         crate::ColorModel,
+        crate::ColorPickerDisplayMode,
         crate::ColorSpectrumComponents,
         crate::ColorSpectrumShape,
         crate::ColorViewTab,

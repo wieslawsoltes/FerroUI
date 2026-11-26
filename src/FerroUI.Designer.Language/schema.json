@@ -2686,6 +2686,46 @@
           "Bottom"
         ],
         "attached": false
+      },
+      "DisplayMode": {
+        "name": "DisplayMode",
+        "type_name": "ColorPickerDisplayMode",
+        "documentation": "ColorPicker.DisplayMode: ColorPickerDisplayMode",
+        "values": [
+          "DropDown",
+          "Inline"
+        ],
+        "attached": false
+      },
+      "IsMoreButtonVisible": {
+        "name": "IsMoreButtonVisible",
+        "type_name": "bool",
+        "documentation": "ColorPicker.IsMoreButtonVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsAlphaSliderVisible": {
+        "name": "IsAlphaSliderVisible",
+        "type_name": "bool",
+        "documentation": "ColorPicker.IsAlphaSliderVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsAlphaTextInputVisible": {
+        "name": "IsAlphaTextInputVisible",
+        "type_name": "bool",
+        "documentation": "ColorPicker.IsAlphaTextInputVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
       }
     },
     "namespace_aliases": [
