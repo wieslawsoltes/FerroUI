@@ -39,9 +39,8 @@ impl INodeInfoProvider for ValueNodeInfoProvider {
         match action {
             ACTION_SET_TEXT => {
                 let text = arguments.and_then(|arguments| arguments.set_text_char_sequence.as_deref());
-                let value = format!("{}{}", provider.value().unwrap_or_default(), text.unwrap_or_default());
                 provider
-                    .set_value(Some(&value))
+                    .set_value(Some(text.unwrap_or_default()))
                     .map_err(|error| NodeActionError::InvalidOperation(error.to_string()))?;
                 Ok(true)
             }

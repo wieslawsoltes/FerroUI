@@ -11,7 +11,7 @@
    "class": "port",
    "note": "Read _NET_WORKAREA through the typed property helper; `update_work_area` still asks for any type.",
    "part": "x11",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "612785a8e2d87f2ccf7ce0dda6b4ed0e8f55a8cc",
@@ -69,7 +69,7 @@
    "class": "port",
    "note": "`automation.mm`: menu role for context menus.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "19952840c5704831de8f853acf4a3ca416955af6",
@@ -105,7 +105,7 @@
    "class": "port",
    "note": "`Popup`: the Y scale read M11/M12.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "b13194be254247a1646bd5c59ef817f1f26dc210",
@@ -201,7 +201,7 @@
    "class": "port",
    "note": "`automation.mm`: AXFocused settable only on keyboard-focusable elements.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "dc0105179bcd9db1110dd20d2612859a7c4ae3ca",
@@ -229,7 +229,7 @@
    "class": "port",
    "note": "OLE data object accepts a combination of media.",
    "part": "win32",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "5eedd4afe52a90964763a901ca7c08afbf3d287d",
@@ -239,7 +239,7 @@
    "class": "port",
    "note": "`automation.mm`: no announcement for an empty live region.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "fa9c3c1572aa848cb2e08ad056552f23d9072aae",
@@ -257,17 +257,15 @@
    "class": "port",
    "note": "`automation.mm`: accessibility activation point.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "51f5c8f1230e98ce2010d665be504cf617e22b13",
    "pr": 22458,
    "date": "2026-10-21",
    "area": "automation",
-   "class": "port",
-   "note": "A masked TextBox must not report its text in clear. Security-relevant.",
-   "part": "automation",
-   "state": "planned"
+   "class": "skip-better",
+   "note": "FerroUI discloses less: providers report no value for a password field, also while revealed (`text_box_automation_peer.rs`). The cached and input-method paths were fixed in PR 1317."
   },
   {
    "hash": "6cef02f424065dc3a968cc56e4c2a4398ea7d72b",
@@ -277,7 +275,7 @@
    "class": "port",
    "note": "Tap and hold compare root positions, so a moving target still taps.",
    "part": "input",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "565b1cf0b100dc771ccefe592a7d2739e1b4471d",
@@ -287,7 +285,7 @@
    "class": "port",
    "note": "ComboBox clears `:pressed` on capture loss.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "d3fcf74a91ae37bf8828d9f7cf5a5077e603e8ef",
@@ -317,7 +315,7 @@
    "class": "port",
    "note": "NUL characters removed from window titles.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "c4dfde67c35e6fb4732d8b4770cae9fbe56957fd",
@@ -327,7 +325,7 @@
    "class": "port",
    "note": "Space key up clicks only a pressed button.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "c2a6e2916e39e9a4313839bcead0c9d4538e1fe7",
@@ -337,7 +335,7 @@
    "class": "port",
    "note": "Window position read again after reparenting.",
    "part": "x11",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "72ebf9aad907a52c1dcdcc05b4da6554472a9c3b",
@@ -367,7 +365,7 @@
    "class": "port",
    "note": "Layout pass tolerates a control moved to another top level.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "913517076982123e42bae247cb1e6cf6eff8b7e6",
@@ -387,7 +385,7 @@
    "class": "port",
    "note": "Gesture unit tests that replace the removed integration tests.",
    "part": "input",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "78316701f30502904076d195a543da2e51dd3b2e",
@@ -405,7 +403,7 @@
    "class": "port",
    "note": "Alt+Space opens the system menu unless handled.",
    "part": "win32",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "52c057b1cdcaf0393e89f81abd8258d1d408ad02",
@@ -425,7 +423,7 @@
    "class": "port",
    "note": "`ACTION_SET_TEXT` replaces the text.",
    "part": "android",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "e7cd2df08ec2bcf58e816fbdcd829643b62ed905",
@@ -455,7 +453,7 @@
    "class": "port",
    "note": "Double tap needs the same button for both clicks.",
    "part": "input",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "bd835340fb37db8aea82596777ad99fd6110fd73",
@@ -463,7 +461,7 @@
    "date": "2026-10-22",
    "area": "themes",
    "class": "deferred",
-   "note": "Fluent 2 theme (16,105 lines). New theme crate; overlaps `ferroui-themes-winui`. Owner decision, see the document."
+   "note": "Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class."
   },
   {
    "hash": "136efefc7de1d7e2b9844c67a97e116a8f642722",
@@ -529,17 +527,15 @@
    "class": "port",
    "note": "VirtualizingStackPanel: condition that was always true.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "13c99cfe42c799b86ff25bd0cb2f5203087af10c",
    "pr": 22594,
    "date": "2026-10-25",
    "area": "platform-linux",
-   "class": "port",
-   "note": "D-Bus input method: dispose does not leave a failure unobserved.",
-   "part": "linux",
-   "state": "planned"
+   "class": "already",
+   "note": "`DBusTextInputMethodBase::dispose` takes the name first and logs a failed disconnect."
   },
   {
    "hash": "b7a70cd06bab900a8f799b185e828ab600229bb6",
@@ -622,10 +618,8 @@
    "pr": 22593,
    "date": "2026-10-27",
    "area": "platform-win32",
-   "class": "port",
-   "note": "`Screen.DisplayName` on Windows: topology argument.",
-   "part": "win32",
-   "state": "planned"
+   "class": "already",
+   "note": "`query_active_display_paths` in `interop/unmanaged_methods.rs` passes a null topology."
   },
   {
    "hash": "db0a9a9cdb8495f2ce6de41735b57fda40569ca7",
@@ -651,7 +645,7 @@
    "class": "port",
    "note": "Calendar waits for a whole wheel notch.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "626c94d77c1b5b746f3b9b149ff5baa5d506a3a8",
@@ -699,7 +693,7 @@
    "class": "port",
    "note": "`ComboBox.WrapSelection` with nothing to select.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "ca9149f2facc3be4dcd8f3aa8c89b7c00d1f6a6d",
@@ -709,7 +703,7 @@
    "class": "port",
    "note": "IBus expects evdev keycodes (X11 keycode minus 8).",
    "part": "linux",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "da1dafcdfbd94250c061d86125230fcb9be5538d",
@@ -809,7 +803,7 @@
    "class": "port",
    "note": "AT-SPI: popups report the window role.",
    "part": "linux",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "5aa47e4f7ff7179cea0bfe0e87ad8112e14c8292",
@@ -819,7 +813,7 @@
    "class": "port",
    "note": "AT-SPI: active state only for the active window.",
    "part": "linux",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "1968b08e1889df87084af827f3320fadc65bdae4",
@@ -959,7 +953,7 @@
    "class": "port",
    "note": "AT-SPI: X11 window id attribute.",
    "part": "linux",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "c3b6f5cf614fa280c08aa4bc34b84e2888e6456a",
@@ -987,7 +981,7 @@
    "class": "port",
    "note": "Alt with another modifier does not open the menu.",
    "part": "input",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "60cb9d62b2ca90f2e3aafbc0031e082ff49b3cb0",
@@ -1043,7 +1037,7 @@
    "class": "port",
    "note": "`IsActive` set before `Activated` is raised.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "69be03931f0cbeab1d248e519b4bd27524ff3ed7",
@@ -1053,7 +1047,7 @@
    "class": "port",
    "note": "Documentation of glob patterns.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "c9b5ae7b211c0449b429b40f0049c1955da2d6d8",
@@ -1151,7 +1145,7 @@
    "class": "port",
    "note": "Two-finger scrolling with the synaptics driver.",
    "part": "x11",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "2061fb509005ce6043389979f773537677281e83",
@@ -1181,7 +1175,7 @@
    "class": "port",
    "note": "ConfigureNotify older than our last resize ignored.",
    "part": "x11",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "0dc28102b44fa06f33011b5ecfc0fc5c05c0a311",
@@ -1245,7 +1239,7 @@
    "class": "port",
    "note": "StatusNotifierItem tooltip text.",
    "part": "linux",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "22e9912b75188097c285939a6c0b091c7c573fe4",
@@ -1273,7 +1267,7 @@
    "class": "port",
    "note": "Input type no longer forced to a password variation.",
    "part": "android",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "84f262c218db34327e0c7aa1cc61df3d9c502b2c",
@@ -1339,7 +1333,7 @@
    "class": "port",
    "note": "Tab navigation skips disabled elements.",
    "part": "input",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "e73a976afd392e7b14ab41709d1dddcca97cde1e",
@@ -1357,7 +1351,7 @@
    "class": "port",
    "note": "No empty `SelectionChanged` during initialization.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "53e461e07a7adc6b64a85eec20d2fda587040c04",
@@ -1377,7 +1371,7 @@
    "class": "port",
    "note": "Grid: debug assertion allows a rounding residual.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "5ea0586b322b7d53c1abd4c6ade093ad66b6dfdb",
@@ -1407,7 +1401,7 @@
    "class": "port",
    "note": "RelativePanel chain with infinite available size.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "ad90a07d030883f5c2ae475a002373ab893384fd",
@@ -1473,7 +1467,7 @@
    "class": "port",
    "note": "`automation.mm`: tab button subrole.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "500e78afef78a82eb6df3270d02ec2a144813d11",
@@ -1493,7 +1487,7 @@
    "class": "port",
    "note": "`FrnWindow.mm`: only the view tracking area resets the cursor.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "4ae41027c062e30a2383ba820e065273b85c8a3e",
@@ -1503,7 +1497,7 @@
    "class": "port",
    "note": "`dcomp.idl`: `BOOL`, not `bool`, for `CreateTargetForHwnd`.",
    "part": "win32",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "7011f50c27560e7d9c3db93c2a7479f57b3fb4a0",
@@ -1613,9 +1607,9 @@
    "date": "2026-11-18",
    "area": "controls",
    "class": "port",
-   "note": "FlexPanel relative basis is a fraction. Behaviour change for existing values.",
+   "note": "FlexPanel relative basis is a fraction. Parsed percentages were divided by 100 twice; code passing `50` must pass `0.5`.",
    "part": "controls",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "192e7a0ba515e916c770d70d627230fcf0e6f636",
@@ -1625,7 +1619,7 @@
    "class": "port",
    "note": "Leaf nodes are not reported as expandable.",
    "part": "macos",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "2d340861036fc489d1d6e7a4ae9c7a79ea46843d",
