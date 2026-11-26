@@ -127,6 +127,7 @@ FerroUI.Controls.Calendar.DisplayDateStart: Option<DateTime> = (null); TwoWay
 FerroUI.Controls.Calendar.DisplayMode: CalendarMode = Month; OneWay
 FerroUI.Controls.Calendar.FirstDayOfWeek: DayOfWeek = Sunday; OneWay
 FerroUI.Controls.Calendar.HeaderBackground: Option<Rc<dyn IBrush>> = (null); OneWay
+FerroUI.Controls.Calendar.IsGroupLabelVisible: bool = False; OneWay
 FerroUI.Controls.Calendar.IsOutOfScopeEnabled: bool = True; OneWay
 FerroUI.Controls.Calendar.IsTodayHighlighted: bool = True; OneWay
 FerroUI.Controls.Calendar.IsWeekNumberVisible: bool = False; OneWay

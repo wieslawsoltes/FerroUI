@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -736642479482127294;
+pub(crate) const API_FINGERPRINT: i64 = -6432209832254453605;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 511] = [
@@ -523,7 +523,7 @@ pub(crate) static TYPE_NAMES: [&str; 511] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1061] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1062] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -931,6 +931,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1061] = [
     "IsFocused",
     "IsGestureEnabled",
     "IsGroup",
+    "IsGroupLabelVisible",
     "IsHeaderItemsCarouselEnabled",
     "IsHitTestVisible",
     "IsIconVisible",

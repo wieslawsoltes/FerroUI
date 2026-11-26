@@ -224,8 +224,8 @@ protected:
     Self& self() noexcept { return static_cast<Self&>(*this); }
 };
 
-inline constexpr std::int64_t api_fingerprint = -736642479482127294;
-inline constexpr std::int64_t selection_fingerprint = -4458338051447842601;
+inline constexpr std::int64_t api_fingerprint = -6432209832254453605;
+inline constexpr std::int64_t selection_fingerprint = -5037082505186837607;
 
 /// Defines how a background is drawn relative to its border.
 enum class BackgroundSizing : std::int64_t {
@@ -356,8 +356,8 @@ class AnimatableApi : public ObjectApi<Self> {
 public:
     using ObjectApi<Self>::ObjectApi;
     /// Transitions. Defines the `Transitions` property.
-    std::string transitions() const { return detail::get_string(this->handle(), 955); }
-    Self& transitions(std::string_view value_) { detail::set_string(this->handle(), 955, value_); return this->self(); }
+    std::string transitions() const { return detail::get_string(this->handle(), 956); }
+    Self& transitions(std::string_view value_) { detail::set_string(this->handle(), 956, value_); return this->self(); }
     Self& transitions(const char* value_) { return transitions(std::string_view(value_)); }
 };
 
@@ -388,21 +388,21 @@ public:
     Self& data_context(const char* value_) { return data_context(std::string_view(value_)); }
     Self& data_context(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 186, value_.handle())); return this->self(); }
     /// Name. Defines the `Name` property.
-    std::string name() const { return detail::get_string(this->handle(), 566); }
-    Self& name(std::string_view value_) { detail::set_string(this->handle(), 566, value_); return this->self(); }
+    std::string name() const { return detail::get_string(this->handle(), 567); }
+    Self& name(std::string_view value_) { detail::set_string(this->handle(), 567, value_); return this->self(); }
     Self& name(const char* value_) { return name(std::string_view(value_)); }
     /// Parent. Defines the `Parent` property.
-    Object parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 634, &result)); return Object(detail::Adopt{}, result); }
+    Object parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 635, &result)); return Object(detail::Adopt{}, result); }
     /// RequestedThemeVariant. Defines the RequestedThemeVariant property: the theme variant
     /// requested for an element and its descendants.
-    std::string requested_theme_variant() const { return detail::get_string(this->handle(), 715); }
-    Self& requested_theme_variant(std::string_view value_) { detail::set_string(this->handle(), 715, value_); return this->self(); }
+    std::string requested_theme_variant() const { return detail::get_string(this->handle(), 716); }
+    Self& requested_theme_variant(std::string_view value_) { detail::set_string(this->handle(), 716, value_); return this->self(); }
     Self& requested_theme_variant(const char* value_) { return requested_theme_variant(std::string_view(value_)); }
     /// TemplatedParent. Defines the `TemplatedParent` property.
-    Object templated_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 861, &result)); return Object(detail::Adopt{}, result); }
+    Object templated_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 862, &result)); return Object(detail::Adopt{}, result); }
     /// Theme. Defines the `Theme` property.
-    Object theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 912, &result)); return Object(detail::Adopt{}, result); }
-    Self& theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 912, value_.handle())); return this->self(); }
+    Object theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 913, &result)); return Object(detail::Adopt{}, result); }
+    Self& theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 913, value_.handle())); return this->self(); }
 };
 
 class StyledElement final : public StyledElementApi<StyledElement> {
@@ -438,31 +438,31 @@ public:
     /// HasMirrorTransform. Defines the `HasMirrorTransform` property.
     bool has_mirror_transform() const { return detail::get_bool(this->handle(), 329); }
     /// IsVisible. Defines the `IsVisible` property.
-    bool is_visible() const { return detail::get_bool(this->handle(), 462); }
-    Self& is_visible(bool value_) { detail::check(ferro_set_bool(this->handle(), 462, value_)); return this->self(); }
+    bool is_visible() const { return detail::get_bool(this->handle(), 463); }
+    Self& is_visible(bool value_) { detail::check(ferro_set_bool(this->handle(), 463, value_)); return this->self(); }
     /// Opacity. Defines the `Opacity` property.
-    double opacity() const { return detail::get_f64(this->handle(), 603); }
-    Self& opacity(double value_) { detail::check(ferro_set_f64(this->handle(), 603, value_)); return this->self(); }
+    double opacity() const { return detail::get_f64(this->handle(), 604); }
+    Self& opacity(double value_) { detail::check(ferro_set_f64(this->handle(), 604, value_)); return this->self(); }
     /// OpacityMask. Defines the `OpacityMask` property.
-    std::string opacity_mask() const { return detail::get_string(this->handle(), 604); }
-    Self& opacity_mask(std::string_view value_) { detail::set_string(this->handle(), 604, value_); return this->self(); }
+    std::string opacity_mask() const { return detail::get_string(this->handle(), 605); }
+    Self& opacity_mask(std::string_view value_) { detail::set_string(this->handle(), 605, value_); return this->self(); }
     Self& opacity_mask(const char* value_) { return opacity_mask(std::string_view(value_)); }
     /// RenderTransform. Defines the `RenderTransform` property.
-    std::string render_transform() const { return detail::get_string(this->handle(), 711); }
-    Self& render_transform(std::string_view value_) { detail::set_string(this->handle(), 711, value_); return this->self(); }
+    std::string render_transform() const { return detail::get_string(this->handle(), 712); }
+    Self& render_transform(std::string_view value_) { detail::set_string(this->handle(), 712, value_); return this->self(); }
     Self& render_transform(const char* value_) { return render_transform(std::string_view(value_)); }
     /// RenderTransformOrigin. Defines the `RenderTransformOrigin` property.
-    std::string render_transform_origin() const { return detail::get_string(this->handle(), 712); }
-    Self& render_transform_origin(std::string_view value_) { detail::set_string(this->handle(), 712, value_); return this->self(); }
+    std::string render_transform_origin() const { return detail::get_string(this->handle(), 713); }
+    Self& render_transform_origin(std::string_view value_) { detail::set_string(this->handle(), 713, value_); return this->self(); }
     Self& render_transform_origin(const char* value_) { return render_transform_origin(std::string_view(value_)); }
     /// Visual.FlowDirection (attached). Defines the `FlowDirection` attached property.
-    static FlowDirection get_flow_direction(const Object& target) { return static_cast<FlowDirection>(detail::get_i64(target.handle(), 1029)); }
-    static void set_flow_direction(const Object& target, FlowDirection value_) { detail::check(ferro_set_i64(target.handle(), 1029, static_cast<std::int64_t>(value_))); }
+    static FlowDirection get_flow_direction(const Object& target) { return static_cast<FlowDirection>(detail::get_i64(target.handle(), 1030)); }
+    static void set_flow_direction(const Object& target, FlowDirection value_) { detail::check(ferro_set_i64(target.handle(), 1030, static_cast<std::int64_t>(value_))); }
     /// VisualParent. Defines the `VisualParent` property.
-    Object visual_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1030, &result)); return Object(detail::Adopt{}, result); }
+    Object visual_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1031, &result)); return Object(detail::Adopt{}, result); }
     /// ZIndex. Defines the `ZIndex` property.
-    std::int64_t z_index() const { return detail::get_i64(this->handle(), 1059); }
-    Self& z_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 1059, value_)); return this->self(); }
+    std::int64_t z_index() const { return detail::get_i64(this->handle(), 1060); }
+    Self& z_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 1060, value_)); return this->self(); }
 };
 
 class Visual final : public VisualApi<Visual> {
@@ -486,30 +486,30 @@ public:
     HorizontalAlignment horizontal_alignment() const { return static_cast<HorizontalAlignment>(detail::get_i64(this->handle(), 343)); }
     Self& horizontal_alignment(HorizontalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 343, static_cast<std::int64_t>(value_))); return this->self(); }
     /// Margin. Defines the `Margin` property.
-    std::string margin() const { return detail::get_string(this->handle(), 521); }
-    Self& margin(std::string_view value_) { detail::set_string(this->handle(), 521, value_); return this->self(); }
+    std::string margin() const { return detail::get_string(this->handle(), 522); }
+    Self& margin(std::string_view value_) { detail::set_string(this->handle(), 522, value_); return this->self(); }
     Self& margin(const char* value_) { return margin(std::string_view(value_)); }
     /// MaxHeight. Defines the `MaxHeight` property.
-    double max_height() const { return detail::get_f64(this->handle(), 530); }
-    Self& max_height(double value_) { detail::check(ferro_set_f64(this->handle(), 530, value_)); return this->self(); }
+    double max_height() const { return detail::get_f64(this->handle(), 531); }
+    Self& max_height(double value_) { detail::check(ferro_set_f64(this->handle(), 531, value_)); return this->self(); }
     /// MaxWidth. Defines the `MaxWidth` property.
-    double max_width() const { return detail::get_f64(this->handle(), 538); }
-    Self& max_width(double value_) { detail::check(ferro_set_f64(this->handle(), 538, value_)); return this->self(); }
+    double max_width() const { return detail::get_f64(this->handle(), 539); }
+    Self& max_width(double value_) { detail::check(ferro_set_f64(this->handle(), 539, value_)); return this->self(); }
     /// MinHeight. Defines the `MinHeight` property.
-    double min_height() const { return detail::get_f64(this->handle(), 549); }
-    Self& min_height(double value_) { detail::check(ferro_set_f64(this->handle(), 549, value_)); return this->self(); }
+    double min_height() const { return detail::get_f64(this->handle(), 550); }
+    Self& min_height(double value_) { detail::check(ferro_set_f64(this->handle(), 550, value_)); return this->self(); }
     /// MinWidth. Defines the `MinWidth` property.
-    double min_width() const { return detail::get_f64(this->handle(), 551); }
-    Self& min_width(double value_) { detail::check(ferro_set_f64(this->handle(), 551, value_)); return this->self(); }
+    double min_width() const { return detail::get_f64(this->handle(), 552); }
+    Self& min_width(double value_) { detail::check(ferro_set_f64(this->handle(), 552, value_)); return this->self(); }
     /// UseLayoutRounding. Defines the `UseLayoutRounding` property.
-    bool use_layout_rounding() const { return detail::get_bool(this->handle(), 1010); }
-    Self& use_layout_rounding(bool value_) { detail::check(ferro_set_bool(this->handle(), 1010, value_)); return this->self(); }
+    bool use_layout_rounding() const { return detail::get_bool(this->handle(), 1011); }
+    Self& use_layout_rounding(bool value_) { detail::check(ferro_set_bool(this->handle(), 1011, value_)); return this->self(); }
     /// VerticalAlignment. Defines the `VerticalAlignment` property.
-    VerticalAlignment vertical_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1018)); }
-    Self& vertical_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1018, static_cast<std::int64_t>(value_))); return this->self(); }
+    VerticalAlignment vertical_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1019)); }
+    Self& vertical_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1019, static_cast<std::int64_t>(value_))); return this->self(); }
     /// Width. Defines the `Width` property.
-    double width() const { return detail::get_f64(this->handle(), 1036); }
-    Self& width(double value_) { detail::check(ferro_set_f64(this->handle(), 1036, value_)); return this->self(); }
+    double width() const { return detail::get_f64(this->handle(), 1037); }
+    Self& width(double value_) { detail::check(ferro_set_f64(this->handle(), 1037, value_)); return this->self(); }
 };
 
 class Layoutable final : public LayoutableApi<Layoutable> {
@@ -555,18 +555,18 @@ public:
     /// IsFocused. Defines the `IsFocused` property.
     bool is_focused() const { return detail::get_bool(this->handle(), 405); }
     /// IsHitTestVisible. Defines the `IsHitTestVisible` property.
-    bool is_hit_test_visible() const { return detail::get_bool(this->handle(), 409); }
-    Self& is_hit_test_visible(bool value_) { detail::check(ferro_set_bool(this->handle(), 409, value_)); return this->self(); }
+    bool is_hit_test_visible() const { return detail::get_bool(this->handle(), 410); }
+    Self& is_hit_test_visible(bool value_) { detail::check(ferro_set_bool(this->handle(), 410, value_)); return this->self(); }
     /// IsKeyboardFocusWithin. Defines the `IsKeyboardFocusWithin` property.
-    bool is_keyboard_focus_within() const { return detail::get_bool(this->handle(), 418); }
+    bool is_keyboard_focus_within() const { return detail::get_bool(this->handle(), 419); }
     /// IsPointerOver. Defines the `IsPointerOver` property.
-    bool is_pointer_over() const { return detail::get_bool(this->handle(), 434); }
+    bool is_pointer_over() const { return detail::get_bool(this->handle(), 435); }
     /// IsTabStop. Defines the `IsTabStop` property.
-    bool is_tab_stop() const { return detail::get_bool(this->handle(), 450); }
-    Self& is_tab_stop(bool value_) { detail::check(ferro_set_bool(this->handle(), 450, value_)); return this->self(); }
+    bool is_tab_stop() const { return detail::get_bool(this->handle(), 451); }
+    Self& is_tab_stop(bool value_) { detail::check(ferro_set_bool(this->handle(), 451, value_)); return this->self(); }
     /// TabIndex. Defines the `TabIndex` property.
-    std::int64_t tab_index() const { return detail::get_i64(this->handle(), 848); }
-    Self& tab_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 848, value_)); return this->self(); }
+    std::int64_t tab_index() const { return detail::get_i64(this->handle(), 849); }
+    Self& tab_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 849, value_)); return this->self(); }
     /// ContextCanceled: the handler takes the object, and may return `true` for handled. Provides
     /// event data for the `ContextCanceled` event.
     template <class Handler>
@@ -793,11 +793,11 @@ public:
     Object context_menu() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 175, &result)); return Object(detail::Adopt{}, result); }
     Self& context_menu(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 175, value_.handle())); return this->self(); }
     /// Tag. Defines the `Tag` property.
-    std::string tag() const { return detail::get_string(this->handle(), 854); }
-    Object tag_object() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 854, &result)); return Object(detail::Adopt{}, result); }
-    Self& tag(std::string_view value_) { detail::set_string(this->handle(), 854, value_); return this->self(); }
+    std::string tag() const { return detail::get_string(this->handle(), 855); }
+    Object tag_object() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 855, &result)); return Object(detail::Adopt{}, result); }
+    Self& tag(std::string_view value_) { detail::set_string(this->handle(), 855, value_); return this->self(); }
     Self& tag(const char* value_) { return tag(std::string_view(value_)); }
-    Self& tag(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 854, value_.handle())); return this->self(); }
+    Self& tag(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 855, value_.handle())); return this->self(); }
     /// Loaded: the handler takes the object, and may return `true` for handled. Defines the
     /// `Loaded` event.
     template <class Handler>
@@ -881,16 +881,16 @@ public:
     Self& foreground(std::string_view value_) { detail::set_string(this->handle(), 304, value_); return this->self(); }
     Self& foreground(const char* value_) { return foreground(std::string_view(value_)); }
     /// LetterSpacing. Defines the `LetterSpacing` property.
-    double letter_spacing() const { return detail::get_f64(this->handle(), 511); }
-    Self& letter_spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 511, value_)); return this->self(); }
+    double letter_spacing() const { return detail::get_f64(this->handle(), 512); }
+    Self& letter_spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 512, value_)); return this->self(); }
     /// Padding. Defines the `Padding` property.
-    std::string padding() const { return detail::get_string(this->handle(), 613); }
-    Self& padding(std::string_view value_) { detail::set_string(this->handle(), 613, value_); return this->self(); }
+    std::string padding() const { return detail::get_string(this->handle(), 614); }
+    Self& padding(std::string_view value_) { detail::set_string(this->handle(), 614, value_); return this->self(); }
     Self& padding(const char* value_) { return padding(std::string_view(value_)); }
     /// TemplatedControl.IsTemplateFocusTarget (attached). Defines the `IsTemplateFocusTarget`
     /// attached property.
-    static bool get_is_template_focus_target(const Object& target) { return detail::get_bool(target.handle(), 860); }
-    static void set_is_template_focus_target(const Object& target, bool value_) { detail::check(ferro_set_bool(target.handle(), 860, value_)); }
+    static bool get_is_template_focus_target(const Object& target) { return detail::get_bool(target.handle(), 861); }
+    static void set_is_template_focus_target(const Object& target, bool value_) { detail::check(ferro_set_bool(target.handle(), 861, value_)); }
     /// TemplateApplied: the handler takes the object, and may return `true` for handled. Defines
     /// the `TemplateApplied` routed event.
     template <class Handler>
@@ -921,8 +921,8 @@ public:
     HorizontalAlignment horizontal_content_alignment() const { return static_cast<HorizontalAlignment>(detail::get_i64(this->handle(), 344)); }
     Self& horizontal_content_alignment(HorizontalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 344, static_cast<std::int64_t>(value_))); return this->self(); }
     /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-    VerticalAlignment vertical_content_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1019)); }
-    Self& vertical_content_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1019, static_cast<std::int64_t>(value_))); return this->self(); }
+    VerticalAlignment vertical_content_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1020)); }
+    Self& vertical_content_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1020, static_cast<std::int64_t>(value_))); return this->self(); }
 };
 
 class ContentControl final : public ContentControlApi<ContentControl> {
@@ -960,7 +960,7 @@ public:
     bool is_default() const { return detail::get_bool(this->handle(), 395); }
     Self& is_default(bool value_) { detail::check(ferro_set_bool(this->handle(), 395, value_)); return this->self(); }
     /// IsPressed. Defines the `IsPressed` property.
-    bool is_pressed() const { return detail::get_bool(this->handle(), 435); }
+    bool is_pressed() const { return detail::get_bool(this->handle(), 436); }
     /// Click: the handler takes the object, and may return `true` for handled. Defines the `Click`
     /// event.
     template <class Handler>
@@ -1007,11 +1007,11 @@ public:
     bool are_vertical_snap_points_regular() const { return detail::get_bool(this->handle(), 32); }
     Self& are_vertical_snap_points_regular(bool value_) { detail::check(ferro_set_bool(this->handle(), 32, value_)); return this->self(); }
     /// Orientation. Defines the `Orientation` property.
-    Orientation orientation() const { return static_cast<Orientation>(detail::get_i64(this->handle(), 606)); }
-    Self& orientation(Orientation value_) { detail::check(ferro_set_i64(this->handle(), 606, static_cast<std::int64_t>(value_))); return this->self(); }
+    Orientation orientation() const { return static_cast<Orientation>(detail::get_i64(this->handle(), 607)); }
+    Self& orientation(Orientation value_) { detail::check(ferro_set_i64(this->handle(), 607, static_cast<std::int64_t>(value_))); return this->self(); }
     /// Spacing. Defines the `Spacing` property.
-    double spacing() const { return detail::get_f64(this->handle(), 819); }
-    Self& spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 819, value_)); return this->self(); }
+    double spacing() const { return detail::get_f64(this->handle(), 820); }
+    Self& spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 820, value_)); return this->self(); }
     /// HorizontalSnapPointsChanged: the handler takes the object, and may return `true` for
     /// handled. Defines the `HorizontalSnapPointsChanged` event.
     template <class Handler>
@@ -1072,48 +1072,48 @@ public:
     Self& inlines(std::string_view value_) { detail::set_string(this->handle(), 373, value_); return this->self(); }
     Self& inlines(const char* value_) { return inlines(std::string_view(value_)); }
     /// LetterSpacing. Defines the `LetterSpacing` property.
-    double letter_spacing() const { return detail::get_f64(this->handle(), 511); }
-    Self& letter_spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 511, value_)); return this->self(); }
+    double letter_spacing() const { return detail::get_f64(this->handle(), 512); }
+    Self& letter_spacing(double value_) { detail::check(ferro_set_f64(this->handle(), 512, value_)); return this->self(); }
     /// Padding. Defines the `Padding` property.
-    std::string padding() const { return detail::get_string(this->handle(), 613); }
-    Self& padding(std::string_view value_) { detail::set_string(this->handle(), 613, value_); return this->self(); }
+    std::string padding() const { return detail::get_string(this->handle(), 614); }
+    Self& padding(std::string_view value_) { detail::set_string(this->handle(), 614, value_); return this->self(); }
     Self& padding(const char* value_) { return padding(std::string_view(value_)); }
     /// Text. Defines the `Text` property.
-    std::string text() const { return detail::get_string(this->handle(), 862); }
-    Self& text(std::string_view value_) { detail::set_string(this->handle(), 862, value_); return this->self(); }
+    std::string text() const { return detail::get_string(this->handle(), 863); }
+    Self& text(std::string_view value_) { detail::set_string(this->handle(), 863, value_); return this->self(); }
     Self& text(const char* value_) { return text(std::string_view(value_)); }
     /// TextBlock.BaselineOffset (attached). Defines the `BaselineOffset` attached property.
-    static double get_baseline_offset(const Object& target) { return detail::get_f64(target.handle(), 864); }
-    static void set_baseline_offset(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 864, value_)); }
+    static double get_baseline_offset(const Object& target) { return detail::get_f64(target.handle(), 865); }
+    static void set_baseline_offset(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 865, value_)); }
     /// TextBlock.LayoutRoundingPlacement (attached). Defines the `LayoutRoundingPlacement` attached
     /// property: where a text block puts the height layout rounding adds to it (a FerroUI
     /// addition). Inherited, so that a theme sets it once on the top-level.
-    static TextLayoutRoundingPlacement get_layout_rounding_placement(const Object& target) { return static_cast<TextLayoutRoundingPlacement>(detail::get_i64(target.handle(), 865)); }
-    static void set_layout_rounding_placement(const Object& target, TextLayoutRoundingPlacement value_) { detail::check(ferro_set_i64(target.handle(), 865, static_cast<std::int64_t>(value_))); }
+    static TextLayoutRoundingPlacement get_layout_rounding_placement(const Object& target) { return static_cast<TextLayoutRoundingPlacement>(detail::get_i64(target.handle(), 866)); }
+    static void set_layout_rounding_placement(const Object& target, TextLayoutRoundingPlacement value_) { detail::check(ferro_set_i64(target.handle(), 866, static_cast<std::int64_t>(value_))); }
     /// TextBlock.LineHeight (attached). Defines the `LineHeight` property.
-    static double get_line_height(const Object& target) { return detail::get_f64(target.handle(), 866); }
-    static void set_line_height(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 866, value_)); }
+    static double get_line_height(const Object& target) { return detail::get_f64(target.handle(), 867); }
+    static void set_line_height(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 867, value_)); }
     /// TextBlock.LineSpacing (attached). Defines the `LineSpacing` property.
-    static double get_line_spacing(const Object& target) { return detail::get_f64(target.handle(), 867); }
-    static void set_line_spacing(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 867, value_)); }
+    static double get_line_spacing(const Object& target) { return detail::get_f64(target.handle(), 868); }
+    static void set_line_spacing(const Object& target, double value_) { detail::check(ferro_set_f64(target.handle(), 868, value_)); }
     /// TextBlock.MaxLines (attached). Defines the `MaxLines` property.
-    static std::int64_t get_max_lines(const Object& target) { return detail::get_i64(target.handle(), 868); }
-    static void set_max_lines(const Object& target, std::int64_t value_) { detail::check(ferro_set_i64(target.handle(), 868, value_)); }
+    static std::int64_t get_max_lines(const Object& target) { return detail::get_i64(target.handle(), 869); }
+    static void set_max_lines(const Object& target, std::int64_t value_) { detail::check(ferro_set_i64(target.handle(), 869, value_)); }
     /// TextBlock.TextAlignment (attached). Defines the `TextAlignment` property.
-    static TextAlignment get_text_alignment(const Object& target) { return static_cast<TextAlignment>(detail::get_i64(target.handle(), 869)); }
-    static void set_text_alignment(const Object& target, TextAlignment value_) { detail::check(ferro_set_i64(target.handle(), 869, static_cast<std::int64_t>(value_))); }
+    static TextAlignment get_text_alignment(const Object& target) { return static_cast<TextAlignment>(detail::get_i64(target.handle(), 870)); }
+    static void set_text_alignment(const Object& target, TextAlignment value_) { detail::check(ferro_set_i64(target.handle(), 870, static_cast<std::int64_t>(value_))); }
     /// TextBlock.TextLineBounds (attached). Defines the `TextLineBounds` attached property: how the
     /// box of each line is bounded above and below (a FerroUI addition after WinUI's
     /// `TextBlock.TextLineBounds`, DEVIATIONS.md, Text block). Inherited, as the other attached
     /// text properties, so that a content presenter sets it for the text of its content.
-    static TextLineBounds get_text_line_bounds(const Object& target) { return static_cast<TextLineBounds>(detail::get_i64(target.handle(), 870)); }
-    static void set_text_line_bounds(const Object& target, TextLineBounds value_) { detail::check(ferro_set_i64(target.handle(), 870, static_cast<std::int64_t>(value_))); }
+    static TextLineBounds get_text_line_bounds(const Object& target) { return static_cast<TextLineBounds>(detail::get_i64(target.handle(), 871)); }
+    static void set_text_line_bounds(const Object& target, TextLineBounds value_) { detail::check(ferro_set_i64(target.handle(), 871, static_cast<std::int64_t>(value_))); }
     /// TextBlock.TextWrapping (attached). Defines the `TextWrapping` property.
-    static TextWrapping get_text_wrapping(const Object& target) { return static_cast<TextWrapping>(detail::get_i64(target.handle(), 872)); }
-    static void set_text_wrapping(const Object& target, TextWrapping value_) { detail::check(ferro_set_i64(target.handle(), 872, static_cast<std::int64_t>(value_))); }
+    static TextWrapping get_text_wrapping(const Object& target) { return static_cast<TextWrapping>(detail::get_i64(target.handle(), 873)); }
+    static void set_text_wrapping(const Object& target, TextWrapping value_) { detail::check(ferro_set_i64(target.handle(), 873, static_cast<std::int64_t>(value_))); }
     /// TextDecorations. Defines the `TextDecorations` property.
-    std::string text_decorations() const { return detail::get_string(this->handle(), 877); }
-    Self& text_decorations(std::string_view value_) { detail::set_string(this->handle(), 877, value_); return this->self(); }
+    std::string text_decorations() const { return detail::get_string(this->handle(), 878); }
+    Self& text_decorations(std::string_view value_) { detail::set_string(this->handle(), 878, value_); return this->self(); }
     Self& text_decorations(const char* value_) { return text_decorations(std::string_view(value_)); }
 };
 
@@ -1138,18 +1138,18 @@ public:
     /// FrameSize. Defines the `FrameSize` property.
     std::string frame_size() const { return detail::get_string(this->handle(), 307); }
     /// TopLevel.AutoSafeAreaPadding (attached). Defines the AutoSafeAreaPadding attached property.
-    static bool get_auto_safe_area_padding(const Object& target) { return detail::get_bool(target.handle(), 948); }
-    static void set_auto_safe_area_padding(const Object& target, bool value_) { detail::check(ferro_set_bool(target.handle(), 948, value_)); }
+    static bool get_auto_safe_area_padding(const Object& target) { return detail::get_bool(target.handle(), 949); }
+    static void set_auto_safe_area_padding(const Object& target, bool value_) { detail::check(ferro_set_bool(target.handle(), 949, value_)); }
     /// TopLevel.SystemBarColor (attached). Defines the SystemBarColor attached property.
-    static Object get_system_bar_color(const Object& target) { FerroHandle result = 0; detail::check(ferro_get_handle(target.handle(), 949, &result)); return Object(detail::Adopt{}, result); }
-    static void set_system_bar_color(const Object& target, const Object& value_) { detail::check(ferro_set_handle(target.handle(), 949, value_.handle())); }
+    static Object get_system_bar_color(const Object& target) { FerroHandle result = 0; detail::check(ferro_get_handle(target.handle(), 950, &result)); return Object(detail::Adopt{}, result); }
+    static void set_system_bar_color(const Object& target, const Object& value_) { detail::check(ferro_set_handle(target.handle(), 950, value_.handle())); }
     /// TransparencyBackgroundFallback. Defines the `TransparencyBackgroundFallback` property.
-    std::string transparency_background_fallback() const { return detail::get_string(this->handle(), 957); }
-    Self& transparency_background_fallback(std::string_view value_) { detail::set_string(this->handle(), 957, value_); return this->self(); }
+    std::string transparency_background_fallback() const { return detail::get_string(this->handle(), 958); }
+    Self& transparency_background_fallback(std::string_view value_) { detail::set_string(this->handle(), 958, value_); return this->self(); }
     Self& transparency_background_fallback(const char* value_) { return transparency_background_fallback(std::string_view(value_)); }
     /// TransparencyLevelHint. Defines the `TransparencyLevelHint` property.
-    std::string transparency_level_hint() const { return detail::get_string(this->handle(), 958); }
-    Self& transparency_level_hint(std::string_view value_) { detail::set_string(this->handle(), 958, value_); return this->self(); }
+    std::string transparency_level_hint() const { return detail::get_string(this->handle(), 959); }
+    Self& transparency_level_hint(std::string_view value_) { detail::set_string(this->handle(), 959, value_); return this->self(); }
     Self& transparency_level_hint(const char* value_) { return transparency_level_hint(std::string_view(value_)); }
     /// BackRequested: the handler takes the object, and may return `true` for handled. Defines the
     /// `BackRequested` event.
@@ -1175,10 +1175,10 @@ public:
     /// IsActive. Defines the `IsActive` property.
     bool is_active() const { return detail::get_bool(this->handle(), 381); }
     /// Owner. Defines the `Owner` property.
-    Object owner() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 612, &result)); return Object(detail::Adopt{}, result); }
+    Object owner() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 613, &result)); return Object(detail::Adopt{}, result); }
     /// Topmost. Defines the `Topmost` property.
-    bool topmost() const { return detail::get_bool(this->handle(), 952); }
-    Self& topmost(bool value_) { detail::check(ferro_set_bool(this->handle(), 952, value_)); return this->self(); }
+    bool topmost() const { return detail::get_bool(this->handle(), 953); }
+    Self& topmost(bool value_) { detail::check(ferro_set_bool(this->handle(), 953, value_)); return this->self(); }
 };
 
 class WindowBase final : public WindowBaseApi<WindowBase> {
@@ -1214,35 +1214,35 @@ public:
     /// IsExtendedIntoWindowDecorations. Defines the `IsExtendedIntoWindowDecorations` property.
     bool is_extended_into_window_decorations() const { return detail::get_bool(this->handle(), 403); }
     /// OffScreenMargin. Defines the `OffScreenMargin` property.
-    std::string off_screen_margin() const { return detail::get_string(this->handle(), 597); }
+    std::string off_screen_margin() const { return detail::get_string(this->handle(), 598); }
     /// ShowActivated. Defines the `ShowActivated` property.
-    bool show_activated() const { return detail::get_bool(this->handle(), 795); }
-    Self& show_activated(bool value_) { detail::check(ferro_set_bool(this->handle(), 795, value_)); return this->self(); }
+    bool show_activated() const { return detail::get_bool(this->handle(), 796); }
+    Self& show_activated(bool value_) { detail::check(ferro_set_bool(this->handle(), 796, value_)); return this->self(); }
     /// ShowInTaskbar. Enables or disables the taskbar icon.
-    bool show_in_taskbar() const { return detail::get_bool(this->handle(), 800); }
-    Self& show_in_taskbar(bool value_) { detail::check(ferro_set_bool(this->handle(), 800, value_)); return this->self(); }
+    bool show_in_taskbar() const { return detail::get_bool(this->handle(), 801); }
+    Self& show_in_taskbar(bool value_) { detail::check(ferro_set_bool(this->handle(), 801, value_)); return this->self(); }
     /// SizeToContent. Defines the `SizeToContent` property.
-    std::string size_to_content() const { return detail::get_string(this->handle(), 809); }
-    Self& size_to_content(std::string_view value_) { detail::set_string(this->handle(), 809, value_); return this->self(); }
+    std::string size_to_content() const { return detail::get_string(this->handle(), 810); }
+    Self& size_to_content(std::string_view value_) { detail::set_string(this->handle(), 810, value_); return this->self(); }
     Self& size_to_content(const char* value_) { return size_to_content(std::string_view(value_)); }
     /// Title. Defines the `Title` property.
-    std::string title() const { return detail::get_string(this->handle(), 926); }
-    Self& title(std::string_view value_) { detail::set_string(this->handle(), 926, value_); return this->self(); }
+    std::string title() const { return detail::get_string(this->handle(), 927); }
+    Self& title(std::string_view value_) { detail::set_string(this->handle(), 927, value_); return this->self(); }
     Self& title(const char* value_) { return title(std::string_view(value_)); }
     /// WindowDecorationMargin. Defines the `WindowDecorationMargin` property.
-    std::string window_decoration_margin() const { return detail::get_string(this->handle(), 1039); }
+    std::string window_decoration_margin() const { return detail::get_string(this->handle(), 1040); }
     /// WindowDecorations. Defines the `WindowDecorations` property.
-    WindowDecorations window_decorations() const { return static_cast<WindowDecorations>(detail::get_i64(this->handle(), 1041)); }
-    Self& window_decorations(WindowDecorations value_) { detail::check(ferro_set_i64(this->handle(), 1041, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowDecorations window_decorations() const { return static_cast<WindowDecorations>(detail::get_i64(this->handle(), 1042)); }
+    Self& window_decorations(WindowDecorations value_) { detail::check(ferro_set_i64(this->handle(), 1042, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowDecorationsTheme. Defines the `WindowDecorationsTheme` property.
-    Object window_decorations_theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1042, &result)); return Object(detail::Adopt{}, result); }
-    Self& window_decorations_theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 1042, value_.handle())); return this->self(); }
+    Object window_decorations_theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1043, &result)); return Object(detail::Adopt{}, result); }
+    Self& window_decorations_theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 1043, value_.handle())); return this->self(); }
     /// WindowStartupLocation. Defines the `WindowStartupLocation` property.
-    WindowStartupLocation window_startup_location() const { return static_cast<WindowStartupLocation>(detail::get_i64(this->handle(), 1045)); }
-    Self& window_startup_location(WindowStartupLocation value_) { detail::check(ferro_set_i64(this->handle(), 1045, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowStartupLocation window_startup_location() const { return static_cast<WindowStartupLocation>(detail::get_i64(this->handle(), 1046)); }
+    Self& window_startup_location(WindowStartupLocation value_) { detail::check(ferro_set_i64(this->handle(), 1046, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowState. Represents the currently effective window state (normal, minimized, maximized).
-    WindowState window_state() const { return static_cast<WindowState>(detail::get_i64(this->handle(), 1046)); }
-    Self& window_state(WindowState value_) { detail::check(ferro_set_i64(this->handle(), 1046, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowState window_state() const { return static_cast<WindowState>(detail::get_i64(this->handle(), 1047)); }
+    Self& window_state(WindowState value_) { detail::check(ferro_set_i64(this->handle(), 1047, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowClosed: the handler takes the object, and may return `true` for handled. Routed event
     /// that can be used for global tracking of window destruction.
     template <class Handler>

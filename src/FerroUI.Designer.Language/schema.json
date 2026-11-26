@@ -1938,6 +1938,16 @@
         ],
         "attached": false
       },
+      "IsGroupLabelVisible": {
+        "name": "IsGroupLabelVisible",
+        "type_name": "bool",
+        "documentation": "Calendar.IsGroupLabelVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "SelectedDates": {
         "name": "SelectedDates",
         "type_name": "SelectedDatesCollection",

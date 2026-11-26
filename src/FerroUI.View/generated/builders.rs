@@ -2908,6 +2908,11 @@ pub trait CalendarProps: ElementBuilder {
     fn is_out_of_scope_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::is_out_of_scope_enabled_property(), value)
     }
+
+    /// Sets [`Calendar::is_group_label_visible_property`](ferroui_controls::Calendar::is_group_label_visible_property).
+    fn is_group_label_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Calendar>::is_group_label_visible_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Calendar>> CalendarProps for El<T> {}
 

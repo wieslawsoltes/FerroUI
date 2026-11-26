@@ -500,7 +500,7 @@
           "keys": [],
           "type_keys": ["CalendarDayButton"],
           "references": ["FontSizeSmall", "HighlightBrush", "ThemeAccentBrush2", "ThemeControlLowBrush", "ThemeForegroundBrush", "ThemeForegroundLowBrush"],
-          "types": ["CalendarDayButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "Rectangle", "ResourceDictionary", "Setter", "Style"]
+          "types": ["CalendarDayButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "Rectangle", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
         },
         {
           "name": "Controls/CalendarItem.xaml",
