@@ -104,6 +104,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
+| `ScrollView` | WinUI's ScrollView: its template is converted from WinUI's ScrollView.xaml into the WinUI theme and its derived themes | #1268 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
@@ -545,3 +546,30 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.12 ScrollView and ScrollPresenter (#1268)
+
+`src/FerroUI.Controls/scroll_view/` (`ScrollView`, WinUI's `ScrollBarController`, the
+`Scrolling*` enumerations, options and event arguments), `primitives/scroll_presenter.rs`
+(`ScrollPresenter`) and `primitives/i_scroll_controller.rs` (`IScrollController` and the
+`ScrollController*RequestedEventArgs`) port `controls/dev/ScrollView/` and
+`controls/dev/ScrollPresenter/` at the pin. The names are WinUI's; the template of the view is
+`Controls/ScrollView.xaml` of the WinUI theme, from WinUI's `ScrollView.xaml`, with its parts
+`PART_ScrollPresenter`, `PART_HorizontalScrollBar`, `PART_VerticalScrollBar` and
+`PART_ScrollBarsSeparator`. Each bar is driven by a scroll controller, as in WinUI, and an
+`AnnotatedScrollBar` (or any other `IScrollController`) can take the place of a bar through
+`ScrollPresenter.VerticalScrollController`.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `ScrollPresenter` drives an `InteractionTracker` and a `VisualInteractionSource`. | It hosts a `ScrollViewer` without scroll bars (scroll bar visibility `Hidden`, or `Disabled` on the axes `ContentOrientation` constrains), whose scroll content presenter, gestures, wheel, keyboard, zoom and anchoring do the scrolling; the offsets are composited as for any scroll viewer. | One scrolling engine: the GPU-composited path of the scroll viewer stays the only one. |
+| An animated `ScrollTo`, `ScrollBy`, `ZoomTo` or `ZoomBy` runs the composition animation on the interaction tracker. | The animation (WinUI's default, or the one a handler of `ScrollAnimationStarting` or `ZoomAnimationStarting` sets) is a `Vector3KeyFrameAnimation` or `ScalarKeyFrameAnimation` of the compositor; its key frames are evaluated on each animation frame, each segment with the easing of its end frame, and set as the offsets or the zoom. Out of a window, or before the view has a composition visual, the change is applied at once. | The offsets drive the layout of the content (anchoring, the scroll bars, the effective viewport), so they are set on the UI thread; the scrolling itself stays composited. |
+| `AddScrollVelocity` and `AddZoomVelocity` add inertia to the tracker. | The velocity moves the view on each frame and decays by the rate per second (0.95 when not given, 0 keeps it), until it is under 1 pixel per second or the view reaches the end of the content. | WinUI's decay rate, without the tracker. |
+| The `Animation` of the animation-starting arguments is a `CompositionAnimation`. | The concrete `Vector3KeyFrameAnimation` (scroll) or `ScalarKeyFrameAnimation` (zoom); `None` applies the change at once. | Typed; the gallery casts it to `Vector3KeyFrameAnimation` anyway. |
+| `IScrollController` events (`ScrollToRequested`, `ScrollByRequested`, `AddScrollVelocityRequested`). | Trait methods that add a handler and return a `Subscription`; `ScrollControllerRequests` keeps the handlers for an implementation. `PanningInfo`, `CanScrollChanged` and `IsScrollingWithMouseChanged` are left out: the view updates its bars after each change of the view or the extent. | Idiomatic Rust; the presenter's own gestures pan the content. |
+| `ComputedHorizontalScrollBarVisibility` and `ComputedVerticalScrollBarVisibility` are `Visibility`. | `bool` (`true` is `Visible`), bound to `IsVisible` of the bar's grid. | FerroUI has no `Visibility` type. |
+| `HorizontalScrollMode` and `VerticalScrollMode` `Disabled` stop every user input of the axis; `IgnoredInputKinds` every listed kind. | They stop the mouse wheel (the presenter handles the wheel in the tunnel phase); touch and the keyboard still scroll. | The scroll viewer has no per-axis switch of its input without a change of its layout. |
+| The chain modes chain per axis and for the zoom; the rail modes keep a pan on its axis; the anchor ratios place the anchor. | Chaining is off only when both axes are `Never`; the rail modes and the anchor ratios are kept without effect (the scroll viewer anchors at the top left). | The scroll viewer has one `IsScrollChainingEnabled`. |
+| `ExpressionAnimationSources`, the snap points collections, `BringingIntoView`, `AnchorRequested`, `CanContentRenderOutsideBounds`. | Left out. | No user in the gallery; follow-ups. |
+| The ScrollingIndicatorStates of the template (mouse and touch indicators) and the delays of ScrollBarsSeparatorStates. | The bars show while they are visible; the separator shows when both bars do. | As the scroll viewer of the WinUI theme (its translation notes). |
+
