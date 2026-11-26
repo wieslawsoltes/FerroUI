@@ -143,15 +143,15 @@ export async function settled(page, quiet = 500, timeout = 8000) {
 
 // A tour of the catalog: pages of most sections, among them pages with pictures (Image, Container
 // Queries), with text input (TextBox), with what is drawn on the thread that renders by code of the
-// page (Composition: a custom visual handler and animations) and the OpenGL page, which in a browser
-// shows its knobs and its information text without a GL control. The sections lower in the drawer come
+// page (Composition: a custom visual handler and animations) and the Viewport3D page of the section
+// "3D" (a 3D scene beside sliders, combo boxes and check boxes). The sections lower in the drawer come
 // first: an open section pushes the entries below it down. `animated` pages keep drawing and are not
 // compared between two runs.
 export const TOUR = [
     { section: "Window & Platform", name: "Platform Information" },
     { section: "Status & Feedback", name: "Data Validation" },
+    { section: "3D", name: "Viewport3D" },
     { section: "Composition", name: "Composition overview", animated: true },
-    { section: "Media & Graphics", name: "OpenGL" },
     { section: "Media & Graphics", name: "Image" },
     { section: "Layout", name: "Container Queries" },
     { section: "Layout", name: "Border" },
