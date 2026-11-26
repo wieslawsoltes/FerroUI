@@ -75,6 +75,45 @@ pub fn border() -> El<ferroui_controls::Border> {
     El::new()
 }
 
+pub use ferroui_controls::BreadcrumbBar;
+
+impl ViewClass for ferroui_controls::BreadcrumbBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::BreadcrumbBar>::new()
+    }
+}
+
+/// Starts an element of [`BreadcrumbBar`](ferroui_controls::BreadcrumbBar).
+pub fn breadcrumb_bar() -> El<ferroui_controls::BreadcrumbBar> {
+    El::new()
+}
+
+pub use ferroui_controls::BreadcrumbBarItem;
+
+impl ViewClass for ferroui_controls::BreadcrumbBarItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::BreadcrumbBarItem>::new()
+    }
+}
+
+/// Starts an element of [`BreadcrumbBarItem`](ferroui_controls::BreadcrumbBarItem).
+pub fn breadcrumb_bar_item() -> El<ferroui_controls::BreadcrumbBarItem> {
+    El::new()
+}
+
+pub use ferroui_controls::primitives::BreadcrumbBarPanel;
+
+impl ViewClass for ferroui_controls::primitives::BreadcrumbBarPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::primitives::BreadcrumbBarPanel>::new()
+    }
+}
+
+/// Starts an element of [`BreadcrumbBarPanel`](ferroui_controls::primitives::BreadcrumbBarPanel).
+pub fn breadcrumb_bar_panel() -> El<ferroui_controls::primitives::BreadcrumbBarPanel> {
+    El::new()
+}
+
 pub use ferroui_controls::Button;
 
 impl ViewClass for ferroui_controls::Button {
@@ -2692,6 +2731,20 @@ pub trait BounceEaseProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::animation::BounceEase>> BounceEaseProps for El<T> {}
+
+/// The properties and routed events of [`BreadcrumbBar`](ferroui_controls::BreadcrumbBar).
+pub trait BreadcrumbBarProps: ElementBuilder {
+    /// Sets [`BreadcrumbBar::items_source_property`](ferroui_controls::BreadcrumbBar::items_source_property).
+    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::BreadcrumbBar>::items_source_property(), value)
+    }
+
+    /// Sets [`BreadcrumbBar::item_template_property`](ferroui_controls::BreadcrumbBar::item_template_property).
+    fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::BreadcrumbBar>::item_template_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::BreadcrumbBar>> BreadcrumbBarProps for El<T> {}
 
 /// The properties and routed events of [`Brush`](ferroui_base::media::Brush).
 pub trait BrushProps: ElementBuilder {
