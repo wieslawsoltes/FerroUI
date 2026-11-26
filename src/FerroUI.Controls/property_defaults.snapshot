@@ -563,6 +563,7 @@ FerroUI.Controls.NavigationView.PaneTitle: String = ""; OneWay
 FerroUI.Controls.NavigationView.PaneToggleButtonStyle: Option<Ref<ControlTheme>> = (null); OneWay
 FerroUI.Controls.NavigationView.SelectedItem: Option<Rc<dyn AnyValue>> = (null); OneWay
 FerroUI.Controls.NavigationView.SelectionFollowsFocus: NavigationViewSelectionFollowsFocus = Disabled; OneWay
+FerroUI.Controls.NavigationView.ShoulderNavigationEnabled: NavigationViewShoulderNavigationEnabled = WhenSelectionFollowsFocus; OneWay
 FerroUI.Controls.NavigationViewItem overrides FerroUI.Input.InputElement.Focusable = True; OneWay
 FerroUI.Controls.NavigationViewItem overrides FerroUI.Visual.ClipToBounds = False; OneWay
 FerroUI.Controls.NavigationViewItem.HasUnrealizedChildren: bool = False; OneWay

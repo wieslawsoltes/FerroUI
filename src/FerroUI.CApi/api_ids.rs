@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -4877862587342757904;
+pub(crate) const API_FINGERPRINT: i64 = -6360045248295461865;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 517] = [
@@ -529,7 +529,7 @@ pub(crate) static TYPE_NAMES: [&str; 517] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1078] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1079] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -1331,6 +1331,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1078] = [
     "ShadowThickness",
     "ShouldLoop",
     "ShouldUseOverlayLayer",
+    "ShoulderNavigationEnabled",
     "ShowActivated",
     "ShowButtonSpinner",
     "ShowDelay",

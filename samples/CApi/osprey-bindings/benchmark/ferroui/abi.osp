@@ -9,10 +9,10 @@
 namespace ferroui;
 
 // apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format 1.
-fn apiFingerprint() = -4877862587342757904
+fn apiFingerprint() = -6360045248295461865
 // selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a
 // library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.
-fn selectionFingerprint() = -3616428717602486515
+fn selectionFingerprint() = 3831318435486760862
 // abiVersion() -> int: the version of the ABI the bindings were generated for.
 fn abiVersion() = 1
 
@@ -106,33 +106,33 @@ fn renderTransformPropertyId() = 718
 fn renderTransformOriginPropertyId() = 719
 fn requestedThemeVariantPropertyId() = 722
 fn shadowPropertyId() = 797
-fn spacingPropertyId() = 826
-fn tabIndexPropertyId() = 856
-fn tagPropertyId() = 871
-fn templatePropertyId() = 875
-fn templatedControlIsTemplateFocusTargetPropertyId() = 877
-fn templatedParentPropertyId() = 878
-fn textPropertyId() = 879
-fn textBlockBaselineOffsetPropertyId() = 881
-fn textBlockLayoutRoundingPlacementPropertyId() = 882
-fn textBlockLineHeightPropertyId() = 883
-fn textBlockLineSpacingPropertyId() = 884
-fn textBlockMaxLinesPropertyId() = 885
-fn textBlockTextAlignmentPropertyId() = 886
-fn textBlockTextLineBoundsPropertyId() = 887
-fn textBlockTextTrimmingPropertyId() = 888
-fn textBlockTextWrappingPropertyId() = 889
-fn textDecorationsPropertyId() = 894
-fn themePropertyId() = 929
-fn transitionsPropertyId() = 972
-fn translationPropertyId() = 973
-fn useLayoutRoundingPropertyId() = 1027
-fn verticalAlignmentPropertyId() = 1035
-fn verticalContentAlignmentPropertyId() = 1036
-fn visualFlowDirectionPropertyId() = 1046
-fn visualParentPropertyId() = 1047
-fn widthPropertyId() = 1053
-fn zIndexPropertyId() = 1076
+fn spacingPropertyId() = 827
+fn tabIndexPropertyId() = 857
+fn tagPropertyId() = 872
+fn templatePropertyId() = 876
+fn templatedControlIsTemplateFocusTargetPropertyId() = 878
+fn templatedParentPropertyId() = 879
+fn textPropertyId() = 880
+fn textBlockBaselineOffsetPropertyId() = 882
+fn textBlockLayoutRoundingPlacementPropertyId() = 883
+fn textBlockLineHeightPropertyId() = 884
+fn textBlockLineSpacingPropertyId() = 885
+fn textBlockMaxLinesPropertyId() = 886
+fn textBlockTextAlignmentPropertyId() = 887
+fn textBlockTextLineBoundsPropertyId() = 888
+fn textBlockTextTrimmingPropertyId() = 889
+fn textBlockTextWrappingPropertyId() = 890
+fn textDecorationsPropertyId() = 895
+fn themePropertyId() = 930
+fn transitionsPropertyId() = 973
+fn translationPropertyId() = 974
+fn useLayoutRoundingPropertyId() = 1028
+fn verticalAlignmentPropertyId() = 1036
+fn verticalContentAlignmentPropertyId() = 1037
+fn visualFlowDirectionPropertyId() = 1047
+fn visualParentPropertyId() = 1048
+fn widthPropertyId() = 1054
+fn zIndexPropertyId() = 1077
 fn clickEventId() = 4
 fn contextCanceledEventId() = 9
 fn contextRequestedEventId() = 11
