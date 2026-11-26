@@ -169,40 +169,17 @@ impl<T: ?Sized> fmt::Display for RoutedEvent<T> {
     }
 }
 
-#[inline]
 fn create_inner<TEventArgs: IRoutedEventArgs>(
     name: &str,
     routing_strategies: RoutingStrategies,
     owner_type: &'static TypeInfo,
 ) -> &'static RoutedEventInner {
-    create_inner_core(
-        name,
-        routing_strategies,
-        owner_type,
-        TypeId::of::<TEventArgs>(),
-        std::any::type_name::<TEventArgs>(),
-        TEventArgs::is_args_type,
-    )
-}
-
-/// The part of [`create_inner`] that does not depend on the args type. It stays out of line: every
-/// registered event is an instance of the generic callers, and inlining this body into each of them
-/// costs about 476 bytes per instance.
-#[inline(never)]
-fn create_inner_core(
-    name: &str,
-    routing_strategies: RoutingStrategies,
-    owner_type: &'static TypeInfo,
-    event_args_type: TypeId,
-    event_args_type_name: &'static str,
-    event_args_is: fn(TypeId) -> bool,
-) -> &'static RoutedEventInner {
     Box::leak(Box::new(RoutedEventInner {
         name: name.into(),
         routing_strategies,
-        event_args_type,
-        event_args_type_name,
-        event_args_is,
+        event_args_type: TypeId::of::<TEventArgs>(),
+        event_args_type_name: std::any::type_name::<TEventArgs>(),
+        event_args_is: TEventArgs::is_args_type,
         owner_type,
         raised: RoutedEventObservable { handlers: HandlerList::new() },
         route_finished: RouteFinishedObservable { handlers: HandlerList::new() },
