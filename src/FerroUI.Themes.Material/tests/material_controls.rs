@@ -463,3 +463,67 @@ fn the_items_of_a_list_in_multiple_show_check_boxes() {
     assert!(part(0, "MultiSelectSquare").is_none());
     window.close();
 }
+
+/// The groups and the check boxes of a grid view (#1424): the `ItemsWrapGrid` of a grouped source
+/// shows a `GridViewHeaderItem` of the theme for each group, and the items of a grid in `Multiple`
+/// get the template with the overlay check box in their top right corner.
+#[test]
+fn the_groups_and_the_check_boxes_of_a_grid_view() {
+    use ferroui_base::Thickness;
+    use ferroui_controls::primitives::TemplatedControl;
+    use ferroui_controls::{
+        Border, CollectionViewGroup, Control, GridView, GridViewHeaderItem, GroupedItemsView, ItemsSource,
+        ItemsWrapGrid, ListViewSelectionMode, Window,
+    };
+
+    let _app = super::support::start_themed_application();
+    let group = |name: &str, count: usize| {
+        let items = (0..count).map(|index| Some(Rc::new(format!("{name} {index}")) as ferroui_base::BoxedValue));
+        CollectionViewGroup::new(
+            Some(Rc::new(name.to_string()) as ferroui_base::BoxedValue),
+            ItemsSource::from_items(items),
+        )
+    };
+    let grid = GridView::new();
+    grid.set_items_source(Some(ItemsSource::new(GroupedItemsView::new(vec![group("A", 3), group("B", 2)]))));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&grid)));
+    window.show();
+    window.update_layout();
+
+    let panel = grid.items_panel_root().and_then(|panel| panel.cast::<ItemsWrapGrid>()).expect("a wrap grid");
+    let headers: Vec<_> =
+        panel.get_visual_children().iter().filter_map(|child| child.clone().cast::<GridViewHeaderItem>()).collect();
+    assert_eq!(headers.len(), 2, "a header for each group");
+    let header = headers[1].clone().cast::<TemplatedControl>().expect("a templated header");
+    assert!(header
+        .get_template_descendants()
+        .iter()
+        .any(|element| element.name().as_deref() == Some("PART_ContentPresenter")));
+    let first_of_b = grid.container_from_index(3).expect("a realized item").bounds();
+    assert!(first_of_b.y >= headers[1].bounds().bottom(), "the second group under its header");
+
+    let part = |index: i32, name: &str| {
+        let item = grid.container_from_index(index).expect("a realized item");
+        let item = item.cast::<TemplatedControl>().expect("a templated item");
+        item.get_template_descendants().into_iter().find(|element| element.name().as_deref() == Some(name))
+    };
+    assert!(part(0, "MultiSelectSquare").is_none(), "Single has no check boxes");
+    grid.set_selection_mode(ListViewSelectionMode::Multiple);
+    grid.selection().select(1);
+    window.update_layout();
+    let square = |index: i32| part(index, "MultiSelectSquare").and_then(|element| element.cast::<Border>());
+    let unselected = square(0).expect("a square");
+    assert_eq!(unselected.margin(), Thickness::new(0.0, 4.0, 4.0, 0.0), "at the selection border, top right");
+    assert_eq!(unselected.border_thickness(), Thickness::uniform(1.0));
+    assert_eq!(
+        square(1).expect("a square").border_thickness(),
+        Thickness::uniform(0.0),
+        "a selected square has no border"
+    );
+    assert_eq!(part(1, "MultiSelectCheck").expect("the check").opacity(), 1.0);
+    grid.set_selection_mode(ListViewSelectionMode::Single);
+    window.update_layout();
+    assert!(part(0, "MultiSelectSquare").is_none());
+    window.close();
+}
