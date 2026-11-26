@@ -258,6 +258,32 @@ gl_entry_points! {
     required unsafe pub fn uniform_matrix4fv(location: i32, count: i32, transpose: u8, value: *const c_void)
         = get("glUniformMatrix4fv");
 
+    // What the 3D executor needs on top (feature `scene3d`, #608 D8). Optional: an application
+    // without 3D scenes runs on a context without them.
+    optional unsafe pub fn get_uniform_block_index(program: i32, name: *const c_char) -> u32
+        = get("glGetUniformBlockIndex");
+    optional safe pub fn uniform_block_binding(program: i32, index: u32, binding: u32)
+        = get("glUniformBlockBinding");
+    optional safe pub fn bind_buffer_range(target: i32, index: u32, buffer: i32, offset: isize, size: isize)
+        = get("glBindBufferRange");
+    optional unsafe pub fn buffer_sub_data(target: i32, offset: isize, size: isize, data: *const c_void)
+        = get("glBufferSubData");
+    optional safe pub fn blend_func_separate(source_rgb: i32, destination_rgb: i32, source_a: i32, destination_a: i32)
+        = get("glBlendFuncSeparate");
+    optional safe pub fn blend_equation(mode: i32) = get("glBlendEquation");
+    optional safe pub fn cull_face(mode: i32) = get("glCullFace");
+    optional safe pub fn front_face(mode: i32) = get("glFrontFace");
+    optional safe pub fn color_mask(red: u8, green: u8, blue: u8, alpha: u8) = get("glColorMask");
+    optional safe pub fn scissor(x: i32, y: i32, width: i32, height: i32) = get("glScissor");
+    optional safe pub fn disable_vertex_attrib_array(index: i32) = get("glDisableVertexAttribArray");
+    optional safe pub fn renderbuffer_storage_multisample(
+        target: i32,
+        samples: i32,
+        internal_format: i32,
+        width: i32,
+        height: i32
+    ) = get("glRenderbufferStorageMultisample");
+
     required safe pub fn enable(what: i32) = get("glEnable");
 
     required safe pub fn disable(what: i32) = get("glDisable");
@@ -511,6 +537,13 @@ impl GlInterface {
         let b = Self::c_string(name);
         // SAFETY: `b` is a NUL-terminated string that outlives the call.
         unsafe { self.get_uniform_location(program, b.as_ptr()) }
+    }
+
+    /// The index of a uniform block of the program.
+    pub fn get_uniform_block_index_string(&self, program: i32, name: &str) -> u32 {
+        let b = Self::c_string(name);
+        // SAFETY: `b` is a NUL-terminated string that outlives the call.
+        unsafe { self.get_uniform_block_index(program, b.as_ptr()) }
     }
 
     /// Deletes one buffer object.
