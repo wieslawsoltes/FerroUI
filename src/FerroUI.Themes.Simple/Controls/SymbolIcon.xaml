@@ -1,0 +1,34 @@
+<!--
+  Not from the upstream theme: SymbolIcon of WinUI, with the template part and the properties of
+  the WinUI theme of this repository (Controls/SymbolIcon.xaml there). The control gives the text
+  block PART_Text the glyph of its symbol and its foreground. The font is not bundled: off Windows
+  an application supplies a symbol font and sets SymbolThemeFontFamily.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <SymbolIcon Symbol="Accept" />
+        <SymbolIcon Symbol="Setting" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type SymbolIcon}" TargetType="SymbolIcon">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock x:Name="PART_Text"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                   FontSize="20"
+                   FontStyle="Normal"
+                   FontWeight="Normal"
+                   AutomationProperties.AccessibilityView="Raw" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
