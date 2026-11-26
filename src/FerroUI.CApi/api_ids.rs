@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -5451091071318546145;
+pub(crate) const API_FINGERPRINT: i64 = -736642479482127294;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 511] = [
@@ -523,7 +523,7 @@ pub(crate) static TYPE_NAMES: [&str; 511] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1061] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -619,6 +619,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
     "CacheLength",
     "CacheMode",
     "CacheSize",
+    "CalendarIdentifier",
     "CanCopy",
     "CanCut",
     "CanDragItems",
@@ -951,6 +952,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
     "IsNavigationStackEnabled",
     "IsNextButtonVisible",
     "IsOpen",
+    "IsOutOfScopeEnabled",
     "IsOverflowButtonVisible",
     "IsPaneOpen",
     "IsPaneToggleButtonVisible",

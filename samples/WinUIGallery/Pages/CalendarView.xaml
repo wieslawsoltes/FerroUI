@@ -1,10 +1,10 @@
 <!-- Ported from the pinned CalendarView example of WinUI Gallery (14061eea) and
-     SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs (date_samples.rs); see
-     ../NOTICE.md. WinUI's CalendarView is FerroUI's Calendar; its SelectionMode Single is
-     SingleDate and Multiple is MultipleRange. FerroUI's Calendar has no IsGroupLabelVisible,
-     IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its day and
-     month names follow the current culture, not a Language of the calendar: those options and
-     their x:Bind are left out. The ComboBox's Header is composed above it. -->
+     CalendarViewPage.xaml.cs (date_samples.rs); see ../NOTICE.md. WinUI's CalendarView is
+     FerroUI's Calendar; its SelectionMode Single is SingleDate and Multiple is MultipleRange.
+     The calendar identifiers and the languages of the code-behind fill the two last combo
+     boxes; the x:Bind of the options are the handlers of date_samples.rs. FerroUI's Calendar has
+     no IsGroupLabelVisible: that check box is left out. The Headers of the combo boxes are
+     composed above them. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="CalendarViewExample1" Spacing="8">
@@ -13,13 +13,20 @@
       <Calendar x:Name="Control1" HorizontalAlignment="Left" VerticalAlignment="Top"
                 SelectionMode="SingleDate" />
       <StackPanel Grid.Column="1" Spacing="4">
-        <TextBlock Text="SelectionMode" />
+        <CheckBox x:Name="isOutOfScopeEnabled" Content="IsOutOfScopeEnabled" IsChecked="True" />
+        <TextBlock Text="SelectionMode" Margin="0,10,0,0" />
         <ComboBox x:Name="selectionMode" HorizontalAlignment="Stretch" SelectedIndex="1"
                   AutomationProperties.Name="SelectionMode">
           <x:String>None</x:String>
           <x:String>Single</x:String>
           <x:String>Multiple</x:String>
         </ComboBox>
+        <TextBlock Text="CalendarIdentifier" Margin="0,10,0,0" />
+        <ComboBox x:Name="calendarIdentifier" Width="220" HorizontalAlignment="Left"
+                  AutomationProperties.Name="CalendarIdentifier" />
+        <TextBlock Text="Language" Margin="0,10,0,0" />
+        <ComboBox x:Name="calendarLanguages" Width="220" HorizontalAlignment="Left"
+                  AutomationProperties.Name="Language" />
       </StackPanel>
     </Grid>
   </StackPanel>

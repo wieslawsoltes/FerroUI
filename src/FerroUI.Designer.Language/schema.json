@@ -1914,6 +1914,30 @@
         "values": [],
         "attached": false
       },
+      "CalendarIdentifier": {
+        "name": "CalendarIdentifier",
+        "type_name": "String",
+        "documentation": "Calendar.CalendarIdentifier: String",
+        "values": [],
+        "attached": false
+      },
+      "Language": {
+        "name": "Language",
+        "type_name": "Locale",
+        "documentation": "Calendar.Language: Locale",
+        "values": [],
+        "attached": false
+      },
+      "IsOutOfScopeEnabled": {
+        "name": "IsOutOfScopeEnabled",
+        "type_name": "bool",
+        "documentation": "Calendar.IsOutOfScopeEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "SelectedDates": {
         "name": "SelectedDates",
         "type_name": "SelectedDatesCollection",

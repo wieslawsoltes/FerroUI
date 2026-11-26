@@ -12812,7 +12812,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_135),
-            line: 196,
+            line: 199,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPointerOver") }),
@@ -12821,7 +12821,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_136),
-            line: 199,
+            line: 202,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_158, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarViewNavigationButtonForegroundPressed") }),
@@ -12830,20 +12830,20 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_147_THEME: rt::ControlThemeTa
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_137),
-            line: 202,
+            line: 205,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(332.0_f64) }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_138),
-                    line: 204,
+                    line: 207,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: true,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_139),
-                            line: 205,
+                            line: 208,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_51, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("CalendarWeekNumberFontSize") }),
@@ -29601,61 +29601,69 @@ fn build_controls_fluentcontrols_xaml_deferred_149(
     // Controls/FluentControls.xaml(174,14) IsVisible
     let priority_75 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_75);
-    // Controls/FluentControls.xaml(181,18) RowDefinitions
+    // Controls/FluentControls.xaml(183,18) RowDefinitions
     let row_definitions_collection_14 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(181,18) RowDefinition
+    // Controls/FluentControls.xaml(183,18) RowDefinition
     let row_definition_16 = ::ferroui_controls::RowDefinition::new();
-    // Controls/FluentControls.xaml(181,18) Height
+    // Controls/FluentControls.xaml(183,18) Height
     let priority_76 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_16.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_76);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_14, ::core::clone::Clone::clone(&row_definition_16));
-    // Controls/FluentControls.xaml(182,18) RowDefinitions
+    // Controls/FluentControls.xaml(184,18) RowDefinitions
     let row_definitions_collection_15 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(182,18) RowDefinition
+    // Controls/FluentControls.xaml(184,18) RowDefinition
     let row_definition_17 = ::ferroui_controls::RowDefinition::new();
-    // Controls/FluentControls.xaml(182,18) Height
+    // Controls/FluentControls.xaml(184,18) Height
     let priority_77 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_17.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_77);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_15, ::core::clone::Clone::clone(&row_definition_17));
-    // Controls/FluentControls.xaml(183,18) RowDefinitions
+    // Controls/FluentControls.xaml(185,18) RowDefinitions
     let row_definitions_collection_16 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(183,18) RowDefinition
+    // Controls/FluentControls.xaml(185,18) RowDefinition
     let row_definition_18 = ::ferroui_controls::RowDefinition::new();
-    // Controls/FluentControls.xaml(183,18) Height
+    // Controls/FluentControls.xaml(185,18) Height
     let priority_78 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_18.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_78);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_16, ::core::clone::Clone::clone(&row_definition_18));
-    // Controls/FluentControls.xaml(186,18) ColumnDefinitions
-    let column_definitions_collection_7 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(186,18) ColumnDefinition
-    let column_definition_12 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(186,18) Width
+    // Controls/FluentControls.xaml(186,18) RowDefinitions
+    let row_definitions_collection_17 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
+    // Controls/FluentControls.xaml(186,18) RowDefinition
+    let row_definition_19 = ::ferroui_controls::RowDefinition::new();
+    // Controls/FluentControls.xaml(186,18) Height
     let priority_79 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_12.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_79);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, ::core::clone::Clone::clone(&column_definition_12));
-    // Controls/FluentControls.xaml(187,18) ColumnDefinitions
-    let column_definitions_collection_8 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(187,18) ColumnDefinition
-    let column_definition_13 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(187,18) Width
-    let priority_80 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_13.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_80);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, ::core::clone::Clone::clone(&column_definition_13));
-    // Controls/FluentControls.xaml(188,18) ColumnDefinitions
-    let column_definitions_collection_9 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/FluentControls.xaml(188,18) ColumnDefinition
-    let column_definition_14 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(188,18) Width
-    let priority_81 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_14.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_81);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_9, ::core::clone::Clone::clone(&column_definition_14));
+    row_definition_19.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_79);
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_17, ::core::clone::Clone::clone(&row_definition_19));
     // Controls/FluentControls.xaml(189,18) ColumnDefinitions
-    let column_definitions_collection_10 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    let column_definitions_collection_7 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/FluentControls.xaml(189,18) ColumnDefinition
-    let column_definition_15 = ::ferroui_controls::ColumnDefinition::new();
+    let column_definition_12 = ::ferroui_controls::ColumnDefinition::new();
     // Controls/FluentControls.xaml(189,18) Width
+    let priority_80 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_12.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_80);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, ::core::clone::Clone::clone(&column_definition_12));
+    // Controls/FluentControls.xaml(190,18) ColumnDefinitions
+    let column_definitions_collection_8 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/FluentControls.xaml(190,18) ColumnDefinition
+    let column_definition_13 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(190,18) Width
+    let priority_81 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_13.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_81);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, ::core::clone::Clone::clone(&column_definition_13));
+    // Controls/FluentControls.xaml(191,18) ColumnDefinitions
+    let column_definitions_collection_9 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/FluentControls.xaml(191,18) ColumnDefinition
+    let column_definition_14 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(191,18) Width
     let priority_82 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_15.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_82);
+    column_definition_14.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_82);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_9, ::core::clone::Clone::clone(&column_definition_14));
+    // Controls/FluentControls.xaml(192,18) ColumnDefinitions
+    let column_definitions_collection_10 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/FluentControls.xaml(192,18) ColumnDefinition
+    let column_definition_15 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(192,18) Width
+    let priority_83 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_15.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star), priority_83);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_10, ::core::clone::Clone::clone(&column_definition_15));
     rt::end_init(&grid_4, 174, 14)?;
     rt::pop_parent_end_init(&context, &grid_0, 79, 12)?;

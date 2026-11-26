@@ -5350,7 +5350,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_90_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_64),
-            line: 204,
+            line: 207,
             position: 6,
             members: &[
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_simplecontrols_xaml_property_24, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(true) }),
@@ -5359,19 +5359,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_DEFERRED_90_THEME: rt::ControlThemeTab
         rt::StyleMember::Style {
             parent: false,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_65),
-            line: 208,
+            line: 211,
             position: 6,
             members: &[
                 rt::StyleMember::Style {
                     parent: false,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_66),
-                    line: 209,
+                    line: 212,
                     position: 8,
                     members: &[
                         rt::StyleMember::Style {
                             parent: false,
                             selector: ::core::option::Option::Some(BUILD_CONTROLS_SIMPLECONTROLS_XAML_SELECTOR_67),
-                            line: 210,
+                            line: 213,
                             position: 10,
                             members: &[
                                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_simplecontrols_xaml_property_33, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(9.5_f64) }),
@@ -5393,7 +5393,7 @@ fn build_controls_simplecontrols_xaml_deferred_90_value_0(
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_92, 195, 10)?;
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_simplecontrols_xaml_deferred_92, 198, 10)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&template_0)))
@@ -17315,121 +17315,129 @@ fn build_controls_simplecontrols_xaml_deferred_91(
     // Controls/SimpleControls.xaml(162,18) IsVisible
     let priority_91 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_91);
-    // Controls/SimpleControls.xaml(168,22) RowDefinitions
+    // Controls/SimpleControls.xaml(170,22) RowDefinitions
     let row_definitions_collection_16 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(168,22) RowDefinition
+    // Controls/SimpleControls.xaml(170,22) RowDefinition
     let row_definition_16 = ::ferroui_controls::RowDefinition::new();
-    // Controls/SimpleControls.xaml(168,22) Height
+    // Controls/SimpleControls.xaml(170,22) Height
     let priority_92 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_16.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_92);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_16, ::core::clone::Clone::clone(&row_definition_16));
-    // Controls/SimpleControls.xaml(169,22) RowDefinitions
+    // Controls/SimpleControls.xaml(171,22) RowDefinitions
     let row_definitions_collection_17 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(169,22) RowDefinition
+    // Controls/SimpleControls.xaml(171,22) RowDefinition
     let row_definition_17 = ::ferroui_controls::RowDefinition::new();
-    // Controls/SimpleControls.xaml(169,22) Height
+    // Controls/SimpleControls.xaml(171,22) Height
     let priority_93 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_17.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_93);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_17, ::core::clone::Clone::clone(&row_definition_17));
-    // Controls/SimpleControls.xaml(170,22) RowDefinitions
+    // Controls/SimpleControls.xaml(172,22) RowDefinitions
     let row_definitions_collection_18 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(170,22) RowDefinition
+    // Controls/SimpleControls.xaml(172,22) RowDefinition
     let row_definition_18 = ::ferroui_controls::RowDefinition::new();
-    // Controls/SimpleControls.xaml(170,22) Height
+    // Controls/SimpleControls.xaml(172,22) Height
     let priority_94 = ::ferroui_base::data::BindingPriority::Template;
     row_definition_18.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_94);
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_18, ::core::clone::Clone::clone(&row_definition_18));
-    // Controls/SimpleControls.xaml(173,22) ColumnDefinitions
-    let column_definitions_collection_9 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(173,22) ColumnDefinition
-    let column_definition_9 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/SimpleControls.xaml(173,22) Width
+    // Controls/SimpleControls.xaml(173,22) RowDefinitions
+    let row_definitions_collection_19 = ::ferroui_controls::Grid::__markup_get_RowDefinitions(&grid_4);
+    // Controls/SimpleControls.xaml(173,22) RowDefinition
+    let row_definition_19 = ::ferroui_controls::RowDefinition::new();
+    // Controls/SimpleControls.xaml(173,22) Height
     let priority_95 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_9.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_95);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_9, ::core::clone::Clone::clone(&column_definition_9));
-    // Controls/SimpleControls.xaml(174,22) ColumnDefinitions
-    let column_definitions_collection_10 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(174,22) ColumnDefinition
-    let column_definition_10 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/SimpleControls.xaml(174,22) Width
-    let priority_96 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_10.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_96);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_10, ::core::clone::Clone::clone(&column_definition_10));
-    // Controls/SimpleControls.xaml(175,22) ColumnDefinitions
-    let column_definitions_collection_11 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
-    // Controls/SimpleControls.xaml(175,22) ColumnDefinition
-    let column_definition_11 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/SimpleControls.xaml(175,22) Width
-    let priority_97 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_11.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_97);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_11, ::core::clone::Clone::clone(&column_definition_11));
+    row_definition_19.set_value_with_priority(::ferroui_controls::RowDefinition::height_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_95);
+    ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_collection_19, ::core::clone::Clone::clone(&row_definition_19));
     // Controls/SimpleControls.xaml(176,22) ColumnDefinitions
-    let column_definitions_collection_12 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    let column_definitions_collection_9 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
     // Controls/SimpleControls.xaml(176,22) ColumnDefinition
-    let column_definition_12 = ::ferroui_controls::ColumnDefinition::new();
+    let column_definition_9 = ::ferroui_controls::ColumnDefinition::new();
     // Controls/SimpleControls.xaml(176,22) Width
+    let priority_96 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_9.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_96);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_9, ::core::clone::Clone::clone(&column_definition_9));
+    // Controls/SimpleControls.xaml(177,22) ColumnDefinitions
+    let column_definitions_collection_10 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/SimpleControls.xaml(177,22) ColumnDefinition
+    let column_definition_10 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/SimpleControls.xaml(177,22) Width
+    let priority_97 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_10.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_97);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_10, ::core::clone::Clone::clone(&column_definition_10));
+    // Controls/SimpleControls.xaml(178,22) ColumnDefinitions
+    let column_definitions_collection_11 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/SimpleControls.xaml(178,22) ColumnDefinition
+    let column_definition_11 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/SimpleControls.xaml(178,22) Width
     let priority_98 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_12.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_98);
+    column_definition_11.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_98);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_11, ::core::clone::Clone::clone(&column_definition_11));
+    // Controls/SimpleControls.xaml(179,22) ColumnDefinitions
+    let column_definitions_collection_12 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_4);
+    // Controls/SimpleControls.xaml(179,22) ColumnDefinition
+    let column_definition_12 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/SimpleControls.xaml(179,22) Width
+    let priority_99 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_12.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto), priority_99);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_12, ::core::clone::Clone::clone(&column_definition_12));
     rt::end_init(&grid_4, 162, 18)?;
     rt::pop_parent_end_init(&context, &grid_0, 29, 16)?;
     rt::pop_parent_end_init(&context, &border_1, 26, 14)?;
     rt::pop_parent_end_init(&context, &border_0, 20, 12)?;
-    // Controls/SimpleControls.xaml(183,12) Children
+    // Controls/SimpleControls.xaml(186,12) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/SimpleControls.xaml(183,12) Rectangle
+    // Controls/SimpleControls.xaml(186,12) Rectangle
     let rectangle_1 = ::ferroui_controls::shapes::Rectangle::new();
     rectangle_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &rectangle_1);
-    // Controls/SimpleControls.xaml(183,22) Name
-    rt::name_element(name_scope.as_ref(), &rectangle_1, &rectangle_1, "DisabledVisual", 183, 22)?;
-    // Controls/SimpleControls.xaml(183,12) Margin
-    let priority_99 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), priority_99);
-    // Controls/SimpleControls.xaml(185,22) Fill
-    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ThemeControlLowBrush", 185, 22)?;
-    // Controls/SimpleControls.xaml(183,12) IsVisible
+    // Controls/SimpleControls.xaml(186,22) Name
+    rt::name_element(name_scope.as_ref(), &rectangle_1, &rectangle_1, "DisabledVisual", 186, 22)?;
+    // Controls/SimpleControls.xaml(186,12) Margin
     let priority_100 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_100);
-    // Controls/SimpleControls.xaml(187,22) Opacity
-    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::opacity_property(), "ThemeDisabledOpacity", 187, 22)?;
-    // Controls/SimpleControls.xaml(183,12) Stretch
+    rectangle_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64), priority_100);
+    // Controls/SimpleControls.xaml(188,22) Fill
+    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ThemeControlLowBrush", 188, 22)?;
+    // Controls/SimpleControls.xaml(186,12) IsVisible
     let priority_101 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Fill, priority_101);
-    rt::pop_parent_end_init(&context, &rectangle_1, 183, 12)?;
+    rectangle_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_101);
+    // Controls/SimpleControls.xaml(190,22) Opacity
+    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::opacity_property(), "ThemeDisabledOpacity", 190, 22)?;
+    // Controls/SimpleControls.xaml(186,12) Stretch
+    let priority_102 = ::ferroui_base::data::BindingPriority::Template;
+    rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Fill, priority_102);
+    rt::pop_parent_end_init(&context, &rectangle_1, 186, 12)?;
     rt::pop_parent_end_init(&context, &panel_0, 19, 10)?;
     ::core::result::Result::Ok(rt::to_value(panel_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/SimpleControls.xaml(195,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/SimpleControls.xaml(198,10)` (a template or a deferred resource).
 fn build_controls_simplecontrols_xaml_deferred_92(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT);
-    // Controls/SimpleControls.xaml(195,10) TextBlock
+    // Controls/SimpleControls.xaml(198,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     rt::set_intermediate_root(&context, &text_block_0);
     text_block_0.begin_init();
     rt::push_parent(&context, &text_block_0);
-    // Controls/SimpleControls.xaml(195,10) Margin
+    // Controls/SimpleControls.xaml(198,10) Margin
     text_block_0.set_value(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64));
-    // Controls/SimpleControls.xaml(195,10) HorizontalAlignment
+    // Controls/SimpleControls.xaml(198,10) HorizontalAlignment
     text_block_0.set_value(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center);
-    // Controls/SimpleControls.xaml(195,10) VerticalAlignment
+    // Controls/SimpleControls.xaml(198,10) VerticalAlignment
     text_block_0.set_value(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center);
-    // Controls/SimpleControls.xaml(195,10) FontSize
+    // Controls/SimpleControls.xaml(198,10) FontSize
     text_block_0.set_value(::ferroui_controls::TextBlock::font_size_property(), 9.5_f64);
-    // Controls/SimpleControls.xaml(195,10) FontWeight
-    let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 199, 20)?;
+    // Controls/SimpleControls.xaml(198,10) FontWeight
+    let value_0 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 202, 20)?;
     text_block_0.set_value(::ferroui_controls::TextBlock::font_weight_property(), ::core::clone::Clone::clone(&value_0));
-    // Controls/SimpleControls.xaml(200,20) Text
+    // Controls/SimpleControls.xaml(203,20) Text
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 200, 20)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 195, 10)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_0, 203, 20)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 198, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 

@@ -857,7 +857,7 @@ mod calendar;
 mod calendar_date_picker;
 pub use calendar::{
     Calendar, CalendarBlackoutDatesCollection, CalendarDateChangedEventArgs, CalendarDateRange, CalendarMode, CalendarModeChangedEventArgs,
-    CalendarSelectionMode,
+    CalendarIdentifiers, CalendarSelectionMode,
 };
 pub use calendar_date_picker::{
     CalendarDatePicker, CalendarDatePickerDateValidationErrorEventArgs, CalendarDatePickerFormat,

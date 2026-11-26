@@ -2893,6 +2893,21 @@ pub trait CalendarProps: ElementBuilder {
     fn display_date_end<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::display_date_end_property(), value)
     }
+
+    /// Sets [`Calendar::calendar_identifier_property`](ferroui_controls::Calendar::calendar_identifier_property).
+    fn calendar_identifier<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::Calendar>::calendar_identifier_property(), value)
+    }
+
+    /// Sets [`Calendar::language_property`](ferroui_controls::Calendar::language_property).
+    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
+        self.prop(<ferroui_controls::Calendar>::language_property(), value)
+    }
+
+    /// Sets [`Calendar::is_out_of_scope_enabled_property`](ferroui_controls::Calendar::is_out_of_scope_enabled_property).
+    fn is_out_of_scope_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Calendar>::is_out_of_scope_enabled_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Calendar>> CalendarProps for El<T> {}
 
