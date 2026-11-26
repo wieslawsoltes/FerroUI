@@ -6,17 +6,15 @@
 //! (`winui_only_tests`).
 
 use crate::{
-    AutoSuggestBox, ContentDialog, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem,
+    AutoSuggestBox, ContentDialog, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem,
     NavigationViewItemHeader, GridView, GridViewItem, ListView, ListViewItem, NavigationViewItemSeparator, NumberBox,
     PagerControl, PersonPicture, Pivot, PivotHeaderItem, PivotItem, ProgressRing, RadioButtons, RatingControl,
-    RichEditBox, SwipeControl, SymbolIcon, TabView, TabViewItem, TabViewListView, TitleBar,
+    RichEditBox, SwipeControl, TabView, TabViewItem, TabViewListView, TitleBar,
 };
 use ferroui_base::TypeInfo;
 
 /// The controls only the WinUI theme and the themes derived from it style, each with the reason.
 pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
-    (FontIcon::TYPE, "WinUI's FontIcon: its text part is in the WinUI-derived themes only"),
-    (SymbolIcon::TYPE, "WinUI's SymbolIcon: its text part is in the WinUI-derived themes only"),
     (InfoBar::TYPE, "WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme and its derived themes"),
     (InfoBadge::TYPE, "WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme and its derived themes"),
     (ProgressRing::TYPE, "WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI-derived themes only"),

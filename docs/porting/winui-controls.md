@@ -78,8 +78,6 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 <!-- winui-only:begin -->
 | Control | Why only the WinUI, macOS and Material themes | Since |
 |---|---|---|
-| `FontIcon` | WinUI's FontIcon: its text part is in the WinUI-derived themes only | W4 |
-| `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI-derived themes only | W4 |
 | `InfoBar` | WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme and its derived themes | W5 |
 | `InfoBadge` | WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme and its derived themes | W5 |
 | `ProgressRing` | WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI-derived themes only | W5 |
@@ -217,7 +215,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 
 ### 10.1 Icons (W4)
 
-`src/FerroUI.Controls/font_icon.rs`, `symbol_icon.rs`, `icon_source.rs`; themes `Controls/FontIcon.xaml` and `Controls/SymbolIcon.xaml` of the WinUI theme. Tests: `font_icon_tests`, `symbol_icon_tests`, `icon_source_tests` (`ferroui-controls`), `the_icons_draw_in_the_symbol_font_of_the_theme` (`ferroui-themes-winui`). `Symbol` is checked against WinUI by `scripts/winui-controls/symbol_map.py --check` and the table `docs/porting/data/winui-controls/symbol-glyphs.tsv`.
+`src/FerroUI.Controls/font_icon.rs`, `symbol_icon.rs`, `icon_source.rs`; themes `Controls/FontIcon.xaml` and `Controls/SymbolIcon.xaml` of the WinUI theme, and the same two documents with `Controls/IconResources.xaml` (the key `SymbolThemeFontFamily`) in the Fluent and Simple themes (#1290). Tests: `font_icon_tests`, `symbol_icon_tests`, `icon_source_tests` (`ferroui-controls`), `the_icons_draw_in_the_symbol_font_of_the_theme` (`ferroui-themes-winui`). `Symbol` is checked against WinUI by `scripts/winui-controls/symbol_map.py --check` and the table `docs/porting/data/winui-controls/symbol-glyphs.tsv`.
 
 | WinUI | Port | Kind | Why |
 |---|---|---|---|
