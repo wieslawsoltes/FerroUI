@@ -327,3 +327,88 @@ fn pulling_the_scroll_viewer_past_the_execution_ratio_and_releasing_requests_a_r
     assert_eq!(visualizer.refresh_visualizer_state(), RefreshVisualizerState::Idle);
     assert_eq!(provider.refresh_visualizer_size(), Size::new(visualizer.bounds().width, 100.0));
 }
+
+/// Not from upstream (#1265): a custom visualizer with its own content follows a pull of touch,
+/// pen and, with `IsMouseEnabled`, the mouse, through each state to a refresh; the mouse does not
+/// pull while `IsMouseEnabled` is off.
+#[test]
+fn a_custom_visualizer_follows_the_pull_of_touch_pen_and_mouse() {
+    use super::RefreshStateChangedEventArgs;
+    use crate::mouse_test_helper::MouseTestHelper;
+    use ferroui_base::input::{MouseButton, PointerType};
+    use ferroui_base::interactivity::Interactive;
+
+    let _scope = test_scope();
+    let custom = RefreshVisualizer::new();
+    let icon = PathIcon::new();
+    custom.set_content(Some(Control::boxed(icon.clone())));
+    let hosted = {
+        let custom = custom.clone();
+        host(move |container| {
+            container.set_visualizer(Some(custom));
+            container.set_is_mouse_enabled(true);
+        })
+    };
+    assert!(hosted.visualizer() == custom);
+    assert!(icon.get_visual_parent().is_some(), "the content is hosted in the root of the visualizer");
+    let provider = custom.refresh_info_provider().expect("refresh info provider");
+
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    {
+        let changes = changes.clone();
+        custom.refresh_state_changed(move |_: &Interactive, e: &RefreshStateChangedEventArgs| {
+            changes.borrow_mut().push(e.new_state());
+        });
+    }
+    let refreshes = Rc::new(Cell::new(0));
+    {
+        let refreshes = refreshes.clone();
+        hosted.container.refresh_requested(move |_, _| refreshes.set(refreshes.get() + 1));
+    }
+
+    type Gesture<'a> = (&'a dyn Fn(Point), &'a dyn Fn(Point), &'a dyn Fn(Point));
+    let scroll_viewer = &hosted.scroll_viewer;
+    let touch = TouchTestHelper::new();
+    let pen = MouseTestHelper::with_pointer_type(PointerType::Pen);
+    let mouse = MouseTestHelper::new();
+    let touch_gesture: Gesture = (
+        &|p| touch.down(scroll_viewer, p),
+        &|p| touch.move_(scroll_viewer, p),
+        &|p| touch.up(scroll_viewer, p),
+    );
+    let pen_gesture: Gesture = (
+        &|p| pen.down_at(scroll_viewer, MouseButton::Left, p, 1),
+        &|p| pen.move_(scroll_viewer, p),
+        &|p| pen.up_at(scroll_viewer, MouseButton::Left, p),
+    );
+    let mouse_gesture: Gesture = (
+        &|p| mouse.down_at(scroll_viewer, MouseButton::Left, p, 1),
+        &|p| mouse.move_(scroll_viewer, p),
+        &|p| mouse.up_at(scroll_viewer, MouseButton::Left, p),
+    );
+    for (name, (down, move_, up)) in [("touch", touch_gesture), ("pen", pen_gesture), ("mouse", mouse_gesture)] {
+        changes.borrow_mut().clear();
+        down(Point::new(10.0, 20.0));
+        move_(Point::new(10.0, 45.0));
+        assert_eq!(provider.interaction_ratio(), 0.25, "{name}");
+        assert_eq!(custom.state(), RefreshVisualizerState::Interacting, "{name}");
+        move_(Point::new(10.0, 115.0));
+        assert_eq!(provider.interaction_ratio(), 0.95, "{name}");
+        assert_eq!(custom.state(), RefreshVisualizerState::Pending, "{name}");
+        up(Point::new(10.0, 115.0));
+        // No deferral: the refresh completes in the request.
+        assert_eq!(custom.state(), RefreshVisualizerState::Idle, "{name}");
+        use RefreshVisualizerState::*;
+        assert_eq!(*changes.borrow(), [Interacting, Pending, Peeking, Refreshing, Idle], "{name}");
+    }
+    assert_eq!(refreshes.get(), 3);
+
+    // Without IsMouseEnabled the mouse does not pull.
+    hosted.container.set_is_mouse_enabled(false);
+    changes.borrow_mut().clear();
+    mouse.down_at(scroll_viewer, MouseButton::Left, Point::new(10.0, 20.0), 1);
+    mouse.move_(scroll_viewer, Point::new(10.0, 115.0));
+    mouse.up_at(scroll_viewer, MouseButton::Left, Point::new(10.0, 115.0));
+    assert!(changes.borrow().is_empty());
+    assert_eq!(refreshes.get(), 3);
+}

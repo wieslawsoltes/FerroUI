@@ -1,6 +1,10 @@
-use super::{RefreshInfoProvider, RefreshRequestedEventArgs, RefreshVisualizerOrientation, RefreshVisualizerState};
+use super::{
+    RefreshInfoProvider, RefreshRequestedEventArgs, RefreshStateChangedEventArgs, RefreshVisualizerOrientation,
+    RefreshVisualizerState,
+};
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::{ContentControl, ContentControlImpl, Control, ControlImpl, Grid};
+use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{InputElementImpl, PullDirection};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
@@ -168,6 +172,19 @@ ferroui_base::ferro_properties! { impl RefreshVisualizer {
     );
 
     ferro_property!(
+        /// Defines the `State` property (WinUI's name of the state; the same value as
+        /// `RefreshVisualizerState`).
+        pub fn state_property() -> DirectProperty<RefreshVisualizer, RefreshVisualizerState> {
+            FerroProperty::register_direct::<RefreshVisualizer, _>(
+                "State",
+                |s| s.state(),
+                None,
+                RefreshVisualizerState::Idle,
+            )
+        }
+    );
+
+    ferro_property!(
         /// Defines the `Orientation` property.
         pub fn orientation_property() -> DirectProperty<RefreshVisualizer, RefreshVisualizerOrientation> {
             FerroProperty::register_direct::<RefreshVisualizer, _>(
@@ -197,6 +214,14 @@ impl RefreshVisualizer {
         /// Defines the `RefreshRequested` event.
         pub fn refresh_requested_event() -> RoutedEvent<RefreshRequestedEventArgs> {
             RoutedEvent::register::<RefreshVisualizer, _>("RefreshRequested", RoutingStrategies::BUBBLE)
+        }
+    );
+
+    ferro_routed_event!(
+        /// Defines the `RefreshStateChanged` event (WinUI): raised on the visualizer after its
+        /// state changed and its content was updated for the new state.
+        pub fn refresh_state_changed_event() -> RoutedEvent<RefreshStateChangedEventArgs> {
+            RoutedEvent::register::<RefreshVisualizer, _>("RefreshStateChanged", RoutingStrategies::DIRECT)
         }
     );
 
@@ -243,9 +268,30 @@ impl RefreshVisualizer {
         self.refresh_visualizer_state.get()
     }
 
+    /// Gets the state of the visualizer (WinUI's `State`): the same value as
+    /// [`refresh_visualizer_state`](Self::refresh_visualizer_state).
+    pub fn state(&self) -> RefreshVisualizerState {
+        self.refresh_visualizer_state.get()
+    }
+
     fn set_refresh_visualizer_state(&self, value: RefreshVisualizerState) {
+        let old_state = self.refresh_visualizer_state.get();
         self.set_and_raise_cell(Self::refresh_visualizer_state_property(), &self.refresh_visualizer_state, value);
+        if old_state == value {
+            self.update_content();
+            return;
+        }
+        self.raise_property_changed(
+            Self::state_property().as_property(),
+            Some(&old_state),
+            &value,
+            BindingPriority::LocalValue,
+            true,
+        );
+        // WinUI's `OnStateChanged`: the content follows the new state, then the change is
+        // raised, so a handler sees (and can change) the content of the new state.
         self.update_content();
+        self.raise_event(&RefreshStateChangedEventArgs::new(old_state, value, Some(Self::refresh_state_changed_event())));
     }
 
     /// Gets or sets a value that indicates the orientation of the
@@ -284,6 +330,14 @@ impl RefreshVisualizer {
         handler: impl Fn(&Interactive, &RefreshRequestedEventArgs) + 'static,
     ) -> RoutedEventHandlerToken {
         self.add_handler(Self::refresh_requested_event(), handler)
+    }
+
+    /// Occurs when the state of the visualizer changes (WinUI's `RefreshStateChanged`).
+    pub fn refresh_state_changed(
+        &self,
+        handler: impl Fn(&Interactive, &RefreshStateChangedEventArgs) + 'static,
+    ) -> RoutedEventHandlerToken {
+        self.add_handler(Self::refresh_state_changed_event(), handler)
     }
 
     fn on_content_loaded(&self) {

@@ -1,4 +1,9 @@
-<!-- Adapted from Samples/PullToRefresh/BasicPulltorefresh.txt; see ../NOTICE.md. -->
+<!-- Adapted from Samples/PullToRefresh/BasicPulltorefresh.txt, CustomIconPulltorefresh.txt and
+     PullToRefreshPage.xaml(.cs); see ../NOTICE.md. Each ListView is a ListBox, as on the other
+     pages of the gallery; the items and the handlers of PullToRefreshPage.xaml.cs are in
+     platform_samples.rs. The custom visualizer shows the SymbolIcon of the sample definition
+     (the page code behind sets a themed sun image). IsMouseEnabled lets a mouse pull as touch
+     and pen do; the buttons request a refresh as RequestRefresh does. -->
 <StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
   <TextBlock Text="Basic PullToRefresh" FontSize="18"/>
   <RefreshContainer x:Name="Refresh" HorizontalAlignment="Left" IsMouseEnabled="True">
@@ -6,4 +11,18 @@
   </RefreshContainer>
   <Button x:Name="RequestRefresh" Content="Request refresh"/>
   <TextBlock x:Name="RefreshOutput" Text="Pull down or request refresh to insert NewControl." TextWrapping="Wrap"/>
+
+  <TextBlock Text="Custom Icon PullToRefresh" FontSize="18"/>
+  <RefreshContainer x:Name="CustomRefresh" HorizontalAlignment="Left" IsMouseEnabled="True">
+    <RefreshContainer.Visualizer>
+      <RefreshVisualizer x:Name="CustomVisualizer">
+        <RefreshVisualizer.Content>
+          <SymbolIcon Symbol="AddFriend"/>
+        </RefreshVisualizer.Content>
+      </RefreshVisualizer>
+    </RefreshContainer.Visualizer>
+    <ListBox x:Name="CustomRefreshItems" Width="300" Height="300" BorderThickness="1" BorderBrush="Black"/>
+  </RefreshContainer>
+  <Button x:Name="RequestCustomRefresh" Content="Request refresh"/>
+  <TextBlock x:Name="CustomRefreshOutput" Text="Pull down or request refresh to insert a new friend." TextWrapping="Wrap"/>
 </StackPanel>

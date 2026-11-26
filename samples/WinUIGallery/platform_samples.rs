@@ -1,5 +1,5 @@
 //! The code behind of the pinned Popup and Clipboard pages (the handlers of `PopupPage.xaml.cs`
-//! and `ClipboardPage.xaml.cs`) and an adaptation of the PullToRefresh code behind.
+//! and `ClipboardPage.xaml.cs`) and an adaptation of the PullToRefresh code behind (both examples).
 //! The controls keep their existing platform services and event/deferral APIs.
 
 use ferroui_base::input::platform::{ClipboardExtensions, IClipboard};
@@ -9,7 +9,8 @@ use ferroui_base::platform::storage::{FilePickerOpenOptions, IStorageItem};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{BoxedValue, ObjectType, Ref, WeakRef};
 use ferroui_controls::primitives::{Popup, ToggleButton};
-use ferroui_controls::pull_to_refresh::{RefreshCompletionDeferral, RefreshContainer};
+use ferroui_base::rendering::composition::{ElementComposition, ICompositionObjectAnimations};
+use ferroui_controls::pull_to_refresh::{RefreshCompletionDeferral, RefreshContainer, RefreshVisualizer};
 use ferroui_controls::{
     Button, Control, Image, ListBox, RichEditBox, TextBlock, TextBox, ToggleSwitch, TopLevel,
 };
@@ -20,6 +21,7 @@ pub(crate) fn wire(root: &Ref<Control>) {
     wire_popup(root);
     wire_clipboard(root);
     wire_refresh(root);
+    wire_custom_refresh(root);
 }
 
 fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {
@@ -370,6 +372,69 @@ fn wire_refresh(root: &Ref<Control>) {
     });
     let weak_refresh = refresh.downgrade();
     root.get_control::<Button>("RequestRefresh")
+        .click(move |_, _| {
+            if let Some(refresh) = weak_refresh.upgrade() {
+                refresh.request_refresh();
+            }
+        });
+}
+
+/// The second example of `PullToRefreshPage.xaml.cs`: the custom visualizer with its own content.
+/// `rc2_RefreshRequested` holds the deferral while a job inserts "New Friend n" (the source's
+/// timer of 800 ms, as the first example's 500 ms, is the job), and `rv2_RefreshStateChanged`
+/// stops the rotation of the content (`StopAnimation("RotationAngle")` of its visual) at each
+/// change of the state, so the icon turns with the pull and stays still while refreshing.
+fn wire_custom_refresh(root: &Ref<Control>) {
+    let Some(refresh) = find::<RefreshContainer>(root, "CustomRefresh") else {
+        return;
+    };
+    let items = root.get_control::<ListBox>("CustomRefreshItems");
+    let output = root.get_control::<TextBlock>("CustomRefreshOutput");
+    for name in ["Mike", "Ben", "Barbra", "Claire", "Justin", "Shawn", "Drew", "Lili"] {
+        items
+            .items()
+            .add(Some(Rc::new(name.to_string()) as BoxedValue));
+    }
+    if let Some(visualizer) = find::<RefreshVisualizer>(root, "CustomVisualizer") {
+        let weak_visualizer = visualizer.downgrade();
+        visualizer.refresh_state_changed(move |_, _| {
+            let content = weak_visualizer
+                .upgrade()
+                .and_then(|visualizer| visualizer.content())
+                .and_then(|content| Control::from_boxed(&content));
+            if let Some(visual) = content.and_then(|content| ElementComposition::get_element_visual(&content)) {
+                visual.stop_animation("RotationAngle");
+            }
+        });
+    }
+    let added = Rc::new(std::cell::Cell::new(0));
+    let weak_items = items.downgrade();
+    let weak_output = output.downgrade();
+    refresh.refresh_requested(move |_, args| {
+        let complete = CompleteOnDrop(args.get_deferral());
+        if let Some(output) = weak_output.upgrade() {
+            output.set_text(Some("Refreshing…"));
+        }
+        let (weak_items, weak_output, added) = (weak_items.clone(), weak_output.clone(), added.clone());
+        Dispatcher::ui_thread().post_local(
+            move || {
+                let name = format!("New Friend {}", added.get());
+                added.set(added.get() + 1);
+                if let Some(items) = weak_items.upgrade() {
+                    items
+                        .items()
+                        .insert(0, Some(Rc::new(name.clone()) as BoxedValue));
+                }
+                if let Some(output) = weak_output.upgrade() {
+                    output.set_text(Some(format!("{name} inserted; refresh completed.").as_str()));
+                }
+                drop(complete);
+            },
+            DispatcherPriority::BACKGROUND,
+        );
+    });
+    let weak_refresh = refresh.downgrade();
+    root.get_control::<Button>("RequestCustomRefresh")
         .click(move |_, _| {
             if let Some(refresh) = weak_refresh.upgrade() {
                 refresh.request_refresh();

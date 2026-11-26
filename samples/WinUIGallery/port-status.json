@@ -1148,7 +1148,7 @@
       "examples": []
     },
     "PullToRefresh": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/PullToRefresh.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1162,13 +1162,25 @@
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "refresh_sample_inserts_source_item_and_completes_its_deferral"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "custom_refresh_sample_uses_its_visualizer_and_inserts_a_new_friend"
+        },
+        {
+          "path": "src/FerroUI.Controls/pull_to_refresh/refresh_container_tests.rs",
+          "name": "a_custom_visualizer_follows_the_pull_of_touch_pen_and_mouse"
+        },
+        {
+          "path": "src/FerroUI.Controls/pull_to_refresh/refresh_visualizer_tests.rs",
+          "name": "custom_content_follows_the_pull_and_the_refresh_states_on_the_compositor"
         }
       ],
-      "notes": "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "Both source examples use native RefreshContainer and RefreshVisualizer with the handlers of PullToRefreshPage.xaml.cs in Rust (platform_samples.rs): RefreshRequested takes the deferral and a dispatcher job inserts NewControl or \"New Friend n\" and completes it (the source's timers of 500 and 800 ms are the job). The custom example sets RefreshContainer.Visualizer to a RefreshVisualizer whose content is the SymbolIcon AddFriend of the sample definition (the page code behind sets a themed sun image), and its RefreshStateChanged stops the RotationAngle animation of the content's composition visual, as rv2_RefreshStateChanged does; the content turns with the pull, dims while interacting and runs the refresh states on the compositor. Touch and pen pull; IsMouseEnabled lets the mouse pull too. Each ListView is a ListBox, as on the other pages of the gallery, and the buttons that request a refresh are added.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/PullToRefresh/BasicPulltorefresh.txt",
-          "status": "partial",
+          "status": "ported",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -1177,10 +1189,38 @@
             {
               "path": "samples/WinUIGallery/tests.rs",
               "name": "refresh_sample_inserts_source_item_and_completes_its_deferral"
+            },
+            {
+              "path": "src/FerroUI.Controls/pull_to_refresh/refresh_container_tests.rs",
+              "name": "a_custom_visualizer_follows_the_pull_of_touch_pen_and_mouse"
             }
           ],
-          "notes": "The source RefreshContainer request/deferral behavior inserts NewControl on the UI dispatcher. ListView is explicitly adapted to ListBox; the custom visualizer and full gesture/animation parity remain pending. Mock host tests establish application behavior; real operating-system integration and upstream visual/accessibility acceptance remain pending.",
+          "notes": "RefreshContainer around the list with RefreshRequested and its deferral inserting NewControl; the ListView is a ListBox.",
           "source_sha256": "612fe03ddb05e30068b17cdafb95885edb37dd1e3839e5ad303d7b6e49850941"
+        },
+        {
+          "source": "WinUIGallery/Samples/PullToRefresh/CustomIconPulltorefresh.txt",
+          "status": "ported",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "custom_refresh_sample_uses_its_visualizer_and_inserts_a_new_friend"
+            },
+            {
+              "path": "src/FerroUI.Controls/pull_to_refresh/refresh_container_tests.rs",
+              "name": "a_custom_visualizer_follows_the_pull_of_touch_pen_and_mouse"
+            },
+            {
+              "path": "src/FerroUI.Controls/pull_to_refresh/refresh_visualizer_tests.rs",
+              "name": "custom_content_follows_the_pull_and_the_refresh_states_on_the_compositor"
+            }
+          ],
+          "notes": "RefreshContainer.Visualizer is a RefreshVisualizer with the SymbolIcon AddFriend as content and a RefreshStateChanged handler that stops the RotationAngle animation of the content's visual; RefreshRequested inserts \"New Friend n\". The ListView is a ListBox.",
+          "source_sha256": "d301385b96a3c25dfc98955ed90069fdecaa7d949bd563e71ad140d97871b506"
         }
       ]
     },
