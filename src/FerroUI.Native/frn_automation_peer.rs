@@ -421,7 +421,12 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn is_expand_collapse_provider(&self) -> bool {
-        self.guard_live(false, || self.is_provider::<dyn IExpandCollapseProvider>())
+        self.guard_live(false, || {
+            // A leaf has nothing to expand, and macOS must not report it as expandable.
+            self.inner
+                .get_provider::<dyn IExpandCollapseProvider>()
+                .is_some_and(|provider| provider.expand_collapse_state() != ExpandCollapseState::LeafNode)
+        })
     }
 
     fn expand_collapse_provider_get_is_expanded(&self) -> bool {

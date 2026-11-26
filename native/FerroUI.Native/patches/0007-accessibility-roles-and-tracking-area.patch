@@ -1,0 +1,95 @@
+diff --git a/native/FerroUI.Native/src/OSX/FrnWindow.mm b/native/FerroUI.Native/src/OSX/FrnWindow.mm
+index 7ce134ac0..0d01dd883 100644
+--- a/native/FerroUI.Native/src/OSX/FrnWindow.mm
++++ b/native/FerroUI.Native/src/OSX/FrnWindow.mm
+@@ -637,14 +637,19 @@
+             break;
+ 
+             case NSEventTypeMouseEntered:
+-            {
+-                parent->UpdateCursor();
+-            }
+-                break;
+-
+             case NSEventTypeMouseExited:
+             {
+-                [[NSCursor arrowCursor] set];
++                // Only react to our own view's tracking area. Other views in the window (the theme
++                // frame, the titlebar, native control hosts) have tracking areas of their own, and
++                // reacting to those would reset the cursor to the arrow in the middle of the content.
++                NSTrackingArea* area = event.trackingArea;
++                if (area != nil && area.owner != parent->View)
++                    break;
++
++                if (event.type == NSEventTypeMouseEntered)
++                    parent->UpdateCursor();
++                else
++                    [[NSCursor arrowCursor] set];
+             }
+                 break;
+ 
+diff --git a/native/FerroUI.Native/src/OSX/automation.mm b/native/FerroUI.Native/src/OSX/automation.mm
+index 5749d219c..c5fbbdb87 100644
+--- a/native/FerroUI.Native/src/OSX/automation.mm
++++ b/native/FerroUI.Native/src/OSX/automation.mm
+@@ -98,7 +98,7 @@
+         case AutomationImage: return NSAccessibilityImageRole;
+         case AutomationListItem: return NSAccessibilityRowRole;
+         case AutomationList: return NSAccessibilityListRole;
+-        case AutomationMenu: return NSAccessibilityMenuBarRole;
++        case AutomationMenu: return NSAccessibilityMenuRole;
+         case AutomationMenuBar: return NSAccessibilityMenuBarRole;
+         case AutomationMenuItem: return NSAccessibilityMenuItemRole;
+         case AutomationProgressBar: return NSAccessibilityProgressIndicatorRole;
+@@ -142,6 +142,7 @@
+     switch (controlType) {
+         case AutomationList: return @"AXContentList";
+         case AutomationListItem: return NSAccessibilityTableRowSubrole;
++        case AutomationTabItem: return NSAccessibilityTabButtonSubrole;
+     }
+ 
+     auto landmarkType = _peer->GetLandmarkType();
+@@ -333,6 +334,12 @@
+     return [self rectToScreen:bounds];
+ }
+ 
++- (NSPoint)accessibilityActivationPoint
++{
++    auto frame = [self accessibilityFrame];
++    return NSMakePoint(NSMidX(frame), NSMidY(frame));
++}
++
+ - (id)accessibilityParent
+ {
+     auto parentPeer = _peer->GetParent();
+@@ -524,6 +531,10 @@
+     {
+         return _peer->IsRangeValueProvider();
+     }
++    else if (selector == @selector(setAccessibilityFocused:))
++    {
++        return _peer->IsKeyboardFocusable();
++    }
+ 
+     return [super isAccessibilitySelectorAllowed:selector];
+ }
+@@ -631,6 +642,10 @@
+     auto name = _peer->GetName();
+     if (name != nullptr)
+     {
++        NSString* announcement = GetNSStringAndRelease(name);
++        if (announcement.length == 0)
++            return;
++
+         NSAccessibilityPriorityLevel priority = NSAccessibilityPriorityLow;
+         switch (_peer->GetLiveSetting())
+         {
+@@ -645,7 +660,7 @@
+         }
+ 
+         NSDictionary <NSString *, id> *userInfo = @{
+-            NSAccessibilityAnnouncementKey: GetNSStringAndRelease(name),
++            NSAccessibilityAnnouncementKey: announcement,
+             NSAccessibilityPriorityKey: @(priority)
+         };
+ 
