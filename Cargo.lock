@@ -2010,6 +2010,7 @@ dependencies = [
  "ferroui-edit-core",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-native",
  "ferroui-textmate",
  "tokio",
  "url",

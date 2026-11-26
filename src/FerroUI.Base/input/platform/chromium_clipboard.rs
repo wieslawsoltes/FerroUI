@@ -12,8 +12,9 @@ const SLOT_COUNT: u8 = 100;
 /// Maximum metadata size before decoding the custom format map.
 pub const MAX_MAP_BYTES: usize = 64 * 1024;
 
-/// Whether this build publishes and reads the map (the `chromium-clipboard-map` feature).
-pub(super) const MAP_ENABLED: bool = cfg!(feature = "chromium-clipboard-map");
+/// Whether this build publishes and reads the map (the `chromium-clipboard-map` feature). A
+/// platform tests it before the code of the map, so that without the feature that code is not linked.
+pub const MAP_ENABLED: bool = cfg!(feature = "chromium-clipboard-map");
 
 #[cfg(feature = "chromium-clipboard-map")]
 fn encode_map(map: &BTreeMap<String, String>) -> Option<Vec<u8>> {

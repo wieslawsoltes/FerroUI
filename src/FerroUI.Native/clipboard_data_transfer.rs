@@ -1,7 +1,7 @@
 use crate::clipboard_data_format_helper::to_data_formats;
 use crate::clipboard_data_transfer_item::ClipboardDataTransferItem;
 use crate::clipboard_read_session::ClipboardReadSession;
-use ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard;
+use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, MAP_ENABLED};
 use ferroui_base::input::platform::{
     ClipboardError, PlatformDataTransfer, PlatformDataTransferImpl, PlatformDataTransferItem,
 };
@@ -41,7 +41,7 @@ impl PlatformDataTransferImpl for ClipboardDataTransfer {
         let mut formats = to_data_formats(formats.as_deref(), &|format| {
             self.session.is_text_format(format)
         });
-        if self.read_web_formats && ChromiumClipboard::MacOs.find_map(&formats).is_some() {
+        if MAP_ENABLED && self.read_web_formats && ChromiumClipboard::MacOs.find_map(&formats).is_some() {
             for item in self.provide_items()? {
                 for format in item.try_formats()?.iter() {
                     if !formats.contains(format) {
