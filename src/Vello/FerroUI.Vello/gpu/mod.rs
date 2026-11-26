@@ -28,6 +28,8 @@ pub mod gl_context_gpu;
 pub mod gl_external_objects;
 #[cfg(target_os = "linux")]
 pub mod dma_buf_external_objects;
+#[cfg(windows)]
+pub mod d3d12_external_objects;
 #[cfg(any(target_os = "linux", windows))]
 pub mod window_surface;
 

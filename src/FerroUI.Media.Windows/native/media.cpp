@@ -701,6 +701,54 @@ void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindo
     *texture=a->texture;return a.release();
 }
 void ferro_windows_alias_release(void *ptr,int alive){std::unique_ptr<Alias>a((Alias*)ptr);if(alive){entry<TextureArray>(a->egl,11)(1,&a->texture);entry<DestroyImage>(a->egl,3)(a->display,a->image);}}
+// The frame for a renderer on another API (#575): a GPU copy into a texture shared by an NT handle.
+// The decoder's texture arrays are not shareable. Nothing is mapped or read on the CPU.
+struct SharedCopy {
+    FerroWindowsFrame *input=nullptr;
+    ComPtr<ID3D11Texture2D> texture;ComPtr<ID3D11Query> ready;ComPtr<ID3D11DeviceContext> context;
+    HANDLE handle=nullptr;
+    ~SharedCopy(){if(handle)CloseHandle(handle);if(input)ferro_windows_frame_release(input);}
+};
+void *ferro_windows_device_for_luid(const uint8_t *luid){
+    try{
+        LUID id{};std::memcpy(&id.LowPart,luid,4);std::memcpy(&id.HighPart,luid+4,4);
+        ComPtr<IDXGIFactory4> factory;check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
+        ComPtr<IDXGIAdapter1> adapter;check(factory->EnumAdapterByLuid(id,IID_PPV_ARGS(&adapter)));
+        D3D_FEATURE_LEVEL levels[]={D3D_FEATURE_LEVEL_11_1,D3D_FEATURE_LEVEL_11_0};ComPtr<ID3D11Device> device;
+        check(D3D11CreateDevice(adapter.Get(),D3D_DRIVER_TYPE_UNKNOWN,nullptr,
+            D3D11_CREATE_DEVICE_BGRA_SUPPORT|D3D11_CREATE_DEVICE_VIDEO_SUPPORT,levels,2,D3D11_SDK_VERSION,&device,nullptr,nullptr));
+        return device.Detach();
+    }catch(...){return nullptr;}
+}
+void *ferro_windows_frame_share(FerroWindowsFrame *f,intptr_t *handle){
+    try{
+        ComPtr<ID3D11Device> device;f->texture->GetDevice(&device);
+        D3D11_TEXTURE2D_DESC source{};f->texture->GetDesc(&source);
+        if(source.Format!=DXGI_FORMAT_B8G8R8A8_UNORM||f->info.width>source.Width||f->info.height>source.Height)return nullptr;
+        auto copy=std::make_unique<SharedCopy>();copy->context=f->context;
+        D3D11_TEXTURE2D_DESC desc{};desc.Width=f->info.width;desc.Height=f->info.height;desc.MipLevels=1;desc.ArraySize=1;
+        desc.Format=source.Format;desc.SampleDesc.Count=1;desc.Usage=D3D11_USAGE_DEFAULT;
+        desc.BindFlags=D3D11_BIND_SHADER_RESOURCE|D3D11_BIND_RENDER_TARGET;
+        desc.MiscFlags=D3D11_RESOURCE_MISC_SHARED|D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+        check(device->CreateTexture2D(&desc,nullptr,&copy->texture));
+        ComPtr<IDXGIResource1> resource;check(copy->texture.As(&resource));
+        check(resource->CreateSharedHandle(nullptr,DXGI_SHARED_RESOURCE_READ|DXGI_SHARED_RESOURCE_WRITE,nullptr,&copy->handle));
+        D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};check(device->CreateQuery(&query,&copy->ready));
+        // Held until the copy is released: the source is read by the commands submitted here.
+        copy->input=new FerroWindowsFrame(*f);
+        D3D11_BOX box{0,0,0,f->info.width,f->info.height,1};
+        f->context->CopySubresourceRegion(copy->texture.Get(),0,0,0,0,f->texture.Get(),f->slice,&box);
+        f->context->End(copy->ready.Get());f->context->Flush();
+        *handle=(intptr_t)copy->handle;return copy.release();
+    }catch(...){return nullptr;}
+}
+int ferro_windows_share_ready(void *ptr){
+    auto copy=(SharedCopy*)ptr;BOOL done=FALSE;
+    HRESULT result=copy->context->GetData(copy->ready.Get(),&done,sizeof(done),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+    if(result==S_OK)return done?1:0;
+    return result==S_FALSE?0:-1;
+}
+void ferro_windows_share_release(void *ptr){delete (SharedCopy*)ptr;}
 struct PhotoResources {ComPtr<ID3D11Texture2D> staging;ComPtr<ID3D11Query> query;std::unique_ptr<FerroWindowsFrame> input;};
 static std::atomic<bool> photo_active{false};
 #ifdef FERROUI_SYNTHETIC_CAMERA
