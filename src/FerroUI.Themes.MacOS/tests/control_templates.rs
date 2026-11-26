@@ -314,6 +314,7 @@ control_tests! {
     pivot_item => "PivotItem";
     swipe_control => "SwipeControl";
     scroll_view => "ScrollView";
+    annotated_scroll_bar => "AnnotatedScrollBar";
 }
 
 /// The window itself is themed: its template is applied when it is shown
