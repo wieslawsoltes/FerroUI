@@ -215,6 +215,11 @@ jobs:
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      # The patched Skia binding and the crates that use it name one version (#622).
+      - name: The patched Skia binding agrees with its users
+        run: |
+          python3 scripts/release/skia_bindings_archive.py --check
+          python3 -m unittest discover -s scripts/release -p 'test_*.py'
       - name: No private references (home directories, local tools, other hosts, tokens)
         run: python3 scripts/conventions/private-references.py
       # The types and mechanisms of the API become idiomatic Rust and std, under the .NET names of
@@ -224,6 +229,8 @@ jobs:
       # only shrinks.
       - name: Tests of the idioms inventory
         run: python3 -m unittest discover -s scripts/idioms -p 'test_*.py'
+      - name: Tests of the API gate scripts
+        run: python3 -m unittest discover -s scripts/api-gate -p 'test_*.py'
       - name: No new .NET-shaped infrastructure types
         run: python3 scripts/idioms/inventory.py --check
       # The crates that are published stay publishable (docs/release.md): the manifests state what
