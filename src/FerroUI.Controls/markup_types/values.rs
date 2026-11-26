@@ -141,6 +141,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::PivotHeaderFocusVisualPlacement as MarkupTyped>::MARKUP,
     <crate::PivotSlideInAnimationGroup as MarkupTyped>::MARKUP,
     <crate::PivotItemEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's BreadcrumbBar (docs/porting/winui-controls.md, section 10.11).
+    <crate::BreadcrumbBarItemClickedEventArgs as MarkupTyped>::MARKUP,
     // WinUI's SwipeControl (docs/porting/winui-calculator-gaps.md, SW-1).
     <crate::SwipeMode as MarkupTyped>::MARKUP,
     <crate::SwipeBehaviorOnInvoked as MarkupTyped>::MARKUP,

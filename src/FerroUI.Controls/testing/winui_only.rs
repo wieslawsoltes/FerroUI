@@ -6,7 +6,7 @@
 //! (`winui_only_tests`).
 
 use crate::{
-    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
+    AutoSuggestBox, BreadcrumbBar, BreadcrumbBarItem, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
     GridView, GridViewItem, ListView, ListViewItem, NavigationViewItemSeparator, NumberBox, PagerControl, PersonPicture,
     Pivot, PivotHeaderItem, PivotItem, ProgressRing, RadioButtons, RatingControl, RichEditBox, SwipeControl, SymbolIcon,
     TitleBar,
@@ -41,6 +41,8 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (PivotItem::TYPE, "WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes"),
     (PivotHeaderItem::TYPE, "WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes"),
     (SwipeControl::TYPE, "WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes"),
+    (BreadcrumbBar::TYPE, "WinUI's BreadcrumbBar: its template is converted from WinUI's BreadcrumbBar.xaml into the WinUI theme and its derived themes"),
+    (BreadcrumbBarItem::TYPE, "WinUI's BreadcrumbBarItem: its template is converted from WinUI's BreadcrumbBar.xaml into the WinUI theme and its derived themes"),
 ];
 
 /// Whether only the WinUI theme and the themes derived from it style `control`.

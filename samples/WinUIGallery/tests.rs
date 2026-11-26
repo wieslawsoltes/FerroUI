@@ -888,6 +888,56 @@ fn autosuggest_example_filters_only_user_changes_and_reports_selected_cat() {
     window.close();
 }
 
+/// BreadcrumbBarPage: the first bar shows FoldersString behind its ellipsis when narrow, a click of
+/// a folder of the second bar removes the folders after it, and the reset adds them back.
+#[cfg(feature = "theme")]
+#[test]
+fn breadcrumb_bar_examples_keep_source_items_clicks_and_reset() {
+    use ferroui_controls::automation::peers::ControlAutomationPeer;
+    use ferroui_controls::automation::provider::IInvokeProvider;
+    use ferroui_controls::primitives::BreadcrumbBarPanel;
+    use ferroui_controls::{BreadcrumbBar, BreadcrumbBarItem, Control, Window};
+    let _application = start_winui();
+    let root = examples::create(examples::find("BreadcrumbBar").unwrap()).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let items = |bar: &BreadcrumbBar| -> Vec<ferroui_base::Ref<BreadcrumbBarItem>> {
+        let panel = bar
+            .get_template_descendants()
+            .into_iter()
+            .find_map(|element| element.cast::<BreadcrumbBarPanel>())
+            .expect("the panel of the bar");
+        panel.children().snapshot().iter().map(|child| child.cast::<BreadcrumbBarItem>().unwrap()).collect()
+    };
+    let first = root.get_control::<BreadcrumbBar>("BreadcrumbBar1");
+    // The ellipsis item and the eight folders, which do not fit in 250 pixels.
+    assert_eq!(9, items(&first).len());
+    first.set_width(250.0);
+    window.update_layout();
+    let panel = first.get_template_descendants().into_iter().find_map(|e| e.cast::<BreadcrumbBarPanel>()).unwrap();
+    assert!(panel.ellipsis_is_rendered());
+
+    let second = root.get_control::<BreadcrumbBar>("BreadcrumbBar2");
+    assert_eq!(5, items(&second).len());
+    let folder1 = items(&second)[2].clone();
+    let peer = ControlAutomationPeer::create_peer_for_element(&folder1);
+    peer.get_provider::<dyn IInvokeProvider>().unwrap().invoke().unwrap();
+    window.update_layout();
+    // Home and Folder1 are left.
+    assert_eq!(3, items(&second).len());
+    root.get_control::<Button>("ResetSampleBtn")
+        .raise_event(&ferroui_base::interactivity::RoutedEventArgs::with_event(Button::click_event()));
+    window.update_layout();
+    assert_eq!(5, items(&second).len());
+    assert_eq!(
+        Some("BreadcrumbBar sample reset successful.".to_string()),
+        root.get_control::<TextBlock>("ResetSampleStatus").text()
+    );
+    window.close();
+}
+
 #[test]
 fn infobar_examples_keep_source_severity_message_action_and_options() {
     use ferroui_controls::{InfoBar, InfoBarSeverity};

@@ -3,6 +3,7 @@
 
 pub mod animation;
 mod swipe_control;
+mod breadcrumb_bar;
 pub mod application_lifetimes;
 pub mod automation;
 pub mod chrome;
@@ -162,6 +163,7 @@ pub use i_clickable_control::{as_clickable_control, register_clickable_control};
 pub use i_command_source::{as_command_source, register_command_source};
 pub use button_spinner::{ButtonSpinner, ButtonSpinnerImpl, ButtonSpinnerImplExt, ButtonSpinnerVTable, Location};
 pub use check_box::CheckBox;
+pub use breadcrumb_bar::{BreadcrumbBar, BreadcrumbBarItem, BreadcrumbBarItemClickedEventArgs};
 pub use swipe_control::{
     ExecuteItemsHaveOneItem, SwipeBehaviorOnInvoked, SwipeControl, SwipeItem, SwipeItemInvokedEventArgs, SwipeItems,
     SwipeMode,

@@ -122,6 +122,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/GridView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Pivot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SwipeControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/BreadcrumbBar.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

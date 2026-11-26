@@ -225,6 +225,26 @@
       "notes": "The source example uses native Border with the handlers of BorderPage.xaml.cs in Rust: ThicknessSlider_ValueChanged sets the uniform thickness, BGRadioButton_Checked the background (Green, Yellow, Blue, White) and RadioButton_Checked the border brush (DarkGreen, Gold, DarkBlue, White). FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values. The slider's IsFocusEngagementEnabled is the gamepad focus engagement of Xbox, which FerroUI does not have (not applicable).",
       "examples": []
     },
+    "BreadcrumbBar": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/BreadcrumbBar.xaml",
+        "samples/WinUIGallery/control_samples.rs",
+        "samples/WinUIGallery/examples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "breadcrumb_bar_examples_keep_source_items_clicks_and_reset"
+        }
+      ],
+      "notes": "Both source examples use native BreadcrumbBar with the code behind of BreadcrumbBarPage.xaml.cs in Rust: the bar of FoldersString with its ellipsis, and the bar of Folders with the custom item template, whose clicks remove the folders after the clicked one and whose reset adds back the default folders.",
+      "examples": []
+    },
     "Button": {
       "status": "ported",
       "implementation": [

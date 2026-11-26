@@ -33,6 +33,7 @@ mod info_bar_automation_peer;
 mod person_picture_automation_peer;
 mod pivot_automation_peer;
 mod pager_control_automation_peer;
+mod breadcrumb_bar_item_automation_peer;
 mod title_bar_automation_peer;
 mod interop_automation_peer;
 #[cfg(test)]
@@ -122,6 +123,7 @@ pub use info_bar_automation_peer::InfoBarAutomationPeer;
 pub use person_picture_automation_peer::PersonPictureAutomationPeer;
 pub use pivot_automation_peer::{PivotAutomationPeer, PivotItemAutomationPeer};
 pub use pager_control_automation_peer::PagerControlAutomationPeer;
+pub use breadcrumb_bar_item_automation_peer::BreadcrumbBarItemAutomationPeer;
 pub use title_bar_automation_peer::TitleBarAutomationPeer;
 pub use interop_automation_peer::InteropAutomationPeer;
 pub use items_control_automation_peer::{

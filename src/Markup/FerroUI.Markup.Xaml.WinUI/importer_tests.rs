@@ -286,6 +286,18 @@ fn feedback_controls_and_item_descriptions_migrate_without_global_type_replaceme
 }
 
 #[test]
+fn breadcrumb_bar_and_its_items_migrate_to_the_native_controls() {
+    let result = migrate("<BreadcrumbBar><BreadcrumbBar.ItemTemplate><DataTemplate><BreadcrumbBarItem Content='{Binding}'/></DataTemplate></BreadcrumbBar.ItemTemplate></BreadcrumbBar>");
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    for name in ["BreadcrumbBar", "BreadcrumbBarItem"] {
+        let element = document.descendants().find(|node| node.tag_name().name() == name).unwrap();
+        assert_eq!(element.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
+    }
+    assert_eq!(migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap().xaml, result.xaml);
+}
+
+#[test]
 fn frame_navigation_and_primitive_type_references_use_their_native_namespaces() {
     for (source_namespace, name, target_namespace) in [
         ("using:Microsoft.UI.Xaml.Navigation", "NavigationEventArgs", NAVIGATION_NAMESPACE),

@@ -14,14 +14,14 @@ import ferroui::*
 // ---- constructors --------------------------------------------------------------------------
 
 // button() -> int: creates a Button. A standard button control.
-fn button() = ferro_create(typeId: 28)
+fn button() = ferro_create(typeId: 32)
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 387)
+fn stackPanel() = ferro_create(typeId: 391)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 433)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 497)
+fn window() = ferro_create(typeId: 501)
 
 // ---- properties ----------------------------------------------------------------------------
 

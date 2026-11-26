@@ -291,6 +291,9 @@ impl Migration<'_, '_> {
                             | "PagerControlDisplayMode"
                             | "PagerControlButtonVisibility"
                             | "PagerControlSelectedIndexChangedEventArgs"
+                            | "BreadcrumbBar"
+                            | "BreadcrumbBarItem"
+                            | "BreadcrumbBarItemClickedEventArgs"
                             | "ProgressRing"
                             | "IconSource"
                             | "FontIconSource"
@@ -318,6 +321,7 @@ impl Migration<'_, '_> {
                             | "RatingControlAutomationPeer"
                             | "PersonPictureAutomationPeer"
                             | "PagerControlAutomationPeer"
+                            | "BreadcrumbBarItemAutomationPeer"
                     ))
                     .then(|| ("using:FerroUI.Automation.Peers".to_string(), name.to_string()))
             });

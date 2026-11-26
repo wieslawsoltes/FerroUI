@@ -14,18 +14,18 @@ import ferroui::*
 // ---- constructors --------------------------------------------------------------------------
 
 // button() -> int: creates a Button. A standard button control.
-fn button() = ferro_create(typeId: 28)
+fn button() = ferro_create(typeId: 32)
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 387)
+fn stackPanel() = ferro_create(typeId: 391)
 // textBox() -> int: creates a TextBox. Represents a control that can be used to display or
 // edit unformatted text. Template parts: `PART_TextPresenter` (a [`TextPresenter`], required)
 // and `PART_ScrollViewer` (a [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every
 // text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code
 // unit index.
-fn textBox() = ferro_create(typeId: 431)
+fn textBox() = ferro_create(typeId: 435)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 497)
+fn window() = ferro_create(typeId: 501)
 
 // ---- properties ----------------------------------------------------------------------------
 

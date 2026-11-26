@@ -88,6 +88,7 @@
         <MergeResourceInclude Source="/Resources/Expander_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/BreadcrumbBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PipsPager_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SelectorBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TitleBar_themeresources.xaml" />

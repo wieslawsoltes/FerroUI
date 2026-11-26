@@ -41,12 +41,61 @@ fn autoSuggestBox(attrs, children) = Element { elementType: 15, elementAttrs: at
 // border(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Border. A control which decorates a child with a border and background.
 fn border(attrs, children) = Element { elementType: 25, elementAttrs: attrs, elementChildren: children }
+// breadcrumbBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class BreadcrumbBar. A
+// navigation aid that shows the path to the current location as a row of crumbs (WinUI's
+// `BreadcrumbBar`). `ItemsSource` is the path, from the root to the current location;
+// `ItemTemplate` shows each item. Each item is shown by a [`BreadcrumbBarItem`] followed by a
+// chevron, and the last one, the current location, without a button. When the items do not
+// fit, the first ones are hidden behind an ellipsis item, which lists them in a flyout.
+// Clicking an item, in the bar or in the flyout, raises `ItemClicked` with the item and its
+// index in the items source. Keyboard: Left and Right move the focus between the shown items
+// (mirrored right to left), from the ellipsis item to the first shown item and back; Enter and
+// Space click the focused item. The focus enters the bar at the ellipsis item when it is
+// shown, and at the first item otherwise. Automation: the bar is a navigation landmark (its
+// control theme); each shown item has its position and the number of shown items, and the
+// ellipsis item is in the raw view while it is hidden. The template is the control theme of
+// the WinUI theme (`Controls/BreadcrumbBar.xaml`, from WinUI's `BreadcrumbBar.xaml`) with the
+// part `PART_ItemsRepeater`, a [`BreadcrumbBarPanel`] whose children the bar realizes: the
+// ellipsis item first, then an item for each item of the source. The Fluent and Simple themes
+// have no template for it (docs/porting/winui-controls.md, section 5.1). Differences
+// (docs/porting/winui-controls.md, section 10.11): the items panel is a panel the bar fills,
+// where WinUI has an `ItemsRepeater` with a `BreadcrumbLayout` (`ferroui-controls` cannot
+// depend on the repeater crate); `ItemTemplate` is a data template (WinUI also takes an
+// element factory); access keys are left out.
+fn breadcrumbBar(attrs) = Element { elementType: 27, elementAttrs: attrs, elementChildren: [] }
+// breadcrumbBarItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
+// element of the class BreadcrumbBarItem. An item of a [`BreadcrumbBar`] (WinUI's
+// `BreadcrumbBarItem`): a content control that shows one crumb of the bar, followed by a
+// chevron. The bar creates one for each item of its items source (an item that is a breadcrumb
+// bar item is its own), and one more as its first child, the ellipsis item, which opens a
+// flyout of the items that do not fit. The items of that flyout are breadcrumb bar items as
+// well, in the drop-down item type. Clicking an item, or Enter or Space on it, raises the
+// `ItemClicked` event of the bar with the item and its index; the last item, the current one,
+// shows its content without a button. The template is the control theme of the WinUI theme
+// (`Controls/BreadcrumbBar.xaml`, from WinUI's `BreadcrumbBar.xaml`), with WinUI's parts
+// `PART_ItemButton`, `PART_EllipsisFlyout` and the panel `PART_EllipsisItemsRepeater` of the
+// flyout. The item sets WinUI's visual states as pseudo-classes: `:ellipsisdropdown` (the
+// drop-down item type), `:defaultrtl`, `:lastitem`, `:ellipsis` and `:ellipsisrtl` (the inline
+// item types), and `:dropdownpointerover`, `:dropdownpressed` and `:dropdowndisabled` (the
+// common states of a drop-down item). The Fluent and Simple themes have no template for it
+// (docs/porting/winui-controls.md, section 5.1).
+fn breadcrumbBarItem(attrs, children) = Element { elementType: 28, elementAttrs: attrs, elementChildren: children }
+// breadcrumbBarPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
+// element of the class BreadcrumbBarPanel. Lays out the items of a [`BreadcrumbBar`] on one
+// line (WinUI's `BreadcrumbLayout`). The first child is the ellipsis item, the others the
+// items of the bar in their order. All of them are measured; the desired size is the width of
+// the items without the ellipsis and the height of the tallest of them. When the items are
+// wider than the available width, the arrange shows the ellipsis item followed by as many of
+// the last items as fit (at least the last one), and gives the others an empty rectangle;
+// otherwise the ellipsis item gets the empty rectangle. Every shown child is as tall as the
+// tallest shown child.
+fn breadcrumbBarPanel(attrs, children) = Element { elementType: 30, elementAttrs: attrs, elementChildren: children }
 // button(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Button. A standard button control.
-fn button(attrs, children) = Element { elementType: 28, elementAttrs: attrs, elementChildren: children }
+fn button(attrs, children) = Element { elementType: 32, elementAttrs: attrs, elementChildren: children }
 // buttonSpinner(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ButtonSpinner. Represents a spinner control that includes two buttons.
-fn buttonSpinner(attrs, children) = Element { elementType: 30, elementAttrs: attrs, elementChildren: children }
+fn buttonSpinner(attrs, children) = Element { elementType: 34, elementAttrs: attrs, elementChildren: children }
 // calendar(attrs: List<Attr<M>>) -> Element<M>: an element of the class Calendar. Represents a
 // control that enables a user to select a date by using a visual calendar display. A Calendar
 // control can be used on its own, or as a drop-down part of a date picker control. A Calendar
@@ -67,133 +116,133 @@ fn buttonSpinner(attrs, children) = Element { elementType: 30, elementAttrs: att
 // Any Switch to the next smaller DisplayMode. If DisplayMode is already Month, no action.
 // SPACEBAR Month Select focused date. SPACEBAR Year or Decade Switch DisplayMode to the Month
 // or Year represented by focused item. ```
-fn calendar(attrs) = Element { elementType: 32, elementAttrs: attrs, elementChildren: [] }
+fn calendar(attrs) = Element { elementType: 36, elementAttrs: attrs, elementChildren: [] }
 // calendarButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class CalendarButton. Represents a button on a [`Calendar`].
-fn calendarButton(attrs, children) = Element { elementType: 34, elementAttrs: attrs, elementChildren: children }
+fn calendarButton(attrs, children) = Element { elementType: 38, elementAttrs: attrs, elementChildren: children }
 // calendarDatePicker(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // CalendarDatePicker. A control to allow the user to select a date.
-fn calendarDatePicker(attrs) = Element { elementType: 35, elementAttrs: attrs, elementChildren: [] }
+fn calendarDatePicker(attrs) = Element { elementType: 39, elementAttrs: attrs, elementChildren: [] }
 // calendarDayButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class CalendarDayButton. Represents a day on a [`Calendar`].
-fn calendarDayButton(attrs, children) = Element { elementType: 37, elementAttrs: attrs, elementChildren: children }
+fn calendarDayButton(attrs, children) = Element { elementType: 41, elementAttrs: attrs, elementChildren: children }
 // calendarItem(attrs: List<Attr<M>>) -> Element<M>: an element of the class CalendarItem.
 // Represents the currently displayed month or year on a [`Calendar`].
-fn calendarItem(attrs) = Element { elementType: 39, elementAttrs: attrs, elementChildren: [] }
+fn calendarItem(attrs) = Element { elementType: 43, elementAttrs: attrs, elementChildren: [] }
 // canvas(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Canvas. A panel that displays child controls at arbitrary locations. Unlike other
 // [`Panel`] implementations, the canvas doesn't lay out its children in any particular layout.
 // Instead, the positioning of each child control is defined by the `Canvas.Left`,
 // `Canvas.Top`, `Canvas.Right` and `Canvas.Bottom` attached properties.
-fn canvas(attrs, children) = Element { elementType: 40, elementAttrs: attrs, elementChildren: children }
+fn canvas(attrs, children) = Element { elementType: 44, elementAttrs: attrs, elementChildren: children }
 // carousel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Carousel. An items control that displays its items as pages and can reveal adjacent
 // pages using `viewport_fraction`.
-fn carousel(attrs, children) = Element { elementType: 41, elementAttrs: attrs, elementChildren: children }
+fn carousel(attrs, children) = Element { elementType: 45, elementAttrs: attrs, elementChildren: children }
 // carouselPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class CarouselPage. A
 // page that displays its child pages in a horizontally scrollable carousel, with optional
 // animated page transitions.
-fn carouselPage(attrs) = Element { elementType: 42, elementAttrs: attrs, elementChildren: [] }
+fn carouselPage(attrs) = Element { elementType: 46, elementAttrs: attrs, elementChildren: [] }
 // checkBox(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class CheckBox. A check box control.
-fn checkBox(attrs, children) = Element { elementType: 44, elementAttrs: attrs, elementChildren: children }
+fn checkBox(attrs, children) = Element { elementType: 48, elementAttrs: attrs, elementChildren: children }
 // comboBox(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class ComboBox. A drop-down list control.
-fn comboBox(attrs, children) = Element { elementType: 54, elementAttrs: attrs, elementChildren: children }
+fn comboBox(attrs, children) = Element { elementType: 58, elementAttrs: attrs, elementChildren: children }
 // comboBoxItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ComboBoxItem. A selectable item in a [`ComboBox`].
-fn comboBoxItem(attrs, children) = Element { elementType: 56, elementAttrs: attrs, elementChildren: children }
+fn comboBoxItem(attrs, children) = Element { elementType: 60, elementAttrs: attrs, elementChildren: children }
 // commandBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class CommandBar. A
 // command bar that provides primary commands displayed inline and secondary commands
 // accessible via an overflow menu.
-fn commandBar(attrs) = Element { elementType: 57, elementAttrs: attrs, elementChildren: [] }
+fn commandBar(attrs) = Element { elementType: 61, elementAttrs: attrs, elementChildren: [] }
 // commandBarButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class CommandBarButton. A button for use in a [`CommandBar`](super::CommandBar).
-fn commandBarButton(attrs, children) = Element { elementType: 58, elementAttrs: attrs, elementChildren: children }
+fn commandBarButton(attrs, children) = Element { elementType: 62, elementAttrs: attrs, elementChildren: children }
 // commandBarSeparator(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // CommandBarSeparator. A visual separator for use in a [`CommandBar`](super::CommandBar).
-fn commandBarSeparator(attrs) = Element { elementType: 59, elementAttrs: attrs, elementChildren: [] }
+fn commandBarSeparator(attrs) = Element { elementType: 63, elementAttrs: attrs, elementChildren: [] }
 // commandBarToggleButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class CommandBarToggleButton. A toggle button for use in a
 // [`CommandBar`](super::CommandBar).
-fn commandBarToggleButton(attrs, children) = Element { elementType: 60, elementAttrs: attrs, elementChildren: children }
+fn commandBarToggleButton(attrs, children) = Element { elementType: 64, elementAttrs: attrs, elementChildren: children }
 // connectedAnimationProxy(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ConnectedAnimationProxy.
-fn connectedAnimationProxy(attrs, children) = Element { elementType: 62, elementAttrs: attrs, elementChildren: children }
+fn connectedAnimationProxy(attrs, children) = Element { elementType: 66, elementAttrs: attrs, elementChildren: children }
 // contentControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class ContentControl. Displays content according to an [`IDataTemplate`].
-fn contentControl(attrs, children) = Element { elementType: 66, elementAttrs: attrs, elementChildren: children }
+fn contentControl(attrs, children) = Element { elementType: 70, elementAttrs: attrs, elementChildren: children }
 // contentPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class ContentPage. A page
 // that displays a single piece of content with optional top and bottom command bars.
-fn contentPage(attrs) = Element { elementType: 68, elementAttrs: attrs, elementChildren: [] }
+fn contentPage(attrs) = Element { elementType: 72, elementAttrs: attrs, elementChildren: [] }
 // contentPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class ContentPresenter. Presents a single item of data inside a templated control.
-fn contentPresenter(attrs, children) = Element { elementType: 70, elementAttrs: attrs, elementChildren: children }
+fn contentPresenter(attrs, children) = Element { elementType: 74, elementAttrs: attrs, elementChildren: children }
 // contextMenu(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ContextMenu. A control context menu.
-fn contextMenu(attrs, children) = Element { elementType: 71, elementAttrs: attrs, elementChildren: children }
+fn contextMenu(attrs, children) = Element { elementType: 75, elementAttrs: attrs, elementChildren: children }
 // controlElement(attrs: List<Attr<M>>) -> Element<M>: an element of the class Control. Base
 // class for controls. The control class extends [`InputElement`] and adds the following
 // features: - A `Tag` property to allow user-defined data to be attached to the control.
-fn controlElement(attrs) = Element { elementType: 72, elementAttrs: attrs, elementChildren: [] }
+fn controlElement(attrs) = Element { elementType: 76, elementAttrs: attrs, elementChildren: [] }
 // dataValidationErrors(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class DataValidationErrors. A control which displays an error notifier when
 // there is a data validation error. Provides attached properties to track errors on a control.
 // You will probably only want to create instances inside of control templates. Pseudo-classes
 // (on the control with the errors): `:error`. An error is an untyped value: the error data of
 // a data validation error, or the error itself boxed as a [`BindingError`].
-fn dataValidationErrors(attrs, children) = Element { elementType: 78, elementAttrs: attrs, elementChildren: children }
+fn dataValidationErrors(attrs, children) = Element { elementType: 82, elementAttrs: attrs, elementChildren: children }
 // datePicker(attrs: List<Attr<M>>) -> Element<M>: an element of the class DatePicker. A
 // control to allow the user to select a date.
-fn datePicker(attrs) = Element { elementType: 79, elementAttrs: attrs, elementChildren: [] }
+fn datePicker(attrs) = Element { elementType: 83, elementAttrs: attrs, elementChildren: [] }
 // datePickerPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // DatePickerPresenter. Defines the presenter used for selecting a date for a [`DatePicker`].
-fn datePickerPresenter(attrs) = Element { elementType: 81, elementAttrs: attrs, elementChildren: [] }
+fn datePickerPresenter(attrs) = Element { elementType: 85, elementAttrs: attrs, elementChildren: [] }
 // dateTimePickerPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class DateTimePickerPanel. The looping, virtualizing panel that shows the
 // values of one unit of a date or time picker.
-fn dateTimePickerPanel(attrs, children) = Element { elementType: 82, elementAttrs: attrs, elementChildren: children }
+fn dateTimePickerPanel(attrs, children) = Element { elementType: 86, elementAttrs: attrs, elementChildren: children }
 // decorator(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Decorator. Base class for controls which decorate a single child control.
-fn decorator(attrs, children) = Element { elementType: 84, elementAttrs: attrs, elementChildren: children }
+fn decorator(attrs, children) = Element { elementType: 88, elementAttrs: attrs, elementChildren: children }
 // dockPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class DockPanel. A panel which arranges its children at the top, bottom, left, right or
 // center.
-fn dockPanel(attrs, children) = Element { elementType: 91, elementAttrs: attrs, elementChildren: children }
+fn dockPanel(attrs, children) = Element { elementType: 95, elementAttrs: attrs, elementChildren: children }
 // drawerPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class DrawerPage. A page
 // that provides a drawer pattern.
-fn drawerPage(attrs) = Element { elementType: 95, elementAttrs: attrs, elementChildren: [] }
+fn drawerPage(attrs) = Element { elementType: 99, elementAttrs: attrs, elementChildren: [] }
 // dropDownButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class DropDownButton. A button with an added drop-down chevron to visually indicate
 // it has a flyout with additional actions.
-fn dropDownButton(attrs, children) = Element { elementType: 101, elementAttrs: attrs, elementChildren: children }
+fn dropDownButton(attrs, children) = Element { elementType: 105, elementAttrs: attrs, elementChildren: children }
 // ellipse(attrs: List<Attr<M>>) -> Element<M>: an element of the class Ellipse. Represents an
 // ellipse which fills its bounds.
-fn ellipse(attrs) = Element { elementType: 111, elementAttrs: attrs, elementChildren: [] }
+fn ellipse(attrs) = Element { elementType: 115, elementAttrs: attrs, elementChildren: [] }
 // embeddableControlRoot(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class EmbeddableControlRoot. A top-level that hosts a control tree inside a
 // surface provided by someone else: a native control of another toolkit, a single-view
 // platform, an offscreen buffer.
-fn embeddableControlRoot(attrs, children) = Element { elementType: 113, elementAttrs: attrs, elementChildren: children }
+fn embeddableControlRoot(attrs, children) = Element { elementType: 117, elementAttrs: attrs, elementChildren: children }
 // expander(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Expander. A control with a header that has a collapsible content section.
-fn expander(attrs, children) = Element { elementType: 115, elementAttrs: attrs, elementChildren: children }
+fn expander(attrs, children) = Element { elementType: 119, elementAttrs: attrs, elementChildren: children }
 // experimentalAcrylicBorder(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class ExperimentalAcrylicBorder. A control which decorates a child with a
 // border and an acrylic material background. The material is drawn by the composition visual
 // of the border, an acrylic visual that receives the material and the corner radius; the
 // platform transparency compensation of the material follows the transparency level of the top
 // level the border is in.
-fn experimentalAcrylicBorder(attrs, children) = Element { elementType: 117, elementAttrs: attrs, elementChildren: children }
+fn experimentalAcrylicBorder(attrs, children) = Element { elementType: 121, elementAttrs: attrs, elementChildren: children }
 // flexPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class FlexPanel. A panel that arranges child controls using CSS FlexBox principles. It
 // organizes child items in one or more lines along a main-axis (either row or column) and
 // provides advanced control over their sizing and layout. See the CSS FlexBox specification:
 // <https://www.w3.org/TR/css-flexbox-1>
-fn flexPanel(attrs, children) = Element { elementType: 120, elementAttrs: attrs, elementChildren: children }
+fn flexPanel(attrs, children) = Element { elementType: 124, elementAttrs: attrs, elementChildren: children }
 // flyoutPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class FlyoutPresenter. The control that hosts the content of a flyout.
-fn flyoutPresenter(attrs, children) = Element { elementType: 123, elementAttrs: attrs, elementChildren: children }
+fn flyoutPresenter(attrs, children) = Element { elementType: 127, elementAttrs: attrs, elementChildren: children }
 // fontIcon(attrs: List<Attr<M>>) -> Element<M>: an element of the class FontIcon. Represents
 // an icon that uses a glyph of a font as its content (WinUI's `FontIcon`). The template of the
 // theme draws [`glyph`](Self::glyph) in its text part `PART_Text` with the font family, size,
@@ -205,7 +254,7 @@ fn flyoutPresenter(attrs, children) = Element { elementType: 123, elementAttrs: 
 // 5.2). The WinUI theme has the template; the Fluent and Simple themes have none. Missing
 // (docs/porting/winui-controls.md, FontIcon): `IsTextScaleFactorEnabled` (FerroUI has no text
 // scale factor).
-fn fontIcon(attrs) = Element { elementType: 124, elementAttrs: attrs, elementChildren: [] }
+fn fontIcon(attrs) = Element { elementType: 128, elementAttrs: attrs, elementChildren: [] }
 // frame(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Frame. A content control that navigates between pages of the WinUI model (WinUI's
 // `Frame`): it shows a [`FramePage`] of the type of a navigation and keeps a journal of the
@@ -222,7 +271,7 @@ fn fontIcon(attrs) = Element { elementType: 124, elementAttrs: attrs, elementChi
 // (docs/porting/winui-controls.md, section 10.4): the navigation transitions
 // (`ContentTransitions`, the `NavigationTransitionInfo` of `Navigate`), `GetNavigationState`
 // and `SetNavigationState`.
-fn frame(attrs, children) = Element { elementType: 126, elementAttrs: attrs, elementChildren: children }
+fn frame(attrs, children) = Element { elementType: 130, elementAttrs: attrs, elementChildren: children }
 // framePage(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class FramePage. A page a [`Frame`] navigates to (WinUI's `Page`, a `UserControl`). The name
 // keeps `Page` for the upstream page of `ferroui-controls` ([`crate::Page`], a templated
@@ -232,41 +281,41 @@ fn frame(attrs, children) = Element { elementType: 126, elementAttrs: attrs, ele
 // frame calls synchronously. The page is styled as a `UserControl` (WinUI's `Page` has no
 // style of its own). Missing (docs/porting/winui-controls.md, section 10.4): `TopAppBar`,
 // `BottomAppBar` and the navigation transitions of the page.
-fn framePage(attrs, children) = Element { elementType: 127, elementAttrs: attrs, elementChildren: children }
+fn framePage(attrs, children) = Element { elementType: 131, elementAttrs: attrs, elementChildren: children }
 // grid(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Grid. Defines a flexible grid area that consists of columns and rows.
-fn grid(attrs, children) = Element { elementType: 135, elementAttrs: attrs, elementChildren: children }
+fn grid(attrs, children) = Element { elementType: 139, elementAttrs: attrs, elementChildren: children }
 // gridSplitter(attrs: List<Attr<M>>) -> Element<M>: an element of the class GridSplitter.
 // Represents the control that redistributes space between columns or rows of a [`Grid`]
 // control.
-fn gridSplitter(attrs) = Element { elementType: 137, elementAttrs: attrs, elementChildren: [] }
+fn gridSplitter(attrs) = Element { elementType: 141, elementAttrs: attrs, elementChildren: [] }
 // gridView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class GridView. A grid of items (WinUI's `GridView`): a [`ListViewBase`] whose items panel
 // is an [`ItemsWrapGrid`] in rows and whose containers are [`GridViewItem`]s.
-fn gridView(attrs, children) = Element { elementType: 138, elementAttrs: attrs, elementChildren: children }
+fn gridView(attrs, children) = Element { elementType: 142, elementAttrs: attrs, elementChildren: children }
 // gridViewItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class GridViewItem. An item of a [`GridView`] (WinUI's `GridViewItem`).
-fn gridViewItem(attrs, children) = Element { elementType: 140, elementAttrs: attrs, elementChildren: children }
+fn gridViewItem(attrs, children) = Element { elementType: 144, elementAttrs: attrs, elementChildren: children }
 // groupBox(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class GroupBox. A headered content control that groups related content.
-fn groupBox(attrs, children) = Element { elementType: 142, elementAttrs: attrs, elementChildren: children }
+fn groupBox(attrs, children) = Element { elementType: 146, elementAttrs: attrs, elementChildren: children }
 // headeredContentControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class HeaderedContentControl. A [`ContentControl`] with a header.
-fn headeredContentControl(attrs, children) = Element { elementType: 143, elementAttrs: attrs, elementChildren: children }
+fn headeredContentControl(attrs, children) = Element { elementType: 147, elementAttrs: attrs, elementChildren: children }
 // headeredItemsControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class HeaderedItemsControl. Represents an [`ItemsControl`] with a related
 // header.
-fn headeredItemsControl(attrs, children) = Element { elementType: 144, elementAttrs: attrs, elementChildren: children }
+fn headeredItemsControl(attrs, children) = Element { elementType: 148, elementAttrs: attrs, elementChildren: children }
 // headeredSelectingItemsControl(attrs: List<Attr<M>>, children: List<Element<M>>) ->
 // Element<M>: an element of the class HeaderedSelectingItemsControl. Represents a
 // [`SelectingItemsControl`] with a related header.
-fn headeredSelectingItemsControl(attrs, children) = Element { elementType: 145, elementAttrs: attrs, elementChildren: children }
+fn headeredSelectingItemsControl(attrs, children) = Element { elementType: 149, elementAttrs: attrs, elementChildren: children }
 // hyperlinkButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class HyperlinkButton. A button control that functions as a navigateable hyperlink.
-fn hyperlinkButton(attrs, children) = Element { elementType: 148, elementAttrs: attrs, elementChildren: children }
+fn hyperlinkButton(attrs, children) = Element { elementType: 152, elementAttrs: attrs, elementChildren: children }
 // image(attrs: List<Attr<M>>) -> Element<M>: an element of the class Image. Displays an
 // [`IImage`].
-fn image(attrs) = Element { elementType: 151, elementAttrs: attrs, elementChildren: [] }
+fn image(attrs) = Element { elementType: 155, elementAttrs: attrs, elementChildren: [] }
 // infoBadge(attrs: List<Attr<M>>) -> Element<M>: an element of the class InfoBadge. A small
 // badge that draws attention to an item (WinUI's `InfoBadge`): a dot, an icon or a number. A
 // [`value`](Self::value) of 0 or more is shown as a number and takes precedence over the
@@ -281,7 +330,7 @@ fn image(attrs) = Element { elementType: 151, elementAttrs: attrs, elementChildr
 // (docs/porting/winui-controls.md, section 10.2): a value below -1 is coerced to -1 and
 // logged, where WinUI throws; whether `CornerRadius` is local is followed from the priority of
 // its changes.
-fn infoBadge(attrs) = Element { elementType: 156, elementAttrs: attrs, elementChildren: [] }
+fn infoBadge(attrs) = Element { elementType: 160, elementAttrs: attrs, elementChildren: [] }
 // infoBar(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class InfoBar. An inline message of the application (WinUI's `InfoBar`): a title, a message,
 // an action button and content, with the icon and the colours of its
@@ -300,7 +349,7 @@ fn infoBadge(attrs) = Element { elementType: 156, elementAttrs: attrs, elementCh
 // Automation notifications are not raised (the peer reports the title and the message as the
 // name and a live setting of the severity instead); the texts of the close button and the
 // severity icons are WinUI's English texts.
-fn infoBar(attrs, children) = Element { elementType: 158, elementAttrs: attrs, elementChildren: children }
+fn infoBar(attrs, children) = Element { elementType: 162, elementAttrs: attrs, elementChildren: children }
 // infoBarPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class InfoBarPanel. Lays out its children on one line when they fit in its width, and
 // below each other otherwise (`InfoBarPanel` of WinUI). One line: the children side by side,
@@ -312,25 +361,25 @@ fn infoBar(attrs, children) = Element { elementType: 158, elementAttrs: attrs, e
 // height (a collapsed one) is left out of both. One child, children wider than the panel, or a
 // child that would be taller on one line than the minimum height of the parent of the panel
 // (less the vertical margins of the panel) give the layout below each other.
-fn infoBarPanel(attrs, children) = Element { elementType: 160, elementAttrs: attrs, elementChildren: children }
+fn infoBarPanel(attrs, children) = Element { elementType: 164, elementAttrs: attrs, elementChildren: children }
 // inputPaneAwareDecorator(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class InputPaneAwareDecorator. A control that automatically adjusts the
 // position or the height of its child based on the height of the input pane to ensure the
 // content is visible.
-fn inputPaneAwareDecorator(attrs, children) = Element { elementType: 165, elementAttrs: attrs, elementChildren: children }
+fn inputPaneAwareDecorator(attrs, children) = Element { elementType: 169, elementAttrs: attrs, elementChildren: children }
 // itemsControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ItemsControl. Displays a collection of items.
-fn itemsControl(attrs, children) = Element { elementType: 175, elementAttrs: attrs, elementChildren: children }
+fn itemsControl(attrs, children) = Element { elementType: 179, elementAttrs: attrs, elementChildren: children }
 // itemsPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class ItemsPresenter.
 // Presents items inside an [`ItemsControl`].
-fn itemsPresenter(attrs) = Element { elementType: 177, elementAttrs: attrs, elementChildren: [] }
+fn itemsPresenter(attrs) = Element { elementType: 181, elementAttrs: attrs, elementChildren: [] }
 // itemsStackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class ItemsStackPanel. The virtualizing items panel of a list view (WinUI's
 // `ItemsStackPanel`): FerroUI's [`VirtualizingStackPanel`] (orientation, cache length,
 // recycling) with WinUI's visible and cache indexes. Grouping (`GroupPadding`,
 // `GroupHeaderPlacement`, `AreStickyGroupHeadersEnabled`) is accepted and has no effect:
 // FerroUI's items controls have no groups.
-fn itemsStackPanel(attrs, children) = Element { elementType: 178, elementAttrs: attrs, elementChildren: children }
+fn itemsStackPanel(attrs, children) = Element { elementType: 182, elementAttrs: attrs, elementChildren: children }
 // itemsWrapGrid(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ItemsWrapGrid. The items panel of a grid view (WinUI's `ItemsWrapGrid`): the items
 // in cells of one size, in rows (`Orientation` horizontal) or columns, wrapping at the edge of
@@ -340,64 +389,64 @@ fn itemsStackPanel(attrs, children) = Element { elementType: 178, elementAttrs: 
 // does not virtualize; WinUI's panel is a modern collection panel that realizes the visible
 // items only. The grouping members (`GroupPadding`, `GroupHeaderPlacement`,
 // `AreStickyGroupHeadersEnabled`) are not ported: FerroUI's items controls have no groups.
-fn itemsWrapGrid(attrs, children) = Element { elementType: 179, elementAttrs: attrs, elementChildren: children }
+fn itemsWrapGrid(attrs, children) = Element { elementType: 183, elementAttrs: attrs, elementChildren: children }
 // label(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Label. Label control. Focuses its `Target` when the label is activated: when it is
 // clicked, or when its access key is pressed.
-fn label(attrs, children) = Element { elementType: 183, elementAttrs: attrs, elementChildren: children }
+fn label(attrs, children) = Element { elementType: 187, elementAttrs: attrs, elementChildren: children }
 // layoutTransformControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class LayoutTransformControl. Control that implements support for
 // transformations as if applied by a layout transform.
-fn layoutTransformControl(attrs, children) = Element { elementType: 188, elementAttrs: attrs, elementChildren: children }
+fn layoutTransformControl(attrs, children) = Element { elementType: 192, elementAttrs: attrs, elementChildren: children }
 // lightDismissOverlayLayer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class LightDismissOverlayLayer. A layer that is used to dismiss a popup when
 // the user clicks outside (internal upstream).
-fn lightDismissOverlayLayer(attrs, children) = Element { elementType: 190, elementAttrs: attrs, elementChildren: children }
+fn lightDismissOverlayLayer(attrs, children) = Element { elementType: 194, elementAttrs: attrs, elementChildren: children }
 // line(attrs: List<Attr<M>>) -> Element<M>: an element of the class Line. Represents a
 // straight line between two points.
-fn line(attrs) = Element { elementType: 191, elementAttrs: attrs, elementChildren: [] }
+fn line(attrs) = Element { elementType: 195, elementAttrs: attrs, elementChildren: [] }
 // listBox(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class ListBox. An [`ItemsControl`] in which individual items can be selected.
-fn listBox(attrs, children) = Element { elementType: 199, elementAttrs: attrs, elementChildren: children }
+fn listBox(attrs, children) = Element { elementType: 203, elementAttrs: attrs, elementChildren: children }
 // listBoxItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ListBoxItem. A selectable item in a `ListBox`.
-fn listBoxItem(attrs, children) = Element { elementType: 201, elementAttrs: attrs, elementChildren: children }
+fn listBoxItem(attrs, children) = Element { elementType: 205, elementAttrs: attrs, elementChildren: children }
 // listView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class ListView. A vertical list of items (WinUI's `ListView`): a [`ListViewBase`] whose
 // items panel is an [`ItemsStackPanel`] and whose containers are [`ListViewItem`]s.
-fn listView(attrs, children) = Element { elementType: 203, elementAttrs: attrs, elementChildren: children }
+fn listView(attrs, children) = Element { elementType: 207, elementAttrs: attrs, elementChildren: children }
 // listViewItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ListViewItem. An item of a [`ListView`] (WinUI's `ListViewItem`).
-fn listViewItem(attrs, children) = Element { elementType: 209, elementAttrs: attrs, elementChildren: children }
+fn listViewItem(attrs, children) = Element { elementType: 213, elementAttrs: attrs, elementChildren: children }
 // maskedTextBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class MaskedTextBox. A
 // text box that restricts its input with a mask.
-fn maskedTextBox(attrs) = Element { elementType: 211, elementAttrs: attrs, elementChildren: [] }
+fn maskedTextBox(attrs) = Element { elementType: 215, elementAttrs: attrs, elementChildren: [] }
 // menu(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Menu. A top-level menu control.
-fn menu(attrs, children) = Element { elementType: 213, elementAttrs: attrs, elementChildren: children }
+fn menu(attrs, children) = Element { elementType: 217, elementAttrs: attrs, elementChildren: children }
 // menuFlyoutPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class MenuFlyoutPresenter. The control that hosts the items of a menu flyout.
-fn menuFlyoutPresenter(attrs, children) = Element { elementType: 216, elementAttrs: attrs, elementChildren: children }
+fn menuFlyoutPresenter(attrs, children) = Element { elementType: 220, elementAttrs: attrs, elementChildren: children }
 // menuItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class MenuItem. A menu item control.
-fn menuItem(attrs, children) = Element { elementType: 217, elementAttrs: attrs, elementChildren: children }
+fn menuItem(attrs, children) = Element { elementType: 221, elementAttrs: attrs, elementChildren: children }
 // nativeControlHost(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // NativeControlHost. Hosts a native control of the platform inside the visual tree: the native
 // control is created for the top-level the host is attached to and follows the bounds and the
 // visibility of the host.
-fn nativeControlHost(attrs) = Element { elementType: 223, elementAttrs: attrs, elementChildren: [] }
+fn nativeControlHost(attrs) = Element { elementType: 227, elementAttrs: attrs, elementChildren: [] }
 // nativeMenuBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class NativeMenuBar.
 // Shows the native menu of the top-level it is in when the platform does not export the menu.
-fn nativeMenuBar(attrs) = Element { elementType: 226, elementAttrs: attrs, elementChildren: [] }
+fn nativeMenuBar(attrs) = Element { elementType: 230, elementAttrs: attrs, elementChildren: [] }
 // nativeMenuBarPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class NativeMenuBarPresenter.
-fn nativeMenuBarPresenter(attrs, children) = Element { elementType: 228, elementAttrs: attrs, elementChildren: children }
+fn nativeMenuBarPresenter(attrs, children) = Element { elementType: 232, elementAttrs: attrs, elementChildren: children }
 // nativeMenuItemPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class NativeMenuItemPresenter.
-fn nativeMenuItemPresenter(attrs, children) = Element { elementType: 231, elementAttrs: attrs, elementChildren: children }
+fn nativeMenuItemPresenter(attrs, children) = Element { elementType: 235, elementAttrs: attrs, elementChildren: children }
 // navigationPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class NavigationPage.
 // A navigation page that supports simple stack-based navigation.
-fn navigationPage(attrs) = Element { elementType: 233, elementAttrs: attrs, elementChildren: [] }
+fn navigationPage(attrs) = Element { elementType: 237, elementAttrs: attrs, elementChildren: [] }
 // navigationView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class NavigationView. A navigation pane with menu items and a content area (WinUI's
 // `NavigationView`). The pane is at the left (`Left`, `LeftCompact`, `LeftMinimal`, or chosen
@@ -420,7 +469,7 @@ fn navigationPage(attrs) = Element { elementType: 233, elementAttrs: attrs, elem
 // section 10.4): the overflow of the top pane, the animations of the pane, the shadow of the
 // pane, the padding of the title bar, the shoulder navigation and the selectors of templates
 // and styles.
-fn navigationView(attrs, children) = Element { elementType: 235, elementAttrs: attrs, elementChildren: children }
+fn navigationView(attrs, children) = Element { elementType: 239, elementAttrs: attrs, elementChildren: children }
 // navigationViewItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class NavigationViewItem. A selectable item of a
 // [`NavigationView`](crate::NavigationView), with an icon, an info badge and child items
@@ -435,7 +484,7 @@ fn navigationView(attrs, children) = Element { elementType: 235, elementAttrs: a
 // compact pane, as WinUI moves its repeater into its flyout. The Fluent and Simple themes have
 // no template. The children are realized in a stack panel, not an `ItemsRepeater` (follow-up
 // F1); the containers of data items are reused across edits of the collections.
-fn navigationViewItem(attrs, children) = Element { elementType: 237, elementAttrs: attrs, elementChildren: children }
+fn navigationViewItem(attrs, children) = Element { elementType: 241, elementAttrs: attrs, elementChildren: children }
 // navigationViewItemHeader(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class NavigationViewItemHeader. A heading of a group of items of a
 // [`NavigationView`](crate::NavigationView) (WinUI's `NavigationViewItemHeader`). It is not
@@ -444,7 +493,7 @@ fn navigationViewItem(attrs, children) = Element { elementType: 237, elementAttr
 // `:top-mode` (the top pane). The template of the WinUI theme presents the content in the text
 // block `HeaderText`; the part `NavigationViewItemHeaderRootGrid` is indented by the depth of
 // the header.
-fn navigationViewItemHeader(attrs, children) = Element { elementType: 240, elementAttrs: attrs, elementChildren: children }
+fn navigationViewItemHeader(attrs, children) = Element { elementType: 244, elementAttrs: attrs, elementChildren: children }
 // navigationViewItemSeparator(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class NavigationViewItemSeparator. A line between items of a
 // [`NavigationView`](crate::NavigationView) (WinUI's `NavigationViewItemSeparator`). It is not
@@ -452,10 +501,10 @@ fn navigationViewItemHeader(attrs, children) = Element { elementType: 240, eleme
 // pseudo-classes: `:horizontal-line-compact` (a closed compact pane) and `:vertical-line` (the
 // top pane); the part `NavigationViewItemSeparatorRootGrid` is indented by the depth of the
 // separator.
-fn navigationViewItemSeparator(attrs, children) = Element { elementType: 241, elementAttrs: attrs, elementChildren: children }
+fn navigationViewItemSeparator(attrs, children) = Element { elementType: 245, elementAttrs: attrs, elementChildren: children }
 // notificationCard(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class NotificationCard. Control that represents and displays a notification.
-fn notificationCard(attrs, children) = Element { elementType: 244, elementAttrs: attrs, elementChildren: children }
+fn notificationCard(attrs, children) = Element { elementType: 248, elementAttrs: attrs, elementChildren: children }
 // numberBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class NumberBox. A text box
 // for numbers (WinUI's `NumberBox`): a value of type `f64`, NaN when the box is empty, with a
 // range, steps, wrapping, expressions and spin buttons. The text is committed when the box
@@ -474,15 +523,15 @@ fn notificationCard(attrs, children) = Element { elementType: 244, elementAttrs:
 // Missing (docs/porting/winui-controls.md, Input): `InputScope`, `SelectionFlyout`,
 // `SelectionHighlightColor`, `TextReadingOrder` and
 // `PreventKeyboardDisplayOnProgrammaticFocus`.
-fn numberBox(attrs) = Element { elementType: 245, elementAttrs: attrs, elementChildren: [] }
+fn numberBox(attrs) = Element { elementType: 249, elementAttrs: attrs, elementChildren: [] }
 // numericUpDown(attrs: List<Attr<M>>) -> Element<M>: an element of the class NumericUpDown.
 // Control that represents a text box with button spinners that allow incrementing and
 // decrementing numeric values.
-fn numericUpDown(attrs) = Element { elementType: 247, elementAttrs: attrs, elementChildren: [] }
+fn numericUpDown(attrs) = Element { elementType: 251, elementAttrs: attrs, elementChildren: [] }
 // pageNavigationHost(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class PageNavigationHost. Hosts a page as the root of a top-level: forwards
 // the safe-area padding and the system back navigation of the top-level to the page.
-fn pageNavigationHost(attrs, children) = Element { elementType: 255, elementAttrs: attrs, elementChildren: children }
+fn pageNavigationHost(attrs, children) = Element { elementType: 259, elementAttrs: attrs, elementChildren: children }
 // pagerControl(attrs: List<Attr<M>>) -> Element<M>: an element of the class PagerControl. A
 // control to move through the pages of a paged content (WinUI's `PagerControl`): buttons to
 // the first, previous, next and last page around a combo box of the page numbers, a number box
@@ -501,18 +550,18 @@ fn pageNavigationHost(attrs, children) = Element { elementType: 255, elementAttr
 // whose panel is a horizontal stack panel, where WinUI has an `ItemsRepeater` with a
 // `StackLayout` (`ferroui-controls` cannot depend on the repeater crate); the indicator of the
 // current page moves without WinUI's `RepositionThemeTransition`.
-fn pagerControl(attrs) = Element { elementType: 257, elementAttrs: attrs, elementChildren: [] }
+fn pagerControl(attrs) = Element { elementType: 261, elementAttrs: attrs, elementChildren: [] }
 // panel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Panel. Base class for controls that can contain multiple children. Controls can be
 // added to a panel by adding them to its `children` collection. All children are layed out to
 // fill the panel.
-fn panel(attrs, children) = Element { elementType: 261, elementAttrs: attrs, elementChildren: children }
+fn panel(attrs, children) = Element { elementType: 265, elementAttrs: attrs, elementChildren: children }
 // path(attrs: List<Attr<M>>) -> Element<M>: an element of the class Path. Draws a
 // [`Geometry`].
-fn path(attrs) = Element { elementType: 263, elementAttrs: attrs, elementChildren: [] }
+fn path(attrs) = Element { elementType: 267, elementAttrs: attrs, elementChildren: [] }
 // pathIcon(attrs: List<Attr<M>>) -> Element<M>: an element of the class PathIcon. Represents
 // an icon that uses a vector path as its content.
-fn pathIcon(attrs) = Element { elementType: 266, elementAttrs: attrs, elementChildren: [] }
+fn pathIcon(attrs) = Element { elementType: 270, elementAttrs: attrs, elementChildren: [] }
 // personPicture(attrs: List<Attr<M>>) -> Element<M>: an element of the class PersonPicture. A
 // picture of a person or a group (WinUI's `PersonPicture`): the profile picture, else the
 // initials of the display name or of the contact, else the glyph of a contact, in a circle,
@@ -528,10 +577,10 @@ fn pathIcon(attrs) = Element { elementType: 266, elementAttrs: attrs, elementChi
 // [`Contact`], whose pictures are images, so the picture of a contact is shown at once (WinUI
 // opens and decodes a stream reference asynchronously, at the size of the control); the
 // pictures are image brush sources (a bitmap), the type of the image brush that paints them.
-fn personPicture(attrs) = Element { elementType: 270, elementAttrs: attrs, elementChildren: [] }
+fn personPicture(attrs) = Element { elementType: 274, elementAttrs: attrs, elementChildren: [] }
 // pipsPager(attrs: List<Attr<M>>) -> Element<M>: an element of the class PipsPager. Represents
 // a control that lets the user navigate through a paginated collection using a set of pips.
-fn pipsPager(attrs) = Element { elementType: 275, elementAttrs: attrs, elementChildren: [] }
+fn pipsPager(attrs) = Element { elementType: 279, elementAttrs: attrs, elementChildren: [] }
 // pivot(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Pivot. A control that shows one of its items at a time, under a row of headers that
 // the user taps, pans or flicks through (WinUI's `Pivot`). The items are [`PivotItem`]s (other
@@ -547,7 +596,7 @@ fn pipsPager(attrs) = Element { elementType: 275, elementAttrs: attrs, elementCh
 // with the headers and the `PivotItemPresenter`. During a pan the layout element stays in the
 // viewport and the items follow the content through expression animations of their
 // `Translation`, on the compositor (WinUI's secondary content relationships).
-fn pivot(attrs, children) = Element { elementType: 278, elementAttrs: attrs, elementChildren: children }
+fn pivot(attrs, children) = Element { elementType: 282, elementAttrs: attrs, elementChildren: children }
 // pivotHeaderItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class PivotHeaderItem. A header of a [`Pivot`] (WinUI's `PivotHeaderItem`): the pivot
 // makes one per item, its content bound to the item's header. Its selection state is WinUI's:
@@ -556,20 +605,20 @@ fn pivot(attrs, children) = Element { elementType: 278, elementAttrs: attrs, ele
 // The states are shown through the pseudo-classes `:selected`, `:pressed` and `:locked` (with
 // `:pointerover` and `:disabled`), as the other WinUI controls of the theme (decision D2), and
 // a template with visual state groups gets the state by name through the visual state manager.
-fn pivotHeaderItem(attrs, children) = Element { elementType: 280, elementAttrs: attrs, elementChildren: children }
+fn pivotHeaderItem(attrs, children) = Element { elementType: 284, elementAttrs: attrs, elementChildren: children }
 // pivotHeaderPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class PivotHeaderPanel. The panel of the headers of a [`Pivot`] (WinUI's
 // `PivotHeaderPanel`, a `Canvas`): the headers side by side, starting at the header of the
 // selected item at the current offset, so that the selected header comes first and the headers
 // before it follow at the end. The pivot moves the panel with the parallax of its scroll
 // viewer.
-fn pivotHeaderPanel(attrs, children) = Element { elementType: 281, elementAttrs: attrs, elementChildren: children }
+fn pivotHeaderPanel(attrs, children) = Element { elementType: 285, elementAttrs: attrs, elementChildren: children }
 // pivotItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class PivotItem. An item of a [`Pivot`] (WinUI's `PivotItem`): a content control with the
 // [`header`](Self::header) the pivot shows for it. The pivot shows one item at a time (and its
 // neighbours while it is panned): the others are transparent, not hit testable, and the root
 // of their template is collapsed so that tabbing skips them (WinUI's `SetContentVisibility`).
-fn pivotItem(attrs, children) = Element { elementType: 282, elementAttrs: attrs, elementChildren: children }
+fn pivotItem(attrs, children) = Element { elementType: 286, elementAttrs: attrs, elementChildren: children }
 // pivotPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class PivotPanel. The panel inside the scroll viewer of a [`Pivot`] (WinUI's
 // `PivotPanel`): as wide as [`PIVOT_PANEL_MULTIPLIER`] sections while the headers wrap, with a
@@ -580,23 +629,23 @@ fn pivotItem(attrs, children) = Element { elementType: 282, elementAttrs: attrs,
 // section the viewport rests on (the pivot's section offset), and the pivot's composition
 // expression keeps it in place during a pan (a recorded deviation: layout and hit testing stay
 // where the content is shown at rest).
-fn pivotPanel(attrs, children) = Element { elementType: 284, elementAttrs: attrs, elementChildren: children }
+fn pivotPanel(attrs, children) = Element { elementType: 288, elementAttrs: attrs, elementChildren: children }
 // polygon(attrs: List<Attr<M>>) -> Element<M>: an element of the class Polygon. Represents a
 // closed figure made of straight lines between points.
-fn polygon(attrs) = Element { elementType: 291, elementAttrs: attrs, elementChildren: [] }
+fn polygon(attrs) = Element { elementType: 295, elementAttrs: attrs, elementChildren: [] }
 // polyline(attrs: List<Attr<M>>) -> Element<M>: an element of the class Polyline. Represents
 // an open figure made of straight lines between points.
-fn polyline(attrs) = Element { elementType: 292, elementAttrs: attrs, elementChildren: [] }
+fn polyline(attrs) = Element { elementType: 296, elementAttrs: attrs, elementChildren: [] }
 // popup(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Popup. Displays a popup window.
-fn popup(attrs, children) = Element { elementType: 294, elementAttrs: attrs, elementChildren: children }
+fn popup(attrs, children) = Element { elementType: 298, elementAttrs: attrs, elementChildren: children }
 // popupOverlayLayer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class PopupOverlayLayer. The surface that hosts the popups shown inside their
 // top-level (internal upstream).
-fn popupOverlayLayer(attrs, children) = Element { elementType: 298, elementAttrs: attrs, elementChildren: children }
+fn popupOverlayLayer(attrs, children) = Element { elementType: 302, elementAttrs: attrs, elementChildren: children }
 // progressBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class ProgressBar. A
 // control used to indicate the progress of an operation.
-fn progressBar(attrs) = Element { elementType: 303, elementAttrs: attrs, elementChildren: [] }
+fn progressBar(attrs) = Element { elementType: 307, elementAttrs: attrs, elementChildren: [] }
 // progressRing(attrs: List<Attr<M>>) -> Element<M>: an element of the class ProgressRing. A
 // ring that shows that something is in progress (WinUI's `ProgressRing`): a spinning arc while
 // [`is_indeterminate`](Self::is_indeterminate) (the default), the part of a ring of the
@@ -618,11 +667,11 @@ fn progressBar(attrs) = Element { elementType: 303, elementAttrs: attrs, element
 // `DeterminateSource` and `IndeterminateSource` (preview members of WinUI) are not ported. The
 // Fluent and Simple themes have no template for it (docs/porting/winui-controls.md, section
 // 5.1).
-fn progressRing(attrs) = Element { elementType: 306, elementAttrs: attrs, elementChildren: [] }
+fn progressRing(attrs) = Element { elementType: 310, elementAttrs: attrs, elementChildren: [] }
 // radioButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class RadioButton. Represents a button that allows a user to select a single option from
 // a group of options.
-fn radioButton(attrs, children) = Element { elementType: 315, elementAttrs: attrs, elementChildren: children }
+fn radioButton(attrs, children) = Element { elementType: 319, elementAttrs: attrs, elementChildren: children }
 // radioButtons(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class RadioButtons. A group of radio buttons with one selection (WinUI's
 // `RadioButtons`). The items are shown as [`RadioButton`]s: an item that is a radio button is
@@ -644,7 +693,7 @@ fn radioButton(attrs, children) = Element { elementType: 315, elementAttrs: attr
 // which the group manager never does (WinUI's `Select` writes both containers). Missing
 // (docs/porting/winui-controls.md, Input): WinUI's element factories and
 // `DataTemplateSelector` as `ItemTemplate`.
-fn radioButtons(attrs, children) = Element { elementType: 317, elementAttrs: attrs, elementChildren: children }
+fn radioButtons(attrs, children) = Element { elementType: 321, elementAttrs: attrs, elementChildren: children }
 // radioButtonsPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class RadioButtonsPanel. Lays out the radio buttons of a [`RadioButtons`] in
 // columns of equal cells as large as the largest one, filling each column from the top, with
@@ -655,7 +704,7 @@ fn radioButtons(attrs, children) = Element { elementType: 317, elementAttrs: att
 // theme with the spacing of the resources `RadioButtonsColumnSpacing` and
 // `RadioButtonsRowSpacing`. `MaxColumns` is read from the group the panel is the items panel
 // of (its templated parent); a panel of another control has one column.
-fn radioButtonsPanel(attrs, children) = Element { elementType: 319, elementAttrs: attrs, elementChildren: children }
+fn radioButtonsPanel(attrs, children) = Element { elementType: 323, elementAttrs: attrs, elementChildren: children }
 // ratingControl(attrs: List<Attr<M>>) -> Element<M>: an element of the class RatingControl. A
 // control to rate with stars (WinUI's `RatingControl`): a value from 1 to `MaxRating`, or -1
 // while it is not set, a placeholder value (a community rating) shown while it is not set, and
@@ -676,70 +725,70 @@ fn radioButtonsPanel(attrs, children) = Element { elementType: 319, elementAttrs
 // Input): the composition animations of the scale of the items (the scale is set when the
 // pointer moves), and the focus engagement of the gamepad (`IsFocusEngagementEnabled`,
 // GamepadA and GamepadB).
-fn ratingControl(attrs) = Element { elementType: 322, elementAttrs: attrs, elementChildren: [] }
+fn ratingControl(attrs) = Element { elementType: 326, elementAttrs: attrs, elementChildren: [] }
 // rectangle(attrs: List<Attr<M>>) -> Element<M>: an element of the class Rectangle. Represents
 // a rectangle with optional rounded corners.
-fn rectangle(attrs) = Element { elementType: 327, elementAttrs: attrs, elementChildren: [] }
+fn rectangle(attrs) = Element { elementType: 331, elementAttrs: attrs, elementChildren: [] }
 // refreshContainer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element
 // of the class RefreshContainer. Represents a container control that provides a
 // [`RefreshVisualizer`] and pull-to-refresh functionality for scrollable content.
-fn refreshContainer(attrs, children) = Element { elementType: 329, elementAttrs: attrs, elementChildren: children }
+fn refreshContainer(attrs, children) = Element { elementType: 333, elementAttrs: attrs, elementChildren: children }
 // refreshVisualizer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class RefreshVisualizer. Shows the progress of a pull-to-refresh interaction
 // and of the refresh it starts.
-fn refreshVisualizer(attrs, children) = Element { elementType: 331, elementAttrs: attrs, elementChildren: children }
+fn refreshVisualizer(attrs, children) = Element { elementType: 335, elementAttrs: attrs, elementChildren: children }
 // relativePanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class RelativePanel. A panel that arranges its children relative to each other and to
 // the panel itself.
-fn relativePanel(attrs, children) = Element { elementType: 332, elementAttrs: attrs, elementChildren: children }
+fn relativePanel(attrs, children) = Element { elementType: 336, elementAttrs: attrs, elementChildren: children }
 // repeatButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class RepeatButton. Represents a control that raises its `Click` event repeatedly when
 // it is pressed and held.
-fn repeatButton(attrs, children) = Element { elementType: 334, elementAttrs: attrs, elementChildren: children }
+fn repeatButton(attrs, children) = Element { elementType: 338, elementAttrs: attrs, elementChildren: children }
 // reversibleStackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ReversibleStackPanel. Implements a panel which lays out its children
 // horizontally or vertically and can reverse the order of its children.
-fn reversibleStackPanel(attrs, children) = Element { elementType: 343, elementAttrs: attrs, elementChildren: children }
+fn reversibleStackPanel(attrs, children) = Element { elementType: 347, elementAttrs: attrs, elementChildren: children }
 // richEditBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class RichEditBox. A
 // structured rich-text editor rendered by FerroUI's text layout, drawing, and input APIs. The
 // `Document` is shared with its persistent presenter and remains editable independently of
 // this control. Read-only and length policies apply to user editing, clipboard, and IME;
 // applications can replace the document directly. Every user operation goes through the same
 // transaction engine, including formatting and accessible value changes.
-fn richEditBox(attrs) = Element { elementType: 344, elementAttrs: attrs, elementChildren: [] }
+fn richEditBox(attrs) = Element { elementType: 348, elementAttrs: attrs, elementChildren: [] }
 // richEditBoxTextPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // RichEditBoxTextPresenter. Renders and scrolls the owner's single rich document using FerroUI
 // text layout. The presenter survives template replacement. It formats the entire document at
 // the viewport width, and translates every text geometry operation by the same pixel scroll
 // offset. It has no separate editing buffer or undo history.
-fn richEditBoxTextPresenter(attrs) = Element { elementType: 346, elementAttrs: attrs, elementChildren: [] }
+fn richEditBoxTextPresenter(attrs) = Element { elementType: 350, elementAttrs: attrs, elementChildren: [] }
 // richTextBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class RichTextBlock.
 // Displays paragraphs, nested spans, hyperlinks and embedded controls. All text indices are
 // UTF-16 code units, matching the shaping and input-method contracts.
-fn richTextBlock(attrs) = Element { elementType: 348, elementAttrs: attrs, elementChildren: [] }
+fn richTextBlock(attrs) = Element { elementType: 352, elementAttrs: attrs, elementChildren: [] }
 // richTextBlockOverflow(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // RichTextBlockOverflow. A continuation of another rich-text view, with its own width and
 // height. Link it with `RichTextBlock::set_overflow_content_target`; the document and its
 // shaped paragraph continuation are shared through weak view references.
-fn richTextBlockOverflow(attrs) = Element { elementType: 350, elementAttrs: attrs, elementChildren: [] }
+fn richTextBlockOverflow(attrs) = Element { elementType: 354, elementAttrs: attrs, elementChildren: [] }
 // scrollBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class ScrollBar. A
 // scrollbar control.
-fn scrollBar(attrs) = Element { elementType: 357, elementAttrs: attrs, elementChildren: [] }
+fn scrollBar(attrs) = Element { elementType: 361, elementAttrs: attrs, elementChildren: [] }
 // scrollContentPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ScrollContentPresenter. Presents a scrolling view of content inside a
 // [`ScrollViewer`].
-fn scrollContentPresenter(attrs, children) = Element { elementType: 359, elementAttrs: attrs, elementChildren: children }
+fn scrollContentPresenter(attrs, children) = Element { elementType: 363, elementAttrs: attrs, elementChildren: children }
 // scrollViewer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ScrollViewer. A control which scrolls its content if the content is bigger than
 // the space available.
-fn scrollViewer(attrs, children) = Element { elementType: 361, elementAttrs: attrs, elementChildren: children }
+fn scrollViewer(attrs, children) = Element { elementType: 365, elementAttrs: attrs, elementChildren: children }
 // sector(attrs: List<Attr<M>>) -> Element<M>: an element of the class Sector. Represents a
 // circular or elliptical sector (a pie-shaped closed region of a circle or ellipse).
-fn sector(attrs) = Element { elementType: 364, elementAttrs: attrs, elementChildren: [] }
+fn sector(attrs) = Element { elementType: 368, elementAttrs: attrs, elementChildren: [] }
 // selectableTextBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // SelectableTextBlock. A control that displays a block of formatted text whose content can be
 // selected and copied.
-fn selectableTextBlock(attrs) = Element { elementType: 365, elementAttrs: attrs, elementChildren: [] }
+fn selectableTextBlock(attrs) = Element { elementType: 369, elementAttrs: attrs, elementChildren: [] }
 // selectingItemsControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class SelectingItemsControl. An [`ItemsControl`] that maintains a selection.
 // [`SelectingItemsControl`] provides a base class for [`ItemsControl`]s that maintain a
@@ -750,28 +799,28 @@ fn selectableTextBlock(attrs) = Element { elementType: 365, elementAttrs: attrs,
 // respecting the current `selection_mode` but it does not react to user input; this must be
 // handled in a derived class. It does, however, respond to `is_selected_changed_event` events
 // from items and updates the selection accordingly.
-fn selectingItemsControl(attrs, children) = Element { elementType: 366, elementAttrs: attrs, elementChildren: children }
+fn selectingItemsControl(attrs, children) = Element { elementType: 370, elementAttrs: attrs, elementChildren: children }
 // selectionIndicator(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // SelectionIndicator. A rectangle whose rounded caps keep their size during composition scale
 // animations. Layout, fill, stroke and styling remain those of a normal Rectangle.
-fn selectionIndicator(attrs) = Element { elementType: 369, elementAttrs: attrs, elementChildren: [] }
+fn selectionIndicator(attrs) = Element { elementType: 373, elementAttrs: attrs, elementChildren: [] }
 // separator(attrs: List<Attr<M>>) -> Element<M>: an element of the class Separator. A
 // separator control.
-fn separator(attrs) = Element { elementType: 370, elementAttrs: attrs, elementChildren: [] }
+fn separator(attrs) = Element { elementType: 374, elementAttrs: attrs, elementChildren: [] }
 // slider(attrs: List<Attr<M>>) -> Element<M>: an element of the class Slider. A control that
 // lets the user select from a range of values by moving a thumb control along a track.
-fn slider(attrs) = Element { elementType: 375, elementAttrs: attrs, elementChildren: [] }
+fn slider(attrs) = Element { elementType: 379, elementAttrs: attrs, elementChildren: [] }
 // splitButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class SplitButton. A button with primary and secondary parts that can each be pressed
 // separately. The primary part behaves like a [`Button`] and the secondary part opens a
 // flyout.
-fn splitButton(attrs, children) = Element { elementType: 383, elementAttrs: attrs, elementChildren: children }
+fn splitButton(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
 // splitView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class SplitView. A control with two views: a collapsible pane and an area for content.
-fn splitView(attrs, children) = Element { elementType: 385, elementAttrs: attrs, elementChildren: children }
+fn splitView(attrs, children) = Element { elementType: 389, elementAttrs: attrs, elementChildren: children }
 // stackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class StackPanel. A panel which lays out its children horizontally or vertically.
-fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
+fn stackPanel(attrs, children) = Element { elementType: 391, elementAttrs: attrs, elementChildren: children }
 // swipeControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class SwipeControl. A container that reveals commands when its content is swiped
 // (WinUI's `SwipeControl`). [`left_items`](Self::left_items) and
@@ -787,7 +836,7 @@ fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs
 // expression animation of its `Translation`, on the compositor. The template parts are
 // `RootGrid`, `SwipeContentRoot`, `SwipeContentStackPanel`, `ContentRoot` and `InputEater`;
 // each item is a `CommandBarButton` with the theme's `SwipeItemStyle`.
-fn swipeControl(attrs, children) = Element { elementType: 397, elementAttrs: attrs, elementChildren: children }
+fn swipeControl(attrs, children) = Element { elementType: 401, elementAttrs: attrs, elementChildren: children }
 // symbolIcon(attrs: List<Attr<M>>) -> Element<M>: an element of the class SymbolIcon.
 // Represents an icon that uses a glyph of the symbol font of the theme as its content (WinUI's
 // `SymbolIcon`). The template of the theme draws the glyph of [`symbol`](Self::symbol)
@@ -799,94 +848,94 @@ fn swipeControl(attrs, children) = Element { elementType: 397, elementAttrs: att
 // and Simple themes have none. Deviation (docs/porting/winui-controls.md, SymbolIcon): WinUI
 // builds the text block in code (`CSymbolIcon::ApplyTemplate`) with the font `Segoe Fluent
 // Icons` written in; here the template is the theme's and the font its resource.
-fn symbolIcon(attrs) = Element { elementType: 401, elementAttrs: attrs, elementChildren: [] }
+fn symbolIcon(attrs) = Element { elementType: 405, elementAttrs: attrs, elementChildren: [] }
 // tabControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TabControl. A tab control that displays a tab strip along with the content of the
 // selected tab.
-fn tabControl(attrs, children) = Element { elementType: 405, elementAttrs: attrs, elementChildren: children }
+fn tabControl(attrs, children) = Element { elementType: 409, elementAttrs: attrs, elementChildren: children }
 // tabItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TabItem. An item in a `TabControl`.
-fn tabItem(attrs, children) = Element { elementType: 406, elementAttrs: attrs, elementChildren: children }
+fn tabItem(attrs, children) = Element { elementType: 410, elementAttrs: attrs, elementChildren: children }
 // tabStrip(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TabStrip. A strip of tabs: a [`SelectingItemsControl`] that always has a selected
 // item.
-fn tabStrip(attrs, children) = Element { elementType: 407, elementAttrs: attrs, elementChildren: children }
+fn tabStrip(attrs, children) = Element { elementType: 411, elementAttrs: attrs, elementChildren: children }
 // tabStripItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TabStripItem. Represents a tab in a `TabStrip`.
-fn tabStripItem(attrs, children) = Element { elementType: 408, elementAttrs: attrs, elementChildren: children }
+fn tabStripItem(attrs, children) = Element { elementType: 412, elementAttrs: attrs, elementChildren: children }
 // tabbedPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class TabbedPage. A page
 // that displays its child pages through a tab strip.
-fn tabbedPage(attrs) = Element { elementType: 409, elementAttrs: attrs, elementChildren: [] }
+fn tabbedPage(attrs) = Element { elementType: 413, elementAttrs: attrs, elementChildren: [] }
 // tableView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TableView. A read-only tabular control that presents items in configurable columns.
-fn tableView(attrs, children) = Element { elementType: 411, elementAttrs: attrs, elementChildren: children }
+fn tableView(attrs, children) = Element { elementType: 415, elementAttrs: attrs, elementChildren: children }
 // tableViewCell(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TableViewCell. Represents a single cell in a
 // [`TableViewRow`](crate::TableViewRow).
-fn tableViewCell(attrs, children) = Element { elementType: 412, elementAttrs: attrs, elementChildren: children }
+fn tableViewCell(attrs, children) = Element { elementType: 416, elementAttrs: attrs, elementChildren: children }
 // tableViewCellsPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TableViewCellsPresenter. Lays out the cells of a [`TableViewRow`]
 // according to the column definitions of the parent table view. The cells are recycled
 // alongside their owning row in a virtualizing stack panel, but are not virtualized in a
 // single row (i.e. there is no column virtualization).
-fn tableViewCellsPresenter(attrs, children) = Element { elementType: 413, elementAttrs: attrs, elementChildren: children }
+fn tableViewCellsPresenter(attrs, children) = Element { elementType: 417, elementAttrs: attrs, elementChildren: children }
 // tableViewColumnHeader(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TableViewColumnHeader. Represents the header of a [`TableViewColumn`].
-fn tableViewColumnHeader(attrs, children) = Element { elementType: 415, elementAttrs: attrs, elementChildren: children }
+fn tableViewColumnHeader(attrs, children) = Element { elementType: 419, elementAttrs: attrs, elementChildren: children }
 // tableViewColumnHeadersPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) ->
 // Element<M>: an element of the class TableViewColumnHeadersPresenter. Displays the column
 // headers for a [`TableView`]. Computes column widths (pixel and star) and exposes them via
 // the actual width of the columns so that the presenters of the cells can align cells with the
 // headers.
-fn tableViewColumnHeadersPresenter(attrs, children) = Element { elementType: 416, elementAttrs: attrs, elementChildren: children }
+fn tableViewColumnHeadersPresenter(attrs, children) = Element { elementType: 420, elementAttrs: attrs, elementChildren: children }
 // tableViewRow(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TableViewRow. A row container in a [`TableView`](crate::TableView).
-fn tableViewRow(attrs, children) = Element { elementType: 417, elementAttrs: attrs, elementChildren: children }
+fn tableViewRow(attrs, children) = Element { elementType: 421, elementAttrs: attrs, elementChildren: children }
 // templatedControl(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TemplatedControl. A lookless control whose visual appearance is defined by its `Template`.
-fn templatedControl(attrs) = Element { elementType: 418, elementAttrs: attrs, elementChildren: [] }
+fn templatedControl(attrs) = Element { elementType: 422, elementAttrs: attrs, elementChildren: [] }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 433, elementAttrs: attrs, elementChildren: [] }
 // textBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBox. Represents a
 // control that can be used to display or edit unformatted text. Template parts:
 // `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a
 // [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position
 // (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index.
-fn textBox(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
+fn textBox(attrs) = Element { elementType: 435, elementAttrs: attrs, elementChildren: [] }
 // textPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextPresenter.
 // The control that displays the text of a text box: the text, the selection, the pre-edit text
 // of an input method and the caret. Every text position (`CaretIndex`, `SelectionStart`,
 // `SelectionEnd`, the positions of [`CharacterHit`]) is a UTF-16 code unit index.
-fn textPresenter(attrs) = Element { elementType: 436, elementAttrs: attrs, elementChildren: [] }
+fn textPresenter(attrs) = Element { elementType: 440, elementAttrs: attrs, elementChildren: [] }
 // textSelectionHandle(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TextSelectionHandle. A control that enables easy control over text selection using touch
 // based input.
-fn textSelectionHandle(attrs) = Element { elementType: 437, elementAttrs: attrs, elementChildren: [] }
+fn textSelectionHandle(attrs) = Element { elementType: 441, elementAttrs: attrs, elementChildren: [] }
 // textSelectionHandleCanvas(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class TextSelectionHandleCanvas. The canvas of the touch selection handles
 // of a text presenter. It lives in the text selector layer of the top level.
-fn textSelectionHandleCanvas(attrs, children) = Element { elementType: 438, elementAttrs: attrs, elementChildren: children }
+fn textSelectionHandleCanvas(attrs, children) = Element { elementType: 442, elementAttrs: attrs, elementChildren: children }
 // textSelectorLayer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TextSelectorLayer. The surface that hosts the text selection handles.
-fn textSelectorLayer(attrs, children) = Element { elementType: 439, elementAttrs: attrs, elementChildren: children }
+fn textSelectorLayer(attrs, children) = Element { elementType: 443, elementAttrs: attrs, elementChildren: children }
 // themeVariantScope(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ThemeVariantScope. Decorator control that isolates a subtree of
 // controls with a locally defined [`ThemeVariant`].
-fn themeVariantScope(attrs, children) = Element { elementType: 441, elementAttrs: attrs, elementChildren: children }
+fn themeVariantScope(attrs, children) = Element { elementType: 445, elementAttrs: attrs, elementChildren: children }
 // thumb(attrs: List<Attr<M>>) -> Element<M>: an element of the class Thumb. A control that can
 // be dragged by the user.
-fn thumb(attrs) = Element { elementType: 444, elementAttrs: attrs, elementChildren: [] }
+fn thumb(attrs) = Element { elementType: 448, elementAttrs: attrs, elementChildren: [] }
 // tickBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class TickBar. An element
 // that is used for drawing the ticks of a [`Slider`](crate::Slider).
-fn tickBar(attrs) = Element { elementType: 446, elementAttrs: attrs, elementChildren: [] }
+fn tickBar(attrs) = Element { elementType: 450, elementAttrs: attrs, elementChildren: [] }
 // timePicker(attrs: List<Attr<M>>) -> Element<M>: an element of the class TimePicker. A
 // control to allow the user to select a time.
-fn timePicker(attrs) = Element { elementType: 448, elementAttrs: attrs, elementChildren: [] }
+fn timePicker(attrs) = Element { elementType: 452, elementAttrs: attrs, elementChildren: [] }
 // timePickerPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TimePickerPresenter. Defines the presenter used for selecting a time. Intended for use with
 // [`TimePicker`] but can be used independently.
-fn timePickerPresenter(attrs) = Element { elementType: 450, elementAttrs: attrs, elementChildren: [] }
+fn timePickerPresenter(attrs) = Element { elementType: 454, elementAttrs: attrs, elementChildren: [] }
 // titleBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class TitleBar. The title
 // bar of a window (WinUI's `TitleBar`): a back button, a pane toggle button, a left header, an
 // icon, a title and a subtitle, content (a search box, in WinUI Gallery) and a right header,
@@ -911,76 +960,76 @@ fn timePickerPresenter(attrs) = Element { elementType: 450, elementAttrs: attrs,
 // input ([`WindowDecorationProperties`] roles, which take effect while the client area extends
 // into the decorations), and follows [`WindowBase::is_active`]. A title is the title of the
 // window while the bar shows it, as in WinUI.
-fn titleBar(attrs) = Element { elementType: 452, elementAttrs: attrs, elementChildren: [] }
+fn titleBar(attrs) = Element { elementType: 456, elementAttrs: attrs, elementChildren: [] }
 // toggleButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ToggleButton. Represents a control that a user can select (check) or clear
 // (uncheck). Base class for controls that can switch states.
-fn toggleButton(attrs, children) = Element { elementType: 455, elementAttrs: attrs, elementChildren: children }
+fn toggleButton(attrs, children) = Element { elementType: 459, elementAttrs: attrs, elementChildren: children }
 // toggleSplitButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ToggleSplitButton. A button with primary and secondary parts that can
 // each be pressed separately. The primary part behaves like a toggle button with two states
 // and the secondary part opens a flyout.
-fn toggleSplitButton(attrs, children) = Element { elementType: 457, elementAttrs: attrs, elementChildren: children }
+fn toggleSplitButton(attrs, children) = Element { elementType: 461, elementAttrs: attrs, elementChildren: children }
 // toggleSwitch(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ToggleSwitch. A toggle switch control.
-fn toggleSwitch(attrs, children) = Element { elementType: 459, elementAttrs: attrs, elementChildren: children }
+fn toggleSwitch(attrs, children) = Element { elementType: 463, elementAttrs: attrs, elementChildren: children }
 // toolTip(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class ToolTip. A control which pops up a hint when a control is hovered. You will probably
 // not want to create a [`ToolTip`] control directly: if added to the tree it will act as a
 // simple [`ContentControl`] styled to look like a tooltip. To add a tooltip to a control, use
 // the `Tip` attached property ([`ToolTip::tip_property`]), assigning the content that you want
 // displayed.
-fn toolTip(attrs, children) = Element { elementType: 460, elementAttrs: attrs, elementChildren: children }
+fn toolTip(attrs, children) = Element { elementType: 464, elementAttrs: attrs, elementChildren: children }
 // track(attrs: List<Attr<M>>) -> Element<M>: an element of the class Track. A control that
 // positions a [`Thumb`] and the buttons before and after it along a range: the building block
 // of scroll bars and sliders.
-fn track(attrs) = Element { elementType: 465, elementAttrs: attrs, elementChildren: [] }
+fn track(attrs) = Element { elementType: 469, elementAttrs: attrs, elementChildren: [] }
 // transitioningContentControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class TransitioningContentControl. Displays the content according to a
 // data template, using a page transition to move between the old and new content.
-fn transitioningContentControl(attrs, children) = Element { elementType: 470, elementAttrs: attrs, elementChildren: children }
+fn transitioningContentControl(attrs, children) = Element { elementType: 474, elementAttrs: attrs, elementChildren: children }
 // treeView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TreeView. Displays a hierarchical tree of data.
-fn treeView(attrs, children) = Element { elementType: 473, elementAttrs: attrs, elementChildren: children }
+fn treeView(attrs, children) = Element { elementType: 477, elementAttrs: attrs, elementChildren: children }
 // treeViewItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TreeViewItem. An item in a [`TreeView`].
-fn treeViewItem(attrs, children) = Element { elementType: 475, elementAttrs: attrs, elementChildren: children }
+fn treeViewItem(attrs, children) = Element { elementType: 479, elementAttrs: attrs, elementChildren: children }
 // uniformGrid(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class UniformGrid. A panel which lays out its children in a grid with all cells having
 // the same size.
-fn uniformGrid(attrs, children) = Element { elementType: 478, elementAttrs: attrs, elementChildren: children }
+fn uniformGrid(attrs, children) = Element { elementType: 482, elementAttrs: attrs, elementChildren: children }
 // userControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class UserControl. Provides the base class for defining a new control that encapsulates
 // related existing controls and provides its own logic.
-fn userControl(attrs, children) = Element { elementType: 482, elementAttrs: attrs, elementChildren: children }
+fn userControl(attrs, children) = Element { elementType: 486, elementAttrs: attrs, elementChildren: children }
 // viewbox(attrs: List<Attr<M>>) -> Element<M>: an element of the class Viewbox. A control used
 // to scale a single child.
-fn viewbox(attrs) = Element { elementType: 484, elementAttrs: attrs, elementChildren: [] }
+fn viewbox(attrs) = Element { elementType: 488, elementAttrs: attrs, elementChildren: [] }
 // virtualizingCarouselPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class VirtualizingCarouselPanel. A panel used by [`Carousel`] to display
 // the current item.
-fn virtualizingCarouselPanel(attrs, children) = Element { elementType: 486, elementAttrs: attrs, elementChildren: children }
+fn virtualizingCarouselPanel(attrs, children) = Element { elementType: 490, elementAttrs: attrs, elementChildren: children }
 // virtualizingStackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class VirtualizingStackPanel. Arranges and virtualizes content on a single
 // line that is oriented either horizontally or vertically.
-fn virtualizingStackPanel(attrs, children) = Element { elementType: 488, elementAttrs: attrs, elementChildren: children }
+fn virtualizingStackPanel(attrs, children) = Element { elementType: 492, elementAttrs: attrs, elementChildren: children }
 // visualLayerManager(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class VisualLayerManager. A control that manages multiple layers such as
 // adorners, overlays, text selectors, and popups.
-fn visualLayerManager(attrs, children) = Element { elementType: 492, elementAttrs: attrs, elementChildren: children }
+fn visualLayerManager(attrs, children) = Element { elementType: 496, elementAttrs: attrs, elementChildren: children }
 // window(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Window. A top-level window.
-fn window(attrs, children) = Element { elementType: 497, elementAttrs: attrs, elementChildren: children }
+fn window(attrs, children) = Element { elementType: 501, elementAttrs: attrs, elementChildren: children }
 // windowNotificationManager(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // WindowNotificationManager. An [`INotificationManager`] that displays notifications in a
 // window.
-fn windowNotificationManager(attrs) = Element { elementType: 503, elementAttrs: attrs, elementChildren: [] }
+fn windowNotificationManager(attrs) = Element { elementType: 507, elementAttrs: attrs, elementChildren: [] }
 // wrapPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class WrapPanel. Positions child elements in sequential position from left to right,
 // breaking content to the next line at the edge of the containing box. Subsequent ordering
 // happens sequentially from top to bottom or from right to left, depending on the value of the
 // `Orientation` property.
-fn wrapPanel(attrs, children) = Element { elementType: 504, elementAttrs: attrs, elementChildren: children }
+fn wrapPanel(attrs, children) = Element { elementType: 508, elementAttrs: attrs, elementChildren: children }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
@@ -1879,8 +1928,8 @@ fn itemWidthCollapsed(value) = AttrNumber { attrNumberProperty: 471, attrNumberV
 fn itemWidthRight(value) = AttrNumber { attrNumberProperty: 472, attrNumberValue: value }
 // itemsAlignment(value: WrapPanelItemsAlignment) -> Attr<M>: sets ItemsAlignment (WrapPanel).
 fn itemsAlignment(value) = AttrText { attrTextProperty: 473, attrTextValue: wrapPanelItemsAlignmentName(value: value) }
-// itemsSource(value: string) -> Attr<M>: sets ItemsSource (AutoCompleteBox, ItemsControl,
-// MenuFlyout, MultiPage).
+// itemsSource(value: string) -> Attr<M>: sets ItemsSource (AutoCompleteBox, BreadcrumbBar,
+// ItemsControl, MenuFlyout, MultiPage).
 fn itemsSource(value) = AttrText { attrTextProperty: 475, attrTextValue: value }
 // itemsUpdatingScrollMode(value: ItemsUpdatingScrollMode) -> Attr<M>: sets
 // ItemsUpdatingScrollMode (ItemsStackPanel).
