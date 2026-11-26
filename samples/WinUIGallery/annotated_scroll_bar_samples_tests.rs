@@ -40,6 +40,7 @@ fn annotated_scroll_bar_page_has_the_source_s_controls_and_labels() {
     assert_eq!(bar.max_height(), 200.0);
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn annotated_scroll_bar_drives_the_view_with_the_winui_theme() {
     use ferroui_controls::Window;
