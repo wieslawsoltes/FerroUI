@@ -69,3 +69,25 @@ On Windows with MSVC 14.52, set `LIBCLANG_PATH` to the LLVM `bin` directory for 
 In the **Visual designer** workflow, enable **Run installed VSIX smoke tests** and select `ubuntu-24.04-arm`. The runner builds the `linux-arm64` VSIX and checks it under both VS Code versions. Download the `ferroui-vsix-Linux-ARM64` artifact from that run. [Visual designer workflow](../../../.github/workflows/designer.yml) · [GitHub-hosted ARM64 runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
 
 Install the artifact in a **Remote–SSH** window connected to an ARM64 Linux workspace. Open XAML and RSX files, check symbols and native preview frames, and make and undo a source edit through editor MCP. Launch a Cargo app from **App Sessions**, open its **Live App** editor, and verify that its inspector stays associated with the remote application. [Open a remote workspace](README.md#open-a-remote-workspace)
+
+## Compare native preview performance
+
+Extract the `extension/bin` directories from the baseline and candidate VSIX packages for the same platform. On macOS and Linux, make both helpers executable if the archive tool removed those permissions. From `editors/vscode`, run the paired benchmark with the two directories.
+
+```sh
+node test/nativePreviewBenchmark.mjs /path/to/baseline/extension/bin /path/to/candidate/extension/bin > native-preview.json
+```
+
+The report records executable digests, the fixture digest, raw timings, and p50 and p95. The render and drop-hint measurements alternate between packages after warmup. Indexing starts a fresh XAML language server for each lookup of an unopened file in a 160-file workspace. The report records the first launch separately from the 12 later launches. Run both packages under the same display and fonts. On Linux you can use the same Xvfb configuration as the [installed package check](#test-the-installed-extension-with-a-running-app).
+
+The memory figures cover the helper's resident set after repeated single-artboard renders. Helpers that support Stages also report separate resident-set samples at zero, one, two, and four captured stages. These timings measure the native request boundary.
+
+### Measure edit-to-frame latency in VS Code
+
+Extract each full `extension` directory from its VSIX and use the same VS Code executable for both runs. Keep the packaged files in each directory, including the native helpers.
+
+```sh
+node test/workbenchBenchmark.mjs /path/to/Code /path/to/baseline/extension /path/to/candidate/extension workbench-preview.json
+```
+
+The harness opens the packaged extension in an isolated VS Code test profile. It alternates two same-length text values in the real editor, waits for the corresponding native image, and measures through the canvas reply after image decoding. The result includes the edit debounce. Each run uses four warmup edits and nine measured edits. The default four rounds give 36 measurements per package, alternating which package runs first. Pass a fifth argument to change the number of rounds. If you set a custom temporary directory on macOS or Linux, use a short path so VS Code can create its local IPC socket.
