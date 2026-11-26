@@ -63,8 +63,11 @@ impl PageType {
         Self { form: Form::Static { identity: T::IDENTITY, create: None } }
     }
 
-    /// The page type of the runtime type `type_`, created by reflection; see
-    /// [`from_type_info`](Self::from_type_info).
+    /// The page type of the runtime type `type_`, created by reflection: a page of it is created
+    /// through the default constructor of its [`TypeInfo`], which builds without the type tables do
+    /// not keep unless code that names the class registers it ([`TypeInfo::register_constructor`]);
+    /// a type that is not a page fails when the frame navigates to it
+    /// ([`NavigationError::NotAPage`]).
     #[inline]
     const fn reflective(type_: &'static TypeInfo) -> Self {
         Self { form: Form::Reflective(type_) }
@@ -156,7 +159,7 @@ impl PageType {
     }
 }
 
-/// The page type of a runtime type, created by reflection ([`PageType::from_type_info`]); what the
+/// The page type of a runtime type, created by reflection; what the
 /// run-time XAML loader, the designer and the tools give a frame for `{x:Type local:Page}`.
 impl From<&'static TypeInfo> for PageType {
     #[inline]

@@ -584,9 +584,7 @@ fn page_types_compare_and_hash_by_the_identity_of_the_class() {
     assert_eq!(FIRST, PageType::of::<FirstPage>());
     assert_ne!(FIRST, SECOND);
     assert_eq!(FIRST, PageType::from(FirstPage::TYPE));
-    #[allow(deprecated)]
-    let deprecated = PageType::from_type_info(SecondPage::TYPE);
-    assert_eq!(deprecated, SECOND);
+    assert_eq!(PageType::from(SecondPage::TYPE), SECOND);
     let set: HashSet<PageType> = [FIRST, PageType::from(FirstPage::TYPE), SECOND, THIRD].into_iter().collect();
     assert_eq!(set.len(), 3);
     assert!(set.contains(&PageType::from(ThirdPage::TYPE)));

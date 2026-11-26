@@ -1544,31 +1544,3 @@ fn an_aborted_dialog_handle_ends_canceled_and_leaves_the_dialog_open() {
     Dispatcher::ui_thread().run_jobs(None);
     assert!(!dialog.is_dialog());
 }
-
-#[test]
-#[allow(deprecated)]
-fn the_deprecated_dialog_tasks_keep_the_contract_of_the_dispatcher_task() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
-    let parent = Window::new();
-    parent.show();
-
-    let untyped = Window::new();
-    let untyped_task = untyped.show_dialog_task(&parent);
-    let typed = Window::new();
-    let typed_task = typed.show_dialog_typed_task::<i32>(&parent);
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(!untyped_task.is_completed());
-
-    let result: BoxedValue = Rc::new(7);
-    untyped.close_with_result(Some(result));
-    let result: BoxedValue = Rc::new("seven".to_string());
-    typed.close_with_result(Some(result));
-    Dispatcher::ui_thread().run_jobs(None);
-
-    assert!(untyped_task.is_completed_successfully());
-    let untyped_result = untyped_task.result().unwrap().expect("the dialog was closed with a result");
-    assert_eq!(Some(&7), untyped_result.downcast_ref::<i32>());
-    // The failed cast is raised again when the task is observed.
-    assert!(typed_task.is_faulted());
-    assert!(catch_unwind(AssertUnwindSafe(|| typed_task.result())).is_err());
-}
