@@ -1083,3 +1083,13 @@ fn scroll_view_and_its_presenter_migrate_to_the_native_controls() {
     assert_eq!(migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap().xaml, result.xaml);
 }
 
+#[test]
+fn annotated_scroll_bar_migrates_to_the_native_control() {
+    let result = migrate("<AnnotatedScrollBar SmallChange='20'/>");
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let bar = document.descendants().find(|node| node.tag_name().name() == "AnnotatedScrollBar").unwrap();
+    assert_eq!(bar.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
+    assert_eq!(bar.attribute("SmallChange"), Some("20"));
+}
+
