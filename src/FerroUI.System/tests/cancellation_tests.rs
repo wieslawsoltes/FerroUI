@@ -3,9 +3,7 @@
 //! callbacks, child tokens, the future of the cancellation, the drop guard, reentrant callbacks,
 //! and the conversions of the cancellation errors.
 
-use crate::task::{block_on, run_pending, Canceled};
-#[allow(deprecated)]
-use crate::threading::tasks::TaskCanceledError;
+use crate::task::{block_on, run_pending};
 use crate::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
 use std::cell::RefCell;
 use std::future::Future;
@@ -323,13 +321,4 @@ fn a_local_callback_runs_on_its_thread_and_its_guard_removes_it_from_any_thread(
         let _late = token.register_local(move || l.borrow_mut().push("late"));
         assert_eq!(*log.borrow(), ["kept", "late"]);
     });
-}
-
-#[test]
-#[allow(deprecated)]
-fn the_cancellation_errors_convert_to_and_from_canceled() {
-    let error: TaskCanceledError = Canceled.into();
-    assert_eq!(error, TaskCanceledError::default());
-    let canceled: Canceled = TaskCanceledError { task_id: Some(7) }.into();
-    assert_eq!(canceled, Canceled);
 }

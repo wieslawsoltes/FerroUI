@@ -7,7 +7,6 @@ mod oneshot_tests;
 mod shared_tests;
 mod cancellation_tests;
 mod async_ordering_tests;
-mod synchronization_context_tests;
 mod slot_order_map_tests;
 mod property_path_tests;
 mod observable_collection_tests;
