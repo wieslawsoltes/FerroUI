@@ -38,6 +38,10 @@ struct State {
     long: Option<Box<LongText>>,
     /// Whether a layout is being made.
     in_layout: bool,
+    /// Whether the foreground or the decorations changed since the cached runs were styled
+    /// (`restyle_later`): the next `apply_style_change` gives them the new style, and an
+    /// invalidation drops it with them.
+    style_changed: bool,
 }
 
 /// What a run cache keeps of a long text.
@@ -146,6 +150,29 @@ impl TextRunCache {
     }
 
     /// The foreground or the decorations of the text changed, which do not change its shaping: the
+    /// cached runs get the new style when the next layout takes them (`apply_style_change`), not
+    /// now. A text that changes its style more than once before that, or its font with it (an
+    /// element that moves to another parent hears both), restyles once or not at all.
+    pub fn restyle_later(&self) {
+        let mut state = self.state.borrow_mut();
+        state.style_changed =
+            state.single.is_some() || state.entries.as_ref().is_some_and(|entries| !entries.is_empty());
+    }
+
+    /// Gives the cached runs the style `style` returns when it changed since they were styled
+    /// (`restyle_later`); `style` is not called otherwise.
+    pub fn apply_style_change(
+        &self,
+        style: impl FnOnce() -> (Option<Rc<dyn IBrush>>, Option<TextDecorationCollection>),
+    ) {
+        if !std::mem::take(&mut self.state.borrow_mut().style_changed) {
+            return;
+        }
+        let (foreground, decorations) = style();
+        self.restyle(foreground.as_ref(), decorations.as_ref());
+    }
+
+    /// The foreground or the decorations of the text changed, which do not change its shaping: the
     /// cached runs are kept with the new style, over the same glyphs. Returns `false`, with the
     /// cache emptied, when a cached run is not a shaped run.
     pub fn restyle(
@@ -167,6 +194,7 @@ impl TextRunCache {
             Some(CachedShapingResult { shaped_runs: runs.into(), ..result.clone() })
         };
         let mut state = self.state.borrow_mut();
+        state.style_changed = false;
         let single = match &state.single {
             Some((key, result)) => restyled(result).map(|new| Some((*key, new))),
             None => Some(None),
@@ -324,6 +352,7 @@ impl TextRunCache {
     }
 
     fn invalidate_entries(state: &mut State) {
+        state.style_changed = false;
         if let Some((_, value)) = state.single.take() {
             Self::dispose_cached_runs(&value);
             return;

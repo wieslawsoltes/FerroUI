@@ -163,6 +163,10 @@ changes behavior upstream defines.
    disposes that buffer when it ends. A run a font fallback made keeps its typeface and scale,
    and the end of a line or a paragraph is kept as it is, since it draws nothing. The runs of
    inlines have styles of their own, so a text block with inlines still drops its shaping.
+   The change only marks the cache (`TextRunCache::restyle_later`); the runs are restyled when
+   the next layout takes the cache (`apply_style_change`). A text block that moves to another
+   parent hears its foreground and its font change together: restyling at once made new runs
+   that the font change then dropped (`InheritanceParent.text_moved` of the benchmarks).
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties

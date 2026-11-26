@@ -122,6 +122,47 @@ fn cache_hit_produces_identical_layout() {
 }
 
 #[test]
+fn a_style_change_restyles_at_the_next_use_and_not_after_an_invalidation() {
+    let _scope = TextTestScope::new();
+    let default_properties = default_properties();
+    let paragraph_properties = paragraph_properties(&default_properties, TextWrapping::NoWrap);
+    let text_source = SingleBufferTextSource::new("Hello later", default_properties.clone());
+    let cache = TextRunCache::new();
+    let red: Rc<dyn crate::media::IBrush> = crate::media::Brushes::red();
+    let style = || -> (Option<Rc<dyn crate::media::IBrush>>, Option<crate::media::TextDecorationCollection>) {
+        (Some(red.clone()), None)
+    };
+
+    // Nothing is cached: nothing to restyle.
+    cache.restyle_later();
+    cache.apply_style_change(|| unreachable!("an empty cache has no style to change"));
+
+    let first = format_line(&text_source, 0, f64::INFINITY, &paragraph_properties, Some(&cache));
+    // A change of the shaping after the style change drops the runs unstyled.
+    cache.restyle_later();
+    cache.invalidate();
+    cache.apply_style_change(|| unreachable!("the invalidated runs are not restyled"));
+
+    let second = format_line(&text_source, 0, f64::INFINITY, &paragraph_properties, Some(&cache));
+    cache.restyle_later();
+    let mut asked = 0;
+    cache.apply_style_change(|| {
+        asked += 1;
+        style()
+    });
+    // Restyled once: the change is applied.
+    cache.apply_style_change(|| unreachable!("the change was applied"));
+    assert_eq!(1, asked);
+    let third = format_line(&text_source, 0, f64::INFINITY, &paragraph_properties, Some(&cache));
+    assert_same_glyphs(&*second, &*third);
+    let foreground = third.text_runs()[0]
+        .downcast_ref::<ShapedTextRun>()
+        .and_then(|run| run.run_properties().foreground_brush().cloned());
+    assert!(foreground.is_some_and(|brush| Rc::ptr_eq(&brush, &red)));
+    first.dispose();
+}
+
+#[test]
 fn restyle_keeps_the_shaping_under_a_new_foreground() {
     let _scope = TextTestScope::new();
     let text = "Hello restyle";
