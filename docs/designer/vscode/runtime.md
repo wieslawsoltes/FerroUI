@@ -593,6 +593,8 @@ Choose the layers icon beside a property to trace why that value is effective in
 
 Filter by control type, name, text, or role. Matches keep their parent path. Escape clears the filter and restores the normal branch layout. Branches stay open or closed during updates to the same window and hierarchy. [Tree disclosure with MCP](reference.md#control-the-live-app-editor-with-mcp)
 
+![Live App shows the path from the native Customer workbench window to the selected Heading in its filtered logical tree.](../images/vscode-live-app-tree-keyboard.png)
+
 ### Use the keyboard in Live App
 
 1. Open a window whose app enabled inspector input. Switch to **Interact**, then choose the keyboard icon labeled **Keyboard input for** that window. The app’s current focus or first tab stop appears below the native frame.
