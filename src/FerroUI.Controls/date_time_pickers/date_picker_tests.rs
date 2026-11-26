@@ -391,7 +391,9 @@ fn selector_scroll_down_should_work() {
 
 #[test]
 fn selector_item_height_change_should_update_layout_state() {
-    for (should_loop, expected_extent_height, expected_offset_y) in [(false, 120.0, 40.0), (true, 12000.0, 6040.0)] {
+    // A bounded wheel includes the viewport around its first/last cell centers:
+    // two 40-unit steps plus the physical 100-unit viewport.
+    for (should_loop, expected_extent_height, expected_offset_y) in [(false, 180.0, 40.0), (true, 12000.0, 6040.0)] {
         let _app = start(services());
 
         let panel = DateTimePickerPanel::new();
@@ -647,7 +649,9 @@ fn scrolling_down_a_panel_without_items_fails_as_the_move_of_the_children_does()
     panel.set_minimum_value(1);
     panel.set_maximum_value(3);
     assert_eq!(0, panel.children().count());
-    assert_eq!(120.0, panel.extent().height);
+    // Before layout the physical viewport is zero; the last of three cells
+    // remains two 40-unit steps from the first cell's center.
+    assert_eq!(80.0, panel.extent().height);
     let payload = catch_unwind(AssertUnwindSafe(|| panel.scroll_down(1))).expect_err("the move fails");
     let message = payload.downcast_ref::<&str>().map(|message| message.to_string()).or_else(|| payload.downcast_ref::<String>().cloned());
     assert!(message.is_some_and(|message| message.starts_with("Index was out of range.")));

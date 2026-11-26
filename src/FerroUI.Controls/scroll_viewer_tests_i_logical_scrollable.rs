@@ -3,7 +3,10 @@ use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::test_support::{test_scope, TestRoot};
 use crate::test_support_scrolling::TestScrollable;
 use crate::{Control, Panel, ScrollViewer};
-use ferroui_base::{Ref, Size, Vector};
+use ferroui_base::reactive::ObservableExt;
+use ferroui_base::{FerroObjectExtensions, Ref, Size, Vector};
+use std::cell::Cell;
+use std::rc::Rc;
 
 fn create_target(content: &Ref<TestScrollable>) -> (Ref<ScrollViewer>, Ref<TestRoot>) {
     let result = ScrollViewer::new();
@@ -42,4 +45,88 @@ fn extent_offset_and_viewport_should_be_read_from_i_logical_scrollable() {
     assert_eq!(scrollable.extent(), target.extent());
     assert_eq!(scrollable.offset(), target.offset());
     assert_eq!(scrollable.viewport(), target.viewport());
+}
+
+#[test]
+fn logical_metrics_transactions_only_write_genuine_final_offset_corrections() {
+    let _scope = test_scope();
+    let selected = Vector::new(75.0, 75.0);
+    let scrollable = TestScrollable::with_state(Size::new(100.0, 100.0), selected, Size::new(25.0, 25.0));
+    let (target, _root) = create_target(&scrollable);
+    assert_eq!(target.offset(), selected);
+    scrollable.take_offset_writes();
+
+    // Either publication order has an invalid intermediate range in one of
+    // these transitions. The completed child state keeps the same legal end
+    // offset; a transient presenter clamp must never become a child selection.
+    for (extent, viewport) in [(275.0, 200.0), (125.0, 50.0)] {
+        scrollable.publish_scroll_state(Size::new(extent, extent), selected, Size::new(viewport, viewport));
+        assert_eq!(target.extent(), scrollable.extent());
+        assert_eq!(target.viewport(), scrollable.viewport());
+        assert_eq!(target.offset(), selected);
+        assert_eq!(scrollable.offset(), selected);
+        assert!(scrollable.take_offset_writes().is_empty());
+    }
+
+    // This final range genuinely excludes 75. The presenter can already have
+    // been coerced to 30 while publishing the extent, so reconciliation must
+    // not depend on the final offset property emitting another change.
+    let clamped = Vector::new(30.0, 30.0);
+    scrollable.publish_scroll_state(Size::new(80.0, 80.0), selected, Size::new(50.0, 50.0));
+    assert_eq!(target.offset(), clamped);
+    assert_eq!(scrollable.offset(), clamped);
+    assert_eq!(scrollable.take_offset_writes(), vec![clamped]);
+
+    // A real property observer may publish a newer child state while metrics
+    // are being forwarded through the owning ScrollViewer. The older outer
+    // snapshot must not overwrite it or issue any transient scroll request.
+    let nested = Rc::new(Cell::new(false));
+    let nested_seen = nested.clone();
+    let nested_scrollable = scrollable.clone();
+    let observed_target: &ferroui_base::FerroObject = &target;
+    let _viewport = FerroObjectExtensions::get_observable(observed_target, ScrollViewer::viewport_property())
+        .subscribe_fn(move |viewport| {
+            if viewport == Size::new(200.0, 200.0) && !nested_seen.replace(true) {
+                nested_scrollable.publish_scroll_state(
+                    Size::new(350.0, 350.0),
+                    Vector::new(50.0, 50.0),
+                    Size::new(300.0, 300.0),
+                );
+            }
+        });
+    scrollable.publish_scroll_state(Size::new(275.0, 275.0), selected, Size::new(200.0, 200.0));
+    assert!(nested.get(), "the viewport notification reentered the logical child");
+    assert_eq!(target.extent(), Size::new(350.0, 350.0));
+    assert_eq!(target.viewport(), Size::new(300.0, 300.0));
+    assert_eq!(target.offset(), Vector::new(50.0, 50.0));
+    assert_eq!(scrollable.offset(), target.offset());
+    assert!(scrollable.take_offset_writes().is_empty());
+
+    // Final offset publication is also observable. An older in-flight offset
+    // notification must not overwrite a newer child transaction from one of
+    // those observers after the metric setters themselves have completed.
+    let offset_nested = Rc::new(Cell::new(false));
+    let offset_nested_seen = offset_nested.clone();
+    let offset_scrollable = scrollable.clone();
+    let _offset = FerroObjectExtensions::get_observable(observed_target, ScrollViewer::offset_property())
+        .subscribe_fn(move |offset| {
+            if offset == Vector::new(80.0, 80.0) && !offset_nested_seen.replace(true) {
+                offset_scrollable.publish_scroll_state(
+                    Size::new(360.0, 360.0),
+                    Vector::new(120.0, 120.0),
+                    Size::new(240.0, 240.0),
+                );
+            }
+        });
+    scrollable.publish_scroll_state(
+        Size::new(200.0, 200.0),
+        Vector::new(80.0, 80.0),
+        Size::new(100.0, 100.0),
+    );
+    assert!(offset_nested.get(), "the offset notification reentered the logical child");
+    assert_eq!(target.extent(), Size::new(360.0, 360.0));
+    assert_eq!(target.viewport(), Size::new(240.0, 240.0));
+    assert_eq!(target.offset(), Vector::new(120.0, 120.0));
+    assert_eq!(scrollable.offset(), target.offset());
+    assert!(scrollable.take_offset_writes().is_empty());
 }

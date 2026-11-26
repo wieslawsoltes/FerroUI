@@ -7,18 +7,19 @@ use crate::shapes::Rectangle;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use crate::{
-    Border, Button, Control, DataValidationErrors, Grid, GridLength, Panel, RowDefinition, ScrollViewer, StackPanel,
+    Border, Button, Control, DataValidationErrors, Grid, GridLength, ListBoxItem, Panel, RowDefinition, ScrollViewer, StackPanel,
     TextBlock, Window,
 };
 use ferroui_base::animation::SignedDuration;
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
+use ferroui_base::input::{InputElement, Key, KeyEventArgs, ScrollGestureEndedEventArgs, ScrollGestureEventArgs};
 use ferroui_base::layout::{ILayoutManager, VerticalAlignment};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
-use ferroui_base::reactive::Observable;
+use ferroui_base::reactive::{Observable, Subscription};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{current_ui_locale, set_current_ui_locale, CultureInfo, DateTimeFormatInfo, Locale, TestCultureDataProvider};
-use ferroui_base::{AnyValue, BoxedValue, Ref, Size, Visual};
-use std::cell::Cell;
+use ferroui_base::{AnyValue, BoxedValue, Ref, Size, Vector, Visual};
+use std::cell::{Cell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
@@ -543,6 +544,237 @@ fn scroll_viewer_template() -> Rc<dyn IControlTemplate> {
         panel.children().add(presenter.register_in_name_scope(&**scope));
         panel.upcast()
     })
+}
+
+/// A real logical-scrolling child and its two-way ScrollViewer template. The
+/// selection observer is attached before the first layout so even a transient
+/// offset fed back during viewport/extent synchronization is observable.
+struct BoundedWheel {
+    window: Ref<Window>,
+    panel: Ref<DateTimePickerPanel>,
+    viewer: Ref<ScrollViewer>,
+    presenter: Ref<ScrollContentPresenter>,
+    changes: Rc<RefCell<Vec<i32>>>,
+    _selection: Subscription,
+}
+
+impl BoundedWheel {
+    fn show(kind: DateTimePickerPanelType, minimum: i32, maximum: i32) -> Self {
+        let panel = DateTimePickerPanel::new();
+        panel.set_panel_type(kind);
+        panel.set_should_loop(false);
+        panel.set_maximum_value(maximum);
+        panel.set_minimum_value(minimum);
+        panel.set_item_height(40.0);
+        panel.set_selected_value(maximum);
+
+        let changes = Rc::new(RefCell::new(Vec::new()));
+        let observed = changes.clone();
+        let weak = panel.downgrade();
+        let selection = panel.selection_changed(move || {
+            observed
+                .borrow_mut()
+                .push(weak.upgrade().unwrap().selected_value());
+        });
+
+        let viewer = ScrollViewer::new();
+        viewer.set_template(Some(scroll_viewer_template()));
+        viewer.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled);
+        viewer.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Hidden);
+        viewer.set_width(120.0);
+        viewer.set_height(200.0);
+        viewer.set_content(Some(Control::boxed(panel.clone())));
+
+        let window = Window::new();
+        window.set_width(320.0);
+        window.set_height(800.0);
+        window.set_content(Some(Control::boxed(viewer.clone())));
+        window.show();
+        window.layout_manager().execute_initial_layout_pass();
+        let presenter = viewer
+            .presenter()
+            .unwrap()
+            .cast::<ScrollContentPresenter>()
+            .unwrap();
+        assert!(Ref::ptr_eq(
+            &panel
+                .get_visual_parent()
+                .unwrap()
+                .cast::<ScrollContentPresenter>()
+                .unwrap(),
+            &presenter
+        ));
+        Self {
+            window,
+            panel,
+            viewer,
+            presenter,
+            changes,
+            _selection: selection,
+        }
+    }
+
+    fn layout(&self) {
+        Dispatcher::ui_thread().run_jobs(None);
+        self.window.layout_manager().execute_layout_pass();
+        assert!(self.panel.is_measure_valid() && self.panel.is_arrange_valid());
+    }
+
+    fn assert_selected_cell(&self, expected: i32) {
+        assert_eq!(expected, self.panel.selected_value());
+        let selected: Vec<_> = self
+            .panel
+            .children()
+            .snapshot()
+            .iter()
+            .filter_map(|child| child.cast::<ListBoxItem>())
+            .filter(|item| item.is_selected())
+            .collect();
+        assert_eq!(1, selected.len(), "exactly one realized cell is selected");
+        let item = &selected[0];
+        let tag = item.tag().unwrap();
+        assert_eq!(
+            Some(&expected),
+            (&*tag as &dyn AnyValue).downcast_ref::<i32>()
+        );
+        let bounds = item.bounds();
+        assert!(
+            (bounds.y + bounds.height / 2.0 - self.panel.bounds().height / 2.0).abs() < 0.001,
+            "selected cell stays centered, including when the viewport clips it: {bounds:?}"
+        );
+        assert_eq!(self.panel.offset(), self.presenter.offset());
+        assert_eq!(self.panel.offset(), self.viewer.offset());
+        assert_eq!(self.panel.bounds().size(), self.viewer.viewport());
+        let last_offset = self.viewer.extent().height - self.viewer.viewport().height;
+        assert!(last_offset.is_finite() && last_offset >= 0.0);
+        assert!((0.0..=last_offset).contains(&self.viewer.offset().y));
+        if expected == self.panel.maximum_value() {
+            assert_eq!(
+                last_offset,
+                self.viewer.offset().y,
+                "the last value is the finite scroll boundary"
+            );
+        }
+        if expected == self.panel.minimum_value() {
+            assert_eq!(0.0, self.viewer.offset().y);
+        }
+    }
+
+    fn key(&self, key: Key) {
+        let mut event = KeyEventArgs::new();
+        event.set_routed_event(Some(InputElement::key_down_event()));
+        event.key = key;
+        self.panel.raise_event(&event);
+        assert!(event.handled());
+        self.layout();
+    }
+}
+
+impl Drop for BoundedWheel {
+    fn drop(&mut self) {
+        self.window.close();
+    }
+}
+
+#[test]
+fn bounded_picker_keeps_pm_and_last_year_through_layout_changes_without_selection_events() {
+    let _app = start_with(TestServices::styled_window());
+    for (kind, minimum, maximum) in [
+        (DateTimePickerPanelType::TimePeriod, 0, 1),
+        (DateTimePickerPanelType::Year, 2020, 2024),
+    ] {
+        let wheel = BoundedWheel::show(kind, minimum, maximum);
+        wheel.layout();
+        wheel.assert_selected_cell(maximum);
+        assert!(
+            wheel.changes.borrow().is_empty(),
+            "initial layout must not restage a selection"
+        );
+
+        // Grow, shrink, clip below one item, then change the pitch in both
+        // directions. All changes use the mounted layout/scroll feedback path.
+        for (height, pitch) in [
+            (480.0, 40.0),
+            (120.0, 40.0),
+            (32.0, 40.0),
+            (32.0, 64.0),
+            (32.0, 48.0),
+            (200.0, 48.0),
+        ] {
+            wheel.viewer.set_height(height);
+            wheel.panel.set_item_height(pitch);
+            wheel.layout();
+            assert_eq!(height, wheel.viewer.viewport().height);
+            wheel.assert_selected_cell(maximum);
+            assert!(
+                wheel.changes.borrow().is_empty(),
+                "geometry alone must not publish selection changes: {:?}",
+                wheel.changes.borrow()
+            );
+        }
+    }
+}
+
+#[test]
+fn bounded_picker_keyboard_and_scroll_gestures_stop_at_the_first_and_last_cells() {
+    let _app = start_with(TestServices::styled_window());
+    for (kind, minimum, maximum) in [
+        (DateTimePickerPanelType::TimePeriod, 0, 1),
+        (DateTimePickerPanelType::Year, 2020, 2024),
+    ] {
+        let wheel = BoundedWheel::show(kind, minimum, maximum);
+        wheel.layout();
+        for (key, expected) in [
+            (Key::Down, maximum),
+            (Key::PageDown, maximum),
+            (Key::Up, maximum - 1),
+            (Key::PageUp, minimum),
+            (Key::Up, minimum),
+            (Key::Down, minimum + 1),
+            (Key::PageDown, maximum),
+        ] {
+            wheel.key(key);
+            wheel.assert_selected_cell(expected);
+        }
+
+        // These are the recognizer's routed events, delivered to the real
+        // presenter; no test calls the panel's offset setter to simulate drag.
+        let id = ScrollGestureEventArgs::get_next_free_id();
+        let last_offset = wheel.viewer.offset().y;
+        let movement = ScrollGestureEventArgs::new(id, Vector::new(0.0, -10.0));
+        wheel.panel.raise_event(&movement);
+        assert!(movement.handled());
+        wheel.layout();
+        assert_eq!(last_offset - 10.0, wheel.viewer.offset().y);
+        assert_eq!(maximum - 1, wheel.panel.selected_value());
+        wheel
+            .panel
+            .raise_event(&ScrollGestureEndedEventArgs::new(id));
+        wheel.layout();
+        wheel.assert_selected_cell(maximum);
+
+        for (delta, expected) in [
+            (-10000.0, minimum),
+            (-10000.0, minimum),
+            (10000.0, maximum),
+            (10000.0, maximum),
+        ] {
+            let id = ScrollGestureEventArgs::get_next_free_id();
+            wheel
+                .panel
+                .raise_event(&ScrollGestureEventArgs::new(id, Vector::new(0.0, delta)));
+            wheel
+                .panel
+                .raise_event(&ScrollGestureEndedEventArgs::new(id));
+            wheel.layout();
+            wheel.assert_selected_cell(expected);
+        }
+        assert!(wheel
+            .changes
+            .borrow()
+            .iter()
+            .all(|value| (minimum..=maximum).contains(value)));
+    }
 }
 
 /// The picker template of the window tests: the hosts are in the picker

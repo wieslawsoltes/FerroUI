@@ -153,6 +153,14 @@ impl FerroObjectImpl for DateTimePickerPanel {
 
             this.update_helper_info();
             this.has_init.set(false);
+        } else if change.property() == Visual::bounds_property().as_property() {
+            let (old, new) = change.get_old_and_new_value::<Rect>();
+            if old.size() != new.size() {
+                // Bounds is assigned after arrange_override. Publish the real
+                // viewport together with its centered scroll extent, including
+                // later resizes which do not reinitialize the item ring.
+                this.raise_scroll_invalidated();
+            }
         }
     }
 }
@@ -666,7 +674,19 @@ impl DateTimePickerPanel {
     }
 
     pub fn extent(&self) -> Size {
-        self.extent.get()
+        let extent = self.extent.get();
+        if self.should_loop() {
+            extent
+        } else {
+            // The first and last items can both occupy the center of the
+            // viewport. Include that leading/trailing space in the public
+            // extent so a ScrollViewer allows every offset from zero through
+            // the last item's index * pitch, even when the viewport is taller
+            // than the item range (for example the two AM/PM values).
+            // Keep the private item extent unchanged for keyboard limits.
+            extent
+                .with_height((extent.height - self.item_height()).max(0.0) + self.viewport().height)
+        }
     }
 
     pub fn viewport(&self) -> Size {
