@@ -2,7 +2,7 @@
 //! and `ClipboardPage.xaml.cs`) and an adaptation of the PullToRefresh code behind.
 //! The controls keep their existing platform services and event/deferral APIs.
 
-use ferroui_base::input::platform::{ClipboardExtensions, IClipboard};
+use ferroui_base::input::platform::{ClipboardContentOptions, ClipboardExtensions, IClipboard};
 use ferroui_base::input::{DataFormat, DataTransfer, DataTransferItem, IAsyncDataTransfer};
 use ferroui_base::media::IImage;
 use ferroui_base::platform::storage::{FilePickerOpenOptions, IStorageItem};
@@ -111,7 +111,7 @@ fn set_status(root: &WeakRef<Control>, name: &str, text: &str) {
 /// `CopyText_Click` with its confirmation, shown for two seconds; `PasteText_Click`;
 /// `CopyImage_Click` and `PasteImage_Click` with the source's rainier.jpg; `CopyFiles_Click`, with
 /// the files of the window's storage provider, and `PasteFiles_Click`; `CopyWithOptions_Click`,
-/// whose history and roaming options FerroUI's clipboard does not have; `ShowFormats_Click` and
+/// with its history and roaming options (Windows has them; elsewhere they do nothing); `ShowFormats_Click` and
 /// `ClearClipboard_Click`; and `ContentChangedToggle_Toggled`, over the clipboard's
 /// `content_changed`, which reads nothing until the application asks.
 fn wire_clipboard(root: &Ref<Control>) {
@@ -123,10 +123,16 @@ fn wire_clipboard(root: &Ref<Control>) {
         root.get_control::<Image>("SourceImage")
             .set_source(Some(Rc::new(bitmap)));
     }
+    // IsHistoryEnabled and IsRoamingEnabled: false where the platform has neither (only Windows
+    // has them).
+    let (history, roaming) = clipboard_of(root)
+        .map(|clipboard| (clipboard.is_history_enabled(), clipboard.is_roaming_enabled()))
+        .unwrap_or_default();
+    let yes_no = |on: bool| if on { "Yes" } else { "No" };
     root.get_control::<TextBlock>("HistoryEnabledText")
-        .set_text(Some("Clipboard history: not available on this platform"));
+        .set_text(Some(&format!("Clipboard history enabled: {}", yes_no(history))));
     root.get_control::<TextBlock>("RoamingEnabledText")
-        .set_text(Some("Clipboard roaming: not available on this platform"));
+        .set_text(Some(&format!("Clipboard roaming enabled: {}", yes_no(roaming))));
 
     on_clipboard_click(root, "CopyText", "ConfirmationTextBlock", |root| {
         let clipboard = clipboard_of(&root);
@@ -261,6 +267,10 @@ fn wire_clipboard(root: &Ref<Control>) {
             .get_control::<TextBox>("HistoryRoamingTextBox")
             .text()
             .unwrap_or_default();
+        let options = ClipboardContentOptions {
+            is_allowed_in_history: root.get_control::<ToggleSwitch>("AllowHistoryToggle").is_checked() == Some(true),
+            is_roaming_allowed: root.get_control::<ToggleSwitch>("AllowRoamingToggle").is_checked() == Some(true),
+        };
         let weak = root.downgrade();
         async move {
             let Some(clipboard) = clipboard else { return };
@@ -268,9 +278,10 @@ fn wire_clipboard(root: &Ref<Control>) {
                 set_status(&weak, "HistoryRoamingStatusText", "Please enter text to copy.");
                 return;
             }
-            let message = match clipboard.set_text_async(Some(&text)).await {
-                Ok(()) => "Text copied to clipboard. History and roaming options are not available on this platform."
-                    .to_string(),
+            let data = DataTransfer::new();
+            data.add(DataTransferItem::create_text(Some(&text)));
+            let message = match clipboard.set_data_with_options_async(Some(data), options).await {
+                Ok(()) => "Text copied to clipboard. History and roaming follow the selected options.".to_string(),
                 Err(_) => "Error copying content to clipboard.".to_string(),
             };
             set_status(&weak, "HistoryRoamingStatusText", &message);

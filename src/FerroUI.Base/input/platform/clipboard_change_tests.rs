@@ -115,3 +115,85 @@ fn the_platform_is_observed_only_while_there_is_a_handler() {
     drop(second);
     assert_eq!(0, platform.subscriptions.get(), "the platform stops when the last handler goes");
 }
+
+mod history {
+    use super::*;
+    use crate::input::platform::{
+        ClipboardContentOptions, ClipboardHistoryItemsResult, ClipboardHistoryItemsResultStatus, IClipboardHistoryImpl,
+    };
+    use crate::input::DataTransfer;
+
+    /// A platform clipboard with a history; it records the options of the last copy.
+    #[derive(Default)]
+    struct HistoryClipboard {
+        options: Cell<Option<ClipboardContentOptions>>,
+    }
+
+    impl IClipboardImpl for HistoryClipboard {
+        fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
+            Box::pin(std::future::ready(Ok(None)))
+        }
+        fn set_data_async(&self, _data_transfer: Rc<dyn IAsyncDataTransfer>) -> LocalBoxFuture<Result<(), ClipboardError>> {
+            Box::pin(std::future::ready(Ok(())))
+        }
+        fn clear_async(&self) -> LocalBoxFuture<Result<(), ClipboardError>> {
+            Box::pin(std::future::ready(Ok(())))
+        }
+        fn as_clipboard_history_impl(&self) -> Option<&dyn IClipboardHistoryImpl> {
+            Some(self)
+        }
+    }
+
+    impl IClipboardHistoryImpl for HistoryClipboard {
+        fn is_history_enabled(&self) -> bool {
+            true
+        }
+        fn is_roaming_enabled(&self) -> bool {
+            false
+        }
+        fn set_data_with_options_async(
+            &self,
+            _data_transfer: Rc<dyn IAsyncDataTransfer>,
+            options: ClipboardContentOptions,
+        ) -> LocalBoxFuture<Result<(), ClipboardError>> {
+            self.options.set(Some(options));
+            Box::pin(std::future::ready(Ok(())))
+        }
+        fn get_history_items_async(&self) -> LocalBoxFuture<Result<ClipboardHistoryItemsResult, ClipboardError>> {
+            Box::pin(std::future::ready(Ok(ClipboardHistoryItemsResult::empty(
+                ClipboardHistoryItemsResultStatus::ClipboardHistoryDisabled,
+            ))))
+        }
+    }
+
+    fn history_of(clipboard: &Rc<Clipboard>) -> ClipboardHistoryItemsResultStatus {
+        let mut read = clipboard.get_history_items_async();
+        match read.as_mut().poll(&mut Context::from_waker(Waker::noop())) {
+            Poll::Ready(result) => result.unwrap().status,
+            Poll::Pending => panic!("the fake clipboard completes at once"),
+        }
+    }
+
+    #[test]
+    fn a_platform_without_history_says_so_and_copies_without_the_options() {
+        let platform = FakeClipboard::new(false);
+        let clipboard = Clipboard::new(platform);
+        assert!(!clipboard.is_history_enabled() && !clipboard.is_roaming_enabled());
+        assert_eq!(ClipboardHistoryItemsResultStatus::NotSupported, history_of(&clipboard));
+        let options = ClipboardContentOptions { is_allowed_in_history: false, is_roaming_allowed: false };
+        complete(clipboard.set_data_with_options_async(Some(DataTransfer::new()), options)).unwrap();
+    }
+
+    #[test]
+    fn a_platform_with_history_gets_the_options_and_answers_the_history() {
+        let platform = Rc::new(HistoryClipboard::default());
+        let clipboard = Clipboard::new(platform.clone());
+        assert!(clipboard.is_history_enabled());
+        assert!(!clipboard.is_roaming_enabled());
+        let options = ClipboardContentOptions { is_allowed_in_history: false, is_roaming_allowed: true };
+        complete(clipboard.set_data_with_options_async(Some(DataTransfer::new()), options)).unwrap();
+        assert_eq!(Some(options), platform.options.get());
+        assert_eq!(ClipboardHistoryItemsResultStatus::ClipboardHistoryDisabled, history_of(&clipboard));
+        assert_eq!(ClipboardContentOptions { is_allowed_in_history: true, is_roaming_allowed: true }, ClipboardContentOptions::default());
+    }
+}

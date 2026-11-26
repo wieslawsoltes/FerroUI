@@ -5,10 +5,10 @@
      and hides again after two seconds. The ToggleSwitches' Headers are their Content and IsOn is
      IsChecked; ThemeResource is DynamicResource; the announcements of
      UIHelper.AnnounceActionForAccessibility are polite live regions. The files of the fourth
-     example come from the window's storage provider. FerroUI's clipboard has no history or
-     roaming (Clipboard.IsHistoryEnabled, IsRoamingEnabled and ClipboardContentOptions are Windows
-     clipboard features): the fifth example copies its text without them and says so, and the page
-     is partial. The monitor switch subscribes to the clipboard's ContentChanged. -->
+     example come from the window's storage provider. IsHistoryEnabled, IsRoamingEnabled and the
+     ClipboardContentOptions of the fifth example are the clipboard's; only Windows has history and
+     roaming, and elsewhere they are No and the options do nothing. The monitor switch subscribes
+     to the clipboard's ContentChanged. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="Example1" Spacing="8">
