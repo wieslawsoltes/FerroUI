@@ -710,9 +710,7 @@ impl Drop for FrameStorage {
 
 /// An 8 by 8 texture of the device in `BGRA8Unorm`, every pixel `bgra`, as a producer's frame.
 fn bgra_frame_texture(device: &TestMetalDevice, bgra: [u8; 4]) -> Retained<ProtocolObject<dyn MTLTexture>> {
-    use objc2_metal::{MTLOrigin, MTLRegion, MTLSize};
-    // SAFETY: a descriptor of a two-dimensional texture, the texture of the device, and the
-    // upload of 8 by 8 pixels of 4 bytes from a buffer of that size.
+    // SAFETY: a descriptor of a two-dimensional texture and the texture of the device.
     unsafe {
         let descriptor = MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
             MTLPixelFormat::BGRA8Unorm,
@@ -723,14 +721,24 @@ fn bgra_frame_texture(device: &TestMetalDevice, bgra: [u8; 4]) -> Retained<Proto
         descriptor.setUsage(MTLTextureUsage::ShaderRead);
         descriptor.setStorageMode(MTLStorageMode::Shared);
         let texture = device.device.newTextureWithDescriptor(&descriptor).expect("a texture of the frame");
-        let pixels: Vec<u8> = std::iter::repeat_n(bgra, 64).flatten().collect();
+        fill_bgra_frame_texture(&texture, bgra);
+        texture
+    }
+}
+
+/// Writes `bgra` to every pixel of an 8 by 8 texture of [`bgra_frame_texture`].
+fn fill_bgra_frame_texture(texture: &ProtocolObject<dyn MTLTexture>, bgra: [u8; 4]) {
+    use objc2_metal::{MTLOrigin, MTLRegion, MTLSize};
+    let pixels: Vec<u8> = std::iter::repeat_n(bgra, 64).flatten().collect();
+    // SAFETY: the upload of 8 by 8 pixels of 4 bytes from a buffer of that size into a shared
+    // texture of that size.
+    unsafe {
         texture.replaceRegion_mipmapLevel_withBytes_bytesPerRow(
             MTLRegion { origin: MTLOrigin { x: 0, y: 0, z: 0 }, size: MTLSize { width: 8, height: 8, depth: 1 } },
             0,
             std::ptr::NonNull::new(pixels.as_ptr().cast_mut().cast()).unwrap(),
             8 * 4,
         );
-        texture
     }
 }
 
@@ -859,4 +867,364 @@ fn a_shared_frame_is_converted_once_on_the_device_and_its_storage_given_back_aft
             assert_eq!(0, budget.usage().frames, "{mode:?} {color:?}: the budget is free again");
         }
     }
+}
+
+/// A quad over a square viewport whose diffuse material samples `bitmap`, under a white ambient
+/// light and an orthographic camera: the frame in its own colours.
+#[cfg(feature = "media3d")]
+fn frame_on_a_quad(
+    bitmap: &Arc<ferroui_base::platform::SharedBitmapImpl>,
+) -> Arc<ferroui_base::rendering::scene3d::Scene3DSnapshot> {
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::imaging::Bitmap;
+    use ferroui_base::media::{AlignmentX, AlignmentY, SharedBrush, Stretch, TileMode};
+    use ferroui_base::{RelativePoint, RelativeRect};
+    let brush = ImmutableImageBrush::new(
+        Some(Rc::new(Bitmap::from_impl(bitmap.clone()))),
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(RelativeRect::FILL),
+        1.0,
+        None,
+        RelativePoint::TOP_LEFT,
+        Some(RelativeRect::FILL),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    quad_scene(SharedBrush::from_brush(&brush))
+}
+
+/// A quad over a square viewport whose diffuse material paints with `brush`, under a white
+/// ambient light and an orthographic camera.
+#[cfg(feature = "media3d")]
+fn quad_scene(
+    brush: Option<ferroui_base::media::SharedBrush>,
+) -> Arc<ferroui_base::rendering::scene3d::Scene3DSnapshot> {
+    use ferroui_base::numerics::{Matrix4x4, Vector2, Vector3};
+    use ferroui_base::rendering::scene3d::*;
+    let positions = vec![
+        Vector3::new(-1.0, -1.0, 0.0),
+        Vector3::new(1.0, -1.0, 0.0),
+        Vector3::new(1.0, 1.0, 0.0),
+        Vector3::new(-1.0, 1.0, 0.0),
+    ];
+    let bounds = Scene3DBounds::of_points(positions.iter().copied());
+    let mesh = Arc::new(MeshData {
+        id: 7_301,
+        version: 1,
+        positions,
+        normals: vec![Vector3::new(0.0, 0.0, 1.0); 4],
+        normals_generated: false,
+        texture_coordinates: vec![
+            Vector2::new(0.0, 1.0),
+            Vector2::new(1.0, 1.0),
+            Vector2::new(1.0, 0.0),
+            Vector2::new(0.0, 0.0),
+        ],
+        indices: vec![0, 1, 2, 0, 2, 3],
+        bounds,
+    });
+    let white = Color::from_argb(255, 255, 255, 255);
+    let layer = Scene3DMaterialLayer {
+        kind: Scene3DMaterialKind::Diffuse,
+        color: white,
+        ambient_color: white,
+        specular_power: 0.0,
+        brush,
+    };
+    let (near, far) = (1.0f32, 10.0f32);
+    let position = Vector3::new(0.0, 0.0, 5.0);
+    let view = Matrix4x4::create_look_at(position, Vector3::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
+    let m33 = 1.0 / (near - far);
+    let projection =
+        Matrix4x4::new(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, m33, 0.0, 0.0, 0.0, near * m33, 1.0);
+    Arc::new(Scene3DSnapshot {
+        structure_generation: 1,
+        record_generation: 1,
+        camera_generation: 1,
+        viewport: Rect::new(0.0, 0.0, 16.0, 16.0),
+        camera: Some(Scene3DCamera {
+            kind: Scene3DCameraKind::Orthographic,
+            view,
+            projection,
+            position,
+            near_plane_distance: near,
+            far_plane_distance: far,
+        }),
+        models: vec![Scene3DModel {
+            world: Matrix4x4::IDENTITY,
+            world_bounds: bounds,
+            mesh,
+            front: vec![layer],
+            back: Vec::new(),
+        }],
+        lights: vec![Scene3DLight::Ambient { color: white }],
+        bounds: None,
+    })
+}
+
+/// #608 D7: a material samples the converted texture of a shared frame. A frame shown flat and
+/// on a quad is converted once, nothing goes through memory, and the next frame uploads no mesh.
+#[cfg(feature = "media3d")]
+#[test]
+fn a_video_material_samples_the_frame_without_a_copy() {
+    use crate::gpu::scene3d_passes::{scene3d_counters, scene_texture};
+    use ferroui_base::platform::{
+        IExternalObjectsRenderInterfaceContextFeature, IPlatformRenderInterfaceContext,
+        PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
+    };
+    use ferroui_base::rendering::composition::frames::*;
+    use ferroui_render3d::wgpu_executor::texture_counters;
+    let Some(device) = TestMetalDevice::new("a_video_material_samples_the_frame_without_a_copy") else {
+        return;
+    };
+    let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    let bgra = [200u8, 100, 50, 255];
+    *device.external.borrow_mut() = Some(Rc::new(TestExternalObjects { texture: bgra_frame_texture(&device, bgra) }));
+    let probe = VelloMetalGpu::new(device.clone()).unwrap();
+    let Some(mode) = window_modes(probe.device()).into_iter().find(|mode| *mode != VelloRenderingMode::Cpu) else {
+        println!("skipped: no GPU mode in this build");
+        return;
+    };
+    let window = Window::new(&device, mode, PixelSize::new(32, 32), 1.0);
+    let context = crate::vello_backend_context::VelloContext::with_gpu(window.gpu.clone(), vec![mode]);
+    let feature = context
+        .public_features()
+        .remove(&TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())
+        .and_then(|feature| feature.downcast::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>().ok())
+        .map(|feature| (*feature).clone())
+        .expect("the external objects feature of the GPU");
+    let imported = feature.import_image(
+        Rc::new(TestHandle),
+        PlatformGraphicsExternalImageProperties {
+            width: 8,
+            height: 8,
+            format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
+            memory_size: 256,
+            memory_offset: 0,
+            top_left_origin: true,
+            vulkan_properties: None,
+            dma_buf_properties: None,
+        },
+    );
+    let drops = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let budget = FrameBudget::new(FrameBudgetLimits::default());
+    let metadata = |sequence: u64| FrameMetadata {
+        identity: FrameIdentity { source: 1, generation: 1, sequence },
+        width: 8,
+        height: 8,
+        visible: FrameRegion { x: 0, y: 0, width: 8, height: 8 },
+        format: FrameFormat::Bgra8,
+        color: FrameColor::Srgb,
+        alpha: FrameAlpha::Opaque,
+        rotation: FrameRotation::None,
+        mirrored: false,
+        top_left_origin: true,
+        timestamp: std::time::Duration::ZERO,
+        device: Some(DeviceIdentity::Luid(TEST_LUID.to_vec())),
+        device_generation: feature.shared_context_generation(),
+        planes: vec![FramePlane { offset: 0, stride: 32, length: 256 }],
+        retained_bytes: 256,
+    };
+    let gpu = window.gpu.device().clone();
+    let draw = |scene: &Arc<ferroui_base::rendering::scene3d::Scene3DSnapshot>| {
+        let drawn = scene_texture(&gpu, scene, PixelSize::new(16, 16), 1.0, false, (0, 0));
+        let drawn = drawn.expect("drawn on the device");
+        let texture = drawn.texture.texture();
+        let (width, height) = (texture.width() as usize, texture.height() as usize);
+        let mut pixels = vec![0u8; width * height * 4];
+        assert!(gpu.read_texture(texture, &mut pixels));
+        let index = (8 * width + 8) * 4;
+        [pixels[index], pixels[index + 1], pixels[index + 2], pixels[index + 3]]
+    };
+
+    let frame = budget.lease(metadata(1), FrameStorage(drops.clone())).unwrap();
+    let counters = frame.counters();
+    let bitmap = imported.acquire_shared_bitmap(frame).expect("the shared bitmap");
+    let uploads = texture_counters().textures_uploaded;
+    let on_device = texture_counters().textures_on_device;
+
+    let scene = frame_on_a_quad(&bitmap);
+    let drawn = draw(&scene);
+    for (channel, expected) in [bgra[2], bgra[1], bgra[0], 255].into_iter().enumerate() {
+        assert!(drawn[channel].abs_diff(expected) <= 2, "the frame on the quad {drawn:?}");
+    }
+    // Shown flat as well: the same conversion.
+    let scene_info = RenderTargetSceneInfo::new(PixelSize::new(32, 32), 1.0, CompositionTransparencyLevel::None);
+    let (mut flat, _) = window.render_target.create_drawing_context(&scene_info);
+    flat.clear(Colors::WHITE);
+    flat.draw_bitmap(&*bitmap, 1.0, Rect::new(0.0, 0.0, 8.0, 8.0), Rect::new(0.0, 0.0, 16.0, 16.0));
+    flat.dispose();
+    let counts = counters.snapshot();
+    assert_eq!(1, counts.gpu_imports);
+    assert_eq!(1, counts.gpu_conversions, "one conversion for the quad and the flat frame");
+    assert_eq!(0, counts.preview.attempts, "nothing through memory");
+    assert_eq!(uploads, texture_counters().textures_uploaded, "no texels written");
+    assert_eq!(on_device + 1, texture_counters().textures_on_device);
+
+    // The next frame is drawn with the mesh and the pipelines the scene has.
+    let before = scene3d_counters();
+    let next = budget.lease(metadata(2), FrameStorage(drops.clone())).unwrap();
+    let next = imported.acquire_shared_bitmap(next).expect("the next shared bitmap");
+    let next_scene = frame_on_a_quad(&next);
+    draw(&next_scene);
+    let after = scene3d_counters();
+    assert_eq!(before.mesh_uploads, after.mesh_uploads);
+    assert_eq!(before.pipelines_created, after.pipelines_created);
+    assert_eq!(uploads, texture_counters().textures_uploaded);
+    assert_eq!(on_device + 2, texture_counters().textures_on_device);
+
+    // The storage of both frames is given back once the device has read them.
+    drop((scene, next_scene));
+    bitmap.dispose();
+    next.dispose();
+    drop((bitmap, next));
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+    while gpu.poll_frame_reads() {
+        assert!(std::time::Instant::now() < deadline, "the device reads the frames no longer");
+        std::thread::yield_now();
+    }
+    assert_eq!(2, drops.load(std::sync::atomic::Ordering::SeqCst));
+    assert_eq!(0, budget.usage().frames);
+}
+
+/// #608 D7: a scene whose material follows a frame slot is drawn again for a new frame with the
+/// same snapshot, in the colours of that frame, and an unchanged slot draws the kept output.
+#[cfg(feature = "media3d")]
+#[test]
+fn a_new_frame_in_the_slot_draws_the_same_snapshot_again() {
+    use crate::gpu::scene3d_passes::{scene3d_counters, scene_texture};
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, SharedBrush, Stretch, TileMode};
+    use ferroui_base::platform::{
+        IExternalObjectsRenderInterfaceContextFeature, IPlatformRenderInterfaceContext,
+        PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
+    };
+    use ferroui_base::rendering::composition::frames::*;
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    use ferroui_base::utilities::RefCountable;
+    use ferroui_base::{RelativePoint, RelativeRect};
+    let Some(device) = TestMetalDevice::new("a_new_frame_in_the_slot_draws_the_same_snapshot_again") else {
+        return;
+    };
+    let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+    let colors = [[200u8, 100, 50, 255], [20, 180, 240, 255]];
+    let storage = bgra_frame_texture(&device, colors[0]);
+    *device.external.borrow_mut() = Some(Rc::new(TestExternalObjects { texture: storage.clone() }));
+    let probe = VelloMetalGpu::new(device.clone()).unwrap();
+    let Some(mode) = window_modes(probe.device()).into_iter().find(|mode| *mode != VelloRenderingMode::Cpu) else {
+        println!("skipped: no GPU mode in this build");
+        return;
+    };
+    let window = Window::new(&device, mode, PixelSize::new(32, 32), 1.0);
+    let context = crate::vello_backend_context::VelloContext::with_gpu(window.gpu.clone(), vec![mode]);
+    let feature = context
+        .public_features()
+        .remove(&TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())
+        .and_then(|feature| feature.downcast::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>().ok())
+        .map(|feature| (*feature).clone())
+        .expect("the external objects feature of the GPU");
+    let budget = FrameBudget::new(FrameBudgetLimits::default());
+    let acquire = |sequence: u64, bgra: [u8; 4]| {
+        // The producer writes the next frame into its storage (the last one is already converted).
+        fill_bgra_frame_texture(&storage, bgra);
+        let imported = feature.import_image(
+            Rc::new(TestHandle),
+            PlatformGraphicsExternalImageProperties {
+                width: 8,
+                height: 8,
+                format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
+                memory_size: 256,
+                memory_offset: 0,
+                top_left_origin: true,
+                vulkan_properties: None,
+                dma_buf_properties: None,
+            },
+        );
+        let metadata = FrameMetadata {
+            identity: FrameIdentity { source: 2, generation: 1, sequence },
+            width: 8,
+            height: 8,
+            visible: FrameRegion { x: 0, y: 0, width: 8, height: 8 },
+            format: FrameFormat::Bgra8,
+            color: FrameColor::Srgb,
+            alpha: FrameAlpha::Opaque,
+            rotation: FrameRotation::None,
+            mirrored: false,
+            top_left_origin: true,
+            timestamp: std::time::Duration::ZERO,
+            device: Some(DeviceIdentity::Luid(TEST_LUID.to_vec())),
+            device_generation: feature.shared_context_generation(),
+            planes: vec![FramePlane { offset: 0, stride: 32, length: 256 }],
+            retained_bytes: 256,
+        };
+        let frame = budget.lease(metadata.clone(), ()).unwrap();
+        let bitmap = imported.acquire_shared_bitmap(frame).expect("the shared bitmap");
+        let item = bitmap.clone();
+        (RefCountable::create(bitmap, move || item.dispose()), metadata)
+    };
+    let tile = ImmutableImageBrush::new(
+        None,
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(RelativeRect::FILL),
+        1.0,
+        None,
+        RelativePoint::TOP_LEFT,
+        Some(RelativeRect::FILL),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let slot = Scene3DFrameSlot::new();
+    let scene = quad_scene(SharedBrush::from_frame_slot(&tile, slot.clone()));
+    let gpu = window.gpu.device().clone();
+    let draw = || {
+        let drawn = scene_texture(&gpu, &scene, PixelSize::new(16, 16), 1.0, false, (0, 0));
+        let drawn = drawn.expect("drawn on the device");
+        let texture = drawn.texture.texture();
+        let (width, height) = (texture.width() as usize, texture.height() as usize);
+        let mut pixels = vec![0u8; width * height * 4];
+        assert!(gpu.read_texture(texture, &mut pixels));
+        let index = (8 * width + 8) * 4;
+        [pixels[index], pixels[index + 1], pixels[index + 2], pixels[index + 3]]
+    };
+    let assert_frame = |drawn: [u8; 4], bgra: [u8; 4]| {
+        for (channel, expected) in [bgra[2], bgra[1], bgra[0], 255].into_iter().enumerate() {
+            assert!(drawn[channel].abs_diff(expected) <= 2, "{drawn:?}, expected the frame {bgra:?}");
+        }
+    };
+
+    assert_eq!(0, draw()[3], "no frame yet: the material paints nothing");
+    let (bitmap, metadata) = acquire(1, colors[0]);
+    slot.publish(bitmap, metadata);
+    assert_frame(draw(), colors[0]);
+
+    // Nothing new: the kept output.
+    let before = scene3d_counters();
+    assert_frame(draw(), colors[0]);
+    let after = scene3d_counters();
+    assert_eq!(before.passes, after.passes, "no 3D pass for an unchanged slot");
+    assert_eq!(before.cached_output_frames + 1, after.cached_output_frames);
+
+    // A new frame in the same snapshot: one pass, no mesh or pipeline.
+    let (bitmap, metadata) = acquire(2, colors[1]);
+    slot.publish(bitmap, metadata);
+    let before = scene3d_counters();
+    assert_frame(draw(), colors[1]);
+    let after = scene3d_counters();
+    assert_eq!(before.passes + 1, after.passes);
+    assert_eq!(before.mesh_uploads, after.mesh_uploads);
+    assert_eq!(before.pipelines_created, after.pipelines_created);
+
+    slot.clear();
+    assert_eq!(0, draw()[3], "an emptied slot paints nothing");
+    drop(scene);
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+    while gpu.poll_frame_reads() {
+        assert!(std::time::Instant::now() < deadline, "the device reads the frames no longer");
+        std::thread::yield_now();
+    }
+    assert_eq!(0, budget.usage().frames, "both frames are given back");
 }

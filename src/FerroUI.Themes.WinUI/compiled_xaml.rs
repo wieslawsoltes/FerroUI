@@ -127,7 +127,7 @@ pub fn populate_winuitheme_xaml(
     let resources_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_1.clone());
     if rt::is_instance(&resources_1, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_1: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 14, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 14, 6)?, count_1.wrapping_add(2410_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_1.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 14, 6)?, count_1.wrapping_add(2412_i32));
     }
     // WinUITheme.xaml(14,6) Key
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
@@ -214,7 +214,7 @@ pub fn populate_winuitheme_xaml(
     let resources_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_2.clone());
     if rt::is_instance(&resources_2, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_2: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 311, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 311, 6)?, count_2.wrapping_add(2410_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_2.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 311, 6)?, count_2.wrapping_add(2412_i32));
     }
     // WinUITheme.xaml(311,6) Key
     let value_160 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
@@ -301,7 +301,7 @@ pub fn populate_winuitheme_xaml(
     let resources_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_3.clone());
     if rt::is_instance(&resources_3, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_3: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 607, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 607, 6)?, count_3.wrapping_add(2410_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_3.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 607, 6)?, count_3.wrapping_add(2412_i32));
     }
     // WinUITheme.xaml(607,25) Key
     let value_319 = crate::WinUITheme::__markup_field_HighContrast();
@@ -1828,6 +1828,8 @@ fn populate_winuitheme_xaml_unit_68(
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 15, 58)?, rt::string_object("ProgressBarBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 15, 58)?;
     // WinUITheme.xaml(16,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_183)?;
+    // WinUITheme.xaml(21,8) Content (resource)
+    rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_184)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1839,7 +1841,7 @@ fn populate_winuitheme_xaml_unit_69(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_184)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_185)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1851,11 +1853,11 @@ fn populate_winuitheme_xaml_unit_70(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_185)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_186)?;
     // WinUITheme.xaml(18,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 56)?, rt::string_object("NumberBoxPopupBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 56)?;
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_186)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_187)?;
     // WinUITheme.xaml(20,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 20, 66)?, rt::string_object("NumberBoxPopupSpinButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 20, 66)?;
     ::core::result::Result::Ok(())
@@ -1869,15 +1871,15 @@ fn populate_winuitheme_xaml_unit_71(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_187)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_188)?;
     // WinUITheme.xaml(24,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 24, 56)?, rt::string_object("ExpanderHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 24, 56)?;
     // WinUITheme.xaml(25,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_188)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_189)?;
     // WinUITheme.xaml(34,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 34, 57)?, rt::string_object("ExpanderChevronBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 57)?;
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_189)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_190)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1889,7 +1891,7 @@ fn populate_winuitheme_xaml_unit_72(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_190)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_191)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1901,7 +1903,7 @@ fn populate_winuitheme_xaml_unit_73(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_191)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_192)?;
     // WinUITheme.xaml(31,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 31, 49)?, rt::string_object("InfoBarBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 31, 49)?;
     ::core::result::Result::Ok(())
@@ -1915,7 +1917,7 @@ fn populate_winuitheme_xaml_unit_74(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_192)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_193)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1927,9 +1929,9 @@ fn populate_winuitheme_xaml_unit_75(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_193)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_194)?;
     // WinUITheme.xaml(33,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_194)?;
+    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_195)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1941,7 +1943,7 @@ fn populate_winuitheme_xaml_unit_76(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(15,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_195)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_196)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1953,19 +1955,19 @@ fn populate_winuitheme_xaml_unit_77(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(16,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_196)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_197)?;
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_197)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_198)?;
     // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_198)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_199)?;
     // WinUITheme.xaml(41,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 41, 63)?, rt::string_object("TabularSurfaceGroupHeaderCountOpacity"), rt::to_object(0.7_f64)), 41, 63)?;
     // WinUITheme.xaml(42,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_199)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_200)?;
     // WinUITheme.xaml(43,67) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 43, 67)?, rt::string_object("TabularSurfaceGroupHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 43, 67)?;
     // WinUITheme.xaml(44,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_200)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_201)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1976,18 +1978,18 @@ fn populate_winuitheme_xaml_unit_78(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(16,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_201)?;
+    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_202)?;
     // WinUITheme.xaml(18,53) Content (resource)
     let value_158 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 18, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 18, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_158))), 18, 53)?;
     // WinUITheme.xaml(19,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_202)?;
+    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_203)?;
     // WinUITheme.xaml(21,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 21, 53)?, rt::string_object("TableViewHeaderCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64))), 21, 53)?;
     // WinUITheme.xaml(22,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_203)?;
+    rt::add_double_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_204)?;
     // WinUITheme.xaml(24,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_204)?;
+    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_WINUITHEME_XAML_ROWS_205)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1999,7 +2001,7 @@ fn populate_winuitheme_xaml_unit_79(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(16,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_205)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_206)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2011,93 +2013,93 @@ fn populate_winuitheme_xaml_unit_80(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(312,57) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_1984, 312, 57)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_1986, 312, 57)?;
     // WinUITheme.xaml(313,49) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_1985, 313, 49)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_1987, 313, 49)?;
     // WinUITheme.xaml(314,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_206)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_207)?;
     // WinUITheme.xaml(344,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_207)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_208)?;
     // WinUITheme.xaml(365,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 365, 66)?, rt::string_object("AppBarExpandButtonThemeWidthGridLength"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(48.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 365, 66)?;
     // WinUITheme.xaml(366,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 366, 60)?, rt::string_object("HyperlinkFocusRectCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 366, 60)?;
     // WinUITheme.xaml(367,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_208)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_209)?;
     // WinUITheme.xaml(393,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_209)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_210)?;
     // WinUITheme.xaml(394,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_210)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_211)?;
     // WinUITheme.xaml(412,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_211)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_212)?;
     // WinUITheme.xaml(413,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_212)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_213)?;
     // WinUITheme.xaml(421,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_213)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_214)?;
     // WinUITheme.xaml(422,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_214)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_215)?;
     // WinUITheme.xaml(424,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_215)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_216)?;
     // WinUITheme.xaml(441,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_216)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_217)?;
     // WinUITheme.xaml(442,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_217)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_218)?;
     // WinUITheme.xaml(444,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_218)?;
-    // WinUITheme.xaml(451,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2044, 451, 8)?;
-    // WinUITheme.xaml(452,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2045, 452, 8)?;
-    // WinUITheme.xaml(453,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2046, 453, 8)?;
-    // WinUITheme.xaml(454,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_219)?;
+    // WinUITheme.xaml(451,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2046, 451, 8)?;
+    // WinUITheme.xaml(452,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2047, 452, 8)?;
+    // WinUITheme.xaml(453,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2048, 453, 8)?;
+    // WinUITheme.xaml(454,8) Content (resource)
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_220)?;
     // WinUITheme.xaml(455,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_220)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_221)?;
     // WinUITheme.xaml(456,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_221)?;
-    // WinUITheme.xaml(463,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2056, 463, 8)?;
-    // WinUITheme.xaml(464,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2057, 464, 8)?;
-    // WinUITheme.xaml(465,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2058, 465, 8)?;
-    // WinUITheme.xaml(466,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_222)?;
+    // WinUITheme.xaml(463,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2058, 463, 8)?;
+    // WinUITheme.xaml(464,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2059, 464, 8)?;
+    // WinUITheme.xaml(465,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2060, 465, 8)?;
+    // WinUITheme.xaml(466,8) Content (resource)
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_223)?;
     // WinUITheme.xaml(469,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_223)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_224)?;
     // WinUITheme.xaml(470,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_224)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_225)?;
     // WinUITheme.xaml(471,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_225)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_226)?;
     // WinUITheme.xaml(482,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_226)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_227)?;
     // WinUITheme.xaml(483,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_227)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_228)?;
     // WinUITheme.xaml(487,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_228)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_229)?;
     // WinUITheme.xaml(494,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_229)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_230)?;
     // WinUITheme.xaml(496,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_230)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_231)?;
     // WinUITheme.xaml(516,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_231)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_232)?;
     // WinUITheme.xaml(517,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_232)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_233)?;
     // WinUITheme.xaml(536,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_233)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_234)?;
     // WinUITheme.xaml(570,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_234)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_235)?;
     // WinUITheme.xaml(571,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_235)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_236)?;
     // WinUITheme.xaml(591,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_236)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_237)?;
     // WinUITheme.xaml(595,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 595, 56)?, rt::string_object("WindowCaptionButtonStrokeWidth"), rt::to_object(0.5_f64)), 595, 56)?;
     // WinUITheme.xaml(596,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_237)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_238)?;
     // WinUITheme.xaml(601,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_238)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_239)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2112,17 +2114,17 @@ fn populate_winuitheme_xaml_unit_81(
     let value_187 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_187))), 28, 52)?;
     // WinUITheme.xaml(29,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_239)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_240)?;
     // WinUITheme.xaml(30,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentVeryHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2197, 30, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentVeryHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2199, 30, 8)?;
     // WinUITheme.xaml(31,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2198, 31, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2200, 31, 8)?;
     // WinUITheme.xaml(32,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_240)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_241)?;
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_241)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_242)?;
     // WinUITheme.xaml(36,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_242)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_243)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2134,33 +2136,33 @@ fn populate_winuitheme_xaml_unit_82(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(219,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_243)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_244)?;
     // WinUITheme.xaml(302,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_244)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_245)?;
     // WinUITheme.xaml(307,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_245)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_246)?;
     // WinUITheme.xaml(310,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_246)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_247)?;
     // WinUITheme.xaml(338,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_247)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_248)?;
     // WinUITheme.xaml(340,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentFillColorSecondaryBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2241, 340, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentFillColorSecondaryBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2243, 340, 8)?;
     // WinUITheme.xaml(341,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentFillColorTertiaryBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2242, 341, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentFillColorTertiaryBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2244, 341, 8)?;
     // WinUITheme.xaml(342,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_248)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_249)?;
     // WinUITheme.xaml(379,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_249)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_250)?;
     // WinUITheme.xaml(380,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_250)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_251)?;
     // WinUITheme.xaml(392,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "ControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2293, 392, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "ControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2295, 392, 8)?;
     // WinUITheme.xaml(401,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "CircleElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2294, 401, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "CircleElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2296, 401, 8)?;
     // WinUITheme.xaml(407,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2295, 407, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2297, 407, 8)?;
     // WinUITheme.xaml(416,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_251)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_252)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2172,15 +2174,15 @@ fn populate_winuitheme_xaml_unit_83(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(41,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransientBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2304, 41, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransientBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2306, 41, 8)?;
     // WinUITheme.xaml(42,51) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_252)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_253)?;
     // WinUITheme.xaml(52,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_253)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_254)?;
     // WinUITheme.xaml(58,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_254)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_255)?;
     // WinUITheme.xaml(61,8) Content (resource)
-    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_255)?;
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_256)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2192,16 +2194,16 @@ fn populate_winuitheme_xaml_unit_84(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(78,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_256)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_257)?;
     // WinUITheme.xaml(95,53) Content (resource)
     let value_281 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_281))), 95, 53)?;
     // WinUITheme.xaml(96,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_257)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_258)?;
     // WinUITheme.xaml(121,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "TextControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2360, 121, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "TextControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2362, 121, 8)?;
     // WinUITheme.xaml(130,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "TextControlElevationBorderFocusedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2361, 130, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "TextControlElevationBorderFocusedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2363, 130, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2213,13 +2215,13 @@ fn populate_winuitheme_xaml_unit_85(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(97,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_258)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_259)?;
     // WinUITheme.xaml(134,66) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_259)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_260)?;
     // WinUITheme.xaml(142,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_260)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_261)?;
     // WinUITheme.xaml(150,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_261)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_262)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2231,101 +2233,101 @@ fn populate_winuitheme_xaml_unit_86(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(67,50) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_262)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_263)?;
     // WinUITheme.xaml(70,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2434, 70, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2436, 70, 8)?;
     // WinUITheme.xaml(71,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2435, 71, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2437, 71, 8)?;
     // WinUITheme.xaml(72,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentAcrylicWindowAccentMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2436, 72, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentAcrylicWindowAccentMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2438, 72, 8)?;
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentAcrylicElementAccentMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2437, 73, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentAcrylicElementAccentMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2439, 73, 8)?;
     // WinUITheme.xaml(74,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark1AcrylicWindowAccentDark1Brush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2438, 74, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark1AcrylicWindowAccentDark1Brush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2440, 74, 8)?;
     // WinUITheme.xaml(75,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark1AcrylicElementAccentDark1Brush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2439, 75, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark1AcrylicElementAccentDark1Brush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2441, 75, 8)?;
     // WinUITheme.xaml(76,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2440, 76, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2442, 76, 8)?;
     // WinUITheme.xaml(77,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2441, 77, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2443, 77, 8)?;
     // WinUITheme.xaml(78,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicWindowMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2442, 78, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicWindowMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2444, 78, 8)?;
     // WinUITheme.xaml(79,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicElementMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2443, 79, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAcrylicElementMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2445, 79, 8)?;
     // WinUITheme.xaml(80,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2444, 80, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2446, 80, 8)?;
     // WinUITheme.xaml(81,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2445, 81, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2447, 81, 8)?;
     // WinUITheme.xaml(82,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2446, 82, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2448, 82, 8)?;
     // WinUITheme.xaml(83,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2447, 83, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2449, 83, 8)?;
     // WinUITheme.xaml(84,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2448, 84, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2450, 84, 8)?;
     // WinUITheme.xaml(85,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2449, 85, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementMediumHighBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2451, 85, 8)?;
     // WinUITheme.xaml(86,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2450, 86, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2452, 86, 8)?;
     // WinUITheme.xaml(87,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2451, 87, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseHighAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2453, 87, 8)?;
     // WinUITheme.xaml(88,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2452, 88, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2454, 88, 8)?;
     // WinUITheme.xaml(89,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2453, 89, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2455, 89, 8)?;
     // WinUITheme.xaml(90,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2454, 90, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2456, 90, 8)?;
     // WinUITheme.xaml(91,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2455, 91, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeMediumAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2457, 91, 8)?;
     // WinUITheme.xaml(92,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeHighAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2456, 92, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeHighAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2458, 92, 8)?;
     // WinUITheme.xaml(93,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeHighAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2457, 93, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlChromeHighAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2459, 93, 8)?;
     // WinUITheme.xaml(94,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2458, 94, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2460, 94, 8)?;
     // WinUITheme.xaml(95,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2459, 95, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2461, 95, 8)?;
     // WinUITheme.xaml(96,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2460, 96, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2462, 96, 8)?;
     // WinUITheme.xaml(97,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2461, 97, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBaseMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2463, 97, 8)?;
     // WinUITheme.xaml(98,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2462, 98, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltLowAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2464, 98, 8)?;
     // WinUITheme.xaml(99,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2463, 99, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltLowAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2465, 99, 8)?;
     // WinUITheme.xaml(100,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2464, 100, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltMediumLowAcrylicWindowMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2466, 100, 8)?;
     // WinUITheme.xaml(101,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2465, 101, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltMediumLowAcrylicElementMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2467, 101, 8)?;
     // WinUITheme.xaml(102,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltHighAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2466, 102, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltHighAcrylicWindowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2468, 102, 8)?;
     // WinUITheme.xaml(103,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltHighAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2467, 103, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlAltHighAcrylicElementBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2469, 103, 8)?;
     // WinUITheme.xaml(104,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransientBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2468, 104, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransientBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2470, 104, 8)?;
     // WinUITheme.xaml(105,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2469, 105, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2471, 105, 8)?;
     // WinUITheme.xaml(106,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2470, 106, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2472, 106, 8)?;
     // WinUITheme.xaml(107,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultInverseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2471, 107, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultInverseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2473, 107, 8)?;
     // WinUITheme.xaml(108,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorDefaultInverseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2472, 108, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorDefaultInverseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2474, 108, 8)?;
     // WinUITheme.xaml(109,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2473, 109, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2475, 109, 8)?;
     // WinUITheme.xaml(110,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2474, 110, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicInAppFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2476, 110, 8)?;
     // WinUITheme.xaml(111,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicBackgroundFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2475, 111, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicBackgroundFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2477, 111, 8)?;
     // WinUITheme.xaml(112,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicInAppFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2476, 112, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicInAppFillColorDefaultBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2478, 112, 8)?;
     // WinUITheme.xaml(113,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicBackgroundFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2477, 113, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicBackgroundFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2479, 113, 8)?;
     // WinUITheme.xaml(114,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicInAppFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2478, 114, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AccentAcrylicInAppFillColorBaseBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2480, 114, 8)?;
     // WinUITheme.xaml(115,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_263)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_264)?;
     // WinUITheme.xaml(116,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultBackdrop", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2480, 116, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "AcrylicBackgroundFillColorDefaultBackdrop", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2482, 116, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2337,85 +2339,85 @@ fn populate_winuitheme_xaml_unit_87(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(120,47) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_264)?;
+    rt::add_color_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_265)?;
     // WinUITheme.xaml(143,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseLowRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2481, 143, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseLowRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2483, 143, 8)?;
     // WinUITheme.xaml(144,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2482, 144, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2484, 144, 8)?;
     // WinUITheme.xaml(145,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundAltHighRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2483, 145, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundAltHighRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2485, 145, 8)?;
     // WinUITheme.xaml(146,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccentRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2484, 146, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccentRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2486, 146, 8)?;
     // WinUITheme.xaml(147,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent3RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2485, 147, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent3RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2487, 147, 8)?;
     // WinUITheme.xaml(148,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent2RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2486, 148, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent2RevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2488, 148, 8)?;
     // WinUITheme.xaml(149,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListMediumRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2487, 149, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListMediumRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2489, 149, 8)?;
     // WinUITheme.xaml(150,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListLowRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2488, 150, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListLowRevealBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2490, 150, 8)?;
     // WinUITheme.xaml(151,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2489, 151, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2491, 151, 8)?;
     // WinUITheme.xaml(152,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2490, 152, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2492, 152, 8)?;
     // WinUITheme.xaml(153,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListMediumRevealListLowBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2491, 153, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListMediumRevealListLowBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2493, 153, 8)?;
     // WinUITheme.xaml(154,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent3RevealAccent2BackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2492, 154, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccent3RevealAccent2BackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2494, 154, 8)?;
     // WinUITheme.xaml(155,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundAccentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2493, 155, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundAccentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2495, 155, 8)?;
     // WinUITheme.xaml(156,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2494, 156, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2496, 156, 8)?;
     // WinUITheme.xaml(157,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2495, 157, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2497, 157, 8)?;
     // WinUITheme.xaml(158,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2496, 158, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2498, 158, 8)?;
     // WinUITheme.xaml(159,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2497, 159, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2499, 159, 8)?;
     // WinUITheme.xaml(160,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2498, 160, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundBaseMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2500, 160, 8)?;
     // WinUITheme.xaml(161,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeBlackHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2499, 161, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeBlackHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2501, 161, 8)?;
     // WinUITheme.xaml(162,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2500, 162, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2502, 162, 8)?;
     // WinUITheme.xaml(163,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2501, 163, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2503, 163, 8)?;
     // WinUITheme.xaml(164,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2502, 164, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2504, 164, 8)?;
     // WinUITheme.xaml(165,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeWhiteRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2503, 165, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundChromeWhiteRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2505, 165, 8)?;
     // WinUITheme.xaml(166,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealListLowBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2504, 166, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealListLowBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2506, 166, 8)?;
     // WinUITheme.xaml(167,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundListLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2505, 167, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundListLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2507, 167, 8)?;
     // WinUITheme.xaml(168,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundListMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2506, 168, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundListMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2508, 168, 8)?;
     // WinUITheme.xaml(169,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2507, 169, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2509, 169, 8)?;
     // WinUITheme.xaml(170,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlForegroundRevealTransparentBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2508, 170, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlForegroundRevealTransparentBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2510, 170, 8)?;
     // WinUITheme.xaml(171,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2509, 171, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlBackgroundTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2511, 171, 8)?;
     // WinUITheme.xaml(172,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2510, 172, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2512, 172, 8)?;
     // WinUITheme.xaml(173,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2511, 173, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAltTransparentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2513, 173, 8)?;
     // WinUITheme.xaml(174,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2512, 174, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightAccentRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2514, 174, 8)?;
     // WinUITheme.xaml(175,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2513, 175, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2515, 175, 8)?;
     // WinUITheme.xaml(176,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2514, 176, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2516, 176, 8)?;
     // WinUITheme.xaml(177,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2515, 177, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2517, 177, 8)?;
     // WinUITheme.xaml(178,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2516, 178, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumHighRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2518, 178, 8)?;
     // WinUITheme.xaml(179,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2517, 179, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightBaseMediumLowRevealBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_2519, 179, 8)?;
     // WinUITheme.xaml(180,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_265)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_266)?;
     // WinUITheme.xaml(183,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_266)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_267)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2427,40 +2429,40 @@ fn populate_winuitheme_xaml_unit_88(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(60,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_267)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_268)?;
     // WinUITheme.xaml(63,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 63, 52)?, rt::string_object("ToolTipBorderThemePadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 5.0_f64, 8.0_f64, 7.0_f64))), 63, 52)?;
     // WinUITheme.xaml(64,58) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_268)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_269)?;
     // WinUITheme.xaml(66,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_269)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_270)?;
     // WinUITheme.xaml(69,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_270)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_271)?;
     // WinUITheme.xaml(70,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 56)?, rt::string_object("MenuFlyoutSeparatorThemeHeight"), rt::to_object(1.0_f64)), 70, 56)?;
     // WinUITheme.xaml(71,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_271)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_272)?;
     // WinUITheme.xaml(73,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_272)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_273)?;
     // WinUITheme.xaml(78,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_273)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_274)?;
     // WinUITheme.xaml(82,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_274)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_275)?;
     // WinUITheme.xaml(83,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_275)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_276)?;
     // WinUITheme.xaml(84,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_276)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_277)?;
     // WinUITheme.xaml(85,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_277)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_278)?;
     // WinUITheme.xaml(87,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 87, 58)?, rt::string_object("ContentDialogCommandSpaceMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 24.0_f64, 0.0_f64, 0.0_f64))), 87, 58)?;
     // WinUITheme.xaml(88,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_278)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_279)?;
     // WinUITheme.xaml(90,56) Content (resource)
     let value_308 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 90, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_308))), 90, 56)?;
     // WinUITheme.xaml(91,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_279)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_280)?;
     // WinUITheme.xaml(102,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 102, 50)?, rt::string_object("ExpanderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 102, 50)?;
     ::core::result::Result::Ok(())
@@ -2474,7 +2476,7 @@ fn populate_winuitheme_xaml_unit_89(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(20,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_280)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_281)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2486,7 +2488,7 @@ fn populate_winuitheme_xaml_unit_90(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(30,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_281)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_282)?;
     // WinUITheme.xaml(42,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 42, 62)?, rt::string_object("HyperlinkButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 42, 62)?;
     ::core::result::Result::Ok(())
@@ -2502,11 +2504,11 @@ fn populate_winuitheme_xaml_unit_91(
     // WinUITheme.xaml(73,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 73, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 73, 57)?;
     // WinUITheme.xaml(74,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_282)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_283)?;
     // WinUITheme.xaml(114,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_283)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_284)?;
     // WinUITheme.xaml(128,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_284)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_285)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2518,15 +2520,15 @@ fn populate_winuitheme_xaml_unit_92(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(51,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_285)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_286)?;
     // WinUITheme.xaml(76,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 76, 65)?, rt::string_object("AppBarButtonHasFlyoutChevronVisibility"), rt::to_object(::core::clone::Clone::clone(&true))), 76, 65)?;
     // WinUITheme.xaml(77,49) Content (resource)
-    rt::add_string_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_286)?;
+    rt::add_string_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_287)?;
     // WinUITheme.xaml(79,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_287)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_288)?;
     // WinUITheme.xaml(82,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_288)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_289)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2538,7 +2540,7 @@ fn populate_winuitheme_xaml_unit_93(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(18,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_289)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_290)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2550,11 +2552,11 @@ fn populate_winuitheme_xaml_unit_94(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(80,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_290)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_291)?;
     // WinUITheme.xaml(123,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_291)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_292)?;
     // WinUITheme.xaml(135,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_292)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_293)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2568,13 +2570,13 @@ fn populate_winuitheme_xaml_unit_95(
     // WinUITheme.xaml(43,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 43, 54)?, rt::string_object("ListBoxBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 43, 54)?;
     // WinUITheme.xaml(44,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_293)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_294)?;
     // WinUITheme.xaml(54,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_294)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_295)?;
     // WinUITheme.xaml(64,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_295)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_296)?;
     // WinUITheme.xaml(65,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_296)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_297)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2586,11 +2588,11 @@ fn populate_winuitheme_xaml_unit_96(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(75,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_297)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_298)?;
     // WinUITheme.xaml(77,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_298)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_299)?;
     // WinUITheme.xaml(110,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_299)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_300)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2602,15 +2604,15 @@ fn populate_winuitheme_xaml_unit_97(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(37,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_300)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_301)?;
     // WinUITheme.xaml(41,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_301)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_302)?;
     // WinUITheme.xaml(44,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 44, 56)?, rt::string_object("CommandBarBorderThicknessOpen"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 44, 56)?;
     // WinUITheme.xaml(45,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_302)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_303)?;
     // WinUITheme.xaml(51,69) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_303)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_304)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2622,13 +2624,13 @@ fn populate_winuitheme_xaml_unit_98(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(58,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_304)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_305)?;
     // WinUITheme.xaml(76,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_305)?;
+    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_306)?;
     // WinUITheme.xaml(78,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 78, 62)?, rt::string_object("GridViewItemSelectedBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 78, 62)?;
     // WinUITheme.xaml(79,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_306)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_307)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2640,17 +2642,17 @@ fn populate_winuitheme_xaml_unit_99(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(88,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_307)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_308)?;
     // WinUITheme.xaml(98,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 98, 74)?, rt::string_object("ListViewItemCompactSelectedBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 98, 74)?;
     // WinUITheme.xaml(99,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_308)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_309)?;
     // WinUITheme.xaml(123,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_309)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_310)?;
     // WinUITheme.xaml(138,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_310)?;
+    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_311)?;
     // WinUITheme.xaml(141,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_311)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_312)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2662,7 +2664,7 @@ fn populate_winuitheme_xaml_unit_100(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(20,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_312)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_313)?;
     // WinUITheme.xaml(22,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 22, 53)?, rt::string_object("FlyoutBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 22, 53)?;
     ::core::result::Result::Ok(())
@@ -2676,13 +2678,13 @@ fn populate_winuitheme_xaml_unit_101(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(64,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_313)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_314)?;
     // WinUITheme.xaml(88,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 88, 53)?, rt::string_object("ButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 88, 53)?;
     // WinUITheme.xaml(89,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_314)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_315)?;
     // WinUITheme.xaml(101,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_315)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_316)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2698,9 +2700,9 @@ fn populate_winuitheme_xaml_unit_102(
     // WinUITheme.xaml(74,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 74, 74)?, rt::string_object("ToggleButtonCheckedStateBackgroundSizing"), rt::to_object(::ferroui_base::media::BackgroundSizing::OuterBorderEdge)), 74, 74)?;
     // WinUITheme.xaml(75,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_316)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_317)?;
     // WinUITheme.xaml(111,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_317)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_318)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2711,7 +2713,7 @@ fn populate_winuitheme_xaml_unit_103(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_318)?;
+    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_319)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2723,11 +2725,11 @@ fn populate_winuitheme_xaml_unit_104(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(33,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_319)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_320)?;
     // WinUITheme.xaml(39,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_320)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_321)?;
     // WinUITheme.xaml(42,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_321)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_322)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2741,9 +2743,9 @@ fn populate_winuitheme_xaml_unit_105(
     // WinUITheme.xaml(39,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 39, 59)?, rt::string_object("RepeatButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 39, 59)?;
     // WinUITheme.xaml(40,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_322)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_323)?;
     // WinUITheme.xaml(52,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_323)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_324)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2757,7 +2759,7 @@ fn populate_winuitheme_xaml_unit_106(
     // WinUITheme.xaml(41,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 41, 65)?, rt::string_object("CalendarDatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 41, 65)?;
     // WinUITheme.xaml(42,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_324)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_325)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2769,11 +2771,11 @@ fn populate_winuitheme_xaml_unit_107(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(93,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_325)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_326)?;
     // WinUITheme.xaml(150,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_326)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_327)?;
     // WinUITheme.xaml(154,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_327)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_328)?;
     // WinUITheme.xaml(166,66) Content (resource)
     let value_309 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_309))), 166, 66)?;
@@ -2794,9 +2796,9 @@ fn populate_winuitheme_xaml_unit_108(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(103,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_328)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_329)?;
     // WinUITheme.xaml(175,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_329)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_330)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2808,15 +2810,15 @@ fn populate_winuitheme_xaml_unit_109(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(32,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_330)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_331)?;
     // WinUITheme.xaml(38,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 51)?, rt::string_object("ContentDialogBorderWidth"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 38, 51)?;
     // WinUITheme.xaml(39,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_331)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_332)?;
     // WinUITheme.xaml(43,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 43, 54)?, rt::string_object("ContentDialogButtonSpacing"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(8.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 43, 54)?;
     // WinUITheme.xaml(44,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_332)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_333)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2828,20 +2830,20 @@ fn populate_winuitheme_xaml_unit_110(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(51,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_333)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_334)?;
     // WinUITheme.xaml(55,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 55, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 55, 54)?;
     // WinUITheme.xaml(56,59) Content (resource)
     let value_312 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 56, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 56, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_312))), 56, 59)?;
     // WinUITheme.xaml(57,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_334)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_335)?;
     // WinUITheme.xaml(80,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_335)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_336)?;
     // WinUITheme.xaml(82,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 82, 57)?, rt::string_object("DatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 82, 57)?;
     // WinUITheme.xaml(83,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_336)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_337)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2853,7 +2855,7 @@ fn populate_winuitheme_xaml_unit_111(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(38,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_337)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_338)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2867,9 +2869,9 @@ fn populate_winuitheme_xaml_unit_112(
     // WinUITheme.xaml(37,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 37, 61)?, rt::string_object("FlipViewButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 37, 61)?;
     // WinUITheme.xaml(38,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_338)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_339)?;
     // WinUITheme.xaml(48,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_339)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_340)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2881,7 +2883,7 @@ fn populate_winuitheme_xaml_unit_113(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(18,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_340)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_341)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2893,15 +2895,15 @@ fn populate_winuitheme_xaml_unit_114(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(82,53) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "PivotHeaderItemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3294, 82, 53)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "PivotHeaderItemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3296, 82, 53)?;
     // WinUITheme.xaml(83,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "PivotTitleFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3295, 83, 48)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "PivotTitleFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3297, 83, 48)?;
     // WinUITheme.xaml(84,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_341)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_342)?;
     // WinUITheme.xaml(87,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 87, 56)?, rt::string_object("PivotHeaderItemCharacterSpacing"), rt::to_object(-25_i32)), 87, 56)?;
     // WinUITheme.xaml(88,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_342)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_343)?;
     // WinUITheme.xaml(94,58) Content (resource)
     let value_313 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 94, 58)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 94, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_313))), 94, 58)?;
@@ -2909,9 +2911,9 @@ fn populate_winuitheme_xaml_unit_114(
     let value_314 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 95, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 95, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_314))), 95, 53)?;
     // WinUITheme.xaml(96,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_343)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_344)?;
     // WinUITheme.xaml(133,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_344)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_345)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2927,11 +2929,11 @@ fn populate_winuitheme_xaml_unit_115(
     // WinUITheme.xaml(72,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 72, 63)?, rt::string_object("ScrollBarPanningBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 72, 63)?;
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_345)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_346)?;
     // WinUITheme.xaml(106,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_346)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_347)?;
     // WinUITheme.xaml(123,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_347)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_348)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2943,7 +2945,7 @@ fn populate_winuitheme_xaml_unit_116(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(18,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_348)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_349)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2955,16 +2957,16 @@ fn populate_winuitheme_xaml_unit_117(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(66,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_349)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_350)?;
     // WinUITheme.xaml(68,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_350)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_351)?;
     // WinUITheme.xaml(70,55) Content (resource)
     let value_315 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_315))), 70, 55)?;
     // WinUITheme.xaml(71,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_351)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_352)?;
     // WinUITheme.xaml(94,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_352)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_353)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2976,13 +2978,13 @@ fn populate_winuitheme_xaml_unit_118(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(51,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_353)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_354)?;
     // WinUITheme.xaml(76,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_354)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_355)?;
     // WinUITheme.xaml(78,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_355)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_356)?;
     // WinUITheme.xaml(80,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_356)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_357)?;
     // WinUITheme.xaml(84,59) Content (resource)
     let value_316 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_316))), 84, 59)?;
@@ -3001,11 +3003,11 @@ fn populate_winuitheme_xaml_unit_119(
     // WinUITheme.xaml(28,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 54)?, rt::string_object("ToolTipBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 28, 54)?;
     // WinUITheme.xaml(29,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_357)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_358)?;
     // WinUITheme.xaml(32,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_358)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_359)?;
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_359)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_360)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3017,7 +3019,7 @@ fn populate_winuitheme_xaml_unit_120(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_360)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_361)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3029,11 +3031,11 @@ fn populate_winuitheme_xaml_unit_121(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(29,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_361)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_362)?;
     // WinUITheme.xaml(31,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_362)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_363)?;
     // WinUITheme.xaml(37,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_363)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_364)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3045,7 +3047,7 @@ fn populate_winuitheme_xaml_unit_122(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(81,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_364)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_365)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3057,7 +3059,7 @@ fn populate_winuitheme_xaml_unit_123(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(18,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_365)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_366)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3069,9 +3071,9 @@ fn populate_winuitheme_xaml_unit_124(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(28,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_366)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_367)?;
     // WinUITheme.xaml(34,64) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_367)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_368)?;
     // WinUITheme.xaml(38,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 38, 55)?;
     ::core::result::Result::Ok(())
@@ -3085,7 +3087,7 @@ fn populate_winuitheme_xaml_unit_125(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_368)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_369)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3097,7 +3099,7 @@ fn populate_winuitheme_xaml_unit_126(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_369)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_370)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3109,11 +3111,11 @@ fn populate_winuitheme_xaml_unit_127(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(28,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_370)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_371)?;
     // WinUITheme.xaml(34,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 34, 53)?, rt::string_object("MenuBarItemBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 53)?;
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_371)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_372)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3125,11 +3127,11 @@ fn populate_winuitheme_xaml_unit_128(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(56,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_372)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_373)?;
     // WinUITheme.xaml(88,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_373)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_374)?;
     // WinUITheme.xaml(92,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_374)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_375)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3141,7 +3143,7 @@ fn populate_winuitheme_xaml_unit_129(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_375)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_376)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3153,11 +3155,11 @@ fn populate_winuitheme_xaml_unit_130(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(47,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_376)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_377)?;
     // WinUITheme.xaml(75,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 75, 58)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 75, 58)?;
     // WinUITheme.xaml(76,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_377)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_378)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3169,7 +3171,7 @@ fn populate_winuitheme_xaml_unit_131(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(20,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_378)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_379)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3181,7 +3183,7 @@ fn populate_winuitheme_xaml_unit_132(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_379)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_380)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3193,11 +3195,11 @@ fn populate_winuitheme_xaml_unit_133(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(93,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_380)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_381)?;
     // WinUITheme.xaml(158,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_381)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_382)?;
     // WinUITheme.xaml(160,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3713, 160, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_3715, 160, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3209,7 +3211,7 @@ fn populate_winuitheme_xaml_unit_134(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_382)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_383)?;
     // WinUITheme.xaml(24,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 24, 52)?, rt::string_object("AutoSuggestBoxIconFontSize"), rt::to_object(12.0_f64)), 24, 52)?;
     ::core::result::Result::Ok(())
@@ -3223,11 +3225,11 @@ fn populate_winuitheme_xaml_unit_135(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(120,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_383)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_384)?;
     // WinUITheme.xaml(181,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_384)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_385)?;
     // WinUITheme.xaml(216,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_385)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_386)?;
     // WinUITheme.xaml(222,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 222, 56)?, rt::string_object("ComboBoxDropdownBorderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 222, 56)?;
     ::core::result::Result::Ok(())
@@ -3241,13 +3243,13 @@ fn populate_winuitheme_xaml_unit_136(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(26,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_386)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_387)?;
     // WinUITheme.xaml(28,60) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_387)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_388)?;
     // WinUITheme.xaml(30,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_388)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_389)?;
     // WinUITheme.xaml(31,60) Content (resource)
-    rt::add_string_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_389)?;
+    rt::add_string_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_390)?;
     // WinUITheme.xaml(34,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 34, 59)?, rt::string_object("SplitViewPaneRootCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 59)?;
     ::core::result::Result::Ok(())
@@ -3260,10 +3262,12 @@ fn populate_winuitheme_xaml_unit_137(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
-    // WinUITheme.xaml(23,58) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 23, 58)?, rt::string_object("ProgressBarBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 23, 58)?;
-    // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_390)?;
+    // WinUITheme.xaml(25,58) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 25, 58)?, rt::string_object("ProgressBarBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 25, 58)?;
+    // WinUITheme.xaml(26,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_391)?;
+    // WinUITheme.xaml(31,8) Content (resource)
+    rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_392)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3275,7 +3279,7 @@ fn populate_winuitheme_xaml_unit_138(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_391)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_393)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3287,11 +3291,11 @@ fn populate_winuitheme_xaml_unit_139(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_392)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_394)?;
     // WinUITheme.xaml(26,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 26, 56)?, rt::string_object("NumberBoxPopupBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 26, 56)?;
     // WinUITheme.xaml(27,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_393)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_395)?;
     // WinUITheme.xaml(28,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 28, 66)?, rt::string_object("NumberBoxPopupSpinButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 28, 66)?;
     ::core::result::Result::Ok(())
@@ -3305,15 +3309,15 @@ fn populate_winuitheme_xaml_unit_140(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(39,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_394)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_396)?;
     // WinUITheme.xaml(48,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 48, 56)?, rt::string_object("ExpanderHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 48, 56)?;
     // WinUITheme.xaml(49,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_395)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_397)?;
     // WinUITheme.xaml(58,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 58, 57)?, rt::string_object("ExpanderChevronBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 58, 57)?;
     // WinUITheme.xaml(59,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_396)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_398)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3325,7 +3329,7 @@ fn populate_winuitheme_xaml_unit_141(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_397)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_399)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3337,7 +3341,7 @@ fn populate_winuitheme_xaml_unit_142(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(34,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_398)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_400)?;
     // WinUITheme.xaml(50,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 50, 49)?, rt::string_object("InfoBarBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 50, 49)?;
     ::core::result::Result::Ok(())
@@ -3351,7 +3355,7 @@ fn populate_winuitheme_xaml_unit_143(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(44,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_399)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_401)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3363,9 +3367,9 @@ fn populate_winuitheme_xaml_unit_144(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(44,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_400)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_402)?;
     // WinUITheme.xaml(62,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_401)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_403)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3377,7 +3381,7 @@ fn populate_winuitheme_xaml_unit_145(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(37,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_402)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_404)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3389,19 +3393,19 @@ fn populate_winuitheme_xaml_unit_146(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(47,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_403)?;
-    // WinUITheme.xaml(54,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_404)?;
-    // WinUITheme.xaml(55,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_405)?;
+    // WinUITheme.xaml(54,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_406)?;
+    // WinUITheme.xaml(55,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_407)?;
     // WinUITheme.xaml(72,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 72, 63)?, rt::string_object("TabularSurfaceGroupHeaderCountOpacity"), rt::to_object(0.7_f64)), 72, 63)?;
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_406)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_408)?;
     // WinUITheme.xaml(74,67) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 74, 67)?, rt::string_object("TabularSurfaceGroupHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 74, 67)?;
     // WinUITheme.xaml(75,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_407)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_409)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3412,18 +3416,18 @@ fn populate_winuitheme_xaml_unit_147(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(31,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_408)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_410)?;
     // WinUITheme.xaml(33,53) Content (resource)
     let value_317 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 33, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 33, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_317))), 33, 53)?;
     // WinUITheme.xaml(34,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_409)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_411)?;
     // WinUITheme.xaml(36,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 36, 53)?, rt::string_object("TableViewHeaderCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64))), 36, 53)?;
     // WinUITheme.xaml(37,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_410)?;
+    rt::add_double_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_412)?;
     // WinUITheme.xaml(39,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_411)?;
+    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_WINUITHEME_XAML_ROWS_413)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3435,7 +3439,7 @@ fn populate_winuitheme_xaml_unit_148(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(19,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_412)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_414)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3447,59 +3451,59 @@ fn populate_winuitheme_xaml_unit_149(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(608,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_413)?;
+    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_415)?;
     // WinUITheme.xaml(634,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_414)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_416)?;
     // WinUITheme.xaml(717,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "SystemControlPageBackgroundMediumAltMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4050, 717, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "SystemControlPageBackgroundMediumAltMediumBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4054, 717, 8)?;
     // WinUITheme.xaml(718,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_415)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_417)?;
     // WinUITheme.xaml(728,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_416)?;
-    // WinUITheme.xaml(735,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_417)?;
-    // WinUITheme.xaml(737,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_418)?;
-    // WinUITheme.xaml(796,57) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4127, 796, 57)?;
-    // WinUITheme.xaml(797,49) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4128, 797, 49)?;
-    // WinUITheme.xaml(798,55) Content (resource)
+    // WinUITheme.xaml(735,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_419)?;
+    // WinUITheme.xaml(737,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_420)?;
+    // WinUITheme.xaml(796,57) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_3, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4131, 796, 57)?;
+    // WinUITheme.xaml(797,49) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_3, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4132, 797, 49)?;
+    // WinUITheme.xaml(798,55) Content (resource)
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_421)?;
     // WinUITheme.xaml(828,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_420)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_422)?;
     // WinUITheme.xaml(849,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 849, 66)?, rt::string_object("AppBarExpandButtonThemeWidthGridLength"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(48.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 849, 66)?;
     // WinUITheme.xaml(850,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 850, 60)?, rt::string_object("HyperlinkFocusRectCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 850, 60)?;
     // WinUITheme.xaml(851,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_421)?;
-    // WinUITheme.xaml(873,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_422)?;
-    // WinUITheme.xaml(875,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_423)?;
-    // WinUITheme.xaml(884,8) Content (resource)
+    // WinUITheme.xaml(873,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_424)?;
-    // WinUITheme.xaml(885,8) Content (resource)
+    // WinUITheme.xaml(875,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_425)?;
-    // WinUITheme.xaml(886,8) Content (resource)
+    // WinUITheme.xaml(884,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_426)?;
-    // WinUITheme.xaml(887,8) Content (resource)
+    // WinUITheme.xaml(885,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_427)?;
-    // WinUITheme.xaml(889,8) Content (resource)
+    // WinUITheme.xaml(886,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_428)?;
-    // WinUITheme.xaml(893,8) Content (resource)
+    // WinUITheme.xaml(887,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_429)?;
-    // WinUITheme.xaml(894,8) Content (resource)
+    // WinUITheme.xaml(889,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_430)?;
-    // WinUITheme.xaml(895,8) Content (resource)
+    // WinUITheme.xaml(893,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_431)?;
+    // WinUITheme.xaml(894,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_432)?;
+    // WinUITheme.xaml(895,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_433)?;
     // WinUITheme.xaml(906,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_432)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_434)?;
     // WinUITheme.xaml(910,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 910, 56)?, rt::string_object("WindowCaptionButtonStrokeWidth"), rt::to_object(3.0_f64)), 910, 56)?;
     // WinUITheme.xaml(911,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_433)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_435)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3514,15 +3518,15 @@ fn populate_winuitheme_xaml_unit_150(
     let value_346 = ::ferroui_base::media::Color::__markup_FromUInt32_2(0_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 41, 52)?, rt::string_object("SystemControlTransparentColor"), rt::to_object(::core::clone::Clone::clone(&value_346))), 41, 52)?;
     // WinUITheme.xaml(42,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_434)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_436)?;
     // WinUITheme.xaml(43,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_435)?;
-    // WinUITheme.xaml(45,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_436)?;
-    // WinUITheme.xaml(48,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_437)?;
+    // WinUITheme.xaml(45,58) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_438)?;
+    // WinUITheme.xaml(48,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_439)?;
     // WinUITheme.xaml(49,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_438)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_440)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3534,21 +3538,21 @@ fn populate_winuitheme_xaml_unit_151(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(426,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_439)?;
-    // WinUITheme.xaml(444,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_440)?;
-    // WinUITheme.xaml(445,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_441)?;
-    // WinUITheme.xaml(449,8) Content (resource)
+    // WinUITheme.xaml(444,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_442)?;
-    // WinUITheme.xaml(450,8) Content (resource)
+    // WinUITheme.xaml(445,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_443)?;
-    // WinUITheme.xaml(453,8) Content (resource)
+    // WinUITheme.xaml(449,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_444)?;
-    // WinUITheme.xaml(454,8) Content (resource)
+    // WinUITheme.xaml(450,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_445)?;
+    // WinUITheme.xaml(453,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_446)?;
+    // WinUITheme.xaml(454,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_447)?;
     // WinUITheme.xaml(519,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_446)?;
+    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_448)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3560,9 +3564,9 @@ fn populate_winuitheme_xaml_unit_152(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(67,51) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_447)?;
+    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_449)?;
     // WinUITheme.xaml(77,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_448)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_450)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3574,20 +3578,20 @@ fn populate_winuitheme_xaml_unit_153(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(141,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_449)?;
-    // WinUITheme.xaml(145,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_450)?;
-    // WinUITheme.xaml(147,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_451)?;
+    // WinUITheme.xaml(145,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_452)?;
+    // WinUITheme.xaml(147,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_453)?;
     // WinUITheme.xaml(158,53) Content (resource)
     let value_440 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1543569665_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 158, 53)?, rt::string_object("TemporaryTextFillColorDisabled"), rt::to_object(::core::clone::Clone::clone(&value_440))), 158, 53)?;
     // WinUITheme.xaml(159,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_452)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_454)?;
     // WinUITheme.xaml(165,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "TextControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4334, 165, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "TextControlElevationBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4338, 165, 8)?;
     // WinUITheme.xaml(174,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "TextControlElevationBorderFocusedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4335, 174, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "TextControlElevationBorderFocusedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4339, 174, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3599,13 +3603,13 @@ fn populate_winuitheme_xaml_unit_154(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(179,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_453)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_455)?;
     // WinUITheme.xaml(216,66) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_454)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_456)?;
     // WinUITheme.xaml(224,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_455)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_457)?;
     // WinUITheme.xaml(232,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_456)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_458)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3617,13 +3621,13 @@ fn populate_winuitheme_xaml_unit_155(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(119,50) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_457)?;
+    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_459)?;
     // WinUITheme.xaml(122,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_458)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_460)?;
     // WinUITheme.xaml(167,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_459)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_461)?;
     // WinUITheme.xaml(168,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "AcrylicBackgroundFillColorDefaultBackdrop", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4454, 168, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "AcrylicBackgroundFillColorDefaultBackdrop", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_4458, 168, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3635,25 +3639,25 @@ fn populate_winuitheme_xaml_unit_156(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(225,47) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_460)?;
+    rt::add_color_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_462)?;
     // WinUITheme.xaml(248,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_461)?;
-    // WinUITheme.xaml(249,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_462)?;
-    // WinUITheme.xaml(250,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_463)?;
-    // WinUITheme.xaml(271,8) Content (resource)
+    // WinUITheme.xaml(249,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_464)?;
-    // WinUITheme.xaml(272,8) Content (resource)
+    // WinUITheme.xaml(250,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_465)?;
-    // WinUITheme.xaml(274,8) Content (resource)
+    // WinUITheme.xaml(271,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_466)?;
-    // WinUITheme.xaml(275,8) Content (resource)
+    // WinUITheme.xaml(272,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_467)?;
+    // WinUITheme.xaml(274,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_468)?;
+    // WinUITheme.xaml(275,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_469)?;
     // WinUITheme.xaml(285,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_468)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_470)?;
     // WinUITheme.xaml(288,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_469)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_471)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3665,44 +3669,44 @@ fn populate_winuitheme_xaml_unit_157(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(105,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_470)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_472)?;
     // WinUITheme.xaml(113,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_471)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_473)?;
     // WinUITheme.xaml(116,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 116, 52)?, rt::string_object("ToolTipBorderThemePadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 5.0_f64, 8.0_f64, 7.0_f64))), 116, 52)?;
     // WinUITheme.xaml(117,58) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_472)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_474)?;
     // WinUITheme.xaml(119,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_473)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_475)?;
     // WinUITheme.xaml(122,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_474)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_476)?;
     // WinUITheme.xaml(123,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 123, 56)?, rt::string_object("MenuFlyoutSeparatorThemeHeight"), rt::to_object(1.0_f64)), 123, 56)?;
     // WinUITheme.xaml(124,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_475)?;
-    // WinUITheme.xaml(126,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_476)?;
-    // WinUITheme.xaml(131,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_477)?;
+    // WinUITheme.xaml(126,53) Content (resource)
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_478)?;
+    // WinUITheme.xaml(131,57) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_479)?;
     // WinUITheme.xaml(135,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_478)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_480)?;
     // WinUITheme.xaml(136,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_479)?;
-    // WinUITheme.xaml(138,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_480)?;
-    // WinUITheme.xaml(139,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_481)?;
+    // WinUITheme.xaml(138,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_482)?;
+    // WinUITheme.xaml(139,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_483)?;
     // WinUITheme.xaml(140,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 140, 58)?, rt::string_object("ContentDialogCommandSpaceMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 24.0_f64, 0.0_f64, 0.0_f64))), 140, 58)?;
     // WinUITheme.xaml(141,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_482)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_484)?;
     // WinUITheme.xaml(143,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_483)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_485)?;
     // WinUITheme.xaml(144,56) Content (resource)
     let value_467 = ::ferroui_base::media::Color::__markup_FromUInt32_2(700777728_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 144, 56)?, rt::string_object("SystemControlErrorBackgroundColor"), rt::to_object(::core::clone::Clone::clone(&value_467))), 144, 56)?;
     // WinUITheme.xaml(145,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_484)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_486)?;
     // WinUITheme.xaml(156,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 156, 50)?, rt::string_object("ExpanderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 156, 50)?;
     ::core::result::Result::Ok(())
@@ -3716,7 +3720,7 @@ fn populate_winuitheme_xaml_unit_158(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_485)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_487)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3728,7 +3732,7 @@ fn populate_winuitheme_xaml_unit_159(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(45,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_486)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_488)?;
     // WinUITheme.xaml(57,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 57, 62)?, rt::string_object("HyperlinkButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 57, 62)?;
     ::core::result::Result::Ok(())
@@ -3744,17 +3748,17 @@ fn populate_winuitheme_xaml_unit_160(
     // WinUITheme.xaml(131,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 131, 57)?, rt::string_object("RadioButtonBorderThemeThickness"), rt::to_object(1.0_f64)), 131, 57)?;
     // WinUITheme.xaml(132,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_487)?;
-    // WinUITheme.xaml(147,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_488)?;
-    // WinUITheme.xaml(148,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_489)?;
-    // WinUITheme.xaml(155,8) Content (resource)
+    // WinUITheme.xaml(147,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_490)?;
-    // WinUITheme.xaml(156,8) Content (resource)
+    // WinUITheme.xaml(148,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_491)?;
-    // WinUITheme.xaml(172,8) Content (resource)
+    // WinUITheme.xaml(155,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_492)?;
+    // WinUITheme.xaml(156,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_493)?;
+    // WinUITheme.xaml(172,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_494)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3766,15 +3770,15 @@ fn populate_winuitheme_xaml_unit_161(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(87,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_493)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_495)?;
     // WinUITheme.xaml(112,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 112, 65)?, rt::string_object("AppBarButtonHasFlyoutChevronVisibility"), rt::to_object(::core::clone::Clone::clone(&true))), 112, 65)?;
     // WinUITheme.xaml(113,49) Content (resource)
-    rt::add_string_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_494)?;
+    rt::add_string_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_496)?;
     // WinUITheme.xaml(115,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_495)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_497)?;
     // WinUITheme.xaml(118,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_496)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_498)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3786,7 +3790,7 @@ fn populate_winuitheme_xaml_unit_162(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_497)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_499)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3798,15 +3802,15 @@ fn populate_winuitheme_xaml_unit_163(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(145,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_498)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_500)?;
     // WinUITheme.xaml(188,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_499)?;
-    // WinUITheme.xaml(191,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_500)?;
-    // WinUITheme.xaml(192,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_501)?;
+    // WinUITheme.xaml(191,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_502)?;
+    // WinUITheme.xaml(192,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_503)?;
     // WinUITheme.xaml(200,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_502)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_504)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3820,9 +3824,9 @@ fn populate_winuitheme_xaml_unit_164(
     // WinUITheme.xaml(71,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 71, 54)?, rt::string_object("ListBoxBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 71, 54)?;
     // WinUITheme.xaml(72,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_503)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_505)?;
     // WinUITheme.xaml(82,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_504)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_506)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3834,15 +3838,15 @@ fn populate_winuitheme_xaml_unit_165(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(135,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_505)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_507)?;
     // WinUITheme.xaml(137,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_506)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_508)?;
     // WinUITheme.xaml(170,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_507)?;
-    // WinUITheme.xaml(189,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_508)?;
-    // WinUITheme.xaml(190,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_509)?;
+    // WinUITheme.xaml(189,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_510)?;
+    // WinUITheme.xaml(190,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_511)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3854,15 +3858,15 @@ fn populate_winuitheme_xaml_unit_166(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(59,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_510)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_512)?;
     // WinUITheme.xaml(62,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 62, 56)?, rt::string_object("CommandBarBorderThicknessOpen"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 62, 56)?;
     // WinUITheme.xaml(63,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_511)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_513)?;
     // WinUITheme.xaml(69,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_512)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_514)?;
     // WinUITheme.xaml(73,69) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_513)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_515)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3874,19 +3878,19 @@ fn populate_winuitheme_xaml_unit_167(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(101,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_514)?;
-    // WinUITheme.xaml(112,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_515)?;
-    // WinUITheme.xaml(114,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_516)?;
-    // WinUITheme.xaml(116,8) Content (resource)
+    // WinUITheme.xaml(112,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_517)?;
+    // WinUITheme.xaml(114,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_518)?;
+    // WinUITheme.xaml(116,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_519)?;
     // WinUITheme.xaml(119,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_518)?;
+    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_520)?;
     // WinUITheme.xaml(121,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 121, 62)?, rt::string_object("GridViewItemSelectedBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 121, 62)?;
     // WinUITheme.xaml(122,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_519)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_521)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3898,21 +3902,21 @@ fn populate_winuitheme_xaml_unit_168(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(161,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_520)?;
-    // WinUITheme.xaml(180,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_521)?;
-    // WinUITheme.xaml(181,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_522)?;
+    // WinUITheme.xaml(180,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_523)?;
+    // WinUITheme.xaml(181,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_524)?;
     // WinUITheme.xaml(185,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_523)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_525)?;
     // WinUITheme.xaml(195,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 195, 74)?, rt::string_object("ListViewItemCompactSelectedBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 195, 74)?;
     // WinUITheme.xaml(196,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_524)?;
-    // WinUITheme.xaml(211,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_525)?;
-    // WinUITheme.xaml(214,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_526)?;
+    // WinUITheme.xaml(211,54) Content (resource)
+    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_527)?;
+    // WinUITheme.xaml(214,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_528)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3924,7 +3928,7 @@ fn populate_winuitheme_xaml_unit_169(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_527)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_529)?;
     // WinUITheme.xaml(27,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 27, 53)?, rt::string_object("FlyoutBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 27, 53)?;
     ::core::result::Result::Ok(())
@@ -3938,11 +3942,11 @@ fn populate_winuitheme_xaml_unit_170(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(113,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_528)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_530)?;
     // WinUITheme.xaml(149,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 149, 53)?, rt::string_object("ButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 149, 53)?;
     // WinUITheme.xaml(150,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_529)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_531)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3958,9 +3962,9 @@ fn populate_winuitheme_xaml_unit_171(
     // WinUITheme.xaml(132,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 132, 74)?, rt::string_object("ToggleButtonCheckedStateBackgroundSizing"), rt::to_object(::ferroui_base::media::BackgroundSizing::OuterBorderEdge)), 132, 74)?;
     // WinUITheme.xaml(133,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_530)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_532)?;
     // WinUITheme.xaml(169,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_531)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_533)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3971,7 +3975,7 @@ fn populate_winuitheme_xaml_unit_172(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_532)?;
+    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_534)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3983,11 +3987,11 @@ fn populate_winuitheme_xaml_unit_173(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(51,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_533)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_535)?;
     // WinUITheme.xaml(57,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_534)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_536)?;
     // WinUITheme.xaml(60,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_535)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_537)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3999,11 +4003,11 @@ fn populate_winuitheme_xaml_unit_174(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(63,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_536)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_538)?;
     // WinUITheme.xaml(75,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 75, 59)?, rt::string_object("RepeatButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 75, 59)?;
     // WinUITheme.xaml(76,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_537)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_539)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4015,7 +4019,7 @@ fn populate_winuitheme_xaml_unit_175(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(67,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_538)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_540)?;
     // WinUITheme.xaml(90,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 90, 65)?, rt::string_object("CalendarDatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 90, 65)?;
     ::core::result::Result::Ok(())
@@ -4029,11 +4033,11 @@ fn populate_winuitheme_xaml_unit_176(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(171,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_539)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_541)?;
     // WinUITheme.xaml(228,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_540)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_542)?;
     // WinUITheme.xaml(232,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_541)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_543)?;
     // WinUITheme.xaml(244,66) Content (resource)
     let value_468 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_468))), 244, 66)?;
@@ -4054,9 +4058,9 @@ fn populate_winuitheme_xaml_unit_177(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(191,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_542)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_544)?;
     // WinUITheme.xaml(263,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_543)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_545)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4068,19 +4072,19 @@ fn populate_winuitheme_xaml_unit_178(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(49,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_544)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_546)?;
     // WinUITheme.xaml(51,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "ContentDialogSmokeFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5205, 51, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "ContentDialogSmokeFill", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5209, 51, 8)?;
     // WinUITheme.xaml(52,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_545)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_547)?;
     // WinUITheme.xaml(55,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 55, 51)?, rt::string_object("ContentDialogBorderWidth"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 55, 51)?;
     // WinUITheme.xaml(56,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_546)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_548)?;
     // WinUITheme.xaml(60,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 60, 54)?, rt::string_object("ContentDialogButtonSpacing"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(8.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 60, 54)?;
     // WinUITheme.xaml(61,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_547)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_549)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4092,21 +4096,21 @@ fn populate_winuitheme_xaml_unit_179(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(87,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_548)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_550)?;
     // WinUITheme.xaml(110,72) Content (resource)
     let value_471 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("DatePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_471))), 110, 72)?;
     // WinUITheme.xaml(111,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_549)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_551)?;
     // WinUITheme.xaml(112,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_550)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_552)?;
     // WinUITheme.xaml(116,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 116, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 116, 54)?;
     // WinUITheme.xaml(117,59) Content (resource)
     let value_472 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 117, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 117, 59)?, rt::string_object("DatePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_472))), 117, 59)?;
     // WinUITheme.xaml(118,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_551)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_553)?;
     // WinUITheme.xaml(120,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 57)?, rt::string_object("DatePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 120, 57)?;
     ::core::result::Result::Ok(())
@@ -4120,7 +4124,7 @@ fn populate_winuitheme_xaml_unit_180(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(61,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_552)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_554)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4134,9 +4138,9 @@ fn populate_winuitheme_xaml_unit_181(
     // WinUITheme.xaml(59,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 59, 61)?, rt::string_object("FlipViewButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 59, 61)?;
     // WinUITheme.xaml(60,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_553)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_555)?;
     // WinUITheme.xaml(70,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_554)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_556)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4148,7 +4152,7 @@ fn populate_winuitheme_xaml_unit_182(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_555)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_557)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4160,17 +4164,17 @@ fn populate_winuitheme_xaml_unit_183(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(149,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_556)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_558)?;
     // WinUITheme.xaml(186,53) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "PivotHeaderItemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5313, 186, 53)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "PivotHeaderItemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5317, 186, 53)?;
     // WinUITheme.xaml(187,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "PivotTitleFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5314, 187, 48)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "PivotTitleFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5318, 187, 48)?;
     // WinUITheme.xaml(188,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_557)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_559)?;
     // WinUITheme.xaml(191,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 191, 56)?, rt::string_object("PivotHeaderItemCharacterSpacing"), rt::to_object(-25_i32)), 191, 56)?;
     // WinUITheme.xaml(192,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_558)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_560)?;
     // WinUITheme.xaml(198,58) Content (resource)
     let value_473 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 198, 58)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 198, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_473))), 198, 58)?;
@@ -4178,7 +4182,7 @@ fn populate_winuitheme_xaml_unit_183(
     let value_474 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Bold")), 199, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 199, 53)?, rt::string_object("PivotTitleThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_474))), 199, 53)?;
     // WinUITheme.xaml(200,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_559)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_561)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4194,11 +4198,11 @@ fn populate_winuitheme_xaml_unit_184(
     // WinUITheme.xaml(128,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 128, 63)?, rt::string_object("ScrollBarPanningBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 128, 63)?;
     // WinUITheme.xaml(129,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_560)?;
-    // WinUITheme.xaml(162,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_561)?;
-    // WinUITheme.xaml(179,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_562)?;
+    // WinUITheme.xaml(162,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_563)?;
+    // WinUITheme.xaml(179,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_564)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4210,7 +4214,7 @@ fn populate_winuitheme_xaml_unit_185(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_563)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_565)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4222,20 +4226,20 @@ fn populate_winuitheme_xaml_unit_186(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(118,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_564)?;
-    // WinUITheme.xaml(139,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_565)?;
-    // WinUITheme.xaml(140,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_566)?;
+    // WinUITheme.xaml(139,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_567)?;
+    // WinUITheme.xaml(140,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_568)?;
     // WinUITheme.xaml(141,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_567)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_569)?;
     // WinUITheme.xaml(143,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_568)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_570)?;
     // WinUITheme.xaml(145,55) Content (resource)
     let value_475 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 145, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 145, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_475))), 145, 55)?;
     // WinUITheme.xaml(146,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_569)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_571)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4247,14 +4251,14 @@ fn populate_winuitheme_xaml_unit_187(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(87,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_570)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_572)?;
     // WinUITheme.xaml(110,72) Content (resource)
     let value_476 = ::ferroui_base::media::Color::__markup_FromUInt32_2(16777215_u32);
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 110, 72)?, rt::string_object("TimePickerFlyoutPresenterHighlightForegroundColor"), rt::to_object(::core::clone::Clone::clone(&value_476))), 110, 72)?;
     // WinUITheme.xaml(111,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_571)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_573)?;
     // WinUITheme.xaml(112,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_572)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_574)?;
     // WinUITheme.xaml(114,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 114, 57)?, rt::string_object("TimePickerSelectorThemeMinWidth"), rt::to_object(80.0_f64)), 114, 57)?;
     // WinUITheme.xaml(115,54) Content (resource)
@@ -4262,7 +4266,7 @@ fn populate_winuitheme_xaml_unit_187(
     // WinUITheme.xaml(116,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 116, 52)?, rt::string_object("TimePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 116, 52)?;
     // WinUITheme.xaml(117,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_573)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_575)?;
     // WinUITheme.xaml(120,59) Content (resource)
     let value_477 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_477))), 120, 59)?;
@@ -4281,11 +4285,11 @@ fn populate_winuitheme_xaml_unit_188(
     // WinUITheme.xaml(40,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 40, 54)?, rt::string_object("ToolTipBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 40, 54)?;
     // WinUITheme.xaml(41,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_574)?;
-    // WinUITheme.xaml(44,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_575)?;
-    // WinUITheme.xaml(47,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_576)?;
+    // WinUITheme.xaml(44,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_577)?;
+    // WinUITheme.xaml(47,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_578)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4297,7 +4301,7 @@ fn populate_winuitheme_xaml_unit_189(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_577)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_579)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4309,11 +4313,11 @@ fn populate_winuitheme_xaml_unit_190(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(43,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_578)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_580)?;
     // WinUITheme.xaml(45,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_579)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_581)?;
     // WinUITheme.xaml(51,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_580)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_582)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4325,19 +4329,19 @@ fn populate_winuitheme_xaml_unit_191(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(147,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_581)?;
-    // WinUITheme.xaml(148,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_582)?;
-    // WinUITheme.xaml(149,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_583)?;
-    // WinUITheme.xaml(150,8) Content (resource)
+    // WinUITheme.xaml(148,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_584)?;
-    // WinUITheme.xaml(151,8) Content (resource)
+    // WinUITheme.xaml(149,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_585)?;
-    // WinUITheme.xaml(190,8) Content (resource)
+    // WinUITheme.xaml(150,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_586)?;
-    // WinUITheme.xaml(191,8) Content (resource)
+    // WinUITheme.xaml(151,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_587)?;
+    // WinUITheme.xaml(190,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_588)?;
+    // WinUITheme.xaml(191,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_589)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4349,7 +4353,7 @@ fn populate_winuitheme_xaml_unit_192(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(21,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_588)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_590)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4361,13 +4365,13 @@ fn populate_winuitheme_xaml_unit_193(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(41,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_589)?;
-    // WinUITheme.xaml(42,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_590)?;
-    // WinUITheme.xaml(45,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_591)?;
+    // WinUITheme.xaml(42,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_592)?;
+    // WinUITheme.xaml(45,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_593)?;
     // WinUITheme.xaml(47,64) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_592)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_594)?;
     // WinUITheme.xaml(51,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 51, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 51, 55)?;
     ::core::result::Result::Ok(())
@@ -4381,9 +4385,9 @@ fn populate_winuitheme_xaml_unit_194(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_593)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_595)?;
     // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_594)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_596)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4395,9 +4399,9 @@ fn populate_winuitheme_xaml_unit_195(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_595)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_597)?;
     // WinUITheme.xaml(24,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_596)?;
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_598)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4409,11 +4413,11 @@ fn populate_winuitheme_xaml_unit_196(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(41,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_597)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_599)?;
     // WinUITheme.xaml(47,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 47, 53)?, rt::string_object("MenuBarItemBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 47, 53)?;
     // WinUITheme.xaml(48,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_598)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_600)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4425,11 +4429,11 @@ fn populate_winuitheme_xaml_unit_197(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(97,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_599)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_601)?;
     // WinUITheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_600)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_602)?;
     // WinUITheme.xaml(133,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_601)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_603)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4441,7 +4445,7 @@ fn populate_winuitheme_xaml_unit_198(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(33,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_602)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_604)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4453,11 +4457,11 @@ fn populate_winuitheme_xaml_unit_199(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(79,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_603)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_605)?;
     // WinUITheme.xaml(107,58) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 107, 58)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 107, 58)?;
     // WinUITheme.xaml(108,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_604)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_606)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4469,7 +4473,7 @@ fn populate_winuitheme_xaml_unit_200(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_605)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_607)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4481,7 +4485,7 @@ fn populate_winuitheme_xaml_unit_201(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_606)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_608)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4493,15 +4497,15 @@ fn populate_winuitheme_xaml_unit_202(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(171,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_607)?;
-    // WinUITheme.xaml(234,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_608)?;
-    // WinUITheme.xaml(235,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_609)?;
+    // WinUITheme.xaml(234,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_610)?;
+    // WinUITheme.xaml(235,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_611)?;
     // WinUITheme.xaml(236,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_610)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_612)?;
     // WinUITheme.xaml(238,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_3, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5694, 238, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_3, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5698, 238, 8)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4513,7 +4517,7 @@ fn populate_winuitheme_xaml_unit_203(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(27,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_611)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_613)?;
     // WinUITheme.xaml(30,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 30, 52)?, rt::string_object("AutoSuggestBoxIconFontSize"), rt::to_object(12.0_f64)), 30, 52)?;
     ::core::result::Result::Ok(())
@@ -4527,15 +4531,15 @@ fn populate_winuitheme_xaml_unit_204(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(225,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_612)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_614)?;
     // WinUITheme.xaml(286,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_613)?;
-    // WinUITheme.xaml(309,8) Content (resource)
-    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_614)?;
-    // WinUITheme.xaml(310,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_615)?;
+    // WinUITheme.xaml(309,8) Content (resource)
+    rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_616)?;
+    // WinUITheme.xaml(310,8) Content (resource)
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_617)?;
     // WinUITheme.xaml(321,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_616)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_618)?;
     // WinUITheme.xaml(327,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 327, 56)?, rt::string_object("ComboBoxDropdownBorderPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 327, 56)?;
     ::core::result::Result::Ok(())
@@ -4549,13 +4553,13 @@ fn populate_winuitheme_xaml_unit_205(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(37,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_617)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_619)?;
     // WinUITheme.xaml(38,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_618)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_620)?;
     // WinUITheme.xaml(40,60) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_619)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_621)?;
     // WinUITheme.xaml(42,60) Content (resource)
-    rt::add_string_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_620)?;
+    rt::add_string_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_622)?;
     // WinUITheme.xaml(45,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 45, 59)?, rt::string_object("SplitViewPaneRootCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 45, 59)?;
     ::core::result::Result::Ok(())
@@ -4568,10 +4572,12 @@ fn populate_winuitheme_xaml_unit_206(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
-    // WinUITheme.xaml(31,58) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 31, 58)?, rt::string_object("ProgressBarBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 31, 58)?;
-    // WinUITheme.xaml(32,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_621)?;
+    // WinUITheme.xaml(35,58) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 35, 58)?, rt::string_object("ProgressBarBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 58)?;
+    // WinUITheme.xaml(36,8) Content (resource)
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_623)?;
+    // WinUITheme.xaml(41,8) Content (resource)
+    rt::add_packed_static_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_624)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4583,7 +4589,7 @@ fn populate_winuitheme_xaml_unit_207(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_622)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_625)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4595,11 +4601,11 @@ fn populate_winuitheme_xaml_unit_208(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(31,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_623)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_626)?;
     // WinUITheme.xaml(34,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 34, 56)?, rt::string_object("NumberBoxPopupBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 34, 56)?;
     // WinUITheme.xaml(35,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_624)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_627)?;
     // WinUITheme.xaml(36,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 36, 66)?, rt::string_object("NumberBoxPopupSpinButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 36, 66)?;
     ::core::result::Result::Ok(())
@@ -4613,15 +4619,15 @@ fn populate_winuitheme_xaml_unit_209(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(63,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_625)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_628)?;
     // WinUITheme.xaml(72,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 72, 56)?, rt::string_object("ExpanderHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 72, 56)?;
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_626)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_629)?;
     // WinUITheme.xaml(82,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 82, 57)?, rt::string_object("ExpanderChevronBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 82, 57)?;
     // WinUITheme.xaml(83,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_627)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_630)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4633,7 +4639,7 @@ fn populate_winuitheme_xaml_unit_210(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(33,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_628)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_631)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4645,7 +4651,7 @@ fn populate_winuitheme_xaml_unit_211(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(53,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_629)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_632)?;
     // WinUITheme.xaml(69,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 69, 49)?, rt::string_object("InfoBarBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 69, 49)?;
     ::core::result::Result::Ok(())
@@ -4659,7 +4665,7 @@ fn populate_winuitheme_xaml_unit_212(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_630)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_633)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4671,9 +4677,9 @@ fn populate_winuitheme_xaml_unit_213(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(73,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_631)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_634)?;
     // WinUITheme.xaml(91,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_632)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_635)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4685,7 +4691,7 @@ fn populate_winuitheme_xaml_unit_214(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(59,8) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_633)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_636)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4697,15 +4703,15 @@ fn populate_winuitheme_xaml_unit_215(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(78,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_634)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_637)?;
     // WinUITheme.xaml(103,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 103, 63)?, rt::string_object("TabularSurfaceGroupHeaderCountOpacity"), rt::to_object(1.0_f64)), 103, 63)?;
     // WinUITheme.xaml(104,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_635)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_638)?;
     // WinUITheme.xaml(105,67) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 105, 67)?, rt::string_object("TabularSurfaceGroupHeaderBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 1.0_f64, 0.0_f64, 1.0_f64))), 105, 67)?;
     // WinUITheme.xaml(106,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_636)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_639)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4716,18 +4722,18 @@ fn populate_winuitheme_xaml_unit_216(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(46,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_637)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_640)?;
     // WinUITheme.xaml(48,53) Content (resource)
     let value_478 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 48, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 48, 53)?, rt::string_object("TableViewHeaderFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_478))), 48, 53)?;
     // WinUITheme.xaml(49,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_638)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_641)?;
     // WinUITheme.xaml(51,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 51, 53)?, rt::string_object("TableViewHeaderCellPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64))), 51, 53)?;
     // WinUITheme.xaml(52,54) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_639)?;
+    rt::add_double_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_642)?;
     // WinUITheme.xaml(54,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_640)?;
+    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_WINUITHEME_XAML_ROWS_643)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4739,7 +4745,7 @@ fn populate_winuitheme_xaml_unit_217(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(22,8) Content (resource)
-    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_641)?;
+    rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_644)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4750,9 +4756,9 @@ fn populate_winuitheme_xaml_unit_218(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(923,49) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_642)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_645)?;
     // WinUITheme.xaml(931,58) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_643)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_646)?;
     // WinUITheme.xaml(937,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 937, 50)?, rt::string_object("RichEditBoxLeftHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64))), 937, 50)?;
     // WinUITheme.xaml(938,51) Content (resource)
@@ -4779,7 +4785,7 @@ fn populate_winuitheme_xaml_unit_219(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(604,51) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_644)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_647)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4803,7 +4809,7 @@ fn populate_winuitheme_xaml_unit_221(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(185,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_645)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_648)?;
     // WinUITheme.xaml(187,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 187, 41)?, rt::string_object("TextBoxIconFontSize"), rt::to_object(12.0_f64)), 187, 41)?;
     ::core::result::Result::Ok(())
@@ -4823,11 +4829,11 @@ fn populate_winuitheme_xaml_unit_222(
     // WinUITheme.xaml(263,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 263, 46)?, rt::string_object("MenuFlyoutThemeMinHeight"), rt::to_object(32.0_f64)), 263, 46)?;
     // WinUITheme.xaml(264,50) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_646)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_649)?;
     // WinUITheme.xaml(269,56) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_647)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_650)?;
     // WinUITheme.xaml(271,4) Content (resource)
-    rt::add_packed_resource_aliases(&resource_dictionary_0, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_648)?;
+    rt::add_packed_resource_aliases(&resource_dictionary_0, &context, &POPULATE_WINUITHEME_XAML_DOCUMENT, &POPULATE_WINUITHEME_XAML_ROWS_651)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4855,21 +4861,21 @@ fn populate_winuitheme_xaml_unit_224(
     // WinUITheme.xaml(160,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 160, 47)?, rt::string_object("MenuFlyoutScrollerMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64))), 160, 47)?;
     // WinUITheme.xaml(161,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_649)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_652)?;
     // WinUITheme.xaml(163,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 163, 49)?, rt::string_object("InfoBarActionButtonPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 8.0_f64, 1.0_f64))), 163, 49)?;
     // WinUITheme.xaml(164,57) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 164, 57)?, rt::string_object("InfoBarActionButtonCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 164, 57)?;
     // WinUITheme.xaml(165,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_650)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_653)?;
     // WinUITheme.xaml(167,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 167, 52)?, rt::string_object("InfoBarHyperlinkButtonPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64))), 167, 52)?;
     // WinUITheme.xaml(168,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_651)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_654)?;
     // WinUITheme.xaml(170,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 170, 42)?, rt::string_object("ExpanderChevronGlyph"), rt::string_object("\u{e70d}")), 170, 42)?;
     // WinUITheme.xaml(171,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_652)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_655)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4880,7 +4886,7 @@ fn populate_winuitheme_xaml_unit_225(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(189,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_653)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_656)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4891,7 +4897,7 @@ fn populate_winuitheme_xaml_unit_226(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(123,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_654)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_657)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4902,9 +4908,9 @@ fn populate_winuitheme_xaml_unit_227(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(24,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_655)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_658)?;
     // WinUITheme.xaml(26,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_656)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_659)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4915,7 +4921,7 @@ fn populate_winuitheme_xaml_unit_228(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(210,61) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_657)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_660)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4928,7 +4934,7 @@ fn populate_winuitheme_xaml_unit_229(
     // WinUITheme.xaml(195,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 195, 50)?, rt::string_object("ToggleSwitchTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 195, 50)?;
     // WinUITheme.xaml(196,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_658)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_661)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4939,7 +4945,7 @@ fn populate_winuitheme_xaml_unit_230(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(81,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_659)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_662)?;
     // WinUITheme.xaml(83,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 83, 60)?, rt::string_object("AppBarEllipsisButtonInnerBorderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 6.0_f64, 6.0_f64, 6.0_f64))), 83, 60)?;
     // WinUITheme.xaml(84,52) Content (resource)
@@ -4956,7 +4962,7 @@ fn populate_winuitheme_xaml_unit_231(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(12,46) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_660)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_663)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4967,7 +4973,7 @@ fn populate_winuitheme_xaml_unit_232(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(12,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_661)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_664)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4979,29 +4985,29 @@ fn populate_winuitheme_xaml_unit_233(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(29,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TopCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5949, 29, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TopCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5955, 29, 4)?;
     // WinUITheme.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "RightCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5950, 30, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "RightCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5956, 30, 4)?;
     // WinUITheme.xaml(31,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BottomCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5951, 31, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "BottomCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5957, 31, 4)?;
     // WinUITheme.xaml(32,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LeftCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5952, 32, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "LeftCornerRadiusFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5958, 32, 4)?;
     // WinUITheme.xaml(33,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TopLeftCornerRadiusDoubleValueConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5953, 33, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TopLeftCornerRadiusDoubleValueConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5959, 33, 4)?;
     // WinUITheme.xaml(34,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BottomRightCornerRadiusDoubleValueConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5954, 34, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "BottomRightCornerRadiusDoubleValueConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5960, 34, 4)?;
     // WinUITheme.xaml(35,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TopThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5955, 35, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TopThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5961, 35, 4)?;
     // WinUITheme.xaml(36,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "BottomThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5956, 36, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "BottomThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5962, 36, 4)?;
     // WinUITheme.xaml(37,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LeftThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5957, 37, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "LeftThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5963, 37, 4)?;
     // WinUITheme.xaml(38,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "RightThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5958, 38, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "RightThicknessFilterConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5964, 38, 4)?;
     // WinUITheme.xaml(39,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabViewLeftInsetCornerConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5959, 39, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TabViewLeftInsetCornerConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5965, 39, 4)?;
     // WinUITheme.xaml(40,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TabViewRightInsetCornerConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5960, 40, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TabViewRightInsetCornerConverter", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5966, 40, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5012,11 +5018,11 @@ fn populate_winuitheme_xaml_unit_234(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(279,45) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_662)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_665)?;
     // WinUITheme.xaml(284,38) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_663)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_666)?;
     // WinUITheme.xaml(286,42) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_664)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_667)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5029,9 +5035,9 @@ fn populate_winuitheme_xaml_unit_235(
     // WinUITheme.xaml(123,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 123, 48)?, rt::string_object("DatePickerTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 123, 48)?;
     // WinUITheme.xaml(124,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_665)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_668)?;
     // WinUITheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_666)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_669)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5042,9 +5048,9 @@ fn populate_winuitheme_xaml_unit_236(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(84,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_667)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_670)?;
     // WinUITheme.xaml(86,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_668)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_671)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5055,7 +5061,7 @@ fn populate_winuitheme_xaml_unit_237(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(81,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_669)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_672)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5066,19 +5072,19 @@ fn populate_winuitheme_xaml_unit_238(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(183,45) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_670)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_673)?;
     // WinUITheme.xaml(187,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 187, 42)?, rt::string_object("ScrollBarThumbOffset"), rt::to_object(2.0_f64)), 187, 42)?;
     // WinUITheme.xaml(188,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_671)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_674)?;
     // WinUITheme.xaml(190,35) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_672)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_675)?;
     // WinUITheme.xaml(198,46) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_673)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_676)?;
     // WinUITheme.xaml(200,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 200, 47)?, rt::string_object("ScrollBarCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64))), 200, 47)?;
     // WinUITheme.xaml(201,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_674)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_677)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5091,7 +5097,7 @@ fn populate_winuitheme_xaml_unit_239(
     // WinUITheme.xaml(24,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 50)?, rt::string_object("ScrollViewerScrollBarMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 24, 50)?;
     // WinUITheme.xaml(25,58) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_675)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_678)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5104,9 +5110,9 @@ fn populate_winuitheme_xaml_unit_240(
     // WinUITheme.xaml(170,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 170, 44)?, rt::string_object("SliderTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 170, 44)?;
     // WinUITheme.xaml(171,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_676)?;
+    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_679)?;
     // WinUITheme.xaml(173,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_677)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_680)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5119,9 +5125,9 @@ fn populate_winuitheme_xaml_unit_241(
     // WinUITheme.xaml(123,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 123, 48)?, rt::string_object("TimePickerTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 123, 48)?;
     // WinUITheme.xaml(124,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_678)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_681)?;
     // WinUITheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_679)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_682)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5145,7 +5151,7 @@ fn populate_winuitheme_xaml_unit_243(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(45,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_680)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_683)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5156,15 +5162,15 @@ fn populate_winuitheme_xaml_unit_244(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(213,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_681)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_684)?;
     // WinUITheme.xaml(215,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_682)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_685)?;
     // WinUITheme.xaml(235,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_683)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_686)?;
     // WinUITheme.xaml(273,63) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_684)?;
+    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_687)?;
     // WinUITheme.xaml(276,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_685)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_688)?;
     // WinUITheme.xaml(278,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 278, 61)?, rt::string_object("NavigationViewItemExpandedGlyphFontSize"), rt::to_object(8.0_f64)), 278, 61)?;
     // WinUITheme.xaml(279,53) Content (resource)
@@ -5179,7 +5185,7 @@ fn populate_winuitheme_xaml_unit_245(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(24,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_686)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_689)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5192,7 +5198,7 @@ fn populate_winuitheme_xaml_unit_246(
     // WinUITheme.xaml(54,35) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 54, 35)?, rt::string_object("MenuBarHeight"), rt::to_object(40.0_f64)), 54, 35)?;
     // WinUITheme.xaml(55,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_687)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_690)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5203,7 +5209,7 @@ fn populate_winuitheme_xaml_unit_247(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(111,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_688)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_691)?;
     // WinUITheme.xaml(113,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 113, 41)?, rt::string_object("SplitButtonPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(11.0_f64, 6.0_f64, 11.0_f64, 7.0_f64))), 113, 41)?;
     ::core::result::Result::Ok(())
@@ -5216,7 +5222,7 @@ fn populate_winuitheme_xaml_unit_248(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(27,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_689)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_692)?;
     // WinUITheme.xaml(29,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 29, 50)?, rt::string_object("RadioButtonsTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64))), 29, 50)?;
     ::core::result::Result::Ok(())
@@ -5229,27 +5235,27 @@ fn populate_winuitheme_xaml_unit_249(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(249,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_690)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_693)?;
     // WinUITheme.xaml(252,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_691)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_694)?;
     // WinUITheme.xaml(257,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 257, 50)?, rt::string_object("TabViewItemHeaderIconMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 10.0_f64, 0.0_f64))), 257, 50)?;
     // WinUITheme.xaml(258,56) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_692)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_695)?;
     // WinUITheme.xaml(262,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_693)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_696)?;
     // WinUITheme.xaml(265,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_694)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_697)?;
     // WinUITheme.xaml(268,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_695)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_698)?;
     // WinUITheme.xaml(271,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_696)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_699)?;
     // WinUITheme.xaml(274,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 274, 59)?, rt::string_object("TabViewItemAddButtonContainerPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(3.0_f64, 0.0_f64, 0.0_f64, 3.0_f64))), 274, 59)?;
     // WinUITheme.xaml(275,40) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 275, 40)?, rt::string_object("TabViewShadowDepth"), rt::to_object(16.0_f64)), 275, 40)?;
     // WinUITheme.xaml(276,49) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_697)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_700)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5260,9 +5266,9 @@ fn populate_winuitheme_xaml_unit_250(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(33,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_698)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_701)?;
     // WinUITheme.xaml(37,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_699)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_702)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5273,7 +5279,7 @@ fn populate_winuitheme_xaml_unit_251(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(330,48) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_700)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_703)?;
     // WinUITheme.xaml(338,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 338, 50)?, rt::string_object("ComboBoxPopupMaxNumberOfItems"), rt::to_object(15_i32)), 338, 50)?;
     // WinUITheme.xaml(339,73) Content (resource)
@@ -5281,9 +5287,9 @@ fn populate_winuitheme_xaml_unit_251(
     // WinUITheme.xaml(340,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 340, 56)?, rt::string_object("ComboBoxItemScaleAnimationDuration"), rt::string_object("00:00:00.167")), 340, 56)?;
     // WinUITheme.xaml(341,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_701)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_704)?;
     // WinUITheme.xaml(353,60) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_702)?;
+    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_705)?;
     // WinUITheme.xaml(357,53) Content (resource)
     let value_479 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_479))), 357, 53)?;
@@ -5299,10 +5305,10 @@ fn populate_winuitheme_xaml_unit_252(
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
-    // WinUITheme.xaml(39,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_703)?;
-    // WinUITheme.xaml(41,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_704)?;
+    // WinUITheme.xaml(45,42) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_706)?;
+    // WinUITheme.xaml(47,49) Content (resource)
+    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_707)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5313,9 +5319,9 @@ fn populate_winuitheme_xaml_unit_253(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(39,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_705)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_708)?;
     // WinUITheme.xaml(41,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_706)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_709)?;
     // WinUITheme.xaml(45,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 45, 52)?, rt::string_object("NumberBoxPopupIndicatorMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 8.0_f64, 0.0_f64))), 45, 52)?;
     ::core::result::Result::Ok(())
@@ -5334,13 +5340,13 @@ fn populate_winuitheme_xaml_unit_254(
     // WinUITheme.xaml(89,69) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 89, 69)?, rt::string_object("ExpanderHeaderVerticalContentAlignment"), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)), 89, 69)?;
     // WinUITheme.xaml(90,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_707)?;
-    // WinUITheme.xaml(92,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_708)?;
-    // WinUITheme.xaml(94,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_709)?;
-    // WinUITheme.xaml(96,45) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_710)?;
+    // WinUITheme.xaml(92,44) Content (resource)
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_711)?;
+    // WinUITheme.xaml(94,47) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_712)?;
+    // WinUITheme.xaml(96,45) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_713)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5361,17 +5367,17 @@ fn populate_winuitheme_xaml_unit_255(
     let value_482 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 75, 48)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 75, 48)?, rt::string_object("InfoBarMessageFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_482))), 75, 48)?;
     // WinUITheme.xaml(76,38) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_711)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_714)?;
     // WinUITheme.xaml(79,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 79, 51)?, rt::string_object("InfoBarHyperlinkButtonMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(-12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 79, 51)?;
     // WinUITheme.xaml(80,48) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_712)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_715)?;
     // WinUITheme.xaml(85,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_713)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_716)?;
     // WinUITheme.xaml(87,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 87, 41)?, rt::string_object("InfoBarIconFontSize"), rt::to_object(16.0_f64)), 87, 41)?;
     // WinUITheme.xaml(88,41) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_714)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_717)?;
     // WinUITheme.xaml(97,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 97, 44)?, rt::string_object("InfoBarCloseButtonSymbol"), rt::to_object(::ferroui_controls::Symbol::Cancel)), 97, 44)?;
     ::core::result::Result::Ok(())
@@ -5384,15 +5390,15 @@ fn populate_winuitheme_xaml_unit_256(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(102,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_715)?;
-    // WinUITheme.xaml(108,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_716)?;
-    // WinUITheme.xaml(110,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_717)?;
-    // WinUITheme.xaml(114,53) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_718)?;
+    // WinUITheme.xaml(108,53) Content (resource)
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_719)?;
+    // WinUITheme.xaml(110,44) Content (resource)
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_720)?;
+    // WinUITheme.xaml(114,53) Content (resource)
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_721)?;
     // WinUITheme.xaml(117,52) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_719)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_722)?;
     // WinUITheme.xaml(119,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 119, 59)?, rt::string_object("PipsPagerNavigationButtonScalePressed"), rt::to_object(0.875_f64)), 119, 59)?;
     ::core::result::Result::Ok(())
@@ -5405,7 +5411,7 @@ fn populate_winuitheme_xaml_unit_257(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(102,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_720)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_723)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5416,13 +5422,13 @@ fn populate_winuitheme_xaml_unit_258(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(81,43) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_721)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_724)?;
     // WinUITheme.xaml(91,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 91, 51)?, rt::string_object("TitleBarCompactContentMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64))), 91, 51)?;
     // WinUITheme.xaml(92,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_722)?;
+    rt::add_double_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_725)?;
     // WinUITheme.xaml(96,41) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_723)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_726)?;
     // WinUITheme.xaml(99,70) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 99, 70)?, rt::string_object("TitleBarLeftHeaderHorizontalAlignment"), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)), 99, 70)?;
     // WinUITheme.xaml(100,66) Content (resource)
@@ -5445,7 +5451,7 @@ fn populate_winuitheme_xaml_unit_259(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(25,54) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_724)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_727)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5457,9 +5463,9 @@ fn populate_winuitheme_xaml_unit_260(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(27,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_725)?;
+    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_728)?;
     // WinUITheme.xaml(36,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "WinUIThemeShadow", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5961, 36, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "WinUIThemeShadow", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5967, 36, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5471,135 +5477,135 @@ fn populate_winuitheme_xaml_unit_261(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(23,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE73E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5962, 23, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE73E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5968, 23, 45)?;
     // WinUITheme.xaml(25,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE9AE", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5963, 25, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE9AE", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5969, 25, 45)?;
     // WinUITheme.xaml(27,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE894", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5964, 27, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE894", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5970, 27, 45)?;
     // WinUITheme.xaml(34,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDD9", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5965, 34, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDD9", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5971, 34, 45)?;
     // WinUITheme.xaml(35,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDA", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5966, 35, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDA", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5972, 35, 45)?;
     // WinUITheme.xaml(36,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5967, 36, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5973, 36, 45)?;
     // WinUITheme.xaml(37,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5968, 37, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDDC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5974, 37, 45)?;
     // WinUITheme.xaml(42,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF136", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5969, 42, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF136", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5975, 42, 45)?;
     // WinUITheme.xaml(43,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5970, 43, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5976, 43, 45)?;
     // WinUITheme.xaml(46,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE711", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5971, 46, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE711", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5977, 46, 45)?;
     // WinUITheme.xaml(52,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE787", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5972, 52, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE787", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5978, 52, 45)?;
     // WinUITheme.xaml(54,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8FB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5973, 54, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8FB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5979, 54, 45)?;
     // WinUITheme.xaml(61,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE921", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5974, 61, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE921", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5980, 61, 45)?;
     // WinUITheme.xaml(62,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE922", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5975, 62, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE922", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5981, 62, 45)?;
     // WinUITheme.xaml(63,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE923", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5976, 63, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE923", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5982, 63, 45)?;
     // WinUITheme.xaml(64,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8BB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5977, 64, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8BB", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5983, 64, 45)?;
     // WinUITheme.xaml(65,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE740", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5978, 65, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE740", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5984, 65, 45)?;
     // WinUITheme.xaml(66,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE73F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5979, 66, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE73F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5985, 66, 45)?;
     // WinUITheme.xaml(69,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE74A", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5980, 69, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE74A", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5986, 69, 45)?;
     // WinUITheme.xaml(72,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE72C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5981, 72, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE72C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5987, 72, 45)?;
     // WinUITheme.xaml(79,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5982, 79, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5988, 79, 45)?;
     // WinUITheme.xaml(80,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5983, 80, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5989, 80, 45)?;
     // WinUITheme.xaml(81,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5984, 81, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF13E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5990, 81, 45)?;
     // WinUITheme.xaml(84,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8B7", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5985, 84, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8B7", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5991, 84, 45)?;
     // WinUITheme.xaml(85,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7C3", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5986, 85, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7C3", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5992, 85, 45)?;
     // WinUITheme.xaml(86,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDA2", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5987, 86, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEDA2", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5993, 86, 45)?;
     // WinUITheme.xaml(89,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE700", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5988, 89, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE700", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5994, 89, 45)?;
     // WinUITheme.xaml(92,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE72B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5989, 92, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE72B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5995, 92, 45)?;
     // WinUITheme.xaml(94,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE712", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5990, 94, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE712", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5996, 94, 45)?;
     // WinUITheme.xaml(97,50) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5991, 97, 50)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "NavigationPageMenuIcon", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5997, 97, 50)?;
     // WinUITheme.xaml(103,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE70D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5992, 103, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE70D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5998, 103, 45)?;
     // WinUITheme.xaml(105,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE70E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5993, 105, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE70E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5999, 105, 45)?;
     // WinUITheme.xaml(108,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE96E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5994, 108, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE96E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6000, 108, 45)?;
     // WinUITheme.xaml(110,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE972", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5995, 110, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE972", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6001, 110, 45)?;
     // WinUITheme.xaml(112,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEA3B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5996, 112, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEA3B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6002, 112, 45)?;
     // WinUITheme.xaml(114,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC8F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5997, 114, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC8F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6003, 114, 45)?;
     // WinUITheme.xaml(122,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE76C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5998, 122, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE76C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6004, 122, 45)?;
     // WinUITheme.xaml(124,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE974", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_5999, 124, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE974", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6005, 124, 45)?;
     // WinUITheme.xaml(126,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE915", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6000, 126, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE915", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6006, 126, 45)?;
     // WinUITheme.xaml(131,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8C6", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6001, 131, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8C6", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6007, 131, 45)?;
     // WinUITheme.xaml(133,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8C8", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6002, 133, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE8C8", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6008, 133, 45)?;
     // WinUITheme.xaml(135,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE77F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6003, 135, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE77F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6009, 135, 45)?;
     // WinUITheme.xaml(137,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7A7", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6004, 137, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7A7", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6010, 137, 45)?;
     // WinUITheme.xaml(139,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7A6", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6005, 139, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7A6", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6011, 139, 45)?;
     // WinUITheme.xaml(143,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF78D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6006, 143, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF78D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6012, 143, 45)?;
     // WinUITheme.xaml(148,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF5B0", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6007, 148, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF5B0", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6013, 148, 45)?;
     // WinUITheme.xaml(150,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AE", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6008, 150, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AE", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6014, 150, 45)?;
     // WinUITheme.xaml(152,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE15B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6009, 152, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE15B", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6015, 152, 45)?;
     // WinUITheme.xaml(154,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE15D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6010, 154, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE15D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6016, 154, 45)?;
     // WinUITheme.xaml(156,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE198", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6011, 156, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE198", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6017, 156, 45)?;
     // WinUITheme.xaml(158,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED3C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6012, 158, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED3C", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6018, 158, 45)?;
     // WinUITheme.xaml(159,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED3D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6013, 159, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED3D", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6019, 159, 45)?;
     // WinUITheme.xaml(161,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE627", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6014, 161, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE627", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6020, 161, 45)?;
     // WinUITheme.xaml(162,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE628", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6015, 162, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE628", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6021, 162, 45)?;
     // WinUITheme.xaml(164,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6016, 164, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6022, 164, 45)?;
     // WinUITheme.xaml(165,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AD", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6017, 165, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF8AD", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6023, 165, 45)?;
     // WinUITheme.xaml(167,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC57", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6018, 167, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC57", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6024, 167, 45)?;
     // WinUITheme.xaml(170,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1CD", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6019, 170, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1CD", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6025, 170, 45)?;
     // WinUITheme.xaml(171,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1CC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6020, 171, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1CC", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6026, 171, 45)?;
     // WinUITheme.xaml(173,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE799", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6021, 173, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE799", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6027, 173, 45)?;
     // WinUITheme.xaml(175,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC15", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6022, 175, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryEC15", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6028, 175, 45)?;
     // WinUITheme.xaml(177,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED1E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6023, 177, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED1E", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6029, 177, 45)?;
     // WinUITheme.xaml(179,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED1F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6024, 179, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryED1F", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6030, 179, 45)?;
     // WinUITheme.xaml(182,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1D9", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6025, 182, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1D9", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6031, 182, 45)?;
     // WinUITheme.xaml(183,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1D8", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6026, 183, 45)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE1D8", ::ferroui_base::data::core::ValueType::object(), &context, populate_winuitheme_xaml_deferred_6032, 183, 45)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5610,7 +5616,7 @@ fn populate_winuitheme_xaml_unit_262(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // WinUITheme.xaml(16,45) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_726)?;
+    rt::add_string_resources(&resource_dictionary_0, POPULATE_WINUITHEME_XAML_ROWS_729)?;
     ::core::result::Result::Ok(())
 }
 
@@ -9137,7 +9143,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_182: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The keys and targets of the packed tables of the unit 62 of `WinUITheme.xaml`, each once (#855).
-const POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS: &str = "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCriticalSystemColorHighlightColorSystemColorWindowColorSystemColorWindowTextColorSystemColorHotlightColor";
+const POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS: &str = "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCriticalProgressBarPausedForegroundBrushProgressBarErrorForegroundBrushSystemColorHighlightColorSystemColorWindowColorSystemColorWindowTextColorSystemColorHotlightColor";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_WINUITHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
@@ -9152,11 +9158,21 @@ static POPULATE_WINUITHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
     ],
 };
 
+/// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_WINUITHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
+    namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        260, 32, 184, 22, 1, 21, 8, 21, 65,
+        292, 31, 237, 23, 1, 22, 8, 22, 64,
+    ],
+};
+
 /// The keys and targets of the packed tables of the unit 63 of `WinUITheme.xaml`, each once (#855).
 const POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS: &str = "ProgressRingForegroundThemeBrushAccentFillColorDefaultBrushProgressRingBackgroundThemeBrushControlFillColorTransparentBrushSystemControlHighlightAccentBrushSystemControlBackgroundBaseLowBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9169,7 +9185,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS: &str = "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrushNumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrushSystemControlForegroundBaseMediumBrushSystemControlBackgroundBaseHighBrushSystemControlTransientBorderBrushSystemControlTransparentBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9180,7 +9196,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9192,7 +9208,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS: &str = "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrushExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrushExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemControlTransparentBrushSystemColorWindowColorBrushSystemColorWindowTextColorBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9209,7 +9225,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9226,7 +9242,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9239,7 +9255,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS: &str = "PagerControlSelectionIndicatorForegroundAccentFillColorDefaultBrushPagerControlPageNavigationButtonBackgroundPointerOverSubtleFillColorSecondaryBrushPagerControlPageNavigationButtonBackgroundPressedSubtleFillColorTertiaryBrushPagerControlPageNavigationButtonBackgroundDisabledSubtleFillColorDisabledBrushPagerControlPageNavigationButtonForegroundPointerOverTextFillColorPrimaryBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledTextFillColorDisabledBrushSystemControlForegroundAccentBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemControlTransparentBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9257,7 +9273,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS: &str = "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrushSystemColorWindowColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorWindowTextColorBrushSystemColorHotlightColorBrushSystemControlTransientBorderBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9284,7 +9300,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabledSystemColorButtonFaceColorBrushSystemColorHighlightColorBrushSystemColorButtonTextColorBrushSystemColorHighlightTextColorBrushSystemColorGrayTextColorBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9322,7 +9338,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS: &str = "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabledSystemColorHighlightColorSystemControlForegroundBaseHighBrushSystemColorGrayTextColor";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9348,7 +9364,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_194: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 33, position: 45 },
     rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 34, position: 53 },
     rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 35, position: 57 },
@@ -9364,7 +9380,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_194: &[rt::ValueRow<[f64; 4]>] = &[
 const POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS: &str = "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabledSystemControlForegroundBaseHighBrushSystemControlDisabledBaseMediumLowBrushSystemControlHighlightAltBaseHighBrushSystemControlBackgroundBaseLowBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrush";
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_195: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9395,7 +9411,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_195: rt::PackedRows = rt::PackedRows {
 const POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS: &str = "TabularSurfaceRowBackgroundBrushTabularSurfaceRowBackgroundPointerOverBrushTabularSurfaceRowBackgroundPressedBrushTabularSurfaceRowBackgroundSelectedBrushTabularSurfaceRowBackgroundSelectedPointerOverBrushTabularSurfaceRowBackgroundSelectedPressedBrushTabularSurfaceRowBackgroundDisabledBrushTabularSurfaceSelectionIndicatorBrushSystemAccentColorTabularSurfaceSelectionIndicatorDisabledBrushTabularSurfaceRowForegroundBrushTabularSurfaceRowForegroundSelectedBrushTabularSurfaceRowForegroundSelectedPointerOverBrushTabularSurfaceRowForegroundSelectedPressedBrushTabularSurfaceRowForegroundPointerOverBrushTabularSurfaceRowForegroundPressedBrushTabularSurfaceRowForegroundDisabledBrushTabularSurfaceHeaderBackgroundBrushTabularSurfaceHeaderForegroundBrushTabularSurfaceHeaderSeparatorBrushTabularSurfaceHeaderBackgroundPointerOverBrushTabularSurfaceHeaderBackgroundPressedBrushTabularSurfaceHeaderForegroundPointerOverBrushTabularSurfaceHeaderForegroundPressedBrushTabularSurfaceGroupHeaderBackgroundBrushTabularSurfaceGroupHeaderForegroundBrushTabularSurfaceGroupHeaderBorderBrushTabularSurfaceGridLineBrushSystemColorWindowColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorGrayTextColorSystemColorWindowTextColor";
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9410,7 +9426,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9419,7 +9435,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9444,7 +9460,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9453,7 +9469,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_201: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9462,25 +9478,25 @@ static POPULATE_WINUITHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_201: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_202: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeight", value: 40.0_f64, line: 16, position: 47 },
     rt::ValueRow { key: "TableViewHeaderFontSize", value: 14.0_f64, line: 17, position: 49 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_202: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_203: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewCellFontSize", value: 14.0_f64, line: 19, position: 47 },
     rt::ValueRow { key: "TableViewResizeGripperWidth", value: 8.0_f64, line: 20, position: 53 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_203: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_204: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightCompact", value: 30.0_f64, line: 22, position: 54 },
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 23, position: 58 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_204: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_205: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 24, position: 47 },
     rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 25, position: 54 },
     rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 26, position: 58 },
@@ -9492,7 +9508,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_204: &[rt::ValueRow<[f64; 4]>] = &[
 const POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS: &str = "ResizeGripperSeparatorBrushSystemAccentColorLight2SystemAccentColorDark1SystemColorHighlightColor";
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_206: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9501,7 +9517,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_206: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_207: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarExpandButtonThemeHeight", value: 24.0_f64, line: 314, position: 55 },
     rt::ValueRow { key: "AppBarExpandButtonThemeWidth", value: 48.0_f64, line: 315, position: 54 },
     rt::ValueRow { key: "AppBarThemeMinimalHeight", value: 24.0_f64, line: 316, position: 50 },
@@ -9535,7 +9551,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_206: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_207: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_208: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarBottomBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 344, position: 59 },
     rt::ValueRow { key: "AppBarBottomThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 345, position: 51 },
     rt::ValueRow { key: "AppBarTopBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 346, position: 56 },
@@ -9560,7 +9576,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_207: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_208: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_209: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemAltHighColor", value: 4294967295_u32, line: 367, position: 41 },
     rt::ValueRow { key: "SystemAltLowColor", value: 872415231_u32, line: 368, position: 40 },
     rt::ValueRow { key: "SystemAltMediumColor", value: 2583691263_u32, line: 369, position: 43 },
@@ -9590,7 +9606,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_208: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9599,7 +9615,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9625,7 +9641,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9634,7 +9650,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9650,7 +9666,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9659,7 +9675,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9669,7 +9685,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9694,7 +9710,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9703,7 +9719,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9713,7 +9729,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9728,7 +9744,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_220: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9737,7 +9753,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_220: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_221: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9746,7 +9762,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_220: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_221: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_222: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9761,7 +9777,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_221: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_222: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_223: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9772,7 +9788,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_222: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_223: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_224: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9781,7 +9797,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_223: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_224: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_225: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9790,7 +9806,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_224: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_225: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_226: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9809,7 +9825,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_225: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_226: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_227: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9818,7 +9834,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_226: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_227: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_228: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9830,7 +9846,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_227: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_228: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_229: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9845,13 +9861,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_228: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_229: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_230: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SmallScrollThumbScale", value: 0.125_f64, line: 494, position: 47 },
     rt::ValueRow { key: "SmallScrollThumbOffset", value: -2.0_f64, line: 495, position: 48 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_230: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_231: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9879,7 +9895,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_230: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_231: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_232: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9888,7 +9904,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_231: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_232: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_233: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9915,7 +9931,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_232: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_233: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_234: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9957,7 +9973,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_233: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_234: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_235: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9966,7 +9982,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_234: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_235: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_236: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -9994,7 +10010,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_235: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_236: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_237: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10006,7 +10022,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_236: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_237: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_238: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10019,7 +10035,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_237: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_238: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_239: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10032,7 +10048,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_238: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_239: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_240: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10041,14 +10057,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_239: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_240: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_241: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 32, position: 58 },
     rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [1.0_f64, 1.0_f64, 1.0_f64, 2.0_f64], line: 33, position: 65 },
     rt::ValueRow { key: "TextControlThemePadding", value: [10.0_f64, 5.0_f64, 6.0_f64, 6.0_f64], line: 34, position: 50 },
 ];
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_241: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_242: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10057,7 +10073,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_241: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_242: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_243: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10068,7 +10084,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_242: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_243: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_244: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "TextFillColorPrimary", value: 3825205248_u32, line: 219, position: 43 },
     rt::ValueRow { key: "TextFillColorSecondary", value: 2650800128_u32, line: 220, position: 45 },
     rt::ValueRow { key: "TextFillColorTertiary", value: 1912602624_u32, line: 221, position: 44 },
@@ -10155,7 +10171,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_243: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_244: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_245: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10168,7 +10184,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_244: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_245: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_246: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10179,7 +10195,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_245: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_246: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_247: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10215,7 +10231,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_246: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_247: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_248: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10225,7 +10241,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_247: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_248: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_249: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10270,7 +10286,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_248: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_249: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_250: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10279,7 +10295,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_249: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_250: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_251: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10299,7 +10315,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_250: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_251: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_252: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10315,7 +10331,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_251: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_252: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_253: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "TextOnAccentFillColorDefault", value: 4294967295_u32, line: 42, position: 51 },
     rt::ValueRow { key: "TextOnAccentAAFillColorPrimary", value: 4294967295_u32, line: 43, position: 53 },
     rt::ValueRow { key: "TextOnAccentAAFillColorSecondary", value: 3019898879_u32, line: 44, position: 55 },
@@ -10329,7 +10345,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_252: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_253: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_254: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10343,7 +10359,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_253: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_254: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_255: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10354,7 +10370,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_254: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_255: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_256: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10366,7 +10382,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_255: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_256: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_257: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10391,7 +10407,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_256: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_257: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_258: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10424,7 +10440,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_257: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_258: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_259: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10469,7 +10485,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_258: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_259: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_260: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutPresenterBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 134, position: 66 },
     rt::ValueRow { key: "MenuFlyoutItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 135, position: 56 },
     rt::ValueRow { key: "MenuFlyoutSubItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 136, position: 59 },
@@ -10481,7 +10497,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_259: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_260: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_261: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10497,7 +10513,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_260: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_261: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_262: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10532,14 +10548,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_261: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_262: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_263: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemChromeMediumHighColor", value: 4293322470_u32, line: 67, position: 50 },
     rt::ValueRow { key: "SystemChromeAltMediumHighColor", value: 3439329279_u32, line: 68, position: 53 },
     rt::ValueRow { key: "SystemChromeAltHighColor", value: 4294967295_u32, line: 69, position: 47 },
 ];
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_263: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_264: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10548,7 +10564,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_263: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_264: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_265: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemRevealAltHighColor", value: 3875536895_u32, line: 120, position: 47 },
     rt::ValueRow { key: "SystemRevealAltLowColor", value: 788529151_u32, line: 121, position: 46 },
     rt::ValueRow { key: "SystemRevealAltMediumColor", value: 2332033023_u32, line: 122, position: 49 },
@@ -10575,14 +10591,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_264: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_265: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_266: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 180, position: 59 },
     rt::ValueRow { key: "RepeatButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 181, position: 65 },
     rt::ValueRow { key: "ToggleButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 182, position: 65 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_266: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_267: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10630,7 +10646,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_266: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_267: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_268: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10641,13 +10657,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_267: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_268: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_269: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ProgressBarIndicatorPauseOpacity", value: 0.6_f64, line: 64, position: 58 },
     rt::ValueRow { key: "ProgressBarThemeMinHeight", value: 4.0_f64, line: 65, position: 51 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_269: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_270: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10658,7 +10674,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_269: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_270: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_271: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10667,13 +10683,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_270: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_271: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_272: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutItemCheckGlyphMargin", value: [12.0_f64, 11.0_f64, 0.0_f64, 13.0_f64], line: 71, position: 57 },
     rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 72, position: 51 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_272: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_273: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ContentDialogButtonMinWidth", value: 130.0_f64, line: 73, position: 53 },
     rt::ValueRow { key: "ContentDialogButtonMaxWidth", value: 202.0_f64, line: 74, position: 53 },
     rt::ValueRow { key: "ContentDialogButtonMinHeight", value: 32.0_f64, line: 75, position: 54 },
@@ -10682,7 +10698,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_272: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_273: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_274: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ContentDialogButton1HostMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 78, position: 57 },
     rt::ValueRow { key: "ContentDialogButton2HostMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 79, position: 57 },
     rt::ValueRow { key: "ContentDialogContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 80, position: 53 },
@@ -10690,7 +10706,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_273: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_274: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_275: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10699,7 +10715,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_274: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_275: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_276: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10708,7 +10724,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_275: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_276: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_277: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10717,7 +10733,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_276: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_277: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_278: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10727,13 +10743,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_277: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_278: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_279: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CheckBoxBorderThemeThickness", value: 1.0_f64, line: 88, position: 54 },
     rt::ValueRow { key: "CheckBoxCheckedStrokeThickness", value: 0.0_f64, line: 89, position: 56 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_279: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_280: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10752,7 +10768,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_279: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_280: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_281: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10763,7 +10779,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_280: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_281: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_282: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10783,7 +10799,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_281: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_282: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_283: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10831,7 +10847,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_282: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_283: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_284: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10853,7 +10869,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_283: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_284: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_285: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10862,7 +10878,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_284: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_285: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_286: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10895,27 +10911,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_285: rt::PackedRows = rt::PackedRows {
 };
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_286: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_287: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "AppBarButtonFlyoutGlyph", value: "\u{e974}", line: 77, position: 49 },
     rt::ValueRow { key: "AppBarButtonOverflowFlyoutGlyph", value: "\u{e974}", line: 78, position: 57 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_287: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_288: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarButtonLabelFontSize", value: 12.0_f64, line: 79, position: 51 },
     rt::ValueRow { key: "AppBarButtonSubItemChevronFontSize", value: 8.0_f64, line: 80, position: 60 },
     rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronFontSize", value: 12.0_f64, line: 81, position: 69 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_288: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_289: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarButtonSubItemChevronMargin", value: [-23.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 82, position: 59 },
     rt::ValueRow { key: "AppBarButtonSubItemChevronLabelOnRightMargin", value: [-7.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 83, position: 71 },
     rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 84, position: 68 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_289: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_290: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10924,7 +10940,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_289: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_290: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_291: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10975,7 +10991,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_290: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_291: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_292: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -10995,7 +11011,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_291: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_292: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_293: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11011,7 +11027,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_292: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_293: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_294: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11029,7 +11045,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_293: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_294: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_295: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11047,7 +11063,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_294: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_295: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_296: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11056,7 +11072,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_295: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_296: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_297: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11068,13 +11084,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_296: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_297: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_298: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: 0.0_f64, line: 75, position: 55 },
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: 1.0_f64, line: 76, position: 64 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_298: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_299: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11115,7 +11131,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_298: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_299: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_300: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11146,7 +11162,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_299: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_300: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_301: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CommandBarOverflowMinWidth", value: 160.0_f64, line: 37, position: 52 },
     rt::ValueRow { key: "CommandBarOverflowTouchMinWidth", value: 240.0_f64, line: 38, position: 57 },
     rt::ValueRow { key: "CommandBarOverflowMaxWidth", value: 480.0_f64, line: 39, position: 52 },
@@ -11154,7 +11170,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_300: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_301: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_302: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11165,7 +11181,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_301: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_302: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_303: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11179,7 +11195,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_302: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_303: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_304: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 51, position: 69 },
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 52, position: 73 },
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 71 },
@@ -11189,7 +11205,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_303: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_304: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_305: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11215,13 +11231,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_304: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_305: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_306: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "GridViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 76, position: 54 },
     rt::ValueRow { key: "GridViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 77, position: 62 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_306: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_307: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11249,7 +11265,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_306: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_307: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_308: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ListViewItemContentOffsetX", value: -40.5_f64, line: 88, position: 52 },
     rt::ValueRow { key: "ListViewItemDisabledThemeOpacity", value: 0.3_f64, line: 89, position: 58 },
     rt::ValueRow { key: "ListViewItemDragThemeOpacity", value: 0.8_f64, line: 90, position: 54 },
@@ -11263,7 +11279,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_307: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_308: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_309: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11295,7 +11311,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_308: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_309: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_310: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11318,14 +11334,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_309: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_310: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_311: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ListViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 138, position: 54 },
     rt::ValueRow { key: "ListViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 139, position: 62 },
     rt::ValueRow { key: "ListViewItemSelectionIndicatorCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 140, position: 72 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_311: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11351,7 +11367,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_311: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_313: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11361,7 +11377,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_313: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_314: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11393,7 +11409,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_313: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_314: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_315: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11413,7 +11429,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_314: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_315: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_316: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11431,7 +11447,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_315: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_316: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_317: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11475,7 +11491,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_316: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_317: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_318: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11501,13 +11517,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_317: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_318: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_319: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ControlCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 21, position: 49 },
     rt::ValueRow { key: "OverlayCornerRadius", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 22, position: 49 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_319: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_320: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11521,14 +11537,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_319: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_320: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_321: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MediaTransportControlsMargin", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 39, position: 55 },
     rt::ValueRow { key: "MediaTransportControlsProgressSliderMargin", value: [7.0_f64, 2.0_f64, 7.0_f64, 1.0_f64], line: 40, position: 69 },
     rt::ValueRow { key: "MediaTransportControlsProgressSliderCompactMargin", value: [12.0_f64, -1.0_f64, 8.0_f64, 1.0_f64], line: 41, position: 76 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_321: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_322: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MediaTransportControlsBorderThickness", value: 1.0_f64, line: 42, position: 63 },
     rt::ValueRow { key: "MediaTransportControlsAppBarButtonHeight", value: 40.0_f64, line: 43, position: 66 },
     rt::ValueRow { key: "MediaTransportControlsAppBarButtonWidth", value: 40.0_f64, line: 44, position: 65 },
@@ -11539,7 +11555,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_321: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_322: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_323: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11559,7 +11575,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_322: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_323: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_324: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11576,7 +11592,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_323: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_324: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_325: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11607,7 +11623,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_324: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_325: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_326: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11672,7 +11688,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_325: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_326: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_327: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarViewFirstOfMonthLabelFontSize", value: 8.0_f64, line: 150, position: 63 },
     rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelFontSize", value: 8.0_f64, line: 151, position: 68 },
     rt::ValueRow { key: "CalendarViewHeaderNavigationButtonFontSize", value: 14.0_f64, line: 152, position: 68 },
@@ -11680,7 +11696,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_326: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_327: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_328: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CalendarViewDayItemMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 0.0_f64], line: 154, position: 52 },
     rt::ValueRow { key: "CalendarViewWeekDayMargin", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 155, position: 52 },
     rt::ValueRow { key: "CalendarViewWeekDayPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 156, position: 53 },
@@ -11696,7 +11712,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_327: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_328: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_329: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11776,7 +11792,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_328: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_329: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_330: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11798,7 +11814,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_329: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_330: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_331: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11812,7 +11828,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_330: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_331: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_332: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ContentDialogMinWidth", value: 320.0_f64, line: 39, position: 47 },
     rt::ValueRow { key: "ContentDialogMaxWidth", value: 548.0_f64, line: 40, position: 47 },
     rt::ValueRow { key: "ContentDialogMinHeight", value: 184.0_f64, line: 41, position: 48 },
@@ -11820,14 +11836,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_331: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_332: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_333: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ContentDialogTitleMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 12.0_f64], line: 44, position: 51 },
     rt::ValueRow { key: "ContentDialogPadding", value: [24.0_f64, 24.0_f64, 24.0_f64, 24.0_f64], line: 45, position: 47 },
     rt::ValueRow { key: "ContentDialogSeparatorThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 46, position: 58 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_333: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_334: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "DatePickerSelectorThemeMinWidth", value: 80.0_f64, line: 51, position: 57 },
     rt::ValueRow { key: "DatePickerSpacerThemeWidth", value: 1.0_f64, line: 52, position: 52 },
     rt::ValueRow { key: "DatePickerSpacingThemeWidth", value: 20.0_f64, line: 53, position: 53 },
@@ -11835,7 +11851,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_333: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_334: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_335: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11866,7 +11882,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_334: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_335: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_336: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11876,7 +11892,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_335: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_336: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_337: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11886,7 +11902,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_336: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_337: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_338: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11915,7 +11931,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_337: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_338: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_339: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11933,7 +11949,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_338: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_339: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_340: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11950,7 +11966,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_339: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_340: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_341: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -11959,14 +11975,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_340: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_341: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_342: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PivotHeaderItemFontSize", value: 24.0_f64, line: 84, position: 49 },
     rt::ValueRow { key: "PivotHeaderItemLockedTranslation", value: 40.0_f64, line: 85, position: 58 },
     rt::ValueRow { key: "PivotTitleFontSize", value: 14.0_f64, line: 86, position: 44 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_342: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_343: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "PivotHeaderItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 88, position: 48 },
     rt::ValueRow { key: "PivotItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 89, position: 42 },
     rt::ValueRow { key: "PivotLandscapeThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 90, position: 53 },
@@ -11976,7 +11992,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_342: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_343: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_344: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12021,7 +12037,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_343: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_344: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_345: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12043,7 +12059,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_344: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_345: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_346: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12084,7 +12100,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_345: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_346: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_347: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12109,7 +12125,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_346: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_347: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_348: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12119,7 +12135,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_347: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_348: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_349: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12128,19 +12144,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_348: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_349: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_350: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderOutsideTickBarThemeHeight", value: 4.0_f64, line: 66, position: 57 },
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 4.0_f64, line: 67, position: 48 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_350: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_351: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SliderBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 68, position: 53 },
     rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 69, position: 50 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_351: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_352: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12171,7 +12187,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_351: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_352: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_353: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12201,7 +12217,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_352: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_353: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_354: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12234,7 +12250,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_353: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_354: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_355: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12244,13 +12260,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_354: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_355: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_356: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSelectorThemeMinWidth", value: 80.0_f64, line: 78, position: 57 },
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 79, position: 52 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_356: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_357: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TimePickerBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 80, position: 57 },
     rt::ValueRow { key: "TimePickerHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 81, position: 54 },
     rt::ValueRow { key: "TimePickerFirstHostThemeMargin", value: [0.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 82, position: 57 },
@@ -12258,7 +12274,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_356: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_357: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_358: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12269,7 +12285,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_357: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_358: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_359: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12280,7 +12296,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_358: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_359: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_360: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12290,7 +12306,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_359: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_360: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_361: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12306,7 +12322,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_360: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_361: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_362: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12316,7 +12332,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_361: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_362: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_363: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBadgeMinHeight", value: 4.0_f64, line: 31, position: 44 },
     rt::ValueRow { key: "InfoBadgeMinWidth", value: 4.0_f64, line: 32, position: 43 },
     rt::ValueRow { key: "InfoBadgeMaxHeight", value: 16.0_f64, line: 33, position: 44 },
@@ -12326,7 +12342,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_362: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_363: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_364: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "InfoBadgePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 37, position: 43 },
     rt::ValueRow { key: "IconInfoBadgeFontIconMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 38, position: 54 },
     rt::ValueRow { key: "ValueInfoBadgeTextMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 39, position: 51 },
@@ -12334,7 +12350,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_363: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_365: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12406,7 +12422,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_365: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_366: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12415,7 +12431,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_365: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_366: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_367: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12429,7 +12445,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_366: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_367: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_368: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeOpacity", value: 1.0_f64, line: 34, position: 64 },
     rt::ValueRow { key: "PersonPictureEllipseBadgeImageSourceStrokeOpacity", value: 1.0_f64, line: 35, position: 75 },
     rt::ValueRow { key: "PersonPictureEllipseStrokeThickness", value: 1.0_f64, line: 36, position: 61 },
@@ -12437,7 +12453,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_367: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_368: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_369: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12447,7 +12463,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_368: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_369: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_370: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12457,7 +12473,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_369: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_370: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_371: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12471,7 +12487,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_370: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_371: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_372: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12483,7 +12499,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_371: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_372: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_373: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12523,7 +12539,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_372: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_373: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_374: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TreeViewItemBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 88, position: 59 },
     rt::ValueRow { key: "TreeViewItemPresenterMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 89, position: 54 },
     rt::ValueRow { key: "TreeViewItemPresenterPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 5.0_f64], line: 90, position: 55 },
@@ -12531,14 +12547,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_373: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_374: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_375: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TreeViewItemMinHeight", value: 28.0_f64, line: 92, position: 47 },
     rt::ValueRow { key: "TreeViewItemMultiSelectCheckBoxMinHeight", value: 28.0_f64, line: 93, position: 66 },
     rt::ValueRow { key: "TreeViewItemContentHeight", value: 20.0_f64, line: 94, position: 51 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_375: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_376: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12553,7 +12569,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_375: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_376: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_377: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12589,7 +12605,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_376: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_377: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_378: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12598,7 +12614,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_377: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_378: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_379: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12609,7 +12625,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_378: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_379: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_380: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12619,7 +12635,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_379: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_380: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_381: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12692,13 +12708,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_380: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_381: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_382: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 158, position: 55 },
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 159, position: 70 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_382: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_383: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12709,7 +12725,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_382: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_383: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_384: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12778,7 +12794,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_383: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_384: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_385: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12821,7 +12837,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_384: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_385: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_386: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12835,19 +12851,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_385: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_386: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_387: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewOpenPaneThemeLength", value: 320.0_f64, line: 26, position: 54 },
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 27, position: 57 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_387: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_388: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SplitViewLeftBorderThemeThickness", value: [0.0_f64, 0.0_f64, 1.0_f64, 0.0_f64], line: 28, position: 60 },
     rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 29, position: 61 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_388: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_389: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12856,27 +12872,37 @@ static POPULATE_WINUITHEME_XAML_ROWS_388: rt::PackedRows = rt::PackedRows {
 };
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_389: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_390: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "SplitViewPaneAnimationOpenDuration", value: "00:00:00.2", line: 31, position: 60 },
     rt::ValueRow { key: "SplitViewPaneAnimationOpenPreDuration", value: "00:00:00.19999", line: 32, position: 63 },
     rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 33, position: 61 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_390: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_391: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 27, 1, 24, 8, 24, 8,
-        48, 21, 69, 31, 1, 25, 8, 25, 8,
-        100, 22, 122, 30, 1, 26, 8, 26, 8,
-        152, 32, 184, 22, 1, 27, 8, 27, 8,
-        206, 31, 237, 23, 1, 28, 8, 28, 8,
+        0, 21, 21, 27, 1, 26, 8, 26, 8,
+        48, 21, 69, 31, 1, 27, 8, 27, 8,
+        100, 22, 122, 30, 1, 28, 8, 28, 8,
+        152, 32, 184, 22, 1, 29, 8, 29, 8,
+        206, 31, 237, 23, 1, 30, 8, 30, 8,
+    ],
+};
+
+/// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_WINUITHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
+    namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        260, 32, 184, 22, 1, 31, 8, 31, 65,
+        292, 31, 237, 23, 1, 32, 8, 32, 64,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_391: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_393: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12886,7 +12912,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_391: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_394: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12897,7 +12923,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_393: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_395: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12906,7 +12932,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_393: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_394: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_396: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12923,7 +12949,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_394: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_395: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12940,7 +12966,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_395: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_396: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12950,7 +12976,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_396: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_399: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12965,7 +12991,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_400: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -12989,7 +13015,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_399: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_401: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13024,7 +13050,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_399: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_400: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_402: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13050,7 +13076,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_400: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_401: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_403: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 62, position: 45 },
     rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 63, position: 53 },
     rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 64, position: 57 },
@@ -13063,7 +13089,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_401: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_402: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_404: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13091,7 +13117,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_402: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_403: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_405: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13106,7 +13132,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_403: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_404: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_406: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13115,7 +13141,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_404: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_405: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_407: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13140,7 +13166,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_405: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_406: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_408: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13149,7 +13175,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_406: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_407: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_409: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13158,25 +13184,25 @@ static POPULATE_WINUITHEME_XAML_ROWS_407: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_408: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_410: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeight", value: 40.0_f64, line: 31, position: 47 },
     rt::ValueRow { key: "TableViewHeaderFontSize", value: 14.0_f64, line: 32, position: 49 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_409: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_411: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewCellFontSize", value: 14.0_f64, line: 34, position: 47 },
     rt::ValueRow { key: "TableViewResizeGripperWidth", value: 8.0_f64, line: 35, position: 53 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_410: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_412: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightCompact", value: 30.0_f64, line: 37, position: 54 },
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 38, position: 58 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_411: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_413: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 39, position: 47 },
     rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 40, position: 54 },
     rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 41, position: 58 },
@@ -13185,7 +13211,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_411: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_412: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_414: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13194,7 +13220,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_412: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_413: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_415: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemAltHighColor", value: 4278190080_u32, line: 608, position: 41 },
     rt::ValueRow { key: "SystemAltLowColor", value: 855638016_u32, line: 609, position: 40 },
     rt::ValueRow { key: "SystemAltMediumColor", value: 2566914048_u32, line: 610, position: 43 },
@@ -13224,7 +13250,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_413: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_414: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_416: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13315,7 +13341,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_414: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_415: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_417: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13333,7 +13359,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_415: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_416: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_418: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13348,13 +13374,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_416: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_417: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_419: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SmallScrollThumbScale", value: 0.125_f64, line: 735, position: 47 },
     rt::ValueRow { key: "SmallScrollThumbOffset", value: -2.0_f64, line: 736, position: 48 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_418: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_420: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13421,7 +13447,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_418: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_419: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_421: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarExpandButtonThemeHeight", value: 24.0_f64, line: 798, position: 55 },
     rt::ValueRow { key: "AppBarExpandButtonThemeWidth", value: 48.0_f64, line: 799, position: 54 },
     rt::ValueRow { key: "AppBarThemeMinimalHeight", value: 24.0_f64, line: 800, position: 50 },
@@ -13455,7 +13481,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_419: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_420: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_422: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarBottomBorderThemeThickness", value: [0.0_f64, 2.0_f64, 0.0_f64, 0.0_f64], line: 828, position: 59 },
     rt::ValueRow { key: "AppBarBottomThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 829, position: 51 },
     rt::ValueRow { key: "AppBarTopBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64], line: 830, position: 56 },
@@ -13480,7 +13506,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_420: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_421: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_423: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13510,7 +13536,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_421: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_422: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_424: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13520,7 +13546,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_422: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_423: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_425: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13537,7 +13563,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_423: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_424: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_426: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13546,7 +13572,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_424: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_425: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_427: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13555,7 +13581,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_425: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_426: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_428: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13564,7 +13590,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_426: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_427: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_429: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13574,7 +13600,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_427: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_428: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_430: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13586,7 +13612,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_428: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_429: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_431: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13595,7 +13621,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_429: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_430: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_432: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13604,7 +13630,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_430: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_431: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_433: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13623,7 +13649,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_431: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_432: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13635,7 +13661,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_432: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_433: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_435: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13653,7 +13679,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_433: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_436: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13662,7 +13688,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_435: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_437: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13672,14 +13698,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_435: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_436: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_438: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 45, position: 58 },
     rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 46, position: 65 },
     rt::ValueRow { key: "TextControlThemePadding", value: [10.0_f64, 5.0_f64, 6.0_f64, 6.0_f64], line: 47, position: 50 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_437: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_439: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13688,7 +13714,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_437: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_438: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_440: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13699,7 +13725,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_438: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_439: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_441: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13725,7 +13751,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_439: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_440: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_442: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13734,7 +13760,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_440: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_441: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_443: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13746,7 +13772,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_441: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_442: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_444: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13755,7 +13781,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_442: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_443: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_445: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13766,7 +13792,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_443: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_444: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_446: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13775,7 +13801,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_444: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_445: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_447: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13848,7 +13874,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_445: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_446: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_448: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "TextFillColorPrimary", value: 4294901760_u32, line: 519, position: 43 },
     rt::ValueRow { key: "TextFillColorSecondary", value: 4294901760_u32, line: 520, position: 45 },
     rt::ValueRow { key: "TextFillColorTertiary", value: 4294901760_u32, line: 521, position: 44 },
@@ -13935,7 +13961,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_446: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_447: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_449: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "TextOnAccentFillColorDefault", value: 4294967295_u32, line: 67, position: 51 },
     rt::ValueRow { key: "TextOnAccentAAFillColorPrimary", value: 4278190080_u32, line: 68, position: 53 },
     rt::ValueRow { key: "TextOnAccentAAFillColorSecondary", value: 2147483648_u32, line: 69, position: 55 },
@@ -13949,7 +13975,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_447: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_448: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_450: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13970,7 +13996,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_448: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_449: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_451: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13982,7 +14008,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_449: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_450: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_452: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -13992,7 +14018,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_450: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_451: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_453: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14011,7 +14037,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_451: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_452: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_454: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_7_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14025,7 +14051,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_452: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_453: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_455: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14070,7 +14096,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_453: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_454: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_456: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutPresenterBorderThemeThickness", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 216, position: 66 },
     rt::ValueRow { key: "MenuFlyoutItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 217, position: 56 },
     rt::ValueRow { key: "MenuFlyoutSubItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 218, position: 59 },
@@ -14082,7 +14108,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_454: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_455: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_457: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14098,7 +14124,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_455: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_456: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_458: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14133,14 +14159,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_456: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_457: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_459: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemChromeMediumHighColor", value: 4281479730_u32, line: 119, position: 50 },
     rt::ValueRow { key: "SystemChromeAltMediumHighColor", value: 3424591647_u32, line: 120, position: 53 },
     rt::ValueRow { key: "SystemChromeAltHighColor", value: 4280229663_u32, line: 121, position: 47 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_458: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_460: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14193,7 +14219,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_458: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_459: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_461: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14202,7 +14228,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_459: rt::PackedRows = rt::PackedRows {
 };
 
 /// The colours of a run of `WinUITheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_460: &[rt::ValueRow<u32>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_462: &[rt::ValueRow<u32>] = &[
     rt::ValueRow { key: "SystemRevealAltHighColor", value: 4278190080_u32, line: 225, position: 47 },
     rt::ValueRow { key: "SystemRevealAltLowColor", value: 855638016_u32, line: 226, position: 46 },
     rt::ValueRow { key: "SystemRevealAltMediumColor", value: 2566914048_u32, line: 227, position: 49 },
@@ -14229,7 +14255,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_460: &[rt::ValueRow<u32>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_461: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_463: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14238,7 +14264,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_461: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_462: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_464: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14247,7 +14273,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_462: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_463: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_465: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14276,7 +14302,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_463: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_464: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_466: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14285,7 +14311,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_464: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_465: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_467: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14295,7 +14321,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_465: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_466: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_468: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14304,7 +14330,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_466: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_467: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_469: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14322,14 +14348,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_467: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_468: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_470: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 285, position: 59 },
     rt::ValueRow { key: "RepeatButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 286, position: 65 },
     rt::ValueRow { key: "ToggleButtonRevealBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 287, position: 65 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_469: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_471: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_10_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14377,7 +14403,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_469: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_470: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_472: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14393,7 +14419,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_470: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_471: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_473: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14404,13 +14430,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_471: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_472: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_474: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ProgressBarIndicatorPauseOpacity", value: 1.0_f64, line: 117, position: 58 },
     rt::ValueRow { key: "ProgressBarThemeMinHeight", value: 4.0_f64, line: 118, position: 51 },
 ];
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_473: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_475: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14421,7 +14447,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_473: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_474: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_476: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14430,13 +14456,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_474: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_475: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_477: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutItemCheckGlyphMargin", value: [12.0_f64, 11.0_f64, 0.0_f64, 13.0_f64], line: 124, position: 57 },
     rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 125, position: 51 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_476: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_478: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ContentDialogButtonMinWidth", value: 130.0_f64, line: 126, position: 53 },
     rt::ValueRow { key: "ContentDialogButtonMaxWidth", value: 202.0_f64, line: 127, position: 53 },
     rt::ValueRow { key: "ContentDialogButtonMinHeight", value: 32.0_f64, line: 128, position: 54 },
@@ -14445,7 +14471,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_476: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_477: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_479: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ContentDialogButton1HostMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 131, position: 57 },
     rt::ValueRow { key: "ContentDialogButton2HostMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 132, position: 57 },
     rt::ValueRow { key: "ContentDialogContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 133, position: 53 },
@@ -14453,7 +14479,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_477: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_478: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_480: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14462,7 +14488,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_478: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_479: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_481: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14472,7 +14498,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_479: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_480: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_482: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14481,7 +14507,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_480: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_481: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_483: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14490,13 +14516,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_481: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_482: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_484: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CheckBoxBorderThemeThickness", value: 1.0_f64, line: 141, position: 54 },
     rt::ValueRow { key: "CheckBoxCheckedStrokeThickness", value: 1.0_f64, line: 142, position: 56 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_483: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_485: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14505,7 +14531,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_483: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_484: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_486: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14524,7 +14550,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_484: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_485: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_487: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_12_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14535,7 +14561,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_485: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_486: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_488: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_13_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14555,7 +14581,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_486: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_487: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_489: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14578,7 +14604,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_487: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_488: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_490: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14587,7 +14613,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_488: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_489: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_491: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14602,7 +14628,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_489: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_490: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_492: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14611,7 +14637,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_490: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_491: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_493: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14635,7 +14661,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_491: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_492: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_494: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_14_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14658,7 +14684,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_492: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_493: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_495: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_15_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14691,27 +14717,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_493: rt::PackedRows = rt::PackedRows {
 };
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_494: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_496: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "AppBarButtonFlyoutGlyph", value: "\u{e974}", line: 113, position: 49 },
     rt::ValueRow { key: "AppBarButtonOverflowFlyoutGlyph", value: "\u{e974}", line: 114, position: 57 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_495: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_497: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarButtonLabelFontSize", value: 12.0_f64, line: 115, position: 51 },
     rt::ValueRow { key: "AppBarButtonSubItemChevronFontSize", value: 8.0_f64, line: 116, position: 60 },
     rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronFontSize", value: 12.0_f64, line: 117, position: 69 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_496: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_498: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarButtonSubItemChevronMargin", value: [-23.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 118, position: 59 },
     rt::ValueRow { key: "AppBarButtonSubItemChevronLabelOnRightMargin", value: [-7.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 119, position: 71 },
     rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 120, position: 68 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_497: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_499: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_16_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14720,7 +14746,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_497: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_498: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_500: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14771,7 +14797,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_498: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_499: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_501: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14782,7 +14808,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_499: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_500: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_502: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14791,7 +14817,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_500: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_501: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_503: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14807,7 +14833,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_501: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_502: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_504: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_17_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14823,7 +14849,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_502: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_503: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_505: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14841,7 +14867,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_503: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_504: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_506: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_18_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14864,13 +14890,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_504: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_505: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_507: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: 1.0_f64, line: 135, position: 55 },
     rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: 1.0_f64, line: 136, position: 64 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_506: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_508: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14911,7 +14937,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_506: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_507: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_509: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14938,7 +14964,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_507: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_508: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_510: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14947,7 +14973,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_508: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_509: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_511: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_19_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14958,7 +14984,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_509: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_510: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_512: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14969,7 +14995,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_510: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_511: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_513: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -14983,7 +15009,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_511: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_512: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_514: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CommandBarOverflowMinWidth", value: 160.0_f64, line: 69, position: 52 },
     rt::ValueRow { key: "CommandBarOverflowTouchMinWidth", value: 240.0_f64, line: 70, position: 57 },
     rt::ValueRow { key: "CommandBarOverflowMaxWidth", value: 480.0_f64, line: 71, position: 52 },
@@ -14991,7 +15017,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_512: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_513: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_515: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 73, position: 69 },
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 74, position: 73 },
     rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 75, position: 71 },
@@ -15001,7 +15027,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_513: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_514: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_516: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15020,7 +15046,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_514: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_515: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_517: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15030,7 +15056,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_515: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_516: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_518: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15040,7 +15066,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_516: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_517: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_519: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15051,13 +15077,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_517: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_518: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_520: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "GridViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 119, position: 54 },
     rt::ValueRow { key: "GridViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 120, position: 62 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_519: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_521: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15085,7 +15111,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_519: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_520: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_522: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15112,7 +15138,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_520: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_521: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_523: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15121,7 +15147,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_521: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_522: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_524: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15133,7 +15159,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_522: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_523: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_525: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ListViewItemContentOffsetX", value: -40.5_f64, line: 185, position: 52 },
     rt::ValueRow { key: "ListViewItemDisabledThemeOpacity", value: 0.3_f64, line: 186, position: 58 },
     rt::ValueRow { key: "ListViewItemDragThemeOpacity", value: 0.8_f64, line: 187, position: 54 },
@@ -15147,7 +15173,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_523: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_524: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_526: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15170,14 +15196,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_524: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_525: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_527: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ListViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 211, position: 54 },
     rt::ValueRow { key: "ListViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 212, position: 62 },
     rt::ValueRow { key: "ListViewItemSelectionIndicatorCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 213, position: 72 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_526: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_528: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_22_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15203,7 +15229,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_526: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_527: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_529: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_25_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15213,7 +15239,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_527: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_528: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_530: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15257,7 +15283,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_528: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_529: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_531: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_26_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15275,7 +15301,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_529: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_530: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_532: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15319,7 +15345,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_530: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_531: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_533: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_27_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15345,13 +15371,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_531: rt::PackedRows = rt::PackedRows {
 };
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_532: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_534: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ControlCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 25, position: 49 },
     rt::ValueRow { key: "OverlayCornerRadius", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 26, position: 49 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_533: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_535: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_29_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15365,14 +15391,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_533: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_534: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_536: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MediaTransportControlsMargin", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 57, position: 55 },
     rt::ValueRow { key: "MediaTransportControlsProgressSliderMargin", value: [7.0_f64, 2.0_f64, 7.0_f64, 1.0_f64], line: 58, position: 69 },
     rt::ValueRow { key: "MediaTransportControlsProgressSliderCompactMargin", value: [12.0_f64, -1.0_f64, 8.0_f64, 1.0_f64], line: 59, position: 76 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_535: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_537: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MediaTransportControlsBorderThickness", value: 1.0_f64, line: 60, position: 63 },
     rt::ValueRow { key: "MediaTransportControlsAppBarButtonHeight", value: 40.0_f64, line: 61, position: 66 },
     rt::ValueRow { key: "MediaTransportControlsAppBarButtonWidth", value: 40.0_f64, line: 62, position: 65 },
@@ -15383,7 +15409,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_535: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_536: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_538: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15403,7 +15429,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_536: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_537: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_539: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_30_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15420,7 +15446,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_537: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_538: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_540: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_31_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15451,7 +15477,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_538: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_539: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_541: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_32_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15516,7 +15542,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_539: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_540: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_542: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarViewFirstOfMonthLabelFontSize", value: 8.0_f64, line: 228, position: 63 },
     rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelFontSize", value: 8.0_f64, line: 229, position: 68 },
     rt::ValueRow { key: "CalendarViewHeaderNavigationButtonFontSize", value: 14.0_f64, line: 230, position: 68 },
@@ -15524,7 +15550,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_540: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_541: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_543: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CalendarViewDayItemMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 0.0_f64], line: 232, position: 52 },
     rt::ValueRow { key: "CalendarViewWeekDayMargin", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 233, position: 52 },
     rt::ValueRow { key: "CalendarViewWeekDayPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 234, position: 53 },
@@ -15540,7 +15566,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_541: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_542: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_544: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15620,7 +15646,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_542: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_543: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_545: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15642,7 +15668,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_543: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_544: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_546: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15652,7 +15678,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_544: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_545: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_547: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_34_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15663,7 +15689,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_545: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_546: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_548: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ContentDialogMinWidth", value: 320.0_f64, line: 56, position: 47 },
     rt::ValueRow { key: "ContentDialogMaxWidth", value: 548.0_f64, line: 57, position: 47 },
     rt::ValueRow { key: "ContentDialogMinHeight", value: 184.0_f64, line: 58, position: 48 },
@@ -15671,14 +15697,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_546: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_547: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_549: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ContentDialogTitleMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 12.0_f64], line: 61, position: 51 },
     rt::ValueRow { key: "ContentDialogPadding", value: [24.0_f64, 24.0_f64, 24.0_f64, 24.0_f64], line: 62, position: 47 },
     rt::ValueRow { key: "ContentDialogSeparatorThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 63, position: 58 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_548: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_550: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15709,7 +15735,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_548: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_549: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_551: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15718,7 +15744,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_549: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_550: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_552: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "DatePickerSelectorThemeMinWidth", value: 80.0_f64, line: 112, position: 57 },
     rt::ValueRow { key: "DatePickerSpacerThemeWidth", value: 1.0_f64, line: 113, position: 52 },
     rt::ValueRow { key: "DatePickerSpacingThemeWidth", value: 20.0_f64, line: 114, position: 53 },
@@ -15726,7 +15752,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_550: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_551: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_553: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_35_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15736,7 +15762,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_551: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_552: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_554: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_36_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15765,7 +15791,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_552: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_553: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_555: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15783,7 +15809,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_553: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_554: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_556: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_37_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15800,7 +15826,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_554: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_555: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_557: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_38_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15809,7 +15835,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_555: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_556: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_558: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15854,14 +15880,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_556: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_557: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_559: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PivotHeaderItemFontSize", value: 24.0_f64, line: 188, position: 49 },
     rt::ValueRow { key: "PivotTitleFontSize", value: 14.0_f64, line: 189, position: 44 },
     rt::ValueRow { key: "PivotHeaderItemLockedTranslation", value: 40.0_f64, line: 190, position: 58 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_558: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_560: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "PivotHeaderItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 192, position: 48 },
     rt::ValueRow { key: "PivotItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 193, position: 42 },
     rt::ValueRow { key: "PivotLandscapeThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 194, position: 53 },
@@ -15871,7 +15897,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_558: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_559: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_561: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15893,7 +15919,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_559: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_560: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_562: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15934,7 +15960,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_560: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_561: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_563: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15959,7 +15985,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_561: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_562: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_564: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_40_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15969,7 +15995,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_562: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_563: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_565: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_41_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -15978,7 +16004,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_563: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_564: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_566: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16007,7 +16033,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_564: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_565: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_567: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16016,7 +16042,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_565: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_566: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_568: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16025,19 +16051,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_566: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_567: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_569: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderOutsideTickBarThemeHeight", value: 4.0_f64, line: 141, position: 57 },
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 2.0_f64, line: 142, position: 48 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_568: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_570: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SliderBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 143, position: 53 },
     rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 144, position: 50 },
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_569: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_571: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_42_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16067,7 +16093,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_569: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_570: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_572: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16098,7 +16124,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_570: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_571: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_573: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16107,7 +16133,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_571: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_572: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_574: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_43_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16117,14 +16143,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_572: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_573: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_575: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TimePickerBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 117, position: 57 },
     rt::ValueRow { key: "TimePickerFirstHostThemeMargin", value: [0.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 118, position: 57 },
     rt::ValueRow { key: "TimePickerThirdHostThemeMargin", value: [20.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 119, position: 57 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_574: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_576: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16135,7 +16161,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_574: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_575: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_577: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16146,7 +16172,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_575: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_576: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_578: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_44_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16156,7 +16182,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_576: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_577: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_579: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_45_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16172,7 +16198,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_577: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_578: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_580: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_46_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16182,7 +16208,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_578: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_579: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_581: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBadgeMinHeight", value: 4.0_f64, line: 45, position: 44 },
     rt::ValueRow { key: "InfoBadgeMinWidth", value: 4.0_f64, line: 46, position: 43 },
     rt::ValueRow { key: "InfoBadgeMaxHeight", value: 16.0_f64, line: 47, position: 44 },
@@ -16192,7 +16218,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_579: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_580: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_582: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "InfoBadgePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 51, position: 43 },
     rt::ValueRow { key: "IconInfoBadgeFontIconMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 52, position: 54 },
     rt::ValueRow { key: "ValueInfoBadgeTextMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 53, position: 51 },
@@ -16200,7 +16226,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_580: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_581: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_583: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16209,7 +16235,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_581: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_582: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_584: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16218,7 +16244,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_582: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_583: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_585: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16227,7 +16253,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_583: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_584: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_586: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16236,7 +16262,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_584: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_585: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_587: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16283,7 +16309,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_585: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_586: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_588: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16292,7 +16318,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_586: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_587: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_589: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_47_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16320,7 +16346,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_587: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_588: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_590: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_48_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16329,7 +16355,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_588: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_589: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_591: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16338,7 +16364,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_589: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_590: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_592: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16349,7 +16375,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_590: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_591: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_593: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_49_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16359,7 +16385,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_591: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_592: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_594: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeOpacity", value: 1.0_f64, line: 47, position: 64 },
     rt::ValueRow { key: "PersonPictureEllipseBadgeImageSourceStrokeOpacity", value: 1.0_f64, line: 48, position: 75 },
     rt::ValueRow { key: "PersonPictureEllipseStrokeThickness", value: 1.0_f64, line: 49, position: 61 },
@@ -16367,7 +16393,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_592: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_593: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_595: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16376,7 +16402,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_593: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_594: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_596: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_50_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16385,7 +16411,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_594: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_595: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_597: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16394,7 +16420,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_595: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_596: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_598: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_51_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16403,7 +16429,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_596: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_597: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_599: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16417,7 +16443,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_597: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_598: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_600: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_52_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16429,7 +16455,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_598: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_599: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_601: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16469,7 +16495,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_599: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_600: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_602: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TreeViewItemBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 129, position: 59 },
     rt::ValueRow { key: "TreeViewItemPresenterMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 130, position: 54 },
     rt::ValueRow { key: "TreeViewItemPresenterPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 5.0_f64], line: 131, position: 55 },
@@ -16477,14 +16503,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_600: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_601: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_603: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TreeViewItemMinHeight", value: 28.0_f64, line: 133, position: 47 },
     rt::ValueRow { key: "TreeViewItemMultiSelectCheckBoxMinHeight", value: 28.0_f64, line: 134, position: 66 },
     rt::ValueRow { key: "TreeViewItemContentHeight", value: 20.0_f64, line: 135, position: 51 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_602: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_604: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_54_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16499,7 +16525,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_602: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_603: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_605: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16535,7 +16561,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_603: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_604: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_606: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_55_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16544,7 +16570,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_604: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_605: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_607: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_56_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16555,7 +16581,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_605: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_606: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_608: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_57_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16565,7 +16591,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_606: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_607: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_609: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16636,7 +16662,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_607: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_608: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_610: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16645,7 +16671,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_608: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_609: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_611: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_58_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16654,13 +16680,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_609: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_610: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_612: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 236, position: 55 },
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 237, position: 70 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_611: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_613: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_59_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16671,7 +16697,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_611: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_612: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_614: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16740,7 +16766,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_612: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_613: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_615: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16771,7 +16797,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_613: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes with a literal colour of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_614: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_616: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16780,7 +16806,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_614: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_615: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_617: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16799,7 +16825,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_615: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_616: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_618: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_60_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16813,7 +16839,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_616: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_617: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_619: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_61_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16822,39 +16848,49 @@ static POPULATE_WINUITHEME_XAML_ROWS_617: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_618: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_620: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewOpenPaneThemeLength", value: 320.0_f64, line: 38, position: 54 },
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 39, position: 57 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_619: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_621: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SplitViewLeftBorderThemeThickness", value: [0.0_f64, 0.0_f64, 1.0_f64, 0.0_f64], line: 40, position: 60 },
     rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 41, position: 61 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_620: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_622: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "SplitViewPaneAnimationOpenDuration", value: "00:00:00.2", line: 42, position: 60 },
     rt::ValueRow { key: "SplitViewPaneAnimationOpenPreDuration", value: "00:00:00.19999", line: 43, position: 63 },
     rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 44, position: 61 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_621: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_623: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 260, 25, 1, 32, 8, 32, 8,
-        48, 21, 285, 22, 1, 33, 8, 33, 8,
-        100, 22, 307, 26, 1, 34, 8, 34, 8,
-        152, 32, 307, 26, 1, 35, 8, 35, 8,
-        206, 31, 333, 24, 1, 36, 8, 36, 8,
+        0, 21, 323, 25, 1, 36, 8, 36, 8,
+        48, 21, 348, 22, 1, 37, 8, 37, 8,
+        100, 22, 370, 26, 1, 38, 8, 38, 8,
+        152, 32, 370, 26, 1, 39, 8, 39, 8,
+        206, 31, 396, 24, 1, 40, 8, 40, 8,
+    ],
+};
+
+/// The brushes whose colour is a static resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
+static POPULATE_WINUITHEME_XAML_ROWS_624: rt::PackedRows = rt::PackedRows {
+    strings: POPULATE_WINUITHEME_XAML_UNIT_62_STRINGS,
+    namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
+    records: &[
+        260, 32, 370, 26, 1, 41, 8, 41, 65,
+        292, 31, 396, 24, 1, 42, 8, 42, 64,
     ],
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_622: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_625: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_63_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16864,7 +16900,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_622: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_623: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_626: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16875,7 +16911,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_623: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_624: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_627: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_64_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16884,7 +16920,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_624: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_625: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_628: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16901,7 +16937,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_625: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_626: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_629: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16918,7 +16954,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_626: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_627: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_630: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_65_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16928,7 +16964,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_627: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_628: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_631: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_66_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16943,7 +16979,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_628: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_629: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_632: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -16967,7 +17003,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_629: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_630: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_633: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_68_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17002,7 +17038,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_630: rt::PackedRows = rt::PackedRows {
 };
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_631: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_634: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_69_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17028,7 +17064,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_631: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_632: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_635: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 91, position: 45 },
     rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 92, position: 53 },
     rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 93, position: 57 },
@@ -17041,7 +17077,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_632: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_633: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_636: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_70_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17069,7 +17105,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_633: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_634: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_637: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17102,7 +17138,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_634: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_635: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_638: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17111,7 +17147,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_635: rt::PackedRows = rt::PackedRows {
 };
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_636: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_639: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17120,25 +17156,25 @@ static POPULATE_WINUITHEME_XAML_ROWS_636: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_637: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_640: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeight", value: 40.0_f64, line: 46, position: 47 },
     rt::ValueRow { key: "TableViewHeaderFontSize", value: 14.0_f64, line: 47, position: 49 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_638: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_641: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewCellFontSize", value: 14.0_f64, line: 49, position: 47 },
     rt::ValueRow { key: "TableViewResizeGripperWidth", value: 8.0_f64, line: 50, position: 53 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_639: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_642: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightCompact", value: 30.0_f64, line: 52, position: 54 },
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 53, position: 58 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_640: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_643: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 54, position: 47 },
     rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 55, position: 54 },
     rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 56, position: 58 },
@@ -17147,7 +17183,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_640: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The brushes bound to a dynamic resource of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_641: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_644: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_73_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17156,7 +17192,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_641: rt::PackedRows = rt::PackedRows {
 };
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_642: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_645: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TimePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 923, position: 49 },
     rt::ValueRow { key: "DatePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 924, position: 49 },
     rt::ValueRow { key: "CalendarDatePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 925, position: 57 },
@@ -17168,7 +17204,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_642: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_643: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_646: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarDatePickerLeftHeaderMaxWidth", value: 296.0_f64, line: 931, position: 58 },
     rt::ValueRow { key: "ComboBoxLeftHeaderMaxWidth", value: 296.0_f64, line: 932, position: 48 },
     rt::ValueRow { key: "DatePickerLeftHeaderMaxWidth", value: 296.0_f64, line: 933, position: 50 },
@@ -17178,7 +17214,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_643: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_644: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_647: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ControlFastOutSlowInKeySpline", value: "0,0,0,1", line: 604, position: 51 },
     rt::ValueRow { key: "ControlNormalAnimationDuration", value: "00:00:00.250", line: 605, position: 52 },
     rt::ValueRow { key: "ControlFastAnimationDuration", value: "00:00:00.167", line: 606, position: 50 },
@@ -17187,13 +17223,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_644: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_645: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_648: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TextBoxTopHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64], line: 185, position: 45 },
     rt::ValueRow { key: "TextBoxInnerButtonMargin", value: [0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 186, position: 47 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_646: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_649: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuFlyoutItemChevronMargin", value: [24.0_f64, 0.0_f64, 0.0_f64, -1.0_f64], line: 264, position: 50 },
     rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [-4.0_f64, 1.0_f64, -4.0_f64, 1.0_f64], line: 265, position: 54 },
     rt::ValueRow { key: "MenuFlyoutItemMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 266, position: 43 },
@@ -17202,13 +17238,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_646: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_647: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_650: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitMenuFlyoutItemSeparatorHeight", value: 18.0_f64, line: 269, position: 56 },
     rt::ValueRow { key: "SplitMenuFlyoutItemChevronButtonWidth", value: 38.0_f64, line: 270, position: 59 },
 ];
 
 /// The resource aliases of a run of `WinUITheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
-static POPULATE_WINUITHEME_XAML_ROWS_648: rt::PackedRows = rt::PackedRows {
+static POPULATE_WINUITHEME_XAML_ROWS_651: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_WINUITHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1],
     records: &[
@@ -17217,38 +17253,38 @@ static POPULATE_WINUITHEME_XAML_ROWS_648: rt::PackedRows = rt::PackedRows {
 };
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_649: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_652: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBarActionButtonMinWidth", value: 96.0_f64, line: 161, position: 49 },
     rt::ValueRow { key: "InfoBarActionButtonMinHeight", value: 24.0_f64, line: 162, position: 50 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_650: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_653: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBarHyperlinkButtonFontSize", value: 14.0_f64, line: 165, position: 52 },
     rt::ValueRow { key: "InfoBarHyperlinkButtonMinHeight", value: 24.0_f64, line: 166, position: 53 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_651: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_654: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ExpanderPopinVerticalOffset", value: 1.0_f64, line: 168, position: 49 },
     rt::ValueRow { key: "ExpanderChevronWidth", value: 1.0_f64, line: 169, position: 42 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_652: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_655: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ExpanderDropdownDownBorderThickness", value: [1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64], line: 171, position: 58 },
     rt::ValueRow { key: "ExpanderDropdownUpBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 172, position: 56 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_653: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_656: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RadioButtonCheckGlyphSize", value: 12.0_f64, line: 189, position: 47 },
     rt::ValueRow { key: "RadioButtonCheckGlyphPointerOverSize", value: 14.0_f64, line: 190, position: 58 },
     rt::ValueRow { key: "RadioButtonCheckGlyphPressedOverSize", value: 10.0_f64, line: 191, position: 58 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_654: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_657: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarButtonContentViewboxMargin", value: [12.0_f64, 16.0_f64, 0.0_f64, 10.0_f64], line: 123, position: 55 },
     rt::ValueRow { key: "AppBarButtonContentViewboxCompactMargin", value: [0.0_f64, 12.0_f64, 0.0_f64, 12.0_f64], line: 124, position: 62 },
     rt::ValueRow { key: "AppBarButtonContentViewboxCollapsedMargin", value: [0.0_f64, 16.0_f64, 0.0_f64, 2.0_f64], line: 125, position: 64 },
@@ -17262,20 +17298,20 @@ static POPULATE_WINUITHEME_XAML_ROWS_654: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_655: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_658: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarSeparatorMargin", value: [2.0_f64, 8.0_f64, 2.0_f64, 8.0_f64], line: 24, position: 44 },
     rt::ValueRow { key: "AppBarOverflowSeparatorMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 25, position: 52 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_656: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_659: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarSeparatorWidth", value: 1.0_f64, line: 26, position: 42 },
     rt::ValueRow { key: "AppBarOverflowSeparatorHeight", value: 1.0_f64, line: 27, position: 51 },
     rt::ValueRow { key: "AppBarSeparatorCornerRadius", value: 0.5_f64, line: 28, position: 49 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_657: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_660: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarToggleButtonBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 210, position: 61 },
     rt::ValueRow { key: "AppBarToggleButtonOverflowTextTouchMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 12.0_f64], line: 211, position: 64 },
     rt::ValueRow { key: "AppBarToggleButtonOverflowCheckTouchMargin", value: [12.0_f64, 10.0_f64, 12.0_f64, 10.0_f64], line: 212, position: 65 },
@@ -17286,20 +17322,20 @@ static POPULATE_WINUITHEME_XAML_ROWS_657: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_658: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_661: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ToggleSwitchPreContentMargin", value: 10.0_f64, line: 196, position: 50 },
     rt::ValueRow { key: "ToggleSwitchPostContentMargin", value: 10.0_f64, line: 197, position: 51 },
     rt::ValueRow { key: "ToggleSwitchThemeMinWidth", value: 154.0_f64, line: 198, position: 47 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_659: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_662: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarThemeMinHeight", value: 64.0_f64, line: 81, position: 42 },
     rt::ValueRow { key: "AppBarThemeCompactHeight", value: 48.0_f64, line: 82, position: 46 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_660: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_663: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CaptionTextBlockFontSize", value: 12.0_f64, line: 12, position: 46 },
     rt::ValueRow { key: "BodyTextBlockFontSize", value: 14.0_f64, line: 13, position: 43 },
     rt::ValueRow { key: "BodyLargeTextBlockFontSize", value: 18.0_f64, line: 14, position: 48 },
@@ -17308,14 +17344,14 @@ static POPULATE_WINUITHEME_XAML_ROWS_660: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_661: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_664: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "BodyStrongTextBlockFontSize", value: 14.0_f64, line: 12, position: 49 },
     rt::ValueRow { key: "TitleLargeTextBlockFontSize", value: 40.0_f64, line: 13, position: 49 },
     rt::ValueRow { key: "DisplayTextBlockFontSize", value: 68.0_f64, line: 14, position: 46 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_662: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_665: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CheckBoxBorderThickness", value: 1.0_f64, line: 279, position: 45 },
     rt::ValueRow { key: "CheckBoxSize", value: 20.0_f64, line: 280, position: 34 },
     rt::ValueRow { key: "CheckBoxGlyphSize", value: 12.0_f64, line: 281, position: 39 },
@@ -17324,19 +17360,19 @@ static POPULATE_WINUITHEME_XAML_ROWS_662: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_663: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_666: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "CheckBoxPadding", value: [8.0_f64, 2.5_f64, 0.0_f64, 2.5_f64], line: 284, position: 38 },
     rt::ValueRow { key: "CheckBoxFocusVisualMargin", value: [-7.0_f64, -3.0_f64, -7.0_f64, -3.0_f64], line: 285, position: 48 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_664: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_667: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "CheckBoxCheckedGlyph", value: "\u{e73e}", line: 286, position: 42 },
     rt::ValueRow { key: "CheckBoxIndeterminateGlyph", value: "\u{e9ae}", line: 287, position: 48 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_665: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_668: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 124, position: 62 },
     rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 125, position: 57 },
     rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 126, position: 74 },
@@ -17345,7 +17381,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_665: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_666: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_669: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 129, position: 59 },
     rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 130, position: 60 },
     rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 131, position: 44 },
@@ -17355,25 +17391,25 @@ static POPULATE_WINUITHEME_XAML_ROWS_666: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_667: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_670: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "LoopingSelectorItemMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 84, position: 48 },
     rt::ValueRow { key: "LoopingSelectorUpDownButtonMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 85, position: 56 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_668: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_671: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "LoopingSelectorUpDownButtonHeight", value: 34.0_f64, line: 86, position: 55 },
     rt::ValueRow { key: "LoopingSelectorUpDownButtonScalePressed", value: 0.875_f64, line: 87, position: 61 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_669: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_672: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "FlipViewButtonFontSize", value: 8.0_f64, line: 81, position: 44 },
     rt::ValueRow { key: "FlipViewButtonScalePressed", value: 0.875_f64, line: 82, position: 48 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_670: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_673: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ScrollBarExpandDuration", value: "00:00:00.167", line: 183, position: 45 },
     rt::ValueRow { key: "ScrollBarOpacityChangeDuration", value: "00:00:00.083", line: 184, position: 52 },
     rt::ValueRow { key: "ScrollBarColorChangeDuration", value: "00:00:00.083", line: 185, position: 50 },
@@ -17381,13 +17417,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_670: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_671: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_674: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ScrollBarContractDelay", value: "00:00:02", line: 188, position: 44 },
     rt::ValueRow { key: "ScrollBarContractFinalKeyframe", value: "00:00:02.1", line: 189, position: 52 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_672: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_675: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ScrollBarSize", value: 12.0_f64, line: 190, position: 35 },
     rt::ValueRow { key: "ScrollBarVerticalThumbMinHeight", value: 30.0_f64, line: 191, position: 53 },
     rt::ValueRow { key: "ScrollBarVerticalThumbMinWidth", value: 8.0_f64, line: 192, position: 52 },
@@ -17399,13 +17435,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_672: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_673: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_676: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ScrollBarExpandBeginTime", value: "00:00:00.40", line: 198, position: 46 },
     rt::ValueRow { key: "ScrollBarContractBeginTime", value: "00:00:00.50", line: 199, position: 48 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_674: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_677: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ScrollBarHorizontalDecreaseMargin", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 201, position: 56 },
     rt::ValueRow { key: "ScrollBarHorizontalIncreaseMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 202, position: 56 },
     rt::ValueRow { key: "ScrollBarVerticalDecreaseMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64], line: 203, position: 54 },
@@ -17413,7 +17449,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_674: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_675: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_678: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ScrollViewerSeparatorExpandBeginTime", value: "00:00:00.40", line: 25, position: 58 },
     rt::ValueRow { key: "ScrollViewerSeparatorExpandDuration", value: "00:00:00.1", line: 26, position: 57 },
     rt::ValueRow { key: "ScrollViewerSeparatorContractBeginTime", value: "00:00:02.00", line: 27, position: 60 },
@@ -17423,13 +17459,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_675: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_676: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_679: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "SliderTrackCornerRadius", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 171, position: 49 },
     rt::ValueRow { key: "SliderThumbCornerRadius", value: [10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64], line: 172, position: 49 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_677: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_680: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderPreContentMargin", value: 14.0_f64, line: 173, position: 44 },
     rt::ValueRow { key: "SliderPostContentMargin", value: 14.0_f64, line: 174, position: 45 },
     rt::ValueRow { key: "SliderInnerThumbHeight", value: 12.0_f64, line: 175, position: 44 },
@@ -17443,7 +17479,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_677: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_678: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_681: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 124, position: 62 },
     rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 125, position: 74 },
     rt::ValueRow { key: "TimePickerThemeMinWidth", value: 242.0_f64, line: 126, position: 45 },
@@ -17452,26 +17488,26 @@ static POPULATE_WINUITHEME_XAML_ROWS_678: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_679: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_682: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 129, position: 59 },
     rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 130, position: 44 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_680: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_683: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RatingControlFontSizeForRendering", value: 32.0_f64, line: 45, position: 55 },
     rt::ValueRow { key: "RatingControlItemSpacing", value: 8.0_f64, line: 46, position: 46 },
     rt::ValueRow { key: "RatingControlCaptionTopMargin", value: -12.5_f64, line: 47, position: 51 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_681: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_684: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "NavigationViewAutoSuggestBoxMargin", value: [16.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 213, position: 57 },
     rt::ValueRow { key: "TopNavigationViewAutoSuggestBoxMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 214, position: 60 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_682: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_685: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PaneToggleButtonHeight", value: 36.0_f64, line: 215, position: 44 },
     rt::ValueRow { key: "PaneToggleButtonWidth", value: 40.0_f64, line: 216, position: 43 },
     rt::ValueRow { key: "PaneOverlayShadowDepth", value: 16.0_f64, line: 217, position: 44 },
@@ -17495,7 +17531,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_682: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_683: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_686: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "NavigationViewToggleBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 235, position: 58 },
     rt::ValueRow { key: "NavigationViewItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 236, position: 56 },
     rt::ValueRow { key: "NavigationViewItemOnLeftIconBoxMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 237, position: 60 },
@@ -17537,51 +17573,51 @@ static POPULATE_WINUITHEME_XAML_ROWS_683: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_684: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_687: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "NavigationViewContentGridCornerRadius", value: [8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 273, position: 63 },
     rt::ValueRow { key: "TopNavigationViewContentGridCornerRadius", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 274, position: 66 },
     rt::ValueRow { key: "NavigationViewMinimalContentGridCornerRadius", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 275, position: 70 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_685: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_688: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TopNavigationViewOverflowMenuPadding", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 276, position: 59 },
     rt::ValueRow { key: "NavigationViewItemChildrenMenuFlyoutPadding", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 277, position: 66 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_686: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_689: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "NavigationBackButtonWidth", value: 40.0_f64, line: 24, position: 47 },
     rt::ValueRow { key: "NavigationBackButtonHeight", value: 36.0_f64, line: 25, position: 48 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_687: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_690: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "MenuBarItemButtonPadding", value: [10.0_f64, 4.0_f64, 10.0_f64, 4.0_f64], line: 55, position: 47 },
     rt::ValueRow { key: "MenuBarItemMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 56, position: 40 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_688: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_691: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitButtonPrimaryButtonSize", value: 35.0_f64, line: 111, position: 50 },
     rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 35.0_f64, line: 112, position: 52 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_689: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_692: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RadioButtonsColumnSpacing", value: 7.0_f64, line: 27, position: 47 },
     rt::ValueRow { key: "RadioButtonsRowSpacing", value: 8.0_f64, line: 28, position: 44 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_690: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_693: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewHeaderPadding", value: [0.0_f64, 8.0_f64, 0.0_f64, 0.0_f64], line: 249, position: 43 },
     rt::ValueRow { key: "TabViewItemHeaderPadding", value: [8.0_f64, 3.0_f64, 4.0_f64, 3.0_f64], line: 250, position: 47 },
     rt::ValueRow { key: "TabViewSelectedItemHeaderPadding", value: [9.0_f64, 3.0_f64, 5.0_f64, 4.0_f64], line: 251, position: 55 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_691: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_694: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemMinHeight", value: 32.0_f64, line: 252, position: 42 },
     rt::ValueRow { key: "TabViewItemMaxWidth", value: 240.0_f64, line: 253, position: 41 },
     rt::ValueRow { key: "TabViewItemMinWidth", value: 100.0_f64, line: 254, position: 41 },
@@ -17590,7 +17626,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_691: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_692: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_695: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonHeight", value: 24.0_f64, line: 258, position: 56 },
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonWidth", value: 32.0_f64, line: 259, position: 55 },
     rt::ValueRow { key: "TabViewItemHeaderCloseButtonSize", value: 16.0_f64, line: 260, position: 54 },
@@ -17598,35 +17634,35 @@ static POPULATE_WINUITHEME_XAML_ROWS_692: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_693: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_696: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewItemHeaderCloseMargin", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 262, position: 51 },
     rt::ValueRow { key: "TabViewItemHeaderPaddingWithCloseButton", value: [8.0_f64, 3.0_f64, 4.0_f64, 3.0_f64], line: 263, position: 62 },
     rt::ValueRow { key: "TabViewItemHeaderPaddingWithoutCloseButton", value: [8.0_f64, 3.0_f64, 8.0_f64, 3.0_f64], line: 264, position: 65 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_694: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_697: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemScrollButtonWidth", value: 32.0_f64, line: 265, position: 50 },
     rt::ValueRow { key: "TabViewItemScrollButtonHeight", value: 24.0_f64, line: 266, position: 51 },
     rt::ValueRow { key: "TabViewItemScrollButonFontSize", value: 8.0_f64, line: 267, position: 52 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_695: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_698: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewItemScrollButtonPadding", value: [7.0_f64, 3.0_f64, 7.0_f64, 3.0_f64], line: 268, position: 53 },
     rt::ValueRow { key: "TabViewItemLeftScrollButtonContainerPadding", value: [8.0_f64, 0.0_f64, 3.0_f64, 3.0_f64], line: 269, position: 66 },
     rt::ValueRow { key: "TabViewItemRightScrollButtonContainerPadding", value: [3.0_f64, 0.0_f64, 8.0_f64, 3.0_f64], line: 270, position: 67 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_696: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_699: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemAddButtonWidth", value: 32.0_f64, line: 271, position: 47 },
     rt::ValueRow { key: "TabViewItemAddButtonHeight", value: 24.0_f64, line: 272, position: 48 },
     rt::ValueRow { key: "TabViewItemAddButtonFontSize", value: 12.0_f64, line: 273, position: 50 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_697: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_700: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TabViewItemSeparatorMargin", value: [0.0_f64, 8.0_f64, 0.0_f64, 8.0_f64], line: 276, position: 49 },
     rt::ValueRow { key: "TabViewItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 277, position: 49 },
     rt::ValueRow { key: "TabViewSelectedItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 278, position: 57 },
@@ -17634,7 +17670,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_697: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_698: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_701: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AutoSuggestBoxTopHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64], line: 33, position: 52 },
     rt::ValueRow { key: "AutoSuggestBoxInnerButtonMargin", value: [1.0_f64, 3.0_f64, 1.0_f64, 3.0_f64], line: 34, position: 54 },
     rt::ValueRow { key: "AutoSuggestBoxDeleteButtonMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 35, position: 55 },
@@ -17642,13 +17678,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_698: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_699: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_702: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AutoSuggestBoxLeftButtonMargin", value: 3.0_f64, line: 37, position: 52 },
     rt::ValueRow { key: "AutoSuggestBoxRightButtonMargin", value: 4.0_f64, line: 38, position: 53 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_700: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_703: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ComboBoxArrowThemeFontSize", value: 21.0_f64, line: 330, position: 48 },
     rt::ValueRow { key: "ComboBoxThemeMinWidth", value: 64.0_f64, line: 331, position: 43 },
     rt::ValueRow { key: "ComboBoxPopupThemeMinWidth", value: 80.0_f64, line: 332, position: 48 },
@@ -17660,7 +17696,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_700: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_701: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_704: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ComboBoxBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 341, position: 51 },
     rt::ValueRow { key: "ComboBoxDropdownBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 342, position: 54 },
     rt::ValueRow { key: "ComboBoxHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 343, position: 48 },
@@ -17676,7 +17712,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_701: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_702: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_705: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ComboBoxHiglightBorderCornerRadius", value: [7.0_f64, 7.0_f64, 7.0_f64, 7.0_f64], line: 353, position: 60 },
     rt::ValueRow { key: "ComboBoxDropDownButtonBackgroundCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 354, position: 70 },
     rt::ValueRow { key: "ComboBoxItemCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 355, position: 50 },
@@ -17684,25 +17720,25 @@ static POPULATE_WINUITHEME_XAML_ROWS_702: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_703: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ProgressBarMinHeight", value: 3.0_f64, line: 39, position: 42 },
-    rt::ValueRow { key: "ProgressBarTrackHeight", value: 1.0_f64, line: 40, position: 44 },
+static POPULATE_WINUITHEME_XAML_ROWS_706: &[rt::ValueRow<f64>] = &[
+    rt::ValueRow { key: "ProgressBarMinHeight", value: 3.0_f64, line: 45, position: 42 },
+    rt::ValueRow { key: "ProgressBarTrackHeight", value: 1.0_f64, line: 46, position: 44 },
 ];
 
 /// The corner radii of a run of `WinUITheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_704: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ProgressBarCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 41, position: 49 },
-    rt::ValueRow { key: "ProgressBarTrackCornerRadius", value: [0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64], line: 42, position: 54 },
+static POPULATE_WINUITHEME_XAML_ROWS_707: &[rt::ValueRow<[f64; 4]>] = &[
+    rt::ValueRow { key: "ProgressBarCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 47, position: 49 },
+    rt::ValueRow { key: "ProgressBarTrackCornerRadius", value: [0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64], line: 48, position: 54 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_705: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_708: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "NumberBoxSpinButtonBorderThickness", value: [0.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 39, position: 57 },
     rt::ValueRow { key: "NumberBoxIconMargin", value: [10.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 42 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_706: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_709: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "NumberBoxPopupHorizonalOffset", value: -21.0_f64, line: 41, position: 51 },
     rt::ValueRow { key: "NumberBoxPopupVerticalOffset", value: -27.0_f64, line: 42, position: 50 },
     rt::ValueRow { key: "NumberBoxPopupShadowDepth", value: 16.0_f64, line: 43, position: 47 },
@@ -17710,39 +17746,39 @@ static POPULATE_WINUITHEME_XAML_ROWS_706: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_707: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_710: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ExpanderHeaderPadding", value: [16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 90, position: 44 },
     rt::ValueRow { key: "ExpanderChevronMargin", value: [20.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 91, position: 44 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_708: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_711: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "ExpanderChevronUpGlyph", value: "\u{e70e}", line: 92, position: 44 },
     rt::ValueRow { key: "ExpanderChevronDownGlyph", value: "\u{e70d}", line: 93, position: 46 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_709: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_712: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ExpanderChevronButtonSize", value: 32.0_f64, line: 94, position: 47 },
     rt::ValueRow { key: "ExpanderChevronGlyphSize", value: 12.0_f64, line: 95, position: 46 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_710: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_713: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ExpanderContentPadding", value: [16.0_f64, 16.0_f64, 16.0_f64, 16.0_f64], line: 96, position: 45 },
     rt::ValueRow { key: "ExpanderContentDownBorderThickness", value: [1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64], line: 97, position: 57 },
     rt::ValueRow { key: "ExpanderContentUpBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 98, position: 55 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_711: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_714: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBarMinHeight", value: 48.0_f64, line: 76, position: 38 },
     rt::ValueRow { key: "InfoBarCloseButtonSize", value: 38.0_f64, line: 77, position: 44 },
     rt::ValueRow { key: "InfoBarCloseButtonGlyphSize", value: 16.0_f64, line: 78, position: 49 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_712: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_715: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "InfoBarIconBackgroundGlyph", value: "\u{f136}", line: 80, position: 48 },
     rt::ValueRow { key: "InfoBarInformationalIconGlyph", value: "\u{f13f}", line: 81, position: 51 },
     rt::ValueRow { key: "InfoBarErrorIconGlyph", value: "\u{f13d}", line: 82, position: 43 },
@@ -17751,13 +17787,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_712: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_713: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_716: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "InfoBarContentRootPadding", value: [16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 85, position: 48 },
     rt::ValueRow { key: "InfoBarIconMargin", value: [0.0_f64, 16.0_f64, 14.0_f64, 16.0_f64], line: 86, position: 40 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_714: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_717: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "InfoBarPanelMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 88, position: 41 },
     rt::ValueRow { key: "InfoBarPanelHorizontalOrientationPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 89, position: 63 },
     rt::ValueRow { key: "InfoBarPanelVerticalOrientationPadding", value: [0.0_f64, 14.0_f64, 0.0_f64, 18.0_f64], line: 90, position: 61 },
@@ -17770,7 +17806,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_714: &[rt::ValueRow<[f64; 4]>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_715: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_718: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PipsPagerButtonWidth", value: 20.0_f64, line: 102, position: 42 },
     rt::ValueRow { key: "PipsPagerButtonHeight", value: 12.0_f64, line: 103, position: 43 },
     rt::ValueRow { key: "PipsPagerHorizontalOrientationButtonWidth", value: 12.0_f64, line: 104, position: 63 },
@@ -17780,13 +17816,13 @@ static POPULATE_WINUITHEME_XAML_ROWS_715: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_716: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_719: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "PipsPagerButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 108, position: 53 },
     rt::ValueRow { key: "PipsPagerNavigationButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 109, position: 63 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_717: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_720: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "PipsPagerSelectedGlyph", value: "\u{ea3b}", line: 110, position: 44 },
     rt::ValueRow { key: "PipsPagerNormalGlyph", value: "\u{ea3b}", line: 111, position: 42 },
     rt::ValueRow { key: "PipsPagerPreviousPageButtonGlyph", value: "\u{eddb}", line: 112, position: 54 },
@@ -17794,20 +17830,20 @@ static POPULATE_WINUITHEME_XAML_ROWS_717: &[rt::ValueRow<&'static str>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_718: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_721: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PipsPagerNavigationButtonHeight", value: 24.0_f64, line: 114, position: 53 },
     rt::ValueRow { key: "PipsPagerNavigationButtonWidth", value: 24.0_f64, line: 115, position: 52 },
     rt::ValueRow { key: "PipsPagerNavigationButtonFontSize", value: 8.0_f64, line: 116, position: 55 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_719: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_722: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "PipsPagerSelectedGlyphFontSize", value: "6", line: 117, position: 52 },
     rt::ValueRow { key: "PipsPagerNormalGlyphFontSize", value: "4", line: 118, position: 50 },
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_720: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_723: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SelectorBarItemPillHeight", value: 3.0_f64, line: 102, position: 47 },
     rt::ValueRow { key: "SelectorBarItemPillWidth", value: 4.0_f64, line: 103, position: 46 },
     rt::ValueRow { key: "SelectorBarItemIconScale", value: 0.8_f64, line: 104, position: 46 },
@@ -17815,7 +17851,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_720: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_721: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_724: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TitleBarCompactHeight", value: 32.0_f64, line: 81, position: 43 },
     rt::ValueRow { key: "TitleBarExpandedHeight", value: 48.0_f64, line: 82, position: 44 },
     rt::ValueRow { key: "TitleBarBackButtonWidth", value: 40.0_f64, line: 83, position: 45 },
@@ -17829,7 +17865,7 @@ static POPULATE_WINUITHEME_XAML_ROWS_721: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The numbers of a run of `WinUITheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_722: &[rt::ValueRow<f64>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_725: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TitleBarIconMaxWidth", value: 16.0_f64, line: 92, position: 42 },
     rt::ValueRow { key: "TitleBarIconMaxHeight", value: 16.0_f64, line: 93, position: 43 },
     rt::ValueRow { key: "TitleBarTitleMinWidth", value: 0.0_f64, line: 94, position: 43 },
@@ -17837,27 +17873,27 @@ static POPULATE_WINUITHEME_XAML_ROWS_722: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_723: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_726: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "TitleBarIconMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 96, position: 41 },
     rt::ValueRow { key: "TitleBarTitleMargin", value: [0.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 97, position: 42 },
     rt::ValueRow { key: "TitleBarSubtitleMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 98, position: 45 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_724: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_727: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ResizeGripperSeparatorThickness", value: [0.0_f64, 0.0_f64, 2.0_f64, 0.0_f64], line: 25, position: 54 },
     rt::ValueRow { key: "ResizeGripperSeparatorThicknessVertical", value: [0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64], line: 26, position: 62 },
 ];
 
 /// The thicknesses of a run of `WinUITheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_725: &[rt::ValueRow<[f64; 4]>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_728: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ThemeShadowFlyoutMargin", value: [16.0_f64, 8.0_f64, 16.0_f64, 24.0_f64], line: 27, position: 46 },
     rt::ValueRow { key: "ThemeShadowSubMenuMargin", value: [20.0_f64, 10.0_f64, 20.0_f64, 30.0_f64], line: 30, position: 47 },
     rt::ValueRow { key: "ThemeShadowToolTipMargin", value: [8.0_f64, 4.0_f64, 8.0_f64, 12.0_f64], line: 33, position: 47 },
 ];
 
 /// The texts of a run of `WinUITheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_WINUITHEME_XAML_ROWS_726: &[rt::ValueRow<&'static str>] = &[
+static POPULATE_WINUITHEME_XAML_ROWS_729: &[rt::ValueRow<&'static str>] = &[
     rt::ValueRow { key: "StringTextFlyoutCutText", value: "Cut", line: 16, position: 45 },
     rt::ValueRow { key: "StringTextFlyoutCopyText", value: "Copy", line: 17, position: 46 },
     rt::ValueRow { key: "StringTextFlyoutPasteText", value: "Paste", line: 18, position: 47 },
@@ -20032,7 +20068,7 @@ fn populate_winuitheme_xaml_deferred_1730(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(312,57)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_1984(
+fn populate_winuitheme_xaml_deferred_1986(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20040,7 +20076,7 @@ fn populate_winuitheme_xaml_deferred_1984(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(313,49)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_1985(
+fn populate_winuitheme_xaml_deferred_1987(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20048,7 +20084,7 @@ fn populate_winuitheme_xaml_deferred_1985(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(451,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2044(
+fn populate_winuitheme_xaml_deferred_2046(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20064,7 +20100,7 @@ fn populate_winuitheme_xaml_deferred_2044(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(452,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2045(
+fn populate_winuitheme_xaml_deferred_2047(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20080,7 +20116,7 @@ fn populate_winuitheme_xaml_deferred_2045(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(453,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2046(
+fn populate_winuitheme_xaml_deferred_2048(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20096,7 +20132,7 @@ fn populate_winuitheme_xaml_deferred_2046(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(463,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2056(
+fn populate_winuitheme_xaml_deferred_2058(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20112,7 +20148,7 @@ fn populate_winuitheme_xaml_deferred_2056(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(464,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2057(
+fn populate_winuitheme_xaml_deferred_2059(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20128,7 +20164,7 @@ fn populate_winuitheme_xaml_deferred_2057(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(465,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2058(
+fn populate_winuitheme_xaml_deferred_2060(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20144,7 +20180,7 @@ fn populate_winuitheme_xaml_deferred_2058(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(30,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2197(
+fn populate_winuitheme_xaml_deferred_2199(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20160,7 +20196,7 @@ fn populate_winuitheme_xaml_deferred_2197(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(31,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2198(
+fn populate_winuitheme_xaml_deferred_2200(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20176,7 +20212,7 @@ fn populate_winuitheme_xaml_deferred_2198(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(340,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2241(
+fn populate_winuitheme_xaml_deferred_2243(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20192,7 +20228,7 @@ fn populate_winuitheme_xaml_deferred_2241(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(341,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2242(
+fn populate_winuitheme_xaml_deferred_2244(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20208,7 +20244,7 @@ fn populate_winuitheme_xaml_deferred_2242(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(392,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2293(
+fn populate_winuitheme_xaml_deferred_2295(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20256,7 +20292,7 @@ fn populate_winuitheme_xaml_deferred_2293(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(401,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2294(
+fn populate_winuitheme_xaml_deferred_2296(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20296,7 +20332,7 @@ fn populate_winuitheme_xaml_deferred_2294(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(407,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2295(
+fn populate_winuitheme_xaml_deferred_2297(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20344,7 +20380,7 @@ fn populate_winuitheme_xaml_deferred_2295(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(41,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2304(
+fn populate_winuitheme_xaml_deferred_2306(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20362,7 +20398,7 @@ fn populate_winuitheme_xaml_deferred_2304(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(121,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2360(
+fn populate_winuitheme_xaml_deferred_2362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20410,7 +20446,7 @@ fn populate_winuitheme_xaml_deferred_2360(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(130,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2361(
+fn populate_winuitheme_xaml_deferred_2363(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20457,7 +20493,7 @@ fn populate_winuitheme_xaml_deferred_2361(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(70,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2434(
+fn populate_winuitheme_xaml_deferred_2436(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20477,7 +20513,7 @@ fn populate_winuitheme_xaml_deferred_2434(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(71,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2435(
+fn populate_winuitheme_xaml_deferred_2437(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20497,7 +20533,7 @@ fn populate_winuitheme_xaml_deferred_2435(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(72,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2436(
+fn populate_winuitheme_xaml_deferred_2438(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20515,7 +20551,7 @@ fn populate_winuitheme_xaml_deferred_2436(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(73,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2437(
+fn populate_winuitheme_xaml_deferred_2439(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20533,7 +20569,7 @@ fn populate_winuitheme_xaml_deferred_2437(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(74,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2438(
+fn populate_winuitheme_xaml_deferred_2440(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20551,7 +20587,7 @@ fn populate_winuitheme_xaml_deferred_2438(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(75,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2439(
+fn populate_winuitheme_xaml_deferred_2441(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20569,7 +20605,7 @@ fn populate_winuitheme_xaml_deferred_2439(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(76,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2440(
+fn populate_winuitheme_xaml_deferred_2442(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20587,7 +20623,7 @@ fn populate_winuitheme_xaml_deferred_2440(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(77,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2441(
+fn populate_winuitheme_xaml_deferred_2443(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20605,7 +20641,7 @@ fn populate_winuitheme_xaml_deferred_2441(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(78,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2442(
+fn populate_winuitheme_xaml_deferred_2444(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20625,7 +20661,7 @@ fn populate_winuitheme_xaml_deferred_2442(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(79,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2443(
+fn populate_winuitheme_xaml_deferred_2445(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20645,7 +20681,7 @@ fn populate_winuitheme_xaml_deferred_2443(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(80,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2444(
+fn populate_winuitheme_xaml_deferred_2446(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20665,7 +20701,7 @@ fn populate_winuitheme_xaml_deferred_2444(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(81,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2445(
+fn populate_winuitheme_xaml_deferred_2447(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20685,7 +20721,7 @@ fn populate_winuitheme_xaml_deferred_2445(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(82,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2446(
+fn populate_winuitheme_xaml_deferred_2448(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20705,7 +20741,7 @@ fn populate_winuitheme_xaml_deferred_2446(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(83,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2447(
+fn populate_winuitheme_xaml_deferred_2449(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20725,7 +20761,7 @@ fn populate_winuitheme_xaml_deferred_2447(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(84,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2448(
+fn populate_winuitheme_xaml_deferred_2450(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20745,7 +20781,7 @@ fn populate_winuitheme_xaml_deferred_2448(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(85,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2449(
+fn populate_winuitheme_xaml_deferred_2451(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20765,7 +20801,7 @@ fn populate_winuitheme_xaml_deferred_2449(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(86,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2450(
+fn populate_winuitheme_xaml_deferred_2452(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20785,7 +20821,7 @@ fn populate_winuitheme_xaml_deferred_2450(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(87,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2451(
+fn populate_winuitheme_xaml_deferred_2453(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20805,7 +20841,7 @@ fn populate_winuitheme_xaml_deferred_2451(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(88,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2452(
+fn populate_winuitheme_xaml_deferred_2454(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20825,7 +20861,7 @@ fn populate_winuitheme_xaml_deferred_2452(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(89,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2453(
+fn populate_winuitheme_xaml_deferred_2455(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20845,7 +20881,7 @@ fn populate_winuitheme_xaml_deferred_2453(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(90,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2454(
+fn populate_winuitheme_xaml_deferred_2456(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20865,7 +20901,7 @@ fn populate_winuitheme_xaml_deferred_2454(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(91,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2455(
+fn populate_winuitheme_xaml_deferred_2457(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20885,7 +20921,7 @@ fn populate_winuitheme_xaml_deferred_2455(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(92,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2456(
+fn populate_winuitheme_xaml_deferred_2458(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20905,7 +20941,7 @@ fn populate_winuitheme_xaml_deferred_2456(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(93,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2457(
+fn populate_winuitheme_xaml_deferred_2459(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20925,7 +20961,7 @@ fn populate_winuitheme_xaml_deferred_2457(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(94,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2458(
+fn populate_winuitheme_xaml_deferred_2460(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20945,7 +20981,7 @@ fn populate_winuitheme_xaml_deferred_2458(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(95,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2459(
+fn populate_winuitheme_xaml_deferred_2461(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20965,7 +21001,7 @@ fn populate_winuitheme_xaml_deferred_2459(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(96,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2460(
+fn populate_winuitheme_xaml_deferred_2462(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -20985,7 +21021,7 @@ fn populate_winuitheme_xaml_deferred_2460(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(97,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2461(
+fn populate_winuitheme_xaml_deferred_2463(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21005,7 +21041,7 @@ fn populate_winuitheme_xaml_deferred_2461(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(98,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2462(
+fn populate_winuitheme_xaml_deferred_2464(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21025,7 +21061,7 @@ fn populate_winuitheme_xaml_deferred_2462(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(99,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2463(
+fn populate_winuitheme_xaml_deferred_2465(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21045,7 +21081,7 @@ fn populate_winuitheme_xaml_deferred_2463(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(100,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2464(
+fn populate_winuitheme_xaml_deferred_2466(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21065,7 +21101,7 @@ fn populate_winuitheme_xaml_deferred_2464(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(101,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2465(
+fn populate_winuitheme_xaml_deferred_2467(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21085,7 +21121,7 @@ fn populate_winuitheme_xaml_deferred_2465(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(102,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2466(
+fn populate_winuitheme_xaml_deferred_2468(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21105,7 +21141,7 @@ fn populate_winuitheme_xaml_deferred_2466(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(103,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2467(
+fn populate_winuitheme_xaml_deferred_2469(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21125,7 +21161,7 @@ fn populate_winuitheme_xaml_deferred_2467(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(104,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2468(
+fn populate_winuitheme_xaml_deferred_2470(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21140,7 +21176,7 @@ fn populate_winuitheme_xaml_deferred_2468(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(105,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2469(
+fn populate_winuitheme_xaml_deferred_2471(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21160,7 +21196,7 @@ fn populate_winuitheme_xaml_deferred_2469(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(106,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2470(
+fn populate_winuitheme_xaml_deferred_2472(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21180,7 +21216,7 @@ fn populate_winuitheme_xaml_deferred_2470(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(107,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2471(
+fn populate_winuitheme_xaml_deferred_2473(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21200,7 +21236,7 @@ fn populate_winuitheme_xaml_deferred_2471(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(108,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2472(
+fn populate_winuitheme_xaml_deferred_2474(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21220,7 +21256,7 @@ fn populate_winuitheme_xaml_deferred_2472(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(109,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2473(
+fn populate_winuitheme_xaml_deferred_2475(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21240,7 +21276,7 @@ fn populate_winuitheme_xaml_deferred_2473(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(110,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2474(
+fn populate_winuitheme_xaml_deferred_2476(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21260,7 +21296,7 @@ fn populate_winuitheme_xaml_deferred_2474(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(111,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2475(
+fn populate_winuitheme_xaml_deferred_2477(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21280,7 +21316,7 @@ fn populate_winuitheme_xaml_deferred_2475(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(112,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2476(
+fn populate_winuitheme_xaml_deferred_2478(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21300,7 +21336,7 @@ fn populate_winuitheme_xaml_deferred_2476(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(113,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2477(
+fn populate_winuitheme_xaml_deferred_2479(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21320,7 +21356,7 @@ fn populate_winuitheme_xaml_deferred_2477(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(114,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2478(
+fn populate_winuitheme_xaml_deferred_2480(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21340,7 +21376,7 @@ fn populate_winuitheme_xaml_deferred_2478(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(116,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2480(
+fn populate_winuitheme_xaml_deferred_2482(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21350,7 +21386,7 @@ fn populate_winuitheme_xaml_deferred_2480(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(143,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2481(
+fn populate_winuitheme_xaml_deferred_2483(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21370,7 +21406,7 @@ fn populate_winuitheme_xaml_deferred_2481(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(144,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2482(
+fn populate_winuitheme_xaml_deferred_2484(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21388,7 +21424,7 @@ fn populate_winuitheme_xaml_deferred_2482(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(145,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2483(
+fn populate_winuitheme_xaml_deferred_2485(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21408,7 +21444,7 @@ fn populate_winuitheme_xaml_deferred_2483(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(146,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2484(
+fn populate_winuitheme_xaml_deferred_2486(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21424,7 +21460,7 @@ fn populate_winuitheme_xaml_deferred_2484(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(147,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2485(
+fn populate_winuitheme_xaml_deferred_2487(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21440,7 +21476,7 @@ fn populate_winuitheme_xaml_deferred_2485(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(148,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2486(
+fn populate_winuitheme_xaml_deferred_2488(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21456,7 +21492,7 @@ fn populate_winuitheme_xaml_deferred_2486(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(149,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2487(
+fn populate_winuitheme_xaml_deferred_2489(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21476,7 +21512,7 @@ fn populate_winuitheme_xaml_deferred_2487(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(150,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2488(
+fn populate_winuitheme_xaml_deferred_2490(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21496,7 +21532,7 @@ fn populate_winuitheme_xaml_deferred_2488(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(151,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2489(
+fn populate_winuitheme_xaml_deferred_2491(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21516,7 +21552,7 @@ fn populate_winuitheme_xaml_deferred_2489(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(152,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2490(
+fn populate_winuitheme_xaml_deferred_2492(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21536,7 +21572,7 @@ fn populate_winuitheme_xaml_deferred_2490(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(153,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2491(
+fn populate_winuitheme_xaml_deferred_2493(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21556,7 +21592,7 @@ fn populate_winuitheme_xaml_deferred_2491(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(154,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2492(
+fn populate_winuitheme_xaml_deferred_2494(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21572,7 +21608,7 @@ fn populate_winuitheme_xaml_deferred_2492(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(155,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2493(
+fn populate_winuitheme_xaml_deferred_2495(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21588,7 +21624,7 @@ fn populate_winuitheme_xaml_deferred_2493(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(156,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2494(
+fn populate_winuitheme_xaml_deferred_2496(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21608,7 +21644,7 @@ fn populate_winuitheme_xaml_deferred_2494(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(157,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2495(
+fn populate_winuitheme_xaml_deferred_2497(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21628,7 +21664,7 @@ fn populate_winuitheme_xaml_deferred_2495(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(158,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2496(
+fn populate_winuitheme_xaml_deferred_2498(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21648,7 +21684,7 @@ fn populate_winuitheme_xaml_deferred_2496(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(159,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2497(
+fn populate_winuitheme_xaml_deferred_2499(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21668,7 +21704,7 @@ fn populate_winuitheme_xaml_deferred_2497(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(160,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2498(
+fn populate_winuitheme_xaml_deferred_2500(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21688,7 +21724,7 @@ fn populate_winuitheme_xaml_deferred_2498(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(161,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2499(
+fn populate_winuitheme_xaml_deferred_2501(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21708,7 +21744,7 @@ fn populate_winuitheme_xaml_deferred_2499(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(162,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2500(
+fn populate_winuitheme_xaml_deferred_2502(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21728,7 +21764,7 @@ fn populate_winuitheme_xaml_deferred_2500(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(163,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2501(
+fn populate_winuitheme_xaml_deferred_2503(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21748,7 +21784,7 @@ fn populate_winuitheme_xaml_deferred_2501(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(164,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2502(
+fn populate_winuitheme_xaml_deferred_2504(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21768,7 +21804,7 @@ fn populate_winuitheme_xaml_deferred_2502(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(165,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2503(
+fn populate_winuitheme_xaml_deferred_2505(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21788,7 +21824,7 @@ fn populate_winuitheme_xaml_deferred_2503(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(166,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2504(
+fn populate_winuitheme_xaml_deferred_2506(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21806,7 +21842,7 @@ fn populate_winuitheme_xaml_deferred_2504(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(167,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2505(
+fn populate_winuitheme_xaml_deferred_2507(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21826,7 +21862,7 @@ fn populate_winuitheme_xaml_deferred_2505(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(168,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2506(
+fn populate_winuitheme_xaml_deferred_2508(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21846,7 +21882,7 @@ fn populate_winuitheme_xaml_deferred_2506(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(169,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2507(
+fn populate_winuitheme_xaml_deferred_2509(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21864,7 +21900,7 @@ fn populate_winuitheme_xaml_deferred_2507(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(170,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2508(
+fn populate_winuitheme_xaml_deferred_2510(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21882,7 +21918,7 @@ fn populate_winuitheme_xaml_deferred_2508(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(171,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2509(
+fn populate_winuitheme_xaml_deferred_2511(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21900,7 +21936,7 @@ fn populate_winuitheme_xaml_deferred_2509(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(172,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2510(
+fn populate_winuitheme_xaml_deferred_2512(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21918,7 +21954,7 @@ fn populate_winuitheme_xaml_deferred_2510(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(173,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2511(
+fn populate_winuitheme_xaml_deferred_2513(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21936,7 +21972,7 @@ fn populate_winuitheme_xaml_deferred_2511(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(174,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2512(
+fn populate_winuitheme_xaml_deferred_2514(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21952,7 +21988,7 @@ fn populate_winuitheme_xaml_deferred_2512(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(175,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2513(
+fn populate_winuitheme_xaml_deferred_2515(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21972,7 +22008,7 @@ fn populate_winuitheme_xaml_deferred_2513(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(176,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2514(
+fn populate_winuitheme_xaml_deferred_2516(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -21992,7 +22028,7 @@ fn populate_winuitheme_xaml_deferred_2514(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(177,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2515(
+fn populate_winuitheme_xaml_deferred_2517(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22012,7 +22048,7 @@ fn populate_winuitheme_xaml_deferred_2515(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(178,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2516(
+fn populate_winuitheme_xaml_deferred_2518(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22032,7 +22068,7 @@ fn populate_winuitheme_xaml_deferred_2516(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(179,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_2517(
+fn populate_winuitheme_xaml_deferred_2519(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22052,7 +22088,7 @@ fn populate_winuitheme_xaml_deferred_2517(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(82,53)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_3294(
+fn populate_winuitheme_xaml_deferred_3296(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22060,7 +22096,7 @@ fn populate_winuitheme_xaml_deferred_3294(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(83,48)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_3295(
+fn populate_winuitheme_xaml_deferred_3297(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22068,7 +22104,7 @@ fn populate_winuitheme_xaml_deferred_3295(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(160,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_3713(
+fn populate_winuitheme_xaml_deferred_3715(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22113,7 +22149,7 @@ fn populate_winuitheme_xaml_deferred_3713(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(717,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4050(
+fn populate_winuitheme_xaml_deferred_4054(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22129,7 +22165,7 @@ fn populate_winuitheme_xaml_deferred_4050(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(796,57)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4127(
+fn populate_winuitheme_xaml_deferred_4131(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22137,7 +22173,7 @@ fn populate_winuitheme_xaml_deferred_4127(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(797,49)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4128(
+fn populate_winuitheme_xaml_deferred_4132(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22145,7 +22181,7 @@ fn populate_winuitheme_xaml_deferred_4128(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(165,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4334(
+fn populate_winuitheme_xaml_deferred_4338(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22193,7 +22229,7 @@ fn populate_winuitheme_xaml_deferred_4334(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(174,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4335(
+fn populate_winuitheme_xaml_deferred_4339(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22240,7 +22276,7 @@ fn populate_winuitheme_xaml_deferred_4335(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(168,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_4454(
+fn populate_winuitheme_xaml_deferred_4458(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22250,7 +22286,7 @@ fn populate_winuitheme_xaml_deferred_4454(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(51,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5205(
+fn populate_winuitheme_xaml_deferred_5209(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22266,7 +22302,7 @@ fn populate_winuitheme_xaml_deferred_5205(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(186,53)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5313(
+fn populate_winuitheme_xaml_deferred_5317(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22274,7 +22310,7 @@ fn populate_winuitheme_xaml_deferred_5313(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(187,48)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5314(
+fn populate_winuitheme_xaml_deferred_5318(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22282,7 +22318,7 @@ fn populate_winuitheme_xaml_deferred_5314(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(238,8)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5694(
+fn populate_winuitheme_xaml_deferred_5698(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22327,7 +22363,7 @@ fn populate_winuitheme_xaml_deferred_5694(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(29,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5949(
+fn populate_winuitheme_xaml_deferred_5955(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22338,7 +22374,7 @@ fn populate_winuitheme_xaml_deferred_5949(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(30,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5950(
+fn populate_winuitheme_xaml_deferred_5956(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22349,7 +22385,7 @@ fn populate_winuitheme_xaml_deferred_5950(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(31,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5951(
+fn populate_winuitheme_xaml_deferred_5957(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22360,7 +22396,7 @@ fn populate_winuitheme_xaml_deferred_5951(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(32,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5952(
+fn populate_winuitheme_xaml_deferred_5958(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22371,7 +22407,7 @@ fn populate_winuitheme_xaml_deferred_5952(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(33,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5953(
+fn populate_winuitheme_xaml_deferred_5959(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22382,7 +22418,7 @@ fn populate_winuitheme_xaml_deferred_5953(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(34,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5954(
+fn populate_winuitheme_xaml_deferred_5960(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22393,7 +22429,7 @@ fn populate_winuitheme_xaml_deferred_5954(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(35,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5955(
+fn populate_winuitheme_xaml_deferred_5961(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22404,7 +22440,7 @@ fn populate_winuitheme_xaml_deferred_5955(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(36,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5956(
+fn populate_winuitheme_xaml_deferred_5962(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22415,7 +22451,7 @@ fn populate_winuitheme_xaml_deferred_5956(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(37,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5957(
+fn populate_winuitheme_xaml_deferred_5963(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22426,7 +22462,7 @@ fn populate_winuitheme_xaml_deferred_5957(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(38,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5958(
+fn populate_winuitheme_xaml_deferred_5964(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22437,7 +22473,7 @@ fn populate_winuitheme_xaml_deferred_5958(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(39,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5959(
+fn populate_winuitheme_xaml_deferred_5965(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22450,7 +22486,7 @@ fn populate_winuitheme_xaml_deferred_5959(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(40,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5960(
+fn populate_winuitheme_xaml_deferred_5966(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_2 });
@@ -22463,7 +22499,7 @@ fn populate_winuitheme_xaml_deferred_5960(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(36,4)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5961(
+fn populate_winuitheme_xaml_deferred_5967(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_1 });
@@ -22473,7 +22509,7 @@ fn populate_winuitheme_xaml_deferred_5961(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(23,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5962(
+fn populate_winuitheme_xaml_deferred_5968(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22482,7 +22518,7 @@ fn populate_winuitheme_xaml_deferred_5962(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(25,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5963(
+fn populate_winuitheme_xaml_deferred_5969(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22491,7 +22527,7 @@ fn populate_winuitheme_xaml_deferred_5963(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(27,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5964(
+fn populate_winuitheme_xaml_deferred_5970(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22500,7 +22536,7 @@ fn populate_winuitheme_xaml_deferred_5964(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(34,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5965(
+fn populate_winuitheme_xaml_deferred_5971(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22509,7 +22545,7 @@ fn populate_winuitheme_xaml_deferred_5965(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(35,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5966(
+fn populate_winuitheme_xaml_deferred_5972(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22518,7 +22554,7 @@ fn populate_winuitheme_xaml_deferred_5966(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(36,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5967(
+fn populate_winuitheme_xaml_deferred_5973(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22527,7 +22563,7 @@ fn populate_winuitheme_xaml_deferred_5967(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(37,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5968(
+fn populate_winuitheme_xaml_deferred_5974(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22536,7 +22572,7 @@ fn populate_winuitheme_xaml_deferred_5968(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(42,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5969(
+fn populate_winuitheme_xaml_deferred_5975(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22545,7 +22581,7 @@ fn populate_winuitheme_xaml_deferred_5969(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(43,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5970(
+fn populate_winuitheme_xaml_deferred_5976(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22554,7 +22590,7 @@ fn populate_winuitheme_xaml_deferred_5970(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(46,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5971(
+fn populate_winuitheme_xaml_deferred_5977(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22563,7 +22599,7 @@ fn populate_winuitheme_xaml_deferred_5971(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(52,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5972(
+fn populate_winuitheme_xaml_deferred_5978(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22572,7 +22608,7 @@ fn populate_winuitheme_xaml_deferred_5972(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(54,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5973(
+fn populate_winuitheme_xaml_deferred_5979(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22581,7 +22617,7 @@ fn populate_winuitheme_xaml_deferred_5973(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(61,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5974(
+fn populate_winuitheme_xaml_deferred_5980(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22590,7 +22626,7 @@ fn populate_winuitheme_xaml_deferred_5974(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(62,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5975(
+fn populate_winuitheme_xaml_deferred_5981(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22599,7 +22635,7 @@ fn populate_winuitheme_xaml_deferred_5975(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(63,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5976(
+fn populate_winuitheme_xaml_deferred_5982(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22608,7 +22644,7 @@ fn populate_winuitheme_xaml_deferred_5976(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(64,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5977(
+fn populate_winuitheme_xaml_deferred_5983(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22617,7 +22653,7 @@ fn populate_winuitheme_xaml_deferred_5977(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(65,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5978(
+fn populate_winuitheme_xaml_deferred_5984(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22626,7 +22662,7 @@ fn populate_winuitheme_xaml_deferred_5978(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(66,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5979(
+fn populate_winuitheme_xaml_deferred_5985(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22635,7 +22671,7 @@ fn populate_winuitheme_xaml_deferred_5979(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(69,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5980(
+fn populate_winuitheme_xaml_deferred_5986(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22644,7 +22680,7 @@ fn populate_winuitheme_xaml_deferred_5980(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(72,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5981(
+fn populate_winuitheme_xaml_deferred_5987(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22653,7 +22689,7 @@ fn populate_winuitheme_xaml_deferred_5981(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(79,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5982(
+fn populate_winuitheme_xaml_deferred_5988(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22662,7 +22698,7 @@ fn populate_winuitheme_xaml_deferred_5982(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(80,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5983(
+fn populate_winuitheme_xaml_deferred_5989(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22671,7 +22707,7 @@ fn populate_winuitheme_xaml_deferred_5983(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(81,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5984(
+fn populate_winuitheme_xaml_deferred_5990(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22680,7 +22716,7 @@ fn populate_winuitheme_xaml_deferred_5984(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(84,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5985(
+fn populate_winuitheme_xaml_deferred_5991(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22689,7 +22725,7 @@ fn populate_winuitheme_xaml_deferred_5985(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(85,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5986(
+fn populate_winuitheme_xaml_deferred_5992(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22698,7 +22734,7 @@ fn populate_winuitheme_xaml_deferred_5986(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(86,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5987(
+fn populate_winuitheme_xaml_deferred_5993(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22707,7 +22743,7 @@ fn populate_winuitheme_xaml_deferred_5987(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(89,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5988(
+fn populate_winuitheme_xaml_deferred_5994(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22716,7 +22752,7 @@ fn populate_winuitheme_xaml_deferred_5988(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(92,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5989(
+fn populate_winuitheme_xaml_deferred_5995(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22725,7 +22761,7 @@ fn populate_winuitheme_xaml_deferred_5989(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(94,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5990(
+fn populate_winuitheme_xaml_deferred_5996(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22734,7 +22770,7 @@ fn populate_winuitheme_xaml_deferred_5990(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(97,50)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5991(
+fn populate_winuitheme_xaml_deferred_5997(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22743,7 +22779,7 @@ fn populate_winuitheme_xaml_deferred_5991(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(103,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5992(
+fn populate_winuitheme_xaml_deferred_5998(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22752,7 +22788,7 @@ fn populate_winuitheme_xaml_deferred_5992(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(105,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5993(
+fn populate_winuitheme_xaml_deferred_5999(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22761,7 +22797,7 @@ fn populate_winuitheme_xaml_deferred_5993(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(108,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5994(
+fn populate_winuitheme_xaml_deferred_6000(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22770,7 +22806,7 @@ fn populate_winuitheme_xaml_deferred_5994(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(110,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5995(
+fn populate_winuitheme_xaml_deferred_6001(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22779,7 +22815,7 @@ fn populate_winuitheme_xaml_deferred_5995(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(112,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5996(
+fn populate_winuitheme_xaml_deferred_6002(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22788,7 +22824,7 @@ fn populate_winuitheme_xaml_deferred_5996(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(114,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5997(
+fn populate_winuitheme_xaml_deferred_6003(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22797,7 +22833,7 @@ fn populate_winuitheme_xaml_deferred_5997(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(122,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5998(
+fn populate_winuitheme_xaml_deferred_6004(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22806,7 +22842,7 @@ fn populate_winuitheme_xaml_deferred_5998(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(124,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_5999(
+fn populate_winuitheme_xaml_deferred_6005(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22815,7 +22851,7 @@ fn populate_winuitheme_xaml_deferred_5999(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(126,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6000(
+fn populate_winuitheme_xaml_deferred_6006(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22824,7 +22860,7 @@ fn populate_winuitheme_xaml_deferred_6000(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(131,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6001(
+fn populate_winuitheme_xaml_deferred_6007(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22833,7 +22869,7 @@ fn populate_winuitheme_xaml_deferred_6001(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(133,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6002(
+fn populate_winuitheme_xaml_deferred_6008(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22842,7 +22878,7 @@ fn populate_winuitheme_xaml_deferred_6002(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(135,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6003(
+fn populate_winuitheme_xaml_deferred_6009(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22851,7 +22887,7 @@ fn populate_winuitheme_xaml_deferred_6003(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(137,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6004(
+fn populate_winuitheme_xaml_deferred_6010(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22860,7 +22896,7 @@ fn populate_winuitheme_xaml_deferred_6004(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(139,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6005(
+fn populate_winuitheme_xaml_deferred_6011(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22869,7 +22905,7 @@ fn populate_winuitheme_xaml_deferred_6005(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(143,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6006(
+fn populate_winuitheme_xaml_deferred_6012(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22878,7 +22914,7 @@ fn populate_winuitheme_xaml_deferred_6006(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(148,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6007(
+fn populate_winuitheme_xaml_deferred_6013(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22887,7 +22923,7 @@ fn populate_winuitheme_xaml_deferred_6007(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(150,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6008(
+fn populate_winuitheme_xaml_deferred_6014(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22896,7 +22932,7 @@ fn populate_winuitheme_xaml_deferred_6008(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(152,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6009(
+fn populate_winuitheme_xaml_deferred_6015(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22905,7 +22941,7 @@ fn populate_winuitheme_xaml_deferred_6009(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(154,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6010(
+fn populate_winuitheme_xaml_deferred_6016(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22914,7 +22950,7 @@ fn populate_winuitheme_xaml_deferred_6010(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(156,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6011(
+fn populate_winuitheme_xaml_deferred_6017(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22923,7 +22959,7 @@ fn populate_winuitheme_xaml_deferred_6011(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(158,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6012(
+fn populate_winuitheme_xaml_deferred_6018(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22932,7 +22968,7 @@ fn populate_winuitheme_xaml_deferred_6012(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(159,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6013(
+fn populate_winuitheme_xaml_deferred_6019(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22941,7 +22977,7 @@ fn populate_winuitheme_xaml_deferred_6013(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(161,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6014(
+fn populate_winuitheme_xaml_deferred_6020(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22950,7 +22986,7 @@ fn populate_winuitheme_xaml_deferred_6014(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(162,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6015(
+fn populate_winuitheme_xaml_deferred_6021(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22959,7 +22995,7 @@ fn populate_winuitheme_xaml_deferred_6015(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(164,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6016(
+fn populate_winuitheme_xaml_deferred_6022(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22968,7 +23004,7 @@ fn populate_winuitheme_xaml_deferred_6016(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(165,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6017(
+fn populate_winuitheme_xaml_deferred_6023(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22977,7 +23013,7 @@ fn populate_winuitheme_xaml_deferred_6017(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(167,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6018(
+fn populate_winuitheme_xaml_deferred_6024(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22986,7 +23022,7 @@ fn populate_winuitheme_xaml_deferred_6018(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(170,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6019(
+fn populate_winuitheme_xaml_deferred_6025(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -22995,7 +23031,7 @@ fn populate_winuitheme_xaml_deferred_6019(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(171,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6020(
+fn populate_winuitheme_xaml_deferred_6026(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23004,7 +23040,7 @@ fn populate_winuitheme_xaml_deferred_6020(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(173,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6021(
+fn populate_winuitheme_xaml_deferred_6027(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23013,7 +23049,7 @@ fn populate_winuitheme_xaml_deferred_6021(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(175,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6022(
+fn populate_winuitheme_xaml_deferred_6028(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23022,7 +23058,7 @@ fn populate_winuitheme_xaml_deferred_6022(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(177,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6023(
+fn populate_winuitheme_xaml_deferred_6029(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23031,7 +23067,7 @@ fn populate_winuitheme_xaml_deferred_6023(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(179,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6024(
+fn populate_winuitheme_xaml_deferred_6030(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23040,7 +23076,7 @@ fn populate_winuitheme_xaml_deferred_6024(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(182,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6025(
+fn populate_winuitheme_xaml_deferred_6031(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23049,7 +23085,7 @@ fn populate_winuitheme_xaml_deferred_6025(
 }
 
 /// Builds the deferred content at `WinUITheme.xaml(183,45)` (a template or a deferred resource).
-fn populate_winuitheme_xaml_deferred_6026(
+fn populate_winuitheme_xaml_deferred_6032(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: POPULATE_WINUITHEME_XAML_DOCUMENT.base_uri, namespaces: POPULATE_WINUITHEME_XAML_XML_NAMESPACES_0 });
@@ -23954,13 +23990,13 @@ fn build_controls_winuicontrols_xaml_unit_45(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
-    // Controls/WinUIControls.xaml(63,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ProgressBarTextFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_161, 63, 4)?;
-    // Controls/WinUIControls.xaml(65,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultProgressBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_162, 65, 4)?;
-    // Controls/WinUIControls.xaml(259,4) Content (resource)
-    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_164, 259, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 259, 4)?;
+    // Controls/WinUIControls.xaml(72,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "ProgressBarTextFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_161, 72, 4)?;
+    // Controls/WinUIControls.xaml(74,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "DefaultProgressBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_162, 74, 4)?;
+    // Controls/WinUIControls.xaml(312,4) Content (resource)
+    let deferred_89 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_164, 312, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_89) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 312, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -33651,28 +33687,28 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_160_THEME: rt::ControlThemeTab
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_152: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_0, source: build_controls_winuicontrols_xaml_property_26, line: 79, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_27, source: build_controls_winuicontrols_xaml_property_28, line: 80, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_39, source: build_controls_winuicontrols_xaml_property_19, line: 81, position: 19 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 82, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_0, source: build_controls_winuicontrols_xaml_property_26, line: 88, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_27, source: build_controls_winuicontrols_xaml_property_28, line: 89, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_39, source: build_controls_winuicontrols_xaml_property_19, line: 90, position: 19 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 91, position: 19 },
 ];
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_153: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 89, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 90, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 98, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 99, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_154: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 92, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 93, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 101, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 102, position: 25 },
 ];
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_155: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 96, position: 25 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 97, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_25, source: build_controls_winuicontrols_xaml_property_3, line: 105, position: 25 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_1, source: build_controls_winuicontrols_xaml_property_29, line: 106, position: 25 },
 ];
 
 /// The control theme built by `build_controls_winuicontrols_xaml_deferred_164`, interpreted by `rt::build_control_theme` (#568).
@@ -33680,7 +33716,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_164_THEME: rt::ControlThemeTab
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultProgressBarStyle"), line: 259, position: 71 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultProgressBarStyle"), line: 312, position: 71 },
     ],
 };
 
@@ -63552,7 +63588,7 @@ fn build_controls_winuicontrols_xaml_deferred_160(
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_160_THEME)
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(63,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(72,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_161(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
@@ -63561,127 +63597,127 @@ fn build_controls_winuicontrols_xaml_deferred_161(
     ::core::result::Result::Ok(rt::to_value(string_format_converter_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(65,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(74,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_162(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
-    // Controls/WinUIControls.xaml(65,4) ControlTheme
+    // Controls/WinUIControls.xaml(74,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(65,4) TargetType
+    // Controls/WinUIControls.xaml(74,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(66,6) Content
-    // Controls/WinUIControls.xaml(66,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "ProgressBarForeground");
-    // Controls/WinUIControls.xaml(67,6) Content
-    // Controls/WinUIControls.xaml(67,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "ProgressBarBackground");
-    // Controls/WinUIControls.xaml(68,6) Content
-    // Controls/WinUIControls.xaml(68,40) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), "ProgressBarBorderThemeThickness");
-    // Controls/WinUIControls.xaml(69,6) Content
-    // Controls/WinUIControls.xaml(69,36) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), "ProgressBarBorderBrush");
-    // Controls/WinUIControls.xaml(70,6) Content
-    let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
-    // Controls/WinUIControls.xaml(70,34) Value
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarMinHeight"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 70, 34)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, ::core::clone::Clone::clone(&provided_4));
-    // Controls/WinUIControls.xaml(71,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::RangeBase::maximum_property()), rt::to_object(100.0_f64));
-    // Controls/WinUIControls.xaml(72,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), rt::to_object(::core::clone::Clone::clone(&false)));
-    // Controls/WinUIControls.xaml(73,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center));
-    // Controls/WinUIControls.xaml(74,6) Content
-    let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
-    // Controls/WinUIControls.xaml(74,37) Value
-    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarCornerRadius"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 37)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, ::core::clone::Clone::clone(&provided_5));
     // Controls/WinUIControls.xaml(75,6) Content
+    // Controls/WinUIControls.xaml(75,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "ProgressBarForeground");
+    // Controls/WinUIControls.xaml(76,6) Content
+    // Controls/WinUIControls.xaml(76,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "ProgressBarBackground");
+    // Controls/WinUIControls.xaml(77,6) Content
+    // Controls/WinUIControls.xaml(77,40) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), "ProgressBarBorderThemeThickness");
+    // Controls/WinUIControls.xaml(78,6) Content
+    // Controls/WinUIControls.xaml(78,36) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), "ProgressBarBorderBrush");
+    // Controls/WinUIControls.xaml(79,6) Content
+    let setter_4 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
+    // Controls/WinUIControls.xaml(79,34) Value
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarMinHeight"));
+    let provided_4 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 79, 34)?;
+    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_4, ::core::clone::Clone::clone(&provided_4));
+    // Controls/WinUIControls.xaml(80,6) Content
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::RangeBase::maximum_property()), rt::to_object(100.0_f64));
+    // Controls/WinUIControls.xaml(81,6) Content
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), rt::to_object(::core::clone::Clone::clone(&false)));
+    // Controls/WinUIControls.xaml(82,6) Content
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center));
+    // Controls/WinUIControls.xaml(83,6) Content
+    let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
+    // Controls/WinUIControls.xaml(83,37) Value
+    let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarCornerRadius"));
+    let provided_5 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 83, 37)?;
+    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, ::core::clone::Clone::clone(&provided_5));
+    // Controls/WinUIControls.xaml(84,6) Content
     let setter_9 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/WinUIControls.xaml(76,8) Value
+    // Controls/WinUIControls.xaml(85,8) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
-    // Controls/WinUIControls.xaml(77,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_163, 77, 10)?;
+    // Controls/WinUIControls.xaml(86,10) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_163, 86, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_9, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/WinUIControls.xaml(125,6) Content
-    // Controls/WinUIControls.xaml(125,6) Style
+    // Controls/WinUIControls.xaml(134,6) Content
+    // Controls/WinUIControls.xaml(134,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
-    // Controls/WinUIControls.xaml(125,6) Selector
+    // Controls/WinUIControls.xaml(134,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":horizontal");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
-    // Controls/WinUIControls.xaml(126,8) Content
-    // Controls/WinUIControls.xaml(126,8) Style
+    // Controls/WinUIControls.xaml(135,8) Content
+    // Controls/WinUIControls.xaml(135,8) Style
     let style_1 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(126,8) Selector
+    // Controls/WinUIControls.xaml(135,8) Selector
     let selector_2 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_3 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_2));
     let selector_4 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_3), <::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_5 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_4), "ProgressBarGrid");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_5.clone()));
-    // Controls/WinUIControls.xaml(127,10) Content
+    // Controls/WinUIControls.xaml(136,10) Content
     let setter_10 = rt::new_setter(rt::property(::ferroui_base::layout::Layoutable::height_property()));
-    // Controls/WinUIControls.xaml(127,35) Value
+    // Controls/WinUIControls.xaml(136,35) Value
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_base::layout::Layoutable::min_height_property()));
     let provided_6 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
     rt::add_setter_value(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_10, rt::to_object(::core::clone::Clone::clone(&provided_6)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 126, 8)?);
-    // Controls/WinUIControls.xaml(129,8) Content
-    // Controls/WinUIControls.xaml(129,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 135, 8)?);
+    // Controls/WinUIControls.xaml(138,8) Content
+    // Controls/WinUIControls.xaml(138,8) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
-    // Controls/WinUIControls.xaml(129,8) Selector
+    // Controls/WinUIControls.xaml(138,8) Selector
     let selector_6 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
     let selector_8 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_7), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "ProgressBarTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_9.clone()));
-    // Controls/WinUIControls.xaml(130,10) Content
+    // Controls/WinUIControls.xaml(139,10) Content
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
-    // Controls/WinUIControls.xaml(130,35) Value
+    // Controls/WinUIControls.xaml(139,35) Value
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarTrackHeight"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 130, 35)?;
+    let provided_7 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 139, 35)?;
     rt::add_setter_value_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, ::core::clone::Clone::clone(&provided_7));
-    // Controls/WinUIControls.xaml(131,10) Content
+    // Controls/WinUIControls.xaml(140,10) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 129, 8)?);
-    // Controls/WinUIControls.xaml(133,8) Content
-    // Controls/WinUIControls.xaml(133,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 138, 8)?);
+    // Controls/WinUIControls.xaml(142,8) Content
+    // Controls/WinUIControls.xaml(142,8) Style
     let style_3 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(133,8) Selector
+    // Controls/WinUIControls.xaml(142,8) Selector
     let selector_10 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_11 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_10));
     let selector_12 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_13 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_12), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_13.clone()));
-    // Controls/WinUIControls.xaml(134,10) Content
+    // Controls/WinUIControls.xaml(143,10) Content
     rt::add_setter(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 133, 8)?);
-    // Controls/WinUIControls.xaml(136,8) Content
-    // Controls/WinUIControls.xaml(136,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 142, 8)?);
+    // Controls/WinUIControls.xaml(145,8) Content
+    // Controls/WinUIControls.xaml(145,8) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
-    // Controls/WinUIControls.xaml(136,8) Selector
+    // Controls/WinUIControls.xaml(145,8) Selector
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_14));
     let selector_16 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_15), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_17 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_16), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_17.clone()));
-    // Controls/WinUIControls.xaml(137,10) Content
+    // Controls/WinUIControls.xaml(146,10) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
-    // Controls/WinUIControls.xaml(138,10) Content
+    // Controls/WinUIControls.xaml(147,10) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
-    // Controls/WinUIControls.xaml(138,34) Value
+    // Controls/WinUIControls.xaml(147,34) Value
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -63695,22 +63731,22 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.set_target_property(::core::option::Option::None);
     rt::add_setter_value_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, rt::to_object(::core::clone::Clone::clone(&provided_8)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 136, 8)?);
-    // Controls/WinUIControls.xaml(140,8) Content
-    // Controls/WinUIControls.xaml(140,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 145, 8)?);
+    // Controls/WinUIControls.xaml(149,8) Content
+    // Controls/WinUIControls.xaml(149,8) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_5.clone()));
-    // Controls/WinUIControls.xaml(140,8) Selector
+    // Controls/WinUIControls.xaml(149,8) Selector
     let selector_18 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_19 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_18));
     let selector_20 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_19), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_21 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_20), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_21.clone()));
-    // Controls/WinUIControls.xaml(141,10) Content
+    // Controls/WinUIControls.xaml(150,10) Content
     rt::add_setter(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left));
-    // Controls/WinUIControls.xaml(142,10) Content
+    // Controls/WinUIControls.xaml(151,10) Content
     let setter_17 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
-    // Controls/WinUIControls.xaml(142,34) Value
+    // Controls/WinUIControls.xaml(151,34) Value
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -63724,90 +63760,90 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.set_target_property(::core::option::Option::None);
     rt::add_setter_value_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_17, rt::to_object(::core::clone::Clone::clone(&provided_9)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 140, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 149, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 125, 6)?);
-    // Controls/WinUIControls.xaml(147,6) Content
-    // Controls/WinUIControls.xaml(147,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 134, 6)?);
+    // Controls/WinUIControls.xaml(156,6) Content
+    // Controls/WinUIControls.xaml(156,6) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_6.clone()));
-    // Controls/WinUIControls.xaml(147,6) Selector
+    // Controls/WinUIControls.xaml(156,6) Selector
     let selector_22 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_23 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_22), ":vertical");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_23.clone()));
-    // Controls/WinUIControls.xaml(148,8) Content
+    // Controls/WinUIControls.xaml(157,8) Content
     let setter_18 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::min_width_property()));
-    // Controls/WinUIControls.xaml(148,35) Value
+    // Controls/WinUIControls.xaml(157,35) Value
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarMinHeight"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 148, 35)?;
+    let provided_10 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 35)?;
     rt::add_setter_value_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_18, ::core::clone::Clone::clone(&provided_10));
-    // Controls/WinUIControls.xaml(149,8) Content
+    // Controls/WinUIControls.xaml(158,8) Content
     rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
-    // Controls/WinUIControls.xaml(150,8) Content
+    // Controls/WinUIControls.xaml(159,8) Content
     rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch));
-    // Controls/WinUIControls.xaml(151,8) Content
-    // Controls/WinUIControls.xaml(151,8) Style
+    // Controls/WinUIControls.xaml(160,8) Content
+    // Controls/WinUIControls.xaml(160,8) Style
     let style_7 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(151,8) Selector
+    // Controls/WinUIControls.xaml(160,8) Selector
     let selector_24 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_25 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_24));
     let selector_26 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_25), <::ferroui_controls::Grid as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_27 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_26), "ProgressBarGrid");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_27.clone()));
-    // Controls/WinUIControls.xaml(152,10) Content
+    // Controls/WinUIControls.xaml(161,10) Content
     let setter_21 = rt::new_setter(rt::property(::ferroui_base::layout::Layoutable::width_property()));
-    // Controls/WinUIControls.xaml(152,34) Value
+    // Controls/WinUIControls.xaml(161,34) Value
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_base::layout::Layoutable::min_width_property()));
     let provided_11 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
     rt::add_setter_value(style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_21, rt::to_object(::core::clone::Clone::clone(&provided_11)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 151, 8)?);
-    // Controls/WinUIControls.xaml(154,8) Content
-    // Controls/WinUIControls.xaml(154,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 160, 8)?);
+    // Controls/WinUIControls.xaml(163,8) Content
+    // Controls/WinUIControls.xaml(163,8) Style
     let style_8 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_8.clone()));
-    // Controls/WinUIControls.xaml(154,8) Selector
+    // Controls/WinUIControls.xaml(163,8) Selector
     let selector_28 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_29 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_28));
     let selector_30 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_29), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_31 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_30), "ProgressBarTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_31.clone()));
-    // Controls/WinUIControls.xaml(155,10) Content
+    // Controls/WinUIControls.xaml(164,10) Content
     let setter_22 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::width_property()));
-    // Controls/WinUIControls.xaml(155,34) Value
+    // Controls/WinUIControls.xaml(164,34) Value
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarTrackHeight"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 155, 34)?;
+    let provided_12 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 164, 34)?;
     rt::add_setter_value_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_22, ::core::clone::Clone::clone(&provided_12));
-    // Controls/WinUIControls.xaml(156,10) Content
+    // Controls/WinUIControls.xaml(165,10) Content
     rt::add_setter(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 154, 8)?);
-    // Controls/WinUIControls.xaml(158,8) Content
-    // Controls/WinUIControls.xaml(158,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 163, 8)?);
+    // Controls/WinUIControls.xaml(167,8) Content
+    // Controls/WinUIControls.xaml(167,8) Style
     let style_9 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(158,8) Selector
+    // Controls/WinUIControls.xaml(167,8) Selector
     let selector_32 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_33 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_32));
     let selector_34 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_33), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_35 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_34), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_35.clone()));
-    // Controls/WinUIControls.xaml(159,10) Content
+    // Controls/WinUIControls.xaml(168,10) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Bottom));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 158, 8)?);
-    // Controls/WinUIControls.xaml(161,8) Content
-    // Controls/WinUIControls.xaml(161,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 167, 8)?);
+    // Controls/WinUIControls.xaml(170,8) Content
+    // Controls/WinUIControls.xaml(170,8) Style
     let style_10 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_10.clone()));
-    // Controls/WinUIControls.xaml(161,8) Selector
+    // Controls/WinUIControls.xaml(170,8) Selector
     let selector_36 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_37 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_36));
     let selector_38 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_37), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_39 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_38), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_39.clone()));
-    // Controls/WinUIControls.xaml(162,10) Content
+    // Controls/WinUIControls.xaml(171,10) Content
     rt::add_setter(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Top));
-    // Controls/WinUIControls.xaml(163,10) Content
+    // Controls/WinUIControls.xaml(172,10) Content
     let setter_26 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
-    // Controls/WinUIControls.xaml(163,35) Value
+    // Controls/WinUIControls.xaml(172,35) Value
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -63821,22 +63857,22 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.set_target_property(::core::option::Option::None);
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_26, rt::to_object(::core::clone::Clone::clone(&provided_13)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 161, 8)?);
-    // Controls/WinUIControls.xaml(165,8) Content
-    // Controls/WinUIControls.xaml(165,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 170, 8)?);
+    // Controls/WinUIControls.xaml(174,8) Content
+    // Controls/WinUIControls.xaml(174,8) Style
     let style_11 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_11.clone()));
-    // Controls/WinUIControls.xaml(165,8) Selector
+    // Controls/WinUIControls.xaml(174,8) Selector
     let selector_40 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_41 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_40));
     let selector_42 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_41), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_43 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_42), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_43.clone()));
-    // Controls/WinUIControls.xaml(166,10) Content
+    // Controls/WinUIControls.xaml(175,10) Content
     rt::add_setter(style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Top));
-    // Controls/WinUIControls.xaml(167,10) Content
+    // Controls/WinUIControls.xaml(176,10) Content
     let setter_28 = rt::new_setter_with_parent(&context, rt::property(::ferroui_base::layout::Layoutable::height_property()));
-    // Controls/WinUIControls.xaml(167,35) Value
+    // Controls/WinUIControls.xaml(176,35) Value
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -63850,121 +63886,125 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.set_target_property(::core::option::Option::None);
     rt::add_setter_value_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_28, rt::to_object(::core::clone::Clone::clone(&provided_14)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 165, 8)?);
-    // Controls/WinUIControls.xaml(169,8) Content
-    // Controls/WinUIControls.xaml(169,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 174, 8)?);
+    // Controls/WinUIControls.xaml(178,8) Content
+    // Controls/WinUIControls.xaml(178,8) Style
     let style_12 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(169,8) Selector
+    // Controls/WinUIControls.xaml(178,8) Selector
     let selector_44 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_45 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_44));
     let selector_46 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_45), <::ferroui_controls::LayoutTransformControl as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_47 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_46), "ProgressTextRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_47.clone()));
-    // Controls/WinUIControls.xaml(170,10) Content
+    // Controls/WinUIControls.xaml(179,10) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::column_property()), rt::to_object(0_i32));
-    // Controls/WinUIControls.xaml(171,10) Content
+    // Controls/WinUIControls.xaml(180,10) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Grid::row_property()), rt::to_object(1_i32));
-    // Controls/WinUIControls.xaml(172,10) Content
+    // Controls/WinUIControls.xaml(181,10) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 8.0_f64, 0.0_f64, 0.0_f64)));
-    // Controls/WinUIControls.xaml(173,10) Content
+    // Controls/WinUIControls.xaml(182,10) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 169, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 178, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 147, 6)?);
-    // Controls/WinUIControls.xaml(178,6) Content
-    // Controls/WinUIControls.xaml(178,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 156, 6)?);
+    // Controls/WinUIControls.xaml(187,6) Content
+    // Controls/WinUIControls.xaml(187,6) Style
     let style_13 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(178,6) Selector
+    // Controls/WinUIControls.xaml(187,6) Selector
     let selector_48 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_49 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_48), ":indeterminate");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_13, ::core::option::Option::Some(selector_49.clone()));
-    // Controls/WinUIControls.xaml(179,8) Content
-    // Controls/WinUIControls.xaml(179,8) Style
+    // Controls/WinUIControls.xaml(188,8) Content
+    // Controls/WinUIControls.xaml(188,8) Style
     let style_14 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(179,8) Selector
+    // Controls/WinUIControls.xaml(188,8) Selector
     let selector_50 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_51 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_50));
     let selector_52 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_51), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_53 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_52), "IndeterminateProgressBarIndicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_14, ::core::option::Option::Some(selector_53.clone()));
-    // Controls/WinUIControls.xaml(180,10) Content
+    // Controls/WinUIControls.xaml(189,10) Content
     rt::add_setter(style_14.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_14.clone(), 179, 8)?);
-    // Controls/WinUIControls.xaml(182,8) Content
-    // Controls/WinUIControls.xaml(182,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_14.clone(), 188, 8)?);
+    // Controls/WinUIControls.xaml(191,8) Content
+    // Controls/WinUIControls.xaml(191,8) Style
     let style_15 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(182,8) Selector
+    // Controls/WinUIControls.xaml(191,8) Selector
     let selector_54 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_55 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_54));
     let selector_56 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_55), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_57 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_56), "IndeterminateProgressBarIndicator2");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_15, ::core::option::Option::Some(selector_57.clone()));
-    // Controls/WinUIControls.xaml(183,10) Content
+    // Controls/WinUIControls.xaml(192,10) Content
     rt::add_setter(style_15.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_15.clone(), 182, 8)?);
-    // Controls/WinUIControls.xaml(185,8) Content
-    // Controls/WinUIControls.xaml(185,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_15.clone(), 191, 8)?);
+    // Controls/WinUIControls.xaml(194,8) Content
+    // Controls/WinUIControls.xaml(194,8) Style
     let style_16 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(185,8) Selector
+    // Controls/WinUIControls.xaml(194,8) Selector
     let selector_58 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_59 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_58));
     let selector_60 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_59), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_61 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_60), "ProgressBarTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_16, ::core::option::Option::Some(selector_61.clone()));
-    // Controls/WinUIControls.xaml(186,10) Content
+    // Controls/WinUIControls.xaml(195,10) Content
     rt::add_setter(style_16.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_16.clone(), 185, 8)?);
-    // Controls/WinUIControls.xaml(188,8) Content
-    // Controls/WinUIControls.xaml(188,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_16.clone(), 194, 8)?);
+    // Controls/WinUIControls.xaml(197,8) Content
+    // Controls/WinUIControls.xaml(197,8) Style
     let style_17 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(188,8) Selector
+    // Controls/WinUIControls.xaml(197,8) Selector
     let selector_62 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_63 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_62));
     let selector_64 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_63), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_65 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_64), "PART_Indicator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_17, ::core::option::Option::Some(selector_65.clone()));
-    // Controls/WinUIControls.xaml(189,10) Content
+    // Controls/WinUIControls.xaml(198,10) Content
     rt::add_setter(style_17.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_17.clone(), 188, 8)?);
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 178, 6)?);
-    // Controls/WinUIControls.xaml(197,6) Content
-    // Controls/WinUIControls.xaml(197,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_17.clone(), 197, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 187, 6)?);
+    // Controls/WinUIControls.xaml(206,6) Content
+    // Controls/WinUIControls.xaml(206,6) Style
     let style_18 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_18.clone()));
-    // Controls/WinUIControls.xaml(197,6) Selector
+    // Controls/WinUIControls.xaml(206,6) Selector
     let selector_66 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_67 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_66), ":horizontal");
     let selector_68 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_67), ":indeterminate");
-    let selector_69 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_68));
-    let selector_70 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_69), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
-    let selector_71 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_70), "IndeterminateProgressBarIndicator");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_18, ::core::option::Option::Some(selector_71.clone()));
-    // Controls/WinUIControls.xaml(199,10) Animations
+    let selector_69 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":error");
+    let selector_70 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_68), selector_69);
+    let selector_71 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":paused");
+    let selector_72 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_70), selector_71);
+    let selector_73 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_72));
+    let selector_74 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_73), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_75 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_74), "IndeterminateProgressBarIndicator");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_18, ::core::option::Option::Some(selector_75.clone()));
+    // Controls/WinUIControls.xaml(208,10) Animations
     let animations_collection_0 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_18.upcast_ref::<::ferroui_base::styling::StyleBase>());
-    // Controls/WinUIControls.xaml(199,10) Animation
+    // Controls/WinUIControls.xaml(208,10) Animation
     let animation_0 = ::ferroui_base::animation::Animation::new();
     context.push_parent(rt::to_value(animation_0.clone()));
-    // Controls/WinUIControls.xaml(199,10) IterationCount
-    let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 199, 20)?;
+    // Controls/WinUIControls.xaml(208,10) IterationCount
+    let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 208, 20)?;
     animation_0.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_0));
-    // Controls/WinUIControls.xaml(199,10) Duration
+    // Controls/WinUIControls.xaml(208,10) Duration
     let value_1 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_1));
-    // Controls/WinUIControls.xaml(200,12) Children
+    // Controls/WinUIControls.xaml(209,12) Children
     let children_collection_0 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/WinUIControls.xaml(200,12) KeyFrame
+    // Controls/WinUIControls.xaml(209,12) KeyFrame
     let key_frame_0 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_0.clone()));
-    // Controls/WinUIControls.xaml(200,12) KeyTime
+    // Controls/WinUIControls.xaml(209,12) KeyTime
     let value_2 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_0, ::core::clone::Clone::clone(&value_2));
-    // Controls/WinUIControls.xaml(201,14) Setters
+    // Controls/WinUIControls.xaml(210,14) Setters
     let setters_collection_0 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_0);
     let setter_37 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_37.clone()));
-    // Controls/WinUIControls.xaml(201,21) Property
+    // Controls/WinUIControls.xaml(210,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_37, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(201,53) Value
+    // Controls/WinUIControls.xaml(210,53) Value
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -63981,24 +64021,24 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_0, ::core::clone::Clone::clone(&setter_37) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&key_frame_0));
-    // Controls/WinUIControls.xaml(203,12) Children
+    // Controls/WinUIControls.xaml(212,12) Children
     let children_collection_1 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/WinUIControls.xaml(203,12) KeyFrame
+    // Controls/WinUIControls.xaml(212,12) KeyFrame
     let key_frame_1 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_1.clone()));
-    // Controls/WinUIControls.xaml(203,12) KeySpline
-    let value_3 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 203, 21)?;
+    // Controls/WinUIControls.xaml(212,12) KeySpline
+    let value_3 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 212, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_1, ::core::option::Option::Some(::core::clone::Clone::clone(&value_3)));
-    // Controls/WinUIControls.xaml(203,12) KeyTime
+    // Controls/WinUIControls.xaml(212,12) KeyTime
     let value_4 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_1, ::core::clone::Clone::clone(&value_4));
-    // Controls/WinUIControls.xaml(204,14) Setters
+    // Controls/WinUIControls.xaml(213,14) Setters
     let setters_collection_1 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_1);
     let setter_38 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_38.clone()));
-    // Controls/WinUIControls.xaml(204,21) Property
+    // Controls/WinUIControls.xaml(213,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_38, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(204,53) Value
+    // Controls/WinUIControls.xaml(213,53) Value
     let path_5 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64015,21 +64055,21 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_1, ::core::clone::Clone::clone(&setter_38) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&key_frame_1));
-    // Controls/WinUIControls.xaml(206,12) Children
+    // Controls/WinUIControls.xaml(215,12) Children
     let children_collection_2 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/WinUIControls.xaml(206,12) KeyFrame
+    // Controls/WinUIControls.xaml(215,12) KeyFrame
     let key_frame_2 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_2.clone()));
-    // Controls/WinUIControls.xaml(206,12) KeyTime
+    // Controls/WinUIControls.xaml(215,12) KeyTime
     let value_5 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_2, ::core::clone::Clone::clone(&value_5));
-    // Controls/WinUIControls.xaml(207,14) Setters
+    // Controls/WinUIControls.xaml(216,14) Setters
     let setters_collection_2 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_2);
     let setter_39 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_39.clone()));
-    // Controls/WinUIControls.xaml(207,21) Property
+    // Controls/WinUIControls.xaml(216,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_39, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(207,53) Value
+    // Controls/WinUIControls.xaml(216,53) Value
     let path_6 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64047,47 +64087,51 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&key_frame_2));
     context.pop_parent();
-    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_0, rt::cast(animation_0.clone(), 199, 10)?);
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_0, rt::cast(animation_0.clone(), 208, 10)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_18.clone(), 197, 6)?);
-    // Controls/WinUIControls.xaml(212,6) Content
-    // Controls/WinUIControls.xaml(212,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_18.clone(), 206, 6)?);
+    // Controls/WinUIControls.xaml(221,6) Content
+    // Controls/WinUIControls.xaml(221,6) Style
     let style_19 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_19.clone()));
-    // Controls/WinUIControls.xaml(212,6) Selector
-    let selector_72 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
-    let selector_73 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_72), ":horizontal");
-    let selector_74 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_73), ":indeterminate");
-    let selector_75 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_74));
-    let selector_76 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_75), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
-    let selector_77 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_76), "IndeterminateProgressBarIndicator2");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_19, ::core::option::Option::Some(selector_77.clone()));
-    // Controls/WinUIControls.xaml(214,10) Animations
+    // Controls/WinUIControls.xaml(221,6) Selector
+    let selector_76 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_77 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_76), ":horizontal");
+    let selector_78 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_77), ":indeterminate");
+    let selector_79 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":error");
+    let selector_80 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_78), selector_79);
+    let selector_81 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":paused");
+    let selector_82 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_80), selector_81);
+    let selector_83 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_82));
+    let selector_84 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_83), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_85 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_84), "IndeterminateProgressBarIndicator2");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_19, ::core::option::Option::Some(selector_85.clone()));
+    // Controls/WinUIControls.xaml(223,10) Animations
     let animations_collection_1 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_19.upcast_ref::<::ferroui_base::styling::StyleBase>());
-    // Controls/WinUIControls.xaml(214,10) Animation
+    // Controls/WinUIControls.xaml(223,10) Animation
     let animation_1 = ::ferroui_base::animation::Animation::new();
     context.push_parent(rt::to_value(animation_1.clone()));
-    // Controls/WinUIControls.xaml(214,10) IterationCount
-    let value_6 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 214, 20)?;
+    // Controls/WinUIControls.xaml(223,10) IterationCount
+    let value_6 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 223, 20)?;
     animation_1.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_6));
-    // Controls/WinUIControls.xaml(214,10) Duration
+    // Controls/WinUIControls.xaml(223,10) Duration
     let value_7 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_1.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_7));
-    // Controls/WinUIControls.xaml(215,12) Children
+    // Controls/WinUIControls.xaml(224,12) Children
     let children_collection_3 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
-    // Controls/WinUIControls.xaml(215,12) KeyFrame
+    // Controls/WinUIControls.xaml(224,12) KeyFrame
     let key_frame_3 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_3.clone()));
-    // Controls/WinUIControls.xaml(215,12) KeyTime
+    // Controls/WinUIControls.xaml(224,12) KeyTime
     let value_8 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_3, ::core::clone::Clone::clone(&value_8));
-    // Controls/WinUIControls.xaml(216,14) Setters
+    // Controls/WinUIControls.xaml(225,14) Setters
     let setters_collection_3 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_3);
     let setter_40 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_40.clone()));
-    // Controls/WinUIControls.xaml(216,21) Property
+    // Controls/WinUIControls.xaml(225,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_40, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(216,53) Value
+    // Controls/WinUIControls.xaml(225,53) Value
     let path_7 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64104,21 +64148,21 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_3, ::core::clone::Clone::clone(&setter_40) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&key_frame_3));
-    // Controls/WinUIControls.xaml(218,12) Children
+    // Controls/WinUIControls.xaml(227,12) Children
     let children_collection_4 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
-    // Controls/WinUIControls.xaml(218,12) KeyFrame
+    // Controls/WinUIControls.xaml(227,12) KeyFrame
     let key_frame_4 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_4.clone()));
-    // Controls/WinUIControls.xaml(218,12) KeyTime
+    // Controls/WinUIControls.xaml(227,12) KeyTime
     let value_9 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_4, ::core::clone::Clone::clone(&value_9));
-    // Controls/WinUIControls.xaml(219,14) Setters
+    // Controls/WinUIControls.xaml(228,14) Setters
     let setters_collection_4 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_4);
     let setter_41 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_41.clone()));
-    // Controls/WinUIControls.xaml(219,21) Property
+    // Controls/WinUIControls.xaml(228,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_41, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(219,53) Value
+    // Controls/WinUIControls.xaml(228,53) Value
     let path_8 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64135,24 +64179,24 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_4, ::core::clone::Clone::clone(&setter_41) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&key_frame_4));
-    // Controls/WinUIControls.xaml(221,12) Children
+    // Controls/WinUIControls.xaml(230,12) Children
     let children_collection_5 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_1);
-    // Controls/WinUIControls.xaml(221,12) KeyFrame
+    // Controls/WinUIControls.xaml(230,12) KeyFrame
     let key_frame_5 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_5.clone()));
-    // Controls/WinUIControls.xaml(221,12) KeySpline
-    let value_10 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 221, 21)?;
+    // Controls/WinUIControls.xaml(230,12) KeySpline
+    let value_10 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 230, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_5, ::core::option::Option::Some(::core::clone::Clone::clone(&value_10)));
-    // Controls/WinUIControls.xaml(221,12) KeyTime
+    // Controls/WinUIControls.xaml(230,12) KeyTime
     let value_11 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_5, ::core::clone::Clone::clone(&value_11));
-    // Controls/WinUIControls.xaml(222,14) Setters
+    // Controls/WinUIControls.xaml(231,14) Setters
     let setters_collection_5 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_5);
     let setter_42 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_42.clone()));
-    // Controls/WinUIControls.xaml(222,21) Property
+    // Controls/WinUIControls.xaml(231,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_42, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
-    // Controls/WinUIControls.xaml(222,53) Value
+    // Controls/WinUIControls.xaml(231,53) Value
     let path_9 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64170,47 +64214,51 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&key_frame_5));
     context.pop_parent();
-    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_1, rt::cast(animation_1.clone(), 214, 10)?);
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_1, rt::cast(animation_1.clone(), 223, 10)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_19.clone(), 212, 6)?);
-    // Controls/WinUIControls.xaml(227,6) Content
-    // Controls/WinUIControls.xaml(227,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_19.clone(), 221, 6)?);
+    // Controls/WinUIControls.xaml(236,6) Content
+    // Controls/WinUIControls.xaml(236,6) Style
     let style_20 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_20.clone()));
-    // Controls/WinUIControls.xaml(227,6) Selector
-    let selector_78 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
-    let selector_79 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_78), ":vertical");
-    let selector_80 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_79), ":indeterminate");
-    let selector_81 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_80));
-    let selector_82 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_81), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
-    let selector_83 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_82), "IndeterminateProgressBarIndicator");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_20, ::core::option::Option::Some(selector_83.clone()));
-    // Controls/WinUIControls.xaml(229,10) Animations
+    // Controls/WinUIControls.xaml(236,6) Selector
+    let selector_86 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_87 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_86), ":vertical");
+    let selector_88 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_87), ":indeterminate");
+    let selector_89 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":error");
+    let selector_90 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_88), selector_89);
+    let selector_91 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":paused");
+    let selector_92 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_90), selector_91);
+    let selector_93 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_92));
+    let selector_94 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_93), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_95 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_94), "IndeterminateProgressBarIndicator");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_20, ::core::option::Option::Some(selector_95.clone()));
+    // Controls/WinUIControls.xaml(238,10) Animations
     let animations_collection_2 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_20.upcast_ref::<::ferroui_base::styling::StyleBase>());
-    // Controls/WinUIControls.xaml(229,10) Animation
+    // Controls/WinUIControls.xaml(238,10) Animation
     let animation_2 = ::ferroui_base::animation::Animation::new();
     context.push_parent(rt::to_value(animation_2.clone()));
-    // Controls/WinUIControls.xaml(229,10) IterationCount
-    let value_12 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 229, 20)?;
+    // Controls/WinUIControls.xaml(238,10) IterationCount
+    let value_12 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 238, 20)?;
     animation_2.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_12));
-    // Controls/WinUIControls.xaml(229,10) Duration
+    // Controls/WinUIControls.xaml(238,10) Duration
     let value_13 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_2.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_13));
-    // Controls/WinUIControls.xaml(230,12) Children
+    // Controls/WinUIControls.xaml(239,12) Children
     let children_collection_6 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_2);
-    // Controls/WinUIControls.xaml(230,12) KeyFrame
+    // Controls/WinUIControls.xaml(239,12) KeyFrame
     let key_frame_6 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_6.clone()));
-    // Controls/WinUIControls.xaml(230,12) KeyTime
+    // Controls/WinUIControls.xaml(239,12) KeyTime
     let value_14 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_6, ::core::clone::Clone::clone(&value_14));
-    // Controls/WinUIControls.xaml(231,14) Setters
+    // Controls/WinUIControls.xaml(240,14) Setters
     let setters_collection_6 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_6);
     let setter_43 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_43.clone()));
-    // Controls/WinUIControls.xaml(231,21) Property
+    // Controls/WinUIControls.xaml(240,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_43, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(231,53) Value
+    // Controls/WinUIControls.xaml(240,53) Value
     let path_10 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64227,24 +64275,24 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_6, ::core::clone::Clone::clone(&setter_43) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&key_frame_6));
-    // Controls/WinUIControls.xaml(233,12) Children
+    // Controls/WinUIControls.xaml(242,12) Children
     let children_collection_7 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_2);
-    // Controls/WinUIControls.xaml(233,12) KeyFrame
+    // Controls/WinUIControls.xaml(242,12) KeyFrame
     let key_frame_7 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_7.clone()));
-    // Controls/WinUIControls.xaml(233,12) KeySpline
-    let value_15 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 233, 21)?;
+    // Controls/WinUIControls.xaml(242,12) KeySpline
+    let value_15 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 242, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_7, ::core::option::Option::Some(::core::clone::Clone::clone(&value_15)));
-    // Controls/WinUIControls.xaml(233,12) KeyTime
+    // Controls/WinUIControls.xaml(242,12) KeyTime
     let value_16 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(15000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_7, ::core::clone::Clone::clone(&value_16));
-    // Controls/WinUIControls.xaml(234,14) Setters
+    // Controls/WinUIControls.xaml(243,14) Setters
     let setters_collection_7 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_7);
     let setter_44 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_44.clone()));
-    // Controls/WinUIControls.xaml(234,21) Property
+    // Controls/WinUIControls.xaml(243,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_44, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(234,53) Value
+    // Controls/WinUIControls.xaml(243,53) Value
     let path_11 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64261,21 +64309,21 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_7, ::core::clone::Clone::clone(&setter_44) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&key_frame_7));
-    // Controls/WinUIControls.xaml(236,12) Children
+    // Controls/WinUIControls.xaml(245,12) Children
     let children_collection_8 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_2);
-    // Controls/WinUIControls.xaml(236,12) KeyFrame
+    // Controls/WinUIControls.xaml(245,12) KeyFrame
     let key_frame_8 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_8.clone()));
-    // Controls/WinUIControls.xaml(236,12) KeyTime
+    // Controls/WinUIControls.xaml(245,12) KeyTime
     let value_17 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_8, ::core::clone::Clone::clone(&value_17));
-    // Controls/WinUIControls.xaml(237,14) Setters
+    // Controls/WinUIControls.xaml(246,14) Setters
     let setters_collection_8 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_8);
     let setter_45 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_45.clone()));
-    // Controls/WinUIControls.xaml(237,21) Property
+    // Controls/WinUIControls.xaml(246,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_45, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(237,53) Value
+    // Controls/WinUIControls.xaml(246,53) Value
     let path_12 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64293,47 +64341,51 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&key_frame_8));
     context.pop_parent();
-    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_2, rt::cast(animation_2.clone(), 229, 10)?);
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_2, rt::cast(animation_2.clone(), 238, 10)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_20.clone(), 227, 6)?);
-    // Controls/WinUIControls.xaml(242,6) Content
-    // Controls/WinUIControls.xaml(242,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_20.clone(), 236, 6)?);
+    // Controls/WinUIControls.xaml(251,6) Content
+    // Controls/WinUIControls.xaml(251,6) Style
     let style_21 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_21.clone()));
-    // Controls/WinUIControls.xaml(242,6) Selector
-    let selector_84 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
-    let selector_85 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_84), ":vertical");
-    let selector_86 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_85), ":indeterminate");
-    let selector_87 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_86));
-    let selector_88 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_87), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
-    let selector_89 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_88), "IndeterminateProgressBarIndicator2");
-    ::ferroui_base::styling::Style::__markup_set_Selector(&style_21, ::core::option::Option::Some(selector_89.clone()));
-    // Controls/WinUIControls.xaml(244,10) Animations
+    // Controls/WinUIControls.xaml(251,6) Selector
+    let selector_96 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_97 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_96), ":vertical");
+    let selector_98 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_97), ":indeterminate");
+    let selector_99 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":error");
+    let selector_100 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_98), selector_99);
+    let selector_101 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":paused");
+    let selector_102 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_100), selector_101);
+    let selector_103 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_102));
+    let selector_104 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_103), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_105 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_104), "IndeterminateProgressBarIndicator2");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_21, ::core::option::Option::Some(selector_105.clone()));
+    // Controls/WinUIControls.xaml(253,10) Animations
     let animations_collection_3 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_21.upcast_ref::<::ferroui_base::styling::StyleBase>());
-    // Controls/WinUIControls.xaml(244,10) Animation
+    // Controls/WinUIControls.xaml(253,10) Animation
     let animation_3 = ::ferroui_base::animation::Animation::new();
     context.push_parent(rt::to_value(animation_3.clone()));
-    // Controls/WinUIControls.xaml(244,10) IterationCount
-    let value_18 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 244, 20)?;
+    // Controls/WinUIControls.xaml(253,10) IterationCount
+    let value_18 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 253, 20)?;
     animation_3.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_18));
-    // Controls/WinUIControls.xaml(244,10) Duration
+    // Controls/WinUIControls.xaml(253,10) Duration
     let value_19 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     animation_3.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_19));
-    // Controls/WinUIControls.xaml(245,12) Children
+    // Controls/WinUIControls.xaml(254,12) Children
     let children_collection_9 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_3);
-    // Controls/WinUIControls.xaml(245,12) KeyFrame
+    // Controls/WinUIControls.xaml(254,12) KeyFrame
     let key_frame_9 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_9.clone()));
-    // Controls/WinUIControls.xaml(245,12) KeyTime
+    // Controls/WinUIControls.xaml(254,12) KeyTime
     let value_20 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_9, ::core::clone::Clone::clone(&value_20));
-    // Controls/WinUIControls.xaml(246,14) Setters
+    // Controls/WinUIControls.xaml(255,14) Setters
     let setters_collection_9 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_9);
     let setter_46 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_46.clone()));
-    // Controls/WinUIControls.xaml(246,21) Property
+    // Controls/WinUIControls.xaml(255,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_46, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(246,53) Value
+    // Controls/WinUIControls.xaml(255,53) Value
     let path_13 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64350,21 +64402,21 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_9, ::core::clone::Clone::clone(&setter_46) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&key_frame_9));
-    // Controls/WinUIControls.xaml(248,12) Children
+    // Controls/WinUIControls.xaml(257,12) Children
     let children_collection_10 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_3);
-    // Controls/WinUIControls.xaml(248,12) KeyFrame
+    // Controls/WinUIControls.xaml(257,12) KeyFrame
     let key_frame_10 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_10.clone()));
-    // Controls/WinUIControls.xaml(248,12) KeyTime
+    // Controls/WinUIControls.xaml(257,12) KeyTime
     let value_21 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_10, ::core::clone::Clone::clone(&value_21));
-    // Controls/WinUIControls.xaml(249,14) Setters
+    // Controls/WinUIControls.xaml(258,14) Setters
     let setters_collection_10 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_10);
     let setter_47 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_47.clone()));
-    // Controls/WinUIControls.xaml(249,21) Property
+    // Controls/WinUIControls.xaml(258,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_47, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(249,53) Value
+    // Controls/WinUIControls.xaml(258,53) Value
     let path_14 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64381,24 +64433,24 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_10, ::core::clone::Clone::clone(&setter_47) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&key_frame_10));
-    // Controls/WinUIControls.xaml(251,12) Children
+    // Controls/WinUIControls.xaml(260,12) Children
     let children_collection_11 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_3);
-    // Controls/WinUIControls.xaml(251,12) KeyFrame
+    // Controls/WinUIControls.xaml(260,12) KeyFrame
     let key_frame_11 = ::ferroui_base::animation::KeyFrame::new();
     context.push_parent(rt::to_value(key_frame_11.clone()));
-    // Controls/WinUIControls.xaml(251,12) KeySpline
-    let value_22 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 251, 21)?;
+    // Controls/WinUIControls.xaml(260,12) KeySpline
+    let value_22 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0.4,0,0.6,1")), 260, 21)?;
     ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_11, ::core::option::Option::Some(::core::clone::Clone::clone(&value_22)));
-    // Controls/WinUIControls.xaml(251,12) KeyTime
+    // Controls/WinUIControls.xaml(260,12) KeyTime
     let value_23 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(20000000_i64);
     ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_11, ::core::clone::Clone::clone(&value_23));
-    // Controls/WinUIControls.xaml(252,14) Setters
+    // Controls/WinUIControls.xaml(261,14) Setters
     let setters_collection_11 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_11);
     let setter_48 = ::ferroui_base::styling::Setter::__markup_new_0();
     context.push_parent(rt::to_value(setter_48.clone()));
-    // Controls/WinUIControls.xaml(252,21) Property
+    // Controls/WinUIControls.xaml(261,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_48, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
-    // Controls/WinUIControls.xaml(252,53) Value
+    // Controls/WinUIControls.xaml(261,53) Value
     let path_15 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
@@ -64416,228 +64468,485 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.pop_parent();
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&key_frame_11));
     context.pop_parent();
-    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_3, rt::cast(animation_3.clone(), 244, 10)?);
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_3, rt::cast(animation_3.clone(), 253, 10)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_21.clone(), 242, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_21.clone(), 251, 6)?);
+    // Controls/WinUIControls.xaml(268,6) Content
+    // Controls/WinUIControls.xaml(268,6) Style
+    let style_22 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_22.clone()));
+    // Controls/WinUIControls.xaml(268,6) Selector
+    let selector_106 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_107 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_106), ":paused");
+    let selector_108 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_107));
+    let selector_109 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_108), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_110 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_109), "PART_Indicator");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_22, ::core::option::Option::Some(selector_110.clone()));
+    // Controls/WinUIControls.xaml(269,8) Content
+    // Controls/WinUIControls.xaml(269,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_22.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ProgressBarPausedForegroundBrush");
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_22.clone(), 268, 6)?);
+    // Controls/WinUIControls.xaml(271,6) Content
+    // Controls/WinUIControls.xaml(271,6) Style
+    let style_23 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_23.clone()));
+    // Controls/WinUIControls.xaml(271,6) Selector
+    let selector_111 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_112 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_111), ":error");
+    let selector_113 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_112));
+    let selector_114 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_113), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_115 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_114), "PART_Indicator");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_23, ::core::option::Option::Some(selector_115.clone()));
+    // Controls/WinUIControls.xaml(272,8) Content
+    // Controls/WinUIControls.xaml(272,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_23.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ProgressBarErrorForegroundBrush");
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_23.clone(), 271, 6)?);
+    // Controls/WinUIControls.xaml(277,6) Content
+    // Controls/WinUIControls.xaml(277,6) Style
+    let style_24 = ::ferroui_base::styling::Style::new();
+    // Controls/WinUIControls.xaml(277,6) Selector
+    let selector_116 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_117 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_116), ":indeterminate");
+    let selector_118 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_117), ":paused");
+    let selector_119 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_118));
+    let selector_120 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_119), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_121 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_120), "IndeterminateProgressBarIndicator");
+    let selector_122 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_123 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_122), ":indeterminate");
+    let selector_124 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_123), ":error");
+    let selector_125 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_124));
+    let selector_126 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_125), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_127 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_126), "IndeterminateProgressBarIndicator");
+    let selector_128 = ::ferroui_base::styling::Selectors::or([selector_121, selector_127]);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_24, ::core::option::Option::Some(selector_128.clone()));
+    // Controls/WinUIControls.xaml(278,8) Content
+    rt::add_setter(style_24.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.0_f64));
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_24.clone(), 277, 6)?);
+    // Controls/WinUIControls.xaml(280,6) Content
+    // Controls/WinUIControls.xaml(280,6) Style
+    let style_25 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_25.clone()));
+    // Controls/WinUIControls.xaml(280,6) Selector
+    let selector_129 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_130 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_129), ":indeterminate");
+    let selector_131 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_130), ":paused");
+    let selector_132 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_131));
+    let selector_133 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_132), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_134 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_133), "IndeterminateProgressBarIndicator2");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_25, ::core::option::Option::Some(selector_134.clone()));
+    // Controls/WinUIControls.xaml(281,8) Content
+    // Controls/WinUIControls.xaml(281,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_25.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ProgressBarPausedForegroundBrush");
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_25.clone(), 280, 6)?);
+    // Controls/WinUIControls.xaml(283,6) Content
+    // Controls/WinUIControls.xaml(283,6) Style
+    let style_26 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_26.clone()));
+    // Controls/WinUIControls.xaml(283,6) Selector
+    let selector_135 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_136 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_135), ":indeterminate");
+    let selector_137 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_136), ":error");
+    let selector_138 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_137));
+    let selector_139 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_138), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_140 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_139), "IndeterminateProgressBarIndicator2");
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_26, ::core::option::Option::Some(selector_140.clone()));
+    // Controls/WinUIControls.xaml(284,8) Content
+    // Controls/WinUIControls.xaml(284,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_26.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ProgressBarErrorForegroundBrush");
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_26.clone(), 283, 6)?);
+    // Controls/WinUIControls.xaml(286,6) Content
+    // Controls/WinUIControls.xaml(286,6) Style
+    let style_27 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_27.clone()));
+    // Controls/WinUIControls.xaml(286,6) Selector
+    let selector_141 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_142 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_141), ":horizontal");
+    let selector_143 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_142), ":indeterminate");
+    let selector_144 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_143), ":paused");
+    let selector_145 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_144));
+    let selector_146 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_145), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_147 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_146), "IndeterminateProgressBarIndicator2");
+    let selector_148 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_149 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_148), ":horizontal");
+    let selector_150 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_149), ":indeterminate");
+    let selector_151 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_150), ":error");
+    let selector_152 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_151));
+    let selector_153 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_152), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_154 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_153), "IndeterminateProgressBarIndicator2");
+    let selector_155 = ::ferroui_base::styling::Selectors::or([selector_147, selector_154]);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_27, ::core::option::Option::Some(selector_155.clone()));
+    // Controls/WinUIControls.xaml(288,10) Animations
+    let animations_collection_4 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_27.upcast_ref::<::ferroui_base::styling::StyleBase>());
+    // Controls/WinUIControls.xaml(288,10) Animation
+    let animation_4 = ::ferroui_base::animation::Animation::new();
+    context.push_parent(rt::to_value(animation_4.clone()));
+    // Controls/WinUIControls.xaml(288,10) FillMode
+    animation_4.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Forward);
+    // Controls/WinUIControls.xaml(288,10) Duration
+    let value_24 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
+    animation_4.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_24));
+    // Controls/WinUIControls.xaml(289,12) Children
+    let children_collection_12 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_4);
+    // Controls/WinUIControls.xaml(289,12) KeyFrame
+    let key_frame_12 = ::ferroui_base::animation::KeyFrame::new();
+    context.push_parent(rt::to_value(key_frame_12.clone()));
+    // Controls/WinUIControls.xaml(289,12) KeyTime
+    let value_25 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_12, ::core::clone::Clone::clone(&value_25));
+    // Controls/WinUIControls.xaml(290,14) Setters
+    let setters_collection_12 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_12);
+    let setter_54 = ::ferroui_base::styling::Setter::__markup_new_0();
+    context.push_parent(rt::to_value(setter_54.clone()));
+    // Controls/WinUIControls.xaml(290,21) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_54, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
+    // Controls/WinUIControls.xaml(290,53) Value
+    let path_16 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
+        let builder = rt::path_property(&builder, rt::class_markup(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), "TemplateSettings", false, rt::class_handle(<::ferroui_controls::ProgressBarTemplateSettings as ::ferroui_base::StaticType>::TYPE), false, false, false);
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::ProgressBarTemplateSettings::container2_animation_start_position_property()));
+        builder.build()
+    };
+    let compiled_binding_extension_16 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_16.clone());
+    context.set_target_property(rt::setter_value_property());
+    let provided_31 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_16, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    ::ferroui_base::styling::Setter::__markup_set_Value(&setter_54, rt::setter_value(&setter_54, rt::to_object(::core::clone::Clone::clone(&provided_31))));
+    context.pop_parent();
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_12, ::core::clone::Clone::clone(&setter_54) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
+    context.pop_parent();
+    ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&key_frame_12));
+    // Controls/WinUIControls.xaml(292,12) Children
+    let children_collection_13 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_4);
+    // Controls/WinUIControls.xaml(292,12) KeyFrame
+    let key_frame_13 = ::ferroui_base::animation::KeyFrame::new();
+    // Controls/WinUIControls.xaml(292,12) KeySpline
+    let value_26 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0,0,0,1")), 292, 21)?;
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_13, ::core::option::Option::Some(::core::clone::Clone::clone(&value_26)));
+    // Controls/WinUIControls.xaml(292,12) KeyTime
+    let value_27 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_13, ::core::clone::Clone::clone(&value_27));
+    // Controls/WinUIControls.xaml(293,14) Setters
+    let setters_collection_13 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_13);
+    let setter_55 = ::ferroui_base::styling::Setter::__markup_new_0();
+    // Controls/WinUIControls.xaml(293,21) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_55, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::x_property())));
+    // Controls/WinUIControls.xaml(293,14) Value
+    ::ferroui_base::styling::Setter::__markup_set_Value(&setter_55, rt::setter_value(&setter_55, rt::to_object(0.0_f64)));
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_13, ::core::clone::Clone::clone(&setter_55) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
+    ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&key_frame_13));
+    context.pop_parent();
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_4, rt::cast(animation_4.clone(), 288, 10)?);
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_27.clone(), 286, 6)?);
+    // Controls/WinUIControls.xaml(298,6) Content
+    // Controls/WinUIControls.xaml(298,6) Style
+    let style_28 = ::ferroui_base::styling::Style::new();
+    context.push_parent(rt::to_value(style_28.clone()));
+    // Controls/WinUIControls.xaml(298,6) Selector
+    let selector_156 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_157 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_156), ":vertical");
+    let selector_158 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_157), ":indeterminate");
+    let selector_159 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_158), ":paused");
+    let selector_160 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_159));
+    let selector_161 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_160), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_162 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_161), "IndeterminateProgressBarIndicator2");
+    let selector_163 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
+    let selector_164 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_163), ":vertical");
+    let selector_165 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_164), ":indeterminate");
+    let selector_166 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_165), ":error");
+    let selector_167 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_166));
+    let selector_168 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_167), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
+    let selector_169 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_168), "IndeterminateProgressBarIndicator2");
+    let selector_170 = ::ferroui_base::styling::Selectors::or([selector_162, selector_169]);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_28, ::core::option::Option::Some(selector_170.clone()));
+    // Controls/WinUIControls.xaml(300,10) Animations
+    let animations_collection_5 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_28.upcast_ref::<::ferroui_base::styling::StyleBase>());
+    // Controls/WinUIControls.xaml(300,10) Animation
+    let animation_5 = ::ferroui_base::animation::Animation::new();
+    context.push_parent(rt::to_value(animation_5.clone()));
+    // Controls/WinUIControls.xaml(300,10) FillMode
+    animation_5.set_direct_value(::ferroui_base::animation::Animation::fill_mode_property(), ::ferroui_base::animation::FillMode::Forward);
+    // Controls/WinUIControls.xaml(300,10) Duration
+    let value_28 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
+    animation_5.set_direct_value(::ferroui_base::animation::Animation::duration_property(), ::core::clone::Clone::clone(&value_28));
+    // Controls/WinUIControls.xaml(301,12) Children
+    let children_collection_14 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_5);
+    // Controls/WinUIControls.xaml(301,12) KeyFrame
+    let key_frame_14 = ::ferroui_base::animation::KeyFrame::new();
+    context.push_parent(rt::to_value(key_frame_14.clone()));
+    // Controls/WinUIControls.xaml(301,12) KeyTime
+    let value_29 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(0_i64);
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_14, ::core::clone::Clone::clone(&value_29));
+    // Controls/WinUIControls.xaml(302,14) Setters
+    let setters_collection_14 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_14);
+    let setter_56 = ::ferroui_base::styling::Setter::__markup_new_0();
+    context.push_parent(rt::to_value(setter_56.clone()));
+    // Controls/WinUIControls.xaml(302,21) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_56, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
+    // Controls/WinUIControls.xaml(302,53) Value
+    let path_17 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), 0);
+        let builder = rt::path_property(&builder, rt::class_markup(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), "TemplateSettings", false, rt::class_handle(<::ferroui_controls::ProgressBarTemplateSettings as ::ferroui_base::StaticType>::TYPE), false, false, false);
+        let builder = builder.ferro_property(rt::property(::ferroui_controls::ProgressBarTemplateSettings::container2_animation_start_position_property()));
+        builder.build()
+    };
+    let compiled_binding_extension_17 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_17.clone());
+    context.set_target_property(rt::setter_value_property());
+    let provided_32 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_17, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    ::ferroui_base::styling::Setter::__markup_set_Value(&setter_56, rt::setter_value(&setter_56, rt::to_object(::core::clone::Clone::clone(&provided_32))));
+    context.pop_parent();
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_14, ::core::clone::Clone::clone(&setter_56) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
+    context.pop_parent();
+    ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&key_frame_14));
+    // Controls/WinUIControls.xaml(304,12) Children
+    let children_collection_15 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_5);
+    // Controls/WinUIControls.xaml(304,12) KeyFrame
+    let key_frame_15 = ::ferroui_base::animation::KeyFrame::new();
+    // Controls/WinUIControls.xaml(304,12) KeySpline
+    let value_30 = rt::invoked(::ferroui_base::animation::KeySpline::__markup_parse(::std::string::String::from("0,0,0,1")), 304, 21)?;
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeySpline(&key_frame_15, ::core::option::Option::Some(::core::clone::Clone::clone(&value_30)));
+    // Controls/WinUIControls.xaml(304,12) KeyTime
+    let value_31 = ::ferroui_base::animation::SignedDuration::__markup_FromTicks_0(7500000_i64);
+    ::ferroui_base::animation::KeyFrame::__markup_set_KeyTime(&key_frame_15, ::core::clone::Clone::clone(&value_31));
+    // Controls/WinUIControls.xaml(305,14) Setters
+    let setters_collection_15 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_15);
+    let setter_57 = ::ferroui_base::styling::Setter::__markup_new_0();
+    // Controls/WinUIControls.xaml(305,21) Property
+    ::ferroui_base::styling::Setter::__markup_set_Property(&setter_57, ::core::option::Option::Some(rt::property(::ferroui_base::media::TranslateTransform::y_property())));
+    // Controls/WinUIControls.xaml(305,14) Value
+    ::ferroui_base::styling::Setter::__markup_set_Value(&setter_57, rt::setter_value(&setter_57, rt::to_object(0.0_f64)));
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_15, ::core::clone::Clone::clone(&setter_57) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
+    ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_15, ::core::clone::Clone::clone(&key_frame_15));
+    context.pop_parent();
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_5, rt::cast(animation_5.clone(), 300, 10)?);
+    context.pop_parent();
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_28.clone(), 298, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(77,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(86,10)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_163(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
     let name_scope = context.name_scope_field();
-    // Controls/WinUIControls.xaml(77,10) Grid
+    // Controls/WinUIControls.xaml(86,10) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     rt::set_intermediate_root(&context, &grid_0);
     grid_0.begin_init();
     rt::push_parent(&context, &grid_0);
-    // Controls/WinUIControls.xaml(77,15) Name
-    rt::name_element(name_scope.as_ref(), &grid_0, &grid_0, "LayoutRoot", 77, 15)?;
-    // Controls/WinUIControls.xaml(77,10) ColumnDefinitions
+    // Controls/WinUIControls.xaml(86,15) Name
+    rt::name_element(name_scope.as_ref(), &grid_0, &grid_0, "LayoutRoot", 86, 15)?;
+    // Controls/WinUIControls.xaml(86,10) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
-    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 77, 35)?;
-    // Controls/WinUIControls.xaml(77,35) ColumnDefinition
+    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 86, 35)?;
+    // Controls/WinUIControls.xaml(86,35) ColumnDefinition
     let column_definition_0 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_0));
-    // Controls/WinUIControls.xaml(77,35) ColumnDefinition
+    // Controls/WinUIControls.xaml(86,35) ColumnDefinition
     let column_definition_1 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_1));
     ::ferroui_controls::Grid::__markup_set_ColumnDefinitions(&grid_0, ::core::clone::Clone::clone(&column_definitions_0));
-    // Controls/WinUIControls.xaml(77,10) RowDefinitions
+    // Controls/WinUIControls.xaml(86,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
-    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 77, 62)?;
-    // Controls/WinUIControls.xaml(77,62) RowDefinition
+    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 86, 62)?;
+    // Controls/WinUIControls.xaml(86,62) RowDefinition
     let row_definition_0 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(1.0_f64, ::ferroui_controls::GridUnitType::Star));
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_0, ::core::clone::Clone::clone(&row_definition_0));
-    // Controls/WinUIControls.xaml(77,62) RowDefinition
+    // Controls/WinUIControls.xaml(86,62) RowDefinition
     let row_definition_1 = ::ferroui_controls::RowDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::RowDefinitions::__markup_Add_0(&row_definitions_0, ::core::clone::Clone::clone(&row_definition_1));
     ::ferroui_controls::Grid::__markup_set_RowDefinitions(&grid_0, ::core::clone::Clone::clone(&row_definitions_0));
-    // Controls/WinUIControls.xaml(78,12) Children
+    // Controls/WinUIControls.xaml(87,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(78,12) Border
+    // Controls/WinUIControls.xaml(87,12) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &border_0);
-    // Controls/WinUIControls.xaml(78,19) Name
-    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "ProgressBarRoot", 78, 19)?;
-    // Controls/WinUIControls.xaml(79,19) BorderBrush
+    // Controls/WinUIControls.xaml(87,19) Name
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "ProgressBarRoot", 87, 19)?;
+    // Controls/WinUIControls.xaml(88,19) BorderBrush
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_152)?;
-    // Controls/WinUIControls.xaml(83,14) Child
-    // Controls/WinUIControls.xaml(83,14) Border
+    // Controls/WinUIControls.xaml(92,14) Child
+    // Controls/WinUIControls.xaml(92,14) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &border_1);
-    // Controls/WinUIControls.xaml(83,21) Name
-    rt::name_element(name_scope.as_ref(), &border_1, &border_1, "ProgressBarClip", 83, 21)?;
-    // Controls/WinUIControls.xaml(83,14) ClipToBounds
+    // Controls/WinUIControls.xaml(92,21) Name
+    rt::name_element(name_scope.as_ref(), &border_1, &border_1, "ProgressBarClip", 92, 21)?;
+    // Controls/WinUIControls.xaml(92,14) ClipToBounds
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_0);
-    // Controls/WinUIControls.xaml(84,16) Child
-    // Controls/WinUIControls.xaml(84,16) Grid
+    // Controls/WinUIControls.xaml(93,16) Child
+    // Controls/WinUIControls.xaml(93,16) Grid
     let grid_1 = ::ferroui_controls::Grid::new();
     grid_1.begin_init();
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &grid_1);
-    // Controls/WinUIControls.xaml(84,21) Name
-    rt::name_element(name_scope.as_ref(), &grid_1, &grid_1, "ProgressBarGrid", 84, 21)?;
-    // Controls/WinUIControls.xaml(85,18) Children
+    // Controls/WinUIControls.xaml(93,21) Name
+    rt::name_element(name_scope.as_ref(), &grid_1, &grid_1, "ProgressBarGrid", 93, 21)?;
+    // Controls/WinUIControls.xaml(94,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(85,18) Border
+    // Controls/WinUIControls.xaml(94,18) Border
     let border_2 = ::ferroui_controls::Border::new();
     border_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &border_2);
-    // Controls/WinUIControls.xaml(85,25) Name
-    rt::name_element(name_scope.as_ref(), &border_2, &border_2, "ProgressBarTrack", 85, 25)?;
-    // Controls/WinUIControls.xaml(86,25) Background
-    rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 25)?;
-    // Controls/WinUIControls.xaml(87,25) CornerRadius (setter chosen at run time)
+    // Controls/WinUIControls.xaml(94,25) Name
+    rt::name_element(name_scope.as_ref(), &border_2, &border_2, "ProgressBarTrack", 94, 25)?;
+    // Controls/WinUIControls.xaml(95,25) Background
+    rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 95, 25)?;
+    // Controls/WinUIControls.xaml(96,25) CornerRadius (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ProgressBarTrackCornerRadius", 87, 25)?;
-    rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_0, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 87, position: 25 }, ::core::option::Option::Some(priority_1))?;
-    rt::pop_parent_end_init(&context, &border_2, 85, 18)?;
-    // Controls/WinUIControls.xaml(88,18) Children
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::Border::corner_radius_property(), "ProgressBarTrackCornerRadius", 96, 25)?;
+    rt::assign_resource_value(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), value_0, &rt::ResourceChoice { name: "CornerRadius", member: "Border.CornerRadius", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::CornerRadius as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 96, position: 25 }, ::core::option::Option::Some(priority_1))?;
+    rt::pop_parent_end_init(&context, &border_2, 94, 18)?;
+    // Controls/WinUIControls.xaml(97,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(88,18) Border
+    // Controls/WinUIControls.xaml(97,18) Border
     let border_3 = ::ferroui_controls::Border::new();
     border_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
-    // Controls/WinUIControls.xaml(88,25) Name
-    rt::name_element(name_scope.as_ref(), &border_3, &border_3, "PART_Indicator", 88, 25)?;
-    // Controls/WinUIControls.xaml(89,25) Background
+    // Controls/WinUIControls.xaml(97,25) Name
+    rt::name_element(name_scope.as_ref(), &border_3, &border_3, "PART_Indicator", 97, 25)?;
+    // Controls/WinUIControls.xaml(98,25) Background
     rt::bind_template_bindings(border_3.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_153)?;
-    rt::end_init(&border_3, 88, 18)?;
-    // Controls/WinUIControls.xaml(91,18) Children
+    rt::end_init(&border_3, 97, 18)?;
+    // Controls/WinUIControls.xaml(100,18) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(91,18) Border
+    // Controls/WinUIControls.xaml(100,18) Border
     let border_4 = ::ferroui_controls::Border::new();
     border_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_controls::Control>());
-    // Controls/WinUIControls.xaml(91,25) Name
-    rt::name_element(name_scope.as_ref(), &border_4, &border_4, "IndeterminateProgressBarIndicator", 91, 25)?;
-    // Controls/WinUIControls.xaml(92,25) Background
+    // Controls/WinUIControls.xaml(100,25) Name
+    rt::name_element(name_scope.as_ref(), &border_4, &border_4, "IndeterminateProgressBarIndicator", 100, 25)?;
+    // Controls/WinUIControls.xaml(101,25) Background
     rt::bind_template_bindings(border_4.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_154)?;
-    // Controls/WinUIControls.xaml(91,18) Opacity
+    // Controls/WinUIControls.xaml(100,18) Opacity
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_4.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_2);
-    rt::end_init(&border_4, 91, 18)?;
-    // Controls/WinUIControls.xaml(95,18) Children
+    rt::end_init(&border_4, 100, 18)?;
+    // Controls/WinUIControls.xaml(104,18) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(95,18) Border
+    // Controls/WinUIControls.xaml(104,18) Border
     let border_5 = ::ferroui_controls::Border::new();
     border_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_controls::Control>());
-    // Controls/WinUIControls.xaml(95,25) Name
-    rt::name_element(name_scope.as_ref(), &border_5, &border_5, "IndeterminateProgressBarIndicator2", 95, 25)?;
-    // Controls/WinUIControls.xaml(96,25) Background
+    // Controls/WinUIControls.xaml(104,25) Name
+    rt::name_element(name_scope.as_ref(), &border_5, &border_5, "IndeterminateProgressBarIndicator2", 104, 25)?;
+    // Controls/WinUIControls.xaml(105,25) Background
     rt::bind_template_bindings(border_5.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_155)?;
-    // Controls/WinUIControls.xaml(95,18) Opacity
+    // Controls/WinUIControls.xaml(104,18) Opacity
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_5.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_3);
-    rt::end_init(&border_5, 95, 18)?;
-    rt::pop_parent_end_init(&context, &grid_1, 84, 16)?;
-    rt::pop_parent_end_init(&context, &border_1, 83, 14)?;
-    rt::pop_parent_end_init(&context, &border_0, 78, 12)?;
-    // Controls/WinUIControls.xaml(102,12) Children
+    rt::end_init(&border_5, 104, 18)?;
+    rt::pop_parent_end_init(&context, &grid_1, 93, 16)?;
+    rt::pop_parent_end_init(&context, &border_1, 92, 14)?;
+    rt::pop_parent_end_init(&context, &border_0, 87, 12)?;
+    // Controls/WinUIControls.xaml(111,12) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(102,12) LayoutTransformControl
+    // Controls/WinUIControls.xaml(111,12) LayoutTransformControl
     let layout_transform_control_0 = ::ferroui_controls::LayoutTransformControl::new();
     layout_transform_control_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&layout_transform_control_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &layout_transform_control_0);
-    // Controls/WinUIControls.xaml(102,35) Name
-    rt::name_element(name_scope.as_ref(), &layout_transform_control_0, &layout_transform_control_0, "ProgressTextRoot", 102, 35)?;
-    // Controls/WinUIControls.xaml(102,12) Column
+    // Controls/WinUIControls.xaml(111,35) Name
+    rt::name_element(name_scope.as_ref(), &layout_transform_control_0, &layout_transform_control_0, "ProgressTextRoot", 111, 35)?;
+    // Controls/WinUIControls.xaml(111,12) Column
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_4);
-    // Controls/WinUIControls.xaml(102,12) Margin
+    // Controls/WinUIControls.xaml(111,12) Margin
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_5);
-    // Controls/WinUIControls.xaml(102,12) VerticalAlignment
+    // Controls/WinUIControls.xaml(111,12) VerticalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_6);
-    // Controls/WinUIControls.xaml(106,35) IsVisible
-    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::ProgressBar::show_progress_text_property()), 106, 35)?;
-    // Controls/WinUIControls.xaml(107,14) Child
-    // Controls/WinUIControls.xaml(107,14) TextBlock
+    // Controls/WinUIControls.xaml(115,35) IsVisible
+    rt::bind_template_binding(layout_transform_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::ProgressBar::show_progress_text_property()), 115, 35)?;
+    // Controls/WinUIControls.xaml(116,14) Child
+    // Controls/WinUIControls.xaml(116,14) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     layout_transform_control_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &text_block_0);
-    // Controls/WinUIControls.xaml(107,24) Name
-    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "ProgressText", 107, 24)?;
-    // Controls/WinUIControls.xaml(107,46) Foreground
-    rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "TextFillColorPrimaryBrush", 107, 46)?;
-    // Controls/WinUIControls.xaml(109,18) Text
+    // Controls/WinUIControls.xaml(116,24) Name
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "ProgressText", 116, 24)?;
+    // Controls/WinUIControls.xaml(116,46) Foreground
+    rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "TextFillColorPrimaryBrush", 116, 46)?;
+    // Controls/WinUIControls.xaml(118,18) Text
     let multi_binding_0 = ::ferroui_base::data::MultiBinding::__markup_new_0();
     context.push_parent(rt::to_value(multi_binding_0.clone()));
-    // Controls/WinUIControls.xaml(109,31) Converter
+    // Controls/WinUIControls.xaml(118,31) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarTextFormatConverter"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 109, 31)?;
-    ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::exact(rt::cast_checked(provided_14, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IMultiValueConverter", 109, 31)?, "FerroUI.Data.MultiBinding.set_Converter", 0, 109, 31)?);
-    // Controls/WinUIControls.xaml(110,20) Bindings
+    let provided_14 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 118, 31)?;
+    ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::exact(rt::cast_checked(provided_14, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IMultiValueConverter", 118, 31)?, "FerroUI.Data.MultiBinding.set_Converter", 0, 118, 31)?);
+    // Controls/WinUIControls.xaml(119,20) Bindings
     let bindings_collection_0 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let template_binding_12 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
-    // Controls/WinUIControls.xaml(110,20) Property
+    // Controls/WinUIControls.xaml(119,20) Property
     ::ferroui_base::data::TemplateBinding::__markup_set_Property(&template_binding_12, ::core::option::Option::Some(rt::property(::ferroui_controls::ProgressBar::progress_text_format_property())));
     let provided_15 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_15));
-    // Controls/WinUIControls.xaml(111,20) Bindings
+    // Controls/WinUIControls.xaml(120,20) Bindings
     let bindings_collection_1 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
-    // Controls/WinUIControls.xaml(111,28) Path
+    // Controls/WinUIControls.xaml(120,28) Path
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.templated_parent();
         let builder = builder.ferro_property(rt::property(::ferroui_controls::primitives::RangeBase::value_property()));
         builder.build()
     };
-    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 111, 28)?, rt::cast(path_0.clone(), 111, 28)?);
+    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 120, 28)?, rt::cast(path_0.clone(), 120, 28)?);
     context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
     let provided_16 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_16) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
-    // Controls/WinUIControls.xaml(112,20) Bindings
+    // Controls/WinUIControls.xaml(121,20) Bindings
     let bindings_collection_2 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let template_binding_13 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
-    // Controls/WinUIControls.xaml(112,20) Property
+    // Controls/WinUIControls.xaml(121,20) Property
     ::ferroui_base::data::TemplateBinding::__markup_set_Property(&template_binding_13, ::core::option::Option::Some(rt::property(::ferroui_controls::ProgressBar::percentage_property())));
     let provided_17 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_17));
-    // Controls/WinUIControls.xaml(113,20) Bindings
+    // Controls/WinUIControls.xaml(122,20) Bindings
     let bindings_collection_3 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let template_binding_14 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
-    // Controls/WinUIControls.xaml(113,20) Property
+    // Controls/WinUIControls.xaml(122,20) Property
     ::ferroui_base::data::TemplateBinding::__markup_set_Property(&template_binding_14, ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::RangeBase::minimum_property())));
     let provided_18 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_14);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_3, ::core::clone::Clone::clone(&provided_18));
-    // Controls/WinUIControls.xaml(114,20) Bindings
+    // Controls/WinUIControls.xaml(123,20) Bindings
     let bindings_collection_4 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let template_binding_15 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
-    // Controls/WinUIControls.xaml(114,20) Property
+    // Controls/WinUIControls.xaml(123,20) Property
     ::ferroui_base::data::TemplateBinding::__markup_set_Property(&template_binding_15, ::core::option::Option::Some(rt::property(::ferroui_controls::primitives::RangeBase::maximum_property())));
     let provided_19 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_15);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_4, ::core::clone::Clone::clone(&provided_19));
     context.pop_parent();
-    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), multi_binding_0, 109, 18)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 107, 14)?;
-    rt::pop_parent_end_init(&context, &layout_transform_control_0, 102, 12)?;
-    rt::pop_parent_end_init(&context, &grid_0, 77, 10)?;
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), multi_binding_0, 118, 18)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 116, 14)?;
+    rt::pop_parent_end_init(&context, &layout_transform_control_0, 111, 12)?;
+    rt::pop_parent_end_init(&context, &grid_0, 86, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(259,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(312,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_164(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2 });
-    // Controls/WinUIControls.xaml(259,4) ControlTheme
+    // Controls/WinUIControls.xaml(312,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_164_THEME)
 }
 
