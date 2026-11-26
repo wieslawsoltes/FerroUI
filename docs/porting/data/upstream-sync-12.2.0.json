@@ -133,7 +133,7 @@
    "class": "port",
    "note": "Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "9b3e9c881b6a91a0a6fcf9cded61c4df819cbc71",
@@ -170,8 +170,8 @@
    "area": "platform-ios",
    "class": "port",
    "note": "Keyboard stays up when focus moves between text boxes.",
-   "part": "ios",
-   "state": "planned"
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "ae55790316720c4d81dcbb5a371720cbcbde558f",
@@ -371,7 +371,7 @@
    "class": "port",
    "note": "`ICustomHitTest` documentation: local coordinates.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "74c62ffd26183f00117d78ea8bad280e4c453059",
@@ -475,9 +475,9 @@
    "date": "2026-10-23",
    "area": "automation",
    "class": "port",
-   "note": "UI Automation Invoke returns immediately.",
-   "part": "win32",
-   "state": "planned"
+   "note": "UI Automation `Invoke` checks the provider and the enabled state, then posts the click, so a modal dialog no longer blocks the client.",
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "74b4e97962b040b1f265cb858af8faa2deae1ee9",
@@ -926,8 +926,8 @@
    "area": "platform-ios",
    "class": "port",
    "note": "Accessibility traversal skips interop peers.",
-   "part": "ios",
-   "state": "planned"
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "99b0962977b65fef3c355d225900ebdb299cf5ab",
@@ -1017,9 +1017,9 @@
    "date": "2026-11-09",
    "area": "platform-browser",
    "class": "port",
-   "note": "Clipboard in non-secure contexts.",
-   "part": "browser",
-   "state": "planned"
+   "note": "Browser clipboard works without `navigator.clipboard` (non-secure contexts); file items of a paste event are copied before the event ends.",
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "48132c0500826f5c21e08cf1a574432a8d92bd2f",
@@ -1055,7 +1055,7 @@
    "date": "2026-11-09",
    "area": "rendering",
    "class": "port",
-   "note": "Native memory and resource checks (bitmap copies and others); each checked against the Rust code.",
+   "note": "Bitmap copy guards and destination stride, pixel writer reset, EDID length are ported (`rendering`). Win32 icon mask and GDI handle lifetimes in OLE are still to port.",
    "part": "rendering",
    "state": "planned"
   },
@@ -1101,7 +1101,7 @@
    "class": "port",
    "note": "`ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "c93b0d6c526d585dc7204859bfd494355b77671c",
@@ -1111,7 +1111,7 @@
    "class": "port",
    "note": "Visual cache layer: the vertical scale was the horizontal one.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "45ddd45380c85058b5471a5ee8e240ed38109a65",
@@ -1249,7 +1249,7 @@
    "class": "port",
    "note": "Skia: one layer less for each opacity mask. Performance gain.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "ee79f65f265a0755764ac3c2a8eadadb598d7b16",
@@ -1295,7 +1295,7 @@
    "class": "port",
    "note": "Animated value written even when an expression has read it.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "61c3aaa8762c9f13cb9dbfa6efd0167a33c984db",
@@ -1305,7 +1305,7 @@
    "class": "port",
    "note": "Remove `CompositorDrawingContextProxy`: on main only its own tests construct it.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "6350ac83e644ea7670b380d4529b59dd3333bd2d",
@@ -1402,8 +1402,8 @@
    "area": "automation",
    "class": "port",
    "note": "`LabeledBy` in Windows UI Automation.",
-   "part": "win32",
-   "state": "planned"
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "10a2fb0ac56b4685041ecdb60d94ebf919d9cbfd",
@@ -1411,9 +1411,9 @@
    "date": "2026-11-13",
    "area": "platform-win32",
    "class": "port",
-   "note": "Clipboard read retried while another process holds it.",
-   "part": "win32",
-   "state": "planned"
+   "note": "OLE `GetData` retried for 100 ms while another process holds the clipboard, then a timeout error instead of no data.",
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "e08cd2521268bab75b5295c97f8668af8a76e68f",
@@ -1447,9 +1447,9 @@
    "date": "2026-11-13",
    "area": "rendering",
    "class": "port",
-   "note": "ContentPresenter and acrylic clip to rounded bounds.",
+   "note": "`ContentPresenter` and acrylic clip to rounded bounds. A presenter pays for a border visual only when it clips with a corner radius.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "d379b92b87d8365617531fe0366a8bc500b17ac3",
@@ -1517,7 +1517,7 @@
    "class": "port",
    "note": "Skia: multiply opacity applied once below an opacity mask.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "ab578c3ea03d28b3affe1b9023d4f5ddbd924e57",
@@ -1627,9 +1627,9 @@
    "date": "2026-11-19",
    "area": "platform-android",
    "class": "port",
-   "note": "Start-up does not wait for the Choreographer thread.",
-   "part": "android",
-   "state": "planned"
+   "note": "The Choreographer timer no longer blocks start-up: the looper thread posts the first callback once it has the choreographer.",
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "5032926e38cd95752041a34a3a15cf502e8dae79",

@@ -11,7 +11,7 @@
 
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Ref};
-use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer};
+use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, InteropAutomationPeer};
 use ferroui_controls::automation::provider::{
     IInvokeProvider, IRangeValueProvider, IScrollProvider, ISelectionItemProvider, IToggleProvider, IValueProvider,
     ScrollAmount,
@@ -401,7 +401,8 @@ impl AutomationPeerWrapper {
         let mut children = Vec::new();
         let mut retained_children = HashSet::new();
         for child in self.peer.get_children().iter() {
-            if child.is_offscreen() {
+            // The peer of a native control answers almost no member: it is never wrapped.
+            if child.cast::<InteropAutomationPeer>().is_some() || child.is_offscreen() {
                 continue;
             }
 

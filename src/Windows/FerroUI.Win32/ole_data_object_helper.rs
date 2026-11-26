@@ -205,6 +205,33 @@ mod imp {
         }
     }
 
+    /// Another process holds the clipboard open.
+    const CLIPBRD_E_CANT_OPEN: u32 = 0x8004_01D0;
+
+    /// `GetData`, tried again for a moment while another process holds the clipboard open.
+    ///
+    /// # Safety
+    /// `format_etc` and `medium` are valid for the call.
+    unsafe fn get_data_with_retry(
+        ole_data_object: &IDataObject,
+        format_etc: *mut FORMATETC,
+        medium: *mut STGMEDIUM,
+    ) -> u32 {
+        const RETRY_COUNT: u32 = 10;
+        const RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(10);
+
+        let mut remaining = RETRY_COUNT;
+        loop {
+            // SAFETY: the caller's guarantee.
+            let result = unsafe { ole_data_object.get_data(format_etc, medium) };
+            remaining -= 1;
+            if result != CLIPBRD_E_CANT_OPEN || remaining == 0 {
+                return result;
+            }
+            std::thread::sleep(RETRY_DELAY);
+        }
+    }
+
     /// The value a data object holds for a format: a `String` for text and
     /// for a format of strings, [`StorageItems`] for files, a shared
     /// bitmap for the bitmap format, shared bytes for a format of bytes.
@@ -219,7 +246,10 @@ mod imp {
         let mut format_etc = to_format_etc(format_id);
         // SAFETY: two structures of this frame, for the duration of the
         // call.
-        let result = unsafe { ole_data_object.get_data(&mut format_etc, &mut medium) };
+        let result = unsafe { get_data_with_retry(ole_data_object, &mut format_etc, &mut medium) };
+        if result == CLIPBRD_E_CANT_OPEN {
+            return Err(ClipboardError::timeout("Another process holds the clipboard open"));
+        }
         if result != HRESULT::S_OK {
             return Ok(None);
         }

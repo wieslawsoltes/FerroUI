@@ -487,11 +487,9 @@ impl FerroView {
         }
     }
 
-    fn reset(&self) {
-        if self.is_driving_text() {
-            self.becomeFirstResponder();
-        }
-    }
+    /// Nothing to do: asking for first responder here hid the keyboard while focus moved from
+    /// one text box to another.
+    fn reset(&self) {}
 
     fn handle_presses(&self, presses: &NSSet<UIPress>, evt: Option<&UIPressesEvent>) -> bool {
         match self.ivars().state.get() {
