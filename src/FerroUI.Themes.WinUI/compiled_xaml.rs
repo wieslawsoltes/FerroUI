@@ -24981,9 +24981,9 @@ fn build_controls_winuicontrols_xaml_unit_97(
     rt::add_deferred_resource(&resource_dictionary_0, "AutoSuggestBoxTextBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_557, 104, 4)?;
     // Controls/WinUIControls.xaml(246,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultAutoSuggestBoxStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_559, 246, 4)?;
-    // Controls/WinUIControls.xaml(316,4) Content (resource)
-    let deferred_306 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_561, 316, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_306) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 316, 4)?;
+    // Controls/WinUIControls.xaml(317,4) Content (resource)
+    let deferred_306 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_561, 317, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_306) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 317, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -55195,6 +55195,11 @@ fn build_controls_winuicontrols_xaml_property_315() -> &'static ::ferroui_base::
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
 fn build_controls_winuicontrols_xaml_property_316() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::AutoCompleteBox::use_floating_placeholder_property())
+}
+
+/// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
+fn build_controls_winuicontrols_xaml_property_317() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::TemplatedControl::font_stretch_property())
 }
 
@@ -55202,66 +55207,67 @@ fn build_controls_winuicontrols_xaml_property_316() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_554: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_153, source: build_controls_winuicontrols_xaml_property_314, line: 265, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_151, source: build_controls_winuicontrols_xaml_property_315, line: 266, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_66, source: build_controls_winuicontrols_xaml_property_66, line: 267, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_3, source: build_controls_winuicontrols_xaml_property_3, line: 268, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_4, source: build_controls_winuicontrols_xaml_property_4, line: 269, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_26, source: build_controls_winuicontrols_xaml_property_26, line: 270, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_28, source: build_controls_winuicontrols_xaml_property_28, line: 271, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_6, source: build_controls_winuicontrols_xaml_property_6, line: 272, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_7, source: build_controls_winuicontrols_xaml_property_7, line: 273, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_13, source: build_controls_winuicontrols_xaml_property_13, line: 274, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_316, source: build_controls_winuicontrols_xaml_property_316, line: 275, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_165, source: build_controls_winuicontrols_xaml_property_316, line: 267, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_66, source: build_controls_winuicontrols_xaml_property_66, line: 268, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_3, source: build_controls_winuicontrols_xaml_property_3, line: 269, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_4, source: build_controls_winuicontrols_xaml_property_4, line: 270, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_26, source: build_controls_winuicontrols_xaml_property_26, line: 271, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_28, source: build_controls_winuicontrols_xaml_property_28, line: 272, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_6, source: build_controls_winuicontrols_xaml_property_6, line: 273, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_7, source: build_controls_winuicontrols_xaml_property_7, line: 274, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_13, source: build_controls_winuicontrols_xaml_property_13, line: 275, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_317, source: build_controls_winuicontrols_xaml_property_317, line: 276, position: 20 },
 ];
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_555: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_29, source: build_controls_winuicontrols_xaml_property_29, line: 280, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_19, source: build_controls_winuicontrols_xaml_property_19, line: 281, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_29, source: build_controls_winuicontrols_xaml_property_29, line: 281, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_19, source: build_controls_winuicontrols_xaml_property_19, line: 282, position: 20 },
 ];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_317() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_318() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::clear_selection_on_lost_focus_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_318() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_319() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::clear_selection_on_lost_focus_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_319() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_320() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::TextBox::max_length_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_320() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_321() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::max_length_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_321() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_322() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::DataValidationErrors::errors_property())
 }
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_556: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_317, source: build_controls_winuicontrols_xaml_property_318, line: 283, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_319, source: build_controls_winuicontrols_xaml_property_320, line: 284, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_321, source: build_controls_winuicontrols_xaml_property_321, line: 285, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_318, source: build_controls_winuicontrols_xaml_property_319, line: 284, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_320, source: build_controls_winuicontrols_xaml_property_321, line: 285, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_322, source: build_controls_winuicontrols_xaml_property_322, line: 286, position: 20 },
 ];
 
 /// The dynamic resources of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_557: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_39, key: "AutoSuggestListMargin", line: 297, position: 21 },
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_27, key: "AutoSuggestListBorderThemeThickness", line: 298, position: 21 },
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_0, key: "AutoSuggestBoxSuggestionsListBorderBrush", line: 299, position: 21 },
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_25, key: "AutoSuggestBoxSuggestionsListBackground", line: 300, position: 21 },
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_1, key: "OverlayCornerRadius", line: 301, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_39, key: "AutoSuggestListMargin", line: 298, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_27, key: "AutoSuggestListBorderThemeThickness", line: 299, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_0, key: "AutoSuggestBoxSuggestionsListBorderBrush", line: 300, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_25, key: "AutoSuggestBoxSuggestionsListBackground", line: 301, position: 21 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_1, key: "OverlayCornerRadius", line: 302, position: 21 },
 ];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_322() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_323() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoCompleteBox::max_drop_down_height_property())
 }
 
@@ -55280,7 +55286,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_559_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_315, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_322, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AutoSuggestListMaxHeight") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_323, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("AutoSuggestListMaxHeight") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Null }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_9, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_winuicontrols_xaml_deferred_560, parent: true, line: 262, position: 10 }) }),
@@ -55297,7 +55303,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_561_THEME: rt::ControlThemeTab
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::AutoCompleteBox as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultAutoSuggestBoxStyle"), line: 316, position: 79 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultAutoSuggestBoxStyle"), line: 317, position: 79 },
     ],
 };
 
@@ -55368,13 +55374,13 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_561: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_323() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_324() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::AutoSuggestBox::placeholder_text_property())
 }
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_562: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_153, source: build_controls_winuicontrols_xaml_property_323, line: 150, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_153, source: build_controls_winuicontrols_xaml_property_324, line: 150, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_66, source: build_controls_winuicontrols_xaml_property_66, line: 151, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_3, source: build_controls_winuicontrols_xaml_property_3, line: 152, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_4, source: build_controls_winuicontrols_xaml_property_4, line: 153, position: 20 },
@@ -55383,7 +55389,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_562: &[rt::TemplateBindingRow]
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_6, source: build_controls_winuicontrols_xaml_property_6, line: 156, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_7, source: build_controls_winuicontrols_xaml_property_7, line: 157, position: 20 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_13, source: build_controls_winuicontrols_xaml_property_13, line: 158, position: 20 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_316, source: build_controls_winuicontrols_xaml_property_316, line: 159, position: 20 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_317, source: build_controls_winuicontrols_xaml_property_317, line: 159, position: 20 },
 ];
 
 /// The template bindings of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
@@ -55450,19 +55456,19 @@ fn build_controls_winuicontrols_xaml_deferred_566_value_0() -> ::ferroui_base::m
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_324() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_325() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RadioButtonsPanel::column_spacing_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_325() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_326() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::primitives::RadioButtonsPanel::row_spacing_property())
 }
 
 /// The dynamic resources of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
 static BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_567: &[rt::DynamicResourceRow] = &[
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_324, key: "RadioButtonsColumnSpacing", line: 52, position: 28 },
-    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_325, key: "RadioButtonsRowSpacing", line: 53, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_325, key: "RadioButtonsColumnSpacing", line: 52, position: 28 },
+    rt::DynamicResourceRow { property: build_controls_winuicontrols_xaml_property_326, key: "RadioButtonsRowSpacing", line: 53, position: 28 },
 ];
 
 /// The dynamic resources of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -55538,22 +55544,22 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_570: &[rt::TemplateBindingRow]
 ];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_326() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_327() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::placeholder_foreground_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_327() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_328() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::placeholder_text_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_328() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_329() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::text_alignment_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_329() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_330() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::text_wrapping_property())
 }
 
@@ -55561,10 +55567,10 @@ fn build_controls_winuicontrols_xaml_property_329() -> &'static ::ferroui_base::
 static BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_571: &[rt::TemplateBindingRow] = &[
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_18, source: build_controls_winuicontrols_xaml_property_28, line: 108, position: 22 },
     rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_152, source: build_controls_winuicontrols_xaml_property_19, line: 109, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_58, source: build_controls_winuicontrols_xaml_property_326, line: 110, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_63, source: build_controls_winuicontrols_xaml_property_327, line: 111, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_154, source: build_controls_winuicontrols_xaml_property_328, line: 112, position: 22 },
-    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_94, source: build_controls_winuicontrols_xaml_property_329, line: 113, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_58, source: build_controls_winuicontrols_xaml_property_327, line: 110, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_63, source: build_controls_winuicontrols_xaml_property_328, line: 111, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_154, source: build_controls_winuicontrols_xaml_property_329, line: 112, position: 22 },
+    rt::TemplateBindingRow { target: build_controls_winuicontrols_xaml_property_94, source: build_controls_winuicontrols_xaml_property_330, line: 113, position: 22 },
 ];
 
 /// The dynamic resources of a run of `Controls/WinUIControls.xaml`, bound in order by `rt::bind_dynamic_resources` (#568).
@@ -55574,12 +55580,12 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_572: &[rt::DynamicResourceRow
 ];
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_330() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_331() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::caret_brush_property())
 }
 
 /// A property definition of the tables of `Controls/WinUIControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_property_331() -> &'static ::ferroui_base::FerroProperty {
+fn build_controls_winuicontrols_xaml_property_332() -> &'static ::ferroui_base::FerroProperty {
     rt::property(::ferroui_controls::RichEditBox::selection_highlight_color_property())
 }
 
@@ -55601,14 +55607,14 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_573_THEME: rt::ControlThemeTab
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_4, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBackground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_26, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderBrush") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_28, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlBorderThemeThickness") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_330, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForegroundFocused") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_331, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_326, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_331, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlForegroundFocused") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_332, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_327, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForeground") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_19, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlThemePadding") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_29, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlCornerRadius") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_7, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ContentControlThemeFontFamily") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_6, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ControlContentThemeFontSize") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_329, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_573_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_330, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_573_value_0) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_87, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_573_value_1) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_88, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_winuicontrols_xaml_deferred_573_value_2) }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_105, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
@@ -55622,7 +55628,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_573_THEME: rt::ControlThemeTab
             line: 124,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_326, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundPointerOver") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_327, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundPointerOver") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_93),
@@ -55650,7 +55656,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_573_THEME: rt::ControlThemeTab
             line: 134,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_326, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundFocused") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_327, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundFocused") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_93),
@@ -55679,7 +55685,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_573_THEME: rt::ControlThemeTab
             line: 145,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_326, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundDisabled") }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_winuicontrols_xaml_property_327, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlPlaceholderForegroundDisabled") }),
                 rt::StyleMember::Style {
                     parent: true,
                     selector: ::core::option::Option::Some(BUILD_CONTROLS_WINUICONTROLS_XAML_SELECTOR_93),
@@ -90725,76 +90731,76 @@ fn build_controls_winuicontrols_xaml_deferred_560(
     // Controls/WinUIControls.xaml(263,12) Margin
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
-    // Controls/WinUIControls.xaml(280,20) CornerRadius
+    // Controls/WinUIControls.xaml(281,20) CornerRadius
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_555)?;
-    // Controls/WinUIControls.xaml(282,20) CaretIndex
-    let template_binding_13 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::caret_index_property()));
-    // Controls/WinUIControls.xaml(282,20) Mode
-    ::ferroui_base::data::TemplateBinding::__markup_set_Mode(&template_binding_13, ::ferroui_base::data::BindingMode::TwoWay);
-    let provided_14 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
-    rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::caret_index_property(), provided_14, 282, 20)?;
-    // Controls/WinUIControls.xaml(283,20) ClearSelectionOnLostFocus
+    // Controls/WinUIControls.xaml(283,20) CaretIndex
+    let template_binding_14 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::caret_index_property()));
+    // Controls/WinUIControls.xaml(283,20) Mode
+    ::ferroui_base::data::TemplateBinding::__markup_set_Mode(&template_binding_14, ::ferroui_base::data::BindingMode::TwoWay);
+    let provided_15 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_14);
+    rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::caret_index_property(), provided_15, 283, 20)?;
+    // Controls/WinUIControls.xaml(284,20) ClearSelectionOnLostFocus
     rt::bind_template_bindings(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_BINDINGS_556)?;
-    // Controls/WinUIControls.xaml(286,20) InnerLeftContent (setter chosen at run time)
+    // Controls/WinUIControls.xaml(287,20) InnerLeftContent (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    let template_binding_17 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::inner_left_content_property()));
-    let provided_18 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_17);
-    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_18);
-    if value_1.is_some() {
-        rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::inner_left_content_property(), value_1.clone(), 286, 20)?;
-    } else {
-        text_box_0.set_value_with_priority(::ferroui_controls::TextBox::inner_left_content_property(), rt::exact(value_1.clone(), "TextBox.InnerLeftContent", 1, 286, 20)?, priority_5);
-    }
-    // Controls/WinUIControls.xaml(287,20) InnerRightContent (setter chosen at run time)
-    let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    let template_binding_18 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::inner_right_content_property()));
+    let template_binding_18 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::inner_left_content_property()));
     let provided_19 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_18);
-    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
-    if value_2.is_some() {
-        rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::inner_right_content_property(), value_2.clone(), 287, 20)?;
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_19);
+    if value_1.is_some() {
+        rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::inner_left_content_property(), value_1.clone(), 287, 20)?;
     } else {
-        text_box_0.set_value_with_priority(::ferroui_controls::TextBox::inner_right_content_property(), rt::exact(value_2.clone(), "TextBox.InnerRightContent", 1, 287, 20)?, priority_6);
+        text_box_0.set_value_with_priority(::ferroui_controls::TextBox::inner_left_content_property(), rt::exact(value_1.clone(), "TextBox.InnerLeftContent", 1, 287, 20)?, priority_5);
+    }
+    // Controls/WinUIControls.xaml(288,20) InnerRightContent (setter chosen at run time)
+    let priority_6 = ::ferroui_base::data::BindingPriority::Template;
+    let template_binding_19 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::AutoCompleteBox::inner_right_content_property()));
+    let provided_20 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_19);
+    let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_20);
+    if value_2.is_some() {
+        rt::bind(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::inner_right_content_property(), value_2.clone(), 288, 20)?;
+    } else {
+        text_box_0.set_value_with_priority(::ferroui_controls::TextBox::inner_right_content_property(), rt::exact(value_2.clone(), "TextBox.InnerRightContent", 1, 288, 20)?, priority_6);
     }
     rt::pop_parent_end_init(&context, &text_box_0, 263, 12)?;
-    // Controls/WinUIControls.xaml(288,12) Children
+    // Controls/WinUIControls.xaml(289,12) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(288,12) Popup
+    // Controls/WinUIControls.xaml(289,12) Popup
     let popup_0 = ::ferroui_controls::primitives::Popup::new();
     popup_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &popup_0);
-    // Controls/WinUIControls.xaml(288,18) Name
-    rt::name_element(name_scope.as_ref(), &popup_0, &popup_0, "PART_Popup", 288, 18)?;
-    // Controls/WinUIControls.xaml(288,12) WindowManagerAddShadowHint
+    // Controls/WinUIControls.xaml(289,18) Name
+    rt::name_element(name_scope.as_ref(), &popup_0, &popup_0, "PART_Popup", 289, 18)?;
+    // Controls/WinUIControls.xaml(289,12) WindowManagerAddShadowHint
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_7);
-    // Controls/WinUIControls.xaml(288,12) IsLightDismissEnabled
+    // Controls/WinUIControls.xaml(289,12) IsLightDismissEnabled
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::is_light_dismiss_enabled_property(), ::core::clone::Clone::clone(&true), priority_8);
-    // Controls/WinUIControls.xaml(291,18) PlacementTarget
-    let template_binding_19 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
-    let provided_20 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_19);
-    rt::bind(popup_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::Popup::placement_target_property(), provided_20, 291, 18)?;
-    // Controls/WinUIControls.xaml(292,14) Child
-    // Controls/WinUIControls.xaml(292,14) Border
+    // Controls/WinUIControls.xaml(292,18) PlacementTarget
+    let template_binding_20 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
+    let provided_21 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_20);
+    rt::bind(popup_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::Popup::placement_target_property(), provided_21, 292, 18)?;
+    // Controls/WinUIControls.xaml(293,14) Child
+    // Controls/WinUIControls.xaml(293,14) Border
     let border_0 = ::ferroui_controls::Border::new();
     border_0.begin_init();
     popup_0.set_value(::ferroui_controls::primitives::Popup::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &border_0);
-    // Controls/WinUIControls.xaml(292,21) Name
-    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "SuggestionsContainer", 292, 21)?;
-    // Controls/WinUIControls.xaml(292,14) Translation
-    let value_3 = rt::invoked(::ferroui_base::Vector3D::__markup_parse(::std::string::String::from("0,0,32")), 293, 21)?;
+    // Controls/WinUIControls.xaml(293,21) Name
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "SuggestionsContainer", 293, 21)?;
+    // Controls/WinUIControls.xaml(293,14) Translation
+    let value_3 = rt::invoked(::ferroui_base::Vector3D::__markup_parse(::std::string::String::from("0,0,32")), 294, 21)?;
     border_0.set_direct_value(::ferroui_base::Visual::translation_property(), ::core::clone::Clone::clone(&value_3));
-    // Controls/WinUIControls.xaml(293,42) Shadow (setter chosen at run time)
+    // Controls/WinUIControls.xaml(294,42) Shadow (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 293, 42)?;
-    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_4, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 293, position: 42 }, ::core::option::Option::Some(priority_9))?;
-    // Controls/WinUIControls.xaml(294,21) Margin (setter chosen at run time)
+    let value_4: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::Visual::shadow_property(), "WinUIThemeShadow", 294, 42)?;
+    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::shadow_property(), value_4, &rt::ResourceChoice { name: "Shadow", member: "Visual.Shadow", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::media::Shadow as ::ferroui_base::StaticType>::TYPE), null: true, line: 294, position: 42 }, ::core::option::Option::Some(priority_9))?;
+    // Controls/WinUIControls.xaml(295,21) Margin (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 294, 21)?;
-    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 294, position: 21 }, ::core::option::Option::Some(priority_10))?;
-    // Controls/WinUIControls.xaml(295,21) MinWidth
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_base::layout::Layoutable::margin_property(), "ThemeShadowFlyoutMargin", 295, 21)?;
+    rt::assign_resource_value(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), value_5, &rt::ResourceChoice { name: "Margin", member: "Layoutable.Margin", index: 1, unset: false, instance: rt::ValueHandle::Markup(<::ferroui_base::Thickness as ::ferroui_base::metadata::MarkupTyped>::MARKUP), null: false, line: 295, position: 21 }, ::core::option::Option::Some(priority_10))?;
+    // Controls/WinUIControls.xaml(296,21) MinWidth
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.templated_parent();
@@ -90802,49 +90808,49 @@ fn build_controls_winuicontrols_xaml_deferred_560(
         let builder = rt::path_property(&builder, <::ferroui_base::Rect as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Width", false, ::ferroui_base::data::core::ValueType::of::<f64>(), false, false, false);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), path_0.clone(), 295, 21)?;
-    // Controls/WinUIControls.xaml(296,21) MaxHeight
-    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::max_height_property(), rt::property(::ferroui_controls::AutoCompleteBox::max_drop_down_height_property()), 296, 21)?;
-    // Controls/WinUIControls.xaml(297,21) Padding
+    rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), path_0.clone(), 296, 21)?;
+    // Controls/WinUIControls.xaml(297,21) MaxHeight
+    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::max_height_property(), rt::property(::ferroui_controls::AutoCompleteBox::max_drop_down_height_property()), 297, 21)?;
+    // Controls/WinUIControls.xaml(298,21) Padding
     rt::bind_dynamic_resources(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_WINUICONTROLS_XAML_RESOURCES_557)?;
-    // Controls/WinUIControls.xaml(302,16) Child
-    // Controls/WinUIControls.xaml(302,16) ListBox
+    // Controls/WinUIControls.xaml(303,16) Child
+    // Controls/WinUIControls.xaml(303,16) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
     list_box_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &list_box_0);
-    // Controls/WinUIControls.xaml(302,24) Name
-    rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_SelectingItemsControl", 302, 24)?;
-    // Controls/WinUIControls.xaml(303,24) ItemTemplate
-    rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 303, 24)?;
-    // Controls/WinUIControls.xaml(304,24) ItemContainerTheme (setter chosen at run time)
+    // Controls/WinUIControls.xaml(303,24) Name
+    rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_SelectingItemsControl", 303, 24)?;
+    // Controls/WinUIControls.xaml(304,24) ItemTemplate
+    rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 304, 24)?;
+    // Controls/WinUIControls.xaml(305,24) ItemContainerTheme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 304, 24)?;
-    rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_6, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 304, position: 24 }, ::core::option::Option::Some(priority_11))?;
-    // Controls/WinUIControls.xaml(305,24) Margin
-    rt::bind_dynamic_resource(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestListPadding", 305, 24)?;
-    // Controls/WinUIControls.xaml(302,16) Background
+    let value_6: ::ferroui_base::metadata::MarkupValue = rt::static_resource_value(&context, ::ferroui_controls::ItemsControl::item_container_theme_property(), "DefaultListViewItemStyle", 305, 24)?;
+    rt::assign_resource_value(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_container_theme_property(), value_6, &rt::ResourceChoice { name: "ItemContainerTheme", member: "ItemsControl.ItemContainerTheme", index: 1, unset: false, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 305, position: 24 }, ::core::option::Option::Some(priority_11))?;
+    // Controls/WinUIControls.xaml(306,24) Margin
+    rt::bind_dynamic_resource(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AutoSuggestListPadding", 306, 24)?;
+    // Controls/WinUIControls.xaml(303,16) Background
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_12);
-    // Controls/WinUIControls.xaml(302,16) BorderThickness
+    // Controls/WinUIControls.xaml(303,16) BorderThickness
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_13);
-    // Controls/WinUIControls.xaml(302,16) IsScrollChainingEnabled
+    // Controls/WinUIControls.xaml(303,16) IsScrollChainingEnabled
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::ScrollViewer::is_scroll_chaining_enabled_property(), ::core::clone::Clone::clone(&false), priority_14);
-    rt::pop_parent_end_init(&context, &list_box_0, 302, 16)?;
-    rt::pop_parent_end_init(&context, &border_0, 292, 14)?;
-    rt::pop_parent_end_init(&context, &popup_0, 288, 12)?;
+    rt::pop_parent_end_init(&context, &list_box_0, 303, 16)?;
+    rt::pop_parent_end_init(&context, &border_0, 293, 14)?;
+    rt::pop_parent_end_init(&context, &popup_0, 289, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 262, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(316,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(317,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_561(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(316,4) ControlTheme
+    // Controls/WinUIControls.xaml(317,4) ControlTheme
     rt::build_control_theme(&context, &BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_561_THEME)
 }
 

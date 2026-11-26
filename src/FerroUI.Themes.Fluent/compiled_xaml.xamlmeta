@@ -92,8 +92,8 @@
           "documents": ["Controls/CommandBar.xaml"],
           "keys": [],
           "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
-          "references": ["CommandBarButtonCompactWidth", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonLabelRightMinWidth", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarOverflowButtonPadding", "CommandBarPadding", "CommandBarSeparatorMargin", "CommandBarSeparatorMinHeight", "CommandBarSeparatorOverflowHeight", "CommandBarSeparatorOverflowMargin", "CommandBarSeparatorWidth", "CommandBarToggleButtonPadding", "OverlayCornerRadius", "SystemControlBackgroundChromeMediumBrush", "SystemControlBackgroundChromeMediumLowBrush", "SystemControlForegroundBaseMediumLowBrush", "SystemControlHighlightAccentBrush", "SystemControlHighlightListLowBrush", "SystemControlHighlightListMediumBrush"],
-          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock"]
+          "references": ["CommandBarButtonCompactWidth", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonLabelRightMinWidth", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarOverflowButtonPadding", "CommandBarPadding", "CommandBarSeparatorMargin", "CommandBarSeparatorMinHeight", "CommandBarSeparatorOverflowHeight", "CommandBarSeparatorOverflowMargin", "CommandBarSeparatorWidth", "CommandBarToggleButtonPadding", "FluentMenuScrollViewer", "OverlayCornerRadius", "SystemControlBackgroundChromeMediumBrush", "SystemControlBackgroundChromeMediumLowBrush", "SystemControlForegroundBaseMediumLowBrush", "SystemControlHighlightAccentBrush", "SystemControlHighlightListLowBrush", "SystemControlHighlightListMediumBrush"],
+          "types": ["Border", "Button", "CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "ItemsControl", "ItemsPanelTemplate", "Panel", "PathIcon", "Popup", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel", "Style", "TextBlock"]
         },
         {
           "name": "Controls/CarouselPage.xaml",
@@ -182,7 +182,7 @@
           "documents": ["Controls/ButtonSpinner.xaml"],
           "keys": ["ButtonSpinnerDecreaseButtonIcon", "ButtonSpinnerIncreaseButtonIcon", "ButtonSpinnerLeftThickness", "ButtonSpinnerRightThickness", "FluentButtonSpinnerRepeatButton"],
           "type_keys": ["ButtonSpinner"],
-          "references": ["ButtonSpinnerDecreaseButtonIcon", "ButtonSpinnerIncreaseButtonIcon", "ButtonSpinnerLeftThickness", "ButtonSpinnerPadding", "ButtonSpinnerRightThickness", "ControlCornerRadius", "FluentButtonSpinnerRepeatButton", "RepeatButtonBackgroundDisabled", "RepeatButtonBackgroundPointerOver", "RepeatButtonBackgroundPressed", "RepeatButtonForegroundDisabled", "SystemErrorTextColor", "TextControlBackground", "TextControlBorderBrush", "TextControlBorderThemeThickness", "TextControlForeground", "TextControlInnerButtonMinWidth", "TextControlThemeMinHeight", "TextControlThemeMinWidth"],
+          "references": ["ButtonSpinnerDecreaseButtonIcon", "ButtonSpinnerIncreaseButtonIcon", "ButtonSpinnerLeftThickness", "ButtonSpinnerPadding", "ButtonSpinnerRightThickness", "ControlCornerRadius", "FluentButtonSpinnerRepeatButton", "LeftCornerRadiusFilterConverter", "RepeatButtonBackgroundDisabled", "RepeatButtonBackgroundPointerOver", "RepeatButtonBackgroundPressed", "RepeatButtonForegroundDisabled", "RightCornerRadiusFilterConverter", "SystemErrorTextColor", "TextControlBackground", "TextControlBorderBrush", "TextControlBorderThemeThickness", "TextControlForeground", "TextControlInnerButtonMinWidth", "TextControlThemeMinHeight", "TextControlThemeMinWidth"],
           "types": ["Border", "ButtonSpinner", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DockPanel", "MarginMultiplierConverter", "PathIcon", "RepeatButton", "ResourceDictionary", "Setter", "StackPanel", "StreamGeometry", "Style"]
         },
         {
@@ -477,10 +477,10 @@
           "name": "Controls/TabItem.xaml",
           "index": 48,
           "documents": ["Controls/TabItem.xaml"],
-          "keys": ["TabItemMinHeight", "TabItemPipeThickness", "TabItemVerticalPipeHeight"],
+          "keys": ["TabItemHeaderSpacing", "TabItemIconVisualMargin", "TabItemMinHeight", "TabItemPipeThickness", "TabItemVerticalPipeHeight"],
           "type_keys": ["TabItem"],
-          "references": ["ControlCornerRadius", "TabItemHeaderBackgroundDisabled", "TabItemHeaderBackgroundSelected", "TabItemHeaderBackgroundSelectedPointerOver", "TabItemHeaderBackgroundSelectedPressed", "TabItemHeaderBackgroundUnselected", "TabItemHeaderBackgroundUnselectedPointerOver", "TabItemHeaderBackgroundUnselectedPressed", "TabItemHeaderFontSize", "TabItemHeaderForegroundDisabled", "TabItemHeaderForegroundSelected", "TabItemHeaderForegroundSelectedPointerOver", "TabItemHeaderForegroundSelectedPressed", "TabItemHeaderForegroundUnselected", "TabItemHeaderForegroundUnselectedPointerOver", "TabItemHeaderForegroundUnselectedPressed", "TabItemHeaderMargin", "TabItemHeaderSelectedPipeFill", "TabItemHeaderThemeFontWeight", "TabItemMinHeight", "TabItemPipeThickness", "TabItemVerticalPipeHeight"],
-          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "Style", "TabItem"]
+          "references": ["ControlCornerRadius", "TabItemHeaderBackgroundDisabled", "TabItemHeaderBackgroundSelected", "TabItemHeaderBackgroundSelectedPointerOver", "TabItemHeaderBackgroundSelectedPressed", "TabItemHeaderBackgroundUnselected", "TabItemHeaderBackgroundUnselectedPointerOver", "TabItemHeaderBackgroundUnselectedPressed", "TabItemHeaderFontSize", "TabItemHeaderForegroundDisabled", "TabItemHeaderForegroundSelected", "TabItemHeaderForegroundSelectedPointerOver", "TabItemHeaderForegroundSelectedPressed", "TabItemHeaderForegroundUnselected", "TabItemHeaderForegroundUnselectedPointerOver", "TabItemHeaderForegroundUnselectedPressed", "TabItemHeaderMargin", "TabItemHeaderSelectedPipeFill", "TabItemHeaderSpacing", "TabItemHeaderThemeFontWeight", "TabItemIconVisualMargin", "TabItemMinHeight", "TabItemPipeThickness", "TabItemVerticalPipeHeight"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "Panel", "ResourceDictionary", "Setter", "Style", "TabItem", "Thickness"]
         },
         {
           "name": "Controls/TableView.xaml",
@@ -531,10 +531,10 @@
           "name": "Controls/TabStripItem.xaml",
           "index": 54,
           "documents": ["Controls/TabStripItem.xaml"],
-          "keys": ["TabStripItemMinHeight", "TabStripItemPipeThickness"],
+          "keys": ["TabStripItemIconVisualMargin", "TabStripItemMinHeight", "TabStripItemPipeThickness", "TabStripItemSpacing"],
           "type_keys": ["TabStripItem"],
-          "references": ["ControlCornerRadius", "TabItemHeaderBackgroundDisabled", "TabItemHeaderBackgroundSelected", "TabItemHeaderBackgroundSelectedPointerOver", "TabItemHeaderBackgroundSelectedPressed", "TabItemHeaderBackgroundUnselected", "TabItemHeaderBackgroundUnselectedPointerOver", "TabItemHeaderBackgroundUnselectedPressed", "TabItemHeaderFontSize", "TabItemHeaderForegroundDisabled", "TabItemHeaderForegroundSelected", "TabItemHeaderForegroundSelectedPointerOver", "TabItemHeaderForegroundSelectedPressed", "TabItemHeaderForegroundUnselected", "TabItemHeaderForegroundUnselectedPointerOver", "TabItemHeaderForegroundUnselectedPressed", "TabItemHeaderMargin", "TabItemHeaderSelectedPipeFill", "TabItemHeaderThemeFontWeight", "TabStripItemMinHeight", "TabStripItemPipeThickness"],
-          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "Style", "TabStripItem"]
+          "references": ["ControlCornerRadius", "TabItemHeaderBackgroundDisabled", "TabItemHeaderBackgroundSelected", "TabItemHeaderBackgroundSelectedPointerOver", "TabItemHeaderBackgroundSelectedPressed", "TabItemHeaderBackgroundUnselected", "TabItemHeaderBackgroundUnselectedPointerOver", "TabItemHeaderBackgroundUnselectedPressed", "TabItemHeaderFontSize", "TabItemHeaderForegroundDisabled", "TabItemHeaderForegroundSelected", "TabItemHeaderForegroundSelectedPointerOver", "TabItemHeaderForegroundSelectedPressed", "TabItemHeaderForegroundUnselected", "TabItemHeaderForegroundUnselectedPointerOver", "TabItemHeaderForegroundUnselectedPressed", "TabItemHeaderMargin", "TabItemHeaderSelectedPipeFill", "TabItemHeaderThemeFontWeight", "TabStripItemIconVisualMargin", "TabStripItemMinHeight", "TabStripItemPipeThickness", "TabStripItemSpacing"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "DockPanel", "Panel", "ResourceDictionary", "Setter", "Style", "TabStripItem", "Thickness"]
         },
         {
           "name": "Controls/TextBox.xaml",
