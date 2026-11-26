@@ -22,7 +22,7 @@ if (debuggerPath) {
     await access(debuggerPath, constants.X_OK);
 }
 
-const failedVersions = [];
+const failedVersions = new Set();
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
     const executable = await testVSCodeExecutable(supplied, { version });
     // Cargo records canonical source paths in the test app's debug information.
@@ -32,10 +32,11 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
     const extensions = join(sandbox, 'extensions');
     const driver = join(sandbox, 'driver');
     const args = ['--user-data-dir', profile, '--extensions-dir', extensions];
+    let runtime;
     try {
         await Promise.all([mkdir(join(profile, 'User'), { recursive: true }), mkdir(driver),
             cp(join(extension, 'test/fixtures'), workspace, { recursive: true })]);
-        const runtime = runtimeEnabled ? await prepareInstalledRuntime(workspace, sandbox, toolkit, Boolean(debuggerPath)) : undefined;
+        if (runtimeEnabled) runtime = await prepareInstalledRuntime(workspace, sandbox, toolkit, Boolean(debuggerPath));
         const contributes = debuggerPath ? {
             breakpoints: [{ language: 'rust' }],
             debuggers: [{ type: 'lldb-dap', label: 'LLDB', program: debuggerPath }],
@@ -54,9 +55,16 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
             },
             launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] })
             .catch(error => {
-                failedVersions.push(version);
+                failedVersions.add(version);
                 console.error(`The installed VS Code ${version} check failed.`, error);
             });
-    } finally { await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
+    } finally {
+        try { runtime?.clean(); }
+        catch (error) {
+            failedVersions.add(version);
+            console.error(`The installed VS Code ${version} fixture could not be cleaned.`, error);
+        }
+        finally { await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
+    }
 }
-if (failedVersions.length) throw new Error(`Installed package checks failed for VS Code ${failedVersions.join(', ')}.`);
+if (failedVersions.size) throw new Error(`Installed package checks failed for VS Code ${[...failedVersions].join(', ')}.`);

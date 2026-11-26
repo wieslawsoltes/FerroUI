@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { copyFile, cp, mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +8,8 @@ export async function prepareInstalledRuntime(workspace, sandbox, toolkit, debug
     const fixture = join(workspace, 'installed-runtime');
     const receipts = join(sandbox, 'runtime-receipts');
     const targetDirectory = resolve(process.env.CARGO_TARGET_DIR ?? join(toolkit, 'target'));
-    const name = 'ferroui-installed-runtime-test';
+    // The two VS Code versions share dependency artifacts, but each builds an app from a new workspace.
+    const name = `ferroui-installed-runtime-${randomUUID().slice(0, 13)}`;
     const crates = {
         'ferroui-base': 'src/FerroUI.Base',
         'ferroui-controls': 'src/FerroUI.Controls',
@@ -53,8 +55,15 @@ export async function prepareInstalledRuntime(workspace, sandbox, toolkit, debug
     execFileSync('rustc', ['--edition=2024', cargoReceipt, '-o', cargo], { stdio: 'inherit', windowsHide: true });
     // Warm the same Cargo target the installed extension will launch. The package tests
     // can then measure a saved edit and replacement without a cold dependency build.
-    execFileSync('cargo', ['build', '--manifest-path', join(fixture, 'Cargo.toml'), '--bin', name], {
+    const runCargo = (action, args) => execFileSync('cargo', [action, '--manifest-path', join(fixture, 'Cargo.toml'), ...args], {
         cwd: fixture, env: { ...process.env, ...environment }, stdio: 'inherit', windowsHide: true,
     });
-    return { settings, environment };
+    const clean = () => runCargo('clean', ['-p', name]);
+    try {
+        runCargo('build', ['--bin', name]);
+    } catch (error) {
+        try { clean(); } catch (cleanupError) { console.error('Installed runtime fixture cleanup failed.', cleanupError); }
+        throw error;
+    }
+    return { settings, environment, clean };
 }

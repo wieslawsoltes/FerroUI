@@ -170,7 +170,13 @@ async function save(document: vscode.TextDocument, text: string): Promise<void> 
 }
 
 async function expectText(client: RuntimeClient, name: string, text: string): Promise<void> {
-    await until(async () => (await client.call<RuntimeNode[]>('find_elements', { name }))[0]?.text === text);
+    let actual: string | undefined;
+    await until(async () => {
+        actual = (await client.call<RuntimeNode[]>('find_elements', { name }))[0]?.text;
+        return actual === text;
+    }).catch(error => {
+        throw new Error(`Expected ${name} to show ${JSON.stringify(text)}. The inspector reported ${JSON.stringify(actual ?? null)}.`, { cause: error });
+    });
 }
 
 async function expectDetachedRuntime(client: RuntimeClient, pid: number, debuggerStatus: object): Promise<void> {
