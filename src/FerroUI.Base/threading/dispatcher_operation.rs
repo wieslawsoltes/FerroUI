@@ -50,41 +50,6 @@ impl DispatcherOperationStatus {
     }
 }
 
-/// The error produced when the result of an aborted operation is requested.
-///
-/// The operations give [`Canceled`] (`ferroui_system::task::Canceled`, re-exported as
-/// `threading::Canceled`), the one cancellation error of the workspace
-/// (docs/idiomatic-rust-async.md, section 3.7); this type converts to and from it.
-#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::Canceled` (`threading::Canceled`)")]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct OperationCanceledError;
-
-#[allow(deprecated)]
-impl fmt::Display for OperationCanceledError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("The dispatcher operation was canceled")
-    }
-}
-
-#[allow(deprecated)]
-impl std::error::Error for OperationCanceledError {}
-
-/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
-#[allow(deprecated)]
-impl From<ferroui_system::task::Canceled> for OperationCanceledError {
-    fn from(_: ferroui_system::task::Canceled) -> Self {
-        OperationCanceledError
-    }
-}
-
-/// The one cancellation error of the workspace (docs/idiomatic-rust-async.md, section 3.7).
-#[allow(deprecated)]
-impl From<OperationCanceledError> for ferroui_system::task::Canceled {
-    fn from(_: OperationCanceledError) -> Self {
-        ferroui_system::task::Canceled
-    }
-}
-
 #[derive(Default)]
 struct OperationInner {
     callback: Option<SendCallback>,

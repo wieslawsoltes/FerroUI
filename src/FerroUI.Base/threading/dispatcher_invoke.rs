@@ -1,16 +1,13 @@
 use std::any::Any;
 use std::fmt;
 use std::future::Future;
-use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use super::dispatcher_operation::{box_local_callback, OperationCore, SendCallback, WaitOutcome};
-use super::dispatcher_task::{new_local_task, new_send_task};
-#[allow(deprecated)]
 use super::{
     CancellationToken, Dispatcher, DispatcherOperation, DispatcherOperationStatus, DispatcherPriority,
-    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable, DispatcherTask,
+    DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable,
 };
 use ferroui_system::task::Canceled;
 
@@ -230,61 +227,6 @@ impl Dispatcher {
             WaitOutcome::Finished => operation.take_result().map_err(|_| DispatcherInvokeError::Canceled),
         }
     }
-
-    /// Runs `action` on the dispatcher thread and waits for it. A panic of
-    /// the action goes through the unhandled-exception events of the
-    /// dispatcher and is re-raised on the dispatcher thread when it is not
-    /// handled there.
-    ///
-    /// `None` stands for [`DispatcherPriority::SEND`].
-    pub(crate) fn send(&self, action: impl FnOnce() + Send + 'static, priority: Option<DispatcherPriority>) {
-        let priority = priority.unwrap_or(DispatcherPriority::SEND);
-
-        if priority == DispatcherPriority::SEND && self.check_access() {
-            self.send_inline(action, priority);
-        } else {
-            let callback: SendCallback = Box::new(move || {
-                action();
-                Box::new(()) as Box<dyn Any + Send>
-            });
-            let operation = OperationCore::new_send(&self.to_arc(), priority, true, callback);
-            self.invoke_async_impl(&operation, &CancellationToken::none());
-            operation.wait();
-        }
-    }
-
-    /// Like [`send`](Self::send) for actions that are not `Send`.
-    ///
-    /// # Panics
-    /// Panics when called from a thread other than the dispatcher thread.
-    pub(crate) fn send_local(&self, action: impl FnOnce() + 'static, priority: Option<DispatcherPriority>) {
-        self.verify_access();
-        let priority = priority.unwrap_or(DispatcherPriority::SEND);
-
-        if priority == DispatcherPriority::SEND {
-            self.send_inline(action, priority);
-        } else {
-            let operation = OperationCore::new_local(&self.to_arc(), priority, true, box_local_callback(action));
-            self.invoke_async_impl(&operation, &CancellationToken::none());
-            operation.wait();
-        }
-    }
-
-    fn send_inline(&self, action: impl FnOnce(), priority: DispatcherPriority) {
-        // Boundary (#567): an application callback. Its panic goes through the
-        // unhandled-exception filter and events of the dispatcher, as the exception of the
-        // reference does, and is raised again only when they do not handle it.
-        let result = catch_unwind(AssertUnwindSafe(|| {
-            let _restore = self.enter_job(priority);
-            action();
-        }));
-        if let Err(payload) = result {
-            if !self.try_catch_when(&payload) {
-                self.forget_exception_if_outermost(&payload);
-                resume_unwind(payload);
-            }
-        }
-    }
 }
 
 /// Asynchronous execution; see [`Dispatcher`] for the `Send`/local split.
@@ -426,132 +368,6 @@ impl Dispatcher {
             operation.set_status(DispatcherOperationStatus::Aborted);
             operation.call_abort_callbacks();
         }
-    }
-
-    /// Executes the specified callback on the dispatcher thread and then
-    /// runs the future it returns there, at
-    /// [`DispatcherPriority::DEFAULT`].
-    ///
-    /// The returned task completes when the future has completed; see
-    /// [`invoke_async_task_with_priority`](Self::invoke_async_task_with_priority).
-    ///
-    /// Deprecated: [`spawn`](Self::spawn) does the same and gives a `JoinHandle`.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `Dispatcher::spawn`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
-    )]
-    #[allow(deprecated)]
-    pub fn invoke_async_task<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
-    where
-        F: FnOnce() -> Fut + Send + 'static,
-        Fut: Future + 'static,
-        Fut::Output: Send + 'static,
-    {
-        self.invoke_async_task_with_priority(callback, DispatcherPriority::DEFAULT)
-    }
-
-    /// Executes the specified callback with the specified priority on the
-    /// dispatcher thread and then runs the future it returns there.
-    ///
-    /// The callback can come from any thread; the future it creates never
-    /// leaves the dispatcher thread and does not have to be `Send`. The
-    /// future is polled for the first time right after the callback, inside
-    /// the same job, and afterwards from jobs of the same priority.
-    ///
-    /// The returned task completes when the future has completed. It is
-    /// canceled when the operation is aborted before the callback ran or the
-    /// dispatcher shuts down before the future is done, and it fails with
-    /// the panic of the callback or the future.
-    ///
-    /// The task is a task of the dispatcher
-    /// ([`spawn_with_priority`](Self::spawn_with_priority)), with a handle
-    /// that keeps the contract of [`DispatcherTask`].
-    ///
-    /// Deprecated: [`spawn_with_priority`](Self::spawn_with_priority) does the
-    /// same and gives a `JoinHandle`.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `Dispatcher::spawn_with_priority`, which gives a `JoinHandle` (a panic of the future is `JoinError::Panicked`, a value)"
-    )]
-    #[allow(deprecated)]
-    pub fn invoke_async_task_with_priority<F, Fut>(
-        &self,
-        callback: F,
-        priority: DispatcherPriority,
-    ) -> DispatcherTask<Fut::Output>
-    where
-        F: FnOnce() -> Fut + Send + 'static,
-        Fut: Future + 'static,
-        Fut::Output: Send + 'static,
-    {
-        DispatcherPriority::validate(priority, "priority");
-        let (task, start) = new_send_task::<Fut::Output>(&self.to_arc());
-        // When the job is dropped without running (the dispatcher has shut
-        // down), `start` is dropped with it, which cancels the task.
-        drop(self.spawn_with_priority(move || start.run(callback), priority));
-        task
-    }
-
-    /// Like [`invoke_async_task`](Self::invoke_async_task) for callbacks and
-    /// results that are not `Send`.
-    ///
-    /// # Panics
-    /// Panics when called from a thread other than the dispatcher thread.
-    ///
-    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
-    /// DispatcherPriority::DEFAULT)` does the same (the callback runs in the
-    /// first poll, a job at that priority) and gives a `JoinHandle`.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, DispatcherPriority::DEFAULT)`, which gives a `JoinHandle`"
-    )]
-    #[allow(deprecated)]
-    pub fn invoke_async_task_local<F, Fut>(&self, callback: F) -> DispatcherTask<Fut::Output>
-    where
-        F: FnOnce() -> Fut + 'static,
-        Fut: Future + 'static,
-        Fut::Output: 'static,
-    {
-        self.invoke_async_task_local_with_priority(callback, DispatcherPriority::DEFAULT)
-    }
-
-    /// Like
-    /// [`invoke_async_task_with_priority`](Self::invoke_async_task_with_priority)
-    /// for callbacks and results that are not `Send`.
-    ///
-    /// # Panics
-    /// Panics when called from a thread other than the dispatcher thread.
-    ///
-    /// Deprecated: `spawn_local_with_priority(async move { callback().await },
-    /// priority)` does the same and gives a `JoinHandle`.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `Dispatcher::spawn_local_with_priority(async move { callback().await }, priority)`, which gives a `JoinHandle`"
-    )]
-    #[allow(deprecated)]
-    pub fn invoke_async_task_local_with_priority<F, Fut>(
-        &self,
-        callback: F,
-        priority: DispatcherPriority,
-    ) -> DispatcherTask<Fut::Output>
-    where
-        F: FnOnce() -> Fut + 'static,
-        Fut: Future + 'static,
-        Fut::Output: 'static,
-    {
-        self.verify_access();
-        DispatcherPriority::validate(priority, "priority");
-        let dispatcher = self.to_arc();
-        let (task, start) = new_local_task::<Fut::Output>(&dispatcher);
-        let target = dispatcher.clone();
-        // The callback is not `Send`: it runs in a local job, which starts the
-        // task with a first poll inside it. When the job is dropped without
-        // running, `start` is dropped with it, which cancels the task.
-        drop(self.invoke_async_local_with_priority(
-            move || drop(target.start_local_with_priority(start.run(callback), priority)),
-            priority,
-        ));
-        task
     }
 
     /// Posts an action that will be invoked on the dispatcher thread.

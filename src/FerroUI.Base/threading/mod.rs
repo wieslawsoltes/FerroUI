@@ -14,16 +14,15 @@ mod dispatcher_priority;
 mod dispatcher_priority_awaitable;
 mod dispatcher_priority_queue;
 mod dispatcher_spawn;
-mod dispatcher_task;
 mod dispatcher_queue;
 mod dispatcher_thread_storage;
 mod dispatcher_timer;
 mod dispatcher_timers;
 mod dispatcher_unhandled_exception_event_args;
 mod dispatcher_unhandled_exception_filter_event_args;
-mod ferro_synchronization_context;
 mod i_dispatcher;
 mod i_dispatcher_impl;
+mod job_priority;
 
 pub use ferroui_system::task::Canceled;
 // The handle of a task of the dispatcher (`Dispatcher::spawn_local`, `spawn`, `start_local`) and how
@@ -39,16 +38,10 @@ pub use dispatcher_event_args::DispatcherEventArgs;
 pub use dispatcher_frame::DispatcherFrame;
 pub use dispatcher_main_loop::DispatcherProcessingDisabled;
 pub use dispatcher_operation::{DispatcherException, DispatcherOperation, DispatcherOperationStatus};
-#[allow(deprecated)]
-pub use dispatcher_operation::OperationCanceledError;
 pub use dispatcher_options::DispatcherOptions;
 pub use dispatcher_priority::{DispatcherPriority, DispatcherPriorityOutOfRangeError};
 pub use dispatcher_invoke::DispatcherInvokeError;
 pub use dispatcher_priority_awaitable::{DispatcherPriorityAwaitable, DispatcherPriorityTaskAwaitable};
-#[allow(deprecated)]
-pub use dispatcher_task::DispatcherTask;
-#[allow(deprecated)]
-pub use ferro_synchronization_context::{DispatcherTaskScheduler, FerroSynchronizationContext, RestoreContext};
 mod thread_safe_object_pool;
 pub use thread_safe_object_pool::ThreadSafeObjectPool;
 pub use dispatcher_thread_storage::UnitTestDispatcherScope;
