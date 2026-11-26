@@ -1,0 +1,26 @@
+<Border xmlns="https://github.com/ferroui" Background="#EAF0F8" Padding="34">
+    <Border Background="White" BorderBrush="#D6E0EF" BorderThickness="1"
+            CornerRadius="18" Padding="26" Width="490"
+            HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="14">
+            <TextBlock Text="Approval workflow" FontSize="29" FontWeight="SemiBold" Foreground="#182F52" />
+            <TextBlock Name="Status" Text="Awaiting a decision" FontSize="15" Foreground="#516985" />
+            <Button Name="Approve" Content="Approve request" Width="210" Height="43"
+                    HorizontalAlignment="Left" HorizontalContentAlignment="Center">
+                <Interaction.Behaviors>
+                    <EventTriggerBehavior EventName='Click'>
+                        <EventTriggerBehavior.Actions>
+                            <ActionCollection>
+                                <!-- Keep the review and archive steps together -->
+                                <ChangePropertyAction PropertyName="Width" Value='278' />
+                                <ChangePropertyAction PropertyName="Width" Value='338' />
+                                <ChangePropertyAction TargetObject="Status" PropertyName="Text" Value="Approved for archive" />
+                            </ActionCollection>
+                        </EventTriggerBehavior.Actions>
+                    </EventTriggerBehavior>
+                </Interaction.Behaviors>
+            </Button>
+            <CheckBox Name="Notify" Content="Notify the requester" />
+        </StackPanel>
+    </Border>
+</Border>

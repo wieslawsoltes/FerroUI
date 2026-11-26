@@ -2,7 +2,6 @@
 //! selection or provider registration changes. Pointer drafts never mutate the document.
 use super::*;
 use crate::{LayoutEditPreview, LayoutHelperSnapshot};
-use ferroui_designer_tools::{Axis, Point as ToolPoint};
 
 pub(super) struct HelperCache {
     uri: String,
@@ -404,21 +403,12 @@ impl DesignSurface {
         } else {
             1.0
         };
-        let distance = sign * step / handle.direction;
-        let local = match handle.axis {
-            Axis::Horizontal => ToolPoint::new(distance, 0.0),
-            Axis::Vertical => ToolPoint::new(0.0, distance),
-        };
-        let result = snapshot
-            .handle_delta_to_artboard(index, local)
-            .map(|delta| Point::new(delta.x, delta.y))
-            .and_then(|delta| {
-                let session = self.session().ok_or("No designer session")?;
-                let preview = session
-                    .borrow()
-                    .preview_layout_handle(&snapshot, index, delta)?;
-                Ok(preview)
-            });
+        let value = (handle.value + sign * step)
+            .max(handle.minimum)
+            .min(handle.maximum.unwrap_or(f64::MAX));
+        let result = self.session().ok_or_else(|| "No designer session".into()).and_then(|session| {
+            session.borrow().preview_layout_handle_value(&snapshot, index, value)
+        });
         match result {
             Ok(preview) if preview.is_accepted() => {
                 if let Some(commit) = self.commit.borrow().as_ref().cloned() {

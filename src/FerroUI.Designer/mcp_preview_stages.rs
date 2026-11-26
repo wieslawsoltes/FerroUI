@@ -2,8 +2,8 @@
 use super::schema as s;
 use super::{decode, integer, text, Permissions};
 use crate::{
-    DesignerWorkspace, PreviewEnvironment, PreviewStageConfiguration, PreviewStageManifest,
-    PreviewStageMode,
+    DesignerWorkspace, PREVIEW_STAGE_ZOOM_LEVELS, PreviewEnvironment, PreviewStageSpec,
+    PreviewStageSet, PreviewStageMode, PreviewTheme,
 };
 use base64::Engine;
 use ferroui_inspect::TreeKind;
@@ -17,6 +17,11 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_preview_stage"
             | "designer_preview_matrix"
             | "designer_preview_image"
+            | "designer_preview_stage_checks"
+            | "designer_preview_stage_states"
+            | "designer_preview_stage_fixtures"
+            | "designer_preview_stage_input"
+            | "designer_preview_stage_pointer"
     )
 }
 
@@ -27,7 +32,7 @@ fn bounded_string(maximum: usize) -> Value {
 fn environment_schema() -> Value {
     let dimension = json!({"type":"number","minimum":1,"maximum":16384});
     s::object(
-        json!({"width":dimension,"height":dimension,"theme":{"enum":["light","dark","inherit"]},
+        json!({"width":dimension,"height":dimension,"theme":{"enum":["light","dark","inherit","high_contrast"]},
         "flow_direction":{"enum":["inherit","left_to_right","right_to_left"]}}),
         &["width", "height", "theme", "flow_direction"],
     )
@@ -57,7 +62,11 @@ fn configuration_schema() -> Value {
     );
     s::object(
         json!({"name":bounded_string(128),"source_uri":bounded_string(8192),"target":target,
-        "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},"states":s::array(state,32),
+        "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},
+        "text":s::object(json!({"locale":s::nullable(bounded_string(128)),
+            "scale_percent":{"type":"integer","minimum":50,"maximum":300}}), &[]),
+        "pointer_input":{"enum":["automatic","touch","pen"]},
+        "design_fixture":s::nullable(bounded_string(128)),"states":s::array(state,32),
         "pinned":{"type":"boolean"},"auto_update":{"type":"boolean"},"mode":{"enum":["select","live"]}}),
         &[
             "name",
@@ -78,7 +87,7 @@ fn matrix_schema() -> Value {
     s::object(
         json!({
             "sizes":s::array(s::object(json!({"name":bounded_string(64),"width":dimension,"height":dimension}), &["name","width","height"]),16),
-            "themes":s::array(json!({"enum":["light","dark","inherit"]}),3),
+            "themes":s::array(json!({"enum":["light","dark","inherit","high_contrast"]}),4),
             "directions":s::array(json!({"enum":["inherit","left_to_right","right_to_left"]}),3),
             "design_time_data":s::array(json!({"type":"boolean"}),2),
             "state_groups":s::array(s::object(json!({"owner":anchor_schema(),"group":bounded_string(256),"states":s::array(bounded_string(256),16)}), &["owner","group","states"]),32)
@@ -87,11 +96,31 @@ fn matrix_schema() -> Value {
     )
 }
 
+pub(super) fn pointer_schema() -> Value {
+    let axis = json!({"type":"number","minimum":-1024,"maximum":1024});
+    let tilt = json!({"type":"number","minimum":-90,"maximum":90});
+    s::object(json!({
+        "contact":{"type":"integer","minimum":0,"maximum":4294967295_u64},
+        "phase":{"enum":["down","move","up","cancel"]}, "device":{"enum":["mouse","touch","pen"]},
+        "x":axis,"y":axis,"pressure":{"type":"number","minimum":0,"maximum":1},
+        "tiltX":tilt,"tiltY":tilt,"twist":{"type":"number","minimum":0,"exclusiveMaximum":360}
+    }), &["contact","phase","device","x","y"])
+}
+
+pub(super) fn keyboard_schema() -> Value {
+    json!({"oneOf":[
+        s::object(json!({"kind":{"const":"focus"}}), &["kind"]),
+        s::object(json!({"kind":{"const":"key"},"key":bounded_string(64)}), &["kind","key"]),
+        s::object(json!({"kind":{"const":"text"},"text":bounded_string(8192)}), &["kind","text"])
+    ]})
+}
+
 fn manifest_schema() -> Value {
     s::object(
-        json!({"version":{"enum":[1,2,3]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
+        json!({"version":{"enum":[1,2,3,4]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
         "active":s::nullable(json!({"type":"integer","minimum":0,"maximum":15})),
-        "prototype":super::prototype::graph_schema(true)}),
+        "prototype":super::prototype::graph_schema(true),
+        "prototype_transitions":super::prototype::transitions_schema()}),
         &["version", "stages", "active"],
     )
 }
@@ -106,7 +135,7 @@ fn action(name: &str, mut properties: Value, required: &[&str]) -> Value {
 pub(super) fn tools() -> Vec<Value> {
     let mut edit = s::actions(
         "designer_preview_stage",
-        "Configure workspace-local native preview stages using the model from designer_preview_stages. Changes never edit authored XAML or undo history. Sources must already be open; missing references retain a diagnostic. Live previews require allow_input as well as allow_property_writes. Focus/select activate the correct document and definition before changing the inspector. Restore accepts a versioned manifest; no filesystem paths are opened.",
+        "Configure workspace-local native preview stages using the model from designer_preview_stages. Sources must already be open. Live preview changes require allow_input as well as allow_property_writes. Focus and select activate the owning document and definition. Restore accepts a versioned manifest. Camera sets display zoom and scroll for a mounted stage using its current epoch and the reported zoom levels.",
         vec![
             action(
                 "add",
@@ -131,6 +160,10 @@ pub(super) fn tools() -> Vec<Value> {
                 &["stage", "paused"],
             ),
             action("refresh", json!({"stage":s::id()}), &["stage"]),
+            action("camera", json!({"stage":s::id(),"expected_epoch":s::id(),"camera":s::object(json!({
+                "zoom_percent":s::nullable(json!({"enum":PREVIEW_STAGE_ZOOM_LEVELS})),
+                "x":{"type":"number","minimum":0}, "y":{"type":"number","minimum":0}
+            }), &["zoom_percent", "x", "y"])}), &["stage", "expected_epoch", "camera"]),
             action("refresh_all", json!({}), &[]),
             action("focus", json!({"stage":s::id()}), &["stage"]),
             action(
@@ -156,6 +189,22 @@ pub(super) fn tools() -> Vec<Value> {
     edit["annotations"]["readOnlyHint"] = json!(false);
     edit["annotations"]["destructiveHint"] = json!(true);
     edit["inputSchema"]["required"] = json!(["action", "expected_model"]);
+    let mut input = s::tool(
+        "designer_preview_stage_input",
+        "Focus the current Live stage or send it a key gesture or text. Use the model and stage epoch from designer_preview_stages. Returns the focused control's accessible name and role. Requires allow_input and allow_property_writes.",
+        s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"expected_epoch":s::revision(),
+            "input":keyboard_schema()}), &["stage","expected_model","expected_epoch","input"]),
+        true,
+    );
+    input["annotations"]["destructiveHint"] = json!(false);
+    let mut pointer = s::tool(
+        "designer_preview_stage_pointer",
+        "Send a primary pointer contact to a current Live stage. Begin inside the artboard using normalized coordinates and the current stage ID, model and epoch. Follow with move and up or cancel using the same contact and device. The stage's explicit device takes precedence over the supplied device. Requires allow_input and allow_property_writes.",
+        s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"expected_epoch":s::revision(),
+            "input":pointer_schema()}), &["stage","expected_model","expected_epoch","input"]),
+        true,
+    );
+    pointer["annotations"]["destructiveHint"] = json!(false);
     vec![
         s::tool(
             "designer_preview_stages",
@@ -176,25 +225,52 @@ pub(super) fn tools() -> Vec<Value> {
             "Capture an accepted, current, already-arranged native preview as PNG without card chrome, source updates, layout changes or input. Returns an image and stage/source/dimension metadata. Scale changes raster density only (0.25..4); maximum 16777216 pixels. Paused previews are accepted only while their source is still current. No filesystem paths are opened.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"scale":{"type":"number","minimum":0.25,"maximum":4}}), &["stage","expected_model"]), false,
         ),
+        s::tool(
+            "designer_preview_stage_checks",
+            "Read source-linked layout, contrast and accessibility findings, the native accessibility tree, and Tab order from a visible, current native stage. Use the model returned by designer_preview_stages.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
+        ),
+        s::tool(
+            "designer_preview_stage_states",
+            "Read the authored state choices and owner anchors for one current stage. Update the stage's configuration to select states or change its design data flag.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
+        ),
+        s::tool(
+            "designer_preview_stage_fixtures",
+            "Read the authored design fixtures for a stage. Set design_fixture in its configuration to select one.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
+        ),
+        input,
+        pointer,
         edit,
     ]
 }
 
 fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> {
+    let view = workspace.preview_stage_view();
     let stages = workspace
         .preview_stages()
         .into_iter()
         .map(|stage| {
             let current = workspace.preview_stage_source_is_current(stage.id);
+            let id = stage.id;
             let mut value = json!(stage);
+            if let Some(spec) = workspace.preview_stage_spec(id) {
+                value["configuration"] = json!(spec);
+            }
             value["current_source"] = json!(current);
             value["current_image_source"] =
                 json!(workspace.preview_stage_image_source_is_current(stage.id));
+            if let Some(camera) = view.as_ref().and_then(|view| view.camera(id)) {
+                value["camera"] = json!(camera);
+            }
             value
         })
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
-        "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_manifest(),
+        "available_themes":PreviewTheme::available(),
+        "text_environment":true, "pointer_input":true, "camera_zooms":PREVIEW_STAGE_ZOOM_LEVELS,
+        "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {
         let kind = if args["tree"] == "logical" {
@@ -214,6 +290,9 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
 }
 
 fn needs_input(workspace: &DesignerWorkspace, action: &str, args: &Value) -> Result<bool, String> {
+    if action == "camera" {
+        return Ok(false);
+    }
     if action == "show"
         && args["visible"] == true
         && workspace.preview_stages().is_empty()
@@ -222,20 +301,20 @@ fn needs_input(workspace: &DesignerWorkspace, action: &str, args: &Value) -> Res
         return Ok(true);
     }
     if let Some(value) = args.get("configuration") {
-        let config: PreviewStageConfiguration =
+        let config: PreviewStageSpec =
             serde_json::from_value(value.clone()).map_err(|error| error.to_string())?;
         config.validate()?;
-        if config.mode == PreviewStageMode::Live {
+        if config.configuration.mode == PreviewStageMode::Live {
             return Ok(true);
         }
     }
     if action == "restore" {
-        let manifest: PreviewStageManifest = decode(args, "manifest")?;
+        let manifest: PreviewStageSet = decode(args, "manifest")?;
         manifest.validate()?;
         if manifest
             .stages
             .iter()
-            .any(|config| config.mode == PreviewStageMode::Live)
+            .any(|config| config.configuration.mode == PreviewStageMode::Live)
         {
             return Ok(true);
         }
@@ -272,6 +351,40 @@ pub(super) fn call(
             "The documents or stage board changed; read designer_preview_stages again".into(),
         );
     }
+    if name == "designer_preview_stage_checks" {
+        let id = integer(args, "stage")?;
+        let stage = workspace.preview_stage(id).ok_or("The preview stage was removed")?;
+        return Ok(json!({"stage":id,"epoch":stage.epoch,"uri":stage.configuration.source_uri,
+            "findings":workspace.preview_stage_checks(id)?, "accessibility":workspace.preview_stage_accessibility(id)?}));
+    }
+    if name == "designer_preview_stage_states" {
+        let id = integer(args, "stage")?;
+        return Ok(json!({"stage":id,"groups":workspace.preview_stage_state_options(id)?}));
+    }
+    if name == "designer_preview_stage_fixtures" {
+        let id = integer(args, "stage")?;
+        return Ok(json!({"stage":id,"fixtures":workspace.preview_stage_fixture_options(id)?}));
+    }
+    if name == "designer_preview_stage_input" {
+        if !permissions.allow_input {
+            return Err("Stage keyboard input requires allow_input".into());
+        }
+        let focus = workspace.preview_stage_keyboard(
+            integer(args, "stage")?,
+            integer(args, "expected_epoch")?,
+            decode(args, "input")?,
+        )?;
+        return Ok(json!(focus));
+    }
+    if name == "designer_preview_stage_pointer" {
+        if !permissions.allow_input {
+            return Err("Stage pointer input requires allow_input".into());
+        }
+        workspace.preview_stage_pointer(
+            integer(args, "stage")?, integer(args, "expected_epoch")?, decode(args, "input")?,
+        )?;
+        return Ok(json!({"interacted":true}));
+    }
     if name == "designer_preview_image" {
         let id = integer(args, "stage")?;
         let image = workspace.preview_stage_image(
@@ -299,10 +412,10 @@ pub(super) fn call(
     match action.as_str() {
         "add" => {
             result["created_stage"] =
-                json!(workspace.add_preview_stage(decode(args, "configuration")?)?)
+                json!(workspace.add_preview_stage_spec(decode(args, "configuration")?)?)
         }
         "update" => workspace
-            .update_preview_stage(integer(args, "stage")?, decode(args, "configuration")?)?,
+            .update_preview_stage_spec(integer(args, "stage")?, decode(args, "configuration")?)?,
         "duplicate" => {
             result["created_stage"] =
                 json!(workspace.duplicate_preview_stage(integer(args, "stage")?)?)
@@ -313,6 +426,8 @@ pub(super) fn call(
         "pause" => workspace
             .set_preview_stage_paused(integer(args, "stage")?, args["paused"].as_bool().unwrap())?,
         "refresh" => workspace.refresh_preview_stage(integer(args, "stage")?)?,
+        "camera" => workspace.preview_stage_view().ok_or("Open the native Stages board first")?
+            .set_camera(integer(args, "stage")?, integer(args, "expected_epoch")?, decode(args, "camera")?)?,
         "refresh_all" => {
             result["refresh_errors"] = json!(workspace
                 .refresh_all_preview_stages()
@@ -326,7 +441,7 @@ pub(super) fn call(
             integer(args, "inspector_id")?,
         )?,
         "show" => workspace.set_preview_stages_visible(args["visible"].as_bool().unwrap())?,
-        "restore" => workspace.restore_preview_stage_manifest(decode(args, "manifest")?)?,
+        "restore" => workspace.restore_preview_stage_set(decode(args, "manifest")?)?,
         "compare" => {
             let variants = args["variants"]
                 .as_array()

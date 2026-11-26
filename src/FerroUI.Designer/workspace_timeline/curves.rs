@@ -1,0 +1,206 @@
+#[path = "channel_picker.rs"]
+mod channel_picker;
+
+use super::*;
+use ferroui_controls::{MenuFlyout, MenuItem, MenuItemToggleType};
+use ferroui_designer_animation::{CurvePoint, KeyframeComponentEdit, KeyframeEdit};
+
+const GRAPH_CHOICES: [(&str, Option<CurveMetric>); 3] = [
+    ("Keyframes", None),
+    ("Value curves", Some(CurveMetric::Value)),
+    ("Velocity curves", Some(CurveMetric::Velocity)),
+];
+
+impl DesignerWorkspace {
+    pub(in crate::workspace) fn connect_timeline_curves(self: &Rc<Self>) {
+        let button = self.root.get_control::<Button>("TimelineCurves");
+        let menu = MenuFlyout::new();
+        for (label, metric) in GRAPH_CHOICES {
+            let item = MenuItem::new();
+            item.set_header(Some(Rc::new(label.to_owned())));
+            item.set_toggle_type(MenuItemToggleType::Radio);
+            item.set_is_checked(metric.is_none());
+            let weak = Rc::downgrade(self);
+            item.click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.set_timeline_curves(metric);
+                }
+            });
+            menu.items().add(Some(Control::boxed(item)));
+        }
+        button.set_flyout(Some(menu.upcast()));
+        crate::chrome::apply_designer_menu_resources(&button, &self.root);
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn timeline_curve_metric(&self) -> Option<CurveMetric> {
+        self.timeline_ui.borrow().curves
+    }
+
+    pub(crate) fn set_timeline_curves(self: &Rc<Self>, metric: Option<CurveMetric>) {
+        self.timeline_ui.borrow_mut().curves = metric;
+        let button = self.root.get_control::<Button>("TimelineCurves");
+        button.classes().set("designer-motion", metric.is_some());
+        let label = match metric {
+            None => "Animation graph · Keyframes",
+            Some(CurveMetric::Value) => "Animation graph · Value",
+            Some(CurveMetric::Velocity) => "Animation graph · Velocity",
+        };
+        if let Some(menu) = button.flyout().and_then(|flyout| flyout.cast::<MenuFlyout>()) {
+            for (entry, (_, choice)) in menu.items().to_vec().into_iter().zip(GRAPH_CHOICES) {
+                if let Some(item) = entry.as_ref().and_then(Control::from_boxed)
+                    .and_then(|control| control.cast::<MenuItem>())
+                {
+                    item.set_is_checked(metric == choice);
+                }
+            }
+        }
+        AutomationProperties::set_name(&button, Some(label));
+        ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
+        self.rebuild_tracks();
+    }
+
+    pub(super) fn timeline_selection_window(&self) -> Option<(f64, f64)> {
+        let ui = self.timeline_ui.borrow();
+        if ui.curves.is_none() || !ui.selection_explicit || ui.compare_clips {
+            return None;
+        }
+        let mut times = ui.selection.iter().map(|key| key.time);
+        let first = times.next()?;
+        let (first, last) = times.fold((first, first), |(first, last), time| {
+            (first.min(time), last.max(time))
+        });
+        Some({
+            let duration = self.session.borrow().timeline().duration;
+            let padding = ((last - first) * 0.1).max(duration * 0.03);
+            ((first - padding).max(0.0), (last + padding).min(duration))
+        })
+    }
+
+    pub(super) fn fit_timeline_selection(&self) {
+        self.set_timeline_view(self.timeline_selection_window());
+    }
+
+    pub(super) fn attach_timeline_curve(
+        self: &Rc<Self>,
+        lane: &TimelineLane,
+        track: &Track,
+        context: &TimelineContext,
+        metric: CurveMetric,
+        channel: TrackCurveChannel,
+    ) {
+        let Some(program) = context.program else {
+            return;
+        };
+        let mut keys = Vec::with_capacity(track.keyframes.len());
+        let mut step = None;
+        for key in &track.keyframes {
+            if let Some(component) = channel.authored_key_component(&key.value) {
+                keys.push(CurvePoint::new(key.time, component.value));
+                step = component.step;
+            }
+        }
+        let target = track.target;
+        let query = Rc::downgrade(self);
+        let query_context = context.clone();
+        let query_property = track.property.clone();
+        let owner = Rc::downgrade(self);
+        let context = context.clone();
+        let property = track.property.clone();
+        let edit_channel = channel.clone();
+        lane.configure_curve(
+            metric,
+            channel.clone(),
+            keys,
+            step,
+            move |window| {
+                let workspace = query.upgrade().ok_or("The Timeline closed")?;
+                query_context.check(&workspace)?;
+                let session = workspace.session.borrow();
+                let points = session.animation_curve_channel(
+                    program,
+                    target,
+                    &query_property,
+                    channel.clone(),
+                    window,
+                )?;
+                metric.measure(points).map_err(|error| error.to_string())
+            },
+            move |from, time, value| {
+                if let Some(workspace) = owner.upgrade() {
+                    let selection = SelectedKey {
+                        target,
+                        property: property.clone(),
+                        time: from,
+                    };
+                    let result = workspace
+                        .apply_curve_drag(&context, &selection, time, &KeyframeComponentEdit {
+                            channel: edit_channel.clone(), value,
+                        })
+                        .and_then(|time| workspace.session.borrow_mut().seek(time));
+                    if result.is_ok() || context.check(&workspace).is_err() {
+                        workspace.refresh(true);
+                    }
+                    workspace.report(result);
+                }
+            },
+        );
+    }
+
+    fn apply_curve_drag(
+        &self,
+        context: &TimelineContext,
+        selected: &SelectedKey,
+        time: f64,
+        edit: &KeyframeComponentEdit,
+    ) -> Result<f64, String> {
+        context.check(self)?;
+        let session = self.session.borrow();
+        if !session.can_manipulate() {
+            return Err("Wait for the current editable animation preview".into());
+        }
+        let program = context.program.ok_or("Choose an animation")?;
+        let easing = session
+            .timeline()
+            .track(selected.target, &selected.property)
+            .and_then(|track| track.keyframes.iter().find(|key| key.time == selected.time))
+            .map(|key| key.easing.to_xaml())
+            .ok_or("Choose an authored curve key")?;
+        let value = session.program_keyframe_component(program, selected.target, &selected.property, selected.time, edit)?;
+        drop(session);
+        self.apply_timeline_keyframe(context, selected, time, &value, &easing)
+    }
+
+    pub(super) fn apply_timeline_keyframe(
+        &self,
+        context: &TimelineContext,
+        selected: &SelectedKey,
+        time: f64,
+        value: &str,
+        easing: &str,
+    ) -> Result<f64, String> {
+        context.check(self)?;
+        let id = context.program.ok_or("Choose an animation")?;
+        self.session.borrow_mut().edit_program_keyframe(
+            id,
+            selected.target,
+            &selected.property,
+            KeyframeEdit::Upsert {
+                previous: Some(selected.time),
+                time,
+                value,
+                easing,
+            },
+        )?;
+        self.remember_keyframe(SelectedKey {
+            time,
+            ..selected.clone()
+        });
+        Ok(self
+            .timeline_ui
+            .borrow()
+            .selected
+            .as_ref()
+            .map_or(time, |key| key.time))
+    }
+}

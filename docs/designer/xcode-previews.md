@@ -79,6 +79,11 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
     closes the top overlay first. These are FerroUI design-review semantics, not an
     emulation of iOS sheets, macOS windows or Apple's sheet-internal Back behavior.
 
+Choose **High contrast** in the stage’s **Theme** picker or the editing canvas’s **Preview
+environment** when the active theme supplies a native contrast variant. Use it alongside
+a Light or Dark stage and read the same native preview checks. Saving the stage set keeps
+the selected contrast variant on the card. [VS Code and MCP](vscode/motion.md#compare-a-high-contrast-stage)
+
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
 component preview alongside the complete document without extracting or rewriting the
@@ -119,10 +124,37 @@ layout still receives the configured dimensions; the reduced card size is not th
 application's layout size.
 
 Each stage has its own theme scope and reading direction. Theme-aware resources resolve
-against that scope, and inherited flow direction reaches the application controls. The
-board does not rewrite fixed widths, font sizes or explicit theme settings authored by
-the application. For example, a fixed-width root can still overflow a narrow stage; that
-is useful evidence about the actual layout.
+against that scope, and inherited flow direction reaches the application controls.
+Authored widths still constrain native layout. A fixed-width root can overflow a narrow stage.
+
+In **Edit preview stage**, set **Locale** to a language tag such as `ja-JP` or `fr-CA`.
+Leave it blank to inherit the application locale. The scope supplies a language for native
+text shaping and a default binding converter culture. Installed native culture data
+supplies locale-specific number and date formatting. Explicit binding cultures and rich-text
+languages take precedence.
+
+Set **Text size** to a whole percentage from 50% to 300%. The stage measures supported
+plain, inline, input, and rich text using the authored sizes multiplied by this value.
+Compare a card at 100% with one at 200% to see how fixed widths and heights affect larger text.
+Both settings travel with the stage set, and earlier sets use the application locale and 100%.
+
+### Try touch and pen
+
+In **Edit preview stage**, set **Interaction** to **Live interaction** and choose
+**Current device**, **Touch**, or **Pen** under **Pointer input**. Touch and Pen let you
+run a native contact with a mouse or trackpad. Press and drag a control on the artboard.
+With Touch or Pen selected, a captured drag continues beyond the artboard. Switching away,
+pausing, or replacing the current preview ends the simulated contact and releases its capture.
+Your choice is saved in `.ferrostages` and applies to that card in both Studio and VS Code.
+
+### Review a stage's accessibility
+
+Open the card's actions menu and choose **Preview checks**. The **Findings** tab shows
+contrast, missing accessible names, and clipping for the current layout. **Tab order**
+lists the controls visited by one pass through the stage using Tab. **Accessibility tree**
+shows the native roles and names, including disabled and offscreen peers. Select a row with
+an authored location to open its XAML or mapped Rust declaration. The report can also be
+queried with `designer_preview_stage_checks`.
 
 **Use design-time values and sample data** controls the existing projection independently
 for each stage. Turning it off exposes the ordinary runtime values and bindings. See
@@ -171,10 +203,12 @@ phone preview changes the intended logical dimensions. Resizing a stage does not
 its native controls or discard text entered in Live mode. It also leaves the source and
 undo history intact.
 
-Each card can display **Fit**, **25%**, **50%**, **75%**, **100%**, **150%** or **200%** zoom.
-Fit keeps the complete preview visible; fixed magnifications use native scrolling when
-the preview exceeds the card. This zoom is board presentation state. It does not change
-the application's layout constraint, saved stage manifest or screenshot density.
+Use the **View** picker on a card to choose **Fit**, **25%**, **50%**, **75%**, **100%**, **150%**
+or **200%**. Fit shows the entire preview. At a fixed magnification, use the scrollbars or
+trackpad to pan when a preview exceeds its viewport. Each card retains its zoom and pan
+position when source updates rebuild the card. The camera is local to the open board.
+The application's layout, shared stage set, and native PNG export use the configured stage
+size. [VS Code camera](vscode/motion.md#zoom-and-pan-a-stage)
 
 ## Comparison matrices
 
@@ -199,6 +233,8 @@ The matrix keeps the base stage's source, definition, layout policy and unrelate
 choices. This lets a content-fitting component use the same comparison workflow as a
 complete view. The resulting ordinary configurations are saved by **Save set**; restoring
 a set does not rerun an external generator or require a special matrix runtime.
+
+VS Code exposes the same matrix planner from a card’s **More Actions** menu. Its editor MCP tools can plan the configurations and apply them against the accepted stage and board epochs. [Compare stages in VS Code](vscode/motion.md#build-a-comparison-from-one-stage)
 
 ## Save a native preview image
 
@@ -334,12 +370,13 @@ The public components can be embedded independently:
 - `PreviewStageView` renders cards and emits explicit actions. It receives stage controls
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
-- `PreviewStageManifest` validates and serializes a versioned stage set, including its
-  prototype graph. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
-  and an empty graph uses version 1. All three versions load; older versions reject
-  overlay actions. JSON parsing rejects unknown fields, invalid dimensions or overlay
+- `PreviewStageSet` validates and serializes a versioned stage set with its prototype
+  graph, per-card design fixtures, and per-interaction transitions. `PreviewStageManifest`
+  provides the original configuration API. Transitions use version 4, overlays use version 3,
+  Navigate and Back use version 2, and an empty graph uses version 1. Studio reads all
+  four versions. JSON parsing rejects unknown fields, invalid dimensions or overlay
   coordinates, malformed source paths, invalid graph references and manifests larger
-  than 1 MiB.
+  than 1 MiB. [Animate an interaction](prototyping.md#animate-an-interaction)
 - `PreviewStageMatrix` validates and expands comparison axes into ordinary stage
   configurations within a supplied capacity.
 - `PreviewStageExportOptions` and `PreviewStageImage` describe bounded PNG density and
@@ -351,8 +388,11 @@ The public components can be embedded independently:
 `set_preview_stage_paused`, `refresh_preview_stage`, `refresh_all_preview_stages`,
 `compare_preview_stage`, `compare_preview_stage_matrix`, `set_active_preview_stage` and
 `set_preview_stages_visible`.
-`preview_stage_manifest` and `restore_preview_stage_manifest` provide persistence without
-requiring the native file picker.
+Use `preview_stage_set` and `restore_preview_stage_set` to include each card’s
+fixture choice when saving without a native file picker. Use
+`PreviewStageSet::from_json_with_fixtures` to load both earlier and current stage
+sets. `preview_stage_manifest` and `restore_preview_stage_manifest` remain
+available for callers using the original configuration API.
 `plan_preview_stage_matrix` returns the exact configurations and validates the available
 capacity without constructing controls; `compare_preview_stage_matrix` adds the validated
 set through the same board as the native editor.
@@ -432,8 +472,11 @@ The MCP tools expose the same workspace board and native graphs:
 
 | Tool | Contract |
 | --- | --- |
-| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
-| `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
+| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, `camera_zooms`, each mounted card’s `camera`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. |
+| `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. For `action: "camera"`, also pass `stage`, `expected_epoch`, and `camera: { zoom_percent, x, y }`. Use a reported fixed zoom and nonnegative scroll offsets, or `null` with zero offsets for Fit. Camera changes require `allow_property_writes`. |
+| `designer_preview_stage_input` | Focus or send keyboard input to a visible Live stage. Supply `stage`, `expected_model` and `expected_epoch` from the latest board. Returns the focused control's accessible name and role, or `null`. |
+| `designer_preview_stage_pointer` | Send a native pointer contact to a visible Live stage. Supply `stage`, `expected_model`, `expected_epoch` and an `input` with a contact ID, phase, device, and normalized coordinates. Press inside the artboard and continue with the same ID. See [pointer contact arguments](vscode/reference.md#send-pointer-contacts-to-a-stage). |
+| `designer_preview_stage_checks` | Read layout, text clipping and contrast findings, the native accessibility tree, and Tab order. Supply `stage` and `expected_model`. Authored locations are byte spans. |
 | `designer_preview_matrix` | Plan the exact combinations and return their configurations, count, available capacity and current model without adding native stages. |
 | `designer_preview_image` | Read a current accepted native stage as a PNG with source, graph and size metadata, using `expected_model` from the latest read. Accepts bounded pixel density; does not refresh the stage, apply drafts or write files. |
 
@@ -453,6 +496,8 @@ stage. The model identifies the current documents, pending source text and board
 an optimistic concurrency guard, not an authorization credential. Stage settings remain
 local presentation state and are available to collaboration viewers with the required
 host permissions.
+
+For stage input, send `input: { kind: "focus" }` to enter the stage, `{ kind: "key", key: "Tab" }` or `"Shift+Tab"` to navigate, or `{ kind: "text", text: "Acme" }` to type into the focused field. This requires both write and input permissions. Use the prototype playback commands when a flow is active.
 
 Matrix planning and image capture are read-only tools and do not require those write or
 input permissions. Image capture returns an MCP image content block plus structured

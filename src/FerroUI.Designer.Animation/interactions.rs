@@ -2,9 +2,12 @@
 //! and nested payloads round-trip through Custom variants instead of being discarded.
 use crate::programs::{core_error, escape, fragment, native_fragment, validate_fragment};
 use crate::{require, AnimationError, Result};
-use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
+use ferroui_designer_core::{Attribute, Document, Node, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+mod source;
+pub use source::{BehaviorActionSource, BehaviorEdit, BehaviorSource};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BehaviorTrigger {
@@ -130,12 +133,11 @@ impl BehaviorAction {
         object_xml(name, &properties, &children)
     }
 }
-impl BehaviorModel {
-    pub fn to_xaml(&self) -> Result<String> {
-        require(self.actions.len() <= 4096, "Too many behavior actions")?;
+impl BehaviorTrigger {
+    fn attributes(&self) -> Result<(&str, BTreeMap<String, String>)> {
         let mut properties = BTreeMap::new();
-        let name = match &self.trigger {
-            BehaviorTrigger::Event { event, source } => {
+        let name = match self {
+            Self::Event { event, source } => {
                 require(
                     !event.trim().is_empty(),
                     "Event trigger requires an event name",
@@ -144,7 +146,7 @@ impl BehaviorModel {
                 optional(&mut properties, "SourceObject", source);
                 "EventTriggerBehavior"
             }
-            BehaviorTrigger::Data {
+            Self::Data {
                 binding,
                 comparison,
                 value,
@@ -175,7 +177,7 @@ impl BehaviorModel {
                 );
                 "DataTriggerBehavior"
             }
-            BehaviorTrigger::Custom {
+            Self::Custom {
                 type_name,
                 properties: values,
             } => {
@@ -183,18 +185,46 @@ impl BehaviorModel {
                 type_name
             }
         };
-        object_xml(
-            name,
-            &properties,
-            &self
-                .actions
-                .iter()
-                .map(BehaviorAction::to_xaml)
-                .collect::<Result<Vec<_>>>()?
-                .join("\n"),
-        )
+        Ok((name, properties))
+    }
+}
+impl BehaviorModel {
+    pub fn to_xaml(&self) -> Result<String> {
+        self.write_xaml(|_| {})
+    }
+
+    /// Encode the behavior together with the byte offset of each action in the fragment.
+    pub fn to_xaml_with_action_offsets(&self) -> Result<(String, Vec<usize>)> {
+        let mut offsets = Vec::with_capacity(self.actions.len());
+        let source = self.write_xaml(|offset| offsets.push(offset))?;
+        Ok((source, offsets))
+    }
+
+    fn write_xaml(&self, mut action_offset: impl FnMut(usize)) -> Result<String> {
+        require(self.actions.len() <= 4096, "Too many behavior actions")?;
+        let (name, properties) = self.trigger.attributes()?;
+        let mut source = object_xml(name, &properties, "")?;
+        let closing_tag = source.split_off(source.len() - name.len() - "</>".len());
+        for (index, action) in self.actions.iter().enumerate() {
+            if index != 0 {
+                source.push('\n');
+            }
+            action_offset(source.len());
+            source.push_str(&action.to_xaml()?);
+        }
+        source.push_str(&closing_tag);
+        Ok(source)
     }
     pub fn read(document: &Document, owner: NodeId) -> Result<Vec<Self>> {
+        Self::authored_nodes(document, owner)?
+            .into_iter()
+            .map(|id| Self::from_source(&fragment(document, id)?, owner, Some(id)))
+            .collect()
+    }
+
+    /// Authored children of the native attached collection in their source order.
+    /// Catalogs can browse the definitions without parsing the actions in each row.
+    pub fn authored_nodes(document: &Document, owner: NodeId) -> Result<Vec<NodeId>> {
         let node = document
             .ast()
             .node(owner)
@@ -203,7 +233,7 @@ impl BehaviorModel {
             .children
             .iter()
             .filter_map(|id| document.ast().node(*id))
-            .find(|node| node.local_name() == "Interaction.Behaviors")
+            .find(|node| Self::is_collection_property(node))
         else {
             return Ok(Vec::new());
         };
@@ -215,15 +245,22 @@ impl BehaviorModel {
                 document
                     .ast()
                     .node(*id)
-                    .is_some_and(|node| node.local_name() == "BehaviorCollection")
+                    .is_some_and(|node| node.local_name() == "BehaviorCollection"
+                        && native_behavior_namespace(node.namespace_uri.as_deref()))
             })
             .unwrap_or(collection.id);
-        document
-            .ast()
-            .element_children(container)
-            .into_iter()
-            .map(|id| Self::from_source(&fragment(document, id)?, owner, Some(id)))
-            .collect()
+        Ok(document.ast().element_children(container))
+    }
+
+    pub fn is_collection_property(node: &Node) -> bool {
+        node.kind == NodeKind::PropertyElement
+            && node.local_name() == "Interaction.Behaviors"
+            && native_behavior_namespace(node.namespace_uri.as_deref())
+    }
+
+    pub fn is_collection_attribute(attribute: &Attribute) -> bool {
+        attribute.name.rsplit(':').next() == Some("Interaction.Behaviors")
+            && native_behavior_namespace(attribute.namespace_uri.as_deref())
     }
     pub fn from_source(source: &str, owner: NodeId, id: Option<NodeId>) -> Result<Self> {
         let document = Document::new(source).map_err(core_error)?;
@@ -313,7 +350,7 @@ impl BehaviorModel {
             .node(self.owner)
             .ok_or_else(|| AnimationError("Unknown behavior owner".into()))?;
         require(
-            owner.attribute("Interaction.Behaviors").is_none(),
+            BehaviorSource::can_attach(document, self.owner),
             "The behavior collection is bound; edit that expression explicitly",
         )?;
         let source = self.to_xaml()?;
@@ -338,7 +375,7 @@ impl BehaviorModel {
             .children
             .iter()
             .filter_map(|id| document.ast().node(*id))
-            .find(|node| node.local_name() == "Interaction.Behaviors")
+            .find(|node| Self::is_collection_property(node))
         {
             let container = document
                 .ast()

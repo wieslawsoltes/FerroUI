@@ -1,0 +1,93 @@
+---
+title: "Test UI and review visual changes"
+description: "Run native XAML and RSX scenarios, compare screenshots with a Git branch, and approve checked baselines from VS Code, Studio, MCP, or CI."
+---
+
+## Run saved UI scenarios
+
+Open a workspace containing the [Task filter and Status indicator examples](../samples/scenarios). In VS Code, **Testing → FerroUI Scenarios** finds saved files ending in `*.ferroui-scenario.json`. The list follows additions, renames, and deletions. Run one test or the selected set. FerroUI opens a fresh native preview for each scenario, sends its input, and checks rendered properties, accessibility, and screenshots.
+
+Use a FerroUI selector such as `#Filter` for interaction and property assertions. For an RSX file with multiple invocations, add a zero-based UTF-16 `caret` with `line` and `character`. Document, stage set, and baseline paths are relative to the scenario file. A saved `.ferrostages` flow can exercise the prototype player, including overlays, focus, keyboard input, and settled transitions. [Scenario format](../../../editors/vscode/README.md#native-ui-scenarios) · [Prototype transitions](motion.md#set-a-prototype-transition)
+
+A normal test run checks the PNG in your working copy. A missing baseline or a visual difference above the specified tolerance fails the matching screenshot assertion. **Test Results** links to the available expected, actual, and difference images. The samples commit their approved PNGs alongside the scenarios. Use a consistent rendering host and fonts when screenshots contain text.
+
+VS Code keeps the generated images for the current extension session. Use the CLI artifact directory for a review you need to retain.
+
+## Review and approve a screenshot
+
+1. Open a scenario and select the compare icon in its editor toolbar, or choose **Review FerroUI Screenshot Baselines** in Testing. **FerroUI: Review Scenario Baselines** also lets you choose a saved scenario from the Command Palette.
+2. Use **Side by side**, **Overlay**, or **Highlight differences**. The overlay slider reveals the current image over the expected image. Magenta marks changed pixels outside the channel tolerance. The screenshot picker appears when the scenario captures several steps.
+3. Select **Approve** to update the one PNG you reviewed. The runner repeats the saved scenario and verifies its source, the capture, the current baseline, and the Git checkout. If another assertion fails or the review is stale, run the review again after resolving the issue.
+4. Run the normal test and commit the approved PNG with the corresponding source and scenario. A new PNG can be approved from the same view after its assertions pass.
+
+![VS Code Test Results and the expected and actual native screenshots from a Git review](../images/vscode-scenario-review.png)
+
+![Highlight differences shows changed pixels in the native capture](../images/vscode-scenario-difference.png)
+
+Studio offers **Review scenario baselines** from the Project toolbar. Open the project folder first, choose a saved scenario, and run it in the comparison window. Use the difference icon to inspect changed pixels and the check icon to approve the selected image. Studio looks for the companion `ferroui-designer-preview` executable beside itself or on PATH. A source checkout can build both with `cargo build -p designer-studio -p ferroui-designer-preview`. Set `FERROUI_DESIGNER_PREVIEW` to the executable path when the helper is elsewhere. [Studio guide](../README.md)
+
+## Compare against Git
+
+Run **FerroUI: Compare Scenario Baselines with Git** and choose a local branch, tag, or commit. You can also set `ferroui.scenarios.baselineRef` for routine review, or enter the reference in Studio. FerroUI reads the recorded PNG from the merge base of that reference and the current checkout. A missing image in that commit appears as a new screenshot.
+
+The comparison displays the historical image beside the current live capture. **Baseline verified** describes the working-copy PNG, so an approved feature branch can pass its tests and still show its proposed changes from the merge base. Approval updates the current workspace PNG. Commit and review that file through your normal Git workflow.
+
+A shallow checkout needs enough local history to find both sides and their merge base. The review displays the resolved commit so you can confirm which image it used. [Git merge-base](https://git-scm.com/docs/git-merge-base)
+
+## Run a suite in CI
+
+Run the installed native preview helper from your project root, or put its build directory on PATH. Pass the scenario directory to `--scenario-suite`. The suite discovers saved scenarios recursively and writes one JSON report with per-case results. The command exits unsuccessfully if any scenario fails to render or an assertion fails.
+
+```sh
+mkdir -p scenario-results
+ferroui-designer-preview --scenario-suite tests/ui --workspace "$PWD" \
+    --artifacts "$PWD/scenario-results" > scenario-results/report.json
+```
+
+Publish `scenario-results` even when the step fails. Open `review.html` from the downloaded artifact to inspect each assertion and its available PNG evidence. The directory also contains the JSON summary. A branch-aware job can pass `--baseline-ref origin/main` to collect historical comparisons in the same run. On a pull request, check out the feature head with its history and fetch the intended base ref before running. The pass or fail result is based on the working-copy PNGs, interaction, and accessibility assertions.
+
+FerroUI's own [Visual Designer workflow](../../../.github/workflows/designer.yml) runs the XAML and RSX sample suite with its compiled preview helper and uploads the reports. Single-case runs use `--scenario <file>`. For a single-case review, add `--review-baselines` and optional `--baseline-ref`. An explicit checked approval uses `--approve-baseline <approval>` with the scenario and the same reference. [Scenario tools for agents](reference.md#review-and-approve-a-scenario-with-mcp)
+
+## Test the installed extension with a running app
+
+Build the platform VSIX and run `npm run test:vsix -- <package.vsix>` from `editors/vscode` in the FerroUI checkout. It installs the package into temporary VS Code profiles for the minimum supported and current stable versions. The runner tries both versions and reports failures by version, including download, installation, extension tests, and cleanup. Set `FERROUI_TEST_INSTALLED_RUNTIME=1` to compile and run the Release Review fixture through **Run with Hot Reload**. Set `CARGO_TARGET_DIR` to reuse a build cache on the workspace host. [Build a platform package](../../../editors/vscode/README.md#install-or-develop-from-the-repository)
+
+The fixture opens Live App, types Unicode into a native field, checks Tab and Shift+Tab, and saves XAML and RSX edits in place. A rejected XAML save, a failed Cargo compilation, and a candidate startup failure all leave the current app available. A successful Rust rebuild produces a new process and inspector with the fixture’s persisted review count. Live App keeps its editor during the replacement. The test stops the app and removes the temporary profiles and workspace.
+
+Set `FERROUI_TEST_INSTALLED_LLDB_DAP` to the host’s `lldb-dap` executable to run **Run and Debug with Hot Reload** in that test. It hits an authored Rust breakpoint and uses **FerroUI: Continue Paused App** to complete the callback. It verifies that failed candidates keep the original debugger, repeats the breakpoint on the replacement process, and detaches while the app keeps running. On macOS, use the executable reported by `xcrun --find lldb-dap`. The installed-package CI matrix supplies LLDB on each host. [LLDB adapter setup](https://lldb.llvm.org/use/lldbdap.html)
+
+The runner uses a canonical temporary workspace path for the editor and Cargo. On Linux, the debugger fixture resolves symbols locally. If debugger startup fails, the runner starts a fresh app to verify native reload and reports the original debugger failure. [LLDB symbol settings](https://lldb.llvm.org/use/settings.html#symbols)
+
+The fixture repeats **Attach Debugger to This App** and checks that the existing debugger stays attached. It uses **Detach Debugger from This App** on the accepted target and, on Windows, verifies the adapter’s acknowledgement of a non-terminating disconnect. It exercises native input while detached, then reattaches and checks the breakpoint, process, and inspector again. A detach failure reports the adapter’s response, process state, and any connection error.
+
+Set `FERROUI_TEST_HOSTED_APP` to Todo Workbench built with `app-preview,hot-reload,mcp` to also exercise native App Preview through the bundled helper. Use `FERROUI_TEST_HOSTED_SOURCE` to point at its matching Todo Workbench source directory if the app was built from another checkout. FerroUI’s installed-package CI runs both native checks on macOS, Linux, and Windows. [Todo Workbench](../../../samples/TodoWorkbench/README.md)
+
+On Windows with MSVC 14.52, set `LIBCLANG_PATH` to the LLVM `bin` directory for Clang 22 or newer before building the native fixtures. ANGLE uses that library to generate its bindings. The hosted Windows job supplies its own LLVM toolchain. [MSVC compiler compatibility check](https://github.com/microsoft/STL/blob/main/stl/inc/yvals_core.h)
+
+### Validate a Linux ARM64 workspace package
+
+In the **Visual designer** workflow, enable **Run installed VSIX smoke tests** and select `ubuntu-24.04-arm`. The runner builds the `linux-arm64` VSIX and checks it under both VS Code versions. Download the `ferroui-vsix-Linux-ARM64` artifact from that run. [Visual designer workflow](../../../.github/workflows/designer.yml) · [GitHub-hosted ARM64 runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+
+Install the artifact in a **Remote–SSH** window connected to an ARM64 Linux workspace. Open XAML and RSX files, check symbols and native preview frames, and make and undo a source edit through editor MCP. Launch a Cargo app from **App Sessions**, open its **Live App** editor, and verify that its inspector stays associated with the remote application. [Open a remote workspace](README.md#open-a-remote-workspace)
+
+## Compare native preview performance
+
+Extract the `extension/bin` directories from the baseline and candidate VSIX packages for the same platform. On macOS and Linux, make both helpers executable if the archive tool removed those permissions. From `editors/vscode`, run the paired benchmark with the two directories.
+
+```sh
+node test/nativePreviewBenchmark.mjs /path/to/baseline/extension/bin /path/to/candidate/extension/bin > native-preview.json
+```
+
+The report records executable digests, the fixture digest, raw timings, and p50 and p95. The render and drop-hint measurements alternate between packages after warmup. Indexing starts a fresh XAML language server for each lookup of an unopened file in a 160-file workspace. The report records the first launch separately from the 12 later launches. Run both packages under the same display and fonts. On Linux you can use the same Xvfb configuration as the [installed package check](#test-the-installed-extension-with-a-running-app).
+
+The memory figures cover the helper's resident set after repeated single-artboard renders. Helpers that support Stages also report separate resident-set samples at zero, one, two, and four captured stages. These timings measure the native request boundary.
+
+### Measure edit-to-frame latency in VS Code
+
+Extract each full `extension` directory from its VSIX and use the same VS Code executable for both runs. Keep the packaged files in each directory, including the native helpers.
+
+```sh
+node test/workbenchBenchmark.mjs /path/to/Code /path/to/baseline/extension /path/to/candidate/extension workbench-preview.json
+```
+
+The harness opens the packaged extension in an isolated VS Code test profile. It alternates two same-length text values in the real editor, waits for the corresponding native image, and measures through the canvas reply after image decoding. The result includes the edit debounce. Each run uses four warmup edits and nine measured edits. The default four rounds give 36 measurements per package, alternating which package runs first. Pass a fifth argument to change the number of rounds. If you set a custom temporary directory on macOS or Linux, use a short path so VS Code can create its local IPC socket.

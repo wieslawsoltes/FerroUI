@@ -1,5 +1,6 @@
 //! Reusable native binding editor. Field changes are local until the host accepts value().
 use super::binding_draft::{
+    BINDING_MODES as MODES, BINDING_TRIGGERS as TRIGGERS,
     PropertyBindingDraft, PropertyBindingOption, PropertyBindingSource, value_source,
 };
 use ferroui_base::Ref;
@@ -12,8 +13,6 @@ use ferroui_designer_core::MarkupValue;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const MODES: &[&str] = &["Default", "OneWay", "TwoWay", "OneTime", "OneWayToSource"];
-const TRIGGERS: &[&str] = &["Default", "PropertyChanged", "LostFocus", "Explicit"];
 const SOURCES: &[&str] = &[
     "Keep current source",
     "DataContext",

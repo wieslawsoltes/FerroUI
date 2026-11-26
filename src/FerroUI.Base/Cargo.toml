@@ -26,6 +26,8 @@ autotests = false
 path = "lib.rs"
 
 [features]
+# On-demand per-window UI profiling, enabled by the runtime inspector.
+ui-profiling = []
 # Development-only tracking of explicit writes to reload-owned root properties.
 hot-reload = []
 # Exposes the render test doubles in `rendering::testing` to other crates.
@@ -79,6 +81,7 @@ tagged-weak-references = []
 # re-exported here at the paths they had before they moved (`lib.rs`, `utilities`, `data::model`,
 # `threading`, `collections`).
 ferroui-system = { workspace = true, features = ["locale", "url"] }
+ferroui-markup-syntax.workspace = true
 # The hasher of identity-keyed maps on hot paths (the layout queues).
 rustc-hash = { workspace = true }
 smallvec = { workspace = true }

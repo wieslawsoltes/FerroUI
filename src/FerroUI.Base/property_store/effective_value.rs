@@ -212,6 +212,10 @@ impl dyn EffectiveValueDyn {
         self.state().value_entry.get()
     }
 
+    pub(crate) fn base_value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
+        self.state().base_value_entry.get()
+    }
+
     pub(crate) fn is_overriden_current_value(&self) -> bool {
         self.state().is_overriden_current_value.get()
     }

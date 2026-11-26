@@ -209,14 +209,11 @@ impl DropShadowDirectionEffect {
         (self.direction() * PI / 180.0).sin() * self.shadow_depth()
     }
 
-    /// Creates an immutable clone of the effect.
-    ///
-    /// As in the reference implementation, the computed offsets are handed
-    /// to the immutable effect as its direction and depth.
+    /// Creates an immutable clone with the same direction and depth.
     pub fn to_immutable(&self) -> std::sync::Arc<dyn IImmutableEffect> {
         std::sync::Arc::new(ImmutableDropShadowDirectionEffect::new(
-            self.offset_x(),
-            self.offset_y(),
+            self.direction(),
+            self.shadow_depth(),
             self.blur_radius(),
             self.color(),
             self.opacity(),
@@ -298,5 +295,23 @@ mod tests {
         let other: Rc<dyn IEffect> = BlurEffect::new().into();
         assert!(*blur != *other);
         assert!(*blur == *blur.clone());
+    }
+
+    #[test]
+    fn freezing_a_directional_shadow_preserves_its_rendering_parameters() {
+        let shadow = DropShadowDirectionEffect::new();
+        shadow.set_direction(90.0);
+        shadow.set_shadow_depth(12.0);
+        shadow.set_blur_radius(6.0);
+        shadow.set_color(Colors::BLUE);
+        shadow.set_opacity(0.5);
+        let effect: Rc<dyn IEffect> = shadow.clone().into();
+        let frozen = EffectExtensions::to_immutable(&effect);
+        assert!(frozen.equals(Some(&*effect)));
+        let frozen = frozen.as_any().downcast_ref::<ImmutableDropShadowDirectionEffect>().unwrap();
+        assert_eq!(frozen.direction(), 90.0);
+        assert_eq!(frozen.shadow_depth(), 12.0);
+        assert_eq!(frozen.offset_x(), shadow.offset_x());
+        assert_eq!(frozen.offset_y(), shadow.offset_y());
     }
 }

@@ -1,0 +1,64 @@
+import { strict as assert } from 'node:assert';
+import { readFile } from 'node:fs/promises';
+import * as vscode from 'vscode';
+import { revision } from '../src/reloadProcess';
+import type { PropertyTrace } from '../src/propertyTrace';
+import { readRuntimeDiagnostics } from '../src/runtimeDiagnostics';
+import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
+import type { NativeProfileReport } from '../src/runtimeProfiles';
+import { sourcePosition } from '../src/runtimeSource';
+import { withNativeApp } from './nativeAppFixture';
+import { until } from './wait';
+
+export async function verifyLiveApp(): Promise<void> {
+    await withNativeApp(['--demo'], async client => {
+        assert.ok(await client.supports('get_element_at'));
+        assert.ok((await client.call<{ matched: boolean }>('wait_for', { name: 'NewTask' })).matched);
+        const [window] = await client.call<RuntimeNode[]>('list_windows');
+        const [entry] = await client.call<RuntimeNode[]>('find_elements', { name: 'NewTask' });
+        const [add] = await client.call<RuntimeNode[]>('find_elements', { name: 'AddTask' });
+        const png = await client.call<string>('screenshot', { node_id: window.node_id });
+        assert.ok(entry && add && png.length);
+        const source = await client.call<RuntimeSource>('get_source', { node_id: entry.node_id });
+        assert.equal(source?.language, 'rust');
+        assert.equal(source.columnEncoding, 'unicodeScalar');
+        assert.ok(source.invocation && source.invocation.line < source.line);
+        assert.ok(source.uri);
+        const rust = await readFile(new URL(source.uri), 'utf8');
+        assert.equal(source.revision, revision(Buffer.from(rust)));
+        const line = rust.split(/\r?\n/)[source.line - 1];
+        assert.match(Array.from(line).slice(source.column - 1).join(''), /^TextBox\s*\{\s*name: "NewTask"/);
+        const trace = await client.call<PropertyTrace<RuntimeSource>>('get_property_trace', { node_id: add.node_id, property: 'Content' });
+        assert.equal(trace.effective, 'Add task');
+        assert.equal(trace.contributors[0].state, 'effective');
+        assert.equal(trace.contributors[0].source?.revision, source.revision);
+        assert.equal(trace.contributors[0].source?.language, 'rust');
+        const unicode = await vscode.workspace.openTextDocument({ language: 'rust', content: 'rsx! { "👋" TextBox {} }\r\n' });
+        const position = sourcePosition(unicode, { ...source, line: 1, column: 12 });
+        assert.equal(position?.character, unicode.lineAt(0).text.indexOf('TextBox'));
+        assert.equal(sourcePosition(unicode, { ...source, line: 1, column: 999 }), undefined);
+        const profile = await client.call<NativeProfileReport>('start_ui_profile', { window_id: window.node_id, duration_ms: 20_000 });
+        assert.ok(profile.recording && profile.window_open);
+        await client.call('type_text', { node_id: entry.node_id, text: 'QA task from VS Code' });
+        await client.call('click', { node_id: add.node_id });
+        assert.ok((await client.call<{ matched: boolean }>('wait_for', { text: 'QA task from VS Code' })).matched);
+        await until(async () => {
+            const live = await client.call<NativeProfileReport>('get_ui_profile', { profile_id: profile.id });
+            return live.rows.some(row => row.kind === 'control') && live.rows.some(row => row.label === 'TodoPage');
+        });
+        const complete = await client.call<NativeProfileReport>('stop_ui_profile', { profile_id: profile.id });
+        assert.equal(complete.recording, false);
+        const page = complete.rows.find(row => row.label === 'TodoPage' && row.kind === 'component');
+        assert.ok(page?.has_source && page.node_id !== null);
+        assert.ok(page.phases.some(phase => phase.phase === 'render' && phase.calls > 0 && phase.total_ms >= phase.self_ms));
+        assert.ok(page.phases.some(phase => phase.phase === 'reconcile' && phase.calls > 0));
+        assert.equal((await client.call<RuntimeSource>('get_source', { node_id: page.node_id })).revision, source.revision);
+        const updated = await client.call<string>('screenshot', { node_id: window.node_id });
+        assert.notEqual(updated, png);
+        const diagnostics = await readRuntimeDiagnostics(client);
+        const stats = diagnostics.frames.find(frame => frame.node_id === window.node_id);
+        assert.ok(stats && stats.layout_pass_count > 0 && stats.layout_timing_available, JSON.stringify(diagnostics.frames));
+        assert.ok(Array.isArray(diagnostics.logs.entries));
+        console.log('Live App verified authored RSX source, native input, frame statistics and a source-linked UI profile');
+    });
+}

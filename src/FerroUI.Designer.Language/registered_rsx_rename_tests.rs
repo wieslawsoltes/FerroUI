@@ -1,0 +1,322 @@
+use crate::{
+    project_navigation_tests::CatalogFixture, DocumentEdits, FileMoveDraft, LanguageService,
+    LineIndex, RegisteredPropertyRequest, RustRenameResolution, TextEdit,
+};
+use ferroui_build_scan::model::AssemblyModel;
+use ferroui_designer_core::SourceSpan;
+use ferroui_designer_project::{file_path, file_uri, rsx_mapping::RsxBuilderMapping, BuildMetadata, Solution};
+use std::fs;
+
+const VIEW: &str = r#"<ui:Card xmlns:ui="using:Customer.Views" Tone="Blue"/>"#;
+const ASSEMBLY: &str = r###"
+mod mapping {
+    // Preserve the originals for other users of these constants. 🪴
+    const KEY: &str = "FerroUI.Designer.Rsx.v1:Customer.Views.FeaturedCard";
+    const FEATURED: &str = "{\"path\": \"crate::builders::Card\", \"properties\": {\"To\\u006Ee\": \"tone\", \"Title\": \"title\"}}";
+    static DESIGN: MarkupAssembly = MarkupAssembly {
+        name: "customer_app",
+        crate_name: "customer_app",
+        metadata: &[
+            (
+                "FerroUI.Designer.Rsx.v1:Customer.Views.Card",
+                r##"{
+                    "path": "crate::controls::cards::Card",
+                    "properties": { "Tone" : "tone" }
+                }"##,
+            ),
+            (self::KEY, FEATURED),
+            ("Unrelated", "Tone Card"),
+        ],
+    };
+}
+"###;
+
+fn request(needle: &str) -> RegisteredPropertyRequest {
+    RegisteredPropertyRequest {
+        version: 1,
+        position: LineIndex::new(VIEW)
+            .position(VIEW.find(needle).unwrap() + 1)
+            .unwrap(),
+    }
+}
+
+fn fixture(same_file: bool) -> (CatalogFixture, LanguageService, String, String) {
+    let fixture = CatalogFixture::create();
+    let metadata = fixture.build();
+    let source = if same_file {
+        let lib = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
+        fixture.write("app/lib.rs", &(lib + "\npub use controls::Card;\n"));
+        let path = "app/rust/controls.rs";
+        let controls = fs::read_to_string(fixture.0.join(path))
+            .unwrap()
+            .replace("mod cards", "pub mod cards");
+        let exports =
+            "\npub mod stable { pub use super::cards::Card as Card; }\npub use stable::*;\n";
+        let assembly = ASSEMBLY.replace("crate::builders::Card", "crate::Card");
+        fixture.write(
+            path,
+            &(controls + &(exports.to_owned() + &assembly).replace('\n', "\r\n")),
+        );
+        path
+    } else {
+        let lib = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
+        fixture.write("app/lib.rs", &(lib + "\nmod registry;\n"));
+        let path = "app/registry.rs";
+        fixture.write(path, &ASSEMBLY.replace('\n', "\r\n"));
+        path
+    };
+    rebuild(&fixture);
+    fixture.write("app/Rename.xaml", VIEW);
+    let uri = file_uri(fixture.0.join("app/Rename.xaml")).unwrap();
+    let rust_uri = file_uri(fixture.0.join(source)).unwrap();
+    let mut service = LanguageService::default();
+    service
+        .index_solution(&Solution::discover(&fixture.0).unwrap())
+        .unwrap();
+    service.set_build_metadata(&metadata).unwrap();
+    service.open(&uri, VIEW, 1).unwrap();
+    (fixture, service, uri, rust_uri)
+}
+
+fn rebuild(fixture: &CatalogFixture) -> AssemblyModel {
+    let dependency =
+        fs::read_to_string(fixture.0.join("output/dep/customer_data.xamlmeta")).unwrap();
+    fixture.export(
+        "app",
+        "customer_app",
+        vec![AssemblyModel::parse(&dependency).unwrap()],
+    )
+}
+
+#[test]
+fn property_review_follows_imported_constants_in_an_unsaved_mapping_file() {
+    let (fixture, mut service, uri, rust_uri) = fixture(false);
+    let original = ASSEMBLY
+        .replace("    const KEY:", "    mod literals {\n        pub(super) const KEY:")
+        .replace("    const FEATURED:", "        pub(super) const FEATURED:")
+        .replace("    static DESIGN", "    }\n    use self::literals::KEY as MAPPING_KEY;\n    static DESIGN")
+        .replace("(self::KEY, FEATURED)", "(MAPPING_KEY, self::literals::FEATURED)")
+        .replace('\n', "\r\n")
+        .replace("// Preserve", "// Unsaved 🧭. Preserve");
+    let draft = FileMoveDraft {
+        uri: rust_uri.clone(),
+        version: 32,
+        source: original.clone(),
+    };
+    let plan = service
+        .plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft])
+        .unwrap();
+    let mapping = plan
+        .documents
+        .iter()
+        .find(|document| document.edit.uri == rust_uri)
+        .unwrap();
+    assert_eq!(mapping.edit.version, 32);
+    assert_eq!(mapping.before, original);
+    let updated = r#"(MAPPING_KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"title\"}}")"#;
+    assert_eq!(
+        mapping.after,
+        original
+            .replace("\"Tone\" : \"tone\"", "\"Accent\" : \"tone\"")
+            .replace("(MAPPING_KEY, self::literals::FEATURED)", updated)
+    );
+    assert!(plan
+        .documents
+        .iter()
+        .any(|entry| entry.after == VIEW.replace("Tone", "Accent")));
+    assert!(plan
+        .documents
+        .iter()
+        .any(|entry| entry.after.contains("String>(\"Accent\",")));
+
+    let ambiguous = original.replace(
+        "    use self::literals::KEY as MAPPING_KEY;",
+        "    use self::literals::KEY as MAPPING_KEY;\r\n    #[cfg(test)]\r\n    use self::literals::FEATURED as MAPPING_KEY;",
+    );
+    let draft = FileMoveDraft { uri: rust_uri.clone(), version: 33, source: ambiguous };
+    let error = service
+        .plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft])
+        .unwrap_err();
+    assert!(error.0.contains("keys in the selected assembly"));
+
+    let collision = original.replace(
+        r#""Tone" : "tone""#,
+        r#""Tone" : "tone", "Accent" : "already_mapped""#,
+    );
+    let draft = FileMoveDraft {
+        uri: rust_uri,
+        version: 34,
+        source: collision,
+    };
+    let error = service
+        .plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft])
+        .unwrap_err();
+    assert!(error.0.contains("already maps Accent"));
+
+    for document in &plan.documents {
+        fs::write(file_path(&document.edit.uri).unwrap(), &document.after).unwrap();
+    }
+    let rebuilt = rebuild(&fixture);
+    let mappings = rebuilt
+        .metadata
+        .iter()
+        .filter(|(key, _)| key.starts_with("FerroUI.Designer.Rsx.v1:"));
+    assert_eq!(mappings.clone().count(), 2);
+    for (key, value) in mappings {
+        let mapping = RsxBuilderMapping::parse(value).unwrap();
+        assert_eq!(
+            mapping.properties.get("Accent").map(String::as_str),
+            Some("tone"),
+            "{key}"
+        );
+    }
+}
+
+#[test]
+fn property_review_uses_the_build_selected_module_and_its_current_draft() {
+    let (fixture, mut service, uri, registry_uri) = fixture(false);
+    let root = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
+    fixture.write("app/lib.rs", &(root + "\nmod mapping_descriptors;\n"));
+    let key = ASSEMBLY.lines().find(|line| line.starts_with("    const KEY:")).unwrap().trim();
+    let featured = ASSEMBLY.lines().find(|line| line.starts_with("    const FEATURED:")).unwrap().trim();
+    let descriptors = [
+        format!("pub(crate) {key}"),
+        "pub(crate) struct ControlMappings;".into(),
+        "impl ControlMappings {".into(),
+        format!("    pub(crate) {featured}"),
+        "}".into(),
+        String::new(),
+    ].join("\r\n");
+    fixture.write("app/mapping_descriptors.rs", &descriptors);
+    let registry = ASSEMBLY.lines().filter(|line| !line.starts_with("    const ")).collect::<Vec<_>>().join("\n")
+        .replace("mod mapping {", "mod mapping {\n    use crate::mapping_descriptors::{KEY as PUBLISHED_KEY, ControlMappings as BuilderSet};")
+        .replace("(self::KEY, FEATURED)", "(PUBLISHED_KEY, BuilderSet::FEATURED)")
+        .replace("(\"Unrelated\"", "(::ferroui_base::metadata::MarkupAssembly::CREATE_SOURCE_INFO, \"True\"),\n            (\"Unrelated\"")
+        .replace('\n', "\r\n");
+    fixture.write("app/registry.rs", &registry);
+    let rebuilt = rebuild(&fixture);
+    assert!(rebuilt.metadata.iter().any(|(key, _)| key.ends_with(":Customer.Views.FeaturedCard")));
+    assert!(rebuilt.metadata.iter().any(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO));
+    service.set_build_metadata(&BuildMetadata {
+        manifest: fixture.0.join("app/Cargo.toml"),
+        directories: vec![fixture.0.join("output/app"), fixture.0.join("output/dep")],
+        package: Some("customer-app".into()),
+    }).unwrap();
+
+    let descriptor_uri = file_uri(fixture.0.join("app/mapping_descriptors.rs")).unwrap();
+    let draft = FileMoveDraft {
+        uri: descriptor_uri.clone(), version: 6,
+        source: descriptors.replace(r#"\"title\""#, r#"\"caption\""#),
+    };
+    let plan = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft]).unwrap();
+    let change = plan.documents.iter().find(|document| document.edit.uri == registry_uri).unwrap();
+    assert_eq!(change.before, registry);
+    assert!(change.after.contains(r#"(PUBLISHED_KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"caption\"}}")"#));
+    assert!(plan.documents.iter().all(|document| document.edit.uri != descriptor_uri));
+
+    let ambiguous = FileMoveDraft {
+        uri: descriptor_uri.clone(), version: 7,
+        source: format!("{descriptors}#[cfg(test)]\r\nimpl ControlMappings {{ {featured} }}\r\n"),
+    };
+    let error = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[ambiguous]).unwrap_err();
+    assert!(error.0.contains("Use a literal or a text constant"), "{error:?}");
+
+    let changed = FileMoveDraft {
+        uri: descriptor_uri, version: 8,
+        source: descriptors.replace("Customer.Views.FeaturedCard", "Customer.Views.DifferentCard"),
+    };
+    let error = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[changed]).unwrap_err();
+    assert!(error.0.contains("changed in Rust"), "{error:?}");
+}
+
+#[test]
+fn type_review_merges_builder_literals_with_semantic_rust_patches_in_the_same_file() {
+    let (fixture, mut service, uri, rust_uri) = fixture(true);
+    let new = "OverviewCard";
+    let request = request("Card");
+    let base = service
+        .plan_registered_type_rename(&uri, &request, new, &[])
+        .unwrap();
+    let rename = base.rust_rename.as_ref().unwrap();
+    assert_eq!(rust_uri, rename.uri);
+    let original = fs::read_to_string(fixture.0.join("app/rust/controls.rs")).unwrap();
+    let index = LineIndex::new(&original);
+    let edits = [
+        ("struct Card;", "struct "),
+        ("ferro_class!(Card:", "ferro_class!("),
+        ("ferro_class_info!(Card {", "ferro_class_info!("),
+        ("FeaturedCard: Card)", "FeaturedCard: "),
+        ("impl Card {", "impl "),
+        ("register::<Card,", "register::<"),
+        ("register_attached::<Card,", "register_attached::<"),
+        (
+            "pub use super::cards::Card as Card",
+            "pub use super::cards::",
+        ),
+    ]
+    .into_iter()
+    .map(|(text, prefix)| {
+        let start = original.find(text).unwrap() + prefix.len();
+        TextEdit {
+            range: index
+                .range(SourceSpan::new(start, start + "Card".len()))
+                .unwrap(),
+            new_text: new.into(),
+        }
+    })
+    .collect();
+    let resolution = RustRenameResolution {
+        rename: rename.clone(),
+        documents: vec![DocumentEdits {
+            uri: rust_uri.clone(),
+            version: -1,
+            edits,
+        }],
+    };
+    let complete = service
+        .complete_registered_type_rename(&uri, &request, new, &[], &base.review, &resolution)
+        .unwrap();
+    let rust = complete
+        .documents
+        .iter()
+        .find(|document| document.edit.uri == rust_uri)
+        .unwrap();
+    assert!(rust.after.contains("struct OverviewCard;"));
+    assert!(rust
+        .after
+        .contains("FerroUI.Designer.Rsx.v1:Customer.Views.OverviewCard"));
+    assert!(rust
+        .after
+        .contains(r#""path": "crate::controls::cards::OverviewCard""#));
+    assert!(rust.after.contains(r#"\"crate::Card\""#));
+    assert!(rust
+        .after
+        .contains("pub use super::cards::OverviewCard as Card;"));
+    assert!(rust.after.contains(r#"("Unrelated", "Tone Card")"#));
+    assert!(complete
+        .documents
+        .iter()
+        .any(|document| document.after == VIEW.replace("Card", new)));
+    fs::write(file_path(&rust_uri).unwrap(), &rust.after).unwrap();
+    let rebuilt = rebuild(&fixture);
+    assert!(rebuilt.types.iter().any(|class| class.name == new));
+    let public_alias = rebuilt
+        .exports
+        .iter()
+        .find(|export| export.path == "::customer_app::Card")
+        .unwrap();
+    assert!(public_alias.explicit_alias);
+    assert_eq!(
+        public_alias.declared,
+        "::customer_app::controls::cards::OverviewCard"
+    );
+    let (_, descriptor) = rebuilt
+        .metadata
+        .iter()
+        .find(|(key, _)| key.ends_with(".OverviewCard"))
+        .unwrap();
+    assert_eq!(
+        RsxBuilderMapping::parse(descriptor).unwrap().path,
+        "crate::controls::cards::OverviewCard"
+    );
+}

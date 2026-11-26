@@ -3,9 +3,9 @@
 use super::*;
 use crate::{
     PreviewPrototype, PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor,
-    PreviewPrototypeLinkEditor, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
-    PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewSourceAnchor,
-    PreviewStageBoard, PreviewStageId,
+    PreviewPrototypeLinkEditor, PreviewPrototypeLinkTransition, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
+    PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewStageBoard,
+    PreviewStageId,
 };
 use ferroui_base::Rect;
 use ferroui_controls::Flyout;
@@ -13,8 +13,6 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
-#[path = "workspace_prototype_layout.rs"]
-mod layout;
 #[path = "workspace_prototype_player.rs"]
 mod player;
 
@@ -94,6 +92,10 @@ impl DesignerWorkspace {
         self.preview_stages.board.borrow().prototype()
     }
 
+    pub fn preview_prototype_transitions(&self) -> Vec<PreviewPrototypeLinkTransition> {
+        self.preview_stages.board.borrow().prototype_transitions().to_vec()
+    }
+
     /// Includes the accepted source/board token and the independent playback epoch.
     /// Reading this token never creates controls, updates layout or advances input.
     pub fn preview_prototype_model(&self) -> String {
@@ -150,72 +152,47 @@ impl DesignerWorkspace {
     }
 
     pub fn set_preview_prototype(self: &Rc<Self>, graph: PreviewPrototype) -> Result<(), String> {
+        self.apply_preview_prototype(graph, None)
+    }
+
+    pub fn set_preview_prototype_with_transitions(
+        self: &Rc<Self>,
+        graph: PreviewPrototype,
+        transitions: Vec<PreviewPrototypeLinkTransition>,
+    ) -> Result<(), String> {
+        self.apply_preview_prototype(graph, Some(transitions))
+    }
+
+    fn apply_preview_prototype(
+        self: &Rc<Self>,
+        graph: PreviewPrototype,
+        transitions: Option<Vec<PreviewPrototypeLinkTransition>>,
+    ) -> Result<(), String> {
         self.validate_preview_prototype(&graph)?;
-        if graph == self.preview_prototype() {
-            return Ok(());
+        let changed = {
+            let mut board = self.preview_stages.board.borrow_mut();
+            let epoch = board.epoch();
+            match transitions {
+                Some(transitions) => board.set_prototype_with_transitions(graph, transitions)?,
+                None => board.set_prototype(graph)?,
+            }
+            board.epoch() != epoch
+        };
+        if changed {
+            self.retire_preview_prototype_player();
+            self.refresh_preview_prototype();
         }
-        self.preview_stages
-            .board
-            .borrow_mut()
-            .set_prototype(graph)?;
-        self.retire_preview_prototype_player();
-        self.refresh_preview_prototype();
         Ok(())
     }
 
     /// Authored, unambiguous source choices from accepted native stage trees.
     /// The returned anchors contain no runtime inspector or session-local node IDs.
     pub fn preview_prototype_elements(&self) -> Vec<PreviewPrototypeElementChoice> {
-        let sources = self.preview_stage_sources();
-        let mut choices = Vec::new();
-        for stage in self.preview_stages() {
-            if !self.preview_stage_source_is_current(stage.id) {
-                continue;
-            }
-            let Some(source) = sources
-                .iter()
-                .find(|source| source.uri == stage.configuration.source_uri)
-            else {
-                continue;
-            };
-            let Ok(rows) = self.preview_stage_runtime_tree(stage.id, TreeKind::Visual) else {
-                continue;
-            };
-            let mut seen = BTreeSet::new();
-            for id in rows.into_iter().filter_map(|row| row.source_id) {
-                if !seen.insert(id) {
-                    continue;
-                }
-                let Some(node) = source.document.ast().node(id) else {
-                    continue;
-                };
-                let Ok(anchor) = PreviewSourceAnchor::capture(&source.document, id) else {
-                    continue;
-                };
-                let label = match node.xaml_name() {
-                    Some(name) => format!("{} · {name}", node.local_name()),
-                    None => format!(
-                        "{} · source line {}",
-                        node.local_name(),
-                        source.document.source()
-                            [..node.span.start.min(source.document.source().len())]
-                            .bytes()
-                            .filter(|byte| *byte == b'\n')
-                            .count()
-                            + 1
-                    ),
-                };
-                choices.push(PreviewPrototypeElementChoice {
-                    stage: stage.id,
-                    label,
-                    anchor,
-                });
-                if choices.len() >= 4096 {
-                    return choices;
-                }
-            }
-        }
-        choices
+        let board = self.preview_stages.board.borrow();
+        board.stages().into_iter()
+            .filter(|stage| self.preview_stage_source_is_current(stage.id))
+            .flat_map(|stage| board.prototype_elements(stage.id).unwrap_or_default())
+            .take(4096).collect()
     }
 
     pub fn set_preview_prototype_visible(self: &Rc<Self>, visible: bool) -> Result<(), String> {
@@ -485,11 +462,15 @@ impl DesignerWorkspace {
             );
         }
         self.close_prototype_editor();
-        let editor = PreviewPrototypeLinkEditor::new(initial, source, stages, elements);
+        let motion = index.and_then(|index| {
+            self.preview_prototype_transitions().into_iter()
+                .find(|entry| entry.link == index).map(|entry| entry.transition)
+        });
+        let editor = PreviewPrototypeLinkEditor::new_with_transition(initial, motion, source, stages, elements);
         let model = self.preview_stage_model();
         let weak = Rc::downgrade(self);
         let expected = model.clone();
-        editor.on_apply(move |link| {
+        editor.on_apply_with_transition(move |link, transition| {
             let workspace = weak.upgrade().ok_or("The workspace was closed")?;
             if workspace.preview_stage_model() != expected {
                 return Err(
@@ -497,11 +478,17 @@ impl DesignerWorkspace {
                 );
             }
             let mut next = workspace.preview_prototype();
+            let slot = index.unwrap_or(next.links.len());
             match index {
                 Some(index) => next.links[index] = link,
                 None => next.links.push(link),
             }
-            workspace.set_preview_prototype(next)
+            let mut transitions = workspace.preview_prototype_transitions();
+            transitions.retain(|entry| entry.link != slot);
+            if let Some(transition) = transition {
+                transitions.push(PreviewPrototypeLinkTransition { link: slot, transition });
+            }
+            workspace.set_preview_prototype_with_transitions(next, transitions)
         });
         let weak = Rc::downgrade(self);
         editor.on_close(move || {

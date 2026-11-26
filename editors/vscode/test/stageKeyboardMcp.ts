@@ -1,0 +1,84 @@
+import { strict as assert } from 'node:assert';
+import * as vscode from 'vscode';
+import type { StageChecks, StageFocus, StageInput, StageModel } from '../src/stagesProtocol';
+import { asRange } from '../src/textDocument';
+import { previewInputKey } from '../webview/previewKeyboard';
+import type { McpFixture } from './mcp';
+
+export async function verifyStageKeyboard({ invoke, content }: McpFixture): Promise<void> {
+    const modifiers = { ctrlKey: false, altKey: false, shiftKey: false, metaKey: false };
+    assert.equal(previewInputKey({ ...modifiers, key: 'ArrowRight', ctrlKey: true, altKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Tab', metaKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Escape', shiftKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Tab', shiftKey: true }), 'Shift+Tab');
+    assert.equal(previewInputKey({ ...modifiers, key: 'Escape' }), 'Escape');
+    assert.equal(previewInputKey({ ...modifiers, key: 'a', ctrlKey: true }), 'Ctrl+A');
+    for (const [path, source] of [
+        ['StageKeyboard.xaml', `<StackPanel xmlns="https://github.com/ferroui" Spacing="8">
+  <Button Name="Apply" Content="Apply"/>
+  <TextBox Name="Customer" Width="260" Text="Northwind"/>
+</StackPanel>`],
+        ['stage_keyboard.rs', `fn stage_view() {
+    let _ = rsx! { StackPanel {
+        Button { name: "Apply", "Apply" }
+        TextBox { name: "Customer", width: 260.0, text: "Northwind" }
+    } };
+}`],
+    ] as const) {
+        content(await invoke('ferroui_workspace_create', { path, source }));
+        const { session } = content<{ session: number }>(await invoke('designer_open', { path }));
+        const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, path);
+        const document = await vscode.workspace.openTextDocument(uri);
+        const version = document.version;
+        const first = content<StageModel>(await invoke('designer_stages_open', { session }));
+        assert.equal(first.keyboardInput, true);
+        const [selection, other] = first.stages;
+        const target = (stage: StageModel['stages'][number]) => ({ session, stage: stage.id, expected_epoch: stage.epoch });
+        const focus = { kind: 'focus' } as const;
+        assert.ok((await invoke('designer_stage_input', { ...target(selection), input: focus })).isError);
+        const { accessibility } = content<StageChecks>(await invoke('designer_stage_checks', target(selection)));
+        assert.ok(accessibility);
+        assert.equal(accessibility.truncated, false);
+        assert.deepEqual(accessibility.tab_order.map(row => row.role), ['Button', 'Edit']);
+        assert.ok(accessibility.tree.some(row => row.name === 'Apply' && row.role === 'Button'));
+        const stops = accessibility.tab_order.map(row => {
+            assert.ok(row.range, JSON.stringify(row));
+            return document.getText(asRange(row.range));
+        });
+        assert.deepEqual(stops, ['Button', 'TextBox']);
+        const update = async (board: StageModel, stage: StageModel['stages'][number], configuration: object) =>
+            content<StageModel>(await invoke('designer_stage_change', { session, expected_epoch: board.epoch, arguments: {
+                action: 'update', id: stage.id, configuration: { ...stage.configuration, ...configuration },
+            } }));
+        const live = await update(first, selection, { mode: 'live' });
+        const stage = live.stages[0];
+        assert.ok((await invoke('designer_stage_input', { ...target(selection), input: focus })).isError);
+        assert.ok((await invoke('designer_stage_checks', target(selection))).isError);
+        const send = async (input: StageInput) => content<StageFocus>(await invoke('designer_stage_input', { ...target(stage), input }));
+        const key = (key: string) => send({ kind: 'key', key });
+        assert.equal((await send(focus)).role, 'Button');
+        assert.equal((await key('Shift+Tab')).role, 'Edit');
+        assert.equal((await key('Tab')).role, 'Button');
+        assert.equal((await key('Tab')).role, 'Edit');
+        const capture = async (entry: StageModel['stages'][number]) => {
+            const result = await invoke('designer_stage_image', target(entry));
+            const png = result.content.find(item => item.type === 'image')?.data;
+            assert.ok(png, JSON.stringify(result.content[0]));
+            return png;
+        };
+        const [before, unaffected] = await Promise.all([capture(stage), capture(other)]);
+        await key('End');
+        await key('Space');
+        await send({ kind: 'text', text: 'Tokyo 🪴' });
+        assert.notEqual(await capture(stage), before);
+        assert.equal(await capture(other), unaffected);
+        assert.equal(document.version, version);
+        assert.equal(document.getText().trimEnd(), source.trimEnd());
+        const paused = await update(live, stage, { auto_update: false });
+        assert.ok((await invoke('designer_stage_input', { ...target(paused.stages[0]), input: focus })).isError);
+        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs)
+            .filter(tab => tab.label === path || tab.label === `Design · ${path}` || tab.label === `Stages · ${path}`);
+        await vscode.window.tabGroups.close(tabs);
+    }
+    console.log('VS Code MCP linked native roles and Tab order to XAML and RSX, rejected stale stages, and preserved the other card and source during keyboard input');
+}

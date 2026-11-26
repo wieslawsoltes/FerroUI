@@ -14,6 +14,8 @@
 //! invokes.
 
 pub mod interop;
+#[cfg(all(target_arch = "wasm32", feature = "live-inspector"))]
+pub mod live_inspector;
 pub mod rendering;
 pub mod storage;
 

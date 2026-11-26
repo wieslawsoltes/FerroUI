@@ -1,6 +1,10 @@
 //! A local, source-preserving binding draft. The caller owns the document transaction.
 use ferroui_designer_core::{MarkupExtension, MarkupValue};
 
+pub(crate) const BINDING_MODES: &[&str] =
+    &["Default", "OneWay", "TwoWay", "OneTime", "OneWayToSource"];
+pub(crate) const BINDING_TRIGGERS: &[&str] = &["Default", "PropertyChanged", "LostFocus", "Explicit"];
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PropertyBindingSource {
     DataContext,
@@ -16,6 +20,7 @@ pub enum PropertyBindingSource {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "mcp", derive(serde::Deserialize))]
 pub enum PropertyBindingOption {
     Converter,
     ConverterParameter,
@@ -26,6 +31,16 @@ pub enum PropertyBindingOption {
 }
 
 impl PropertyBindingOption {
+    #[cfg(feature = "mcp")]
+    pub(crate) const ALL: [Self; 6] = [
+        Self::Converter,
+        Self::ConverterParameter,
+        Self::ConverterCulture,
+        Self::StringFormat,
+        Self::FallbackValue,
+        Self::TargetNullValue,
+    ];
+
     pub fn name(self) -> &'static str {
         match self {
             Self::Converter => "Converter",
@@ -157,10 +172,7 @@ impl PropertyBindingDraft {
     }
 
     pub fn set_mode(&mut self, mode: &str) -> Result<(), String> {
-        if !matches!(
-            mode,
-            "Default" | "OneWay" | "TwoWay" | "OneTime" | "OneWayToSource"
-        ) {
+        if !BINDING_MODES.contains(&mode) {
             return Err("Choose a supported binding mode".into());
         }
         self.set_argument(
@@ -171,10 +183,7 @@ impl PropertyBindingDraft {
     }
 
     pub fn set_update_source_trigger(&mut self, trigger: &str) -> Result<(), String> {
-        if !matches!(
-            trigger,
-            "Default" | "PropertyChanged" | "LostFocus" | "Explicit"
-        ) {
+        if !BINDING_TRIGGERS.contains(&trigger) {
             return Err("Choose a supported update-source trigger".into());
         }
         self.set_argument(
@@ -353,20 +362,10 @@ impl PropertyBindingDraft {
         {
             return Err("A binding can use only one of ElementName, RelativeSource and Source; choose one source".into());
         }
-        if self.literal("Mode").is_some_and(|mode| {
-            !matches!(
-                mode,
-                "Default" | "OneWay" | "TwoWay" | "OneTime" | "OneWayToSource"
-            )
-        }) {
+        if self.literal("Mode").is_some_and(|mode| !BINDING_MODES.contains(&mode)) {
             return Err("Choose a supported binding mode".into());
         }
-        if self.literal("UpdateSourceTrigger").is_some_and(|trigger| {
-            !matches!(
-                trigger,
-                "Default" | "PropertyChanged" | "LostFocus" | "Explicit"
-            )
-        }) {
+        if self.literal("UpdateSourceTrigger").is_some_and(|trigger| !BINDING_TRIGGERS.contains(&trigger)) {
             return Err("Choose a supported update-source trigger".into());
         }
         if self.literal("Delay").is_some_and(|delay| {
@@ -437,7 +436,7 @@ impl PropertyBindingDraft {
 }
 
 /// Quote a decoded value without confusing braces, commas or quotes with XAML syntax.
-pub(super) fn value_source(value: &MarkupValue) -> String {
+pub(crate) fn value_source(value: &MarkupValue) -> String {
     match value {
         MarkupValue::Literal(value) => format!(
             "'{}{}'",

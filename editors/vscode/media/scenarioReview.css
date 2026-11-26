@@ -1,0 +1,69 @@
+body { min-height: 100vh; display: flex; flex-direction: column; }
+.toolbar #capture { flex: 0 1 260px; }
+#approve { margin-inline-start: auto; display: flex; align-items: center; gap: 5px; }
+.review-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 14px;
+    align-items: center;
+    padding: 7px 10px;
+    border-block-end: 1px solid var(--line);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+#reference { font-weight: 600; color: var(--vscode-foreground); }
+#workspace-status { margin-inline-start: auto; color: var(--vscode-testing-iconPassed, var(--muted)); }
+#workspace-status[data-pending=true] { color: var(--vscode-editorWarning-foreground, var(--muted)); }
+.review-canvases {
+    --wipe: 50%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    flex: 1 1 auto;
+    min-block-size: 0;
+}
+.review-canvases[data-mode=split] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.review-frame { margin: 0; min-inline-size: 0; display: flex; flex-direction: column; }
+#expected { border-inline-end: 1px solid var(--line); }
+.review-frame figcaption {
+    min-block-size: 30px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-block-end: 1px solid var(--line);
+    color: var(--muted);
+    font-weight: 600;
+}
+.review-scroll {
+    display: grid;
+    place-items: safe center;
+    flex: 1 1 auto;
+    block-size: 0;
+    min-block-size: 158px;
+    overflow: auto;
+    padding: 20px;
+}
+.review-canvases[data-fit=true] .review-scroll { overflow: hidden; }
+.review-scroll:focus-visible { outline: 1px solid var(--focus); outline-offset: -1px; }
+.review-tile {
+    position: relative;
+    inline-size: max-content;
+    block-size: auto;
+    max-inline-size: none;
+}
+.review-tile img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: fill;
+    display: block;
+    border: 1px solid var(--line);
+}
+.review-tile p { overflow-wrap: anywhere; color: var(--muted); }
+.review-overlay { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--wipe)) 0 0); }
+#wipe { inline-size: min(180px, 50%); block-size: 18px; min-block-size: 18px; }
+@media (max-width: 480px) {
+    .review-canvases[data-mode=split] { grid-template-columns: minmax(0, 1fr); }
+    #expected { border-inline-end: 0; }
+    .review-scroll { min-block-size: 120px; }
+    .review-summary { gap: 4px 9px; }
+}

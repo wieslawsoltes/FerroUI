@@ -6,6 +6,7 @@ use crate::documents::{
     RichTextDocument, TextHighlightRegion, Typography,
 };
 use crate::text_block::InlinesTextSource;
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::text_formatting::{
     FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties,
@@ -188,7 +189,7 @@ impl RichTextSource {
                         view.font_weight(),
                         view.font_stretch(),
                     ),
-                    view.font_size(),
+                    DesignTextEnvironment::font_size(view, view.font_size()),
                     view.text_decorations(),
                     view.foreground(),
                     None,
@@ -206,7 +207,7 @@ impl RichTextSource {
                         block.font_weight(),
                         block.font_stretch(),
                     ),
-                    block.font_size(),
+                    DesignTextEnvironment::font_size(&block, block.font_size()),
                     block.get_value(Inline::text_decorations_property()),
                     block.foreground(),
                     block.background(),

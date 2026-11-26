@@ -1,13 +1,13 @@
-//! Native literal serialization shared by direct session edits and component commands.
+//! Native literal validation and serialization for session edits and component commands.
 //! Portable property descriptors cannot prove that an application's `Width` is a number.
 use crate::{DesignerSession, Document, NodeId, PropertyEditorContext};
 use ferroui_base::{FerroObject, FerroProperty, TypeInfo};
-use ferroui_designer_core::MarkupValue;
+pub(crate) use ferroui_designer_animation::native::{registered_type, setter_target_type};
+use ferroui_designer_animation::native::element_type;
+#[cfg(feature = "mcp")]
+use ferroui_designer_tools::PropertyComponentType;
 use ferroui_inspect::Inspector;
 use std::rc::Rc;
-
-const FRAMEWORK: &str = "https://github.com/ferroui";
-const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
 impl DesignerSession {
     pub(crate) fn canonical_property_literal(
@@ -17,32 +17,22 @@ impl DesignerSession {
         value: &str,
         setter: bool,
     ) -> Result<Option<&'static str>, String> {
-        if value.strip_prefix("{}").unwrap_or(value).trim() != "Auto" {
+        if value.starts_with('{') && !value.starts_with("{}") {
             return Ok(None);
         }
-        let property = if setter {
-            setter_target_type(self.document(), node)
-                .and_then(|type_| property_on_type(self.document(), node, type_, name))
-        } else {
-            // A retained preview can describe an older document after a failed reload.
-            let live = if matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision())
-                && !name.contains(':')
-            {
-                self.preview.visual(node).and_then(|visual| {
-                    Inspector::property(&visual.upcast::<FerroObject>(), name).ok()
-                })
-            } else {
-                None
-            };
-            live.or_else(|| {
-                element_type(self.document(), node)
-                    .and_then(|type_| property_on_type(self.document(), node, type_, name))
-            })
-        };
-        let Some(property) = property else {
+        let Some(property) = self.literal_property(node, name, setter) else {
             // Unknown application types retain their own serializer and authored spelling.
             return Ok(None);
         };
+        if let Some(shape) = crate::editors::property_component_shape(property.property_type_name()) {
+            if property.is_read_only() {
+                return Err(format!("{name} is read-only"));
+            }
+            shape.validate_markup(name, value).map_err(|error| error.to_string())?;
+        }
+        if value.strip_prefix("{}").unwrap_or(value).trim() != "Auto" {
+            return Ok(None);
+        }
         if ![
             std::any::TypeId::of::<f32>(),
             std::any::TypeId::of::<f64>(),
@@ -64,32 +54,38 @@ impl DesignerSession {
         crate::resolve_property_editor_metadata(&context, Some(property))
             .prepare_literal(&context, value)
     }
-}
 
-fn registered_type(document: &Document, node: NodeId, token: &str) -> Option<&'static TypeInfo> {
-    let (prefix, name) = token.split_once(':').unwrap_or(("", token));
-    let namespaces = document.ast().namespaces(node);
-    let uri = match namespaces.get(prefix) {
-        Some(uri) => uri.as_str(),
-        None if prefix.is_empty() => FRAMEWORK,
-        None => return None,
-    };
-    crate::native_types::registered_xml_type(uri, name)
-}
-
-fn element_type(document: &Document, node: NodeId) -> Option<&'static TypeInfo> {
-    let element = document.ast().node(node)?;
-    if let Some(class) = element.attributes.iter().find(|attribute| {
-        attribute.namespace_uri.as_deref() == Some(XAML)
-            && attribute.name.rsplit(':').next() == Some("Class")
-    }) {
-        let (namespace, name) = class.value.rsplit_once('.')?;
-        return TypeInfo::find(namespace, name);
+    #[cfg(feature = "mcp")]
+    pub(crate) fn authored_component_shape(&self, node: NodeId, name: &str) -> Option<PropertyComponentType> {
+        let property = self.literal_property(node, name, false)?;
+        if property.is_read_only() {
+            return None;
+        }
+        crate::editors::property_component_shape(property.property_type_name())
     }
-    registered_type(document, node, &element.name)
+
+    fn literal_property(&self, node: NodeId, name: &str, setter: bool) -> Option<&'static FerroProperty> {
+        if setter {
+            return setter_target_type(self.document(), node)
+                .and_then(|type_| property_on_type(self.document(), node, type_, name));
+        }
+        // A retained preview can describe an older document after a failed reload.
+        if matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision())
+            && !name.contains(':')
+        {
+            let live = self.preview.visual(node).and_then(|visual| {
+                Inspector::property(&visual.upcast::<FerroObject>(), name).ok()
+            });
+            if live.is_some() {
+                return live;
+            }
+        }
+        element_type(self.document(), node)
+            .and_then(|type_| property_on_type(self.document(), node, type_, name))
+    }
 }
 
-fn property_on_type(
+pub(crate) fn property_on_type(
     document: &Document,
     node: NodeId,
     type_: &'static TypeInfo,
@@ -104,39 +100,6 @@ fn property_on_type(
     (!name.contains(':'))
         .then(|| type_.find_property(name))
         .flatten()
-}
-
-fn setter_target_type(document: &Document, owner: NodeId) -> Option<&'static TypeInfo> {
-    let type_ = element_type(document, owner)?;
-    if !ferroui_base::styling::ControlTheme::TYPE.is_assignable_from(type_) {
-        return None;
-    }
-    let value = document.ast().node(owner)?.attribute("TargetType")?;
-    let token = match MarkupValue::parse(value).ok()? {
-        MarkupValue::Literal(value) => value,
-        MarkupValue::Extension(extension) => {
-            let (prefix, name) = extension.name.split_once(':')?;
-            if name != "Type"
-                || document
-                    .ast()
-                    .namespaces(owner)
-                    .get(prefix)
-                    .map(String::as_str)
-                    != Some(XAML)
-            {
-                return None;
-            }
-            extension.arguments.into_iter().find_map(|argument| {
-                if argument.name.is_none() || argument.name.as_deref() == Some("TypeName") {
-                    if let MarkupValue::Literal(value) = argument.value {
-                        return Some(value);
-                    }
-                }
-                None
-            })?
-        }
-    };
-    registered_type(document, owner, token.trim())
 }
 
 #[cfg(test)]

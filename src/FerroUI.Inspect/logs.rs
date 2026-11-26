@@ -1,7 +1,8 @@
 //! One bounded diagnostic capture per process, shared by every inspection server (MCP, CDP). The
 //! first [`LogCapture::install`] tees the framework's log sink; the tee forwards to the sink it
 //! replaced, and that sink is restored when the last [`LogGuard`] is dropped.
-use ferroui_base::logging::{ILogSink, LogEventLevel, Logger};
+use ferroui_base::logging::{ILogSink, LogArea, LogEventLevel, Logger};
+use ferroui_base::FerroObject;
 use serde_json::{json, Value};
 use std::{
     any::Any,
@@ -40,7 +41,22 @@ impl LogEntry {
 
 struct Ring {
     last: u64,
-    entries: VecDeque<LogEntry>,
+    entries: VecDeque<CapturedLog>,
+}
+
+struct CapturedLog {
+    entry: LogEntry,
+    source: Option<Value>,
+}
+
+impl CapturedLog {
+    fn to_json(&self) -> Value {
+        let mut result = self.entry.to_json();
+        if let Some(source) = &self.source {
+            result["source"] = source.clone();
+        }
+        result
+    }
 }
 static RING: Mutex<Ring> = Mutex::new(Ring {
     last: 0,
@@ -82,20 +98,22 @@ impl LogCapture {
         let entries = ring
             .entries
             .iter()
-            .filter(|e| e.sequence > *cursor)
-            .cloned()
+            .filter(|e| e.entry.sequence > *cursor)
+            .map(|e| e.entry.clone())
             .collect();
         *cursor = ring.last;
         entries
     }
     /// `{"cursor", "entries"}` of the entries after `after`.
     pub fn snapshot(after: u64) -> Value {
-        let mut cursor = after;
-        let entries: Vec<_> = Self::since(&mut cursor)
+        let ring = RING.lock().unwrap_or_else(|e| e.into_inner());
+        let entries: Vec<_> = ring
+            .entries
             .iter()
-            .map(LogEntry::to_json)
+            .filter(|e| e.entry.sequence > after)
+            .map(CapturedLog::to_json)
             .collect();
-        json!({"cursor":cursor.max(after),"entries":entries})
+        json!({"cursor":ring.last.max(after),"entries":entries})
     }
 }
 
@@ -127,10 +145,20 @@ struct CaptureSink {
 fn captured(level: LogEventLevel) -> bool {
     level as i32 >= MINIMUM.load(Ordering::Acquire)
 }
-fn record(level: LogEventLevel, area: &str, template: &str, values: &[&dyn Display]) {
+fn record(
+    level: LogEventLevel,
+    area: &str,
+    target: Option<&dyn Any>,
+    template: &str,
+    values: &[&dyn Display],
+) {
     if !captured(level) {
         return;
     }
+    let source = target
+        .filter(|_| area == LogArea::BINDING)
+        .and_then(|target| target.downcast_ref::<FerroObject>())
+        .and_then(crate::source::location);
     let timestamp = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
@@ -150,7 +178,7 @@ fn record(level: LogEventLevel, area: &str, template: &str, values: &[&dyn Displ
             .collect(),
         timestamp,
     };
-    ring.entries.push_back(entry);
+    ring.entries.push_back(CapturedLog { entry, source });
     while ring.entries.len() > CAPACITY {
         ring.entries.pop_front();
     }
@@ -164,7 +192,7 @@ impl ILogSink for CaptureSink {
                 .is_some_and(|p| p.is_enabled(level, area))
     }
     fn log(&self, level: LogEventLevel, area: &str, source: Option<&dyn Any>, message: &str) {
-        record(level, area, message, &[]);
+        record(level, area, source, message, &[]);
         if let Some(sink) = self.previous.as_ref().filter(|p| p.is_enabled(level, area)) {
             sink.log(level, area, source, message);
         }
@@ -177,7 +205,7 @@ impl ILogSink for CaptureSink {
         message: &str,
         values: &[&dyn Display],
     ) {
-        record(level, area, message, values);
+        record(level, area, source, message, values);
         if let Some(sink) = self.previous.as_ref().filter(|p| p.is_enabled(level, area)) {
             sink.log_with_values(level, area, source, message, values);
         }
@@ -217,7 +245,13 @@ mod tests {
         let mut start = 0;
         LogCapture::since(&mut start);
         for i in 0..1100 {
-            record(LogEventLevel::Warning, "Binding", "Failure {Value}", &[&i]);
+            record(
+                LogEventLevel::Warning,
+                "Binding",
+                None,
+                "Failure {Value}",
+                &[&i],
+            );
         }
         let snapshot = LogCapture::snapshot(start);
         assert_eq!(snapshot["cursor"], start + 1100);
@@ -230,7 +264,13 @@ mod tests {
             1
         );
         assert_eq!(LogCapture::snapshot(start + 1100)["entries"], json!([]));
-        record(LogEventLevel::Debug, "Binding", "below the minimum", &[]);
+        record(
+            LogEventLevel::Debug,
+            "Binding",
+            None,
+            "below the minimum",
+            &[],
+        );
         assert_eq!(LogCapture::snapshot(start + 1100)["entries"], json!([]));
     }
 

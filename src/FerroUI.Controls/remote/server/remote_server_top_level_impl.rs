@@ -660,6 +660,14 @@ impl RemoteServerTopLevelImpl {
         self.base.surfaces()
     }
 
+    /// Request a frame after the caller has updated the scene. The returned sequence
+    /// identifies the last frame sent before this request, including one awaiting its acknowledgement.
+    pub fn request_frame(&self) -> i64 {
+        let previous = self.surface.state().last_sent_frame;
+        self.render_and_send_frame_if_needed();
+        previous
+    }
+
     /// `RenderAndSendFrameIfNeeded` (protected: for deriving classes).
     pub fn render_and_send_frame_if_needed(&self) {
         if self.is_disposed() {

@@ -7,9 +7,18 @@
 //! are left to protocols, such as CDP's document node).
 mod frames;
 mod input;
+mod keyboard;
+mod layout_overflow;
+mod layout_values;
 mod logs;
+mod property_trace;
 mod schema;
+mod source;
 pub mod target;
+mod template_sources;
+mod text_contrast;
+mod ui_profile;
+mod visual_checks;
 use base64::Engine;
 use ferroui_base::controls::{IResourceHost, ResourceKey};
 use ferroui_base::data::core::{ValueType, ValueTypes};
@@ -22,15 +31,20 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::{ControlTheme, Selector, Style};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
-    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Rect, Ref,
+    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Point, Rect, Ref,
     StyledElement, Thickness, TypeInfo, Vector, Visual, WeakRef,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+pub use keyboard::{KeyboardFocus, KeyboardInput, keyboard_focus, keyboard_input, tab_target};
+pub use layout_overflow::MeasuredOverflow;
+pub use layout_values::{LayoutValueFinding, check_layout_values};
 pub use logs::{LogCapture, LogEntry, LogGuard};
+pub use property_trace::{InspectedPropertyTrace, PropertyContributor, display_property_value};
 pub use schema::{tools, validate};
+pub use visual_checks::{VisualChecks, VisualFinding, check_visual, check_visual_with_layout};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -133,6 +147,7 @@ pub struct Inspector {
     roots: Vec<WeakRef<TopLevel>>,
     frames: HashMap<NodeId, frames::FrameStats>,
     overlays: Vec<WeakRef<Visual>>,
+    profile: Option<ui_profile::Recording>,
 }
 
 impl Default for Inspector {
@@ -151,6 +166,7 @@ impl Inspector {
             roots: Vec::new(),
             frames: HashMap::new(),
             overlays: Vec::new(),
+            profile: None,
         }
     }
 
@@ -203,7 +219,7 @@ impl Inspector {
         self.overlays.retain(|weak| weak.upgrade().is_some());
     }
 
-    /// The open top levels: the registered roots and the windows of the desktop lifetime.
+    /// The open top levels from the application lifetime and explicitly registered roots.
     pub fn windows(&mut self) -> Vec<Ref<TopLevel>> {
         self.prune();
         self.roots.retain(|weak| weak.upgrade().is_some());
@@ -214,6 +230,13 @@ impl Inspector {
             .filter(|r| r.platform_impl().is_some())
             .collect();
         if let Some(lifetime) = Application::current().and_then(|a| a.application_lifetime()) {
+            if let Some(root) = lifetime
+                .as_single_top_level_application_lifetime()
+                .and_then(|lifetime| lifetime.top_level())
+                .filter(|root| root.platform_impl().is_some() && !roots.contains(root))
+            {
+                roots.push(root);
+            }
             if let Some(desktop) = lifetime.as_classic_desktop_style_application_lifetime() {
                 for window in desktop.windows() {
                     let root = window.upcast::<TopLevel>();
@@ -326,10 +349,14 @@ impl Inspector {
 
     /// A registered or attached (`Owner.Name`) property of the object.
     pub fn property(object: &FerroObject, name: &str) -> Result<&'static FerroProperty, String> {
-        Self::registered(object)
-            .into_iter()
-            .find(|p| property_name(p) == name)
-            .ok_or_else(|| format!("Unknown property: {name}"))
+        let property = if name.contains('.') {
+            Self::registered(object)
+                .into_iter()
+                .find(|property| property_name(property) == name)
+        } else {
+            FerroPropertyRegistry::instance().find_registered_for(object, name)
+        };
+        property.ok_or_else(|| format!("Unknown property: {name}"))
     }
 
     /// The registered and attached properties of the object, sorted by name.
@@ -693,8 +720,7 @@ impl Inspector {
         catch(|| {
             if is_input(name) {
                 let object = self.prepare_input(args, permissions)?;
-                input::execute(name, &object, args, permissions)?;
-                return Ok(json!({"ok":true}));
+                return input_result(name, &object, args, permissions);
             }
             self.execute_inner(name, args, permissions)
         })
@@ -762,6 +788,32 @@ impl Inspector {
                 &Self::visual_object(&self.object(args)?),
                 args.get("properties"),
             )),
+            "get_property_trace" => {
+                let object = Self::visual_object(&self.object(args)?);
+                let name = args["property"].as_str().ok_or("property required")?;
+                let trace = Self::property_trace(&object, name)?;
+                Ok(trace.json(|_, entry| entry.source_location()))
+            }
+            "get_template_sources" => template_sources::list(&Self::visual_object(&self.object(args)?)),
+            "get_element_at" => {
+                let root = Self::visual_object(&self.object(args)?)
+                    .cast::<Visual>().ok_or("The selected object has no visual surface")?;
+                let point = Point::new(args["x"].as_f64().unwrap(), args["y"].as_f64().unwrap());
+                let mut seen = HashSet::new();
+                let mut hits = Vec::new();
+                let root_id = self.node_id(&root);
+                for hit in root.get_visuals_at(point) {
+                    let mut candidate = Some(hit);
+                    while let Some(visual) = candidate {
+                        let id = self.node_id(&visual);
+                        if id == root_id || hits.len() == 32 { break; }
+                        candidate = visual.visual_parent();
+                        if seen.insert(id) { hits.push(self.describe(&visual.upcast(), None)); }
+                    }
+                }
+                Ok(Value::Array(hits))
+            }
+            "get_source" => Ok(source::location(&Self::visual_object(&self.object(args)?)).unwrap_or(Value::Null)),
             "set_property" => {
                 if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());
@@ -866,18 +918,25 @@ impl Inspector {
                 )
             }
             "get_logs" => Ok(LogCapture::snapshot(args["after"].as_u64().unwrap_or(0))),
+            "start_ui_profile" => self.start_ui_profile(
+                args["window_id"].as_u64().unwrap(), args["duration_ms"].as_u64().unwrap(),
+            ),
+            "get_ui_profile" => self.read_ui_profile(args["profile_id"].as_u64(), false),
+            "stop_ui_profile" => self.read_ui_profile(args["profile_id"].as_u64(), true),
             "get_frame_stats" => {
                 let windows = self.windows();
                 Ok(Value::Array(
                     windows
                         .iter()
                         .map(|w| {
-                            let t = w.renderer_diagnostics().last_layout_pass_timing();
+                            let layout = w.layout_manager();
+                            let timing = layout.last_pass_timing();
                             let id = self.node_id(w);
                             let mut stats = self.frames[&id].snapshot();
                             stats["node_id"] = json!(id);
-                            stats["layout_pass_count"] = json!(t.pass_counter);
-                            stats["layout_ms"] = json!(t.elapsed.as_secs_f64() * 1000.0);
+                            stats["layout_pass_count"] = json!(layout.total_pass_count());
+                            stats["layout_timing_available"] = json!(timing.is_some());
+                            stats["layout_ms"] = json!(timing.map_or(0.0, |t| t.elapsed.as_secs_f64() * 1000.0));
                             stats
                         })
                         .collect(),
@@ -904,10 +963,7 @@ pub fn execute(name: &str, args: &Value, permissions: Permissions) -> InspectRes
                 .map_err(|_| "The inspector is busy".to_owned())?;
             inspector.prepare_input(args, permissions)?
         };
-        return catch(|| {
-            input::execute(name, &object, args, permissions)?;
-            Ok(json!({"ok":true}))
-        });
+        return catch(|| input_result(name, &object, args, permissions));
     }
     let mut inspector = shared
         .try_borrow_mut()
@@ -918,8 +974,21 @@ pub fn execute(name: &str, args: &Value, permissions: Permissions) -> InspectRes
 fn is_input(name: &str) -> bool {
     matches!(
         name,
-        "click" | "type_text" | "press_key" | "scroll" | "invoke_pattern"
+        "click" | "type_text" | "press_key" | "window_keyboard" | "scroll" | "invoke_pattern"
     )
+}
+
+fn input_result(
+    name: &str,
+    object: &Ref<FerroObject>,
+    args: &Value,
+    permissions: Permissions,
+) -> InspectResult {
+    if name == "window_keyboard" {
+        return keyboard::window_input(object, args);
+    }
+    input::execute(name, object, args, permissions)?;
+    Ok(json!({"ok":true}))
 }
 
 fn catch(f: impl FnOnce() -> InspectResult) -> InspectResult {

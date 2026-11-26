@@ -5,9 +5,15 @@ use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, HeadlessUnitTestSession,
     HeadlessWindowExtensions,
 };
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_skia::SkiaApplicationExtensions;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::Cell;
+
+#[path = "property_trace_tests.rs"]
+mod property_trace_tests;
+#[path = "ui_profile_tests.rs"]
+mod ui_profile_tests;
 
 fn app() -> AppBuilder {
     AppBuilder::configure::<Application>()
@@ -226,6 +232,57 @@ fn raw_click_keyboard_text_and_automation_drive_the_ui() {
         window.close();
     });
 }
+
+#[test]
+fn window_keyboard_follows_native_focus_and_requires_input_permission() {
+    run(|| {
+        let (window, button, text, mut inspector) = fixture();
+        let window_id = inspector.node_id(&window);
+        let button_id = inspector.node_id(&button);
+        let focus = json!({"node_id":window_id,"input":{"kind":"focus"}});
+        inspector.permissions.allow_input = false;
+        assert_eq!(
+            inspector.execute("window_keyboard", &focus).unwrap_err(),
+            "Input is disabled"
+        );
+        inspector.permissions.allow_input = true;
+        assert!(
+            inspector
+                .execute("window_keyboard", &json!({"node_id":button_id,"input":{"kind":"focus"}}))
+                .is_err()
+        );
+        assert!(
+            inspector
+                .execute(
+                    "window_keyboard",
+                    &json!({"node_id":window_id,"input":{"kind":"focus","text":"ignored"}}),
+                )
+                .is_err()
+        );
+        inspector.execute("click", &json!({"node_id":button_id})).unwrap();
+        assert_eq!(
+            inspector.execute("window_keyboard", &focus).unwrap()["role"],
+            "Button"
+        );
+        let key = |key| json!({"node_id":window_id,"input":{"kind":"key","key":key}});
+        assert_eq!(
+            inspector.execute("window_keyboard", &key("Tab")).unwrap()["role"],
+            "Edit"
+        );
+        let insert = |text| json!({"node_id":window_id,"input":{"kind":"text","text":text}});
+        inspector.execute("window_keyboard", &insert("Review")).unwrap();
+        inspector.execute("window_keyboard", &key("Space")).unwrap();
+        inspector.execute("window_keyboard", &insert("📝")).unwrap();
+        assert_eq!(text.text().as_deref(), Some("Review 📝"));
+        assert_eq!(
+            inspector.execute("window_keyboard", &key("Shift+Tab")).unwrap()["role"],
+            "Button"
+        );
+        window.close();
+        assert!(inspector.execute("window_keyboard", &focus).is_err());
+    });
+}
+
 #[test]
 fn resources_styles_screenshots_waits_and_stats() {
     run(|| {
@@ -286,7 +343,12 @@ fn resources_styles_screenshots_waits_and_stats() {
 }
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
-    assert_eq!(tools().len(), 16);
+    let tools = tools();
+    assert!(tools.iter().any(|tool| tool["name"] == "get_frame_stats"));
+    let templates = tools.iter().find(|tool| tool["name"] == "get_template_sources").unwrap();
+    assert_eq!(templates["annotations"]["readOnlyHint"], true);
+    assert!(validate("get_template_sources", &json!({"node_id":1})).is_ok());
+    assert!(validate("get_template_sources", &json!({})).is_err());
     for args in [
         json!({"node_id":0}),
         json!({"node_id":-1}),
@@ -296,8 +358,42 @@ fn schemas_reject_invalid_input_before_mutating() {
         assert!(validate("click", &args).is_err());
     }
     assert!(validate("get_tree", &json!({"depth":100})).is_err());
+    assert!(validate("get_property_trace", &json!({"node_id":1,"property":false})).is_err());
     assert!(validate("screenshot", &json!({"scale":0})).is_err());
     assert!(validate("unknown", &json!({})).is_err());
+}
+
+#[test]
+fn native_hits_and_compiler_locations_share_runtime_ids() {
+    run(|| {
+        use ferroui_base::diagnostics::{RsxSourceInfo, RsxSourceLocation};
+
+        let (window, button, _, mut inspector) = fixture();
+        let root = inspector.node_id(&window);
+        let id = inspector.node_id(&button);
+        assert!(inspector.execute("get_source", &json!({"node_id":id})).unwrap().is_null());
+        let boxed: BoxedValue = Rc::new(button.clone());
+        let compiled = RsxSourceInfo::new(file!(), env!("CARGO_MANIFEST_DIR"), RsxSourceLocation {
+            element: (11, 19), invocation: (9, 5), index: 2, revision: Some(42),
+        });
+        button.clone().upcast::<FerroObject>().set_value(RsxSourceInfo::location_property(), Some(compiled));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(), json!({
+            "uri":compiled.source_uri().unwrap().as_str(), "language":"rust", "line":11, "column":19,
+            "columnEncoding":"unicodeScalar", "invocation":{"line":9,"column":5,"index":2},
+            "revision":"000000000000002a"
+        }));
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(3, 5, Some("/source/View.xaml"))));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":3,"column":5}));
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(4, 6, Some("/source/View.xaml")).with_source_revision(43)));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":4,"column":6,"revision":"000000000000002b"}));
+        let local = Point::new(button.bounds().width / 2.0, button.bounds().height / 2.0);
+        let at = button.translate_point(local, &window.clone().upcast()).unwrap();
+        let hits = inspector.execute("get_element_at", &json!({"node_id":root,"x":at.x,"y":at.y})).unwrap();
+        assert!(hits.as_array().unwrap().iter().any(|node| node["node_id"] == id));
+        window.close();
+    });
 }
 #[test]
 fn one_inspector_serves_the_tools_and_the_targets() {

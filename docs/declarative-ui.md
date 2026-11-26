@@ -148,7 +148,9 @@ A setter of a property whose value is `T` takes what converts to it (`IntoProp<T
 | `Bind(binding)` | is bound by the property system |
 | an element, for a property that holds an object (`content`, `header`, `tag`) | holds its control |
 
-The conversions of values: `T` to `Option<T>`; text to `String` and `Option<String>`; numbers to `f64` and to text; `f64` and tuples to `Thickness`; `f64` to `CornerRadius`; a `Color`, a color name or `#rgb` text to a brush.
+Setters convert `T` to `Option<T>`, text to `String` or `Option<String>`, and numbers to `f64` or text. They also convert a `Color`, color name, or `#rgb` value to a brush.
+
+For `Thickness` and `CornerRadius`, a single `f64` applies to all sides or corners. A thickness tuple uses `(horizontal, vertical)` or `(left, top, right, bottom)`. A corner radius tuple uses `(top, bottom)` or `(top_left, top_right, bottom_right, bottom_left)`. For example, `Border { corner_radius: (8.0, 16.0) }` applies 8 to both top corners and 16 to both bottom corners.
 
 ### 4.2 The forms of upstream's code-first API
 
@@ -162,6 +164,58 @@ Upstream writes properties and bindings in code with indexers and operators on p
 | `!!` (two-way) | `.text(signal.two_way())` |
 | `control.Classes.Add("accent")` | `.class("accent")` |
 | `new Style(x => x.OfType<Button>())` | the styles API of the port (`Selectors`, `Style`, `Setter`), unchanged |
+
+### 4.3 Build TableView columns
+
+Use `table_column()` to define a native `TableViewColumn` and `table_columns` to collect the builders for `TableView::Columns`. Give each column a typed `GridLength` and optionally bind it to a property of the row object.
+
+```rust
+use ferroui_view::prelude::*;
+
+fn customer_table() -> Element {
+    rsx! {
+        TableView {
+            columns: ferroui_view::table_columns([
+                ferroui_view::table_column().header("Customer").binding_path("Name")
+                    .width(ferroui_controls::GridLength::from_pixels(156.0)),
+                ferroui_view::table_column().header("Region").binding_path("Region"),
+            ]),
+        }
+    }
+}
+```
+
+Set `items_source` to your row collection. `binding_path` creates a reflection binding for a row property. Use `binding` to pass an existing `AssignedBinding`, or supply a `cell_template` to render the whole row object. The same collection works with the chained `table_view().columns(...)` builder. Fully qualified helpers and an inline array let Designer Studio and the VS Code Columns view edit the original Rust declaration. [Designer workflow](designer/vscode/authoring.md#edit-an-rsx-tableview)
+
+### 4.4 Build TreeDataGrid columns
+
+Enable the `treedatagrid` feature of `ferroui-view` to use `TreeDataGrid`. Give the grid an `items_source` and a `column_definitions` collection. Each column builder's `.build()` creates a native column that can share the collection with different column kinds.
+
+```rust
+use ferroui_controls::ItemsSource;
+use ferroui_view::prelude::*;
+
+fn account_tree(items: ItemsSource) -> Element {
+    rsx! {
+        TreeDataGrid {
+            items_source: items,
+            column_definitions: ::ferroui_view::tree_data_grid_columns([
+                ::ferroui_view::tree_data_grid_row_header_column().build(),
+                ::ferroui_view::tree_data_grid_expander_column(
+                    ::ferroui_view::tree_data_grid_text_column()
+                        .header("Account").binding_path("Name").build()
+                ).children_path("Children").build(),
+                ::ferroui_view::tree_data_grid_check_box_column()
+                    .header("Active").binding_path("Active").build(),
+            ])
+        }
+    }
+}
+```
+
+The native grid builds a hierarchy when it encounters an expander column. Give each row a binding-readable name and children collection, or supply a compiled binding to the builder. Put header and width settings on the expander's inner column. Text, checkbox, template, and row-header columns can also stand on their own. Template columns start with the framework's default text template. Use `.cell_template(ferroui_view::template(...))` or `.cell_editing_template(...)` for a typed row.
+
+If the column definitions change when the view runs again, the grid replaces the collection in one update. For unchanged columns, reuse the collection through a hook or memo. [TreeDataGrid authoring in VS Code](designer/vscode/authoring.md#edit-an-rsx-treedatagrid)
 
 ## 5. The macros
 
@@ -389,6 +443,10 @@ rsx! { ListBox { items_source: source, item_template: item_template } }
 
 Each item container gets a `ComponentHost`. Its component reads the item (the `DataContext` of the container) and runs `view` with it. The template matches data of type `T`.
 
+To author the body on the designer canvas, assign a direct qualified call such as `ferroui_view::template(|person: Person| rsx! { TextBlock { text: person.name } })`. Use the same builder in `.cell_template(...)` on a `table_column()` for a TableView row. The isolated designer projects literal controls from that RSX body. The application evaluates the closure with the typed item. [Designer authoring walkthrough](designer/vscode/authoring.md#edit-a-rust-item-or-cell-template)
+
+Use `ferroui_view::template!(|person: Person| /* view */)` when editor-enabled debug builds need the factory's source before the first item renders. The macro passes the closure to the same data template implementation and records the constructor's file revision and position during compilation. A shared editing template can then open in App Preview and Live App before its cell enters editing mode. [Shared template example](designer/vscode/runtime.md#record-an-unmounted-rust-templates-source)
+
 **Recycling.** A virtualizing panel realizes only the visible items. When it takes a container away, it clears the container's content, so the presenter builds a new child for the next item: a template that made a new host each time would mount a new component and new controls for every item scrolled into view. The template keeps a pool instead:
 
 1. A host that leaves the visual tree goes to the pool of its template, with its component still mounted. While it has no data context, the component keeps showing its last item, so nothing is taken down.
@@ -479,6 +537,8 @@ stack_panel().styles([
 
 - `style(selector)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. `style_of(selector)` takes a selector built with the selectors API.
 - `.set(property, value)` takes what converts to the value of the property, as the setters of elements do.
+- `.resource(key, value)` adds a native resource to the rule's dictionary. `.set_resource(property, key)` follows the value seen by each matched control, including local overrides and theme variants. A `Color` resource can supply a brush property. For example, `.resource("Accent", Color::from_rgb(0, 99, 177)).set_resource(TemplatedControl::background_property(), "Accent")` uses the same key in the authored rule and the live property binding. [Author color resources in VS Code](designer/vscode/styles.md#edit-rust-style-color-resources)
+- `.theme_resource(variant, key, value)` adds a value in the rule's native theme dictionary. Use `ThemeVariant::default()` for a fallback and `ThemeVariant::light()` or `ThemeVariant::dark()` for an appearance-specific value. A shared `.resource` with the same key takes precedence within the rule. High contrast uses the variant supplied by the active native theme and follows its inheritance chain.
 - `.nested(style("^..."))` adds a nested style; its selector starts with `^`, the selector of the style it is in (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
 - `.styles([..])` of an element (`styles: [..]` in `rsx!`) adds the styles to the `Styles` of the control when it is made.
 
@@ -506,6 +566,8 @@ A `ThemeVariantScope` element (`requested_theme_variant: variant`) switches the 
 
 In a component that runs again, keep `transitions([..])` in `use_hook`, as the template and the items of section 9.2: a new value on each run is set again.
 
+FerroUI's designer previews and edits inline transition arrays on mapped RSX controls. Use a qualified builder path or an explicit import with a literal duration. [Preview and edit Rust property transitions](designer/vscode/motion.md#preview-and-edit-property-transitions-in-rust)
+
 ### 10.5 Popups and context menus
 
 A `Popup` takes its child as an element (`popup().child(..)`, or `Popup { .. }` in `rsx!`). The child is shown in a root of its own above the window: in the logical tree and under the owner of the popup, outside the visual tree of its parent. That is what a portal is in React. A property that holds a control of a class takes an element too: `context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } } }`. The reconciler patches the element there like any other.
@@ -524,6 +586,44 @@ Flyouts (`flyout`, `context_flyout`) are not controls (`FlyoutBase` derives from
 | Light | Dark |
 |---|---|
 | ![The gallery, light](images/declarative-ui/view-gallery.png) | ![The gallery, dark](images/declarative-ui/view-gallery-dark.png) |
+
+### Attach native behaviors
+
+Enable the `behaviors` feature of `ferroui-view`. Pass the trigger and its ordered actions to
+the control’s `behaviors` field. The same declarations also work with the `.behaviors(...)` builder method.
+
+```rust
+use ferroui_view::behavior::{add_class, change_property, event};
+use ferroui_view::prelude::*;
+
+fn approval() -> Element {
+    rsx! {
+        StackPanel {
+            TextBlock { name: "Status", text: "Waiting for review" }
+            Button {
+                content: "Approve",
+                behaviors: [event("Click", None, [
+                    change_property(Some("Status"), "Text", "Ready for handoff"),
+                    add_class(None, "approved"),
+                ])],
+            }
+        }
+    }
+}
+```
+
+`event` listens on the owner when its source is `None`. Pass a control name to listen on that
+control. An action with no explicit target uses the trigger sender. Named references resolve
+when the control joins the logical tree.
+
+`data("IsReady", Comparison::Equal, "True", true, [...])` compares a path on the current data
+context and restores reversible action values when the comparison becomes false.
+`invoke_command("SaveCommand", Some("approve"))` binds an existing command from the data context.
+`call_method` invokes a method through the native behavior registry. Literal property values
+use the same native converter as XAML behavior actions.
+
+Behavior declarations attach to each mounted control. Designer Studio and VS Code can edit the
+literal operands in a supported inline array. [Designer workflow](designer/vscode/authoring.md#edit-a-behavior-in-rust)
 
 ## 11. Tools (phase 4)
 

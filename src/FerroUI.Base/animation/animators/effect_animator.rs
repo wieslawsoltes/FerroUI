@@ -73,6 +73,16 @@ impl Animator for EffectAnimator {
         &self.base
     }
 
+    fn specialized_animator(&self) -> Option<Rc<dyn IAnimator>> {
+        self.try_create_animator::<BlurEffectAnimator>(|effect| effect.as_blur_effect().is_some())
+            .or_else(|| self.try_create_animator::<DropShadowEffectAnimator>(|effect| effect.as_drop_shadow_effect().is_some()))
+            .or_else(|| {
+                self.try_create_animator::<CustomEffectAnimator>(|effect| {
+                    effect.as_custom_effect().is_some() || EffectExtensions::to_custom_effect(effect).is_some()
+                })
+            })
+    }
+
     fn apply(
         this: &Rc<Self>,
         animation: &Animation,
@@ -82,15 +92,7 @@ impl Animator for EffectAnimator {
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
     ) -> Result<Option<Rc<dyn IDisposable>>, crate::animation::AnimationError> {
-        let animator = this
-            .try_create_animator::<BlurEffectAnimator>(|effect| effect.as_blur_effect().is_some())
-            .or_else(|| this.try_create_animator::<DropShadowEffectAnimator>(|effect| effect.as_drop_shadow_effect().is_some()))
-            .or_else(|| {
-                this.try_create_animator::<CustomEffectAnimator>(|effect| {
-                    effect.as_custom_effect().is_some() || EffectExtensions::to_custom_effect(effect).is_some()
-                })
-            });
-        if let Some(animator) = animator {
+        if let Some(animator) = this.specialized_animator() {
             return animator.apply(animation, control, clock, match_, on_complete, should_pause_on_invisible);
         }
 

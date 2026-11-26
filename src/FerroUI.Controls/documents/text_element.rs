@@ -69,7 +69,8 @@ impl FerroObjectImpl for TextElement {
 
         match change.property().name() {
             "Background" | "FontFamily" | "FontSize" | "FontStyle" | "FontWeight"
-            | "FontStretch" | "Foreground" | "FontFeatures" | "LetterSpacing" | "Language" => {
+            | "FontStretch" | "Foreground" | "FontFeatures" | "LetterSpacing" | "Language"
+            | "DesignTextEnvironment" => {
                 this.invalidate_format_change(change);
             }
             _ => {}

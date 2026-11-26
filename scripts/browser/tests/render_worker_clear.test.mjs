@@ -190,8 +190,8 @@ async function measureWaits(page) {
 // (`CanvasPresenter`), which it removes two animation frames after the size stopped changing.
 async function expectResize(page, viewport, canvas, marker) {
     await page.resize(viewport[0], viewport[1]);
-    await page.waitFor(`${STATE}.includes(' size=${canvas[0]}x${canvas[1]} ')`, 15000);
-    await page.waitFor("document.querySelector('#view .ferroui-resize-overlay') === null", 15000);
+    await page.waitFor(`${STATE}.includes(' size=${canvas[0]}x${canvas[1]} ')
+        && !document.querySelector('#view .ferroui-resize-overlay')`, 15000);
     await expectFrameInCanvas(page, { width: canvas[0], height: canvas[1], animated: true, marker, viewport });
 }
 

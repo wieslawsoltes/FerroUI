@@ -12,6 +12,7 @@ use ferroui_base::controls::{ResourceDictionary, ResourceKey};
 use ferroui_base::media::fonts::testing::TestAssetLoader;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, UserControl};
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 
 use super::support::{assert_is_type, build, describe, try_build, xaml_test_base};
 use crate::{compiled_xaml, compiled_xaml_source_info};
@@ -46,6 +47,17 @@ fn resource_include_loads_resource_dictionary(create_source_info: bool) {
     let background = border.background().expect("the background is null");
     let brush = background.as_solid_color_brush().expect("the brush is not an ISolidColorBrush");
     assert_eq!(0xff506070, brush.color().to_uint32(), "createSourceInfo: {create_source_info}");
+
+    let location = XamlSourceInfo::for_object(&border.clone().upcast::<ferroui_base::FerroObject>());
+    if create_source_info {
+        let (path, source) = crate::documents::SOURCE_INFO_DOCUMENTS[0];
+        let location = location.expect("the built control has a compiled source location");
+        let file = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(path);
+        assert_eq!(location.source_uri().unwrap().to_file_path().unwrap(), file);
+        assert_eq!(location.source_revision(), Some(ferroui_reload_protocol::fingerprint(source.as_bytes())));
+    } else {
+        assert!(location.is_none());
+    }
 }
 
 #[test]

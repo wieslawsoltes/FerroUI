@@ -234,22 +234,54 @@ fn skip_space(source: &str, start: usize) -> usize {
 #[derive(Clone, Debug)]
 pub(crate) struct Argument {
     pub extension: String,
+    pub depth: usize,
     pub name: Option<String>,
     pub value: String,
     pub span: SourceSpan,
     pub quote: Option<char>,
 }
 pub(crate) fn markup_arguments(source: &str) -> Vec<Argument> {
-    let decoded = Decoded::new(source);
-    if !decoded.text.starts_with('{') || decoded.text.starts_with("{}") {
-        return Vec::new();
-    }
-    let mut arguments = Vec::new();
-    parse_extension(&decoded, 0, 0, &mut arguments);
-    arguments.sort_by_key(|argument| argument.span.start);
-    arguments
+    collect_markup_tokens(source, false, false).arguments
 }
-fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Argument>) -> usize {
+
+/// Include direct extension-valued arguments such as `DataType={x:Type local:Model}`.
+pub(crate) fn markup_arguments_with_extensions(source: &str) -> Vec<Argument> {
+    collect_markup_tokens(source, true, false).arguments
+}
+
+pub(crate) struct MarkupTokens {
+    pub arguments: Vec<Argument>,
+    pub names: Vec<(String, SourceSpan)>,
+    include_names: bool,
+    include_extensions: bool,
+}
+
+/// Lex names and their value arguments together, preserving nesting and escaped text.
+pub(crate) fn markup_tokens(source: &str) -> MarkupTokens {
+    collect_markup_tokens(source, false, true)
+}
+
+fn collect_markup_tokens(source: &str, include_extensions: bool, include_names: bool) -> MarkupTokens {
+    let decoded = Decoded::new(source);
+    let mut tokens = MarkupTokens {
+        arguments: Vec::new(),
+        names: Vec::new(),
+        include_names,
+        include_extensions,
+    };
+    if decoded.text.starts_with('{') && !decoded.text.starts_with("{}") {
+        parse_extension(&decoded, 0, 0, &mut tokens);
+    }
+    tokens.arguments.sort_by_key(|argument| argument.span.start);
+    tokens
+}
+
+fn parse_extension(
+    source: &Decoded,
+    open: usize,
+    depth: usize,
+    out: &mut MarkupTokens,
+) -> usize {
     if depth >= 128 {
         return source.text.len();
     }
@@ -259,6 +291,9 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
         .find(|c: char| c.is_whitespace() || matches!(c, ',' | '}' | '{'))
         .map_or(text.len(), |i| start + i);
     let extension = &text[start..end];
+    if out.include_names && start < end {
+        out.names.push((extension.into(), SourceSpan::new(source.boundaries[start], source.boundaries[end])));
+    }
     let mut at = skip_space(text, end);
     let mut segment = at;
     let mut equal = None;
@@ -298,7 +333,7 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
                 }
             }
             ',' | '}' => {
-                push_argument(source, extension, segment, at, equal, out);
+                push_argument(source, extension, depth, segment..at, equal, out.include_extensions, &mut out.arguments);
                 if ch == '}' {
                     return next;
                 }
@@ -309,21 +344,22 @@ fn parse_extension(source: &Decoded, open: usize, depth: usize, out: &mut Vec<Ar
         }
         at = next;
     }
-    push_argument(source, extension, segment, at, equal, out);
+    push_argument(source, extension, depth, segment..at, equal, out.include_extensions, &mut out.arguments);
     at
 }
 fn push_argument(
     source: &Decoded,
     extension: &str,
-    start: usize,
-    end: usize,
+    depth: usize,
+    segment: std::ops::Range<usize>,
     equal: Option<usize>,
+    include_extensions: bool,
     out: &mut Vec<Argument>,
 ) {
     let text = &source.text;
-    let name = equal.map(|equal| text[start..equal].trim().to_owned());
-    let mut start = skip_space(text, equal.map_or(start, |equal| equal + 1));
-    let mut end = end;
+    let name = equal.map(|equal| text[segment.start..equal].trim().to_owned());
+    let mut start = skip_space(text, equal.map_or(segment.start, |equal| equal + 1));
+    let mut end = segment.end;
     while end > start
         && text[..end]
             .chars()
@@ -332,7 +368,20 @@ fn push_argument(
     {
         end -= text[..end].chars().next_back().unwrap().len_utf8();
     }
-    if start >= end || text.as_bytes()[start] == b'{' {
+    if start >= end {
+        return;
+    }
+    if text.as_bytes()[start] == b'{' {
+        if include_extensions && depth == 0 {
+            out.push(Argument {
+                extension: extension.into(),
+                depth,
+                name,
+                value: text[start..end].into(),
+                span: SourceSpan::new(source.boundaries[start], source.boundaries[end]),
+                quote: None,
+            });
+        }
         return;
     }
     let quote = text[start..end]
@@ -366,6 +415,7 @@ fn push_argument(
     }
     out.push(Argument {
         extension: extension.into(),
+        depth,
         name,
         value,
         span: SourceSpan::new(source.boundaries[start], source.boundaries[end]),

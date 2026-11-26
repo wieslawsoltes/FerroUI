@@ -98,7 +98,7 @@ impl TransformOperations {
         matrix
     }
 
-    fn try_interpolate(
+    pub(crate) fn try_interpolate(
         from: &TransformOperations,
         to: &TransformOperations,
         progress: f64,

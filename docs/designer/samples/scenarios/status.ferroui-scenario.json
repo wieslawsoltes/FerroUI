@@ -1,0 +1,10 @@
+{
+    "version": 1,
+    "name": "Status indicator",
+    "document": "status.rs",
+    "viewport": { "width": 320, "height": 112 },
+    "steps": [
+        { "action": "expectProperty", "selector": "#StatusMark", "property": "Width", "value": 132 },
+        { "action": "expectScreenshot", "baseline": "Baselines/status.png", "channelTolerance": 2 }
+    ]
+}

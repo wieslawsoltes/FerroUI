@@ -1,0 +1,29 @@
+<Grid xmlns="https://github.com/ferroui" Classes="designer-chrome" RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource DesignerChromeBrush}">
+  <Grid.Styles>
+    <Style Selector="Border.handoff-row">
+      <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+  </Grid.Styles>
+  <Border Padding="12,7" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="5">
+      <Button Name="OpenHandoff" Classes="icon" ToolTip.Tip="Open handoff JSON" AutomationProperties.Name="Open handoff JSON" />
+      <Button Name="RefreshHandoff" Grid.Column="1" Classes="icon" ToolTip.Tip="Refresh handoff review" AutomationProperties.Name="Refresh handoff review" IsEnabled="False" />
+      <Button Name="EditHandoff" Grid.Column="2" Classes="icon" ToolTip.Tip="Edit handoff JSON" AutomationProperties.Name="Edit handoff JSON" IsEnabled="False" />
+      <TextBlock Name="HandoffFile" Grid.Column="3" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+      <ComboBox Name="HandoffPlacement" Grid.Column="4" MinWidth="105" AutomationProperties.Name="Placement relative to selection" ToolTip.Tip="Placement relative to the selected control">
+        <ComboBoxItem Content="Inside" />
+        <ComboBoxItem Content="Before" />
+        <ComboBoxItem Content="After" />
+      </ComboBox>
+    </Grid>
+  </Border>
+  <Grid Grid.Row="1" ColumnDefinitions="200,*" ColumnSpacing="12" Margin="12,10,12,3">
+    <TextBox Name="HandoffFilter" PlaceholderText="Filter mappings" AutomationProperties.Name="Filter mappings" />
+    <TextBlock Name="HandoffCount" Grid.Column="1" Classes="designer-muted" VerticalAlignment="Center" />
+  </Grid>
+  <ScrollViewer Grid.Row="2" Margin="10,3,10,0" HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Name="HandoffRows" AutomationProperties.Name="Mapped design elements and assets" />
+  </ScrollViewer>
+  <TextBlock Grid.Row="3" Name="HandoffStatus" Margin="12,7,12,10" TextWrapping="Wrap" AutomationProperties.Name="Handoff review status" />
+</Grid>

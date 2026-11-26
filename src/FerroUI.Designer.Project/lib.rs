@@ -1,18 +1,61 @@
 //! Project discovery, transactional document buffers and process tasks without a UI dependency.
 mod discovery;
+mod dictionary_file;
+mod markup;
+mod packaged_assets;
+pub use packaged_assets::{is_packaged_asset_uri, is_raster_asset, PackagedAssetSource, PackagedAssets, PublishedAsset, PublishedAssetMove};
+mod preview_sources;
+mod compiled_resources;
+pub use compiled_resources::{compiled_resource_key, CompiledResources};
 mod tasks;
+mod toolbox;
 mod uri;
 mod workspace;
+pub mod project_templates;
+pub mod design_handoff;
+pub mod scenario_baselines;
+pub mod scenario_process;
+pub mod toolchain;
 
-pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution};
+pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
+pub use dictionary_file::{DictionaryDestination, dictionary_destination, suggested_dictionary_name};
 use std::fmt;
+pub use markup::{BuildMetadata, CompiledXamlOutput, MarkupAnimationProperty, MarkupAssemblySource, MarkupCatalog, MarkupControl, MarkupEventSignature, MarkupSource};
+pub mod rsx_mapping;
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
-pub use uri::{canonical_file_uri, file_path, file_uri, resolve_uri};
-pub use workspace::{Buffer, BufferUpdate, ProjectWorkspace, SavePolicy};
+pub use toolbox::{ToolboxSnippet, toolbox_snippets};
+pub use uri::{canonical_file_uri, file_path, file_uri, relative_asset_path, relative_asset_uri, resolve_uri, same_loader_address};
+mod file_move;
+mod process;
+pub use process::{spawn_project_process, stop_project_process};
+pub use tasks::CargoBuildConfiguration;
+pub use file_move::{ProjectFileMove, SavedDesignFile, XamlFileMove, relative_file_path, relative_file_reference};
+mod rust_xaml;
+mod rust_imports;
+mod rust_modules;
+pub use rust_imports::visit_rust_imports;
+pub use rust_modules::{RustModuleProject, RustModuleSource, RustModuleSources};
+pub use rust_xaml::{
+    check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
+    CargoAssetCall, RustAssetReferences, RustFilePath, RustIncludeSyntax, RustXamlRegistration,
+    rust_file_includes, rust_source_offset, rust_string_like,
+};
+pub use preview_sources::{
+    hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
+    PreviewInclude, PreviewIncludes, PreviewSourceBuffer, xaml_source_revision,
+};
+pub use workspace::{asset_digest, Buffer, BufferUpdate, CreatedSourceFile, MovedAssetFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectError(pub String);
 pub type Result<T> = std::result::Result<T, ProjectError>;
+
+/// Publish a generated text file at an explicitly selected path. A competing
+/// file creation keeps its contents, and failed writes leave no output file.
+pub fn create_new_file(path: &std::path::Path, source: &str) -> Result<()> {
+    workspace::atomic_create(path, source)
+}
+
 impl fmt::Display for ProjectError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)

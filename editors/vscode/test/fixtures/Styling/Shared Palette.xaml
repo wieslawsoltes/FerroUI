@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="AccountAccent" Color="#FF3468AC" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Colors/Dark.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <SolidColorBrush x:Key="AccountStatus" Color="#FF254F6E" />
+  <ControlTheme x:Key="AccountAction" TargetType="Button">
+    <Setter Property="Padding" Value="12,8" />
+  </ControlTheme>
+</ResourceDictionary>

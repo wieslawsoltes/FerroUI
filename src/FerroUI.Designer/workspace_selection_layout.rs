@@ -1,6 +1,6 @@
 //! Discoverable selection layout commands use the session's native planners.
 use super::*;
-use crate::{LayoutMatch, LayoutReset};
+use crate::{LayoutMatch, LayoutReset, WrapKind};
 use ferroui_controls::MenuItem;
 
 impl DesignerWorkspace {
@@ -16,6 +16,14 @@ impl DesignerWorkspace {
     pub fn match_selection_size(self: &Rc<Self>, mode: LayoutMatch) -> Result<(), String> {
         self.ensure_selection_layout_workspace()?;
         self.session.borrow_mut().match_selection_size(mode)?;
+        self.refresh(true);
+        Ok(())
+    }
+
+    /// Wrap the selection through the same authored operation as the editor and MCP.
+    pub fn wrap_selection(self: &Rc<Self>, kind: WrapKind) -> Result<(), String> {
+        self.ensure_selection_layout_workspace()?;
+        self.session.borrow_mut().wrap_selection(kind)?;
         self.refresh(true);
         Ok(())
     }
@@ -47,6 +55,14 @@ impl DesignerWorkspace {
                 }
             });
         }
+        for (name, kind) in wrap_commands() {
+            let weak = Rc::downgrade(self);
+            self.root.get_control::<MenuItem>(name).click(move |_, _| {
+                if let Some(workspace) = weak.upgrade() {
+                    workspace.report(workspace.wrap_selection(kind));
+                }
+            });
+        }
     }
 
     pub(super) fn refresh_selection_layout(&self) {
@@ -74,6 +90,18 @@ impl DesignerWorkspace {
                 .get_control::<MenuItem>(name)
                 .set_is_enabled(enabled && session.selection().len() > 1);
         }
+        let wrapping = if enabled {
+            crate::selection_wrap::WrapContext::new(&session, None).ok()
+        } else {
+            None
+        };
+        let mut can_wrap = false;
+        for (name, kind) in wrap_commands() {
+            let available = wrapping.as_ref().is_some_and(|context| context.layout(kind).is_ok());
+            can_wrap |= available;
+            self.root.get_control::<MenuItem>(name).set_is_enabled(available);
+        }
+        self.root.get_control::<MenuItem>("LayoutWrapMenu").set_is_enabled(can_wrap);
     }
 }
 
@@ -93,5 +121,16 @@ fn match_commands() -> [(&'static str, LayoutMatch); 3] {
         ("LayoutMatchWidth", LayoutMatch::Width),
         ("LayoutMatchHeight", LayoutMatch::Height),
         ("LayoutMatchSize", LayoutMatch::Size),
+    ]
+}
+
+fn wrap_commands() -> [(&'static str, WrapKind); 6] {
+    [
+        ("WrapVerticalStack", WrapKind::VerticalStack),
+        ("WrapHorizontalStack", WrapKind::HorizontalStack),
+        ("WrapFlowPanel", WrapKind::WrapPanel),
+        ("WrapGrid", WrapKind::Grid),
+        ("WrapCanvas", WrapKind::Canvas),
+        ("WrapBorder", WrapKind::Border),
     ]
 }

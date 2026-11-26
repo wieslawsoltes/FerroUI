@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="660" d:DesignHeight="440"
+             d:Fixtures='{"default":"Customers","fixtures":[{"name":"Customers","data":{"Customers":[{"Name":"Alpine &amp; Co.","Tier":"Enterprise"},{"Name":"Juniper Studio","Tier":"Growth"}]}},{"name":"Trial","data":{"Customers":[{"Name":"Cedar Systems","Tier":"Trial"}]}}]}'>
+  <UserControl.Resources>
+    <SolidColorBrush x:Key="AccountInk" Color="#FF1D4862" />
+    <DataTemplate x:Key="CustomerRow">
+      <Border Name="CustomerCard" Background="#FFEAF2F7" CornerRadius="8" Padding="14,9" Margin="0,0,0,6" MinWidth="230">
+        <StackPanel Spacing="3">
+          <TextBlock Name="CustomerName" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource AccountInk}" Text="{Binding Name}" />
+          <TextBlock FontSize="12" Foreground="#FF456478" Text="{Binding Tier}" />
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="CompactCustomer">
+      <TextBlock Margin="8,4" Foreground="{StaticResource AccountInk}" Text="{Binding Name}" />
+    </DataTemplate>
+  </UserControl.Resources>
+  <Border Background="#FFF6F9FB" Padding="24">
+    <StackPanel Spacing="10">
+      <TextBlock Text="Customer directory" FontSize="26" FontWeight="SemiBold" Foreground="#FF172F41" />
+      <ListBox Name="Directory" Height="152" ItemsSource="{Binding Customers}">
+        <!-- Keep this comment with the directory. -->
+        <ItemsControl.ItemTemplate><StaticResource ResourceKey="CustomerRow" /></ItemsControl.ItemTemplate>
+      </ListBox>
+      <TextBlock Text="Review queue" FontSize="16" Foreground="#FF1D4862" />
+      <ListBox Name="ReviewQueue" Height="80" ItemsSource="{Binding Customers}" />
+    </StackPanel>
+  </Border>
+</UserControl>

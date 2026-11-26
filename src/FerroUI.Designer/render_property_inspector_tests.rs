@@ -1,7 +1,8 @@
 //! Native property-source grouping and options remain usable under the real WinUI theme.
 use super::*;
 use crate::{PropertyInspectorFilter, PropertyInspectorSort, PropertyInspectorView};
-use ferroui_controls::{ComboBox, Flyout, TextBox};
+use ferroui_base::Ref;
+use ferroui_controls::{ComboBox, Flyout, TextBox, automation::AutomationProperties};
 
 #[test]
 fn native_property_inspector_sources_and_view_options_render_without_authoring() {
@@ -110,18 +111,7 @@ fn native_property_inspector_sources_and_view_options_render_without_authoring()
         .get_control::<ComboBox>("PropertyFilter");
     assert!(sort.bounds().width > 180.0 && filter.bounds().width > 180.0);
     assert_eq!(sort.selected_index(), 2);
-    let bitmap = RenderTargetBitmap::new(PixelSize::new(1600, 1040));
-    bitmap.render(&window.to_ref().upcast());
-    bitmap
-        .save_to_file(
-            directory
-                .join("designer-property-view-options.png")
-                .to_str()
-                .unwrap(),
-            &PngBitmapEncoderOptions::default().into(),
-        )
-        .unwrap();
-    bitmap.dispose();
+    capture_property_popup(&window, &directory.join("designer-property-view-options.png"));
     flyout.hide();
     workspace
         .control()
@@ -132,6 +122,25 @@ fn native_property_inspector_sources_and_view_options_render_without_authoring()
         &clock,
         &directory.join("designer-property-resource-filter.png"),
     );
+    let trace_button = workspace
+        .control()
+        .get_visual_descendants()
+        .find_map(|visual| {
+            let button = visual.cast::<Button>()?;
+            (AutomationProperties::get_name(&button).as_deref() == Some("Trace Background value"))
+                .then_some(button)
+        })
+        .expect("resource property has a value trace");
+    let trace = trace_button.flyout().unwrap().cast::<Flyout>().unwrap();
+    trace.show_at(&trace_button);
+    for _ in 0..3 {
+        Dispatcher::ui_thread().run_jobs(None);
+        clock.pulse();
+        window.update_layout();
+    }
+    assert!(trace.is_open());
+    capture_property_popup(&window, &directory.join("designer-property-value-trace.png"));
+    trace.hide();
     workspace.go_to_property_definition("Background").unwrap();
     assert_eq!(session.borrow().document().revision(), revision);
     assert_eq!(session.borrow().document().source(), source);
@@ -141,4 +150,13 @@ fn native_property_inspector_sources_and_view_options_render_without_authoring()
     drop(workspace);
     drop(app);
     drop(locator);
+}
+
+fn capture_property_popup(window: &Ref<Window>, path: &Path) {
+    let bitmap = RenderTargetBitmap::new(PixelSize::new(1600, 1040));
+    bitmap.render(&window.to_ref().upcast());
+    bitmap
+        .save_to_file(path.to_str().unwrap(), &PngBitmapEncoderOptions::default().into())
+        .unwrap();
+    bitmap.dispose();
 }

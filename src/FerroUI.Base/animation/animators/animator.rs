@@ -7,7 +7,7 @@ use crate::reactive::{
     CompositeDisposable, Disposable, IDisposable, IObservable, IObserver, LightweightSubject,
     ObservableError,
 };
-use crate::{AnyValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual};
+use crate::{AnyValue, BoxedValue, FerroProperty, FerroPropertyRegistry, PropertyValue, Ref, StyledProperty, Visual};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -108,6 +108,22 @@ pub trait Animator: Sized + 'static {
         new_value: &Self::Value,
     ) -> Self::Value;
 
+    /// Resolve a specialized animator for the prepared keyframes. Animators
+    /// that dispatch by their key values use the same delegate for playback and sampling.
+    fn specialized_animator(&self) -> Option<Rc<dyn IAnimator>> {
+        None
+    }
+
+    /// Resolve the object whose underlying value supplies the sampled track.
+    fn preview_target(&self, control: &Animatable) -> Option<Ref<Animatable>> {
+        Some(control.to_ref())
+    }
+
+    fn neutral_value(&self, control: &Animatable) -> Self::Value {
+        let property = self.base().styled_property::<Self::Value>();
+        control.get_base_value(property).unwrap_or_else(|| control.get_value(property))
+    }
+
     /// Reads a key frame value; `None` when it is not a value this animator
     /// can animate, in which case the neutral value is used in its place.
     #[inline]
@@ -206,6 +222,9 @@ pub(crate) fn run<A: Animator>(
     let base_clock = clock
         .or_else(|| control.clock())
         .unwrap_or_else(Clock::global_clock);
+    if !base_clock.runs_animations() {
+        return Disposable::empty();
+    }
     let instance = AnimationInstance::new(
         animation.clone(),
         control,
@@ -215,11 +234,10 @@ pub(crate) fn run<A: Animator>(
         should_pause_on_invisible,
         visual_target,
     );
-    if animation.is_preview() {
-        // Value-store frames subscribe lazily, and stop a hidden binding. Preview clocks
-        // must keep advancing even below another program, so retain one eager producer
-        // and replay its latest value when this original property frame becomes visible.
-        let values = Rc::new(PreviewValue {
+    if animation.keeps_fill_at_animation_priority() {
+        // Value-store frames stop hidden bindings. Keep the scoped animation clock running
+        // and replay its latest value when the binding becomes visible again.
+        let values = Rc::new(ScopedAnimationValue {
             value: RefCell::new(None),
             subject: LightweightSubject::new(),
             complete: Cell::new(false),
@@ -234,13 +252,13 @@ pub(crate) fn run<A: Animator>(
     }
 }
 
-struct PreviewValue<T> {
+struct ScopedAnimationValue<T> {
     value: RefCell<Option<T>>,
     subject: LightweightSubject<T>,
     complete: Cell<bool>,
     error: RefCell<Option<ObservableError>>,
 }
-impl<T: Clone + 'static> IObservable<T> for PreviewValue<T> {
+impl<T: Clone + 'static> IObservable<T> for ScopedAnimationValue<T> {
     fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
         if self.complete.get() {
             let error = self.error.borrow().clone();
@@ -259,7 +277,7 @@ impl<T: Clone + 'static> IObservable<T> for PreviewValue<T> {
         subscription
     }
 }
-impl<T: Clone> IObserver<T> for PreviewValue<T> {
+impl<T: Clone> IObserver<T> for ScopedAnimationValue<T> {
     fn on_next(&self, value: T) {
         if !self.complete.get() {
             self.value.replace(Some(value.clone()));
@@ -437,6 +455,24 @@ impl<A: Animator> IAnimator for A {
 
     fn animator_type(&self) -> TypeId {
         TypeId::of::<A>()
+    }
+
+    fn sample_for_preview(&self, control: &Animatable, positions: &[f64]) -> Option<Vec<BoxedValue>> {
+        let property = self.property()?;
+        let target = self.preview_target(control)?;
+        if property.as_styled::<A::Value>().is_none()
+            || (!property.is_attached() && !property.owner_type().is_assignable_from(target.get_type())
+                && !FerroPropertyRegistry::instance().is_registered_for(&target, property))
+        {
+            return None;
+        }
+        if let Some(animator) = self.specialized_animator() {
+            return animator.sample_for_preview(&target, positions);
+        }
+        let base = self.neutral_value(&target);
+        Some(positions.iter().map(|&position| {
+            Rc::new(interpolation_handler(self, position, &base)) as BoxedValue
+        }).collect())
     }
 
     fn apply(

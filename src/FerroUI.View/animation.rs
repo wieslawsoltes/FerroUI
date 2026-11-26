@@ -8,7 +8,7 @@ use crate::hooks::use_effect_with;
 use crate::reactive::on_cleanup;
 use ferroui_base::animation::{
     Animatable, Animation, BoolTransition, BrushTransition, ColorTransition, CornerRadiusTransition, Cue,
-    DoubleTransition, FillMode, FloatTransition, ITransition, IntegerTransition, IterationCount, KeyFrame,
+    DoubleTransition, FillMode, FloatTransition, ITransition, IntegerTransition, IterationCount, KeyFrame, KeySpline,
     PointTransition, SizeTransition, ThicknessTransition, SignedDuration, Transitions, VectorTransition,
 };
 use ferroui_base::animation::easings::Easing;
@@ -105,9 +105,18 @@ pub struct KeyFrameBuilder {
 impl KeyFrameBuilder {
     /// Sets `property` to `value` at the cue of the frame.
     pub fn set<P: TypedProperty + ?Sized>(self, property: &'static P, value: impl IntoValue<P::Value>) -> Self {
-        let value: BoxedValue = Rc::new(value.into_value());
-        let setter: Rc<dyn ferroui_base::animation::IAnimationSetter> = Setter::new_untyped(property.untyped(), value);
+        self.set_boxed(property.untyped(), Rc::new(value.into_value()))
+    }
+
+    pub(crate) fn set_boxed(self, property: &'static FerroProperty, value: BoxedValue) -> Self {
+        let setter: Rc<dyn ferroui_base::animation::IAnimationSetter> = Setter::new_untyped(property, value);
         self.frame.setters().add(setter);
+        self
+    }
+
+    /// Sets the cubic Bézier easing of the segment arriving at this key.
+    pub fn key_spline(self, x1: f64, y1: f64, x2: f64, y2: f64) -> Self {
+        self.frame.set_key_spline(Some(KeySpline::with_points(x1, y1, x2, y2)));
         self
     }
 }
@@ -144,6 +153,11 @@ impl AnimationBuilder {
     /// Whether the values of its ends are kept before and after it runs.
     pub fn fill_mode(self, fill_mode: FillMode) -> Self {
         self.animation.set_fill_mode(fill_mode);
+        self
+    }
+
+    pub(crate) fn fill_at_animation_priority(self) -> Self {
+        self.animation.set_fill_at_animation_priority(true);
         self
     }
 

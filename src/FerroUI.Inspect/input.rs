@@ -4,7 +4,7 @@ use ferroui_base::input::raw::{
     RawPointerEventType, RawTextInputEventArgs,
 };
 use ferroui_base::input::{
-    InputManager, Key, KeyDeviceType, KeyGesture, KeyboardDevice, MouseDevice, PhysicalKey,
+    Key, KeyDeviceType, KeyGesture, KeyboardDevice, MouseDevice, PhysicalKey,
     RawInputModifiers,
 };
 use ferroui_base::{FerroObject, Point, Ref, Vector};
@@ -82,10 +82,10 @@ pub(super) fn execute(
     }
     let root =
         TopLevel::get_top_level(Some(&control)).ok_or("Control is not attached to a top level")?;
-    if root.platform_impl().is_none() {
-        return Err("Window is closed".into());
-    }
-    let manager = InputManager::instance().ok_or("Input manager is unavailable")?;
+    let platform = root.platform_impl().ok_or("Window is closed")?;
+    // Route through the same presentation source as native input so pointer
+    // events receive hit-test results before dispatch.
+    let dispatch = platform.input().ok_or("Window input is unavailable")?;
     let input_root = root.input_root();
     // One monotonic clock for all injected events (including multi-click recognition).
     static START: std::sync::OnceLock<Instant> = std::sync::OnceLock::new();
@@ -96,7 +96,7 @@ pub(super) fn execute(
         }
         let keyboard = KeyboardDevice::instance().ok_or("Keyboard is unavailable")?;
         if name == "type_text" {
-            manager.process_input(Rc::new(RawTextInputEventArgs::new(
+            dispatch(Rc::new(RawTextInputEventArgs::new(
                 keyboard,
                 timestamp,
                 input_root,
@@ -110,7 +110,7 @@ pub(super) fn execute(
             }
             let modifiers = RawInputModifiers::from_bits_truncate(gesture.key_modifiers().bits());
             for event in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
-                manager.process_input(Rc::new(RawKeyEventArgs::new(
+                dispatch(Rc::new(RawKeyEventArgs::new(
                     keyboard.clone(),
                     timestamp,
                     input_root.clone(),
@@ -135,7 +135,7 @@ pub(super) fn execute(
     let point = local * transform;
     let mouse = MouseDevice::primary();
     if name == "scroll" {
-        manager.process_input(Rc::new(RawMouseWheelEventArgs::new(
+        dispatch(Rc::new(RawMouseWheelEventArgs::new(
             mouse,
             timestamp,
             input_root,
@@ -169,7 +169,7 @@ pub(super) fn execute(
             (down, pressed),
             (up, RawInputModifiers::NONE),
         ] {
-            manager.process_input(Rc::new(RawPointerEventArgs::new(
+            dispatch(Rc::new(RawPointerEventArgs::new(
                 mouse.clone(),
                 timestamp,
                 input_root.clone(),

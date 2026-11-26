@@ -1,0 +1,23 @@
+.data-view { display: grid; gap: 7px; padding: 7px 8px 10px; }
+.data-view p { margin: 0; overflow-wrap: anywhere; }
+.data-editor { display: grid; gap: 6px; min-inline-size: 0; }
+.data-preview-field { display: flex; align-items: center; gap: 6px; }
+.data-preview-field .codicon { color: var(--muted); }
+#data-preview { flex: 1; min-inline-size: 0; }
+.data-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.data-toolbar label { flex: 1; padding-inline-start: 1px; font-weight: 600; }
+.data-editor textarea {
+    inline-size: 100%;
+    min-block-size: 156px;
+    block-size: 17vh;
+    padding: 7px 8px;
+    resize: vertical;
+    background: var(--vscode-editor-background, var(--vscode-input-background));
+    color: var(--vscode-editor-foreground, var(--vscode-input-foreground));
+    font-family: var(--vscode-editor-font-family, monospace);
+    font-size: var(--vscode-editor-font-size, var(--vscode-font-size));
+    line-height: 1.5;
+    tab-size: 2;
+}
+#data-fixture-hint, #data-status { color: var(--muted); line-height: 1.35; }
+#data-error { color: var(--vscode-errorForeground); }

@@ -1,9 +1,9 @@
 //! Preview environment belongs to the workspace, independently of source history and roles.
 use super::*;
 use crate::{PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection, PreviewTheme};
+use crate::preview_theme::preview_backing;
 use ferroui_base::Visual;
-use ferroui_base::media::{FlowDirection, SolidColorBrush};
-use ferroui_base::styling::ThemeVariant;
+use ferroui_base::media::FlowDirection;
 use ferroui_base::media::{Stretch, StretchDirection};
 use ferroui_controls::{Border, Flyout, ThemeVariantScope, Viewbox};
 use std::rc::Weak;
@@ -143,6 +143,7 @@ impl DesignerWorkspace {
     /// precedence. The source buffer, undo history, collaboration and editor chrome are intact.
     pub fn set_preview_environment(&self, value: PreviewEnvironment) -> Result<(), String> {
         value.validate()?;
+        let theme = value.theme.resolve()?;
         let changed = self.preview_environment() != value;
         let invalidation = self
             .preview_environment
@@ -157,11 +158,7 @@ impl DesignerWorkspace {
         let scope = self
             .root
             .get_control::<ThemeVariantScope>("PreviewThemeScope");
-        scope.set_requested_theme_variant(match value.theme {
-            PreviewTheme::Light => Some(ThemeVariant::light()),
-            PreviewTheme::Dark => Some(ThemeVariant::dark()),
-            PreviewTheme::Inherit => None,
-        });
+        scope.set_requested_theme_variant(theme);
         match value.flow_direction {
             PreviewFlowDirection::Inherit => scope.clear_value(Visual::flow_direction_property()),
             PreviewFlowDirection::LeftToRight => {
@@ -171,17 +168,7 @@ impl DesignerWorkspace {
                 scope.set_flow_direction(FlowDirection::RightToLeft)
             }
         }
-        self.artboard.set_background(Some(
-            SolidColorBrush::parse(
-                if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
-                    "#FF202020"
-                } else {
-                    "#FFFFFFFF"
-                },
-            )
-            .unwrap()
-            .into(),
-        ));
+        self.artboard.set_background(Some(preview_backing(&scope)));
         self.root
             .get_control::<Button>("PreviewTheme")
             .set_content(Some(Rc::new(
@@ -189,6 +176,7 @@ impl DesignerWorkspace {
                     PreviewTheme::Light => "Light preview",
                     PreviewTheme::Dark => "Dark preview",
                     PreviewTheme::Inherit => "App theme",
+                    PreviewTheme::HighContrast => "High contrast",
                 }
                 .to_owned(),
             )));
@@ -264,17 +252,7 @@ impl DesignerWorkspace {
                 if let (Some(scope), Some(artboard)) =
                     (weak_scope.upgrade(), weak_artboard.upgrade())
                 {
-                    artboard.set_background(Some(
-                        SolidColorBrush::parse(
-                            if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
-                                "#FF202020"
-                            } else {
-                                "#FFFFFFFF"
-                            },
-                        )
-                        .unwrap()
-                        .into(),
-                    ));
+                    artboard.set_background(Some(preview_backing(&scope)));
                 }
             }
             invalidation.changed();

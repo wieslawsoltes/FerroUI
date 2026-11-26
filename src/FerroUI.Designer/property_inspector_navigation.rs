@@ -23,8 +23,8 @@ impl PropertyNavigationSnapshot {
             return Err("Runtime-only properties do not have authored source".into());
         }
         let session = workspace.session.borrow();
-        if !session.document().is_valid() {
-            return Err("Fix the XAML syntax before navigating from a property".into());
+        if !session.authored_is_valid() {
+            return Err("Fix the source syntax before navigating from a property".into());
         }
         let [node] = session.selection() else {
             return Err("Select one authored element to inspect its property source".into());
@@ -64,6 +64,9 @@ enum PropertyReferenceTarget {
 }
 
 fn authored_span(session: &DesignerSession, node: NodeId, property: &str) -> Option<SourceSpan> {
+    if session.uses_rust_source() {
+        return session.rust_property_span(node, property);
+    }
     let document = session.document();
     let node = document.ast().node(node)?;
     authored_property_attribute(document, node, property)
@@ -93,32 +96,7 @@ fn reference_target(
             .ok_or("This application expression does not declare a designer reference")?;
     match extension_name {
         "StaticResource" | "DynamicResource" => {
-            let arguments = extension
-                .arguments
-                .iter()
-                .filter(|argument| {
-                    argument
-                        .name
-                        .as_deref()
-                        .is_none_or(|name| name == "ResourceKey")
-                })
-                .collect::<Vec<_>>();
-            let [argument] = arguments.as_slice() else {
-                return Err("The resource expression must have one string key".into());
-            };
-            let MarkupValue::Literal(key) = &argument.value else {
-                return Err("An application resource key must be inspected in XAML".into());
-            };
-            let context = session.component_resource_context(node);
-            let resource = ferroui_designer_tools::component_resource_resolution(
-                document,
-                node,
-                key,
-                context.as_ref(),
-            )
-            .map_err(|error| error.to_string())?
-            .resolved()
-            .ok_or("The resource is external, missing or ambiguous in this preview context")?;
+            let resource = crate::property_trace::resolve_property_resource(session, node, &extension)?;
             Ok(PropertyReferenceTarget::Resource(resource))
         }
         "Binding" | "CompiledBinding" | "ReflectionBinding" => {
@@ -213,10 +191,11 @@ impl DesignerWorkspace {
         if authored_span(&session, snapshot.node, property).is_none() {
             return Vec::new();
         }
-        let has_reference = matches!(source, InspectorSource::Binding | InspectorSource::Resource)
+        let rust = session.uses_rust_source();
+        let has_reference = !rust && matches!(source, InspectorSource::Binding | InspectorSource::Resource)
             && reference_target(&session, snapshot.node, property).is_ok();
         drop(session);
-        let mut commands = vec![("Show authored XAML", false)];
+        let mut commands = vec![(if rust { "Reveal in Rust" } else { "Show authored XAML" }, false)];
         if has_reference {
             commands.push(("Go to referenced definition", true));
         }

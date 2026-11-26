@@ -118,6 +118,8 @@ same source planners used by property and layout editing.
 
 ## Native input and transaction flow
 
+VS Code exposes the same measured gap, margin, and padding planners through **Show Spacing Handles** and the Studio MCP tools. VS Code enters the checked patch in its editor history. Studio applies the planner’s transaction to the native document. [VS Code spacing workflow](vscode/authoring.md#adjust-spacing-on-the-canvas)
+
 The **Layout helpers** canvas command controls only presentation. Hiding helpers
 cancels pending helper/drop drafts. Select/Interact modes continue to distinguish
 authoring from interaction with the preview application.

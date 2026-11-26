@@ -21,6 +21,8 @@
 pub mod automation;
 pub mod interop;
 pub mod log;
+#[cfg(all(target_os = "android", feature = "live-inspector"))]
+pub mod live_inspector;
 pub mod platform;
 
 mod android_platform;

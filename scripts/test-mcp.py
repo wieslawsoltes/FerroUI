@@ -125,7 +125,9 @@ def exercise(binary, http=False, writable=True):
     catalog = Catalog.__new__(Catalog)
     try:
         catalog.__init__(binary, http, writable)
-        assert len(catalog.rpc("tools/list")["tools"]) == 16
+        tools = {tool["name"]: tool for tool in catalog.rpc("tools/list")["tools"]}
+        assert tools["get_element_at"]["annotations"]["readOnlyHint"]
+        assert tools["get_source"]["annotations"]["readOnlyHint"]
         catalog.tool("wait_for", {"type": "MainWindow", "timeout_ms": 30000})
         window = catalog.tool("list_windows")[0]["node_id"]
         if not writable:
@@ -138,7 +140,15 @@ def exercise(binary, http=False, writable=True):
             assert catalog.tool("get_tree", {"tree": tree, "depth": 4, "properties": ["Width"]})
         # The search box of the shell is the AutoSuggestBox `SearchBox` of the pane; its text box is
         # the template part `TextBox` (the only one on the home page).
-        editor = catalog.tool("find_elements", {"selector": "TextBox#TextBox"})[0]["node_id"]
+        element = catalog.tool("find_elements", {"selector": "TextBox#TextBox"})[0]
+        editor = element["node_id"]
+        bounds = element["bounds_in_root"]
+        hits = catalog.tool("get_element_at", {"node_id": window,
+                                               "x": bounds["x"] + bounds["width"] / 2,
+                                               "y": bounds["y"] + bounds["height"] / 2})
+        assert any(hit["node_id"] == editor for hit in hits), hits
+        source = catalog.tool("get_source", {"node_id": editor})
+        assert source is None or "uri" in source, source
         catalog.tool("get_properties", {"node_id": editor, "properties": ["Text", "IsVisible"]})
         catalog.tool("click", {"node_id": editor})
         catalog.tool("type_text", {"node_id": editor, "text": "Button"})

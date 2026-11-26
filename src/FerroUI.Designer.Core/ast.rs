@@ -5,8 +5,10 @@ use std::collections::BTreeMap;
 mod parser;
 mod reconciliation;
 mod validation;
+mod xml_text;
 
 pub(crate) use parser::validate_xml;
+pub use xml_text::XmlText;
 
 #[cfg(test)]
 mod tests;

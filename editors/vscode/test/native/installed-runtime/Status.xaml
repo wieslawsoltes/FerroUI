@@ -1,0 +1,3 @@
+<ContentControl xmlns="https://github.com/ferroui">
+  <TextBlock Name="XamlStatus" Text="Initial XAML status"/>
+</ContentControl>

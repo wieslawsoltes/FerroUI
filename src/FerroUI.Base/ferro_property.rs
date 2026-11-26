@@ -830,9 +830,7 @@ impl FerroProperty {
         }
     }
 
-    /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
-    #[inline]
-    /// The codec of a styled property, `None` for a direct property.
+    /// The [styled codec](crate::styled_property::StyledCodec), when the property has one.
     #[inline]
     pub(crate) fn styled_codec_if_any(&self) -> Option<&'static dyn crate::styled_property::StyledCodec> {
         self.styled_codec.get().copied()
@@ -1140,7 +1138,7 @@ impl FerroProperty {
     }
 
     #[inline(never)]
-    fn register_attached_with_core<TValue: StyledValue>(
+    pub(crate) fn register_attached_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         host_type: &'static TypeInfo,
         name: &str,

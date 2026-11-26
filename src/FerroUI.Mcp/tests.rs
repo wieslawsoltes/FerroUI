@@ -54,9 +54,19 @@ fn http_authentication_origin_sessions_and_protocol() {
     let init=json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":protocol::VERSION,"capabilities":{},"clientInfo":{"name":"test","version":"1"}}}).to_string();
     let (status, head, body) = request(address, "POST", &headers(token, None), &init);
     assert_eq!(status, 200);
+    let initialized = serde_json::from_str::<Value>(&body).unwrap();
+    assert_eq!(initialized["result"]["protocolVersion"], protocol::VERSION);
+    let identity = &initialized["result"]["_meta"]["org.ferroui/inspector"];
+    assert_eq!(identity["pid"], std::process::id());
+    let instance = identity["instance"].as_str().unwrap();
+    assert_eq!(instance.len(), 32);
+    assert!(instance.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    assert!(!token.contains(instance));
+    let (_, _, another) = request(address, "POST", &headers(token, None), &init);
     assert_eq!(
-        serde_json::from_str::<Value>(&body).unwrap()["result"]["protocolVersion"],
-        protocol::VERSION
+        serde_json::from_str::<Value>(&another).unwrap()["result"]["_meta"]
+            ["org.ferroui/inspector"],
+        *identity
     );
     let session = head
         .lines()
@@ -76,19 +86,21 @@ fn http_authentication_origin_sessions_and_protocol() {
         .0,
         202
     );
-    let (_, _, body) = request(
+    let (status, _, body) = request(
         address,
         "POST",
         &auth,
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#,
     );
-    assert_eq!(
-        serde_json::from_str::<Value>(&body).unwrap()["result"]["tools"]
-            .as_array()
-            .unwrap()
-            .len(),
-        16
-    );
+    assert_eq!(status, 200);
+    let listing: Value = serde_json::from_str(&body).unwrap();
+    let tools = listing["result"]["tools"].as_array().unwrap();
+    for name in ["list_windows", "get_tree", "get_element_at", "get_source", "screenshot"] {
+        assert!(
+            tools.iter().any(|tool| tool["name"] == name && tool["inputSchema"]["type"] == "object"),
+            "Missing tool or input schema for {name}"
+        );
+    }
     assert_eq!(request(address, "POST", &auth, "{").0, 400);
     assert_eq!(
         request(

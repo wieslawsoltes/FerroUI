@@ -5,7 +5,7 @@ use ferroui_base::FerroProperty;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTypeKind};
 use ferroui_designer_core::{Node, NodeId};
-use ferroui_designer_tools::PropertyValueShape;
+use ferroui_designer_tools::{PropertyComponentType, PropertyValueShape};
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -291,6 +291,9 @@ pub fn resolve_property_editor_metadata(
         },
         framework_type,
     );
+    let components = standard.then_some(leaf)
+        .and_then(PropertyComponentType::for_type)
+        .and_then(PropertyComponentType::value_shape);
     let kind = if let Some(metadata) =
         markup.filter(|metadata| metadata.kind == MarkupTypeKind::Enum)
     {
@@ -302,19 +305,13 @@ pub fn resolve_property_editor_metadata(
                 .collect(),
             flags: metadata.is_flags,
         }
+    } else if let Some(shape) = components {
+        PropertyEditorKind::Components(shape)
     } else {
         match if standard { leaf } else { "" } {
             "bool" | "Boolean" => PropertyEditorKind::Boolean,
             "f32" | "f64" | "i8" | "i16" | "i32" | "i64" | "isize" | "u8" | "u16" | "u32"
             | "u64" | "usize" | "Decimal" => PropertyEditorKind::Number,
-            "Point" | "PixelPoint" => PropertyEditorKind::Components(PropertyValueShape::Point),
-            "Size" | "PixelSize" => PropertyEditorKind::Components(PropertyValueShape::Size),
-            "Vector" => PropertyEditorKind::Components(PropertyValueShape::Vector),
-            "Rect" | "PixelRect" => PropertyEditorKind::Components(PropertyValueShape::Rect),
-            "Matrix" => PropertyEditorKind::Components(PropertyValueShape::Matrix),
-            "RelativePoint" => PropertyEditorKind::Components(PropertyValueShape::RelativePoint),
-            "RelativeRect" => PropertyEditorKind::Components(PropertyValueShape::RelativeRect),
-            "CornerRadius" => PropertyEditorKind::Components(PropertyValueShape::CornerRadius),
             "Thickness" => PropertyEditorKind::Thickness,
             "Color" => PropertyEditorKind::Color,
             "IBrush"
@@ -505,6 +502,10 @@ fn type_identity(mut value: &str) -> &str {
 pub(super) fn type_leaf(value: &str) -> &str {
     let identity = type_identity(value);
     identity.rsplit("::").next().unwrap_or(identity)
+}
+
+pub(crate) fn property_component_shape(runtime_type: &str) -> Option<PropertyComponentType> {
+    PropertyComponentType::for_type(type_identity(runtime_type))
 }
 
 fn framework_type(metadata: &MarkupType) -> bool {

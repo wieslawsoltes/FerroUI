@@ -1,0 +1,24 @@
+.handoff-toolbar { justify-content: space-between; }
+#handoff-manifest { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.handoff-body { padding: 0 12px 14px; }
+.handoff-summary { display: flex; align-items: center; gap: 10px; margin-block: 9px 5px; }
+#handoff-filter { min-width: 0; width: min(190px, 55%); }
+#handoff-count { color: var(--muted); }
+#handoff-rows { list-style: none; padding: 0; margin: 0; }
+#handoff-rows li {
+    display: grid; grid-template-columns: minmax(104px, .75fr) minmax(140px, 1.4fr) 84px;
+    gap: 9px; padding: 8px 3px; align-items: start; border-block-end: 1px solid var(--line);
+}
+.handoff-label, .handoff-detail { min-width: 0; overflow-wrap: anywhere; }
+.handoff-label { display: grid; grid-template-columns: 16px 1fr; gap: 2px 5px; }
+.handoff-label small { grid-column: 2; color: var(--muted); }
+.handoff-label .codicon { color: var(--muted); align-self: center; }
+#handoff-rows .tool-group { justify-self: end; }
+.handoff-detail code, .handoff-detail small { display: block; margin-block-start: 3px; }
+.handoff-detail code { width: fit-content; max-width: 100%; white-space: pre-wrap; }
+.handoff-transfer { color: var(--muted); white-space: pre-wrap; }
+.handoff-issue { color: var(--vscode-editorWarning-foreground, var(--vscode-foreground)); }
+@media (max-width: 460px) {
+    #handoff-rows li { grid-template-columns: minmax(0, 1fr) 84px; gap: 4px 8px; }
+    .handoff-detail { grid-area: 2 / 1 / 3 / -1; padding-inline-start: 21px; }
+}

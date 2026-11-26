@@ -1,0 +1,12 @@
+.token-toolbar { justify-content: space-between; }
+#token-source { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#token-report { padding: 0 12px 14px; }
+#token-report h2 { color: var(--muted); font-size: 12px; margin: 14px 0 6px; }
+#token-report ul { list-style: none; padding: 0; margin: 0; }
+#token-report li { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 8px 0; border-block-end: 1px solid var(--line); }
+.token-detail { min-width: 0; overflow-wrap: anywhere; }
+.token-detail strong { display: block; font-weight: 600; }
+.token-detail code, .token-detail small { display: block; margin-block-start: 3px; }
+.token-detail code { width: fit-content; max-width: 100%; }
+.token-detail small { color: var(--muted); }
+#token-issue-list strong { color: var(--vscode-editorWarning-foreground, var(--vscode-foreground)); }

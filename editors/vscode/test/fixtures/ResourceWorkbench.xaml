@@ -1,0 +1,9 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="CustomerProfile">
+    <StackPanel Spacing="12" Margin="36">
+        <TextBlock Text="Customer profile" FontSize="24" />
+        <Border Name="CustomerCard" Background="#FF2D6A51" CornerRadius="8" Padding="20">
+            <!-- Preserve the card's authored content. -->
+            <TextBlock Text="Northwind Studio" Foreground="White" />
+        </Border>
+    </StackPanel>
+</UserControl>

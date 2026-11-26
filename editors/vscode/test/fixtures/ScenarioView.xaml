@@ -1,0 +1,6 @@
+<Border xmlns="https://github.com/ferroui" Background="#E4EEE8" Padding="16">
+    <StackPanel Spacing="8">
+        <TextBox Name="Query" AutomationProperties.Name="Customer query" Text="" />
+        <TextBlock Name="Result" Text="{Binding Text, ElementName=Query}" />
+    </StackPanel>
+</Border>

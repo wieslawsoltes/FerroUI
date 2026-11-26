@@ -1,0 +1,31 @@
+<Grid xmlns="https://github.com/ferroui" RowDefinitions="Auto,Auto,*" Background="{DynamicResource DesignerChromeBrush}">
+  <Border Padding="12,6" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1">
+    <Grid ColumnDefinitions="*,220,Auto,Auto" ColumnSpacing="6">
+      <ComboBox Name="ScenarioFile" AutomationProperties.Name="Scenario" HorizontalAlignment="Stretch" />
+      <TextBox Name="ScenarioReference" Grid.Column="1" PlaceholderText="Workspace baseline" ToolTip.Tip="Optional local Git reference" AutomationProperties.Name="Git reference" />
+      <Button Name="RunScenario" Grid.Column="2" Classes="designer-icon-button" ToolTip.Tip="Run baseline review" AutomationProperties.Name="Run baseline review" />
+      <Button Name="ApproveScenario" Grid.Column="3" Classes="designer-icon-button" IsEnabled="False" ToolTip.Tip="Approve reviewed baseline" AutomationProperties.Name="Approve reviewed baseline" />
+    </Grid>
+  </Border>
+  <Border Grid.Row="1" Padding="12,6" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1">
+    <Grid ColumnDefinitions="230,Auto,*" ColumnSpacing="8">
+      <ComboBox Name="ScenarioCapture" AutomationProperties.Name="Screenshot assertion" HorizontalAlignment="Stretch" />
+      <Button Name="ScenarioDifference" Grid.Column="1" Classes="designer-icon-button" IsEnabled="False" AutomationProperties.Name="Toggle visual difference" ToolTip.Tip="Toggle visual difference" />
+      <TextBlock Name="ScenarioStatus" Grid.Column="2" VerticalAlignment="Center" TextWrapping="Wrap" />
+    </Grid>
+  </Border>
+  <Grid Name="ComparedImages" Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="10" Margin="12">
+    <Grid RowDefinitions="Auto,*" RowSpacing="6">
+      <TextBlock Name="ReferenceTitle" Text="Expected" FontWeight="SemiBold" />
+      <Image Name="ScenarioExpected" Grid.Row="1" Stretch="Uniform" AutomationProperties.Name="Expected screenshot" />
+    </Grid>
+    <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="6">
+      <TextBlock Text="Actual" FontWeight="SemiBold" />
+      <Image Name="ScenarioActual" Grid.Row="1" Stretch="Uniform" AutomationProperties.Name="Current native screenshot" />
+    </Grid>
+  </Grid>
+  <Grid Name="DifferenceImage" Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="6" Margin="12" IsVisible="False">
+    <TextBlock Text="Changed pixels" FontWeight="SemiBold" />
+    <Image Name="ScenarioDiff" Grid.Row="1" Stretch="Uniform" AutomationProperties.Name="Changed pixels highlighted in magenta" />
+  </Grid>
+</Grid>

@@ -514,6 +514,34 @@ fn tier_d_platform_fallback_is_invoked_when_cache_sweep_has_no_covering_family()
 }
 
 #[test]
+fn platform_resolves_the_requested_locale_independently_of_the_warm_font_cache() {
+    use crate::media::fonts::FontCodePageCoverage;
+
+    let _scope = TestFontScope::start();
+    let chinese = TestFontBuilder::new("Simplified fallback")
+        .codepoints(&[(CJK_ICHI as u32, CJK_ICHI as u32)])
+        .code_page_coverage(FontCodePageCoverage::ChineseSimplified | FontCodePageCoverage::JapaneseJis)
+        .localized_family_name(0x0804, "Simplified fallback");
+    let japanese = TestFontBuilder::new("Japanese fallback")
+        .codepoints(&[(CJK_ICHI as u32, CJK_ICHI as u32)])
+        .code_page_coverage(FontCodePageCoverage::JapaneseJis)
+        .localized_family_name(0x0411, "Japanese fallback");
+    let expected = create_glyph_typeface(&japanese, FontSimulations::None);
+    for warm in [false, true] {
+        let collection = RecordingFontCollection::new("fonts:locale-independent");
+        if warm {
+            load_fonts(&*collection, std::slice::from_ref(&chinese));
+            let cached = match_character(&*collection, CJK_ICHI, None, Some(&culture("zh-CN"))).unwrap();
+            assert_eq!(family_of(&cached), "Simplified fallback");
+        }
+        *collection.platform_fallback_result.borrow_mut() = Some(expected.clone());
+        let matched = match_character(&*collection, CJK_ICHI, None, Some(&culture("ja-JP"))).unwrap();
+        assert_eq!(family_of(&matched), "Japanese fallback");
+        assert_eq!(collection.platform_call_count.get(), 1);
+    }
+}
+
+#[test]
 fn tier_d_platform_fallback_is_invoked_at_most_once_per_script_culture_pair() {
     let _scope = TestFontScope::start();
 

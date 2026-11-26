@@ -132,7 +132,13 @@ impl Session {
                         json!({"jsonrpc":"2.0","id":id,"result":{"protocolVersion":version,"capabilities":{"tools":{}},"serverInfo":{"name":"ferroui-mcp-service","version":env!("CARGO_PKG_VERSION")},"instructions":"Application service. Only its advertised tools are available; each service validates its own identities and access policies."}}),
                     );
                 }
-                json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{"subscribe":false,"listChanged":false},"logging":{}},"serverInfo":{"name":"ferroui-mcp","version":env!("CARGO_PKG_VERSION")},"instructions":"Inspect a running FerroUI application. Property writes and input require explicit application permissions. IDs expire when their objects are destroyed."})
+                let mut result = json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{"subscribe":false,"listChanged":false},"logging":{}},"serverInfo":{"name":"ferroui-mcp","version":env!("CARGO_PKG_VERSION")},"instructions":"Inspect a running FerroUI application. Property writes and input require explicit application permissions. IDs expire when their objects are destroyed."});
+                if let Some(instance) = &client.inspector_instance {
+                    result["_meta"] = json!({
+                        "org.ferroui/inspector": { "pid": std::process::id(), "instance": instance }
+                    });
+                }
+                result
             }
             "ping" => json!({}),
             "tools/list" => json!({"tools":client.tools()}),
@@ -231,9 +237,7 @@ impl Session {
                             json!({"contents":[{"uri":uri,"mimeType":"application/json","text":value.to_string()}]})
                         } else if tool == "screenshot" && client.service.is_none() {
                             json!({"content":[{"type":"image","mimeType":"image/png","data":value["data"]}],"isError":false})
-                        } else if client.service.is_none()
-                            && value["mimeType"] == "image/png"
-                            && value["data"].is_string()
+                        } else if value["mimeType"] == "image/png" && value["data"].is_string()
                         {
                             native_image_result(value)
                         } else {

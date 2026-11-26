@@ -93,7 +93,8 @@ draws registered graphs offscreen once, so their pipelines are compiled before a
   gives its padding; `Effect::parse` reads `blur(...)` and `drop-shadow(...)` and is the markup
   converter of `IEffect` (`markup_types/contracts.rs`). `EffectTransition` and `EffectAnimator`
   (`animation/transitions/effect_transition.rs`, `animation/animators/effect_animator.rs`)
-  interpolate blurs and shadows.
+  interpolate blurs and shadows. Freezing a directional shadow preserves its authored
+  angle and depth so static and animation frames resolve to the same rendered offsets.
 - **The transport**: `Visual` freezes its `Effect` when it updates its composition visual
   (`visual.rs`, `EffectExtensions::to_immutable` when the frozen value is no longer equal), the
   generated property writes the `Arc<dyn IImmutableEffect>` into the object stream of the batch

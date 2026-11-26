@@ -2045,6 +2045,54 @@ mod tests {
         pump(&[&owner, &guest], &|| {
             guest_session.borrow().document().source().contains("66")
         });
+
+        // The editor worker connects to the same native Share room. Studio keeps its own
+        // source transaction history when receiving and compensating these operations.
+        let previous_invitation = owner.status().invitation;
+        pump(&[&owner, &guest], &|| !owner.busy.get());
+        owner.invite(Role::Editor).unwrap();
+        pump(&[&owner, &guest], &|| {
+            owner.status().invitation != previous_invitation && !owner.busy.get()
+        });
+        let editor = RefCell::new(
+            host::editor::OpenRoom {
+                directory: directory.join("Editor"),
+                uri: "file:///Editor.xaml".into(),
+                start: host::editor::StartRoom::Join {
+                    invitation: owner.status().invitation.unwrap(),
+                    display_name: "VS Code".into(),
+                },
+            }
+            .connect()
+            .unwrap(),
+        );
+        {
+            let mut editor = editor.borrow_mut();
+            editor.tick(true);
+            let current = editor.review().unwrap();
+            let source = current.source.replace("Name=\"Target\"", "Name=\"Target\" Content=\"Edited in VS Code\"");
+            let revision = current.revision;
+            editor.publish(&revision, source).unwrap();
+            editor.tick(true);
+        }
+        pump(&[&owner, &guest], &|| {
+            owner_session.borrow().document().source().contains("Edited in VS Code") && !owner.busy.get()
+        });
+        let owner_target = target(&owner_session);
+        owner_session.borrow_mut().set_property(&[owner_target], "Content", "Edited in Studio").unwrap();
+        pump(&[&owner, &guest], &|| {
+            let mut editor = editor.borrow_mut();
+            editor.tick(true);
+            editor.review().unwrap().source.contains("Edited in Studio")
+        });
+        owner_session.borrow_mut().undo().unwrap();
+        pump(&[&owner, &guest], &|| {
+            let mut editor = editor.borrow_mut();
+            editor.tick(true);
+            editor.review().unwrap().source.contains("Edited in VS Code")
+        });
+        drop(editor);
+
         guest.disconnect();
         owner.disconnect();
         pump(&[&owner, &guest], &|| {

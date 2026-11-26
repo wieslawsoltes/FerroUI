@@ -1,6 +1,7 @@
 //! Design-time XAML is authored independently of the application's values. The preview
 //! projection resolves namespace identities, preserves source ownership, and is never saved.
 use crate::DesignerSession;
+use ferroui_designer_core::design_fixtures::{DesignFixtures, FIXTURES_ATTRIBUTE, is_fixtures};
 use ferroui_designer_core::{Ast, Document, Edit, Node, NodeId, NodeKind, SourceSpan};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
@@ -9,7 +10,7 @@ use std::sync::Arc;
 mod editor;
 pub use editor::{DesignTimeEditor, DesignTimeEditorModel};
 
-pub const DESIGN_NAMESPACE: &str = "http://schemas.microsoft.com/expression/blend/2008";
+pub use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
 const COMPATIBILITY_NAMESPACE: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 const FRAMEWORK: &str = "https://github.com/ferroui";
 
@@ -103,11 +104,36 @@ impl DesignerSession {
     /// Presentation state; source and undo history remain untouched. Viewers can inspect
     /// both the sample-data preview and the authored application values.
     pub fn set_design_time_enabled(&mut self, enabled: bool) -> Result<(), String> {
+        let fixture = self.preview.design_fixture().map(str::to_owned);
+        self.configure_design_data(enabled, fixture)
+    }
+
+    pub fn design_fixture(&self) -> Option<&str> {
+        self.preview.design_fixture()
+    }
+
+    pub fn set_design_fixture(&mut self, fixture: Option<String>) -> Result<(), String> {
+        if let Some(name) = &fixture {
+            let fixtures = DesignFixtures::from_document(&self.document)?;
+            if fixtures.as_ref().and_then(|set| set.get(name)).is_none() {
+                return Err(format!(
+                    "Design fixture '{name}' is unavailable in this view."
+                ));
+            }
+        }
+        self.configure_design_data(true, fixture)
+    }
+
+    pub(crate) fn configure_design_data(
+        &mut self,
+        enabled: bool,
+        fixture: Option<String>,
+    ) -> Result<(), String> {
         if !self.document.is_valid() {
             return Err("Repair the XAML before switching design data.".into());
         }
         self.preview
-            .set_design_time_enabled(enabled, &self.document)?;
+            .configure_design_data(enabled, fixture, &self.document)?;
         self.definition_scope_epoch = self.definition_scope_epoch.wrapping_add(1);
         self.generation = self.generation.wrapping_add(1);
         self.refresh_layer_visuals();
@@ -207,7 +233,7 @@ pub fn plan_design_time_edits(
     let mut candidate = document.clone();
     let mut result = Vec::new();
     for command in commands {
-        let (node, property, value, object) = match command {
+        let (node, property, mut value, object) = match command {
             DesignTimeEdit::SetProperty {
                 node,
                 property,
@@ -235,6 +261,17 @@ pub fn plan_design_time_edits(
             }
         };
         validate_property(&property)?;
+        if property == FIXTURES_ATTRIBUTE {
+            if node != candidate.ast().root() || object {
+                return Err("Design fixtures use a JSON attribute on the view root.".into());
+            }
+            if let Some(draft) = &value {
+                let manifest = DesignFixtures::parse(draft)?;
+                // XML attribute normalization does not have to preserve a JSON editor's indentation.
+                // Store the canonical form, and keep the editor draft separate.
+                value = Some(serde_json::to_string(&manifest).map_err(|error| error.to_string())?);
+            }
+        }
         if value.as_ref().is_some_and(|value| value.len() > 262_144) {
             return Err("A design-time value cannot exceed 256 KiB.".into());
         }
@@ -417,6 +454,7 @@ pub(crate) fn project(
     document: &Document,
     base_source: &str,
     enabled: bool,
+    selected_fixture: Option<&str>,
 ) -> Result<Option<DesignTimeProjection>, String> {
     let has_design = document.ast().elements().any(|node| {
         node.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE)
@@ -459,6 +497,39 @@ pub(crate) fn project(
     let mut patches = Vec::new();
     let mut samples = Vec::new();
     let mut notices = Vec::new();
+    let root = base
+        .ast()
+        .node(base.ast().root())
+        .ok_or("No preview root.")?;
+    let fixture = if enabled {
+        DesignFixtures::from_document(&base)?.and_then(|manifest| {
+            let selected = selected_fixture.and_then(|name| manifest.get(name));
+            if let Some(name) = selected_fixture.filter(|_| selected.is_none()) {
+                notices.push(format!(
+                    "Design fixture '{name}' was removed. Showing '{}' instead.",
+                    manifest.default
+                ));
+            }
+            selected
+                .or_else(|| manifest.get(&manifest.default))
+                .cloned()
+        })
+    } else {
+        None
+    };
+    if let Some(fixture) = &fixture {
+        suppress_runtime_value(&base, root, "DataContext", None, &mut patches);
+        samples.push(crate::design_time_samples::request(
+            &base,
+            root.id,
+            "DataContext",
+            1,
+            Some(crate::design_records::DesignRecord::from_json(
+                &fixture.data,
+            )),
+            &mut notices,
+        ));
+    }
     for node in base.ast().elements() {
         if enabled {
             let mut overrides = BTreeSet::new();
@@ -534,6 +605,10 @@ pub(crate) fn project(
                         mask(&mut patches, node.span, base_source);
                         continue;
                     }
+                    if fixture.is_some() && parent.id == root.id && property == "DataContext" {
+                        mask(&mut patches, node.span, base_source);
+                        continue;
+                    }
                     suppress_runtime_value(&base, parent, property, Some(node.id), &mut patches);
                     if matches!(property, "PreviewWith" | "DesignStyle") {
                         continue;
@@ -575,6 +650,17 @@ pub(crate) fn project(
             } else {
                 local(&attribute.name)
             };
+            if is_fixtures(attribute) {
+                if enabled && node.id != root.id {
+                    return Err("Design fixtures belong on the view root.".into());
+                }
+                mask(&mut patches, attribute.span, base_source);
+                continue;
+            }
+            if fixture.is_some() && node.id == root.id && original == "DataContext" {
+                mask(&mut patches, attribute.span, base_source);
+                continue;
+            }
             if !enabled {
                 mask(&mut patches, attribute.span, base_source);
                 continue;
@@ -602,6 +688,7 @@ pub(crate) fn project(
                     node.id,
                     property,
                     count,
+                    None,
                     &mut notices,
                 ));
             } else {

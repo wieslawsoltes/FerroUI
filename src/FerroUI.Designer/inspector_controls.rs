@@ -471,7 +471,7 @@ fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool)
         return match entry.name.as_str() {
             "Project" => (COMPONENT, 0xffb6a2f6, false),
             "Folder" => (FOLDER, 0xff9caecb, false),
-            "XAML" => (FILE, 0xff79a8ff, false),
+            "XAML" | "RSX" => (FILE, 0xff79a8ff, false),
             "Rust" => (FILE, 0xffd5ad8f, false),
             "Asset" => (IMAGE, 0xffa4c5b7, false),
             _ => (FILE, 0xffa9adba, false),
@@ -524,6 +524,7 @@ pub(super) struct PropertyRow {
     pub metadata: Option<crate::editors::PropertyEditorMetadata>,
     pub can_reset: bool,
     pub reveal: Option<Rc<dyn Fn()>>,
+    trace: Option<super::property_trace_view::TraceAction>,
     source_actions: Vec<(String, Rc<dyn Fn()>)>,
     validate_drop: Option<PropertyDropValidator>,
     // Resolve on hover so animations can update diagnostics without replacing an editor
@@ -561,7 +562,7 @@ struct OutlineSnapshot {
     revision: u64,
     ast: Arc<ferroui_designer_core::Ast>,
     generation: u64,
-    mode: OutlineMode,
+    mode: Option<RuntimeOutlineMode>,
     filter: String,
     scope: Option<NodeId>,
     layer_epoch: u64,
@@ -615,9 +616,7 @@ impl InspectorControls {
         self.outline_snapshot
             .borrow()
             .as_ref()
-            .is_some_and(|snapshot| {
-                snapshot.mode == OutlineMode::Source && snapshot.matches_document(session)
-            })
+            .is_some_and(|snapshot| snapshot.mode.is_none() && snapshot.matches_document(session))
     }
 
     pub fn new(root: &Ref<Control>) -> Self {
@@ -732,7 +731,9 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
     }
     let cell = Grid::new();
     cell.classes().add("property-value-cell");
-    cell.set_column_definitions(ColumnDefinitions::parse("*,22").unwrap());
+    let trace_column = if row.trace.is_some() && row.context.is_some() { 2 } else { 1 };
+    let columns = if trace_column == 2 { "*,22,22" } else { "*,22" };
+    cell.set_column_definitions(ColumnDefinitions::parse(columns).unwrap());
     cell.set_min_height(28.0);
     cell.set_margin(Thickness::new(0.0, 1.0, 0.0, 1.0));
     ToolTip::set_tip(
@@ -840,7 +841,7 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         cell.children().add(reset.upcast::<Control>());
     } else if let Some(reveal) = &row.reveal {
         cell.children()
-            .add(property_source_link("View XAML…", reveal));
+            .add(property_source_link("View source…", reveal));
     } else {
         let value = TextBox::new();
         value.set_text(Some(&row.display_value));
@@ -849,6 +850,11 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         value.set_font_size(12.0);
         AutomationProperties::set_name(&value, Some(&format!("{} read only value", row.name)));
         cell.children().add(value.upcast::<Control>());
+    }
+    if let Some(trace) = &row.trace {
+        let button = trace();
+        Grid::set_column(&button, trace_column);
+        cell.children().add(button.upcast::<Control>());
     }
     cell.upcast::<Control>()
 }
@@ -1420,12 +1426,12 @@ impl DesignerWorkspace {
             uri: session.document_uri().to_owned(),
             revision: session.document().revision(),
             ast: session.document().ast_snapshot(),
-            generation: if self.outline_mode.get() == OutlineMode::Source {
+            generation: if self.runtime_outline_mode().is_none() {
                 0
             } else {
                 session.generation()
             },
-            mode: self.outline_mode.get(),
+            mode: self.runtime_outline_mode(),
             scope: session.definition_scope().map(|scope| scope.node),
             layer_epoch: session.layer_view_epoch(),
             scope_epoch: session.definition_scope_epoch(),
@@ -1449,8 +1455,8 @@ impl DesignerWorkspace {
                 self.inspectors.outline.expansion.borrow_mut().clear();
                 self.inspectors.outline.paths.borrow_mut().clear();
             }
-            let entries = if snapshot.mode == OutlineMode::Source {
-                session
+            let entries = match snapshot.mode {
+                None => session
                     .document()
                     .ast()
                     .nodes_in_source_order()
@@ -1489,7 +1495,7 @@ impl DesignerWorkspace {
                             label: node.name.clone(),
                             name: node.xaml_name().or(resource).unwrap_or_default().to_owned(),
                             detail: resource.map_or_else(
-                                || "XAML".into(),
+                                || if session.uses_rust_source() { "RSX" } else { "XAML" }.into(),
                                 |key| format!("XAML · Resource key: {key}"),
                             ),
                             source: Some(node.id),
@@ -1500,31 +1506,36 @@ impl DesignerWorkspace {
                             ..Default::default()
                         }
                     })
-                    .collect()
-            } else {
-                session
-                    .runtime_tree(if snapshot.mode == OutlineMode::Visual {
-                        TreeKind::Visual
-                    } else {
-                        TreeKind::Logical
-                    })
+                    .collect(),
+                Some(mode) => session
+                    .runtime_outline(mode)
                     .into_iter()
-                    .map(|row| TreeEntry {
-                        key: format!("runtime:{}", row.inspector_id),
-                        parent: row.parent.map(|id| format!("runtime:{id}")),
-                        label: row.type_name,
-                        name: row.name.unwrap_or_default(),
-                        detail: if row.source_id.is_some() {
-                            "XAML"
-                        } else {
-                            "Runtime"
+                    .map(|entry| {
+                        let row = entry.node;
+                        let membership = match (entry.visual, entry.logical) {
+                            (true, true) => "Visual + Logical",
+                            (true, false) => "Visual",
+                            _ => "Logical",
+                        };
+                        TreeEntry {
+                            key: format!("runtime:{}", row.inspector_id),
+                            parent: row.parent.map(|id| format!("runtime:{id}")),
+                            label: row.type_name,
+                            name: row.name.unwrap_or_default(),
+                            detail: format!(
+                                "{} · {membership}",
+                                if row.source_id.is_some() {
+                                    if session.uses_rust_source() { "RSX" } else { "XAML" }
+                                } else {
+                                    "Runtime"
+                                }
+                            ),
+                            source: row.source_id,
+                            runtime: Some(row.inspector_id),
+                            ..Default::default()
                         }
-                        .into(),
-                        source: row.source_id,
-                        runtime: Some(row.inspector_id),
-                        ..Default::default()
                     })
-                    .collect()
+                    .collect(),
             };
             self.inspectors.outline.replace(entries, &snapshot.filter);
             *self.inspectors.outline_snapshot.borrow_mut() = Some(snapshot);
@@ -1956,14 +1967,7 @@ impl DesignerWorkspace {
             .collect::<Vec<_>>();
         let scope = session.definition_scope().map(|scope| scope.node);
         let scope_epoch = session.definition_scope_epoch();
-        let name_scope = session.document().ast().name_scope(first.id);
-        let named_elements = session
-            .document()
-            .ast()
-            .nodes_in_source_order()
-            .filter(|node| session.document().ast().name_scope(node.id) == name_scope)
-            .filter_map(|node| node.xaml_name().map(str::to_owned))
-            .collect::<Vec<_>>();
+        let named_elements = crate::element_names::names_in_scope(session.document(), first.id);
         let resources = session
             .visible_component_resources(first.id)
             .unwrap_or_default()
@@ -1997,6 +2001,7 @@ impl DesignerWorkspace {
                     })
             })
             .collect::<Vec<_>>();
+        let trace_snapshot = crate::design_time::DesignTimeSnapshot::capture(&session);
         drop(session);
         let resource_owners = self.component_owners();
         let factories = Rc::new(self.property_editors.borrow().clone());
@@ -2071,7 +2076,7 @@ impl DesignerWorkspace {
                             this.rebuild_properties();
                             return;
                         }
-                        let span = session.document().ast().node(node).map(|node| node.span);
+                        let span = session.authored_span(node);
                         drop(session);
                         if let Some(span) = span {
                             this.session.borrow_mut().select([node]);
@@ -2175,6 +2180,9 @@ impl DesignerWorkspace {
                 });
                 Rc::new(PropertyRow {
                     category: None,
+                    trace: (selected.len() == 1 && native_property.is_some()).then(|| {
+                        self.property_trace_action(&trace_snapshot, crate::property_trace::TraceTarget::Authored(selected[0]), &name)
+                    }),
                     source_actions: if can_reset && selected.len() == 1 {
                         self.property_source_actions(&name, source_kind)
                     } else { Vec::new() },
@@ -2218,6 +2226,7 @@ impl DesignerWorkspace {
         let uri = session.document_uri().to_owned();
         let revision = session.document().revision();
         let ast_snapshot = session.document().ast_snapshot();
+        let trace_snapshot = crate::design_time::DesignTimeSnapshot::capture(&session);
         drop(session);
         let mut rows = Inspector::properties(&object)
             .into_iter()
@@ -2228,6 +2237,7 @@ impl DesignerWorkspace {
                 let name = info.name.clone();
                 Rc::new(PropertyRow {
                     category: None,
+                    trace: Some(self.property_trace_action(&trace_snapshot, crate::property_trace::TraceTarget::Runtime(id), &name)),
                     name: info.name.clone(),
                     display_value: ferroui_inspect::display_value(Some(&info.value)),
                     effective: ferroui_inspect::display_value(Some(&info.value)),
@@ -2347,6 +2357,7 @@ impl DesignerWorkspace {
                 factories: Rc::new(Vec::new()),
                 can_reset: false,
                 reveal: None,
+                trace: None,
                 source_actions: Vec::new(),
                 validate_drop: None,
                 tooltip: Rc::new(|| None),

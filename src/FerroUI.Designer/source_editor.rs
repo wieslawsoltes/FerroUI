@@ -1,10 +1,11 @@
 //! Native text interaction backed by the shared XAML language service.
 use super::*;
 use ferroui_designer_core::{Edit, SourceSpan};
-use ferroui_designer_language::{
-    FormattingOptions, LanguageService, LineIndex, Location, Schema, TextEdit, WorkspaceEdit,
-};
+use ferroui_designer_language::{LanguageService, LineIndex, Location, Schema, TextEdit, WorkspaceEdit};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "source_formatting.rs"]
+mod formatting;
 
 pub(super) struct SourceTools {
     pub service: LanguageService,
@@ -105,6 +106,17 @@ impl DesignerWorkspace {
             });
     }
     pub(super) fn refresh_source_tools(self: &Rc<Self>) {
+        let rust = self.refresh_rust_source_tools();
+        self.root.get_control::<Button>("CreateEventHandler").set_is_visible(!rust);
+        self.root.get_control::<Button>("ExtractResourceDictionary").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("MoveXamlFile").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("RenameRegisteredProperty").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("RenameRegisteredType").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("RenameResource").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        self.root.get_control::<Button>("MoveResource").set_is_visible(!rust && self.project.borrow().workspace.is_some());
+        if rust {
+            return;
+        }
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
@@ -183,6 +195,9 @@ impl DesignerWorkspace {
     }
     fn source_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
         self.refresh_source_tools();
+        if self.session.borrow().uses_rust_source() {
+            return Err("Use rust-analyzer for Rust language commands".into());
+        }
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
@@ -231,7 +246,7 @@ impl DesignerWorkspace {
                 let locations = {
                     let tools = self.source_tools.borrow();
                     if command == "SourceDefinition" {
-                        tools.service.definitions(&uri, offset)
+                        tools.service.definitions_with_source(&uri, offset, |rust| self.open_rust_source(rust))
                     } else {
                         tools.service.references(&uri, offset)
                     }
@@ -261,24 +276,7 @@ impl DesignerWorkspace {
                 self.refresh_source_tools();
             }
             "FormatSource" => {
-                self.session
-                    .borrow()
-                    .ensure_writable()
-                    .map_err(|error| error.to_string())?;
-                let edits = self
-                    .source_tools
-                    .borrow()
-                    .service
-                    .format(&uri, FormattingOptions::default())
-                    .map_err(|e| e.to_string())?;
-                let source = apply_text_edits(&source, &edits)?;
-                {
-                    let mut session = self.session.borrow_mut();
-                    session.stage_source(source);
-                    session.apply_staged_preview()?;
-                }
-                self.pending_source.set(false);
-                self.refresh(true);
+                self.format_source(&uri, &source, revision)?;
             }
             "RenameSource" => {
                 let name = self
@@ -300,12 +298,20 @@ impl DesignerWorkspace {
     }
     pub fn navigate_to(self: &Rc<Self>, location: &Location) -> Result<(), String> {
         self.activate_document(&location.uri)?;
-        let source = self.session.borrow().document().source().to_owned();
+        let source = self.session.borrow().authored_source().to_owned();
         let span = LineIndex::new(&source)
             .span(location.range)
             .map_err(|e| e.to_string())?;
         self.select_source_span(span);
         Ok(())
+    }
+
+    pub(crate) fn open_rust_source(&self, uri: &str) -> Option<String> {
+        let uri = super::project::document_identity(uri).ok()?;
+        let project = self.project.borrow();
+        let tab = project.tabs.get(&uri)?;
+        tab.rust.as_ref()?;
+        Some(tab.source().to_owned())
     }
     /// Apply a versioned completion even while its surrounding XAML is an incomplete draft.
     pub fn apply_source_completion(
@@ -342,6 +348,9 @@ impl DesignerWorkspace {
         let mut documents = BTreeSet::new();
         for change in &mut changes {
             change.uri = super::project::document_identity(&change.uri)?;
+            if crate::rsx_document::RustDocument::for_uri(&change.uri) {
+                return Err("XAML workspace refactoring cannot target a Rust file".into());
+            }
             if !documents.insert(change.uri.clone()) {
                 return Err("A workspace edit contains duplicate document identities".into());
             }
@@ -365,6 +374,7 @@ impl DesignerWorkspace {
             super::project::Tab {
                 preview_uri: self.session.borrow().document_uri().into(),
                 document: active_document,
+                rust: self.session.borrow().rust.clone(),
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
                 layers: Some(self.session.borrow().layer_view_snapshot()),
@@ -387,6 +397,7 @@ impl DesignerWorkspace {
                 let tab = super::project::Tab {
                     preview_uri: change.uri.clone(),
                     document: buffer.document().clone(),
+                    rust: None,
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
                     layers: None,

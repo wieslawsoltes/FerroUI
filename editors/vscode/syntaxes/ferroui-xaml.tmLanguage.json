@@ -1,0 +1,5 @@
+{
+  "name": "FerroUI XAML",
+  "scopeName": "text.xml.ferroui-xaml",
+  "patterns": [{ "include": "text.xml" }]
+}

@@ -1,6 +1,6 @@
 use crate::animation::{Animatable, Animation, AnimationError, AnimatorKeyFrame, IClock};
 use crate::reactive::{IDisposable, IObservable};
-use crate::{FerroProperty, Ref};
+use crate::{BoxedValue, FerroProperty, Ref};
 use std::any::TypeId;
 use std::rc::Rc;
 
@@ -23,6 +23,12 @@ pub trait IAnimator: 'static {
 
     /// The type of the animator, by which key frames find their animator.
     fn animator_type(&self) -> TypeId;
+
+    /// Sample positions after easing within an iteration for a designer graph.
+    /// Animators with a redirected target may leave sampling unsupported.
+    fn sample_for_preview(&self, _control: &Animatable, _positions: &[f64]) -> Option<Vec<BoxedValue>> {
+        None
+    }
 
     /// Applies the animation to a control: the animation runs while
     /// `match_` is true.

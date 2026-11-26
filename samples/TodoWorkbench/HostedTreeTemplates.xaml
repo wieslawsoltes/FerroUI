@@ -1,0 +1,32 @@
+<Border xmlns="https://github.com/ferroui" Width="640" Height="330" Padding="22">
+  <Border.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="TreeTemplateResources.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Border.Resources>
+  <StackPanel Spacing="13">
+    <TextBlock Text="Account hierarchy" FontSize="27" Foreground="#203657" />
+    <TextBlock Text="Review company names and onboarding status" Foreground="#496280" />
+    <TreeDataGrid Name="Accounts" Height="178" ItemsSource="{ReflectionBinding .}">
+      <TreeDataGridHierarchicalExpanderColumn ChildrenBinding="{ReflectionBinding Children}">
+        <TreeDataGridTemplateColumn Header="Company" Width="285"
+                                    CellTemplateResourceKey="CompanyDisplay"
+                                    CellEditingTemplateResourceKey="CompanyEditor" />
+      </TreeDataGridHierarchicalExpanderColumn>
+      <TreeDataGridTemplateColumn Header="Review" Width="190">
+        <TreeDataGridTemplateColumn.CellTemplate>
+          <DataTemplate>
+            <TextBlock Text="Ready for review" Foreground="#306859" />
+          </DataTemplate>
+        </TreeDataGridTemplateColumn.CellTemplate>
+        <TreeDataGridTemplateColumn.CellEditingTemplate>
+          <DataTemplate>
+            <TextBox PlaceholderText="Review status" />
+          </DataTemplate>
+        </TreeDataGridTemplateColumn.CellEditingTemplate>
+      </TreeDataGridTemplateColumn>
+    </TreeDataGrid>
+  </StackPanel>
+</Border>

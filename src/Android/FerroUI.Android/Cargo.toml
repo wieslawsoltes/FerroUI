@@ -34,6 +34,10 @@ url.workspace = true
 [target.'cfg(target_os = "android")'.dependencies]
 ferroui-skia.workspace = true
 ferroui-harfbuzz.workspace = true
+ferroui-mcp = { workspace = true, optional = true }
+ferroui-themes-simple = { workspace = true, optional = true }
+ferroui-view = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 jni-sys.workspace = true
 libc.workspace = true
 
@@ -52,6 +56,8 @@ skia-safe.workspace = true
 # published binary of Skia with both for the Android targets: nothing is compiled from source
 # (docs/porting/vulkan.md, section 2). Without it the mode is passed over with a warning.
 vulkan = ["ferroui-skia/vulkan"]
+live-inspector = ["dep:ferroui-mcp", "dep:serde_json"]
+inspector-example = ["live-inspector", "dep:ferroui-themes-simple", "dep:ferroui-view"]
 
 # The smoke application: a shared library that `scripts/android/apk.sh` packages
 # (docs/porting/android-platform.md, sections 9 and 10). Empty on another system.
@@ -59,6 +65,12 @@ vulkan = ["ferroui-skia/vulkan"]
 name = "android_smoke"
 path = "examples/android_smoke.rs"
 crate-type = ["cdylib"]
+
+[[example]]
+name = "android_inspector"
+path = "examples/android_inspector.rs"
+crate-type = ["cdylib"]
+required-features = ["inspector-example"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

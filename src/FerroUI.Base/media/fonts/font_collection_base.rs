@@ -440,6 +440,7 @@ impl FontCollectionBase {
         let script = cp.script();
         let refined_script = FontFallbackScriptHints::refine_with_culture(cp, culture);
         let script_key: ScriptFallbackKey = (refined_script, culture.cloned());
+        let prefers_platform = refined_script != script && culture.is_some_and(|locale| *locale != Locale::UNKNOWN);
 
         // --- Tier A: requested family, coverage-checked, culture-compatible ---
         if let Some(family_name) = family_name {
@@ -482,6 +483,7 @@ impl FontCollectionBase {
         }
 
         // --- Tier C: deterministic cache sweep (non last-resort), culture-scored ---
+        let mut cached_fallback = None;
         if let Some((best_gt, best_family_name)) = base.try_match_in_cache(
             codepoint,
             key,
@@ -492,17 +494,20 @@ impl FontCollectionBase {
             shaping_script,
             false,
         ) {
-            // The sweep returns the nearest cached key for the winning family. A codepoint the
-            // bucket family can't cover (e.g. a Simplified-only ideograph when the bucket is a JP
-            // font) lands here, so the exact-key upgrade is needed here too: otherwise a Bold
-            // face cached for an earlier run is rendered for a Normal request.
-            let best_gt = Self::prefer_exact_key(this, best_gt, key, codepoint, culture, shaping_script);
+            if !prefers_platform {
+                // Upgrade the cached face when it covers the codepoint at a neighboring key.
+                let best_gt = Self::prefer_exact_key(this, best_gt, key, codepoint, culture, shaping_script);
 
-            if FontFallbackScriptHints::is_locale_sensitive(refined_script) || culture.is_some() {
-                base.script_fallback_cache.borrow_mut().entry(script_key).or_insert(Some(best_family_name));
+                if FontFallbackScriptHints::is_locale_sensitive(refined_script) || culture.is_some() {
+                    base.script_fallback_cache.borrow_mut().entry(script_key).or_insert(Some(best_family_name));
+                }
+
+                return Some(Self::build_typeface_with_synthesis(this, &best_gt, key));
             }
-
-            return Some(Self::build_typeface_with_synthesis(this, &best_gt, key));
+            // A font loaded for another locale can advertise the same code pages.
+            // Let the platform choose the family for the refined script before
+            // using a match from the general cache sweep.
+            cached_fallback = Some(best_gt);
         }
 
         // --- Tier D: platform fallback ---
@@ -541,6 +546,11 @@ impl FontCollectionBase {
             if !has_cache_entry {
                 base.script_fallback_cache.borrow_mut().entry(script_key).or_insert(None);
             }
+        }
+
+        if let Some(face) = cached_fallback {
+            let face = Self::prefer_exact_key(this, face, key, codepoint, culture, shaping_script);
+            return Some(Self::build_typeface_with_synthesis(this, &face, key));
         }
 
         // --- Tier E: last-resort cache sweep ---

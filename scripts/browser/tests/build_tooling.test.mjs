@@ -498,6 +498,65 @@ if (args[1] === "build") {
     });
 }
 
+test("the selected workspace owns a browser target whose name matches a bundled example", t => {
+    if (process.platform === "win32") return t.skip("the browser build entry point requires Bash");
+    const { root } = fixture(t);
+    const standalone = path.join(root, "standalone");
+    fs.mkdirSync(path.join(root, "src/Browser/FerroUI.Browser/examples/live_inspector/wwwroot"), { recursive: true });
+    fs.mkdirSync(path.join(standalone, "wwwroot"), { recursive: true });
+    fs.mkdirSync(path.join(root, "scripts/browser"), { recursive: true });
+    fs.mkdirSync(path.join(root, "bin"));
+    fs.writeFileSync(path.join(root, "Cargo.toml"), 'wasm-bindgen = "=0.2.99"\n');
+    fs.writeFileSync(path.join(root, "scripts/browser/build-webapp.mjs"), "");
+    const script = path.join(root, "scripts/build-browser.sh");
+    fs.copyFileSync(path.resolve(scripts, "../build-browser.sh"), script);
+    for (const tool of ["emcc", "em++", "wasm-bindgen"]) {
+        fs.writeFileSync(path.join(root, "bin", tool), '#!/bin/sh\necho "wasm-bindgen 0.2.99"\n', { mode: 0o755 });
+    }
+    fs.writeFileSync(path.join(root, "bin/cargo"), `#!${process.execPath}
+const args = process.argv.slice(2);
+if (args[0] === "metadata") {
+    console.log(JSON.stringify({ packages: [{ name: "live_inspector", manifest_path: process.cwd() + "/Cargo.toml",
+        targets: [{ name: "live_inspector", kind: ["bin"] }] }] }));
+} else {
+    console.error(JSON.stringify(args));
+    process.exit(23);
+}
+`, { mode: 0o755 });
+    const env = { ...process.env, PATH: `${path.join(root, "bin")}${path.delimiter}${process.env.PATH}`,
+        CARGO_TARGET_DIR: path.join(root, "target") };
+    const alias = path.join(root, "checkout-alias");
+    fs.symlinkSync(root, alias);
+    const selection = (workspace, ...options) => {
+        const result = spawnSync("bash", [script, "live_inspector", ...options], {
+            env: { ...env, FERROUI_BROWSER_WORKSPACE: workspace }, encoding: "utf8",
+        });
+        assert.equal(result.status, 23, result.stderr + result.stdout);
+        return JSON.parse(result.stderr.trim());
+    };
+    const target = flags => flags.slice(flags.indexOf("-p"), flags.indexOf("-p") + 4);
+    const standaloneBuild = selection(standalone, "--debug");
+    assert.deepEqual(target(standaloneBuild), ["-p", "live_inspector", "--bin", "live_inspector"]);
+    const example = selection(alias, "--debug");
+    assert.deepEqual(target(example), ["-p", "ferroui-browser", "--example", "live_inspector"]);
+    assert.ok(!example.includes("--config"));
+    for (const [workspace, ordinary] of [[standalone, standaloneBuild], [alias, example]]) {
+        const optimized = selection(workspace);
+        assert.equal(optimized[0], "build");
+        assert.deepEqual(target(optimized), target(ordinary));
+        assert.equal(optimized[optimized.indexOf("--profile") + 1], "browser");
+        assert.ok(!optimized.includes("--"));
+        assert.equal(ordinary[0], "rustc");
+        assert.deepEqual(ordinary.slice(-4), ["--message-format=json-render-diagnostics",
+            "--", "-Cdebuginfo=0", "-Clink-arg=-g2"]);
+        const symbols = selection(workspace, "--debug-symbols");
+        assert.equal(symbols[0], "rustc");
+        assert.deepEqual(target(symbols), target(ordinary));
+        assert.deepEqual(symbols.slice(-5), ["--message-format=json-render-diagnostics",
+            "--", "-Cdebuginfo=2", "-Cstrip=none", "-Clink-arg=-g3"]);
+    }
+});
+
 test("directory symlink cycles are rejected instead of reusing incomplete input coverage", t => {
     const f = fixture(t);
     if (process.platform === "win32") return t.skip("creating symlinks may require Windows privileges");

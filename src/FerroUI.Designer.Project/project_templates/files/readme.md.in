@@ -1,0 +1,7 @@
+# __APP_TITLE__
+
+Run `cargo run` from this directory. Open `__ENTRY__` and use **FerroUI: Open Designer** to edit it alongside the native preview.
+
+Use **FerroUI: Build Project XAML Schema** after changing project registrations or dependencies. In the **FerroUI** Project view, expand **Cargo**, right-click the binary, and choose **Run Cargo Binary**.
+
+The first build resolves and compiles the framework and desktop backend. See the [FerroUI documentation](https://ferroui.com/docs/) for platform prerequisites and control APIs.

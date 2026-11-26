@@ -377,31 +377,17 @@ impl DesignSurface {
             });
             if side.is_none() || aligned {
                 if let Some(index) = &gesture.guide_snap_index {
-                    if let Ok(snapped) = index.snap_with(
+                    if let Ok(snapped) = index.snap_with_axis(
                         ferroui_designer_tools::Rect::new(position.x, position.y, 0.0, 0.0),
                         None,
                         self.canvas_guides.borrow().snap_tolerance / self.zoom.get(),
+                        side,
                     ) {
-                        let guides: Vec<_> = snapped
-                            .guides
-                            .into_iter()
-                            .filter(|guide| side.is_none_or(|axis| guide.axis == axis))
-                            .collect();
-                        if !guides.is_empty() {
-                            *self.snap_guides.borrow_mut() = guides;
+                        if !snapped.guides.is_empty() {
+                            *self.snap_guides.borrow_mut() = snapped.guides;
                             return Point::new(
-                                position.x
-                                    + if side == Some(ferroui_designer_tools::Axis::Vertical) {
-                                        0.0
-                                    } else {
-                                        snapped.delta.x
-                                    },
-                                position.y
-                                    + if side == Some(ferroui_designer_tools::Axis::Horizontal) {
-                                        0.0
-                                    } else {
-                                        snapped.delta.y
-                                    },
+                                position.x + snapped.delta.x,
+                                position.y + snapped.delta.y,
                             );
                         }
                     }
@@ -425,30 +411,17 @@ impl DesignSurface {
         let Some(index) = &gesture.snap_index else {
             return position;
         };
-        match index.snap_with(
+        match index.snap_with_axis(
             moving,
             (self.grid.get() > 0.0).then(|| self.grid.get()),
             self.canvas_guides.borrow().snap_tolerance / self.zoom.get(),
+            axis,
         ) {
             Ok(snapped) => {
-                *self.snap_guides.borrow_mut() = snapped
-                    .guides
-                    .into_iter()
-                    .filter(|guide| axis.is_none_or(|axis| guide.axis == axis))
-                    .collect();
+                *self.snap_guides.borrow_mut() = snapped.guides;
                 Point::new(
-                    position.x
-                        + if axis == Some(ferroui_designer_tools::Axis::Vertical) {
-                            0.0
-                        } else {
-                            snapped.delta.x
-                        },
-                    position.y
-                        + if axis == Some(ferroui_designer_tools::Axis::Horizontal) {
-                            0.0
-                        } else {
-                            snapped.delta.y
-                        },
+                    position.x + snapped.delta.x,
+                    position.y + snapped.delta.y,
                 )
             }
             Err(_) => position,
@@ -795,26 +768,7 @@ impl InputElementImpl for DesignSurface {
         }
         let start = position;
         let selected = session.borrow().selection().to_vec();
-        let snap_bounds: Vec<_> = {
-            let session = session.borrow();
-            let moving: std::collections::BTreeSet<_> = selected
-                .iter()
-                .flat_map(|node| session.document().ast().subtree(*node))
-                .map(|node| node.id)
-                .collect();
-            session
-                .document()
-                .ast()
-                .elements()
-                .filter(|node| !moving.contains(&node.id))
-                .filter(|node| {
-                    let state = session.layer_state(node.id);
-                    !state.is_hidden() && !state.outside_isolation
-                })
-                .filter_map(|node| session.preview.bounds(node.id, &this.to_ref().upcast()))
-                .map(|r| ferroui_designer_tools::Rect::new(r.x, r.y, r.width, r.height))
-                .collect()
-        };
+        let snap_bounds = session.borrow().snap_peer_bounds(&selected, &this.to_ref().upcast());
         let rectangles = this.rectangles();
         let selection_bounds = rectangles
             .iter()

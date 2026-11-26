@@ -1,0 +1,801 @@
+import * as vscode from 'vscode';
+import type { AppSessions } from './appSessions';
+import type { AnimationGraphMode } from './animationGraph';
+import type { TimelineLayout } from './timelineLayout';
+import type { TimelineViewportChange } from './timelineViewportProtocol';
+import type { TimelineTrackCommand } from './timelineTrackProtocol';
+import type { TimelineSnapChange, TimelineWorkAreaChange } from './timelineTimingProtocol';
+import type { Collaboration } from './collaboration';
+import { collaborationTool, isCollaborationTool } from './collaborationAgents';
+import { agentCatalog, type AgentTool } from './agentCatalog';
+import { validate } from './agentSchema';
+import type { AssetImportRequest } from './assetImport';
+import type { DesignHandoffActions, HandoffAgentInput } from './designHandoffActions';
+import type { CanvasSnapInput, GuideEdit } from './canvasGuidesProtocol';
+import type { CargoSelection } from './cargoTarget';
+import type { CommandBindingEdit } from './commandBindings';
+import type { TokenRequest } from './designTokenProtocol';
+import type { DesignerPanel } from './designerPanel';
+import type { DesignerWorkbench } from './designerWorkbench';
+import { runEditorHistory } from './editorHistory';
+import type { FileMoveRequest, FileMoves } from './fileMoves';
+import type { RegisteredRename } from './registeredRename';
+import type { ResourceRename } from './resourceRename';
+import type { ResourceMove, ResourceMoveInput } from './resourceMove';
+import type { SourceRenameAgentRequest } from './reviewedSources';
+import type { HotReload } from './hotReload';
+import type { IosSimulatorRun } from './iosSimulatorTargets';
+import type { IosAppRun } from './iosAppProfiles';
+import type { IosDeviceAttachRequest } from './iosDeviceAttachment';
+import type { AndroidRequest } from './androidTargets';
+import type { BrowserRequest } from './browserTargets';
+import type { HostedDesign } from './hostedDesign';
+import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
+import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
+import type { HostedGesture } from './hostedProtocol';
+import type { KeyboardInput } from './previewKeyboardProtocol';
+import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
+import { filterOutline } from './outlineFilter';
+import type { StateGroupEdit } from './stateGroupProtocol';
+import type { ProjectFile, ProjectInventory } from './projectInventory';
+import type { ProjectDefinition } from './projectLibrary';
+import type { ProjectScaffold } from './projectScaffold';
+import type { ProjectSetup } from './projectSetup';
+import type { ProjectTemplateRequest } from './projectSetupProtocol';
+import type { RuntimeSourceTools } from './runtimeSourceTools';
+import type { RuntimeProfiles } from './runtimeProfiles';
+import type { RuntimeViewChange } from './runtimeProtocol';
+import type { ScenarioRunner } from './scenarioRunner';
+import type { ScenarioReview } from './scenarioReview';
+import { renameRsxControl } from './rsxRename';
+import type { AppRuntime, RuntimeTarget } from './runtimeTargets';
+import type { StagesPanel } from './stagesPanel';
+import type { PrototypeCommand, PrototypeInput, StageChange, StageComparison, StageContact, StageInput } from './stagesProtocol';
+import type { PaletteEdit, StylesPage } from './stylesProtocol';
+import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
+import type { StateTransitionControl } from './stateTransitionProtocol';
+import { withViewportTheme, type CanvasAction, type CanvasInteraction, type CanvasTheme, type DesignerView, type DragOrigin, type DropTarget, type OutlineMode, type Placement, type Range } from './protocol';
+import { applyTextEdits } from './textDocument';
+import { isWorkspaceTool } from './workspaceCatalog';
+import { isWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
+import { bufferDiagnostics, WorkspaceTools } from './workspaceTools';
+
+interface Arguments extends CanvasAction, CargoSelection {
+    session: number;
+    expected_revision: number;
+    expected_version: number;
+    expected_uri: string;
+    graph_mode: AnimationGraphMode;
+    layout: TimelineLayout;
+    viewport: TimelineViewportChange;
+    track: TimelineTrackCommand;
+    work_area: TimelineWorkAreaChange;
+    frame_snap: TimelineSnapChange;
+    prefix?: string;
+    change?: CommandBindingEdit;
+    expected_rust_version: number;
+    expected_generation: number;
+    expected_debugger_generation: number;
+    expected_process_generation?: number;
+    expected_sequence: number;
+    runtime?: RuntimeTarget;
+    app_session?: string;
+    url?: string;
+    token?: string;
+    accept_baselines?: boolean;
+    baseline_ref?: string;
+    approval?: string;
+    open?: boolean;
+    all?: boolean;
+    path: string;
+    line?: number;
+    character?: number;
+    index: number;
+    lines?: number;
+    include_source?: boolean;
+    include_counterpart?: boolean;
+    node?: number;
+    member?: string;
+    template_destination?: import('./hostedTemplates').HostedTemplateSelection['destination'];
+    template_id?: string;
+    filter?: string;
+    offset?: number;
+    limit?: number;
+    view?: DesignerView;
+    styles_page?: StylesPage;
+    outline_mode?: OutlineMode;
+    inspector_id?: number;
+    width?: number;
+    height?: number;
+    dark?: boolean;
+    theme?: CanvasTheme;
+    refresh?: boolean;
+    reveal_source?: boolean;
+    asset?: string;
+    project_asset?: string;
+    property: string;
+    event: string;
+    handler?: string;
+    file_name?: string;
+    review?: string;
+    value?: string;
+    resource: number;
+    dynamic?: boolean;
+    anchor?: number;
+    moving_anchor?: number;
+    handle?: number;
+    dx?: number;
+    dy?: number;
+    position?: 'inside' | 'before' | 'after';
+    x?: number;
+    y?: number;
+    label: string;
+    edits: object[];
+    edit?: GuideEdit;
+    snap?: CanvasSnapInput;
+    source: string;
+    address: string;
+    range: Range;
+    action: string;
+    tool: string;
+    arguments: object;
+    program: number;
+    selection?: number[];
+    stage?: number;
+    comparison?: StageComparison;
+    window?: number;
+    profile_id?: number;
+    row?: number;
+    duration_ms?: number;
+    expected_epoch?: number;
+    expected_frame?: number;
+    debug_configuration?: string;
+    debug?: boolean;
+    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput | HostedGesture | KeyboardInput;
+    kind?: string;
+    language?: 'xaml' | 'rsx';
+    fixture?: string;
+    query?: string;
+    entry?: ProjectDefinition;
+    destination?: 'preview' | 'source';
+}
+
+export class AgentTools {
+    private readonly workspace = new WorkspaceTools();
+
+    constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
+        private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
+        private readonly appSessions: AppSessions,
+        private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold, private readonly projectSetup: ProjectSetup,
+        private readonly scenarios: ScenarioRunner, private readonly scenarioReviews: ScenarioReview,
+        private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves, private readonly collaboration: Collaboration,
+        private readonly sourceReviews: {
+            property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
+        }, private readonly designHandoff: DesignHandoffActions) {}
+
+    definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
+
+    async call(name: string, input: unknown, signal: AbortSignal): Promise<unknown> {
+        signal.throwIfAborted();
+        if (!vscode.workspace.isTrusted) throw new Error('FerroUI agent tools require a trusted workspace.');
+        const config = vscode.workspace.getConfiguration('ferroui.mcp');
+        if (!config.get('enableDesigner', true)) throw new Error('The VS Code designer MCP server is disabled.');
+        if (!Object.hasOwn(agentCatalog, name)) throw new Error('Unknown FerroUI tool');
+        const tool = name as AgentTool;
+        const definition = agentCatalog[tool];
+        validate(definition.inputSchema, input);
+        if (!definition.annotations.readOnlyHint && !config.get('allowWrites', false)) {
+            throw new Error('Enable ferroui.mcp.allowWrites to let agents edit files or control the designer and running application.');
+        }
+        if (isWorkspaceTool(tool)) return this.workspace.call(tool, input, signal);
+        if (isCollaborationTool(tool)) return collaborationTool(this.collaboration, tool, input, signal);
+        if (tool === 'ferroui_workspace_plan_xaml_move') return this.fileMoves.agent(input as FileMoveRequest, signal);
+        if (tool === 'ferroui_workspace_move_xaml') {
+            const request = input as FileMoveRequest & { review: string };
+            return this.fileMoves.agent(request, signal, request.review);
+        }
+        if (tool === 'ferroui_workspace_plan_property_rename' || tool === 'ferroui_workspace_rename_property') {
+            return this.sourceReviews.property.agent(input as SourceRenameAgentRequest, signal);
+        }
+        if (tool === 'ferroui_workspace_plan_type_rename' || tool === 'ferroui_workspace_rename_type') {
+            return this.sourceReviews.type.agent(input as SourceRenameAgentRequest, signal);
+        }
+        if (tool === 'ferroui_workspace_plan_resource_rename' || tool === 'ferroui_workspace_rename_resource') {
+            return this.sourceReviews.resource.agent(input as SourceRenameAgentRequest, signal);
+        }
+        if (tool === 'ferroui_workspace_resource_move_targets' || tool === 'ferroui_workspace_plan_resource_move' || tool === 'ferroui_workspace_move_resource') {
+            return this.sourceReviews.resourceMove.agent(input as ResourceMoveInput, signal);
+        }
+        if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
+        if (tool === 'designer_design_handoff' || tool === 'designer_apply_handoff') {
+            return this.designHandoff.agent(input as HandoffAgentInput, signal);
+        }
+        if (tool === 'ferroui_project_templates') return this.projectSetup.catalog(signal);
+        if (tool === 'ferroui_project_plan_new' || tool === 'ferroui_project_create') {
+            return this.projectSetup.agentTemplate(input as ProjectTemplateRequest & { folder?: string; review?: string }, signal);
+        }
+        if (tool === 'ferroui_project_check_toolchain') return this.projectSetup.agentToolchain(input as CargoSelection & { target?: string }, signal);
+        if (tool === 'ferroui_project_run_cargo') return this.projectSetup.agentRunCargo(input as CargoSelection, signal);
+        if (tool === 'ferroui_project_cargo_tasks') return this.projectSetup.cargoTasks.list();
+        if (tool === 'ferroui_project_stop_cargo') return this.projectSetup.cargoTasks.stop((input as { id: number }).id);
+        if (tool === 'ferroui_project_plan_asset_import' || tool === 'ferroui_project_import_asset') {
+            const request = input as AssetImportRequest & { review?: string };
+            return this.project.assetImport.agent(request, request.review, signal);
+        }
+        if (tool === 'ferroui_project_plan_asset_move' || tool === 'ferroui_project_move_asset') {
+            const request = input as FileMoveRequest & { review?: string; session?: number };
+            let published: vscode.Uri | undefined;
+            if (/^ferres:\/\//i.test(request.path)) {
+                const design = this.workbench.designs().find(panel => panel.session === request.session);
+                if (!design) throw new Error('Pass the designer session that lists the published asset.');
+                published = vscode.Uri.parse((await design.publishedAsset(request.path)).uri, true);
+            }
+            return this.project.assetMoves.agent(request, request.review, signal, published);
+        }
+        const args = input as Arguments;
+        if (tool === 'ferroui_designs') {
+            const panels = [];
+            for (const panel of this.workbench.designs()) {
+                if (await isWorkspaceFile(panel.document.uri)) panels.push(describe(panel));
+            }
+            const active = this.workbench.activeDesign?.session;
+            return { active: panels.some(panel => panel.session === active) ? active : null, designs: panels };
+        }
+        if (tool === 'designer_open') {
+            const uri = await resolveWorkspaceFile(args.path, args.folder);
+            signal.throwIfAborted();
+            const position = args.line === undefined ? undefined : new vscode.Position(args.line, args.character ?? 0);
+            const panel = await this.workbench.openDocument(uri, position);
+            await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });
+            return describe(panel);
+        }
+        if (tool === 'ferroui_app_sessions') return this.appSessions.list();
+        if (tool === 'ferroui_continue_debugger') return this.appSessions.continueDebugger(args.runtime as AppRuntime, args.expected_debugger_generation, signal);
+        if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal,
+            args.debug ? { name: args.debug_configuration } : undefined);
+        if (tool === 'ferroui_ios_simulator_debug') return this.appSessions.simulators.debug(args.runtime as AppRuntime,
+            args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
+        if (tool === 'ferroui_ios_simulator_stop') {
+            await this.appSessions.simulators.stop(args.runtime as AppRuntime);
+            return { stopped: true };
+        }
+        if (tool === 'ferroui_ios_simulator_rebuild') return this.appSessions.simulators.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_ios_simulator_output') return { output: this.appSessions.simulators.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_ios_device_targets') return this.appSessions.iosDevices.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_ios_device_run') return this.appSessions.iosDevices.open(input as IosAppRun, signal,
+            args.debug ? { name: args.debug_configuration } : undefined);
+        if (tool === 'ferroui_ios_device_attach') return this.appSessions.iosDevices.attach(input as IosDeviceAttachRequest, signal);
+        if (tool === 'ferroui_ios_device_debug') return this.appSessions.iosDevices.debug(args.runtime as AppRuntime,
+            args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
+        if (tool === 'ferroui_ios_device_output') return { output: this.appSessions.iosDevices.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_ios_device_rebuild') return this.appSessions.iosDevices.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_ios_device_stop') {
+            await this.appSessions.iosDevices.stop(args.runtime as AppRuntime);
+            return { stopped: true };
+        }
+        if (tool === 'ferroui_android_targets') return this.appSessions.android.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
+            const run = tool === 'ferroui_android_run';
+            return this.appSessions.android.open(input as AndroidRequest, run ? 'run' : 'attach', signal,
+                run && args.debug ? { name: args.debug_configuration } : undefined);
+        }
+        if (tool === 'ferroui_android_debug') return this.appSessions.android.debug(args.runtime as AppRuntime, args.expected_generation,
+            { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
+        if (tool === 'ferroui_android_stop') {
+            await this.appSessions.android.stop(args.runtime as AppRuntime);
+            return { closed: true };
+        }
+        if (tool === 'ferroui_android_rebuild') return this.appSessions.android.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_android_output') return { output: this.appSessions.android.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_browser_targets') return this.appSessions.browser.targets((input as { folder?: string }).folder);
+        if (tool === 'ferroui_browser_run' || tool === 'ferroui_browser_attach') {
+            const request = input as BrowserRequest & { debug?: boolean };
+            const mode = tool === 'ferroui_browser_attach' ? 'attach' : request.debug ? 'debug' : 'run';
+            return this.appSessions.browser.open(request, mode, signal);
+        }
+        if (tool === 'ferroui_browser_stop') {
+            await this.appSessions.browser.stop(args.runtime as AppRuntime);
+            return { closed: true };
+        }
+        if (tool === 'ferroui_browser_rebuild') return this.appSessions.browser.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_browser_debug') return this.appSessions.browser.debug(args.runtime as AppRuntime, args.expected_generation,
+            { detach: args.action === 'detach', signal });
+        if (tool === 'ferroui_browser_output') return this.appSessions.browser.recentOutput(args.runtime as AppRuntime, args.lines ?? 60);
+        if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
+        if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
+        if (tool === 'ferroui_runtime_open') { this.appSessions.open(args.runtime as AppRuntime); return { runtime: args.runtime }; }
+        if (tool === 'ferroui_live_app_view') return this.appSessions.view(args.runtime as AppRuntime);
+        if (tool === 'ferroui_live_app_control') {
+            const { change } = input as { change: RuntimeViewChange };
+            return this.appSessions.controlView(args.runtime as AppRuntime, args.expected_generation, args.expected_revision, change, signal);
+        }
+        if (tool === 'ferroui_runtime_tools') return this.appSessions.mcp.tools(args.runtime as AppRuntime, signal);
+        if (tool === 'ferroui_runtime_query' || tool === 'ferroui_runtime_call') {
+            return this.appSessions.mcp.call({ runtime: args.runtime as AppRuntime, expected_generation: args.expected_generation,
+                tool: args.tool, arguments: args.arguments }, tool === 'ferroui_runtime_query', signal);
+        }
+        if (tool === 'ferroui_reload_status') return this.reload.stateFor(args.app_session);
+        if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
+        if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60, args.app_session);
+        if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50, args.app_session) };
+        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args, signal);
+        if (tool === 'ferroui_runtime_profile_windows') return this.runtimeProfiles.windows(signal, args.runtime);
+        if (tool === 'ferroui_runtime_profile_read') {
+            if (args.profile_id !== undefined && (args.runtime === undefined || args.expected_generation === undefined)) {
+                throw new Error('Pass the runtime and expected generation with a profile ID.');
+            }
+            return this.runtimeProfiles.read(signal, args.runtime, args.expected_generation, args.profile_id);
+        }
+        if (tool === 'ferroui_runtime_profile_start' || tool === 'ferroui_runtime_profile_stop' || tool === 'ferroui_runtime_profile_source') {
+            const target = { runtime: args.runtime!, generation: args.expected_generation };
+            if (tool === 'ferroui_runtime_profile_start') return this.runtimeProfiles.start(target, args.window!, args.duration_ms!, signal);
+            if (tool === 'ferroui_runtime_profile_stop') return this.runtimeProfiles.stop(target, args.profile_id!, signal);
+            return this.runtimeProfiles.sourceAt(target, args.profile_id!, args.row!, signal, args.reveal_source === true);
+        }
+        if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal, args.runtime);
+        if (tool === 'ferroui_runtime_templates') return this.runtimeSource.templates(args.node!, signal, args.runtime);
+        if (tool === 'ferroui_runtime_template_source') {
+            return this.runtimeSource.templateSource(args.node!, args.template_id!, args.expected_generation, signal, args.runtime);
+        }
+        if (tool === 'ferroui_runtime_apply_source') {
+            return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal, args.runtime);
+        }
+        if (tool === 'ferroui_project_files') return this.project.list(args.folder, args.kind as ProjectFile['kind'] | undefined, args.offset ?? 0, args.limit ?? 100, signal);
+        if (tool === 'ferroui_project_library') return this.workbench.projectLibrary.list(args.folder, args.query ?? '', args.offset ?? 0, args.limit ?? 100, signal);
+        if (tool === 'designer_open_project_definition') return this.workbench.openProjectDefinition(args.entry!, args.destination ?? 'preview', signal);
+        if (tool === 'ferroui_project_scaffold') return this.scaffolds.create(args.kind as 'view' | 'component', args.language!, args.path, args.folder, signal);
+        if (tool === 'ferroui_scenario_run' || tool === 'ferroui_scenario_review' || tool === 'ferroui_scenario_approve_baseline') {
+            const uri = await resolveWorkspaceFile(args.path, args.folder);
+            if (tool === 'ferroui_scenario_review') return this.scenarioReviews.run(uri, signal, args.baseline_ref, args.open);
+            return this.scenarios.run(uri, signal, { accept: args.accept_baselines, reference: args.baseline_ref, approval: args.approval });
+        }
+
+        const panel = this.workbench.designs().find(panel => panel.session === args.session);
+        if (!panel || !await isWorkspaceFile(panel.document.uri)) throw new Error('Select an open design inside the current workspace.');
+        signal.throwIfAborted();
+        const document = panel.document;
+        switch (tool) {
+            case 'designer_hosted_open': return this.hosted.open(document, args, signal);
+            case 'designer_hosted_fixtures': return this.hosted.fixtures(document.uri);
+            case 'designer_hosted_refresh':
+                return this.hosted.refresh(document.uri, args.expected_generation, args.expected_revision);
+            case 'designer_hosted_fixture':
+                return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
+            case 'designer_hosted_animations': return this.hosted.animations(document.uri);
+            case 'designer_hosted_timeline_view': return this.hosted.timelineDisplay(document.uri, signal);
+            case 'designer_hosted_timeline_set_graph':
+                return this.hosted.setGraphMode(document.uri, args.expected_generation, args.expected_revision, args.graph_mode);
+            case 'designer_hosted_timeline_set_layout':
+                return this.hosted.setTimelineLayout(document.uri, args.expected_generation, args.expected_revision, args.layout);
+            case 'designer_hosted_timeline_set_viewport':
+                return this.hosted.changeTimelinePresentation(document.uri, args.expected_generation, args.expected_revision,
+                    { kind: 'viewport', viewport: args.viewport }, signal);
+            case 'designer_hosted_timeline_track_action':
+                return this.hosted.changeTimelinePresentation(document.uri, args.expected_generation, args.expected_revision,
+                    { kind: 'tracks', track: args.track }, signal, args.expected_sequence);
+            case 'designer_hosted_timeline_set_work_area':
+                return this.hosted.changeTimelinePresentation(document.uri, args.expected_generation, args.expected_revision,
+                    { kind: 'work_area', work_area: args.work_area }, signal, args.expected_sequence);
+            case 'designer_hosted_curve':
+                return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedCurveQuery, signal);
+            case 'designer_hosted_image': return this.hosted.image(document.uri);
+            case 'designer_hosted_input':
+                return this.hosted.input(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.input as HostedGesture, signal);
+            case 'designer_hosted_keyboard':
+                return this.hosted.keyboard(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.input as KeyboardInput, signal);
+            case 'designer_hosted_palette':
+                return this.hosted.palette(document.uri, (args.arguments as { target?: HostedPaletteTarget } | undefined)?.target, signal);
+            case 'designer_hosted_palette_edit_draft':
+            case 'designer_hosted_palette_edit': {
+                const { target, edit } = args.arguments as { target: HostedPaletteTarget; edit: PaletteEdit };
+                return this.hosted.paletteEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, edit,
+                    tool === 'designer_hosted_palette_edit', signal);
+            }
+            case 'designer_hosted_palette_source': {
+                const { address, range } = args.arguments as { address: string; range: Range };
+                return this.hosted.paletteSource(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, address, range, signal);
+            }
+            case 'designer_hosted_palette_references': {
+                const { target, node } = args.arguments as { target: HostedPaletteTarget; node: number };
+                return this.hosted.paletteReferences(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, node, signal);
+            }
+            case 'designer_hosted_palette_show':
+                return this.hosted.showPalette(document.uri, args.expected_generation, args.arguments as HostedPalettePresentation | undefined, signal);
+            case 'designer_hosted_styles':
+                return this.hosted.styles(document.uri, (args.arguments as HostedStyleRead | undefined) ?? { action: 'files' }, signal);
+            case 'designer_hosted_style_edit_draft':
+            case 'designer_hosted_style_edit': {
+                const { target, edit } = args.arguments as { target: HostedStyleTarget; edit: HostedStyleEdit };
+                return this.hosted.stylesEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, edit, tool === 'designer_hosted_style_edit', signal);
+            }
+            case 'designer_hosted_style_resources': {
+                const { target, property } = args.arguments as { target: HostedStyleTarget; property: string };
+                return this.hosted.styleResources(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, property, signal);
+            }
+            case 'designer_hosted_style_source': {
+                const { address, range } = args.arguments as { address: string; range: Range };
+                return this.hosted.styleSource(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, address, range, signal);
+            }
+            case 'designer_hosted_style_show':
+                return this.hosted.showStyles(document.uri, args.expected_generation, args.arguments as HostedStylePresentation | undefined, signal);
+            case 'designer_hosted_templates':
+                return this.hosted.templates(document.uri, signal);
+            case 'designer_hosted_template_source':
+            case 'designer_hosted_template_copy_draft':
+            case 'designer_hosted_template_copy':
+                return this.hosted.templateAction(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.node!,
+                    tool === 'designer_hosted_template_source' ? 'source' : tool === 'designer_hosted_template_copy_draft' ? 'draft' : 'apply', signal,
+                    { member: args.member, destination: args.template_destination });
+            case 'designer_hosted_animation':
+                return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedAnimationAction, signal);
+            case 'designer_animation_issue': {
+                const frame = { session: panel.session, token: args.expected_revision };
+                if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
+                const catalog = await panel.studioQuery('designer_programs', { include_source: false }, undefined, signal) as { sourceIssues?: AnimationSourceIssue[] };
+                signal.throwIfAborted();
+                const issue = catalog.sourceIssues?.[args.index!];
+                if (!issue || !panel.canUse(frame)) throw new Error('Choose a source issue from the current designer revision.');
+                await panel.revealSource(frame, issue.range);
+                return issue;
+            }
+            case 'designer_hosted_keyframe_draft':
+            case 'designer_hosted_keyframe':
+                return this.hosted.keyframe(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedKeyframeDraft, tool === 'designer_hosted_keyframe', signal);
+            case 'designer_hosted_state_route_draft':
+            case 'designer_hosted_state_route':
+                return this.hosted.stateRoute(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedStateDraft, tool === 'designer_hosted_state_route', signal);
+            case 'designer_hosted_state_group_draft':
+            case 'designer_hosted_state_group':
+                return this.hosted.stateGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as StateGroupEdit, tool === 'designer_hosted_state_group', signal);
+            case 'designer_hosted_property_transitions':
+                return this.hosted.propertyTransitions(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.arguments as TransitionOwner, signal);
+            case 'designer_hosted_property_transition_draft':
+            case 'designer_hosted_property_transition':
+                return this.hosted.propertyTransitionEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.arguments as TransitionEdit,
+                    tool === 'designer_hosted_property_transition', signal);
+            case 'designer_hosted_keyframe_group_draft':
+            case 'designer_hosted_keyframe_group':
+                return this.hosted.keyframeGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedKeyframeGroupDraft, tool === 'designer_hosted_keyframe_group', signal);
+            case 'designer_hosted_clip_placement_draft':
+            case 'designer_hosted_clip_placement':
+                return this.hosted.clipPlacement(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedClipDraft, tool === 'designer_hosted_clip_placement', signal);
+            case 'designer_hosted_clip_draft':
+            case 'designer_hosted_clip_edit':
+                return this.hosted.clipEdit(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
+                    args.arguments as HostedClipEdit, tool === 'designer_hosted_clip_edit', signal);
+            case 'designer_document': {
+                if (args.include_counterpart) {
+                    await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });
+                }
+                const source = args.include_source ? document.getText() : undefined;
+                if (source && Buffer.byteLength(source) > 1024 * 1024) throw new Error('The authored buffer exceeds 1 MiB.');
+                return { ...describe(panel), source,
+                    counterpart: args.include_counterpart ? panel.snapshot?.counterpart : undefined,
+                    diagnostics: bufferDiagnostics(document.uri) };
+            }
+            case 'designer_outline': {
+                const snapshot = await panel.waitForSnapshot(signal);
+                if (args.node !== undefined) {
+                    const selected = snapshot.nodes.find(node => node.id === args.node);
+                    if (!selected) throw new Error('Read the current outline for valid node IDs.');
+                    return { revision: panel.currentToken, node: selected };
+                }
+                const nodes = filterOutline(snapshot.nodes, args.filter ?? '');
+                const offset = args.offset ?? 0;
+                return { revision: panel.currentToken, total: nodes.length, offset,
+                    nodes: nodes.slice(offset, offset + (args.limit ?? 100)).map(({ properties, addableProperties, ...node }) => node) };
+            }
+            case 'designer_toolbox':
+                await panel.waitForSnapshot(signal);
+                return { assets: panel.assets };
+            case 'designer_inspect': {
+                await panel.waitForSnapshot(signal);
+                const frame = { session: panel.session, token: panel.currentToken! };
+                if ([args.node, args.inspector_id, args.selection].filter(value => value !== undefined).length > 1) throw new Error('Choose source nodes or one runtime object.');
+                if (args.selection && args.selection.length !== 1) return panel.inspect(frame, { type: 'selection', nodes: args.selection });
+                const node = args.node ?? args.selection?.[0] ?? panel.selectedNode?.id;
+                const runtime = args.inspector_id ?? (args.node === undefined && !args.selection ? panel.runtimeSelection?.inspector_id : undefined);
+                if (runtime === undefined && node === undefined) throw new Error('Select a control or provide its node ID.');
+                const result = await panel.inspect(frame, runtime === undefined ? { type: 'source', node: node! } : { type: 'runtime', id: runtime });
+                return { revision: frame.token, ...result };
+            }
+            case 'designer_resources': {
+                await panel.waitForSnapshot(signal);
+                const frame = { session: panel.session, token: panel.currentToken! };
+                return { revision: frame.token, resources: await panel.resources(frame, args.node ?? panel.selectedNode?.id) };
+            }
+            case 'designer_assets': {
+                const assets = await this.workbench.projectAssets(panel);
+                const offset = args.offset ?? 0;
+                return { assets: assets.slice(offset, offset + (args.limit ?? 100)), offset, total: assets.length };
+            }
+            case 'designer_preview_image': {
+                const snapshot = await panel.waitForSnapshot(signal);
+                if (!snapshot.image) throw new Error(snapshot.renderError ?? 'The native preview image is unavailable.');
+                const { png, width, height } = snapshot.image;
+                return { mimeType: 'image/png', data: png, width, height, revision: panel.currentToken, uri: document.uri.toString() };
+            }
+            case 'designer_wait':
+                await panel.waitForSnapshot(signal);
+                return describe(panel);
+            case 'designer_block':
+                await panel.selectBlock({ session: panel.session, token: args.expected_revision }, args.index, args.reveal_source);
+                await panel.waitForSnapshot(signal);
+                return describe(panel);
+            case 'designer_view': {
+                const view = args.view ?? (args.styles_page ? 'styles' : undefined);
+                if (args.styles_page && view !== 'styles') throw new Error('Choose the Styles & Themes view to set its palette page.');
+                if (args.outline_mode) this.workbench.setOutlineMode(panel, args.outline_mode);
+                if (view) await this.workbench.revealDesign(panel, view, args.styles_page);
+                const { width, height, dark } = args;
+                const theme = args.theme ?? (dark === undefined ? undefined : dark ? 'dark' : 'light');
+                if (theme === 'high_contrast' && !panel.supportsHighContrastTheme) {
+                    await panel.waitForSnapshot(signal);
+                    if (!panel.supportsHighContrastTheme) throw new Error('Update the FerroUI preview helper to use High contrast.');
+                }
+                const { dimensions } = panel;
+                const viewport = { ...dimensions, width: width ?? dimensions.width, height: height ?? dimensions.height };
+                if (args.refresh || width !== undefined || height !== undefined || theme) {
+                    panel.configure(theme ? withViewportTheme(viewport, theme) : viewport);
+                }
+                return describe(panel);
+            }
+            case 'designer_canvas':
+                await this.workbench.revealDesign(panel, 'canvas');
+                return panel.controlCanvas(args, signal);
+            case 'designer_canvas_guides': {
+                await panel.waitForSnapshot(signal);
+                const state = panel.canvasGuides;
+                if (!state) throw new Error('Render a canvas before reading its guides.');
+                return { ...state, revision: state.frame.token };
+            }
+            case 'designer_canvas_guides_edit': {
+                const result = await panel.editCanvasGuides({ session: panel.session, token: args.expected_revision }, args.expected_epoch!, args.edit!, signal);
+                return { ...result, revision: result.frame.token };
+            }
+            case 'designer_canvas_input':
+                await panel.interact(args.expected_revision, args.input as CanvasInteraction, signal);
+                return describe(panel);
+            case 'designer_select': {
+                const frame = { session: panel.session, token: args.expected_revision };
+                if (!panel.canUse(frame)) throw new Error('Read the current outline before selecting.');
+                if ([args.node, args.inspector_id, args.selection].filter(value => value !== undefined).length !== 1) {
+                    throw new Error('Choose a source node, an ordered source selection, or a runtime object.');
+                }
+                if (args.inspector_id !== undefined) {
+                    const row = (await panel.runtimeTree(frame, 'combined')).find(row => row.inspector_id === args.inspector_id);
+                    signal.throwIfAborted();
+                    if (!row || !panel.canUse(frame)) throw new Error('Read the current runtime tree before selecting.');
+                    await panel.selectRuntime(frame, row, args.reveal_source ?? false);
+                } else if (args.selection) {
+                    await panel.selectNodes(frame, args.selection);
+                } else {
+                    if (!panel.nodes.some(node => node.id === args.node)) throw new Error('Read the current source outline before selecting.');
+                    await panel.select({ ...frame, node: args.node! }, args.reveal_source);
+                }
+                return describe(panel);
+            }
+            case 'designer_placement_hint': case 'designer_place': {
+                const placement = await this.placement(panel, args);
+                signal.throwIfAborted();
+                if (tool === 'designer_placement_hint') {
+                    return panel.previewPlacement({ session: panel.session, token: args.expected_revision }, placement);
+                }
+                await panel.agentEdit(args.expected_revision, { type: 'place', frame: args.expected_revision, placement }, signal);
+                break;
+            }
+            case 'designer_remove':
+                await panel.agentEdit(args.expected_revision, { type: 'removeNode', node: args.node! }, signal);
+                break;
+            case 'designer_set_image_source': {
+                const target = { session: panel.session, token: args.expected_revision, node: args.node! };
+                const operation = await this.workbench.projectImageSource(panel, target, args.project_asset!, args.property);
+                await panel.agentEdit(target.token, operation, signal);
+                break;
+            }
+            case 'designer_resize_hint':
+                return panel.previewResize({ session: panel.session, token: args.expected_revision },
+                    { node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy!, snap: args.snap });
+            case 'designer_resize':
+                await panel.agentEdit(args.expected_revision, { type: 'resize', frame: args.expected_revision,
+                    node: args.node!, handle: args.handle!, dx: args.dx!, dy: args.dy!, snap: args.snap }, signal);
+                break;
+            case 'designer_edit_property':
+                if (args.action === 'set' && args.value === undefined) throw new Error('Supply the property value.');
+                await this.workbench.editPropertyForAgent(panel, args.expected_revision, args.action === 'set'
+                    ? { type: 'setProperty', node: args.node!, name: args.property, value: args.value! }
+                    : { type: 'resetProperty', node: args.node!, name: args.property }, signal);
+                break;
+            case 'designer_set_event':
+                if (args.action === 'set' && !args.handler) throw new Error('Supply a handler name or expression.');
+                await panel.agentEdit(args.expected_revision, { type: 'setEvent', node: args.node!, name: args.event,
+                    value: args.action === 'set' ? args.handler! : null }, signal);
+                break;
+            case 'designer_event_handler': case 'designer_scaffold_handler': {
+                const site = this.workbench.eventHandlerSite(panel, { session: panel.session, token: args.expected_revision }, args.node!, args.event);
+                return tool === 'designer_event_handler'
+                    ? this.workbench.handlers.inspect(site, args.handler, signal)
+                    : this.workbench.handlers.scaffold(site, args.handler!, args.expected_rust_version, signal);
+            }
+            case 'designer_command_bindings': case 'designer_command_binding': {
+                const site = this.workbench.commandBindingSite(panel, { session: panel.session, token: args.expected_revision, node: args.node! });
+                if (tool === 'designer_command_bindings') return this.workbench.commandBindings.inspect(site, args.prefix, signal);
+                if (args.expected_uri !== document.uri.toString() || args.expected_version !== site.version) {
+                    throw new Error('The XAML source changed. Read the command binding again.');
+                }
+                await this.workbench.commandBindings.apply(site, args.change!, signal);
+                break;
+            }
+            case 'designer_dictionary_extraction': case 'designer_extract_dictionary': {
+                const site = await this.workbench.dictionarySite(panel, { session: panel.session, token: args.expected_revision }, args.node!);
+                const extraction = this.workbench.dictionaryExtraction;
+                return tool === 'designer_dictionary_extraction'
+                    ? extraction.inspect(site, args.file_name, signal)
+                    : extraction.apply(site, args.file_name!, args.review!, signal);
+            }
+            case 'designer_apply_resource':
+                await panel.agentEdit(args.expected_revision, { type: 'applyResource', frame: args.expected_revision,
+                    resource: args.resource, node: args.node!, property: args.property, dynamic: args.dynamic ?? false }, signal);
+                break;
+            case 'designer_apply':
+                await panel.agentEdit(args.expected_revision, { type: 'apply', label: args.label, edits: args.edits }, signal);
+                break;
+            case 'designer_rename_rsx_control':
+                await renameRsxControl(panel, args.expected_revision, args.node!, args.value!, signal);
+                break;
+            case 'designer_apply_counterpart':
+                await panel.agentEdit(args.expected_revision, { type: 'applyCounterpart', source: args.source }, signal);
+                break;
+            case 'designer_source': {
+                if (Buffer.byteLength(args.source) > 1024 * 1024) throw new Error('The authored source exceeds 1 MiB.');
+                const end = document.positionAt(document.getText().length);
+                await applyTextEdits(document, args.expected_version, [{ range: { start: { line: 0, character: 0 }, end }, newText: args.source }]);
+                break;
+            }
+            case 'designer_history':
+                assertVersion(document, args.expected_version);
+                if (args.action !== 'undo' && args.action !== 'redo') throw new Error('Choose undo or redo.');
+                await runEditorHistory(document, args.action, () => assertVersion(document, args.expected_version), signal);
+                break;
+            case 'designer_save':
+                assertVersion(document, args.expected_version);
+                if (!await document.save()) throw new Error('VS Code could not save the buffer.');
+                break;
+            case 'designer_studio_tools': return panel.studioTools();
+            case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, args.selection, signal);
+            case 'designer_studio_edit': {
+                const { timelineKeys, moduleEdit } = await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                return { ...describe(panel), ...(timelineKeys && { keyframes: timelineKeys }),
+                    ...(moduleEdit && { edited_source: { uri: moduleEdit.uri, version: moduleEdit.version } }) };
+            }
+            case 'designer_rsx_style_source':
+                await panel.revealRustModule({ session: panel.session, token: args.expected_revision }, args.address, args.range, signal);
+                break;
+            case 'designer_studio_present': {
+                const presentation = await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source,
+                    opened_session: presentation.navigationSession };
+                if (presentation?.returnToConsumer) return { ...describe(panel), returned_to: presentation.returnToConsumer,
+                    ...(presentation.navigationSession !== undefined && { returned_session: presentation.navigationSession }) };
+                if (presentation?.openRustTemplate) return { ...describe(panel), opened_template: presentation.openRustTemplate,
+                    ...(presentation.navigationSession !== undefined && { opened_session: presentation.navigationSession }) };
+                break;
+            }
+            case 'designer_timeline_control':
+                await this.workbench.revealDesign(panel, 'timeline');
+                return this.workbench.controlTimeline(panel, { session: panel.session, token: args.expected_revision },
+                    args.arguments as TimelineControl, signal);
+            case 'designer_timeline_view': return this.workbench.timelineDisplay(panel, signal);
+            case 'designer_timeline_set_graph':
+                return this.workbench.setTimelineGraph(panel, { session: panel.session, token: args.expected_revision }, args.graph_mode, signal);
+            case 'designer_timeline_set_layout':
+                return this.workbench.setTimelineLayout(panel, { session: panel.session, token: args.expected_revision }, args.layout, signal);
+            case 'designer_timeline_set_viewport':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'viewport', viewport: args.viewport }, signal);
+            case 'designer_timeline_track_action':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'tracks', track: args.track }, signal);
+            case 'designer_timeline_set_work_area':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'work_area', work_area: args.work_area }, signal);
+            case 'designer_timeline_set_frame_rate':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'snap', snap: args.frame_snap }, signal);
+            case 'designer_timeline_markers':
+            case 'designer_timeline_marker_edit':
+                if ((args.all === true) === (args.program !== undefined)) throw new Error('Choose a clip or the shared elapsed ruler.');
+                return this.workbench.timelineMarkers(panel, { session: panel.session, token: args.expected_revision }, args.program,
+                    signal, tool === 'designer_timeline_marker_edit' ? args.arguments as TimelineMarkerAction : undefined);
+            case 'designer_transition_control':
+                await this.workbench.revealDesign(panel, 'timeline');
+                return await this.workbench.controlStateTransition(panel, { session: panel.session, token: args.expected_revision },
+                    args.arguments as StateTransitionControl, signal) ?? describe(panel);
+            case 'designer_stages_open': {
+                const block = panel.snapshot?.activeBlock?.start;
+                return this.stages.open(document, block ? new vscode.Position(block.line, block.character) : new vscode.Position(0, 0)).wait(signal);
+            }
+            case 'designer_stages': return this.stages.board(document.uri).inspect(signal);
+            case 'designer_stage_image': {
+                const image = await this.stages.board(document.uri).capture(args.stage!, args.expected_epoch!, signal);
+                return { mimeType: 'image/png', data: image.png, width: image.width, height: image.height };
+            }
+            case 'designer_stage_hotspots': return this.stages.board(document.uri).hotspots(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_checks': return this.stages.board(document.uri).checks(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_comparison': return this.stages.board(document.uri).planComparison({
+                base: { id: args.stage!, epoch: args.expected_epoch! }, comparison: args.comparison!,
+            }, signal);
+            case 'designer_stage_states': return this.stages.board(document.uri).stateOptions(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_fixtures': return this.stages.board(document.uri).fixtureOptions(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_input': return this.stages.board(document.uri).keyboard({
+                id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageInput,
+            }, signal);
+            case 'designer_stage_pointer': return this.stages.board(document.uri).contact({
+                id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageContact,
+            }, signal);
+            case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
+            case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal, args.expected_frame);
+            case 'designer_stage_prototype_image': {
+                const image = await this.stages.board(document.uri).prototypeImage(args.expected_frame!, signal);
+                return { mimeType: 'image/png', data: image.png, width: image.width, height: image.height };
+            }
+            case 'designer_stage_prototype_input': return this.stages.board(document.uri)
+                .prototypeInput(args.expected_frame!, args.input as PrototypeInput, signal);
+        }
+        return describe(panel);
+    }
+
+    private async placement(panel: DesignerPanel, args: Arguments): Promise<Placement> {
+        if ([args.node, args.asset, args.project_asset, args.selection].filter(value => value !== undefined).length !== 1) {
+            throw new Error('Specify a Toolbox control, project image, source node, or selection.');
+        }
+        const origin: DragOrigin = args.selection ? { type: 'nodes', nodes: args.selection, anchor: args.moving_anchor ?? args.selection[0] }
+            : args.node !== undefined ? { type: 'node', node: args.node }
+            : args.project_asset !== undefined ? await this.workbench.projectImage(panel, args.project_asset)
+                : { type: 'asset', control: args.asset! };
+        const hasOutline = args.anchor !== undefined && args.position !== undefined;
+        const hasPoint = args.x !== undefined && args.y !== undefined;
+        if (hasOutline === hasPoint) throw new Error('Specify one outline anchor and position or one canvas point.');
+        if (hasOutline && args.snap) throw new Error('Snapping applies to a canvas placement.');
+        const target: DropTarget = hasOutline ? { type: 'outline', node: args.anchor!, position: args.position! }
+            : { type: 'canvas', x: args.x!, y: args.y!, snap: args.snap };
+        return { origin, target };
+    }
+}
+
+function describe(panel: DesignerPanel) {
+    const snapshot = panel.snapshot;
+    const active = snapshot?.activeBlock?.start;
+    const blocks = snapshot?.blocks.map((range, index) => ({ index, range,
+        active: range.start.line === active?.line && range.start.character === active.character })) ?? [];
+    return { session: panel.session, uri: panel.document.uri.toString(), language: panel.language, version: panel.document.version,
+        revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null, selection: panel.selectedIds,
+        inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
+        viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks,
+        available_themes: panel.supportsHighContrastTheme ? ['light', 'dark', 'high_contrast'] : ['light', 'dark'],
+        ...(snapshot?.rustTemplate && { rust_template: snapshot.rustTemplate }) };
+}
+
+function assertVersion(document: vscode.TextDocument, version: number): void {
+    if (document.version !== version) throw new Error('The source buffer changed. Read its latest version.');
+}

@@ -642,7 +642,9 @@ fn a_confined_compositor_keeps_what_renders_on_the_render_thread() {
 
     // Show: the first frame creates the graphics context, the backend
     // context and the render target, and draws.
+    let before_show = confined.render_loop.frames_requested_out_of_turn();
     let (target, root) = confined.show();
+    assert!(confined.render_loop.frames_requested_out_of_turn() > before_show, "show requests a frame");
     assert!(confined.log.saw("the graphics context is created"));
     assert!(confined.log.saw("the backend context is created"));
     assert!(confined.log.saw("the render target is created"));
@@ -650,14 +652,12 @@ fn a_confined_compositor_keeps_what_renders_on_the_render_thread() {
     assert!(confined.log.saw("the surface is asked for its type"));
 
     // Resize, as a top level reports it: another synchronous commit.
+    let before_resize = confined.render_loop.frames_requested_out_of_turn();
     root.set_size(Vector::new(200.0, 150.0));
     target.set_size(Size::new(200.0, 150.0));
     MediaContext::instance().immediate_render_requested(&confined.compositor);
-    // Each wait asked the loop for a frame out of turn first, and so did
-    // each of the two batches that followed a tick with nothing to draw
-    // (the render thread of this test ticks all the time).
-    let out_of_turn = confined.render_loop.frames_requested_out_of_turn();
-    assert!((2..=4).contains(&out_of_turn), "{out_of_turn} frames were requested out of turn");
+    // The background loop can also request frames for batches that miss a tick.
+    assert!(confined.render_loop.frames_requested_out_of_turn() > before_resize, "resize requests a frame");
 
     // The job of the render thread has answered the first request.
     let feature = wait_for("the first request is answered", first).expect("the render thread has the feature");

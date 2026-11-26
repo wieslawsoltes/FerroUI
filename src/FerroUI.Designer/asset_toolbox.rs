@@ -8,7 +8,7 @@ use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{
-    Border, Button, ColumnDefinitions, ComboBox, Control, Grid, PathIcon, RowDefinitions,
+    Border, Button, ColumnDefinitions, ComboBox, ContextMenu, Control, Grid, PathIcon, RowDefinitions,
     ScrollViewer, StackPanel, TextBlock, TextBox, ToolTip, WrapPanel,
 };
 use std::cell::{Cell, RefCell};
@@ -25,6 +25,22 @@ pub struct DesignerAsset {
     pub description: String,
     pub source: String,
     pub icon: AssetIcon,
+}
+
+pub fn project_designer_assets(
+    workspace: &std::path::Path,
+    document: &std::path::Path,
+) -> Result<Vec<DesignerAsset>, String> {
+    ferroui_designer_project::toolbox_snippets(workspace, document)
+        .map_err(|error| error.to_string())
+        .map(|snippets| snippets.into_iter().map(|snippet| DesignerAsset {
+            id: format!("project-file:{}", snippet.title),
+            title: snippet.title,
+            category: "Project snippets".into(),
+            description: snippet.path.display().to_string(),
+            source: snippet.source,
+            icon: AssetIcon::Control,
+        }).collect())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -54,7 +70,8 @@ pub enum AssetIcon {
     CustomPath(String),
 }
 impl AssetIcon {
-    fn path(&self) -> &str {
+    /// A 24 × 24 path in FerroUI geometry syntax.
+    pub fn path(&self) -> &str {
         match self {
             Self::Control => "F1 M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z",
             Self::Text => "F1 M3 4H21V7H14V21H10V7H3Z",
@@ -116,6 +133,7 @@ pub enum AssetViewMode {
 
 type Activate = Rc<dyn Fn(&DesignerAsset)>;
 type BeginDrag = Rc<dyn Fn(&DesignerAsset, &PointerPressedEventArgs)>;
+type PrepareMenu = Rc<dyn Fn(&DesignerAsset, &Ref<ContextMenu>) -> bool>;
 
 pub struct AssetToolbox {
     root: Ref<Grid>,
@@ -129,9 +147,11 @@ pub struct AssetToolbox {
     view_mode: Cell<AssetViewMode>,
     count: Ref<TextBlock>,
     catalog: RefCell<Vec<DesignerAsset>>,
+    project_catalog: RefCell<Vec<DesignerAsset>>,
     visible: RefCell<Vec<String>>,
     activate: RefCell<Option<Activate>>,
     begin_drag: RefCell<Option<BeginDrag>>,
+    prepare_menu: RefCell<Option<PrepareMenu>>,
     guard: Cell<bool>,
 }
 impl AssetToolbox {
@@ -215,9 +235,11 @@ impl AssetToolbox {
             view_mode: Cell::new(AssetViewMode::Grid),
             count,
             catalog: RefCell::new(Vec::new()),
+            project_catalog: RefCell::new(Vec::new()),
             visible: RefCell::new(Vec::new()),
             activate: RefCell::new(None),
             begin_drag: RefCell::new(None),
+            prepare_menu: RefCell::new(None),
             guard: Cell::new(false),
         });
         // Register through the same replacement path hosts use for extensions.
@@ -287,10 +309,24 @@ impl AssetToolbox {
         self.visible.borrow().clone()
     }
     pub fn assets(&self) -> Vec<DesignerAsset> {
+        self.catalog.borrow().iter().chain(self.project_catalog.borrow().iter()).cloned().collect()
+    }
+    pub(crate) fn registered_assets(&self) -> Vec<DesignerAsset> {
         self.catalog.borrow().clone()
+    }
+    pub(crate) fn replace_project_assets(self: &Rc<Self>, assets: Vec<DesignerAsset>) {
+        if *self.project_catalog.borrow() == assets {
+            return;
+        }
+        *self.project_catalog.borrow_mut() = assets;
+        self.rebuild_categories();
+        self.refresh_tiles();
     }
     pub fn on_activate(&self, callback: impl Fn(&DesignerAsset) + 'static) {
         *self.activate.borrow_mut() = Some(Rc::new(callback));
+    }
+    pub(crate) fn on_prepare_menu(&self, callback: impl Fn(&DesignerAsset, &Ref<ContextMenu>) -> bool + 'static) {
+        *self.prepare_menu.borrow_mut() = Some(Rc::new(callback));
     }
     pub fn on_begin_drag(
         &self,
@@ -342,6 +378,7 @@ impl AssetToolbox {
             .catalog
             .borrow()
             .iter()
+            .chain(self.project_catalog.borrow().iter())
             .map(|asset| asset.category.clone())
             .collect::<BTreeSet<_>>()
             .into_iter()
@@ -350,7 +387,7 @@ impl AssetToolbox {
         self.category.items().clear();
         self.category
             .items()
-            .add(Some(Rc::new("All controls".to_owned())));
+            .add(Some(Rc::new("All assets".to_owned())));
         for category in &categories {
             self.category.items().add(Some(Rc::new(category.clone())));
         }
@@ -375,6 +412,7 @@ impl AssetToolbox {
             .catalog
             .borrow()
             .iter()
+            .chain(self.project_catalog.borrow().iter())
             .filter(|asset| {
                 if category
                     .as_ref()
@@ -395,9 +433,9 @@ impl AssetToolbox {
         self.buttons.borrow_mut().clear();
         *self.visible.borrow_mut() = assets.iter().map(|asset| asset.id.clone()).collect();
         self.count.set_text(Some(&if assets.is_empty() {
-            "No matching controls".to_owned()
+            "No matching assets".to_owned()
         } else {
-            format!("{} controls", assets.len())
+            format!("{} assets", assets.len())
         }));
         if assets.is_empty() {
             self.groups.children().add(empty_assets());
@@ -471,6 +509,11 @@ impl AssetToolbox {
                 );
                 let content = asset_content(&asset, self.view_mode.get());
                 tile.set_content(Some(Control::boxed(&content)));
+                if ferroui_designer_project::is_packaged_asset_uri(&asset.id) {
+                    if let Some(prepare) = self.prepare_menu.borrow().clone() {
+                        attach_asset_menu(&tile, &asset, prepare);
+                    }
+                }
                 let weak = Rc::downgrade(self);
                 let drag_asset = asset.clone();
                 // Button handles pointer presses in its class handler. Observe the
@@ -509,6 +552,18 @@ impl AssetToolbox {
             self.groups.children().add(section.upcast::<Control>());
         }
     }
+}
+
+fn attach_asset_menu(tile: &Ref<Button>, asset: &DesignerAsset, prepare: PrepareMenu) {
+    let menu = ContextMenu::new();
+    let weak_menu = menu.downgrade();
+    let asset = asset.clone();
+    menu.opening(move |event| {
+        if !weak_menu.upgrade().is_some_and(|menu| prepare(&asset, &menu)) {
+            event.set_cancel(true);
+        }
+    }).detach();
+    tile.set_context_menu(&menu);
 }
 
 fn toolbox_icon(path: &str, size: f64, color: u32) -> Ref<PathIcon> {

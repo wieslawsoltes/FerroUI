@@ -79,7 +79,8 @@ impl TransformParser {
     }
 }
 
-fn parse_value(mut part: &str) -> Result<UnitValue, FormatError> {
+fn parse_value(part: &str) -> Result<UnitValue, FormatError> {
+    let mut part = part.trim();
     let mut unit_index = None;
 
     for (i, c) in part.char_indices() {

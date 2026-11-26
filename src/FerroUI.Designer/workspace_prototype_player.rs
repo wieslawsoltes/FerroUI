@@ -1,67 +1,20 @@
 //! A play session realizes a bounded set of isolated native stages. Screen history
 //! stores original board identities; native controls are retained until Exit/Play.
 use super::*;
-use crate::{
-    PreviewPrototypeHotspot, PreviewPrototypePlayerAction, PreviewStageMode, PreviewStageSize,
-    PreviewStageStatus,
-};
-use ferroui_base::input::InputElement;
+use crate::preview_prototype_layout as layout;
+use crate::{PreviewPrototypeHotspot, PreviewPrototypeInput, PreviewPrototypePlayerAction,
+    PreviewStageExportOptions, PreviewStageFocus, PreviewStageImage, PreviewStagePointerOrigin,
+    PreviewStageSize, PreviewStageStatus};
 use std::collections::BTreeSet;
-
-struct PrototypeHotspotFrame {
-    hotspots: Vec<PreviewPrototypeHotspot>,
-    focus_targets: Vec<(usize, Ref<InputElement>)>,
-    bounds: BTreeMap<usize, Rect>,
-    diagnostics: Vec<String>,
-}
 
 fn inspect_prototype_hotspots(
     player: &mut RunningPrototype,
     graph: &PreviewPrototype,
     size: PreviewStageSize,
     top: Rect,
-) -> Result<PrototypeHotspotFrame, String> {
-    let id = player.stages[&player.session.current()];
-    // Only the top layer is interactive. Covered views retain their native
-    // graphs without rebuilding every hidden source map on each tick.
-    player.board.refresh_runtime_mapping(id)?;
-    let mut hotspots = Vec::new();
-    let mut focus_targets = Vec::new();
-    let mut diagnostics = Vec::new();
-    let mut indexed = graph
-        .links
-        .iter()
-        .enumerate()
-        .filter(|(_, link)| link.source == player.session.current())
-        .collect::<Vec<_>>();
-    indexed.sort_by_key(|(index, link)| (link.trigger.path.len(), *index));
-    for (index, link) in indexed {
-        match layout::hotspot(&player.board, id, &link.trigger, size, top) {
-            Ok(bounds) => {
-                if let Ok(visual) = player.board.prototype_hotspot_visual(id, &link.trigger) {
-                    if let Some(input) = visual.cast::<InputElement>() {
-                        focus_targets.push((index, input));
-                    }
-                }
-                hotspots.push(PreviewPrototypeHotspot {
-                    link: index,
-                    name: link.name.clone(),
-                    bounds,
-                });
-            }
-            Err(error) => diagnostics.push(format!("{}: {error}", link.name)),
-        }
-    }
-    let bounds = hotspots
-        .iter()
-        .map(|hotspot| (hotspot.link, hotspot.bounds))
-        .collect();
-    Ok(PrototypeHotspotFrame {
-        hotspots,
-        focus_targets,
-        bounds,
-        diagnostics,
-    })
+) -> Result<layout::PreviewPrototypeHotspots, String> {
+    let current = player.session.current();
+    layout::hotspots(&mut player.board, player.stages[&current], current, graph, size, top)
 }
 
 impl DesignerWorkspace {
@@ -91,51 +44,30 @@ impl DesignerWorkspace {
     }
 
     pub fn start_preview_prototype(self: &Rc<Self>, flow_name: &str) -> Result<(), String> {
+        self.start_preview_prototype_with_motion_preference(flow_name, false)
+    }
+
+    pub fn start_preview_prototype_with_motion_preference(
+        self: &Rc<Self>,
+        flow_name: &str,
+        reduced_motion: bool,
+    ) -> Result<(), String> {
         let graph = self.preview_prototype();
-        PreviewPrototypeSession::start(&graph, flow_name)?;
+        let session = PreviewPrototypeSession::start_with_transitions(
+            &graph, flow_name, &self.preview_prototype_transitions(),
+        )?;
+        self.cancel_preview_stage_pointer_input();
         self.set_preview_prototype_visible(true)?;
         let source_model = self.preview_stage_model();
-        let stages = self.preview_stages();
-        graph.validate(&stages.iter().map(|stage| stage.id).collect::<Vec<_>>())?;
-        let session = PreviewPrototypeSession::start(&graph, flow_name)?;
-        let reachable = graph.reachable(session.current());
-        let sources = self.preview_stage_sources();
-        let mut configurations = Vec::new();
-        let mut originals = Vec::new();
-        for info in stages.iter().filter(|info| reachable.contains(&info.id)) {
-            let source = sources
-                .iter()
-                .find(|source| source.uri == info.configuration.source_uri)
-                .ok_or("Open every screen source in the selected flow before playing it")?;
-            if source.pending || !source.document.is_valid() {
-                return Err("Apply or repair the flow's pending XAML before playing it".into());
-            }
-            for link in graph.links.iter().filter(|link| link.source == info.id) {
-                link.trigger.resolve(&source.document)?;
-            }
-            let mut configuration = info.configuration.clone();
-            configuration.mode = PreviewStageMode::Live;
-            configuration.auto_update = true;
-            configuration.pinned = true;
-            originals.push(info.id);
-            configurations.push(configuration);
-        }
-        let (options, options_epoch) = self.preview_stage_host_options();
-        let mut board = PreviewStageBoard::new();
-        board.sync_sources(
-            self.session.borrow().document_uri(),
-            sources,
-            options,
-            options_epoch,
-        )?;
-        let ids = board.add_configurations(configurations)?;
-        let mapping = originals.into_iter().zip(ids).collect::<BTreeMap<_, _>>();
+        let sources = self.preview_stages.board.borrow().prototype_sources(&session)?;
+        let (board, mapping) = sources.realize()?;
 
         if source_model != self.preview_stage_model() {
             return Err("The sources or stage definitions changed while creating the prototype; play it again".into());
         }
         self.retire_preview_prototype_player();
         self.ensure_preview_prototype_player_view();
+        self.preview_prototype_player_view().unwrap().set_reduced_motion(reduced_motion);
         *self.prototype.player.borrow_mut() = Some(RunningPrototype {
             session,
             board,
@@ -155,6 +87,9 @@ impl DesignerWorkspace {
 
     pub fn activate_preview_prototype_link(self: &Rc<Self>, index: usize) -> Result<(), String> {
         self.ensure_current_prototype_player()?;
+        if self.preview_prototype_motion_running() {
+            return Err("Wait for the prototype transition to finish".into());
+        }
         let graph = self.preview_prototype();
         let link = graph
             .links
@@ -172,7 +107,7 @@ impl DesignerWorkspace {
                 .stages
                 .get(&link.source)
                 .ok_or("The prototype screen was removed")?;
-            let (size, layers) = layout::layers(player, &player.session)?;
+            let (size, layers) = layout::layers(&player.board, &player.stages, &player.session)?;
             if player.layout != layout::signature(&layers) {
                 return Err(
                     "The presented screens moved; wait for the current native layout".into(),
@@ -257,6 +192,63 @@ impl DesignerWorkspace {
         self.refresh_preview_prototype();
     }
 
+    pub fn preview_prototype_motion_running(&self) -> bool {
+        self.preview_prototype_player_view().is_some_and(|view| view.motion_running())
+    }
+
+    pub fn set_preview_prototype_reduced_motion(&self, reduced: bool) -> Result<(), String> {
+        self.ensure_current_prototype_player()?;
+        let view = self.preview_prototype_player_view().ok_or("The prototype was closed")?;
+        view.set_reduced_motion(reduced);
+        Ok(())
+    }
+
+    /// Deliver agent input to the same native controls used by the Studio player.
+    pub fn preview_prototype_input(self: &Rc<Self>, frame: u64, input: PreviewPrototypeInput)
+        -> Result<Option<PreviewStageFocus>, String>
+    {
+        let view = self.accepted_prototype_view(frame)?;
+        view.check_motion_input(&input)?;
+        match input {
+            PreviewPrototypeInput::Keyboard { input } => {
+                view.focus_active_plane();
+                self.accepted_prototype_view(frame)?;
+                let target = {
+                    let state = self.prototype.player.borrow();
+                    let player = state.as_ref().ok_or("The prototype was closed")?;
+                    view.keyboard_target(&player.board, player.stages[&player.session.current()])?
+                };
+                target.input(input)
+            }
+            PreviewPrototypeInput::Pointer { input } => {
+                let target = {
+                    let state = self.prototype.player.borrow();
+                    let player = state.as_ref().ok_or("The prototype was closed")?;
+                    view.pointer_target(&player.board, player.stages[&player.session.current()], PreviewStagePointerOrigin::Automation)?
+                };
+                target.input(input)?;
+                Ok(None)
+            }
+        }
+    }
+
+    pub fn preview_prototype_image(&self, frame: u64) -> Result<PreviewStageImage, String> {
+        let view = self.accepted_prototype_view(frame)?;
+        view.advance_motion();
+        view.control().update_layout();
+        let image = crate::capture_preview_stage_png(&view.artboard(), PreviewStageExportOptions::default())?;
+        self.accepted_prototype_view(frame)?;
+        Ok(image)
+    }
+
+    fn accepted_prototype_view(&self, frame: u64) -> Result<Rc<PreviewPrototypePlayerView>, String> {
+        self.ensure_current_prototype_player()?;
+        if frame != self.prototype.generation.get() {
+            return Err("The prototype changed. Use its current frame.".into());
+        }
+        self.preview_prototype_player_view().ok_or_else(|| "The native prototype player was closed".into())
+    }
+
     fn accept_prototype_navigation(
         self: &Rc<Self>,
         next: PreviewPrototypeSession,
@@ -269,7 +261,7 @@ impl DesignerWorkspace {
             }
             // Reject unusable manual positions or unavailable layer identities
             // before changing accepted history, overlays or the current screen.
-            layout::layers(player, &next)?;
+            layout::layers(&player.board, &player.stages, &next)?;
             (
                 player.session.clone(),
                 player
@@ -280,9 +272,12 @@ impl DesignerWorkspace {
         if self.prototype.refreshing.replace(true) {
             return Err("Wait for the current native prototype layout before navigating".into());
         }
+        let view = self.preview_prototype_player_view();
+        let motion = view.as_ref().map(|view| view.capture_motion(next.motion())).transpose();
         {
             let mut player = self.prototype.player.borrow_mut();
             let player = player.as_mut().unwrap();
+            player.board.cancel_pointer_input(PreviewStagePointerOrigin::Automation);
             player.session = next;
             player.bounds.clear();
             player.layout.clear();
@@ -290,6 +285,17 @@ impl DesignerWorkspace {
         }
         self.bump_prototype_generation();
         let result = self.refresh_preview_prototype_player();
+        if result.is_ok() {
+            match motion {
+                Ok(Some(capture)) => view.unwrap().play_motion(capture),
+                Ok(None) => {}
+                Err(error) => {
+                    if let Some(player) = self.prototype.player.borrow_mut().as_mut() {
+                        player.diagnostics.push(format!("Transition skipped. {error}"));
+                    }
+                }
+            }
+        }
         if result.is_err() {
             // A fitted destination can resolve a different size only after it
             // inherits the real native root. Recover the prior retained stack
@@ -432,7 +438,7 @@ impl DesignerWorkspace {
             let (size, layers, title, can_back, prior_hotspots, failed) = {
                 let player = self.prototype.player.borrow();
                 let player = player.as_ref().ok_or("The prototype was closed")?;
-                let (size, layers) = layout::layers(player, &player.session)?;
+                let (size, layers) = layout::layers(&player.board, &player.stages, &player.session)?;
                 let active = *player.stages.get(&player.session.current()).unwrap();
                 let info = player
                     .board
@@ -513,7 +519,7 @@ impl DesignerWorkspace {
             let current = {
                 let player = self.prototype.player.borrow();
                 let player = player.as_ref().ok_or("The prototype was closed")?;
-                let (_, current) = layout::layers(player, &player.session)?;
+                let (_, current) = layout::layers(&player.board, &player.stages, &player.session)?;
                 layout::signature(&current)
             };
             if current == layout::signature(&layers) {
@@ -541,7 +547,7 @@ impl DesignerWorkspace {
                     ));
                 }
             }
-            let PrototypeHotspotFrame {
+            let layout::PreviewPrototypeHotspots {
                 hotspots,
                 focus_targets,
                 bounds,
@@ -575,7 +581,7 @@ impl DesignerWorkspace {
         let player = player
             .as_mut()
             .ok_or("The prototype was closed during layout")?;
-        let (size, current) = layout::layers(player, &player.session)?;
+        let (size, current) = layout::layers(&player.board, &player.stages, &player.session)?;
         if player.layout != layout::signature(&current) {
             return Ok(false);
         }

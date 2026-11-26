@@ -1,3 +1,4 @@
+use crate::PreviewStageConfiguration;
 use super::*;
 use crate::mcp::DesignerMcp;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
@@ -52,7 +53,7 @@ fn stage_tools_are_workspace_only_and_reject_unbounded_or_mixed_schema_inputs() 
         json!({"action":"remove","stage":1}),
         json!({"action":"remove","stage":1,"expected_model":"0","configuration":config("Extra")}),
         json!({"action":"move","stage":1,"expected_model":"0","index":16}),
-        json!({"action":"restore","expected_model":"0","manifest":{"version":4,"stages":[],"active":null}}),
+        json!({"action":"restore","expected_model":"0","manifest":{"version":5,"stages":[],"active":null}}),
     ] {
         assert!(provider
             .validate("designer_preview_stage", &invalid)
@@ -73,6 +74,11 @@ fn stage_tools_are_workspace_only_and_reject_unbounded_or_mixed_schema_inputs() 
             "{invalid}"
         );
     }
+    let input = json!({"stage":1,"expected_model":"0","expected_epoch":1,"input":{"kind":"focus"}});
+    provider.validate("designer_preview_stage_input", &input).unwrap();
+    let mut conflict = input;
+    conflict["input"]["text"] = json!("Unexpected");
+    assert!(provider.validate("designer_preview_stage_input", &conflict).is_err());
 }
 
 #[test]

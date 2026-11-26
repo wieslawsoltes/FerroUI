@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FerroUI design handoff",
+  "type": "object",
+  "required": ["version", "mappings"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "mappings": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": ["id", "target"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "description": "Unique external design ID or component link." },
+          "name": { "type": "string", "description": "Name shown in the review." },
+          "target": {
+            "oneOf": [
+              { "$ref": "#/definitions/control" },
+              { "$ref": "#/definitions/definition" },
+              { "$ref": "#/definitions/asset" },
+              { "$ref": "#/definitions/publishedAsset" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Relative path with forward slashes inside its designated folder."
+    },
+    "control": {
+      "type": "object",
+      "required": ["kind", "toolbox"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "control" },
+        "toolbox": { "type": "string", "description": "Exact ID shown by designer_toolbox for the active Cargo project." }
+      }
+    },
+    "definition": {
+      "type": "object",
+      "required": ["kind", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "definition" },
+        "path": { "$ref": "#/definitions/path" },
+        "key": { "type": "string", "description": "The exact XAML resource key. Omit for a root UserControl or custom view." },
+        "scope": { "type": "string", "description": "Optional XAML owner or ancestor name that disambiguates a resource key." }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "required": ["kind", "path"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "asset" },
+        "path": { "$ref": "#/definitions/path" },
+        "transfer": {
+          "type": "object",
+          "required": ["direction", "file"],
+          "additionalProperties": false,
+          "properties": {
+            "direction": { "enum": ["import", "export"] },
+            "file": { "$ref": "#/definitions/path" }
+          }
+        }
+      }
+    },
+    "publishedAsset": {
+      "type": "object",
+      "required": ["kind", "address"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "publishedAsset" },
+        "address": { "type": "string", "pattern": "^ferres://", "description": "Exact address from the selected Cargo build." },
+        "export": { "$ref": "#/definitions/path" }
+      }
+    }
+  }
+}

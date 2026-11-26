@@ -1,0 +1,28 @@
+.preview-keyboard-capture {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    clip-path: inset(50%);
+    overflow: hidden;
+}
+
+.preview-keyboard-status, .stage-frame-status {
+    position: absolute;
+    inset: auto 7px 7px;
+    justify-self: start;
+    max-block-size: 65%;
+    overflow: auto;
+    margin: 0;
+    padding: 4px 7px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+    color: var(--muted);
+    overflow-wrap: anywhere;
+    font-size: .92em;
+}
+
+.preview-keyboard-status { pointer-events: none; }

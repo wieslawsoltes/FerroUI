@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Background="#F3F6FB" Padding="36">
+        <Border Width="420" Padding="28" Background="White" BorderBrush="#DBE2ED"
+                BorderThickness="1" CornerRadius="14" HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="14">
+                <TextBlock FontSize="26" Foreground="#1B2C47" Text="Workspace settings" />
+                <TextBlock Foreground="#485E7D" Text="Choose a name for this workspace." />
+                <TextBox Text="Northwind" />
+                <Button x:Name="saveButton" Content="Save changes" HorizontalAlignment="Left" />
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

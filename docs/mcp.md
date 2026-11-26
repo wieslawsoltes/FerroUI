@@ -5,6 +5,8 @@ Model Context Protocol (MCP), with newline-delimited JSON-RPC over stdio or Stre
 Neither crate starts a service merely by being linked. Applications must opt in and retain the
 handle returned by `ferroui_mcp::serve`. Property writes and input are disabled by default.
 
+The [FerroUI VS Code extension](../editors/vscode/README.md#drive-the-designer-with-mcp) publishes its editor designer through the same MCP transport. Its command **FerroUI: Connect to Running MCP Server** also attaches the existing endpoint of Designer Studio or an application, with the permissions chosen by that process.
+
 ## ControlCatalog and Claude Code
 
 Build the optional integration:
@@ -40,6 +42,11 @@ claude mcp add --transport http ferroui http://127.0.0.1:8765/mcp --header "Auth
 The token changes on every run. Do not commit it. HTTP binds only to loopback, validates Host and
 Origin, requires the bearer token for every method, and does not enable cross-origin access.
 
+An app that delivers its endpoint through a private channel can start the inspector with
+`ferroui_mcp::serve_private` and use the address and token from the returned handle. The Android
+Live App helper delivers these values in the debuggable app’s private files directory. VS Code reads
+the receipt through ADB and connects over its session’s port forward. [Run or attach an Android app in VS Code](designer/vscode/runtime.md#run-or-attach-an-android-app)
+
 Example agent request: “Find SearchBox, type Button, inspect the resulting tree, and show me a
 screenshot.” The schema descriptions returned by `tools/list` describe all arguments.
 
@@ -73,14 +80,21 @@ This is available in release builds only when the application includes the depen
 the call; there is no automatic release listener or debug listener. The catalog requires both
 `--features mcp` and a transport switch.
 
-Desktop lifetime windows are discovered on every request. For a custom lifetime, register each
-top level with the shared inspector of the UI thread:
+Classic desktop lifetime windows are discovered on every request. With a custom lifetime
+or the single-window `ferroui_view::launch` helpers, register each top level with the shared
+inspector of the UI thread:
 `ferroui_inspect::Inspector::shared().borrow_mut().register_root(&top_level)`. The MCP server and
 the [Chrome DevTools Protocol endpoint](devtools-cdp.md) use that one inspector, so a node has the
 same ID in both. The inspector holds only weak object/root references. IDs remain stable for the
 life of the object, are never reused, and return a tool error after the object is destroyed. Automation trees retain separate
 peer IDs, including peers without visual owners. Property and input tools map a control peer to
 its owner. A nonvisual peer still supports its automation patterns.
+
+When VS Code launches a debug app with **FerroUI: Run with Hot Reload**, a loopback HTTP
+inspector started through `serve` or `serve_with_tools` is also offered as **FerroUI Managed
+Application**. The extension consumes the private startup record and supplies the bearer
+to its MCP transport. The application still chooses its listener and permissions.
+[FerroUI for VS Code](../editors/vscode/README.md#drive-the-designer-with-mcp)
 
 For stdio, reserve stdout **before platform/application initialization**:
 
@@ -120,9 +134,10 @@ An application adds its own tools to the same transport, permissions, cancellati
   their endpoint across restarts; the provider stays responsible for its own identity and access
   rules.
 
-HTTP binds to loopback only, for these servers as for the inspector. A service server prints
-nothing at startup, so a persisted bearer never reaches a log; only an inspector server prints its
-URL and its fresh token to stderr.
+HTTP binds to loopback only. A service server does not report its bearer at startup. An
+inspector server prints its URL and fresh token to stderr for standalone attachment. When
+managed by VS Code, the extension consumes these values without forwarding them to its
+Hot Reload output.
 
 ## Tools and resources
 
@@ -132,18 +147,24 @@ URL and its fresh token to stderr.
 | `get_tree` | Visual, logical or automation snapshot; optional root, depth and property filters |
 | `find_elements` | Combined type, Name, automation ID, text substring and parsed FerroUI selector filters |
 | `get_properties` | Registered and attached properties, values, types, read-only flags, binding presence, effective priorities |
+| `get_template_sources` | The selected control’s effective control, item and cell templates, with source locations when the app records a source revision |
+| `get_property_trace` | The effective value of one property, its ordered contributors, and available authored source locations. Pass `node_id` and `property`. |
 | `set_property` | Validated local value or clear; booleans, numbers, null, and strings through framework converters |
 | `get_styles` | Applied style/theme/template/local value frames, selectors, active state, priority and setters |
 | `get_resources` | Scoped lookup of specified string keys, or local dictionary keys including type keys |
 | `click` | Raw pointer move/down/up at node center or local x/y; left, right or middle button |
 | `type_text` | Focus the control, then deliver raw text input |
 | `press_key` | Focus and deliver key down/up for a framework key gesture such as `Ctrl+A` or `Return` |
+| `window_keyboard` | Focus or type in a window from `list_windows`. Pass `input` with `kind` set to `focus`, `key`, or `text`. Each call returns the focused control’s name and role or `null`. |
 | `scroll` | Raw wheel event at the node center with horizontal/vertical deltas |
 | `invoke_pattern` | Invoke, Toggle, Expand/Collapse, SelectionItem, or Value provider actions |
 | `screenshot` | PNG of a visual at an optional scale; first window when no ID is supplied |
 | `wait_for` | Exists, absent, visible, enabled, or property equality, with a bounded timeout |
 | `get_logs` | Up to 1024 recent diagnostics, including binding errors; incremental `after` cursor |
 | `get_frame_stats` | Observed rendered scene updates, update interval and last layout pass timing |
+| `start_ui_profile` | Record native layout and declarative component activity for one window |
+| `get_ui_profile` | Read the current or completed recording, with per-phase work and live node IDs |
+| `stop_ui_profile` | End the specified recording early and return its measurements |
 
 `set_property` requires `allow_property_writes`. Input and automation actions require
 `allow_input`; the Value provider's `set_value` requires both. Disabled/hidden controls reject
@@ -159,6 +180,20 @@ they are editable JSON. Attached properties use `Owner.Property` names.
 The frame tracker observes composition scene updates after rendering, starting when a window is
 first inspected. It does not claim to count idle display refreshes or report GPU presentation
 latency. Layout counts/timing come from the renderer's existing diagnostics.
+
+### Record a UI profile
+
+Call `list_windows`, then `start_ui_profile` with `window_id` and `duration_ms`. Reproduce
+the interaction while the capture runs. Use `get_ui_profile` with the returned ID as
+`profile_id`, or use `stop_ui_profile` with that ID to finish early. The report includes
+each control’s measure and arrange operations and each RSX component’s render and
+reconciliation activity. Follow a live row’s `node_id` with `get_source` to locate
+authored code. [VS Code workflow](designer/vscode/runtime.md#profile-a-running-window)
+
+Each phase reports its call count, total elapsed milliseconds, self time after subtracting
+nested operations, and longest single self time. The report sorts rows by sum of self time.
+The native inspector accepts one active capture per UI thread, for up to 30 seconds and
+1,024 rows. Captures observe UI work with the inspector’s ordinary read permissions.
 
 `ferroui://tree` and `ferroui://logs` are JSON resources that can be re-read. Use
 `logging/setLevel` to receive `notifications/message` on stdio or an HTTP GET SSE stream. The log
@@ -198,15 +233,15 @@ Limits: 1 MiB incoming messages, 16 transport workers, 64 HTTP sessions, 10,000 
 levels, 60-second condition waits, and 16-megapixel screenshots at scales 0.1–4. These limits and
 argument schemas are checked before mutation. Prefer a scoped node ID for large trees.
 
-## Browser bridge assessment
+## Browser Live App
 
-The browser page must not host a TCP/stdin server. `ferroui-mcp` is a native-host dependency and
-is not added to `ControlCatalog.Browser`. The transport-independent inspector can be called on
-the browser's UI thread by a future Emscripten/page adapter: send a JSON tool request through the
-page, execute it with the same permissions and weak IDs, and return JSON or a PNG payload. A host
-MCP/CDP bridge can then own authentication, session management, timeouts and polling. This avoids
-introducing a second native inspection protocol. Implementing that page/CDP bridge belongs to
-the separate CDP work; this change evaluates the boundary and provides the shared core.
+Debug WebAssembly apps can enable `ferroui-browser`’s `live-inspector` feature and register the app
+host element with `live_inspector::install`. This connects the browser’s UI thread to
+`ferroui-inspect` with the app’s chosen input and property permissions. The workspace extension
+host uses Chromium’s DevTools connection to read the page’s inspector and capture the rendered app
+frame. It publishes the browser session through the VS Code editor MCP server. Use the session’s
+runtime ID and generation with `ferroui_runtime_tools`, `ferroui_runtime_query`, and
+`ferroui_runtime_call`. [Browser setup](designer/vscode/runtime.md#run-or-attach-a-browser-app) · [Browser app MCP tools](designer/vscode/reference.md#run-or-attach-a-browser-app-with-mcp)
 
 ## Verification
 

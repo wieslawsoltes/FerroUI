@@ -1,4 +1,5 @@
 use super::RoutedEvent;
+use crate::metadata::MarkupType;
 use crate::{StaticType, TypeInfo};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -77,6 +78,27 @@ impl RoutedEventRegistry {
                 if let Some(found) = found {
                     return Some(*found);
                 }
+            }
+            current = type_.base_type();
+        }
+        None
+    }
+
+    /// Resolves an event mentioned by name in markup or a declarative builder.
+    /// Event getters are lazy, so initialize the declared field before consulting the registry.
+    pub fn resolve_by_name(&self, owner: &'static TypeInfo, name: &str) -> Option<RoutedEvent> {
+        let field_name = if name.ends_with("Event") { name.to_owned() } else { format!("{name}Event") };
+        let mut current = Some(owner);
+        while let Some(type_) = current {
+            if let Some(field) = MarkupType::find_by_type_info(type_)
+                .and_then(|metadata| metadata.fields.iter().find(|field| field.name == field_name))
+            {
+                (field.get)();
+            }
+            if let Some(event) = self.get_registered(type_).into_iter()
+                .find(|event| event.name() == name || event.name() == name.strip_suffix("Event").unwrap_or(name))
+            {
+                return Some(event);
             }
             current = type_.base_type();
         }

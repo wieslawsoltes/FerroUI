@@ -236,6 +236,9 @@ impl ReloadManifest {
     pub fn session(&self) -> Result<HotReloadSession, ReloadError> {
         let mut session = HotReloadSession::new();
         session.build_contracts = self.contracts.clone();
+        if ferroui_reload_protocol::enabled() {
+            session.editor_files.clone_from(&self.files);
+        }
         for (uri, source) in &self.sources {
             session.register_document(uri.clone(), source.clone())?;
         }

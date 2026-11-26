@@ -137,6 +137,14 @@ impl<M: TreeModel> TemplateColumn<M> {
         &self.options
     }
 
+    /// The assigned or already resolved templates. Reading does not perform a resource lookup.
+    pub(crate) fn known_templates(&self) -> [Option<Rc<dyn IDataTemplate>>; 2] {
+        [
+            self.cell_template.template.borrow().clone(),
+            self.cell_editing_template.as_ref().and_then(|slot| slot.template.borrow().clone()),
+        ]
+    }
+
     /// Sets the column header.
     pub fn set_header(&self, value: Option<BoxedValue>) {
         self.base.set_header(value);

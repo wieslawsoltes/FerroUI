@@ -12,15 +12,37 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
+      - 'src/Markup/FerroUI.Markup.Syntax/**'
+      - 'src/FerroUI.View/**'
+      - 'src/FerroUI.View.Macros/**'
+      - 'src/FerroUI.View.Syntax/**'
+      - 'src/FerroUI.ReloadProtocol/**'
+      - 'editors/vscode/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
+      - 'samples/TodoWorkbench/**'
       - '.github/workflows/designer.yml'
   schedule:
     - cron: '5 4 * * *'
   workflow_dispatch:
+    inputs:
+      installed-vsix:
+        description: Run installed VSIX smoke tests
+        type: boolean
+        default: false
+      installed-vsix-os:
+        description: Select all desktop operating systems or a specific runner
+        type: choice
+        default: all
+        options:
+          - all
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-15
+          - windows-latest
 
 concurrency:
-  group: designer-${{ github.ref }}
+  group: designer-${{ github.ref }}${{ inputs.installed-vsix && format('-vsix-{0}', inputs.installed-vsix-os) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -36,6 +58,7 @@ env:
 jobs:
   portable:
     name: Portable engines (${{ matrix.os }}, Rust ${{ matrix.rust }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -57,25 +80,33 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy
       - name: Source preservation, transaction, language, timeline and convergence regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
+        run: cargo test --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
 
   native:
     name: Native studio, MCP and render smoke
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # One native build feeds Studio and both VS Code hosts. Cold runners have
+    # reached 45 minutes while the minimum-version host is still running.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: clippy
-      - name: Fonts for native rendering
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Native fonts and the VS Code test display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
       - name: Studio, MCP tools and render-smoke suites
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
-        run: cargo test --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp -- --test-threads=1
+        run: cargo test --locked -p ferroui-designer -p designer-studio -p ferroui-inspect --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp -- --test-threads=1
       - name: The studio is warning-free
         run: cargo clippy --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp --all-targets --no-deps -- -D warnings
       - name: Headless studio startup and clean shutdown, with the sample documents
@@ -88,10 +119,128 @@ jobs:
           done
       - name: Release build without development hot reload
         run: cargo check --locked -p ferroui-designer --features mcp --release
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Build the VS Code backend tools and native fixture
+        run: |
+          cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview \
+            -p todo-workbench --features todo-workbench/app-preview,todo-workbench/hot-reload,todo-workbench/mcp
+      - name: Native scenario render, accessibility and interaction gate
+        run: |
+          mkdir -p designer-render/scenarios
+          target/debug/ferroui-designer-preview --scenario-suite docs/designer/samples/scenarios \
+            --workspace "$GITHUB_WORKSPACE" --artifacts designer-render/scenarios > designer-render/scenarios/report.json
+      - name: Current VS Code extension host
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
+        run: |
+          npm ci
+          xvfb-run -a npm test
+      - name: Minimum VS Code extension host (1.102.0)
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
+          FERROUI_TEST_VSCODE_VERSION: '1.102.0'
+        run: xvfb-run -a node test/run.mjs
+      - name: Managed Android lifecycle in VS Code
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_ANDROID_MANAGED: '1'
+        run: xvfb-run -a node test/run.mjs
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: designer-native-renders
           path: designer-render
+          if-no-files-found: warn
+
+  packaged-vscode:
+    name: Installed VS Code package (${{ matrix.os }})
+    if: github.event_name == 'workflow_dispatch' && inputs.installed-vsix
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.installed-vsix-os == 'all' && '["macos-15","ubuntu-24.04","windows-latest"]' || format('["{0}"]', inputs.installed-vsix-os)) }}
+    env:
+      FERROUI_TEST_INSTALLED_RUNTIME: '1'
+      FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/${{ matrix.os == 'windows-latest' && 'todo-workbench.exe' || 'todo-workbench' }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Linux native dependencies and display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev lldb-18
+      - name: Select the native LLDB adapter
+        if: runner.os != 'Windows'
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            adapter="$(xcrun --find lldb-dap)"
+          else
+            adapter=/usr/lib/llvm-18/bin/lldb-dap
+          fi
+          test -x "$adapter"
+          printf 'FERROUI_TEST_INSTALLED_LLDB_DAP=%s\n' "$adapter" >> "$GITHUB_ENV"
+      - name: Install matching LLVM tools for Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # The current MSVC standard library requires Clang 22 or newer for ANGLE's bindings.
+          $version = '23.1.6'
+          $installer = Join-Path $env:RUNNER_TEMP "LLVM-$version-win64.msi"
+          Invoke-WebRequest "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-win64.msi" -OutFile $installer
+          $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash
+          if ($hash -ne '81f7eb520ca698eb2d5cd8bc4b8f24f7add9ed66ed40a6f722a6e6f060737c00') { throw 'Unexpected LLVM installer hash.' }
+          $install = Start-Process msiexec.exe -ArgumentList '/i', "`"$installer`"", '/qn', '/norestart' -PassThru -Wait
+          if ($install.ExitCode -notin 0, 3010) { throw "LLVM installation failed with exit code $($install.ExitCode)." }
+          Remove-Item -LiteralPath $installer
+          $llvm = Join-Path $env:ProgramFiles 'LLVM/bin'
+          $adapter = Join-Path $llvm 'lldb-dap.exe'
+          if (!(Test-Path (Join-Path $llvm 'libclang.dll')) -or !(Test-Path $adapter)) { throw 'The LLVM install is missing its native tools.' }
+          $compiler = & (Join-Path $llvm 'clang.exe') --version | Select-Object -First 1
+          if ($compiler -notlike "*clang version $version *") { throw "Unexpected clang version: $compiler" }
+          Write-Host $compiler
+          "LIBCLANG_PATH=$llvm" >> $env:GITHUB_ENV
+          "FERROUI_TEST_INSTALLED_LLDB_DAP=$adapter" >> $env:GITHUB_ENV
+      - name: Compile the release helpers for the workspace host
+        run: cargo build --locked --profile dist-unwind -p ferroui-designer-language -p ferroui-designer-preview
+      - name: Build the native app-hosted design fixture
+        run: cargo build --locked -p todo-workbench --features app-preview,hot-reload,mcp
+      - name: Package the native VSIX
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm run check
+          npm run build
+          npm run package:platform -- ../../target/dist-unwind ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code
+        if: runner.os != 'Linux'
+        working-directory: editors/vscode
+        run: npm run test:vsix -- ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code under Xvfb
+        if: runner.os == 'Linux'
+        working-directory: editors/vscode
+        run: xvfb-run -a npm run test:vsix -- ferroui-designer.vsix
+      - name: Package evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ferroui-vsix-${{ runner.os }}-${{ runner.arch }}
+          path: editors/vscode/ferroui-designer.vsix
           if-no-files-found: warn

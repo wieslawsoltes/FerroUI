@@ -7,7 +7,14 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 type Condition = Rc<dyn Fn(&'static FerroProperty) -> bool>;
-type Registration = (Condition, TypeId, AnimatorFactory);
+
+#[derive(Clone)]
+struct Registration {
+    condition: Condition,
+    type_: TypeId,
+    factory: AnimatorFactory,
+    custom: bool,
+}
 
 struct Registry {
     /// Animator selection, in order of precedence.
@@ -20,8 +27,18 @@ fn by_type<T: PropertyValue>() -> Condition {
     Rc::new(|property| property.property_type() == TypeId::of::<T>())
 }
 
+fn is_transform_component(property: &'static FerroProperty) -> bool {
+    property.property_type() == TypeId::of::<f64>()
+        && Transform::TYPE.is_assignable_from(property.owner_type())
+}
+
 fn registration<A: Animator + Default>(condition: Condition) -> Registration {
-    (condition, TypeId::of::<A>(), Rc::new(|| Rc::new(A::default())))
+    Registration {
+        condition,
+        type_: TypeId::of::<A>(),
+        factory: Rc::new(|| Rc::new(A::default())),
+        custom: false,
+    }
 }
 
 fn register_animator<A: Animator + Default>(animators: &mut Vec<Registration>) {
@@ -31,10 +48,7 @@ fn register_animator<A: Animator + Default>(animators: &mut Vec<Registration>) {
 impl Registry {
     fn new() -> Self {
         let mut animators: Vec<Registration> = vec![
-            registration::<TransformAnimator>(Rc::new(|property| {
-                property.property_type() == TypeId::of::<f64>()
-                    && Transform::TYPE.is_assignable_from(property.owner_type())
-            })),
+            registration::<TransformAnimator>(Rc::new(is_transform_component)),
             registration::<BoolAnimator>(by_type::<bool>()),
             registration::<ByteAnimator>(by_type::<u8>()),
             registration::<Int16Animator>(by_type::<i16>()),
@@ -50,6 +64,7 @@ impl Registry {
         register_animator::<EffectAnimator>(&mut animators);
         register_animator::<BoxShadowAnimator>(&mut animators);
         register_animator::<BoxShadowsAnimator>(&mut animators);
+        register_animator::<TransformListAnimator>(&mut animators);
         register_animator::<BaseBrushAnimator>(&mut animators);
         register_animator::<CornerRadiusAnimator>(&mut animators);
         register_animator::<ColorAnimator>(&mut animators);
@@ -104,20 +119,58 @@ impl Animation {
             animator.create_wrapper()
         });
         REGISTRY.with(|registry| {
-            registry.borrow_mut().animators.insert(0, (by_type::<TAnimator::Value>(), type_, factory));
+            registry.borrow_mut().animators.insert(0, Registration {
+                condition: by_type::<TAnimator::Value>(), type_, factory, custom: true,
+            });
         });
+    }
+
+    /// Whether a setter in this animation uses an explicit or registered application animator.
+    pub fn uses_custom_animators(&self) -> bool {
+        self.children().snapshot().iter().any(|keyframe| {
+            keyframe.setters().snapshot().iter().any(|setter| {
+                Self::get_animator(setter).is_some() || setter.property()
+                    .and_then(registered_animator).is_some_and(|registration| registration.custom)
+            })
+        })
+    }
+
+    /// Properties whose registered animator targets a visual's render transform.
+    pub fn transform_components(&self) -> Vec<&'static FerroProperty> {
+        let mut properties = Vec::new();
+        for frame in self.children().snapshot().iter() {
+            for setter in frame.setters().snapshot().iter() {
+                let Some(property) = setter.property().filter(|p| is_transform_component(p)) else {
+                    continue;
+                };
+                let animator = Self::get_animator(setter)
+                    .or_else(|| Self::get_animator_type(property));
+                if animator.is_some_and(|(kind, _)| kind == TypeId::of::<TransformAnimator>())
+                    && !properties.contains(&property)
+                {
+                    properties.push(property);
+                }
+            }
+        }
+        properties
     }
 
     /// Selects the animator for a property: the first registration whose
     /// condition the property meets.
     pub(crate) fn get_animator_type(property: &'static FerroProperty) -> Option<(TypeId, AnimatorFactory)> {
-        // The conditions are evaluated outside of the registry borrow.
-        let animators: Vec<Registration> = REGISTRY.with(|registry| registry.borrow().animators.clone());
-        animators
-            .into_iter()
-            .find(|(condition, _, _)| condition(property))
-            .map(|(_, type_, factory)| (type_, factory))
+        registered_animator(property).map(|entry| (entry.type_, entry.factory))
     }
+
+    /// Whether a styled property has a native or application-registered animator.
+    pub fn can_animate_property(property: &'static FerroProperty) -> bool {
+        !property.is_direct() && registered_animator(property).is_some()
+    }
+}
+
+fn registered_animator(property: &'static FerroProperty) -> Option<Registration> {
+    // Evaluate conditions outside the registry borrow.
+    let animators = REGISTRY.with(|registry| registry.borrow().animators.clone());
+    animators.into_iter().find(|entry| (entry.condition)(property))
 }
 
 fn same_setter(a: &Rc<dyn IAnimationSetter>, b: &Rc<dyn IAnimationSetter>) -> bool {

@@ -1,0 +1,3 @@
+fn main() {
+    ferroui_build::export_metadata();
+}

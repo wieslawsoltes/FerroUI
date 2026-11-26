@@ -26,7 +26,7 @@ pub use func_template::{FuncTemplate, FuncTemplateWithParam};
 pub use func_template_name_scope_extensions::FuncTemplateNameScopeExtensions;
 pub use func_tree_data_template::FuncTreeDataTemplate;
 pub use i_control_template::IControlTemplate;
-pub use i_data_template::IDataTemplate;
+pub use i_data_template::{IDataTemplate, RustDataTemplateSource};
 pub use i_data_template_component::{IDataTemplateComponent, XamlBindingHelper};
 pub use i_data_template_host::IDataTemplateHost;
 pub use i_recycling_data_template::IRecyclingDataTemplate;

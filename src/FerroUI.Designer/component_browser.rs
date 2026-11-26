@@ -15,6 +15,10 @@ use ferroui_designer_core::NodeId;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+#[path = "component_browser_scopes.rs"]
+mod scopes;
+use scopes::ScopeFilter;
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ComponentLibraryFilter {
     #[default]
@@ -68,6 +72,7 @@ pub struct ComponentLibrary {
     root: Ref<Grid>,
     search: Ref<TextBox>,
     filter: Ref<ComboBox>,
+    scopes: ScopeFilter,
     list: Ref<ListBox>,
     count: Ref<TextBlock>,
     empty: Ref<TextBlock>,
@@ -115,14 +120,15 @@ impl ComponentLibrary {
         let filter = ComboBox::new();
         filter.set_name(Some("ComponentLibraryFilter".into()));
         filter.set_horizontal_alignment(HorizontalAlignment::Stretch);
-        filter.set_margin(Thickness::new(4.0, 0.0, 4.0, 8.0));
         AutomationProperties::set_name(&filter, Some("Definition category"));
         for choice in FILTERS {
             filter.items().add(Some(Rc::new(choice.title().to_owned())));
         }
         filter.set_selected_index(0);
-        Grid::set_row(&filter, 1);
-        root.children().add(filter.clone().upcast::<Control>());
+        let scopes = ScopeFilter::new(&filter);
+        Grid::set_row(scopes.control(), 1);
+        root.children()
+            .add(scopes.control().clone().upcast::<Control>());
         let list = ListBox::new();
         list.set_name(Some("ComponentLibraryList".into()));
         list.classes().add("designer-library-list");
@@ -151,7 +157,7 @@ impl ComponentLibrary {
         count.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
         footer.children().add(count.clone().upcast::<Control>());
         let hint = TextBlock::new();
-        hint.set_text(Some("Enter to edit · Drag resources to properties"));
+        hint.set_text(Some("Enter to open · Drag resources to properties"));
         hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
         hint.set_font_size(10.0);
         hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
@@ -162,6 +168,7 @@ impl ComponentLibrary {
             root,
             search,
             filter,
+            scopes,
             list,
             count,
             empty,
@@ -187,14 +194,14 @@ impl ComponentLibrary {
                 this.refresh();
             }
         });
-        let weak = Rc::downgrade(&this);
-        this.filter.selection_changed(move |_, _| {
-            if let Some(this) = weak.upgrade() {
-                if !this.guard.get() {
+        for filter in [&this.filter, this.scopes.picker()] {
+            let weak = Rc::downgrade(&this);
+            filter.selection_changed(move |_, _| {
+                if let Some(this) = weak.upgrade().filter(|this| !this.guard.get()) {
                     this.refresh();
                 }
-            }
-        });
+            });
+        }
         let weak = Rc::downgrade(&this);
         this.list.selection_changed(move |_, _| {
             let Some(this) = weak.upgrade().filter(|this| !this.guard.get()) else {
@@ -213,24 +220,33 @@ impl ComponentLibrary {
             }
         });
         let weak = Rc::downgrade(&this);
-        this.list
-            .add_handler(InputElement::key_down_event(), move |_, event| {
+        this.list.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, event| {
                 let Some(this) = weak.upgrade() else {
                     return;
                 };
                 if event.key == Key::Enter {
-                    if let Some(item) = this.selected_item() {
+                    if let Some(item) = this
+                        .list
+                        .selected_item()
+                        .and_then(|item| item.downcast_ref::<ComponentLibraryItem>().cloned())
+                    {
                         let callback = this.activate.borrow().clone();
                         if let Some(callback) = callback {
-                            callback(&item);
                             event.set_handled(true);
+                            callback(&item);
                         }
                     }
                 }
                 if event.key == Key::Escape {
                     this.cancel_pending_drag();
                 }
-            });
+            },
+            // A focused ListBoxItem handles Enter for selection on the bubble route.
+            RoutingStrategies::TUNNEL,
+            false,
+        );
         let weak = Rc::downgrade(&this);
         create.click(move |_, _| {
             if let Some(this) = weak.upgrade() {
@@ -310,14 +326,27 @@ impl ComponentLibrary {
         self.list.scroll_into_view(index as i32);
         true
     }
-    pub fn replace_items(&self, mut items: Vec<ComponentLibraryItem>) {
+    pub fn replace_items(&self, items: Vec<ComponentLibraryItem>) {
+        self.replace_scoped_items(items, "", "", &[]);
+    }
+
+    pub(crate) fn replace_scoped_items(
+        &self,
+        mut items: Vec<ComponentLibraryItem>,
+        uri: &str,
+        source: &str,
+        scopes: &[crate::library_scopes::LibraryScope],
+    ) {
         items.sort_by(|a, b| {
             a.title
                 .to_lowercase()
                 .cmp(&b.title.to_lowercase())
                 .then(a.id.cmp(&b.id))
         });
-        if *self.items.borrow() == items {
+        self.guard.set(true);
+        let changed = self.scopes.replace(uri, source, scopes);
+        self.guard.set(false);
+        if !changed && *self.items.borrow() == items {
             return;
         }
         self.cancel_pending_drag();
@@ -332,20 +361,27 @@ impl ComponentLibrary {
             .get(self.filter.selected_index().max(0) as usize)
             .copied()
             .unwrap_or_default();
-        let items = self
-            .items
-            .borrow()
-            .iter()
-            .filter(|item| {
-                (filter == ComponentLibraryFilter::All || item.filter == filter)
-                    && terms.iter().all(|term| {
-                        format!("{} {} {}", item.title, item.kind, item.detail)
-                            .to_lowercase()
-                            .contains(term)
-                    })
-            })
-            .cloned()
-            .collect::<Vec<_>>();
+        let scope = self.scopes.selected_owner();
+        self.scopes.show_owner_path(scope);
+        let (items, total) = {
+            let catalog = self.items.borrow();
+            let scoped = catalog
+                .iter()
+                .filter(|item| self.scopes.contains(&item.id, scope));
+            let total = scoped.clone().count();
+            let items = scoped
+                .filter(|item| {
+                    (filter == ComponentLibraryFilter::All || item.filter == filter)
+                        && terms.iter().all(|term| {
+                            format!("{} {} {}", item.title, item.kind, item.detail)
+                                .to_lowercase()
+                                .contains(term)
+                        })
+                })
+                .cloned()
+                .collect::<Vec<_>>();
+            (items, total)
+        };
         let selected = self.selected.borrow().clone();
         self.guard.set(true);
         self.list.items().clear();
@@ -360,11 +396,14 @@ impl ComponentLibrary {
         );
         self.guard.set(false);
         self.empty.set_is_visible(items.is_empty());
-        self.count.set_text(Some(&format!(
-            "{} of {} definitions",
-            items.len(),
-            self.items.borrow().len()
-        )));
+        let kind = if scope.is_some() {
+            "object"
+        } else {
+            "definition"
+        };
+        let plural = if total == 1 { "" } else { "s" };
+        self.count
+            .set_text(Some(&format!("{} of {total} {kind}{plural}", items.len())));
         *self.visible.borrow_mut() = items;
     }
     fn item_control(self: &Rc<Self>, item: &ComponentLibraryItem) -> Ref<Control> {
@@ -462,7 +501,7 @@ impl ComponentLibrary {
                             callback(&item);
                             event.set_handled(true);
                         }
-                    } else {
+                    } else if !this.scopes.is_source_only(&item.id) {
                         if let Some(row) = pressed_row.upgrade() {
                             event.pointer().capture(Some(&row.upcast::<InputElement>()));
                         }

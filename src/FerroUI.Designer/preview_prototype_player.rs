@@ -1,6 +1,8 @@
 //! Native prototype presentation. Application roots and navigation remain host-owned.
 use crate::{
-    PreviewPrototypeOverlayOptions, PreviewStageId, PreviewStageSize,
+    PreviewPrototypeOverlayOptions, PreviewStageBoard, PreviewStageId, PreviewStageKeyboardInput,
+    PreviewStageKeyboardTarget, PreviewStagePointerInput, PreviewStagePointerOrigin,
+    PreviewStagePointerTarget, PreviewStageSize,
     MAX_PREVIEW_PROTOTYPE_OVERLAYS,
 };
 use ferroui_base::input::{
@@ -20,6 +22,11 @@ use ferroui_controls::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use serde::Deserialize;
+
+#[path = "preview_prototype_motion_view.rs"]
+mod motion;
+pub use motion::PreviewPrototypeMotionCapture;
 
 /// Clipped bounds are expressed in the accepted stage host's logical coordinates.
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +54,14 @@ pub enum PreviewPrototypePlayerAction {
     DismissOverlay,
     Restart,
     Exit,
+}
+
+/// Keyboard and pointer input use the active native layer and the accepted artboard.
+#[derive(Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum PreviewPrototypeInput {
+    Keyboard { input: PreviewStageKeyboardInput },
+    Pointer { input: PreviewStagePointerInput },
 }
 
 type Action = Rc<dyn Fn(PreviewPrototypePlayerAction, u64, Ref<Control>) -> Result<(), String>>;
@@ -86,6 +101,7 @@ pub struct PreviewPrototypePlayerView {
     hints: Ref<CheckBox>,
     search: Ref<TextBox>,
     empty: Ref<TextBlock>,
+    artboard: Ref<Grid>,
     content: Ref<Grid>,
     hotspots: Ref<Canvas>,
     commands: Ref<StackPanel>,
@@ -97,10 +113,21 @@ pub struct PreviewPrototypePlayerView {
     frame_retired: RefCell<Rc<Cell<bool>>>,
     focus_pending: Cell<bool>,
     action: RefCell<Option<Action>>,
+    playing_motion: RefCell<Option<motion::PlayingMotion>>,
+    reduced_motion: Cell<bool>,
 }
 
 impl PreviewPrototypePlayerView {
     pub fn new(_palette: &Control) -> Rc<Self> {
+        Self::build(false)
+    }
+
+    /// The same native layers and modal behavior with host-owned player chrome.
+    pub fn new_embedded() -> Rc<Self> {
+        Self::build(true)
+    }
+
+    fn build(embedded: bool) -> Rc<Self> {
         let root = Grid::new();
         root.set_name(Some("PreviewPrototypePlayer".into()));
         let keyboard_navigation = KeyboardNavigationHandler::new();
@@ -139,7 +166,9 @@ impl PreviewPrototypePlayerView {
             toolbar.children().add(control);
         }
         header.children().add(toolbar.upcast::<Control>());
-        root.children().add(header.upcast::<Control>());
+        if !embedded {
+            root.children().add(header.upcast::<Control>());
+        }
         let error = text("");
         error.set_name(Some("PrototypePlayerError".into()));
         error.classes().add("designer-error");
@@ -147,7 +176,9 @@ impl PreviewPrototypePlayerView {
         error.set_is_visible(false);
         error.set_margin(Thickness::new(16.0, 0.0, 16.0, 8.0));
         Grid::set_row(&error, 1);
-        root.children().add(error.clone().upcast::<Control>());
+        if !embedded {
+            root.children().add(error.clone().upcast::<Control>());
+        }
         let body = Grid::new();
         body.set_column_definitions(ColumnDefinitions::parse("*,240").unwrap());
         body.set_column_spacing(16.0);
@@ -160,6 +191,9 @@ impl PreviewPrototypePlayerView {
         viewport.set_padding(Thickness::uniform(16.0));
         let content = Grid::new();
         content.set_clip_to_bounds(true);
+        let artboard = Grid::new();
+        artboard.set_clip_to_bounds(true);
+        artboard.children().add(content.clone().upcast::<Control>());
         let hotspots = Canvas::new();
         hotspots.set_name(Some("PrototypePlayerHotspots".into()));
         hotspots.set_clip_to_bounds(true);
@@ -169,7 +203,9 @@ impl PreviewPrototypePlayerView {
         viewbox.set_stretch_direction(StretchDirection::Both);
         viewbox.set_horizontal_alignment(HorizontalAlignment::Center);
         viewbox.set_vertical_alignment(VerticalAlignment::Center);
-        viewbox.set_child(Some(content.clone().upcast::<Control>()));
+        if !embedded {
+            viewbox.set_child(Some(artboard.clone().upcast::<Control>()));
+        }
         viewport.set_child(Some(viewbox.upcast::<Control>()));
         body.children().add(viewport.upcast::<Control>());
         let aside = Grid::new();
@@ -207,7 +243,11 @@ impl PreviewPrototypePlayerView {
         Grid::set_row(&scroll, 3);
         aside.children().add(scroll.upcast::<Control>());
         body.children().add(aside.upcast::<Control>());
-        root.children().add(body.upcast::<Control>());
+        if embedded {
+            root.children().add(artboard.clone().upcast::<Control>());
+        } else {
+            root.children().add(body.upcast::<Control>());
+        }
         let view = Rc::new(Self {
             root,
             _keyboard_navigation: keyboard_navigation,
@@ -219,6 +259,7 @@ impl PreviewPrototypePlayerView {
             hints,
             search,
             empty,
+            artboard,
             content,
             hotspots,
             commands,
@@ -230,6 +271,8 @@ impl PreviewPrototypePlayerView {
             frame_retired: RefCell::new(Rc::new(Cell::new(false))),
             focus_pending: Cell::new(false),
             action: RefCell::new(None),
+            playing_motion: RefCell::new(None),
+            reduced_motion: Cell::new(false),
         });
         for (control, action) in [
             (view.back.clone(), PreviewPrototypePlayerAction::Back),
@@ -293,6 +336,35 @@ impl PreviewPrototypePlayerView {
     pub fn control(&self) -> Ref<Control> {
         self.root.clone().upcast()
     }
+
+    pub fn artboard(&self) -> Ref<Control> {
+        self.artboard.clone().upcast()
+    }
+
+    pub fn active_plane(&self) -> Option<Ref<Control>> {
+        self.layers.borrow().last().map(|layer| layer.plane.clone().upcast())
+    }
+
+    pub fn keyboard_target(&self, board: &PreviewStageBoard, native: PreviewStageId) -> Result<PreviewStageKeyboardTarget, String> {
+        let epoch = board.stage(native).ok_or("The native stage was removed")?.epoch;
+        board.keyboard_target(native, epoch)?.on_surface(self.active_plane().ok_or("The prototype has no active layer")?)
+    }
+
+    pub fn pointer_target(&self, board: &PreviewStageBoard, native: PreviewStageId,
+        origin: PreviewStagePointerOrigin) -> Result<PreviewStagePointerTarget, String>
+    {
+        let epoch = board.stage(native).ok_or("The native stage was removed")?.epoch;
+        board.pointer_target(native, epoch, origin)?.on_surface(self.artboard())
+    }
+
+    pub fn focus_active_plane(&self) {
+        let focused = FocusManager::get_focus_manager(&self.root).and_then(|manager| manager.get_focused_element());
+        if !self.layers.borrow().last().is_some_and(|layer| {
+            focused.as_ref().is_some_and(|input| contains(&layer.plane, input))
+        }) {
+            self.restore_active_focus();
+        }
+    }
     pub fn on_action(
         &self,
         callback: impl Fn(PreviewPrototypePlayerAction, u64, Ref<Control>) -> Result<(), String>
@@ -308,13 +380,16 @@ impl PreviewPrototypePlayerView {
     /// Bind source controls to the current frame's semantic interaction identities.
     /// Keep the previous frame's bindings until preparation has saved its focus;
     /// the host supplies the new bindings before finalizing the native frame.
-    pub(crate) fn set_hotspot_focus_targets(&self, targets: &[(usize, Ref<InputElement>)]) {
+    pub fn set_hotspot_focus_targets(&self, targets: &[(usize, Ref<InputElement>)]) {
         *self.hotspot_focus_targets.borrow_mut() = targets
             .iter()
             .map(|(link, target)| (*link, target.downgrade()))
             .collect();
     }
     fn emit(&self, action: PreviewPrototypePlayerAction, epoch: u64, anchor: Ref<Control>) {
+        if self.motion_running() && matches!(action, PreviewPrototypePlayerAction::Activate { .. }) {
+            return;
+        }
         let result = self
             .action
             .borrow()
@@ -364,7 +439,7 @@ impl PreviewPrototypePlayerView {
 
     /// Attach and measure native layers while their final hotspots are settling.
     /// Focus is saved once and restored by the next successful `update_layers`.
-    pub(crate) fn prepare_layers(
+    pub fn prepare_layers(
         self: &Rc<Self>,
         frame_size: PreviewStageSize,
         layers: &[PreviewPrototypePlayerLayer],
@@ -483,8 +558,8 @@ impl PreviewPrototypePlayerView {
         )));
         self.back.set_is_enabled(can_back);
         self.close_overlay.set_is_visible(layers.len() > 1);
-        self.content.set_width(frame_size.width);
-        self.content.set_height(frame_size.height);
+        self.artboard.set_width(frame_size.width);
+        self.artboard.set_height(frame_size.height);
 
         let rebuild_hotspots = active_changed || !same_hotspots;
         if rebuild_hotspots {
@@ -938,17 +1013,20 @@ impl PreviewPrototypePlayerView {
             true,
         );
         macro_rules! block_lower_input {
-            ($event:expr) => {{
+            ($event:expr, $guard:expr) => {{
                 let weak = Rc::downgrade(self);
                 self.root.add_handler_with(
                     $event,
                     move |_, event| {
                         if let Some(view) = weak.upgrade() {
-                            if view.blocked_source(
-                                event
-                                    .source()
-                                    .and_then(|source| source.cast::<InputElement>()),
-                            ) {
+                            let source = event.source().and_then(|source| source.cast::<InputElement>());
+                            if view.motion_running() && ($guard)(event)
+                                && source.as_ref().is_some_and(|source| contains(&view.content, source))
+                            {
+                                event.set_handled(true);
+                                return;
+                            }
+                            if view.blocked_source(source) {
                                 event.set_handled(true);
                                 view.restore_active_focus();
                             }
@@ -959,9 +1037,9 @@ impl PreviewPrototypePlayerView {
                 );
             }};
         }
-        block_lower_input!(InputElement::key_down_event());
-        block_lower_input!(InputElement::key_up_event());
-        block_lower_input!(InputElement::text_input_event());
+        block_lower_input!(InputElement::key_down_event(), |event: &ferroui_base::input::KeyEventArgs| event.key != Key::Escape);
+        block_lower_input!(InputElement::key_up_event(), |_| true);
+        block_lower_input!(InputElement::text_input_event(), |_| true);
         macro_rules! block_lower_pointer {
             ($event:expr) => {{
                 let weak = Rc::downgrade(self);
@@ -1038,6 +1116,7 @@ impl PreviewPrototypePlayerView {
 
     /// Retire all captured callback epochs before the host drops its playback graph.
     pub fn clear(&self) {
+        self.finish_motion();
         self.frame_retired.borrow().set(true);
         self.focus_pending.set(false);
         self.host.borrow_mut().take();

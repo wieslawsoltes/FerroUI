@@ -1,6 +1,11 @@
 //! Lexical resource lookup and structured markup references shared by catalog and edits.
 use super::*;
+use super::resource_graph::ResourceScope;
+use ferroui_designer_core::design_fixtures::is_fixtures;
 use ferroui_designer_core::{MarkupArgument, MarkupExtension};
+
+#[path = "component_resource_copy_keys.rs"]
+pub(super) mod copy_keys;
 
 /// The runtime's active theme and its inheritance chain, nearest inherited variant
 /// first. `None` (or `Default`) looks only in Default dictionaries before merges.
@@ -21,6 +26,13 @@ pub struct ComponentResourceResolution {
     /// An external provider, unsupported key, or invalid dictionary is unresolved.
     pub external: bool,
 }
+
+/// The authored results of a lookup across local and referenced dictionaries.
+pub struct ScopedResourceResolution<'a> {
+    pub candidates: Vec<ComponentResourceLocation<'a>>,
+    pub may_be_missing: bool,
+    pub external: bool,
+}
 impl ComponentResourceResolution {
     /// A single declaration only when every possible lookup path resolves to it.
     pub fn resolved(&self) -> Option<NodeId> {
@@ -30,12 +42,31 @@ impl ComponentResourceResolution {
 }
 
 #[derive(Default)]
-struct Lookup {
-    candidates: BTreeSet<NodeId>,
+pub(super) struct Lookup<'a> {
+    pub(super) candidates: BTreeSet<ComponentResourceLocation<'a>>,
     may_be_missing: bool,
-    external: bool,
+    pub(super) external: bool,
+    /// The authored scope which determines every variant, when it can be proven.
+    provider: Option<ComponentResourceLocation<'a>>,
+    pub(super) origin: Option<ValueOrigin<'a>>,
 }
-impl Lookup {
+
+/// Value queries also need the ambient parent stack and the outer lookup owner.
+pub(super) struct ValueOrigin<'a> {
+    pub scope: ResourceScope<'a>,
+    pub found_at: Option<NodeId>,
+    pub mounts: Vec<(ResourceScope<'a>, NodeId)>,
+}
+impl<'a> Lookup<'a> {
+    pub(super) fn unique(&self) -> Option<ComponentResourceLocation<'a>> {
+        (!self.may_be_missing && !self.external && self.candidates.len() == 1)
+            .then(|| *self.candidates.first().expect("one candidate"))
+    }
+
+    pub(super) fn provider(&self) -> Option<ComponentResourceLocation<'a>> {
+        self.provider.filter(|_| !self.external && !self.may_be_missing)
+    }
+
     fn missing() -> Self {
         Self {
             may_be_missing: true,
@@ -50,6 +81,9 @@ impl Lookup {
     }
     /// Join mutually possible theme/provider outcomes.
     fn alternative(&mut self, other: Self) {
+        let first = self.candidates.is_empty() && !self.may_be_missing && !self.external;
+        self.provider = if first { other.provider() } else { None };
+        self.origin = if first { other.origin } else { None };
         self.candidates.extend(other.candidates);
         self.may_be_missing |= other.may_be_missing;
         self.external |= other.external;
@@ -57,6 +91,9 @@ impl Lookup {
     /// Later scopes are reachable only along lookup paths that can still miss.
     fn fallback(&mut self, other: Self) {
         if self.may_be_missing {
+            let first = self.candidates.is_empty() && !self.external;
+            self.provider = if first { other.provider() } else { None };
+            self.origin = if first { other.origin } else { None };
             self.candidates.extend(other.candidates);
             self.may_be_missing = other.may_be_missing;
             self.external |= other.external;
@@ -98,6 +135,54 @@ pub fn component_resource_resolution(
     key: &str,
     context: Option<&ComponentResourceContext>,
 ) -> Result<ComponentResourceResolution> {
+    let result = resolve(ResourceScope::root(document, "", None), target, key, context)?;
+    Ok(ComponentResourceResolution {
+        candidates: result.candidates.into_iter().map(|candidate| candidate.node).collect(),
+        may_be_missing: result.may_be_missing,
+        external: result.external,
+    })
+}
+
+/// Resolve a declaration from the accepted include graph. An opaque provider,
+/// unknown theme path or duplicate key can prevent proving a single target.
+pub fn component_resource_location<'a>(
+    document: &'a Document,
+    address: &'a str,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    sources: &'a dyn ComponentResourceSources,
+) -> Result<Option<ComponentResourceLocation<'a>>> {
+    let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
+    Ok(result.unique())
+}
+
+/// Resolve a scope through the same include graph and theme rules as the native inspector.
+pub fn scoped_resource_resolution<'a>(
+    document: &'a Document,
+    address: &'a str,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    sources: &'a dyn ComponentResourceSources,
+) -> Result<ScopedResourceResolution<'a>> {
+    let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
+    Ok(ScopedResourceResolution {
+        candidates: result.candidates.into_iter().collect(),
+        may_be_missing: result.may_be_missing,
+        external: result.external,
+    })
+}
+
+type Visited<'a> = BTreeSet<(&'a str, NodeId)>;
+
+pub(super) fn resolve<'a>(
+    scope: ResourceScope<'a>,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+) -> Result<Lookup<'a>> {
+    let document = scope.document;
     valid_document(document)?;
     element(document, target)?;
     if let Some(context) = context {
@@ -132,37 +217,54 @@ pub fn component_resource_resolution(
             .ast()
             .node(id)
             .ok_or_else(|| ToolError("Missing resource ancestor".into()))?;
-        result.fallback(lookup_scope(
-            document,
+        let mut candidate = lookup_scope(
+            scope,
             node,
             key,
             context,
             &mut BTreeSet::new(),
-        ));
+        );
+        if let Some(origin) = &mut candidate.origin {
+            origin.found_at = Some(id);
+        }
+        result.fallback(candidate);
         ancestor = node.parent;
     }
-    Ok(ComponentResourceResolution {
-        candidates: result.candidates.into_iter().collect(),
-        may_be_missing: result.may_be_missing,
-        external: result.external,
-    })
+    Ok(result)
 }
 
-fn lookup_scope(
-    document: &Document,
+fn lookup_scope<'a>(
+    scope: ResourceScope<'a>,
     owner: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
-    if !seen.insert(owner.id) {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let id = (scope.address, owner.id);
+    if !seen.insert(id) {
         return Lookup::external();
     }
+    let mut result = lookup_owner(scope, owner, key, context, seen);
+    if result.provider.is_none() && !result.external && !result.may_be_missing && !result.candidates.is_empty() {
+        result.provider = Some(scope.location(owner.id));
+    }
+    seen.remove(&id);
+    result
+}
+
+fn lookup_owner<'a>(
+    scope: ResourceScope<'a>,
+    owner: &Node,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     if framework(owner) && owner.local_name() == "ResourceDictionary" {
         if external_dictionary(document, owner) {
             return Lookup::external();
         }
-        return lookup_children(document, &owner.children, key, context, seen);
+        return lookup_children(scope, &owner.children, key, context, seen);
     }
     let Ok(resources) = property_elements(document, owner, "Resources") else {
         return Lookup::external();
@@ -171,10 +273,10 @@ fn lookup_scope(
         .into_iter()
         .flat_map(|node| node.children.iter().copied())
         .collect::<Vec<_>>();
-    lookup_children(document, &children, key, context, seen)
+    lookup_children(scope, &children, key, context, seen)
 }
 
-fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
+pub(super) fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
     let Some(owner) = node.parent.and_then(|id| document.ast().node(id)) else {
         return false;
     };
@@ -185,13 +287,14 @@ fn dictionary_property(document: &Document, node: &Node, member: &str) -> bool {
             .is_ok_and(|identity| identity.matches_element(owner, node))
 }
 
-fn lookup_children(
-    document: &Document,
+fn lookup_children<'a>(
+    scope: ResourceScope<'a>,
     children: &[NodeId],
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     let nodes = children
         .iter()
         .filter_map(|id| document.ast().node(*id))
@@ -199,11 +302,12 @@ fn lookup_children(
     let local = nodes
         .iter()
         .filter(|node| literal_key(node).as_deref() == Some(key))
-        .map(|node| node.id)
+        .map(|node| scope.location(node.id))
         .collect::<BTreeSet<_>>();
     if !local.is_empty() {
         return Lookup {
             candidates: local,
+            origin: scope.track_value.then(|| ValueOrigin { scope, found_at: None, mounts: Vec::new() }),
             ..Lookup::default()
         };
     }
@@ -217,7 +321,7 @@ fn lookup_children(
         if !result.may_be_missing {
             return result;
         }
-        result.fallback(lookup_scope(document, node, key, context, seen));
+        result.fallback(lookup_scope(scope, node, key, context, seen));
     }
     let themes = nodes
         .iter()
@@ -230,7 +334,7 @@ fn lookup_children(
         };
         for themes in themes {
             alternatives.alternative(lookup_themes(
-                document,
+                scope,
                 themes,
                 key,
                 context,
@@ -261,11 +365,7 @@ fn lookup_children(
                 if !group.may_be_missing {
                     break;
                 }
-                let value = if framework(child) && child.local_name() == "ResourceDictionary" {
-                    lookup_scope(document, child, key, context, &mut group_seen)
-                } else {
-                    Lookup::external()
-                };
+                let value = lookup_dictionary(scope, child, key, context, &mut group_seen);
                 group.fallback(value);
             }
             alternatives.alternative(group);
@@ -275,13 +375,14 @@ fn lookup_children(
     result
 }
 
-fn lookup_themes(
-    document: &Document,
+fn lookup_themes<'a>(
+    scope: ResourceScope<'a>,
     themes: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
+    let document = scope.document;
     let variants = themes
         .children
         .iter()
@@ -300,7 +401,7 @@ fn lookup_themes(
                 return result;
             }
             result.fallback(lookup_theme_name(
-                document,
+                scope,
                 &variants,
                 theme,
                 key,
@@ -318,7 +419,7 @@ fn lookup_themes(
                 continue;
             }
             let mut value =
-                lookup_theme_dictionary(document, variant, key, context, &mut seen.clone());
+                lookup_dictionary(scope, variant, key, context, &mut seen.clone());
             if name.is_none() && (!value.candidates.is_empty() || value.external) {
                 value.external = true;
             }
@@ -327,28 +428,28 @@ fn lookup_themes(
     }
     if result.may_be_missing {
         result.fallback(lookup_theme_name(
-            document, &variants, "Default", key, context, seen,
+            scope, &variants, "Default", key, context, seen,
         ));
     }
     result
 }
 
-fn lookup_theme_name(
-    document: &Document,
+fn lookup_theme_name<'a>(
+    scope: ResourceScope<'a>,
     variants: &[&Node],
     theme: &str,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
     let mut result: Option<Lookup> = None;
     let mut matches = 0;
     for variant in variants {
-        let name = theme_key(document, variant);
+        let name = theme_key(scope.document, variant);
         if name.as_deref().is_some_and(|name| name != theme) {
             continue;
         }
-        let mut value = lookup_theme_dictionary(document, variant, key, context, &mut seen.clone());
+        let mut value = lookup_dictionary(scope, variant, key, context, &mut seen.clone());
         if name.is_none() {
             // This runtime expression may denote the requested variant or another one.
             value.may_be_missing = true;
@@ -367,22 +468,38 @@ fn lookup_theme_name(
     result
 }
 
-fn lookup_theme_dictionary(
-    document: &Document,
+fn lookup_dictionary<'a>(
+    scope: ResourceScope<'a>,
     variant: &Node,
     key: &str,
     context: Option<&ComponentResourceContext>,
-    seen: &mut BTreeSet<NodeId>,
-) -> Lookup {
+    seen: &mut Visited<'a>,
+) -> Lookup<'a> {
     if framework(variant) && variant.local_name() == "ResourceDictionary" {
-        lookup_scope(document, variant, key, context, seen)
-    } else {
-        Lookup::external()
+        return lookup_scope(scope, variant, key, context, seen);
     }
+    if let Some(included) = scope.include(variant) {
+        let ast = included.document.ast();
+        if let Some(root) = ast.node(ast.root()).filter(|node| {
+            framework(node) && node.local_name() == "ResourceDictionary"
+        }) {
+            let mut result = lookup_scope(included, root, key, context, seen);
+            if let Some(origin) = &mut result.origin {
+                origin.mounts.push((scope, variant.id));
+            }
+            return result;
+        }
+    }
+    Lookup::external()
 }
 
-fn theme_key(document: &Document, node: &Node) -> Option<String> {
+/// Decode an authored theme layer using the same rules as palette and resource lookup.
+pub fn theme_key(document: &Document, node: &Node) -> Option<String> {
+    use crate::theme_variants::{HIGH_CONTRAST_KEY, HighContrastProvider};
     if let Some(key) = literal_key(node) {
+        if key.trim() == HIGH_CONTRAST_KEY {
+            return None;
+        }
         // The runtime's built-in ThemeVariant converter trims surrounding whitespace.
         return Some(if matches!(key.trim(), "Default" | "Light" | "Dark") {
             key.trim().into()
@@ -413,14 +530,15 @@ fn theme_key(document: &Document, node: &Node) -> Option<String> {
     };
     let (owner, value) = member.rsplit_once('.')?;
     let (prefix, owner) = owner.rsplit_once(':').unwrap_or(("", owner));
-    if owner != "ThemeVariant"
-        || !namespaces
-            .get(prefix)
-            .is_some_and(|namespace| framework_type_namespace(owner, namespace))
-    {
-        return None;
+    let namespace = namespaces.get(prefix)?;
+    if owner == "ThemeVariant" && framework_type_namespace(owner, namespace) {
+        return matches!(value, "Default" | "Light" | "Dark").then(|| value.into());
     }
-    matches!(value, "Default" | "Light" | "Dark").then(|| value.into())
+    (value == HIGH_CONTRAST_KEY
+        && HighContrastProvider::ALL.iter().any(|provider| {
+            provider.theme_class() == owner && provider.matches_namespace(namespace)
+        }))
+    .then(|| HIGH_CONTRAST_KEY.into())
 }
 
 pub fn component_resource_references(
@@ -454,7 +572,7 @@ pub(crate) fn all_references(document: &Document) -> Result<Vec<(NodeId, String,
 
 /// Keep unresolved uses as well as resolved ones: moving/copying a definition can
 /// capture a previously unknown key in its new lexical resource scope.
-fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, String)>> {
+pub(super) fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, String)>> {
     let mut result = Vec::new();
     if framework(node)
         && matches!(
@@ -477,7 +595,7 @@ fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, 
         }
     }
     for attribute in &node.attributes {
-        if attribute.is_namespace() || !attribute.value.starts_with('{') {
+        if attribute.is_namespace() || is_fixtures(attribute) || !attribute.value.starts_with('{') {
             continue;
         }
         let value = attribute.markup().map_err(ToolError)?;
@@ -488,7 +606,7 @@ fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, 
     Ok(result)
 }
 
-fn object_resource_key(document: &Document, node: &Node) -> Result<Option<(String, String)>> {
+pub(super) fn object_resource_key(document: &Document, node: &Node) -> Result<Option<(String, String)>> {
     let Some(attribute) = component_property_attribute(document, node.id, "ResourceKey")? else {
         return Ok(None);
     };
@@ -557,7 +675,7 @@ pub(crate) fn validate_copied_references(
     Ok(())
 }
 
-fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
+pub(crate) fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
     let (prefix, local) = name.rsplit_once(':').unwrap_or(("", name));
     if !document
         .ast()
@@ -574,7 +692,7 @@ fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool>
     }
 }
 
-fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
+pub(crate) fn resource_argument(extension: &MarkupExtension) -> Option<usize> {
     extension
         .arguments
         .iter()
@@ -657,7 +775,7 @@ pub(crate) fn rename_resource(
             }
         }
         for attribute in &element.attributes {
-            if attribute.is_namespace() || !attribute.value.starts_with('{') {
+            if attribute.is_namespace() || is_fixtures(attribute) || !attribute.value.starts_with('{') {
                 continue;
             }
             let mut value = attribute.markup().map_err(ToolError)?;

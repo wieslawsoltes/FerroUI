@@ -16,7 +16,6 @@ use crate::{
     TreeDataGridRowHeaderColumn, TreeDataGridSelectionChangedEventArgs, TreeDataGridSelectionMode,
     TreeDataGridTemplateColumn, TreeDataGridTextColumn,
 };
-use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::media::{TextAlignment, TextTrimming, TextWrapping};
@@ -24,6 +23,7 @@ use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::BoxedValue;
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::{AssignedBinding, GridLength};
+use ferroui_markup_xaml::resource_key_of;
 use std::rc::Rc;
 
 /// A binding a document assigns to a property (`[AssignBinding]`), as the column holds it.
@@ -202,14 +202,16 @@ ferro_markup_type!(class TreeDataGridTemplateColumn {
             get: |this: &Rc<TreeDataGridTemplateColumn>| this.cell_editing_template(),
             set: |this: &Rc<TreeDataGridTemplateColumn>, value: Option<Rc<dyn IDataTemplate>>| this.set_cell_editing_template(value)
         },
-        CellTemplateResourceKey: Option<ResourceKey> {
-            get: |this: &Rc<TreeDataGridTemplateColumn>| this.cell_template_resource_key(),
-            set: |this: &Rc<TreeDataGridTemplateColumn>, value: Option<ResourceKey>| this.set_cell_template_resource_key(value)
+        CellTemplateResourceKey: Option<BoxedValue> {
+            get: |this: &Rc<TreeDataGridTemplateColumn>| this.cell_template_resource_key().map(|key| Rc::new(key) as BoxedValue),
+            set: |this: &Rc<TreeDataGridTemplateColumn>, value: Option<BoxedValue>| {
+                this.set_cell_template_resource_key(value.as_ref().map(resource_key_of))
+            }
         },
-        CellEditingTemplateResourceKey: Option<ResourceKey> {
-            get: |this: &Rc<TreeDataGridTemplateColumn>| this.cell_editing_template_resource_key(),
-            set: |this: &Rc<TreeDataGridTemplateColumn>, value: Option<ResourceKey>| {
-                this.set_cell_editing_template_resource_key(value)
+        CellEditingTemplateResourceKey: Option<BoxedValue> {
+            get: |this: &Rc<TreeDataGridTemplateColumn>| this.cell_editing_template_resource_key().map(|key| Rc::new(key) as BoxedValue),
+            set: |this: &Rc<TreeDataGridTemplateColumn>, value: Option<BoxedValue>| {
+                this.set_cell_editing_template_resource_key(value.as_ref().map(resource_key_of))
             }
         },
         TextSearchBinding: Option<AssignedBinding> {

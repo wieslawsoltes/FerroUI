@@ -1,0 +1,53 @@
+{
+  "$description": "Customer workspace design tokens",
+  "brand": {
+    "$type": "color",
+    "accent": { "$value": { "colorSpace": "srgb", "components": [0.1764705882, 0.4156862745, 0.3176470588] } },
+    "card": { "$value": "{brand.accent}" },
+    "banner": { "$type": "gradient", "$value": [
+      { "color": "{brand.accent}", "position": 0 },
+      { "color": { "colorSpace": "srgb", "components": [0.3, 0.65, 0.48] }, "position": 1 }
+    ] }
+  },
+  "layout": {
+    "$type": "dimension",
+    "cardWidth": { "$value": { "value": 320, "unit": "px" } },
+    "padding": { "$value": { "value": 1.5, "unit": "rem" } }
+  },
+  "motion": {
+    "fade": { "$type": "duration", "$value": { "value": 250, "unit": "ms" } },
+    "settle": { "$type": "cubicBezier", "$value": [0.2, 0.8, 0.3, 1.18] },
+    "hover": { "$type": "transition", "$value": {
+      "duration": "{motion.fade}", "delay": { "value": 30, "unit": "ms" }, "timingFunction": "{motion.settle}"
+    } }
+  },
+  "outline": {
+    "segments": { "$type": "strokeStyle", "$value": {
+      "dashArray": [{ "value": 8, "unit": "px" }, { "value": 4, "unit": "px" }], "lineCap": "round"
+    } },
+    "card": { "$type": "border", "$value": {
+      "color": "{brand.accent}", "width": { "value": 2, "unit": "px" }, "style": "solid"
+    } },
+    "divider": { "$type": "border", "$value": {
+      "color": "{brand.accent}", "width": { "value": 4, "unit": "px" }, "style": "{outline.segments}"
+    } }
+  },
+  "depth": {
+    "card": { "$type": "shadow", "$value": [
+      { "color": { "colorSpace": "srgb", "components": [0.05, 0.2, 0.14], "alpha": 0.3 },
+        "offsetX": { "value": 0, "unit": "px" }, "offsetY": { "value": 4, "unit": "px" },
+        "blur": { "value": 12, "unit": "px" }, "spread": { "value": -2, "unit": "px" } },
+      { "color": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.2 },
+        "offsetX": { "value": 0, "unit": "px" }, "offsetY": { "value": 1, "unit": "px" },
+        "blur": { "value": 2, "unit": "px" }, "spread": { "value": 0, "unit": "px" }, "inset": true }
+    ] }
+  },
+  "text": {
+    "family": { "$type": "fontFamily", "$value": ["Inter", "Arial", "DejaVu Sans"] },
+    "emphasis": { "$type": "fontWeight", "$value": "semi-bold" },
+    "title": { "$type": "typography", "$value": {
+      "fontFamily": "{text.family}", "fontSize": { "value": 20, "unit": "px" },
+      "fontWeight": "{text.emphasis}", "letterSpacing": { "value": 0.25, "unit": "px" }, "lineHeight": 1.2
+    } }
+  }
+}

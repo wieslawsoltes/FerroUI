@@ -2,7 +2,7 @@
 //! Planning observes source only; every descriptor is validated before a host adds any card.
 use crate::{
     PreviewFlowDirection, PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageState,
-    PreviewStageTarget, PreviewTheme, MAX_PREVIEW_STAGES,
+    PreviewStageTarget, PreviewTheme, MAX_PREVIEW_STAGES, PREVIEW_SIZE_PRESETS,
 };
 use ferroui_designer_animation::VisualStateGroup;
 use ferroui_designer_core::Document;
@@ -15,6 +15,16 @@ pub struct PreviewStageMatrixSize {
     pub name: String,
     pub width: f64,
     pub height: f64,
+}
+
+impl PreviewStageMatrixSize {
+    pub fn presets() -> Vec<Self> {
+        PREVIEW_SIZE_PRESETS.iter().map(|size| Self {
+            name: size.name.split('·').next().unwrap_or(size.name).trim().into(),
+            width: size.width,
+            height: size.height,
+        }).collect()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -47,7 +57,7 @@ impl PreviewStageMatrix {
     /// Validate descriptors and count without allocating the expanded product.
     pub fn count(&self) -> Result<usize, String> {
         if self.sizes.len() > MAX_PREVIEW_STAGES
-            || self.themes.len() > 3
+            || self.themes.len() > 4
             || self.directions.len() > 3
             || self.design_time_data.len() > 2
             || self.state_groups.len() > 32
@@ -181,6 +191,7 @@ impl PreviewStageMatrix {
                 PreviewTheme::Light => "Light",
                 PreviewTheme::Dark => "Dark",
                 PreviewTheme::Inherit => "App theme",
+                PreviewTheme::HighContrast => "High contrast",
             }
             .into()
         });

@@ -1171,7 +1171,11 @@ impl Visual {
             })
             .detach();
         Self::clip_to_bounds_property().changed().subscribe(|_| bump_geometry_version()).detach();
-        Self::render_transform_origin_property().changed().subscribe(|_| bump_geometry_version()).detach();
+        Self::render_transform_origin_property().changed().subscribe(|change| {
+            if let Some(visual) = change.sender().downcast_ref::<Visual>() {
+                visual.render_transform_value_changed();
+            }
+        }).detach();
         Self::z_index_property().changed().subscribe(|e| {
             let Some(sender) = e.sender().downcast_ref::<Visual>() else { return };
             let parent = sender.visual_parent();

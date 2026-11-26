@@ -1,8 +1,9 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]
-#                            [--features <list>] [--webapp-prebuilt]
+#   scripts/build-browser.sh <application> [--debug | --debug-symbols] [--out <directory>] [--threads | --both]
+#                            [--features <list>] [--webapp-prebuilt | --reuse-webapp]
+#                            [--editor-messages <file>]
 #
 # <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
@@ -21,6 +22,8 @@
 # invocation installs, type checks, lints and bundles the module. --both does that
 # once for its two sites when a reusable receipt can cover their shared script inputs;
 # custom external tool configuration falls back to full validation in each child.
+# --reuse-webapp verifies the current receipt and rebuilds the script module if it is stale.
+# --editor-messages records Cargo's JSON messages and prints the rendered compiler diagnostics.
 #
 # An application in a repository of its own, with this repository as a submodule: set
 # FERROUI_BROWSER_WORKSPACE to the directory of its cargo workspace. The binary package is looked
@@ -32,6 +35,7 @@
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
+# The ordinary development output preserves function names. --debug-symbols also retains DWARF.
 #
 # --features <list> turns on features of the package that is built (cargo's --features): `vello`
 # adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
@@ -84,21 +88,27 @@ THREADS=""
 BOTH=""
 FEATURES=""
 WEBAPP_PREBUILT=""
+REUSE_WEBAPP=""
+EDITOR_MESSAGES=""
+DEBUG_SYMBOLS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
+    --debug-symbols) PROFILE="debug"; DEBUG_SYMBOLS="1";;
     --out) shift; OUT="$1";;
     --threads) THREADS="1";;
     --both) BOTH="1";;
     --features) shift; FEATURES="$1";;
     --webapp-prebuilt) WEBAPP_PREBUILT="1";;
+    --reuse-webapp) REUSE_WEBAPP="1";;
+    --editor-messages) shift; EDITOR_MESSAGES="$1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) APPLICATION="$1";;
   esac
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both] [--features <list>] [--webapp-prebuilt]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug | --debug-symbols] [--out <directory>] [--threads | --both] [--features <list>] [--webapp-prebuilt | --reuse-webapp] [--editor-messages <file>]" >&2
   exit 2
 fi
 case "$FEATURES" in
@@ -110,12 +120,26 @@ if [ -n "$BOTH" ] && [ -n "$THREADS" ]; then
   echo "--both builds the site with threads too: give one of --threads and --both" >&2
   exit 2
 fi
+if [ -n "$BOTH" ] && [ -n "$EDITOR_MESSAGES" ]; then
+  echo "write editor messages for one browser target at a time" >&2
+  exit 2
+fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE="$ROOT/src/Browser/FerroUI.Browser"
 # The cargo workspace of the application: this repository, or that of FERROUI_BROWSER_WORKSPACE.
 WORKSPACE="$(cd "${FERROUI_BROWSER_WORKSPACE:-$ROOT}" && pwd)"
 TARGET_DIR="${CARGO_TARGET_DIR:-$WORKSPACE/target}"
+prepare_webapp() {
+  local builder="$ROOT/scripts/browser/build-webapp.mjs"
+  if [ -n "$WEBAPP_PREBUILT" ]; then
+    node "$builder" verify
+  elif [ -n "$REUSE_WEBAPP" ] && node "$builder" verify >/dev/null 2>&1; then
+    echo "Reusing the validated browser script module."
+  else
+    node "$builder" build
+  fi
+}
 # Where cargo builds. The threaded mode has its own directory: its standard library and its flags
 # differ, and sharing the directory would rebuild everything at each change of mode.
 BUILD_DIR="$TARGET_DIR"
@@ -124,17 +148,17 @@ BUILD_DIR="$TARGET_DIR"
 if [ -n "$BOTH" ]; then
   command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
   MODE=()
+  prepare_webapp
   if [ -n "$WEBAPP_PREBUILT" ]; then
-    node "$ROOT/scripts/browser/build-webapp.mjs" verify
     MODE+=(--webapp-prebuilt)
   else
-    node "$ROOT/scripts/browser/build-webapp.mjs" build
     # An ordinary full build can succeed with custom external configuration whose inputs
     # cannot be bounded by a receipt. Keep --both usable in that case; each child runs all
     # validation gates. A present receipt is always verified again by the child before reuse.
     if [ -f "$CRATE/dist/.ferroui-validated-webapp.json" ]; then MODE+=(--webapp-prebuilt); fi
   fi
-  [ "$PROFILE" = "debug" ] && MODE+=(--debug)
+  if [ -n "$DEBUG_SYMBOLS" ]; then MODE+=(--debug-symbols)
+  elif [ "$PROFILE" = "debug" ]; then MODE+=(--debug); fi
   [ -n "$FEATURES" ] && MODE+=(--features "$FEATURES")
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"} --threads
@@ -174,8 +198,10 @@ fi
 OUT="${OUT:-$TARGET_DIR/browser$SITE_SUFFIX/$APPLICATION}"
 
 command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
-# An example of the browser crate, or else the binary of the workspace package of that name.
-if [ -d "$CRATE/examples/$APPLICATION" ]; then
+ROOT_REAL="$(cd "$ROOT" && pwd -P)"
+WORKSPACE_REAL="$(cd "$WORKSPACE" && pwd -P)"
+# Bundled examples belong to the toolkit workspace. An external workspace can use the same name.
+if [ "$WORKSPACE_REAL" = "$ROOT_REAL" ] && [ -d "$CRATE/examples/$APPLICATION" ]; then
   KIND="example"
   WWWROOT="$CRATE/examples/$APPLICATION/wwwroot"
   CARGO_SELECTION=(-p ferroui-browser --example "$APPLICATION")
@@ -207,8 +233,6 @@ abspath() {
     console.log(path.join(fs.realpathSync(p), ...rest));' "$1"
 }
 [ -n "$OUT" ] || { echo "the output directory is empty" >&2; exit 2; }
-ROOT_REAL="$(cd "$ROOT" && pwd -P)"
-WORKSPACE_REAL="$(cd "$WORKSPACE" && pwd -P)"
 TARGET_REAL="$(abspath "$TARGET_DIR")"
 OUT_REAL="$(abspath "$OUT")"
 case "$OUT_REAL" in
@@ -279,13 +303,9 @@ if [ -n "$THREADS" ]; then
 fi
 
 echo "== script module"
-if [ -n "$WEBAPP_PREBUILT" ]; then
-  node "$ROOT/scripts/browser/build-webapp.mjs" verify
-else
-  node "$ROOT/scripts/browser/build-webapp.mjs" build
-fi
+prepare_webapp
 
-echo "== WebAssembly module ($PROFILE${THREADS:+, threads})"
+echo "== WebAssembly module ($PROFILE${THREADS:+, threads}${DEBUG_SYMBOLS:+, DWARF})"
 FLAGS=()
 [ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
 [ -n "$FEATURES" ] && FLAGS+=(--features "$FEATURES")
@@ -326,13 +346,34 @@ trap 'rm -f -- "$MESSAGES"' EXIT
 # Outside this repository cargo finds the configuration of the browser target only when the
 # configuration of the application includes it (docs/apps.md); otherwise it is given here. Given
 # twice, its link arguments would be repeated.
-if [ "$WORKSPACE" != "$ROOT" ] \
+if [ "$WORKSPACE_REAL" != "$ROOT_REAL" ] \
     && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
   FLAGS+=(--config "$ROOT/.cargo/config.toml")
 fi
+# Pass the flags through Cargo so a cached ordinary build cannot satisfy a DWARF build.
+# cargo rustc applies them only to the selected binary or example, reusing its dependencies.
+CARGO_COMMAND=build
+RUSTC_FLAGS=()
+if [ -n "$DEBUG_SYMBOLS" ]; then
+  CARGO_COMMAND=rustc
+  RUSTC_FLAGS+=(-- -Cdebuginfo=2 -Cstrip=none -Clink-arg=-g3)
+elif [ "$PROFILE" = "debug" ]; then
+  CARGO_COMMAND=rustc
+  RUSTC_FLAGS+=(-- -Cdebuginfo=0 -Clink-arg=-g2)
+fi
 # Bash 3 (the macOS system shell) treats an empty array as unset under -u.
-(cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" ${FLAGS[@]+"${FLAGS[@]}"} \
-  --message-format=json-render-diagnostics > "$MESSAGES")
+STATUS=0
+(cd "$WORKSPACE" && cargo "$CARGO_COMMAND" --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" ${FLAGS[@]+"${FLAGS[@]}"} \
+  --message-format=json-render-diagnostics ${RUSTC_FLAGS[@]+"${RUSTC_FLAGS[@]}"} > "$MESSAGES") || STATUS=$?
+if [ -n "$EDITOR_MESSAGES" ]; then
+  cp -- "$MESSAGES" "$EDITOR_MESSAGES"
+  node -e 'for (const line of require("fs").readFileSync(process.argv[1], "utf8").split("\n")) {
+    let message;
+    try { message = JSON.parse(line); } catch { continue; }
+    if (message.reason === "compiler-message" && message.message?.rendered) process.stderr.write(message.message.rendered);
+  }' "$MESSAGES"
+fi
+[ "$STATUS" -eq 0 ] || exit "$STATUS"
 
 echo "== site"
 BUILT="$BUILD_DIR/wasm32-unknown-emscripten/$PROFILE"

@@ -28,6 +28,9 @@ impl Fixture {
             "ferres://FerroUI.Designer/LayoutHelpers.xaml".into(),
         )
         .unwrap();
+        Self::host(session, host)
+    }
+    fn host(session: DesignerSession, host: Ref<ContentControl>) -> Self {
         let window = Window::new();
         window.set_width(760.0);
         window.set_height(460.0);
@@ -97,6 +100,114 @@ fn selecting_a_leaf_button_exposes_parent_flow_and_margin_helpers() {
             if *node == first && property == "Margin"))
     );
     assert!(!fixture.session.can_undo());
+}
+
+#[test]
+fn wrapping_canvas_children_preserves_native_bounds_and_undo_in_a_collaboration_room() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" UseLayoutRounding="False" Width="520" Height="300">
+  <Border Name="A" Canvas.Left="17.5" Canvas.Top="30" Width="86" Height="62" Margin="4"/>
+  <Border Name="B" Canvas.Right="40" Canvas.Bottom="94" Width="110" Height="54" />
+  <Border Name="C" Canvas.Right="32" Canvas.Bottom="18" Width="62" Height="40" />
+</Canvas>"#;
+    let mut fixture = Fixture::new(source);
+    let before = ["A", "B", "C"].map(|name| fixture.bounds(name));
+    let a = fixture.id("A");
+    let b = fixture.id("B");
+    fixture.session.enable_collaboration("reviewer", "wrapping").unwrap();
+    fixture.session.select([b, a]);
+    let wrapper = fixture.session.wrap_selection(crate::WrapKind::Canvas).unwrap();
+    fixture.refresh();
+    let after = ["A", "B", "C"].map(|name| fixture.bounds(name));
+    assert_eq!(before, after);
+    assert_eq!(fixture.session.document().ast().element_children(wrapper), [a,b]);
+    assert_eq!(fixture.session.selection(), &[wrapper]);
+    assert_eq!(fixture.session.document().revision(), 1);
+    fixture.session.undo().unwrap();
+    assert_eq!(fixture.session.document().source(), source);
+    assert!(!fixture.session.can_undo());
+    fixture.session.redo().unwrap();
+    fixture.refresh();
+    assert_eq!(["A", "B", "C"].map(|name| fixture.bounds(name)), before);
+}
+
+#[test]
+fn wrapping_mapped_rust_siblings_in_studio_preserves_owned_source_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = concat!(
+        "fn view() -> Element { rsx! { StackPanel {\r\n",
+        "    TextBlock { name: \"a\", text: caption() }\r\n",
+        "    // keep this 🍃\r\n",
+        "    TextBlock { name: \"b\", text: \"Second\" }\r\n",
+        "    for item in items { TextBlock { text: item.name } }\r\n",
+        "} } }\r\n",
+        "fn other() -> Element { rsx! { TextBlock { text: \"Another view\" } } }\r\n",
+    );
+    let host = ContentControl::new();
+    let session = DesignerSession::with_rust_source(source, host.clone(), "file:///tmp/LayoutWrap.rs".into()).unwrap();
+    let mut fixture = Fixture::host(session, host);
+    let a = fixture.id("a");
+    let b = fixture.id("b");
+    fixture.session.select([b, a]);
+    let wrapper = fixture.session.wrap_selection(crate::WrapKind::HorizontalStack).unwrap();
+    let authored = fixture.session.authored_source();
+    assert!(authored.contains("Orientation::Horizontal,\r\n"));
+    assert!(authored.contains("        // keep this 🍃\r\n"));
+    assert!(authored.contains("text: caption()"));
+    assert!(authored.contains("    for item in items { TextBlock { text: item.name } }\r\n"));
+    assert_eq!(fixture.session.selection(), &[wrapper]);
+    assert_eq!(fixture.session.document().ast().element_children(wrapper).len(), 2);
+    fixture.session.undo().unwrap();
+    assert_eq!(fixture.session.authored_source(), source);
+    assert!(!fixture.session.can_undo());
+}
+
+#[cfg(feature = "mcp")]
+#[test]
+fn measured_spacing_catalog_edits_one_side_and_rejects_retired_selection() {
+    use crate::workspace_spacing::{Adjustment, SpacingModel};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(SOURCE);
+    let empty = fixture.id("Empty");
+    let flow = fixture.id("Flow");
+    let first = fixture.id("First");
+    fixture.session.select([empty]);
+    let model = SpacingModel::capture(&fixture.session, 1);
+    let catalog = model.catalog(&fixture.session);
+    let handles = catalog["handles"].as_array().unwrap();
+    let padding = handles.iter().find(|handle| handle["label"] == "Padding left").unwrap();
+    let margin = handles.iter().find(|handle| handle["label"] == "Margin right").unwrap();
+    assert_eq!(padding["owner"], empty);
+    assert_eq!(margin["owner"], empty);
+    assert_eq!(padding["value"], 12.0);
+    let padding_id = padding["id"].as_str().unwrap();
+    let unchanged = model.plan(&fixture.session, padding_id, Adjustment::Value { value: 12.0 }).unwrap().1;
+    assert!(unchanged.source_edits(&fixture.session).unwrap().is_empty());
+    assert!(model.plan(&fixture.session, padding_id, Adjustment::Value { value: -1.0 }).is_err());
+    let (_, preview) = model.plan(&fixture.session, padding_id, Adjustment::Value { value: 19.125 }).unwrap();
+    assert_eq!(fixture.session.document().source(), SOURCE);
+    fixture.session.commit_layout_preview(&preview).unwrap();
+    assert_eq!(fixture.session.document().ast().node(empty).unwrap().attribute("Padding"), Some("19.125,12,12,12"));
+    assert_eq!(fixture.session.document().revision(), 1);
+    fixture.session.undo().unwrap();
+    assert_eq!(fixture.session.document().source(), SOURCE);
+    assert!(!model.is_current(&fixture.session));
+
+    fixture.refresh();
+    fixture.session.select([first]);
+    let model = SpacingModel::capture(&fixture.session, 2);
+    let catalog = model.catalog(&fixture.session);
+    let handles = catalog["handles"].as_array().unwrap();
+    let gap = handles.iter().find(|handle| handle["property"] == "Spacing").unwrap();
+    assert_eq!(gap["owner"], flow);
+    assert_eq!(gap["value"], 0.0);
+    let gap_id = gap["id"].as_str().unwrap();
+    assert!(model.is_current(&fixture.session));
+    fixture.session.select([empty]);
+    fixture.session.select([first]);
+    assert!(model.plan(&fixture.session, gap_id, Adjustment::Value { value: 7.5 }).is_err());
+    assert_eq!(fixture.session.document().source(), SOURCE);
 }
 
 #[test]
@@ -355,6 +466,46 @@ fn native_asset_preview_targets_transparent_nested_content_and_selects_inserted_
     assert_eq!(fixture.session.selection(), &[inserted]);
     fixture.session.undo().unwrap();
     assert_eq!(fixture.session.document().source(), NESTED);
+}
+
+#[test]
+fn asset_drop_resolves_occupied_hosts_and_shell_padding() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(
+        r#"<Border xmlns="https://github.com/ferroui" Name="Shell" Width="500" Height="300" Padding="28"><Grid Name="Body"><Border Name="Card" Width="120" Height="80"><TextBlock Text="Occupied"/></Border></Grid></Border>"#,
+    );
+    let body = fixture.id("Body");
+    for position in [fixture.center("Card"), fixture.at("Shell", 12.0, 12.0)] {
+        let preview = fixture
+            .session
+            .preview_layout_insert_nearby(r#"<Button Name="Added"/>"#, position)
+            .unwrap();
+        assert!(preview.is_accepted(), "{:?}", preview.rejection());
+        assert_eq!(preview.target(), body);
+        fixture.session.commit_layout_preview(&preview).unwrap();
+        let added = fixture.id("Added");
+        assert_eq!(
+            fixture.session.document().ast().node(added).unwrap().parent,
+            Some(body)
+        );
+        fixture.session.undo().unwrap();
+        fixture.refresh();
+    }
+}
+
+#[test]
+fn asset_drop_keeps_single_content_and_locked_body_guards() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new(
+        r#"<Border xmlns="https://github.com/ferroui" Name="Shell" Width="500" Height="300" Padding="28"><Grid Name="Body" /></Border>"#,
+    );
+    let body = fixture.id("Body");
+    fixture.session.set_layers_locked(&[body], true).unwrap();
+    let preview = fixture
+        .session
+        .preview_layout_insert_nearby("<Button/>", fixture.at("Shell", 12.0, 12.0))
+        .unwrap();
+    assert!(!preview.is_accepted());
 }
 
 struct CustomHelpers;

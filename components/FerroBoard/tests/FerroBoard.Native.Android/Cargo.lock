@@ -286,6 +286,7 @@ dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
  "ferroui-ident-macros",
+ "ferroui-markup-syntax",
  "ferroui-system",
  "icu_locale_core",
  "libc",
@@ -361,7 +362,12 @@ name = "ferroui-markup"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-markup-syntax",
 ]
+
+[[package]]
+name = "ferroui-markup-syntax"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-markup-xaml"
@@ -381,6 +387,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "ferroui-reload-protocol",
  "quote",
  "roxmltree",
  "syn 2.0.119",
@@ -459,6 +466,10 @@ dependencies = [
  "ferroui-controls",
  "libc",
 ]
+
+[[package]]
+name = "ferroui-reload-protocol"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-remote-protocol"

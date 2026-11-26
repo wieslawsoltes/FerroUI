@@ -13,6 +13,29 @@ fn ready(session: &DesignerSession) {
 }
 
 #[test]
+fn native_property_edit_validates_compound_values_before_grouped_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui">
+    <Border Name="First" Width="80" Height="32" RenderTransformOrigin="25%, 40%" />
+    <Border Name="Second" Width="80" Height="32" RenderTransformOrigin="90%, 60%" />
+</StackPanel>"#;
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let targets = ["First", "Second"].map(|name| session.document().ast().find_name(name).unwrap());
+    ready(&session);
+    let error = session.set_property(&targets, "RenderTransformOrigin", "25%, 40").unwrap_err();
+    assert!(error.contains("same unit"), "{error}");
+    assert_eq!(session.document().source(), source);
+    assert!(!session.can_undo());
+    ready(&session);
+    session.set_property(&targets, "RenderTransformOrigin", "30%, 50%").unwrap();
+    ready(&session);
+    assert_eq!(session.document().source().matches("30%, 50%").count(), 2);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn native_auto_literal_session_and_component_edits_serialize_float_sentinels_and_undo_once() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" Width="100" /></Canvas>"#;

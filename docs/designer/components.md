@@ -225,6 +225,8 @@ The optional MCP provider exposes the same session model:
 | `designer_component` | Create, copy, rename, remove, apply, extract or edit a definition through a semantic component action. |
 | `designer_definition_scope` | Read the current scope, preview options and scope epoch. |
 | `designer_definition` | Enter or exit a native definition preview. |
+| `ferroui_project_library` | Search reusable XAML definitions across an open solution, including retained source drafts. Pass `query`, `offset` and `limit` to filter and page results. |
+| `designer_open_project_definition` | Use an `entry` from the Library search to open its source or native scope. Set `destination` to `source` or `preview`. This navigation requires MCP write permission. |
 
 Document writes require the existing property-write permission and `expected_revision`.
 `copy_definition_for_instance` creates the resource and retargets only that instance in one

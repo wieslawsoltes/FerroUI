@@ -15,13 +15,19 @@ framework=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(framework)
 model=framework.Model()
 crates=list(framework.CRATES)
-# Templates, resource includes and markup extensions are declared by the XAML runtime,
-# not by the native view-builder crates. Read their real metadata through the same scanner.
-crates.append(("src/Markup/FerroUI.Markup.Xaml", "ferroui_markup_xaml"))
+# The XAML runtime and attached behaviors declare markup types independently of
+# the native view builders. Read their metadata through the same scanner.
+crates.extend([
+    ("src/Markup/FerroUI.Markup.Xaml", "ferroui_markup_xaml"),
+    ("src/Behaviors/FerroUI.Xaml.Interactivity", "ferroui_xaml_interactivity"),
+    ("src/Behaviors/FerroUI.Xaml.Interactions", "ferroui_xaml_interactions"),
+    ("src/Behaviors/FerroUI.Xaml.Interactions.Custom", "ferroui_xaml_interactions_custom"),
+])
 for _,_,group,_ in framework.GROUPS:
     crates.extend(group)
 for directory,crate in crates:
-    framework.read_paths(model,directory,crate)
+    if (ROOT/directory/"rust_paths.rs").is_file():
+        framework.read_paths(model,directory,crate)
 for directory,crate in crates:
     framework.read_classes(model,directory,crate)
 
@@ -81,13 +87,16 @@ for directory,crate in crates:
             properties=extra.setdefault(match.group(1),{})
             read_markup_properties(body,properties)
             register_aliases(match.group(1),path,body)
-        # Plain runtime markup classes include Setter and easing objects. They use the same
-        # property table as object-model classes, but are not ferro_class! declarations.
-        for match in re.finditer(r'ferro_markup_type!\s*\(\s*(?:class|value)\s+([A-Z]\w*)(?:\s+as\s+"([A-Z]\w*)")?\s*\{' ,text):
-            name=match.group(2) or match.group(1)
-            if name!=match.group(1) and match.group(1) in model.paths:
-                model.paths[name]=model.paths[match.group(1)]
+        # Plain runtime markup classes and structs use the same property table as
+        # object-model classes. Struct declarations also provide scalar XAML values.
+        for match in re.finditer(r'ferro_markup_type!\s*\(\s*(class|struct|value)\s+([A-Z]\w*)(?:\s+as\s+"([A-Z]\w*)")?\s*\{' ,text):
+            kind, carrier, alias=match.groups()
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
+            if kind=="struct" and not re.search(r'\bparse:\s*\S',body):
+                continue
+            name=alias or carrier
+            if name!=carrier and carrier in model.paths:
+                model.paths[name]=model.paths[carrier]
             read_markup_properties(body,extra.setdefault(name,{}))
             register_aliases(name,path,body)
             # XAML also supplies IServiceProvider constructor arguments itself.

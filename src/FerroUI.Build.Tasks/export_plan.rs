@@ -22,7 +22,7 @@
 
 use std::path::PathBuf;
 
-use ferroui_build_scan::xaml_metadata::DocumentModel;
+use ferroui_build_scan::{packaged_assets::AssetDeclaration, xaml_metadata::DocumentModel};
 
 /// What `compiled_markup::register()` of a crate registers (#857).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -31,11 +31,20 @@ pub struct ExportPlan {
     closed: Option<ClosedPlan>,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default)]
 struct ClosedPlan {
     documents: Vec<String>,
-    assets: Vec<String>,
+    assets: Vec<AssetDeclaration>,
 }
+
+impl PartialEq for ClosedPlan {
+    fn eq(&self, other: &Self) -> bool {
+        self.documents == other.documents && self.assets.iter().map(|site| &site.value)
+            .eq(other.assets.iter().map(|site| &site.value))
+    }
+}
+
+impl Eq for ClosedPlan {}
 
 impl ExportPlan {
     /// Every public document of the exported groups and every embedded asset: what a crate
@@ -61,9 +70,10 @@ impl ExportPlan {
 
     /// Adds the asset with the rooted path `path` (`/Assets/logo.png`) to a closed plan; a plan
     /// of every asset already has it.
+    #[track_caller]
     pub fn asset(mut self, path: &str) -> Self {
         if let Some(closed) = &mut self.closed {
-            closed.assets.push(path.to_string());
+            closed.assets.push(AssetDeclaration::at(path, std::panic::Location::caller()));
         }
         self
     }
@@ -71,6 +81,10 @@ impl ExportPlan {
     /// Whether the plan is closed.
     pub fn is_closed(&self) -> bool {
         self.closed.is_some()
+    }
+
+    pub(crate) fn asset_registrations(&self) -> Option<Vec<AssetDeclaration>> {
+        self.closed.as_ref().map(|closed| closed.assets.clone())
     }
 }
 
@@ -136,7 +150,8 @@ pub(crate) fn apply(
         }
     }
     let mut kept = Vec::new();
-    for path in &closed.assets {
+    for declaration in &closed.assets {
+        let path = &declaration.value;
         match assets.iter().find(|(rooted, _)| same(rooted, path)) {
             Some(asset) => {
                 if !kept.contains(asset) {

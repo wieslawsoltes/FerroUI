@@ -303,7 +303,7 @@ purpose acknowledges it with the label `build-output-changes`. With the label:
   some with other features. Every other field of a unit and each revision's
   repetition of its own graph are still required; the units built with other features are
   listed in the summary of the job.
-- `compare.py` and `catalog-freshness.py` also accept a change of the set of units: a pull request
+- `compare.py`, `catalog-freshness.py`, and the real sample workload in `sample-freshness.py` also accept a change of the set of units. A pull request
   that gives the measured package a dependency (a crate of controls a theme now has templates
   for, for example) builds units the baseline does not. The units both revisions build keep
   their profiles, each revision repeats its own graph, and the units that are added or no longer

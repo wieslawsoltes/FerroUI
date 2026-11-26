@@ -17,7 +17,7 @@ use super::compiled::{CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED};
 use super::compiled::{compile_documents_with, file_of, generate_class_file_with, ClassConstructor, ClassFile, ClassGroup, CompiledDocument, EmitterHost, GeneratedFile};
 use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::runtime_types::RuntimeEmitTypes;
-use super::source::function_name_of;
+use ferroui_build_scan::compiled_names::function_name_of;
 use super::transform::TransformOptions;
 #[cfg(any(test, feature = "testing"))]
 use super::transform::{transform_group, DocumentSource, TransformedDocument};

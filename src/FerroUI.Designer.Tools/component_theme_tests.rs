@@ -17,6 +17,43 @@ fn context(theme: &str, inherited: &[&str]) -> ComponentResourceContext {
 }
 
 #[test]
+fn included_resource_lookup_preserves_owner_identity_and_theme_precedence() {
+    struct Includes(BTreeMap<&'static str, Document>);
+    impl ComponentResourceSources for Includes {
+        fn include(&self, _: &str, _: &Document, node: &Node) -> Option<IncludedResourceDocument<'_>> {
+            let (uri, document) = self.0.get_key_value(node.attribute("Source")?)?;
+            Some(IncludedResourceDocument { address: uri, uri, document })
+        }
+    }
+    let dictionary = |name: &str| Document::new(format!(
+        r#"<ResourceDictionary xmlns="{FRAMEWORK}" xmlns:x="{XAML}"><DataTemplate x:Key="Card" Name="{name}"><Border/></DataTemplate></ResourceDictionary>"#
+    )).unwrap();
+    let includes = Includes(BTreeMap::from([
+        ("base.xaml", dictionary("Base")),
+        ("dark.xaml", dictionary("Dark")),
+    ]));
+    let make = |merged: &str| document(&format!(
+        r#"<Grid.Resources><ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries><ResourceInclude Source="base.xaml"/>{merged}</ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries><ResourceInclude x:Key="Dark" Source="dark.xaml"/></ResourceDictionary.ThemeDictionaries>
+            <Color x:Key="Local">Red</Color>
+        </ResourceDictionary></Grid.Resources><ListBox Name="Target"/>"#
+    ));
+    let root = make("");
+    let lookup = |source: &Document, key: &str, theme: Option<&ComponentResourceContext>| {
+        component_resource_location(source, "view.xaml", named(source, "Target"), key, theme, &includes)
+            .unwrap().map(|location| (location.uri.map(str::to_owned), location.node))
+    };
+    assert_eq!(lookup(&root, "Card", Some(&context("Light", &[]))).unwrap().0.as_deref(), Some("base.xaml"));
+    assert_eq!(lookup(&root, "Card", Some(&context("Dark", &[]))).unwrap().0.as_deref(), Some("dark.xaml"));
+    assert_eq!(lookup(&root, "Card", None), None);
+    assert_eq!(lookup(&root, "Local", None).unwrap().0, None);
+    let missing = make(r#"<ResourceInclude Source="unknown.xaml"/>"#);
+    assert_eq!(lookup(&missing, "Card", Some(&context("Light", &[]))), None);
+    assert_eq!(lookup(&missing, "Card", Some(&context("Dark", &[]))).unwrap().0.as_deref(), Some("dark.xaml"));
+}
+
+#[test]
 fn explicit_theme_lookup_follows_runtime_local_selected_inherited_default_merge_order() {
     let d = document(
         r#"<Grid.Resources><Color x:Key="Ancestor" Name="Outer">Gray</Color></Grid.Resources>

@@ -43,7 +43,7 @@ pub use extensions::ServiceProviderExtensions;
 pub use populate_overrides::{PopulateOverride, PopulateOverrideGuard};
 pub use ferro_xaml_loader::{CompiledXamlLoader, FerroXamlLoader, IRuntimeXamlLoader};
 pub use markup_extension::MarkupExtension;
-pub use object_casts::{FromXamlObject, XamlResourceNode};
+pub use object_casts::{resource_key_of, FromXamlObject, XamlResourceNode};
 pub use register_types::{register_types, ASSEMBLY};
 pub use runtime_xaml_loader_configuration::{
     RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration, XamlDiagnosticFunc,

@@ -119,6 +119,9 @@ impl BsonStreamTransportConnection {
                 // `new byte[length]`.
                 return Err(Error::Overflow("Arithmetic operation resulted in an overflow.".to_string()));
             }
+            if length as usize > 80 * 1024 * 1024 {
+                return Err(Error::Argument("The remote message exceeds 80 MiB".into()));
+            }
             let mut buffer = vec![0u8; length as usize];
             self.read_exact(input_stream, &mut buffer)?;
             let class = self.resolver.get_by_guid(guid)?;

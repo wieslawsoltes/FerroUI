@@ -2,7 +2,7 @@
 use crate::{
     PreviewFlowDirection, PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageMatrix,
     PreviewStageMatrixSize, PreviewStageStateAxis, PreviewStageTarget, PreviewTheme,
-    MAX_PREVIEW_STAGES, PREVIEW_SIZE_PRESETS,
+    MAX_PREVIEW_STAGES,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -75,22 +75,12 @@ impl PreviewStageMatrixEditor {
             width: base.environment.width,
             height: base.environment.height,
         }];
-        for size in PREVIEW_SIZE_PRESETS {
+        for size in PreviewStageMatrixSize::presets() {
             if !size_values
                 .iter()
                 .any(|value| value.width == size.width && value.height == size.height)
             {
-                size_values.push(PreviewStageMatrixSize {
-                    name: size
-                        .name
-                        .split('·')
-                        .next()
-                        .unwrap_or(size.name)
-                        .trim()
-                        .into(),
-                    width: size.width,
-                    height: size.height,
-                });
+                size_values.push(size);
             }
         }
         let sizes = size_values
@@ -106,15 +96,9 @@ impl PreviewStageMatrixEditor {
             })
             .collect();
         section(&body, "Themes");
-        let themes = choices(
-            &body,
-            "MatrixTheme",
-            &[
-                (PreviewTheme::Light, "Light"),
-                (PreviewTheme::Dark, "Dark"),
-                (PreviewTheme::Inherit, "Application theme"),
-            ],
-        );
+        let theme_options = PreviewTheme::available()
+            .into_iter().map(|theme| (theme, theme.label())).collect::<Vec<_>>();
+        let themes = choices(&body, "MatrixTheme", &theme_options);
         section(&body, "Reading directions");
         let directions = choices(
             &body,

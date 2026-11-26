@@ -1,0 +1,2229 @@
+{
+  "name": "ferroui",
+  "displayName": "FerroUI Designer",
+  "description": "FerroUI XAML and RSX design, native hot reload, and MCP tools for VS Code.",
+  "version": "0.4.1",
+  "publisher": "FerroUI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wieslawsoltes/FerroUI.git",
+    "directory": "editors/vscode"
+  },
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:ferroui-xaml",
+    "onLanguage:rust",
+    "workspaceContains:**/*.ferroui-scenario.json",
+    "onWebviewPanel:ferroui.designer",
+    "onWebviewPanel:ferroui.stages"
+  ],
+  "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": "*.ferroui-handoff.json",
+        "url": "./schemas/design-handoff.schema.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "ferroui",
+        "required": ["manifest", "binary"],
+        "properties": {
+          "manifest": { "type": "string", "description": "Cargo manifest path" },
+          "binary": { "type": "string", "description": "Cargo binary name" }
+        }
+      }
+    ],
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "ferroui.mcp",
+        "label": "FerroUI"
+      }
+    ],
+    "languages": [
+      {
+        "id": "ferroui-xaml",
+        "aliases": [
+          "FerroUI XAML",
+          "XAML"
+        ],
+        "extensions": [
+          ".xaml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ferroui-xaml",
+        "scopeName": "text.xml.ferroui-xaml",
+        "path": "./syntaxes/ferroui-xaml.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ferroui.showAppSessions",
+        "title": "Show App Sessions",
+        "category": "FerroUI",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "ferroui.hotReload.select",
+        "title": "Select Hot Reload Application",
+        "category": "FerroUI",
+        "icon": "$(list-selection)"
+      },
+      {
+        "command": "ferroui.hotReload.stopAll",
+        "title": "Stop All Hot Reload Applications",
+        "category": "FerroUI",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.appSessions.preview",
+        "title": "Open This Live App",
+        "category": "FerroUI",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "ferroui.appSessions.select",
+        "title": "Select This Managed App",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.appSessions.rebuild",
+        "title": "Rebuild This App",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ferroui.appSessions.debug",
+        "title": "Attach Debugger to This App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.appSessions.detachDebug",
+        "title": "Detach Debugger from This App",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "ferroui.appSessions.continueDebug",
+        "title": "Continue Paused App",
+        "category": "FerroUI",
+        "icon": "$(debug-continue)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.appSessions.showOutput",
+        "title": "Show App Output",
+        "category": "FerroUI",
+        "icon": "$(output)"
+      },
+      {
+        "command": "ferroui.appSessions.stop",
+        "title": "Stop or Disconnect This App",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "ferroui.iosSimulator.run",
+        "title": "Run iOS Simulator App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "ferroui.iosSimulator.debug",
+        "title": "Run and Debug iOS Simulator App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.iosDevice.run",
+        "title": "Run iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "ferroui.iosDevice.debug",
+        "title": "Run and Debug iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.iosDevice.attach",
+        "title": "Attach to iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "ferroui.appSessions.mobile",
+        "title": "Open Mobile App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "ferroui.android.run",
+        "title": "Run Android App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.android.debug",
+        "title": "Run and Debug Android App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.android.attach",
+        "title": "Attach to Android App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.appSessions.browser",
+        "title": "Open Browser App",
+        "category": "FerroUI",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "ferroui.browser.run",
+        "title": "Run Browser App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.browser.debug",
+        "title": "Run and Debug Browser App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.browser.attach",
+        "title": "Attach to Browser App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.collaboration.host",
+        "title": "Host XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(share)"
+      },
+      {
+        "command": "ferroui.collaboration.join",
+        "title": "Join XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "ferroui.collaboration.resume",
+        "title": "Resume XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "ferroui.collaboration.review",
+        "title": "Review Room Source",
+        "category": "FerroUI",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "ferroui.collaboration.publish",
+        "title": "Publish Local Draft…",
+        "category": "FerroUI",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "ferroui.collaboration.resolve",
+        "title": "Publish Reviewed Resolution…",
+        "category": "FerroUI",
+        "icon": "$(merge)"
+      },
+      {
+        "command": "ferroui.collaboration.sync",
+        "title": "Synchronize Room",
+        "category": "FerroUI",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "ferroui.collaboration.invite",
+        "title": "Copy Room Invitation…",
+        "category": "FerroUI",
+        "icon": "$(link)"
+      },
+      {
+        "command": "ferroui.collaboration.member",
+        "title": "Manage Room Member…",
+        "category": "FerroUI",
+        "icon": "$(account)"
+      },
+      {
+        "command": "ferroui.collaboration.checkpoint",
+        "title": "Checkpoint Room…",
+        "category": "FerroUI",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "ferroui.collaboration.checkpointResolution",
+        "title": "Review Room Checkpoint Resolution…",
+        "category": "FerroUI",
+        "icon": "$(git-merge)"
+      },
+      {
+        "command": "ferroui.collaboration.recover",
+        "title": "Review Saved Room Backup…",
+        "category": "FerroUI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "ferroui.collaboration.disconnect",
+        "title": "Disconnect Room",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "ferroui.collaboration.incoming.apply",
+        "title": "Apply Reviewed Room Source",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.collaboration.incoming.cancel",
+        "title": "Close Room Source Review",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.collaboration.outgoing.apply",
+        "title": "Publish Reviewed Room Source",
+        "category": "FerroUI",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "ferroui.collaboration.outgoing.cancel",
+        "title": "Close Room Publish Review",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.openDesigner",
+        "title": "Open Designer",
+        "category": "FerroUI",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "ferroui.restartLanguageServer",
+        "title": "Restart XAML Language Server",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.buildProjectSchema",
+        "title": "Build Project XAML Schema",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.project.findView",
+        "title": "Find Project View",
+        "category": "FerroUI",
+        "icon": "$(search)"
+      },
+      {
+        "command": "ferroui.project.refresh",
+        "title": "Refresh Project",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ferroui.diagnostics.refresh",
+        "title": "Refresh Diagnostics",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ferroui.diagnostics.recordProfile",
+        "title": "Record UI Profile",
+        "category": "FerroUI",
+        "icon": "$(record)"
+      },
+      {
+        "command": "ferroui.diagnostics.stopProfile",
+        "title": "Stop UI Profile",
+        "category": "FerroUI",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.diagnostics.exportProfile",
+        "title": "Export UI Profile",
+        "category": "FerroUI",
+        "icon": "$(export)"
+      },
+      {
+        "command": "ferroui.diagnostics.profileSource",
+        "title": "Reveal Profile Source",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.project.newView",
+        "title": "New View",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.scenario.review",
+        "title": "Review Scenario Baselines",
+        "category": "FerroUI",
+        "icon": "$(diff)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.scenario.compare",
+        "title": "Compare Scenario Baselines with Git",
+        "category": "FerroUI",
+        "icon": "$(git-compare)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.newProject",
+        "title": "New Project",
+        "category": "FerroUI",
+        "icon": "$(new-folder)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.checkToolchain",
+        "title": "Check Project Toolchain",
+        "category": "FerroUI",
+        "icon": "$(checklist)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.checkTarget",
+        "title": "Check Cargo Target",
+        "category": "FerroUI",
+        "icon": "$(checklist)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.runCargo",
+        "title": "Run Cargo Binary",
+        "category": "FerroUI",
+        "icon": "$(debug-start)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.newComponent",
+        "title": "New Component",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.designHandoff.review",
+        "title": "Review Design Handoff",
+        "category": "FerroUI",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.designTokens.import",
+        "title": "Import Design Tokens",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.designTokens.export",
+        "title": "Export Design Tokens",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.project.runTarget",
+        "title": "Run with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "ferroui.showOutline",
+        "title": "Show Outline",
+        "category": "FerroUI",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "ferroui.showProperties",
+        "title": "Show Properties",
+        "category": "FerroUI",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "ferroui.showColumns",
+        "title": "Edit Columns",
+        "category": "FerroUI",
+        "icon": "$(table)"
+      },
+      {
+        "command": "ferroui.editItemTemplates",
+        "title": "Edit Item Templates",
+        "category": "FerroUI",
+        "icon": "$(symbol-structure)"
+      },
+      {
+        "command": "ferroui.editControlTemplate",
+        "title": "Edit Control Template",
+        "category": "FerroUI",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "ferroui.editCommandBinding",
+        "title": "Edit Command Binding",
+        "category": "FerroUI",
+        "icon": "$(link)"
+      },
+      {
+        "command": "ferroui.columns.add",
+        "title": "Add Column",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.columns.source",
+        "title": "Reveal Column Collection",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.columns.reveal",
+        "title": "Reveal in Source",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.columns.earlier",
+        "title": "Move Column Earlier",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "ferroui.columns.later",
+        "title": "Move Column Later",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "ferroui.columns.duplicate",
+        "title": "Duplicate Column",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "ferroui.columns.remove",
+        "title": "Remove Column",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "ferroui.columns.reset",
+        "title": "Reset Property",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "ferroui.showBehaviors",
+        "title": "Edit Behaviors",
+        "category": "FerroUI",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "ferroui.studio.propertyTransitions",
+        "title": "Edit Property Transitions",
+        "category": "FerroUI",
+        "icon": "$(watch)"
+      },
+      {
+        "command": "ferroui.behaviors.attach",
+        "title": "Attach Behavior",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.behaviors.preview",
+        "title": "Preview Actions",
+        "icon": "$(play)"
+      },
+      {
+        "command": "ferroui.behaviors.clear",
+        "title": "Reset Behavior Preview",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.behaviors.append",
+        "title": "Add Action",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.behaviors.source",
+        "title": "Reveal in Source",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.behaviors.earlier",
+        "title": "Move Action Earlier",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "ferroui.behaviors.later",
+        "title": "Move Action Later",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "ferroui.behaviors.remove",
+        "title": "Remove",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "ferroui.showToolbox",
+        "title": "Show Toolbox",
+        "category": "FerroUI",
+        "icon": "$(extensions)"
+      },
+      {
+        "command": "ferroui.showEvents",
+        "title": "Show Events",
+        "category": "FerroUI",
+        "icon": "$(symbol-event)"
+      },
+      {
+        "command": "ferroui.createEventHandler",
+        "title": "Create Rust Event Handler",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.extractResourceDictionary",
+        "title": "Extract Resource Dictionary…",
+        "category": "FerroUI",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.showFile",
+        "title": "Review New Dictionary",
+        "category": "FerroUI",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.apply",
+        "title": "Apply Extraction",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.dictionaryReview.cancel",
+        "title": "Cancel Extraction",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.moveXamlFile",
+        "title": "Move XAML File…",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.project.moveXamlFile",
+        "title": "Move XAML File…",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.fileMoveReview.apply",
+        "title": "Apply File Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.fileMoveReview.cancel",
+        "title": "Cancel File Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.assetMoveReview.apply",
+        "title": "Apply Asset Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.assetMoveReview.cancel",
+        "title": "Cancel Asset Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.renameResource",
+        "title": "Rename Resource and References…",
+        "category": "FerroUI",
+        "icon": "$(rename)"
+      },
+      {
+        "command": "ferroui.resourceRenameReview.apply",
+        "title": "Apply Resource Rename",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.resourceRenameReview.cancel",
+        "title": "Cancel Resource Rename",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.moveResource",
+        "title": "Move Resource…",
+        "category": "FerroUI",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "ferroui.resourceMoveReview.apply",
+        "title": "Apply Resource Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.resourceMoveReview.cancel",
+        "title": "Cancel Resource Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.renameRegisteredProperty",
+        "title": "Rename Registered Property…",
+        "category": "FerroUI",
+        "icon": "$(rename)"
+      },
+      {
+        "command": "ferroui.propertyRenameReview.apply",
+        "title": "Apply Property Rename",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.propertyRenameReview.cancel",
+        "title": "Cancel Property Rename",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.renameRegisteredType",
+        "title": "Rename Registered Type…",
+        "category": "FerroUI",
+        "icon": "$(rename)"
+      },
+      {
+        "command": "ferroui.typeRenameReview.apply",
+        "title": "Apply Type Rename",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.typeRenameReview.cancel",
+        "title": "Cancel Type Rename",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.showResources",
+        "title": "Show Resources",
+        "category": "FerroUI",
+        "icon": "$(library)"
+      },
+      {
+        "command": "ferroui.showAssets",
+        "title": "Show Assets",
+        "category": "FerroUI",
+        "icon": "$(file-media)"
+      },
+      {
+        "command": "ferroui.importAsset",
+        "title": "Import Asset…",
+        "category": "FerroUI",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.moveAsset",
+        "title": "Move or Rename Asset…",
+        "category": "FerroUI",
+        "icon": "$(rename)"
+      },
+      {
+        "command": "ferroui.showStudio",
+        "title": "Show Studio Tools",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.showTimeline",
+        "title": "Show Animation Timeline",
+        "category": "FerroUI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "ferroui.showData",
+        "title": "Show Design Data",
+        "category": "FerroUI",
+        "icon": "$(database)"
+      },
+      {
+        "command": "ferroui.showLibrary",
+        "title": "Show Library",
+        "category": "FerroUI",
+        "icon": "$(library)"
+      },
+      {
+        "command": "ferroui.showStyles",
+        "title": "Show Styles & Themes",
+        "category": "FerroUI",
+        "icon": "$(paintcan)"
+      },
+      {
+        "command": "ferroui.studio.findDefinition",
+        "title": "Find Definition in Designer",
+        "category": "FerroUI",
+        "icon": "$(search)"
+      },
+      {
+        "command": "ferroui.rsx.renameControl",
+        "title": "Rename RSX Control",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.studio.layout",
+        "title": "Arrange Selection",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.studio.wrapSelection",
+        "title": "Wrap Selection",
+        "category": "FerroUI",
+        "icon": "$(group-by-ref-type)"
+      },
+      {
+        "command": "ferroui.studio.gridTracks",
+        "title": "Edit Grid Tracks",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.revealDesignerSource",
+        "title": "Reveal Selected Control in Source",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.hotReload.start",
+        "title": "Run with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(flame)"
+      },
+      {
+        "command": "ferroui.hotReload.startRegistered",
+        "title": "Run with Registered Rust Patches",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.runAndDebug",
+        "title": "Run and Debug with Hot Reload",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.hotReload.rebuild",
+        "title": "Rebuild Hot Reload Application",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.stop",
+        "title": "Stop Hot Reload Application",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.showOutput",
+        "title": "Show Hot Reload Output",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.openLiveApp",
+        "title": "Open Live App",
+        "category": "FerroUI",
+        "icon": "$(run)"
+      },
+      {
+        "command": "ferroui.openHostedDesign",
+        "title": "Open App-Hosted Design",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.openStages",
+        "title": "Open Preview Stages",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.hotReload.debug",
+        "title": "Attach Debugger to Managed App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.mcp.attach",
+        "title": "Connect to Running MCP Server",
+        "category": "FerroUI",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "ferroui.mcp.detach",
+        "title": "Disconnect Running MCP Server",
+        "category": "FerroUI"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ferroui.appSessions.preview",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.select",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.rebuild",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.debug",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.detachDebug",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.showOutput",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.stop",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.iosSimulator.run",
+          "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
+        },
+        {
+          "command": "ferroui.iosSimulator.debug",
+          "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
+        },
+        {
+          "command": "ferroui.iosDevice.run",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
+          "command": "ferroui.iosDevice.debug",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
+          "command": "ferroui.iosDevice.attach",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
+          "command": "ferroui.appSessions.mobile",
+          "when": "isWorkspaceTrusted && ferroui.mobileAppProfiles"
+        },
+        {
+          "command": "ferroui.android.run",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.android.debug",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.android.attach",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.appSessions.browser",
+          "when": "isWorkspaceTrusted && ferroui.browserAppProfiles"
+        },
+        {
+          "command": "ferroui.browser.run",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.browser.debug",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.browser.attach",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.collaboration.incoming.apply",
+          "when": "ferroui.roomApplyReview"
+        },
+        {
+          "command": "ferroui.collaboration.incoming.cancel",
+          "when": "ferroui.roomApplyReview"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.apply",
+          "when": "ferroui.roomPublishReview"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.cancel",
+          "when": "ferroui.roomPublishReview"
+        },
+        {
+          "command": "ferroui.project.runCargo",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.project.checkTarget",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.diagnostics.profileSource",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.createEventHandler",
+          "when": "editorLangId == ferroui-xaml"
+        },
+        {
+          "command": "ferroui.extractResourceDictionary",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.dictionaryReview.showFile",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
+          "command": "ferroui.dictionaryReview.apply",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
+          "command": "ferroui.dictionaryReview.cancel",
+          "when": "resourceScheme == ferroui-dictionary-review"
+        },
+        {
+          "command": "ferroui.moveXamlFile",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.project.moveXamlFile",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.fileMoveReview.apply",
+          "when": "ferroui.reviewingFileMove"
+        },
+        {
+          "command": "ferroui.fileMoveReview.cancel",
+          "when": "ferroui.reviewingFileMove"
+        },
+        {
+          "command": "ferroui.moveAsset",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.assetMoveReview.apply",
+          "when": "ferroui.reviewingAssetMove"
+        },
+        {
+          "command": "ferroui.assetMoveReview.cancel",
+          "when": "ferroui.reviewingAssetMove"
+        },
+        {
+          "command": "ferroui.renameResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.resourceRenameReview.apply",
+          "when": "ferroui.reviewingResourceRename"
+        },
+        {
+          "command": "ferroui.resourceRenameReview.cancel",
+          "when": "ferroui.reviewingResourceRename"
+        },
+        {
+          "command": "ferroui.moveResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.apply",
+          "when": "ferroui.reviewingResourceMove"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.cancel",
+          "when": "ferroui.reviewingResourceMove"
+        },
+        {
+          "command": "ferroui.renameRegisteredProperty",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.propertyRenameReview.apply",
+          "when": "ferroui.reviewingPropertyRename"
+        },
+        {
+          "command": "ferroui.propertyRenameReview.cancel",
+          "when": "ferroui.reviewingPropertyRename"
+        },
+        {
+          "command": "ferroui.renameRegisteredType",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.typeRenameReview.apply",
+          "when": "ferroui.reviewingTypeRename"
+        },
+        {
+          "command": "ferroui.typeRenameReview.cancel",
+          "when": "ferroui.reviewingTypeRename"
+        },
+        {
+          "command": "ferroui.openDesigner",
+          "when": "editorLangId == ferroui-xaml || editorLangId == rust"
+        },
+        {
+          "command": "ferroui.project.runTarget",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.showColumns",
+          "when": "ferroui.hasColumnEditor"
+        },
+        {
+          "command": "ferroui.columns.add",
+          "when": "focusedView == ferroui.columns && ferroui.canAddColumn"
+        },
+        {
+          "command": "ferroui.columns.source",
+          "when": "focusedView == ferroui.columns && ferroui.canRevealColumnSource"
+        },
+        {
+          "command": "ferroui.columns.reveal",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.earlier",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.later",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.duplicate",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.remove",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.columns.reset",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.showBehaviors",
+          "when": "ferroui.hasBehaviorEditor"
+        },
+        {
+          "command": "ferroui.behaviors.attach",
+          "when": "focusedView == ferroui.behaviors && ferroui.canAttachBehavior"
+        },
+        {
+          "command": "ferroui.behaviors.clear",
+          "when": "focusedView == ferroui.behaviors && ferroui.canResetBehavior"
+        },
+        {
+          "command": "ferroui.behaviors.preview",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.append",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.source",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.earlier",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.later",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.remove",
+          "when": "false"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "ferroui.collaboration.incoming.apply",
+          "when": "ferroui.roomApplyReview",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.incoming.cancel",
+          "when": "ferroui.roomApplyReview",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.apply",
+          "when": "ferroui.roomPublishReview",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.cancel",
+          "when": "ferroui.roomPublishReview",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.openDesigner",
+          "when": "resourceScheme == file && (editorLangId == ferroui-xaml || editorLangId == rust)",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.scenario.review",
+          "when": "isWorkspaceTrusted && resourceScheme == file && resourceFilename =~ /\\.ferroui-scenario\\.json$/",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.dictionaryReview.showFile",
+          "when": "resourceScheme == ferroui-dictionary-review && resourcePath =~ /^\\/(before|after)\\//",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.dictionaryReview.apply",
+          "when": "resourceScheme == ferroui-dictionary-review",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.dictionaryReview.cancel",
+          "when": "resourceScheme == ferroui-dictionary-review",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.fileMoveReview.apply",
+          "when": "ferroui.reviewingFileMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-file-move-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.fileMoveReview.cancel",
+          "when": "ferroui.reviewingFileMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-file-move-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.assetMoveReview.apply",
+          "when": "ferroui.reviewingAssetMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-asset-move-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.assetMoveReview.cancel",
+          "when": "ferroui.reviewingAssetMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-asset-move-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.resourceRenameReview.apply",
+          "when": "ferroui.reviewingResourceRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-rename-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.resourceRenameReview.cancel",
+          "when": "ferroui.reviewingResourceRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-rename-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.apply",
+          "when": "ferroui.reviewingResourceMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-move-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.cancel",
+          "when": "ferroui.reviewingResourceMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-move-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.propertyRenameReview.apply",
+          "when": "ferroui.reviewingPropertyRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-property-rename-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.propertyRenameReview.cancel",
+          "when": "ferroui.reviewingPropertyRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-property-rename-review)",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.typeRenameReview.apply",
+          "when": "ferroui.reviewingTypeRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-type-rename-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.typeRenameReview.cancel",
+          "when": "ferroui.reviewingTypeRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-type-rename-review)",
+          "group": "navigation@2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "ferroui.renameResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
+          "group": "1_modification@42"
+        },
+        {
+          "command": "ferroui.moveResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
+          "group": "1_modification@43"
+        },
+        {
+          "command": "ferroui.renameRegisteredProperty",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
+          "group": "1_modification@40"
+        },
+        {
+          "command": "ferroui.renameRegisteredType",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
+          "group": "1_modification@41"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ferroui.designHandoff.review",
+          "when": "resourceFilename =~ /\\.ferroui-handoff\\.json$/i && resourceScheme == file && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.openDesigner",
+          "when": "resourceExtname == .xaml || resourceExtname == .rs"
+        },
+        {
+          "command": "ferroui.moveXamlFile",
+          "when": "resourceExtname =~ /^\\.xaml$/i && resourceScheme == file && isWorkspaceTrusted && !explorerResourceIsFolder",
+          "group": "ferroui"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ferroui.hotReload.start",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.mcp.attach",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.appSessions.mobile",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.mobileAppProfiles",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.appSessions.browser",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.browserAppProfiles",
+          "group": "navigation@4"
+        },
+        {
+          "command": "ferroui.hotReload.stopAll",
+          "when": "view == ferroui.appSessions && ferroui.hasManagedApps",
+          "group": "1_apps"
+        },
+        {
+          "command": "ferroui.collaboration.host",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.join",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.collaboration.resume",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.project.newProject",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.project.checkToolchain",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.importAsset",
+          "when": "view == ferroui.assets",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.showColumns",
+          "when": "view == ferroui.properties && ferroui.hasColumnEditor",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.columns.add",
+          "when": "view == ferroui.columns && ferroui.canAddColumn",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.columns.source",
+          "when": "view == ferroui.columns && ferroui.canRevealColumnSource",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.showBehaviors",
+          "when": "view == ferroui.properties && ferroui.hasBehaviorEditor",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.behaviors.attach",
+          "when": "view == ferroui.behaviors && ferroui.canAttachBehavior",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.behaviors.clear",
+          "when": "view == ferroui.behaviors && ferroui.canResetBehavior",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.revealDesignerSource",
+          "when": "view == ferroui.outline",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.studio.findDefinition",
+          "when": "view == ferroui.library",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.project.findView",
+          "when": "view == ferroui.project",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.project.newView",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.project.refresh",
+          "when": "view == ferroui.project",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ferroui.project.newComponent",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designHandoff.review",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designTokens.import",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designTokens.export",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.diagnostics.refresh",
+          "when": "view == ferroui.diagnostics",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ferroui.appSessions.preview",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-debugging)?(-paused)?$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.appSessions.continueDebug",
+          "when": "view == ferroui.appSessions && viewItem =~ /-paused$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.appSessions.rebuild",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(simulator|ios-device|android|browser)-development(-debug)?)(-debugging)?(-paused)?$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.appSessions.stop",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-debugging)?(-paused)?$/",
+          "group": "inline@4"
+        },
+        {
+          "command": "ferroui.appSessions.select",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)(-debugging)?(-paused)?$/",
+          "group": "1_apps@1"
+        },
+        {
+          "command": "ferroui.appSessions.debug",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|ios-device|(simulator|ios-device|android|browser)(-development)?-debug)(-debugging)?$/",
+          "group": "1_apps@2"
+        },
+        {
+          "command": "ferroui.appSessions.detachDebug",
+          "when": "view == ferroui.appSessions && viewItem =~ /-debugging(-paused)?$/",
+          "group": "1_apps@3"
+        },
+        {
+          "command": "ferroui.appSessions.showOutput",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-debugging)?(-paused)?$/",
+          "group": "1_apps@4"
+        },
+        {
+          "command": "ferroui.collaboration.review",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.collaboration.publish",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor)$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.collaboration.sync",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.collaboration.resolve",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor)$/",
+          "group": "1_source@1"
+        },
+        {
+          "command": "ferroui.collaboration.recover",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "1_source@2"
+        },
+        {
+          "command": "ferroui.collaboration.invite",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "2_members@1"
+        },
+        {
+          "command": "ferroui.collaboration.member",
+          "when": "view == ferroui.collaboration && viewItem == room-participant",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.collaboration.checkpoint",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "3_checkpoint@1"
+        },
+        {
+          "command": "ferroui.collaboration.checkpointResolution",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "3_checkpoint@2"
+        },
+        {
+          "command": "ferroui.collaboration.disconnect",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "4_connection"
+        },
+        {
+          "command": "ferroui.project.runCargo",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "ferroui@1"
+        },
+        {
+          "command": "ferroui.project.checkTarget",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.diagnostics.recordProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileReady",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.stopProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileRecording",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.exportProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileReport",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.profileSource",
+          "when": "view == ferroui.diagnostics && viewItem == profileSource",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.behaviors.preview",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bpreview\\b/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.behaviors.append",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bappend\\b/",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.behaviors.source",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bsource\\b/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.behaviors.earlier",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bearlier\\b/",
+          "group": "1_order@1"
+        },
+        {
+          "command": "ferroui.behaviors.later",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\blater\\b/",
+          "group": "1_order@2"
+        },
+        {
+          "command": "ferroui.behaviors.remove",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bremove\\b/",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "ferroui.project.moveXamlFile",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectXaml && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.columns.reveal",
+          "when": "view == ferroui.columns && viewItem =~ /\\bsource\\b/",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.columns.earlier",
+          "when": "view == ferroui.columns && viewItem =~ /\\bearlier\\b/",
+          "group": "1_order@1"
+        },
+        {
+          "command": "ferroui.columns.later",
+          "when": "view == ferroui.columns && viewItem =~ /\\blater\\b/",
+          "group": "1_order@2"
+        },
+        {
+          "command": "ferroui.columns.duplicate",
+          "when": "view == ferroui.columns && viewItem =~ /\\bduplicate\\b/",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "ferroui.columns.remove",
+          "when": "view == ferroui.columns && viewItem =~ /\\bremove\\b/",
+          "group": "2_edit@2"
+        },
+        {
+          "command": "ferroui.columns.reset",
+          "when": "view == ferroui.columns && viewItem =~ /\\breset\\b/",
+          "group": "2_edit"
+        },
+        {
+          "command": "ferroui.project.runTarget",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FerroUI",
+      "properties": {
+        "ferroui.xaml.formatting.attributeLayout": {
+          "type": "string",
+          "enum": ["preserve", "inline", "onePerLine", "wrap"],
+          "enumDescriptions": [
+            "Keep the original attribute separators.",
+            "Place attributes on the same line as the element name.",
+            "Place each attribute on its own line.",
+            "Place attributes on separate lines when the start tag exceeds Wrap Column."
+          ],
+          "default": "preserve",
+          "scope": "resource",
+          "description": "Choose how Format Document and Format Selection lay out XAML attributes."
+        },
+        "ferroui.xaml.formatting.wrapColumn": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 20,
+          "maximum": 240,
+          "scope": "resource",
+          "description": "Start-tag width for the Wrap attribute layout, including its indentation."
+        },
+        "ferroui.xaml.formatting.closingBracketOnNewLine": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "description": "Place the closing bracket of a wrapped start tag on its own line."
+        },
+        "ferroui.xaml.formatting.selfClosingSpace": {
+          "type": "string",
+          "enum": ["preserve", "space", "none"],
+          "default": "preserve",
+          "scope": "resource",
+          "description": "Choose spacing before a self-closing XAML bracket on the same line."
+        },
+        "ferroui.xaml.formatting.preserveBlankLines": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "description": "Keep existing blank lines between XAML elements."
+        },
+        "ferroui.browser.executablePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to Chrome or Chromium on the workspace host. Leave empty to discover an installed browser."
+        },
+        "ferroui.browser.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Live App profiles for managed browser builds or served debug apps on the workspace host loopback address.",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "oneOf": [
+              { "required": ["url"], "not": { "required": ["build"] } },
+              { "required": ["build"], "not": { "anyOf": [{ "required": ["url"] }, { "required": ["debugPort"] }] } }
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile ID in this workspace folder." },
+              "url": { "type": "string", "description": "Exact HTTP or HTTPS app URL on the workspace host loopback address." },
+              "label": { "type": "string", "description": "App name shown in the picker and App Sessions." },
+              "width": { "type": "integer", "default": 960, "minimum": 240, "maximum": 2560, "description": "Managed browser viewport width in CSS pixels." },
+              "height": { "type": "integer", "default": 620, "minimum": 240, "maximum": 1600, "description": "Managed browser viewport height in CSS pixels." },
+              "debugPort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Loopback Chromium debugging port for an independently started browser profile." },
+              "build": {
+                "type": "object",
+                "required": ["application"],
+                "additionalProperties": false,
+                "description": "Build the Cargo browser app and reload it when its source is saved.",
+                "properties": {
+                  "application": { "type": "string", "description": "Name of the FerroUI browser example or the Cargo package and its matching browser binary." },
+                  "toolchain": { "type": "string", "description": "Path to the FerroUI checkout that contains scripts/build-browser.sh. Defaults to the profile's workspace folder." },
+                  "manifestPath": { "type": "string", "description": "Cargo manifest for the app's workspace. Defaults to Cargo.toml in the profile's workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the selected browser target." },
+                  "threads": { "type": "boolean", "default": false, "description": "Use the installed threaded browser toolchain and cross-origin isolation." },
+                  "debugSymbols": { "type": "boolean", "default": false, "description": "Retain WebAssembly DWARF symbols for Rust source breakpoints in Run and Debug Browser App." }
+                }
+              }
+            }
+          }
+        },
+        "ferroui.android.adbPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to the Android Debug Bridge executable on the workspace host."
+        },
+        "ferroui.android.passArtSignals": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Let Android Runtime handle SIGSEGV and SIGBUS raised in its managed code regions during LLDB debugging. Requires LLDB Python support."
+        },
+        "ferroui.android.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Profiles for debuggable Android apps that enable the FerroUI Live App inspector.",
+          "items": {
+            "type": "object",
+            "required": ["id", "packageId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile ID in this workspace folder." },
+              "packageId": { "type": "string", "description": "The application's Android package name." },
+              "label": { "type": "string", "description": "App name shown in the picker and App Sessions." },
+              "activity": {
+                "type": "string",
+                "default": "org.ferroui.android.FerroMainActivity",
+                "description": "The app's launch activity."
+              },
+              "apkPath": { "type": "string", "description": "Optional built APK to install when running. Relative paths start at this workspace folder." },
+              "symbolFiles": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Optional unstripped native libraries from the installed debug APK's build and ABI. Relative paths start at this workspace folder."
+              },
+              "build": {
+                "type": "object",
+                "description": "Build and deploy from a Cargo workspace. Use this in place of apkPath.",
+                "additionalProperties": false,
+                "oneOf": [{ "required": ["application"] }, { "required": ["package"] }],
+                "properties": {
+                  "application": { "type": "string", "enum": ["inspector"], "description": "The bundled Service Review example in the FerroUI workspace." },
+                  "package": { "type": "string", "description": "The name of a custom Android cdylib package." },
+                  "toolchain": { "type": "string", "default": ".", "description": "FerroUI checkout containing scripts/android/apk.sh." },
+                  "manifestPath": { "type": "string", "default": "Cargo.toml", "description": "The owning Cargo manifest, relative to the workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Extra Cargo features passed to the Android build." },
+                  "debugger": { "type": "boolean", "default": false, "description": "Package the NDK LLDB server and retain matching Rust symbols." },
+                  "debugKeystore": { "type": "string", "description": "Optional existing FerroUI-compatible debug signing key. Relative paths start at this workspace folder." },
+                  "reloadOnSave": { "type": "boolean", "default": false, "description": "Build and redeploy after saves to this Cargo app's Rust or XAML sources." }
+                }
+              }
+            }
+          }
+        },
+        "ferroui.iosSimulator.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Launch profiles for FerroUI apps with a native inspector on an iOS simulator.",
+          "items": {
+            "type": "object",
+            "required": ["id", "bundleId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique profile identifier in this workspace folder."
+              },
+              "bundleId": {
+                "type": "string",
+                "description": "Bundle identifier of the simulator app to launch."
+              },
+              "label": {
+                "type": "string",
+                "description": "App name shown in the profile picker and App Sessions."
+              },
+              "appPath": {
+                "type": "string",
+                "description": "Optional path to a built simulator .app bundle. Relative paths start at this workspace folder."
+              },
+              "build": {
+                "type": "object",
+                "description": "Build an iOS simulator bundle from Cargo. Use this in place of appPath.",
+                "additionalProperties": false,
+                "oneOf": [{ "required": ["application"] }, { "required": ["package", "binary"] }, { "required": ["package", "example"] }],
+                "properties": {
+                  "application": { "type": "string", "enum": ["contact-review"], "description": "The bundled Contact Review example in the FerroUI workspace." },
+                  "package": { "type": "string", "description": "The selected Cargo package." },
+                  "binary": { "type": "string", "description": "A binary target in the selected package." },
+                  "example": { "type": "string", "description": "An example target in the selected package." },
+                  "toolchain": { "type": "string", "default": ".", "description": "FerroUI checkout containing scripts/ios/bundle.sh." },
+                  "manifestPath": { "type": "string", "default": "Cargo.toml", "description": "The Cargo manifest relative to the workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the simulator build." },
+                  "noDefaultFeatures": { "type": "boolean", "default": false, "description": "Exclude default Cargo features for a custom application." },
+                  "target": { "type": "string", "enum": ["aarch64-apple-ios-sim", "x86_64-apple-ios"], "description": "Simulator Rust target. Defaults to the workspace host architecture." },
+                  "reloadOnSave": { "type": "boolean", "default": false, "description": "Build and redeploy after saves to this app's Rust or XAML sources." }
+                }
+              },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Arguments passed to the app, such as --mcp and --mcp-input when the app supports them."
+              }
+            }
+          }
+        },
+        "ferroui.iosDevice.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Launch profiles for development-signed FerroUI apps on a paired iPhone or iPad.",
+          "items": {
+            "type": "object",
+            "required": ["id", "bundleId"],
+            "additionalProperties": false,
+            "not": { "required": ["appPath", "build"] },
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile identifier in this workspace folder." },
+              "bundleId": { "type": "string", "description": "Bundle identifier of the development app to launch." },
+              "label": { "type": "string", "description": "App name shown in the profile picker and App Sessions." },
+              "appPath": { "type": "string", "description": "Optional path to a development-signed iPhoneOS .app bundle to install before launch. Relative paths start at this workspace folder." },
+              "build": {
+                "type": "object",
+                "description": "Build and sign an iPhoneOS app from Cargo. Choose this in place of appPath.",
+                "required": ["signing"],
+                "additionalProperties": false,
+                "oneOf": [{ "required": ["application"] }, { "required": ["package", "binary"] }, { "required": ["package", "example"] }],
+                "properties": {
+                  "application": { "type": "string", "enum": ["contact-review"], "description": "The bundled Contact Review example in the FerroUI workspace." },
+                  "package": { "type": "string", "description": "The selected Cargo package." },
+                  "binary": { "type": "string", "description": "A binary target in the selected package." },
+                  "example": { "type": "string", "description": "An example target in the selected package." },
+                  "toolchain": { "type": "string", "default": ".", "description": "FerroUI checkout containing scripts/ios/bundle.sh." },
+                  "manifestPath": { "type": "string", "default": "Cargo.toml", "description": "The Cargo manifest relative to the workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the iPhoneOS build." },
+                  "noDefaultFeatures": { "type": "boolean", "default": false, "description": "Exclude default Cargo features for a custom application." },
+                  "target": { "type": "string", "enum": ["aarch64-apple-ios"], "default": "aarch64-apple-ios", "description": "Rust target for an iPhone or iPad." },
+                  "reloadOnSave": { "type": "boolean", "default": false, "description": "Build, sign, and redeploy after saves to this app's Rust or XAML sources." },
+                  "signing": {
+                    "type": "object",
+                    "required": ["identity", "provisioningProfile"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "identity": { "type": "string", "pattern": "^[A-Fa-f0-9]{40}$", "description": "SHA-1 fingerprint of an Apple Development certificate with a private key on the workspace Mac." },
+                      "provisioningProfile": { "type": "string", "description": "Development provisioning profile for this app and device. Relative paths start at this workspace folder." },
+                      "entitlements": { "type": "string", "description": "Optional property list with additional app entitlements authorized by the provisioning profile." }
+                    }
+                  }
+                }
+              },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "App arguments that enable its stdio inspector and any supported input, such as --mcp-stdio and --mcp-input."
+              }
+            }
+          }
+        },
+        "ferroui.iosDevice.inetcatPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute inetcat executable path on the workspace Mac. The extension uses it to attach over USB to independently running iPhone or iPad apps."
+        },
+        "ferroui.mcp.enableDesigner": {
+          "type": "boolean",
+          "default": true,
+          "scope": "machine",
+          "description": "Offer the current VS Code designer workspace as a FerroUI MCP server."
+        },
+        "ferroui.mcp.allowWrites": {
+          "type": "boolean",
+          "default": false,
+          "scope": "machine",
+          "description": "Allow agents to edit editor buffers, control designer views, or run an application through the VS Code designer MCP server."
+        },
+        "ferroui.scenarios.baselineRef": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Optional local Git reference for visual scenario review. The review uses the merge-base images and verifies the worktree baseline."
+        },
+        "ferroui.mcp.stdioServers": {
+          "type": "array",
+          "default": [],
+          "scope": "machine",
+          "description": "Existing FerroUI application or Designer Studio MCP servers started by VS Code.",
+          "items": {
+            "type": "object",
+            "required": ["label", "command"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "command": { "type": "string", "description": "Absolute path to the native FerroUI executable." },
+              "args": { "type": "array", "items": { "type": "string" }, "description": "Arguments such as --mcp-stdio and optional native permission flags." }
+            }
+          }
+        },
+        "ferroui.hotReload.cargoPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Path to the Cargo executable used by Run with Hot Reload. Leave empty to use Cargo from PATH."
+        },
+        "ferroui.hotReload.registeredSupervisor": {
+          "type": "string",
+          "scope": "resource",
+          "default": "scripts/hot-reload/supervisor.py",
+          "description": "Workspace-relative owning supervisor for registered Rust patch and state-restoration sessions."
+        },
+        "ferroui.hotReload.pythonPath": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Python executable for the registered patch supervisor."
+        },
+        "ferroui.hotReload.patchCompilerPath": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Path to the supervisor's pinned dx patch compiler. Leave empty to use PATH."
+        },
+        "ferroui.hotReload.targets": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Cargo binaries offered by Run with Hot Reload. An empty list discovers binaries from Cargo.toml.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "manifestPath": {
+                "type": "string",
+                "description": "Path to Cargo.toml relative to the workspace folder."
+              },
+              "package": {
+                "type": "string"
+              },
+              "binary": {
+                "type": "string"
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Cargo features. The package's hot-reload feature is enabled by default when present."
+              },
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Arguments for the application."
+              }
+            }
+          }
+        },
+        "ferroui.languageServer.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to ferroui-xaml-lsp. Leave empty to use the bundled binary or PATH."
+        },
+        "ferroui.collaboration.bindAddress": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Loopback IP and port of newly hosted rooms. Leave empty for an available local port."
+        },
+        "ferroui.collaboration.publicEndpoint": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Optional HTTPS MCP endpoint advertised for new hosted rooms behind a TLS reverse proxy."
+        },
+        "ferroui.preview.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to ferroui-designer-preview. Leave empty to use the bundled binary or PATH."
+        },
+        "ferroui.rsx.completion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Offer FerroUI property names at mapped RSX fields alongside Rust completions."
+        },
+        "ferroui.hostedPreview.assembly": {
+          "type": "string",
+          "scope": "resource",
+          "default": "",
+          "description": "Registered markup assembly for application previews. By default, use the selected Cargo package name."
+        },
+        "ferroui.rsx.inlayHints": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show FerroUI types at RSX fields whose values can be edited in the designer."
+        },
+        "ferroui.types": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "object"
+          },
+          "description": "Custom XAML type and property metadata for the FerroUI language server."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ferrouiWorkbench",
+          "title": "FerroUI",
+          "icon": "dist/icons/preview.svg"
+        }
+      ],
+      "panel": [
+        {
+          "id": "ferrouiTimeline",
+          "title": "FerroUI Timeline",
+          "icon": "dist/icons/history.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "ferroui.appSessions",
+        "contents": "[Run with Hot Reload](command:ferroui.hotReload.start)\n[Connect to a Running App](command:ferroui.mcp.attach)",
+        "when": "isWorkspaceTrusted"
+      },
+      {
+        "view": "ferroui.collaboration",
+        "contents": "[Host XAML Room…](command:ferroui.collaboration.host)\n[Join XAML Room…](command:ferroui.collaboration.join)\n[Resume XAML Room…](command:ferroui.collaboration.resume)",
+        "when": "isWorkspaceTrusted"
+      }
+    ],
+    "views": {
+      "ferrouiWorkbench": [
+        {
+          "id": "ferroui.project",
+          "name": "Project",
+          "contextualTitle": "FerroUI Project",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.diagnostics",
+          "name": "Diagnostics",
+          "contextualTitle": "FerroUI Diagnostics",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.appSessions",
+          "name": "App Sessions",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI App Sessions",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.collaboration",
+          "name": "Collaboration",
+          "icon": "dist/icons/account.svg",
+          "contextualTitle": "FerroUI Collaboration",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.toolbox",
+          "name": "Toolbox",
+          "icon": "dist/icons/extensions.svg",
+          "contextualTitle": "FerroUI Toolbox"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.outline",
+          "name": "Outline",
+          "icon": "dist/icons/list-tree.svg",
+          "contextualTitle": "FerroUI Outline"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.properties",
+          "name": "Properties",
+          "icon": "dist/icons/settings-gear.svg",
+          "contextualTitle": "FerroUI Properties"
+        },
+        {
+          "id": "ferroui.columns",
+          "name": "Columns",
+          "icon": "dist/icons/table.svg",
+          "contextualTitle": "FerroUI Columns",
+          "when": "ferroui.hasColumnEditor",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.behaviors",
+          "name": "Behaviors",
+          "icon": "dist/icons/symbol-event.svg",
+          "contextualTitle": "FerroUI Behaviors",
+          "when": "ferroui.hasBehaviorEditor",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.events",
+          "name": "Events",
+          "icon": "dist/icons/symbol-event.svg",
+          "contextualTitle": "FerroUI Events",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.resources",
+          "name": "Resources",
+          "icon": "dist/icons/library.svg",
+          "contextualTitle": "FerroUI Resources",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.styles",
+          "name": "Styles & Themes",
+          "icon": "dist/icons/paintcan.svg",
+          "contextualTitle": "FerroUI Styles & Themes",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.assets",
+          "name": "Assets",
+          "icon": "dist/icons/file-media.svg",
+          "contextualTitle": "FerroUI Assets",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.studio",
+          "name": "Studio",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI Studio",
+          "visibility": "collapsed"
+        },
+        {
+          "type": "webview",
+          "id": "ferroui.data",
+          "name": "Data",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI Design Data",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.library",
+          "name": "Library",
+          "icon": "dist/icons/library.svg",
+          "contextualTitle": "FerroUI Component Library",
+          "visibility": "collapsed"
+        }
+      ],
+      "ferrouiTimeline": [
+        {
+          "type": "webview",
+          "id": "ferroui.timeline",
+          "name": "Timeline",
+          "icon": "dist/icons/history.svg",
+          "contextualTitle": "FerroUI Timeline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "node build.mjs",
+    "test": "npm run check && npm run build && node test/run.mjs",
+    "test:vsix": "node test/installed.mjs",
+    "vscode:prepublish": "npm run build",
+    "package": "node package-vsix.mjs",
+    "package:platform": "node package-platform.mjs"
+  },
+  "dependencies": {
+    "vscode-jsonrpc": "8.2.0",
+    "vscode-languageclient": "9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/vscode": "1.102.0",
+    "@vscode/codicons": "0.0.45",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.1.1",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

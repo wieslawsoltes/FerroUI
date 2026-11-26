@@ -1,0 +1,25 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#F2F5FB" Spacing="10" Margin="20">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="Accent" Color="#2661A7" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="Accent" Color="#8B4DB1" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <Border Height="84" Background="{DynamicResource Accent}">
+    <TextBlock Text="Customer accounts" Margin="16" Foreground="White" />
+  </Border>
+  <StackPanel>
+    <StackPanel.Resources>
+      <SolidColorBrush x:Key="Accent" Color="#156E66" />
+    </StackPanel.Resources>
+    <Border Height="50" Background="{StaticResource Accent}">
+      <TextBlock Text="Recent activity" Margin="12" Foreground="White" />
+    </Border>
+  </StackPanel>
+</StackPanel>

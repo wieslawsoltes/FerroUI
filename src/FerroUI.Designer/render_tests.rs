@@ -137,6 +137,45 @@ fn capture_current_at(
     pixels
 }
 
+fn capture_easing_draft(
+    workspace: &Rc<DesignerWorkspace>,
+    clock: &RenderClock,
+    target: ferroui_designer_core::NodeId,
+    path: &Path,
+) {
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
+    use ferroui_controls::{ContentControl, StackPanel};
+
+    workspace
+        .select_keyframes(&[(target, "Width".into(), 3.0)])
+        .unwrap();
+    let source = workspace.session().borrow().authored_source().to_owned();
+    let content = workspace
+        .control()
+        .get_control::<ContentControl>("TimelineInspectorHost")
+        .content();
+    let row = content
+        .as_ref()
+        .and_then(Control::from_boxed)
+        .and_then(|control| control.cast::<StackPanel>())
+        .unwrap();
+    let graph = row
+        .children()
+        .to_vec()
+        .into_iter()
+        .find_map(|child| child.cast::<crate::EasingPreview>())
+        .unwrap();
+    let mut nudge = KeyEventArgs::new();
+    nudge.key = Key::Up;
+    nudge.key_modifiers = KeyModifiers::SHIFT;
+    nudge.set_routed_event(Some(InputElement::key_down_event()));
+    graph.raise_event(&nudge);
+    assert!(nudge.handled());
+    capture_current_at(workspace, clock, path, Size::new(1600.0, 1040.0));
+    assert_eq!(graph.bounds().size(), Size::new(156.0, 78.0));
+    assert_eq!(workspace.session().borrow().authored_source(), source);
+}
+
 #[path = "render_layout_helpers_tests.rs"]
 mod layout_helpers;
 
@@ -376,6 +415,15 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         authored,
         "Timeline selection and frame-grid UI must remain view state"
     );
+    capture_easing_draft(
+        &workspace,
+        &clock,
+        target,
+        &directory.join("designer-easing-handles.png"),
+    );
+    workspace
+        .select_keyframes(&[(target, "Width".into(), 0.0), (target, "Width".into(), 3.0)])
+        .unwrap();
     window.set_width(1280.0);
     window.set_height(820.0);
     window.update_layout();

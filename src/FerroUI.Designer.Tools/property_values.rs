@@ -1,7 +1,7 @@
 //! Portable value shapes for designer editors and headless property validation.
 //! These describe serialization, not native widgets. Hosts can register richer value
 //! editors without depending on a windowing or runtime reflection system.
-use crate::{Result, ToolError, require};
+use crate::{require, Result, ToolError};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -23,10 +23,17 @@ pub enum PropertyValueShape {
 
 impl PropertyValueShape {
     pub fn components(self) -> &'static [&'static str] {
+        self.component_labels(0)
+    }
+
+    pub fn component_labels(self, value_count: usize) -> &'static [&'static str] {
         match self {
             Self::Point | Self::Vector | Self::RelativePoint => &["X", "Y"],
             Self::Size => &["W", "H"],
             Self::Rect | Self::RelativeRect => &["X", "Y", "W", "H"],
+            Self::Matrix if value_count == 9 => {
+                &["M11", "M12", "M21", "M22", "DX", "DY", "M13", "M23", "M33"]
+            }
             Self::Matrix => &["M11", "M12", "M21", "M22", "DX", "DY"],
             Self::CornerRadius => &["TL", "TR", "BR", "BL"],
             _ => &[],
@@ -38,15 +45,11 @@ impl PropertyValueShape {
     }
 
     pub fn parse_components(self, source: &str) -> Result<(Vec<f64>, bool)> {
-        let expected = self.components().len();
         require(
-            expected != 0,
+            !self.components().is_empty(),
             "This property does not have numeric components",
         )?;
-        let values = source
-            .split(|c: char| c == ',' || c.is_whitespace())
-            .filter(|part| !part.is_empty())
-            .collect::<Vec<_>>();
+        let values = component_tokens(source).collect::<Vec<_>>();
         let relative = values.first().is_some_and(|value| value.ends_with('%'));
         require(
             !relative || self.relative(),
@@ -59,7 +62,8 @@ impl PropertyValueShape {
         let mut parsed = values
             .iter()
             .map(|part| {
-                part.trim_end_matches('%')
+                part.strip_suffix('%')
+                    .unwrap_or(part)
                     .parse::<f64>()
                     .ok()
                     .filter(|value| value.is_finite())
@@ -69,10 +73,11 @@ impl PropertyValueShape {
         if self == Self::CornerRadius {
             parsed = match parsed.as_slice() {
                 [all] => vec![*all; 4],
-                [first, second] => vec![*first, *second, *first, *second],
+                [top, bottom] => vec![*top, *top, *bottom, *bottom],
                 _ => parsed,
             };
         }
+        let expected = self.component_labels(parsed.len()).len();
         require(
             parsed.len() == expected,
             format!("Expected {expected} components"),
@@ -136,6 +141,12 @@ impl PropertyValueShape {
     }
 }
 
+pub(super) fn component_tokens(source: &str) -> impl Iterator<Item = &str> {
+    source
+        .split(|c: char| c == ',' || c.is_whitespace())
+        .filter(|part| !part.is_empty())
+}
+
 fn validate_time(value: &str) -> Result<()> {
     require(!value.is_empty(), "Enter a duration such as 00:00:00.250")?;
     let value = value.strip_prefix('-').unwrap_or(value);
@@ -182,37 +193,43 @@ mod tests {
                 .unwrap(),
             (vec![25.0, 50.0], true)
         );
-        assert!(
-            PropertyValueShape::RelativePoint
-                .validate("25%, 50")
-                .is_err()
-        );
+        assert!(PropertyValueShape::RelativePoint
+            .validate("25%, 50")
+            .is_err());
         assert!(PropertyValueShape::Point.validate("25%, 50%").is_err());
         assert!(PropertyValueShape::Rect.validate("-4, 5, 30, 40").is_ok());
         assert!(PropertyValueShape::Rect.validate("4, 5, -30, 40").is_err());
-        assert!(
-            PropertyValueShape::Matrix
-                .validate("1,0,0,1,10,-20")
-                .is_ok()
-        );
-        assert!(
-            PropertyValueShape::Matrix
-                .validate("1,0,0,1,NaN,0")
-                .is_err()
-        );
+        assert!(PropertyValueShape::Matrix
+            .validate("1,0,0,1,10,-20")
+            .is_ok());
+        assert!(PropertyValueShape::Matrix
+            .validate("1,0,0,1,NaN,0")
+            .is_err());
         assert_eq!(
             PropertyValueShape::CornerRadius
                 .parse_components("4,8")
                 .unwrap()
                 .0,
-            vec![4.0, 8.0, 4.0, 8.0]
+            vec![4.0, 4.0, 8.0, 8.0]
+        );
+        let perspective = "1, 0, 0, 1, 10, -20, 0.01, 0.02, 1";
+        let (values, relative) = PropertyValueShape::Matrix
+            .parse_components(perspective)
+            .unwrap();
+        assert_eq!(
+            PropertyValueShape::Matrix.component_labels(values.len())[6..],
+            ["M13", "M23", "M33"]
+        );
+        assert_eq!(
+            PropertyValueShape::Matrix
+                .format_components(&values, relative)
+                .unwrap(),
+            perspective
         );
         assert!(PropertyValueShape::Duration.validate("Forever").is_ok());
-        assert!(
-            PropertyValueShape::TimeSpan
-                .validate("00:00:00.250")
-                .is_ok()
-        );
+        assert!(PropertyValueShape::TimeSpan
+            .validate("00:00:00.250")
+            .is_ok());
         assert!(PropertyValueShape::TimeSpan.validate("00:90:00").is_err());
     }
 }

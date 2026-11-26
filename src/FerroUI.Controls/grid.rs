@@ -1041,6 +1041,17 @@ impl Grid {
         self.set_value(Self::row_spacing_property(), value)
     }
 
+    /// Row and column counts used by the currently arranged layout, including implicit tracks.
+    pub fn arranged_track_counts(&self) -> Option<(usize, usize)> {
+        if !self.is_arrange_valid() {
+            return None;
+        }
+        if !self.is_measured_with_definitions() {
+            return Some((1, 1));
+        }
+        Some((self.definitions_v().count(), self.definitions_u().count()))
+    }
+
     /// The size of the spacing to place between grid columns.
     pub fn column_spacing(&self) -> f64 {
         self.get_value(Self::column_spacing_property())

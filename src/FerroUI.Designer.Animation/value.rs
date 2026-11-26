@@ -1,6 +1,22 @@
 use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "native-values")]
+use crate::{AnimationBrush, AnimationTransformList};
+
+#[cfg(feature = "native-values")]
+#[path = "box_shadow_value.rs"]
+mod box_shadows;
+#[cfg(feature = "native-values")]
+pub use box_shadows::{AnimationBoxShadow, AnimationBoxShadows};
+
+#[path = "effect_value.rs"]
+mod effect;
+#[cfg(feature = "native-values")]
+#[path = "registered_effect.rs"]
+pub(crate) mod registered_effect;
+pub use effect::{AnimationEffect, EffectForm};
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ValueKind {
     Number,
@@ -13,6 +29,13 @@ pub enum ValueKind {
     RelativePoint,
     RelativeScalar,
     Thickness,
+    Effect,
+    #[cfg(feature = "native-values")]
+    BoxShadows,
+    #[cfg(feature = "native-values")]
+    TransformList,
+    #[cfg(feature = "native-values")]
+    Brush,
     Discrete,
 }
 
@@ -74,9 +97,30 @@ pub enum AnimationValue {
         right: f64,
         bottom: f64,
     },
+    Effect(AnimationEffect),
+    #[cfg(feature = "native-values")]
+    BoxShadows(AnimationBoxShadows),
+    #[cfg(feature = "native-values")]
+    TransformList(AnimationTransformList),
+    #[cfg(feature = "native-values")]
+    Brush(AnimationBrush),
     Discrete(String),
 }
 impl AnimationValue {
+    pub fn from_argb8([a, r, g, b]: [u8; 4]) -> Self {
+        Self::Color {
+            a: f64::from(a) / 255.0,
+            r: f64::from(r) / 255.0,
+            g: f64::from(g) / 255.0,
+            b: f64::from(b) / 255.0,
+        }
+    }
+
+    pub fn argb8(&self) -> Option<[u8; 4]> {
+        let Self::Color { a, r, g, b } = *self else { return None };
+        Some([a, r, g, b].map(channel))
+    }
+
     pub fn kind(&self) -> ValueKind {
         match self {
             Self::Number(_) => ValueKind::Number,
@@ -89,9 +133,24 @@ impl AnimationValue {
             Self::RelativePoint { .. } => ValueKind::RelativePoint,
             Self::RelativeScalar { .. } => ValueKind::RelativeScalar,
             Self::Thickness { .. } => ValueKind::Thickness,
+            Self::Effect(_) => ValueKind::Effect,
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(_) => ValueKind::BoxShadows,
+            #[cfg(feature = "native-values")]
+            Self::TransformList(_) => ValueKind::TransformList,
+            #[cfg(feature = "native-values")]
+            Self::Brush(_) => ValueKind::Brush,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
+
+    pub(crate) fn relative_unit(&self) -> Option<RelativeUnit> {
+        match self {
+            Self::RelativePoint { unit, .. } | Self::RelativeScalar { unit, .. } => Some(*unit),
+            _ => None,
+        }
+    }
+
     pub fn validate(&self) -> Result<()> {
         if let Self::RelativePoint {
             x,
@@ -163,6 +222,13 @@ impl AnimationValue {
                 [*left, *top, *right, *bottom].iter().all(|n| n.is_finite()),
                 "Thickness must be finite",
             ),
+            Self::Effect(effect) => effect.validate(),
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(shadows) => shadows.validate(),
+            #[cfg(feature = "native-values")]
+            Self::TransformList(list) => list.validate(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(brush) => brush.validate(),
             Self::Discrete(value) => require(
                 value.len() <= 1_048_576
                     && value.chars().all(|c| {
@@ -323,6 +389,19 @@ impl AnimationValue {
                 right: mix(*right, *r),
                 bottom: mix(*bottom, *b),
             },
+            (Self::Effect(from), Self::Effect(to)) => {
+                require(
+                    !matches!((from, to), (AnimationEffect::Registered { .. }, _) | (_, AnimationEffect::Registered { .. })),
+                    "Sample registered effects with the application's native animation clock",
+                )?;
+                Self::Effect(from.clone().interpolate(to.clone(), progress, mix, color))
+            }
+            #[cfg(feature = "native-values")]
+            (Self::BoxShadows(from), Self::BoxShadows(to)) => Self::BoxShadows(from.interpolate(to, progress)),
+            #[cfg(feature = "native-values")]
+            (Self::TransformList(from), Self::TransformList(to)) => Self::TransformList(from.interpolate(to, progress)?),
+            #[cfg(feature = "native-values")]
+            (Self::Brush(from), Self::Brush(to)) => Self::Brush(from.interpolate(to, progress)?),
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {
                     self.clone()
@@ -377,6 +456,13 @@ impl AnimationValue {
                 right,
                 bottom,
             } => format!("{left},{top},{right},{bottom}"),
+            Self::Effect(effect) => effect.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(shadows) => shadows.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::TransformList(list) => list.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(brush) => brush.to_xaml(),
             Self::Discrete(v) => v.clone(),
         }
     }
@@ -405,12 +491,7 @@ impl AnimationValue {
                 };
                 let bits = u32::from_str_radix(&expanded, 16)
                     .map_err(|_| AnimationError("Invalid hexadecimal color".into()))?;
-                Self::Color {
-                    a: ((bits >> 24) & 255) as f64 / 255.0,
-                    r: ((bits >> 16) & 255) as f64 / 255.0,
-                    g: ((bits >> 8) & 255) as f64 / 255.0,
-                    b: (bits & 255) as f64 / 255.0,
-                }
+                Self::from_argb8(bits.to_be_bytes())
             }
             ValueKind::Point => {
                 let v = values()?;
@@ -525,6 +606,13 @@ impl AnimationValue {
                     }
                 }
             }
+            ValueKind::Effect => Self::Effect(AnimationEffect::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::BoxShadows => Self::BoxShadows(AnimationBoxShadows::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::TransformList => Self::TransformList(AnimationTransformList::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::Brush => Self::Brush(AnimationBrush::parse(source)?),
             ValueKind::Discrete => Self::Discrete(source.into()),
         };
         result.validate()?;

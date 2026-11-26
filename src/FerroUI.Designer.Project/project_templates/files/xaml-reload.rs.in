@@ -1,0 +1,36 @@
+use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
+use ferroui_base::Ref;
+use ferroui_controls::Window;
+use ferroui_hot_reload::{ContentReloadTarget, ReloadManifest, ReloadTarget};
+use std::{cell::RefCell, rc::Rc, time::Duration};
+
+pub fn start(window: &Ref<Window>) {
+    if std::env::var("FERROUI_EDITOR_RELOAD").as_deref() != Ok("1") {
+        return;
+    }
+    let uri = crate::main_view_uri();
+    let manifest = ReloadManifest::parse(include_str!(env!("FERROUI_HOT_RELOAD_MANIFEST")))
+        .expect("read the starter's build-generated reload manifest");
+    let mut session = manifest.session().expect("register the compiled view for hot reload");
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &window.clone().upcast(), uri.clone(), manifest.transitive_dependencies(&uri),
+        manifest.configuration(None),
+    ));
+    session.register_target(&target);
+    let session = RefCell::new(session);
+    let interval = Duration::from_millis(60);
+    let watcher = manifest.watcher(interval);
+    let timer = DispatcherTimer::with_callback(interval, DispatcherPriority::BACKGROUND, move |_| {
+        // The session holds a weak reference to each registered target.
+        let _live_target = &target;
+        let mut session = session.borrow_mut();
+        if let Some(batch) = watcher.changes.try_iter().last() {
+            session.submit_files(batch);
+        }
+        session.apply_pending();
+    });
+    window.closed(move || timer.stop()).detach();
+    ferroui_hot_reload::notify_editor_on_open(window);
+}

@@ -2,7 +2,7 @@
 //! never reloads a file behind an unsaved tab or reparses an unchanged AST snapshot.
 use super::{ComponentUi, DesignerDefinitionAsset, DesignerWorkspace, LibrarySelection};
 use ferroui_designer_core::{Ast, Document, NodeId};
-use ferroui_designer_tools::{ComponentCatalog, ComponentKind, component_fragment};
+use ferroui_designer_tools::{ComponentCatalog, component_fragment};
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -58,22 +58,9 @@ pub(super) fn prepare_component_document(
     document: Rc<Document>,
     automatic: bool,
 ) -> Result<PreparedComponentDocument, String> {
-    let assets = ComponentCatalog::from_document(&document)
+    let assets = ComponentCatalog::project_definitions(&document)
         .map_err(|error| error.to_string())?
-        .entries
         .into_iter()
-        .filter(|entry| match entry.kind {
-            ComponentKind::UserControl | ComponentKind::CustomControl => {
-                entry.node == document.ast().root()
-            }
-            ComponentKind::ControlTheme | ComponentKind::DataTemplate => true,
-            ComponentKind::ControlTemplate => entry.target_type.is_some() || entry.key.is_some(),
-            ComponentKind::Style => entry
-                .target_type
-                .as_deref()
-                .is_some_and(|selector| !selector.contains('^')),
-            _ => false,
-        })
         .map(|entry| {
             let source =
                 component_fragment(&document, entry.node).map_err(|error| error.to_string())?;

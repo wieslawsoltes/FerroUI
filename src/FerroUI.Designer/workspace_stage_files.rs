@@ -1,7 +1,7 @@
 //! Stage collections use the host's native storage picker. A manifest contains
 //! preview configurations and source references, never serialized control graphs.
 use super::*;
-use crate::PreviewStageManifest;
+use crate::PreviewStageSet;
 use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions,
 };
@@ -106,13 +106,13 @@ impl DesignerWorkspace {
     /// Export the collection captured when the picker opens. Newer edits remain
     /// local and source-file dirty markers are unaffected by this independent save.
     pub async fn save_preview_stages_file(self: &Rc<Self>) -> Result<bool, String> {
-        let manifest = self.preview_stage_manifest().to_json()?;
+        let manifest = self.preview_stage_set().to_json()?;
         let top = TopLevel::get_top_level(Some(&self.root))
             .ok_or("Attach the designer to a window to save preview stages")?;
         let provider = top.storage_provider();
         if !provider.can_save() {
             return Err(
-                "This host has no save picker; use preview_stage_manifest().to_json()".into(),
+                "This host has no save picker; use preview_stage_set().to_json()".into(),
             );
         }
         let mut options = FilePickerSaveOptions::new();
@@ -160,7 +160,7 @@ impl DesignerWorkspace {
         let provider = top.storage_provider();
         if !provider.can_open() {
             return Err(
-                "This host has no open picker; use restore_preview_stage_manifest()".into(),
+                "This host has no open picker; use restore_preview_stage_set()".into(),
             );
         }
         let mut options = FilePickerOpenOptions::new();
@@ -183,12 +183,12 @@ impl DesignerWorkspace {
             .take(1_048_577)
             .read_to_string(&mut source)
             .map_err(|error| error.to_string())?;
-        let manifest = PreviewStageManifest::from_json(&source)?;
+        let manifest = PreviewStageSet::from_json_with_fixtures(&source)?;
         if model != self.preview_stage_model() {
             return Err("The documents or preview stages changed while the file picker was open; load the collection again".into());
         }
         let has_stages = !manifest.stages.is_empty();
-        self.restore_preview_stage_manifest(manifest)?;
+        self.restore_preview_stage_set(manifest)?;
         if has_stages {
             self.set_preview_stages_visible(true)?;
         }

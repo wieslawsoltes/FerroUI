@@ -203,6 +203,39 @@ fn linear_gradient_has_its_stop_colors_at_the_endpoints() {
 }
 
 #[test]
+fn gradient_renders_unsorted_offsets_with_authored_hard_stop_order() {
+    let render = |stops: &[ImmutableGradientStop]| {
+        let target = Target::new();
+        target.draw(|context| {
+            let brush = ImmutableLinearGradientBrush::new(
+                stops,
+                1.0,
+                None,
+                None,
+                GradientSpreadMethod::Pad,
+                Some(RelativePoint::TOP_LEFT),
+                Some(RelativePoint::new(1.0, 0.0, RelativeUnit::Relative)),
+                None,
+            );
+            context.draw_rectangle(Some(&brush), None, rect(0.0, 0.0, 100.0, 100.0), &no_shadows());
+        });
+        target
+    };
+    let red = ImmutableGradientStop::new(0.0, Colors::RED);
+    let green = ImmutableGradientStop::new(0.5, Colors::LIME);
+    let yellow = ImmutableGradientStop::new(0.5, Colors::YELLOW);
+    let blue = ImmutableGradientStop::new(1.0, Colors::BLUE);
+    let actual = render(&[red, blue, green, yellow]);
+    let ordered = render(&[red, green, yellow, blue]);
+
+    for x in [1, 49, 50, 98] {
+        assert_eq!(actual.pixel(x, 50), ordered.pixel(x, 50), "gradient at x = {x}");
+    }
+    assert!(actual.pixel(49, 50).0 < 32, "left of the hard stop is lime");
+    assert!(actual.pixel(50, 50).0 > 220, "right of the hard stop is yellow");
+}
+
+#[test]
 fn linear_gradient_spread_methods_extend_the_gradient() {
     // The gradient covers the left 25 pixels (absolute end point).
     let end_point = RelativePoint::new(25.0, 0.0, RelativeUnit::Absolute);

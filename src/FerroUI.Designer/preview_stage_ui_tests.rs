@@ -1,5 +1,5 @@
 use super::*;
-use crate::PreviewStageLayout;
+use crate::{PreviewFlowDirection, PreviewStageLayout, PreviewTheme};
 use ferroui_base::input::{
     IPointer, KeyEventArgs, MouseButton, Pointer, PointerEventArgs, PointerPointProperties,
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, PointerUpdateKind,
@@ -130,6 +130,8 @@ fn stage_editor_applies_complete_draft_for_viewer_and_cancel_preserves_source_an
     named::<TextBox>(&editor.control(), "StageHeight").set_text(Some("844"));
     named::<ComboBox>(&editor.control(), "StageTheme").set_selected_index(1);
     named::<ComboBox>(&editor.control(), "StageDirection").set_selected_index(2);
+    named::<TextBox>(&editor.control(), "StageLocale").set_text(Some("fr-CA"));
+    named::<TextBox>(&editor.control(), "StageTextSize").set_text(Some("150"));
     named::<CheckBox>(&editor.control(), "StagePinned").set_is_checked(Some(true));
     named::<CheckBox>(&editor.control(), "StageAutoUpdate").set_is_checked(Some(false));
     named::<CheckBox>(&editor.control(), "StageDesignData").set_is_checked(Some(false));
@@ -146,6 +148,8 @@ fn stage_editor_applies_complete_draft_for_viewer_and_cancel_preserves_source_an
         }
     );
     assert!(configuration.pinned);
+    assert_eq!(configuration.text.locale.as_deref(), Some("fr-CA"));
+    assert_eq!(configuration.text.scale_percent, 150);
     assert!(!configuration.auto_update);
     assert!(!configuration.design_time_data);
     assert_eq!(workspace.session.borrow().document().source(), SOURCE);
@@ -347,6 +351,56 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
 }
 
 #[test]
+fn stage_keyboard_uses_native_tab_order_and_keeps_text_in_the_target_card() {
+    use crate::PreviewStageKeyboardInput as Input;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let workspace = &f.workspace;
+    let id = f.first();
+    let original = workspace.preview_stage(id).unwrap();
+    assert!(workspace.preview_stage_keyboard(id, original.epoch, Input::Focus).is_err());
+    let mut configuration = original.configuration;
+    configuration.mode = PreviewStageMode::Live;
+    workspace.update_preview_stage(id, configuration).unwrap();
+    let other = workspace.duplicate_preview_stage(id).unwrap();
+    f.layout();
+
+    let epoch = workspace.preview_stage(id).unwrap().epoch;
+    assert!(workspace.preview_stage_keyboard(id, original.epoch, Input::Focus).is_err());
+    let send = |input| workspace.preview_stage_keyboard(id, epoch, input).unwrap().unwrap();
+    let key = |key: &str| Input::Key { key: key.into() };
+    let activations = Rc::new(Cell::new(0));
+    let count = activations.clone();
+    native::<Button>(&workspace.preview_stage_control(id).unwrap(), "Card")
+        .click(move |_, _| count.set(count.get() + 1));
+    assert_eq!(send(Input::Focus).role, "Button");
+    send(key("Enter"));
+    send(key("Space"));
+    assert_eq!(activations.get(), 2);
+    assert_eq!(send(key("Shift+Tab")).role, "Edit");
+    assert_eq!(send(key("Tab")).role, "Button");
+    assert_eq!(send(key("Tab")).role, "Edit");
+    let input = native::<TextBox>(&workspace.preview_stage_control(id).unwrap(), "Input");
+    // Tab selects the original text. The windowing test theme does not
+    // supply the text presenter that handles caret navigation.
+    assert_eq!(input.text().as_deref(), Some("Edit me"));
+    assert_eq!((input.selection_start(), input.selection_end()), (0, 7));
+    send(key("Space"));
+    send(Input::Text { text: "東京 🪴".into() });
+    assert_eq!(input.text().as_deref(), Some(" 東京 🪴"));
+    assert_eq!(
+        native::<TextBox>(&workspace.preview_stage_control(other).unwrap(), "Input").text().as_deref(),
+        Some("Edit me")
+    );
+    workspace.set_preview_stage_paused(id, true).unwrap();
+    assert!(workspace.preview_stage_keyboard(id, workspace.preview_stage(id).unwrap().epoch, Input::Focus).is_err());
+    let session = workspace.session.borrow();
+    assert_eq!(session.document().source(), SOURCE);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn scaled_stage_pointer_selects_its_authored_control_before_inspector_handoff() {
     let _app = UnitTestApplication::start(services());
     let f = Fixture::new();
@@ -407,6 +461,106 @@ fn scaled_stage_pointer_selects_its_authored_control_before_inspector_handoff() 
         .root
         .get_control::<Control>("ArtboardScroll")
         .is_visible());
+}
+
+#[test]
+fn stage_pointer_profiles_dispatch_native_contacts_and_cancel_on_invalidation() {
+    use crate::{PreviewStagePointerDevice as Device, PreviewStagePointerInput, PreviewStagePointerPhase as Phase,
+        PreviewStagePointerProfile as Profile};
+    use ferroui_base::threading::Dispatcher;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let workspace = &f.workspace;
+    let id = f.first();
+    let initial = workspace.preview_stage(id).unwrap();
+    let mut configuration = initial.configuration;
+    configuration.mode = PreviewStageMode::Live;
+    configuration.pointer_input = Profile::Pen;
+    workspace.update_preview_stage(id, configuration.clone()).unwrap();
+    let other = workspace.duplicate_preview_stage(id).unwrap();
+    f.layout();
+
+    let epoch = workspace.preview_stage(id).unwrap().epoch;
+    let host = workspace.preview_stage_control(id).unwrap();
+    let button = native::<Button>(&host, "Card");
+    let position = button.translate_point(Point::new(12.0, 12.0), &host).unwrap();
+    let size = host.bounds().size();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_pressed_event(), move |_, event| {
+        let point = event.get_current_point(None);
+        events.borrow_mut().push((Phase::Down, point.pointer.type_(), point.properties.pressure, point.properties.x_tilt));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_moved_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Move, event.pointer().type_(), event.properties().pressure, event.properties().x_tilt));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_released_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Up, event.pointer().type_(), 0.0, 0.0));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_capture_lost_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Cancel, event.pointer().type_(), 0.0, 0.0));
+    }, ferroui_base::interactivity::RoutingStrategies::DIRECT, true);
+
+    let input = PreviewStagePointerInput {
+        contact: 42, phase: Phase::Down, device: Device::Mouse,
+        x: position.x / size.width, y: position.y / size.height,
+        pressure: Some(0.8), tilt_x: Some(-14.0), tilt_y: Some(10.0), twist: Some(30.0),
+    };
+    let send = |phase, x| workspace.preview_stage_pointer(id, epoch, PreviewStagePointerInput { phase, x, ..input });
+    assert!(workspace.preview_stage_pointer(id, initial.epoch, input).is_err());
+    assert!(send(Phase::Move, input.x).is_err());
+    assert!(send(Phase::Down, 1.1).is_err());
+    send(Phase::Down, input.x).unwrap();
+    assert!(send(Phase::Down, input.x).is_err());
+    send(Phase::Move, 1.1).unwrap();
+    send(Phase::Up, 1.1).unwrap();
+    assert!(send(Phase::Up, 1.1).is_err());
+    assert_eq!(&received.borrow()[..3], &[
+        (Phase::Down, PointerType::Pen, 0.8, -14.0),
+        (Phase::Move, PointerType::Pen, 0.8, -14.0),
+        (Phase::Up, PointerType::Pen, 0.0, 0.0),
+    ]);
+    received.borrow_mut().clear();
+    send(Phase::Down, input.x).unwrap();
+    send(Phase::Cancel, input.x).unwrap();
+    assert_eq!(received.borrow().iter().map(|event| event.0).collect::<Vec<_>>(), [Phase::Down, Phase::Cancel]);
+    assert!(!button.is_pressed());
+
+    received.borrow_mut().clear();
+    send(Phase::Down, input.x).unwrap();
+    configuration.pointer_input = Profile::Touch;
+    workspace.update_preview_stage(id, configuration).unwrap();
+    Dispatcher::ui_thread().run_jobs(None);
+    f.layout();
+    assert!(send(Phase::Up, input.x).is_err());
+    assert_eq!(received.borrow().iter().map(|event| event.0).collect::<Vec<_>>(), [Phase::Down, Phase::Cancel]);
+    assert_eq!(native::<Button>(&workspace.preview_stage_control(id).unwrap(), "Card"), button);
+    assert_eq!(workspace.preview_stage(other).unwrap().configuration.pointer_input, Profile::Pen);
+    let saved = serde_json::to_value(workspace.preview_stage_set()).unwrap();
+    assert_eq!(saved["stages"][0]["pointer_input"], "touch");
+    assert_eq!(saved["stages"][1]["pointer_input"], "pen");
+
+    received.borrow_mut().clear();
+    let cursor = StagePointer {
+        pointer: Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true),
+        source: named(&workspace.preview_stage_view().unwrap().control(), &format!("Stage{id}PointerSurface")),
+        root: f.window.clone(),
+    };
+    let point = host.translate_point(position, &f.window).unwrap();
+    cursor.press(point);
+    cursor.motion(Point::new(point.x + 12.0, point.y));
+    cursor.release(point);
+    assert_eq!(received.borrow().iter().take(3).map(|event| (event.0, event.1)).collect::<Vec<_>>(), [
+        (Phase::Down, PointerType::Touch), (Phase::Move, PointerType::Touch), (Phase::Up, PointerType::Touch),
+    ]);
+    assert!(cursor.pointer.captured().is_none());
+    let session = workspace.session.borrow();
+    assert_eq!(session.document().source(), SOURCE);
+    assert!(!session.can_undo());
 }
 
 #[test]
@@ -703,9 +857,8 @@ fn native_resize_cancels_on_escape_capture_loss_zoom_reflow_and_card_retirement(
     assert!(!f.workspace.session.borrow().can_undo());
 }
 
-#[test]
 #[cfg(feature = "render-smoke")]
-fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_graph() {
+fn native_stage_theme() -> ferroui_controls::testing::UnitTestApplicationScope {
     use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
     use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver};
     struct ThemeClock;
@@ -728,8 +881,15 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
     native_services.theme = Some(Rc::new(|| {
         ferroui_themes_winui::WinUITheme::new().as_style()
     }));
-    let _app = UnitTestApplication::start(native_services);
+    let app = UnitTestApplication::start(native_services);
     ferroui_themes_winui::register_types();
+    app
+}
+
+#[cfg(feature = "render-smoke")]
+#[test]
+fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_graph() {
+    let _app = native_stage_theme();
     let f = Fixture::new();
     let id = f.first();
     let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
@@ -765,6 +925,10 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
     viewport.set_offset(Vector::new(50.0, 20.0));
     f.layout();
     assert!(viewport.offset().x > 0.0);
+    let offset = viewport.offset();
+    let camera = view.camera(id).unwrap();
+    assert_eq!((camera.x, camera.y), (offset.x, offset.y));
+    let stage_epoch = f.workspace.preview_stage(id).unwrap().epoch;
     let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
     configuration.name = "Same camera after card update".into();
     f.workspace.update_preview_stage(id, configuration).unwrap();
@@ -773,8 +937,59 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
         named::<ComboBox>(&view.control(), &format!("Stage{id}Zoom")).selected_index(),
         4
     );
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), offset);
+    assert_eq!(view.camera(id), Some(camera));
+    assert!(view.set_camera(id, stage_epoch, crate::PreviewStageCamera::default()).is_err());
     assert_eq!(input.text().as_deref(), Some("Camera state is independent"));
     assert_eq!(f.workspace.session.borrow().document().source(), SOURCE);
+}
+
+#[cfg(all(feature = "mcp", feature = "render-smoke"))]
+#[test]
+fn studio_camera_tool_uses_the_native_view_without_changing_the_stage_set() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_inspect::Permissions;
+    use ferroui_mcp::UiToolProvider;
+    use serde_json::json;
+
+    let _app = native_stage_theme();
+    let f = Fixture::new();
+    let provider = DesignerMcp::with_workspace(&f.workspace);
+    let read = Permissions { allow_property_writes: false, allow_input: false };
+    let write = Permissions { allow_property_writes: true, allow_input: false };
+    let board = provider.call("designer_preview_stages", &json!({}), read).unwrap();
+    let stage = &board["stages"][0];
+    let camera = json!({"zoom_percent":150,"x":45.0,"y":36.0});
+    let mut command = json!({"action":"camera","expected_model":board["model"],"stage":stage["id"],
+        "expected_epoch":stage["epoch"],"camera":camera});
+    assert!(provider.call("designer_preview_stage", &command, read).is_err());
+    let updated = provider.call("designer_preview_stage", &command, write).unwrap();
+    let id = f.first();
+    let view = f.workspace.preview_stage_view().unwrap();
+    f.layout();
+    assert_eq!(updated["board"]["stages"][0]["camera"], camera);
+    assert_eq!(updated["board"]["manifest"], board["manifest"]);
+    assert_eq!(updated["board"]["model"], board["model"]);
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), Vector::new(45.0, 36.0));
+    command["camera"]["zoom_percent"] = json!(42);
+    assert!(provider.call("designer_preview_stage", &command, write).is_err());
+    let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
+    configuration.name = "Recreated card".into();
+    f.workspace.update_preview_stage(id, configuration).unwrap();
+    f.layout();
+    command["camera"] = camera;
+    assert!(provider.call("designer_preview_stage", &command, write).is_err());
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), Vector::new(45.0, 36.0));
+    let board = provider.call("designer_preview_stages", &json!({}), read).unwrap();
+    command["expected_model"] = board["model"].clone();
+    command["expected_epoch"] = board["stages"][0]["epoch"].clone();
+    command["camera"] = json!({"zoom_percent":null,"x":0.0,"y":0.0});
+    let updated = provider.call("designer_preview_stage", &command, write).unwrap();
+    assert_eq!(updated["board"]["stages"][0]["camera"], command["camera"]);
+    assert_eq!(viewport.offset(), Vector::default());
 }
 
 #[test]

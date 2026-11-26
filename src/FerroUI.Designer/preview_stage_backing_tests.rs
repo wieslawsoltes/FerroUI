@@ -1,5 +1,7 @@
 use super::*;
+use crate::PreviewTheme;
 use ferroui_base::media::Color;
+use ferroui_base::styling::ThemeVariant;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{TextBox, Window};
 
@@ -58,6 +60,42 @@ fn color(backing: &Border) -> Option<Color> {
     backing
         .background()
         .map(|brush| brush.as_solid_color_brush().unwrap().color())
+}
+
+#[test]
+fn high_contrast_stage_uses_the_registered_scope_and_round_trips() {
+    use ferroui_base::controls::ResourceDictionary;
+
+    struct RestoreTheme(Option<ThemeVariant>);
+    impl Drop for RestoreTheme {
+        fn drop(&mut self) {
+            ThemeVariant::set_high_contrast_variant(self.0.clone());
+        }
+    }
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _restore = RestoreTheme(ThemeVariant::high_contrast_variant());
+    let variant = ThemeVariant::new("StageContrast", Some(ThemeVariant::dark()));
+    ThemeVariant::set_high_contrast_variant(Some(variant.clone()));
+    assert!(PreviewTheme::available().contains(&PreviewTheme::HighContrast));
+
+    let (mut board, stage, document, window) = setup();
+    let theme = ResourceDictionary::new();
+    let window_color = Color::from_uint32(0xFF21272B);
+    theme.add("SystemColorWindowColor", Some(Rc::new(window_color)));
+    window.resources().add_theme_dictionary(variant.clone(), &theme);
+    let mut configuration = board.stage(stage).unwrap().configuration;
+    configuration.environment.theme = PreviewTheme::HighContrast;
+    board.update(stage, configuration).unwrap();
+    window.update_layout();
+    assert_eq!(rendered(&board, stage).scope.actual_theme_variant(), Some(variant));
+    assert_eq!(color(&rendered(&board, stage).backing), Some(window_color));
+    assert_eq!(window.actual_theme_variant(), Some(ThemeVariant::light()));
+    let encoded = serde_json::to_string(&board.stage_set()).unwrap();
+    let restored: PreviewStageSet = serde_json::from_str(&encoded).unwrap();
+    assert_eq!(restored.stages[0].configuration.environment.theme, PreviewTheme::HighContrast);
+    assert_eq!(document.revision(), 0);
+    window.close();
 }
 
 #[test]

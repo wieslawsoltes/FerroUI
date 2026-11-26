@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/ferroui" Background="#FFF5F8FC">
+    <StackPanel Width="360" Margin="28" Spacing="12" HorizontalAlignment="Left">
+        <TextBlock Text="Customer details" FontSize="28" Foreground="#FF17394F" />
+        <TextBlock Name="FadedNote" Text="Enter the main contact details" FontSize="14"
+                   Foreground="#FFABABAB" Background="#FFFFFFFF" />
+        <TextBlock Name="ReadableNote" Text="The changes are visible to your team" FontSize="14"
+                   Foreground="#FF17394F" Background="#FFFFFFFF" />
+        <TextBox Name="UnlabeledInput" Width="270" HorizontalAlignment="Left" />
+        <TextBox Name="LabeledInput" Width="270" HorizontalAlignment="Left"
+                 Text="Northwind Studio" AutomationProperties.Name="Customer name" />
+        <Canvas Name="FixedActions" Width="205" Height="42" ClipToBounds="True"
+                Background="#FFE5EFF7" HorizontalAlignment="Left">
+            <Button Name="CutOffAction" Content="Save customer" Canvas.Left="146" Canvas.Top="4" Width="135" />
+        </Canvas>
+        <ScrollViewer Width="205" Height="45" HorizontalAlignment="Left" HorizontalScrollBarVisibility="Auto">
+            <Canvas Width="340" Height="38">
+                <Button Name="ScrollableAction" Content="More details" Canvas.Left="150" Width="135" />
+            </Canvas>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>

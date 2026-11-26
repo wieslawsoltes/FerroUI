@@ -5,8 +5,8 @@ use crate::{Element, GridDefinitions, IntoElement, IntoProp};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::Color;
-use ferroui_base::{BoxedValue, Ref, Thickness};
-use ferroui_controls::{Button, Control, Grid, StackPanel, TextBlock, TextBox};
+use ferroui_base::{BoxedValue, CornerRadius, Ref, Thickness};
+use ferroui_controls::{Border, Button, Control, Grid, StackPanel, TextBlock, TextBox};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -39,6 +39,16 @@ fn setters_give_the_properties_their_values_with_the_conversions() {
     assert_eq!(text.name().as_deref(), Some("greeting"));
     assert!(text.classes().contains("title") && text.classes().contains("large"));
     owner.dispose();
+}
+
+#[test]
+fn corner_radius_tuples_follow_xaml_corner_order() {
+    let (paired, paired_owner) = mount(border().corner_radius((4.0, 8.0)));
+    let (individual, individual_owner) = mount(border().corner_radius((4.0, 8.0, 12.0, 16.0)));
+    assert_eq!(paired.cast::<Border>().unwrap().corner_radius(), CornerRadius::new(4.0, 4.0, 8.0, 8.0));
+    assert_eq!(individual.cast::<Border>().unwrap().corner_radius(), CornerRadius::new(4.0, 8.0, 12.0, 16.0));
+    paired_owner.dispose();
+    individual_owner.dispose();
 }
 
 #[test]

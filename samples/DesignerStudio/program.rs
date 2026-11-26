@@ -11,7 +11,7 @@ fn main() -> std::process::ExitCode {
     }
     if args.iter().any(|arg| arg == "--help" || arg == "-h") {
         eprintln!(
-            "FerroUI Designer Studio\n  --file PATH        Open a XAML document\n  --project PATH     Open a solution or project folder\n  --mcp              Enable authenticated loopback MCP (read only)\n  --mcp-port PORT    Choose the MCP HTTP port (0 chooses a free port)\n  --mcp-stdio        Use the existing MCP stdio transport\n  --mcp-write        Allow document editing through MCP\n  --mcp-input        Allow input simulation; with --mcp-write, allow behavior and process execution\n  --headless         Use the headless host (requires feature headless)"
+            "FerroUI Designer Studio\n  --file PATH        Open a XAML or Rust view\n  --project PATH     Open a solution or project folder\n  --mcp              Enable authenticated loopback MCP (read only)\n  --mcp-port PORT    Choose the MCP HTTP port (0 chooses a free port)\n  --mcp-stdio        Use the existing MCP stdio transport\n  --mcp-write        Allow document editing through MCP\n  --mcp-input        Allow input simulation; with --mcp-write, allow behavior and process execution\n  --headless         Use the headless host (requires feature headless)"
         );
         return std::process::ExitCode::SUCCESS;
     }
@@ -27,7 +27,7 @@ fn main() -> std::process::ExitCode {
     }
     if let Some(index) = args.iter().position(|arg| arg == "--file") {
         let Some(path) = args.get(index + 1) else {
-            eprintln!("--file requires a XAML path");
+            eprintln!("--file requires a XAML or Rust path");
             return std::process::ExitCode::FAILURE;
         };
         match std::fs::read_to_string(path) {
@@ -69,8 +69,8 @@ fn main() -> std::process::ExitCode {
 fn document_uri(path: &std::path::Path) -> Result<String, &'static str> {
     let path = path
         .to_str()
-        .ok_or("The XAML path contains unsupported non-Unicode characters")?;
-    file_uri(path, cfg!(windows)).ok_or("The XAML path could not be represented as a file URI")
+        .ok_or("The source path contains unsupported non-Unicode characters")?;
+    file_uri(path, cfg!(windows)).ok_or("The source path could not be represented as a file URI")
 }
 
 fn file_uri(path: &str, windows: bool) -> Option<String> {

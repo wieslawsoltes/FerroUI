@@ -141,7 +141,7 @@ impl PreviewHostOptions {
                 ))
             })
     }
-    pub(crate) fn load(&self, source: &str, uri: &str) -> Result<BoxedValue, String> {
+    pub(crate) fn load(&self, source: &str, uri: &str, fixture: Option<&str>) -> Result<BoxedValue, String> {
         let _design_mode = DesignModeGuard::new(self.configuration.design_mode);
         let document = Document::new(source).map_err(|e| e.to_string())?;
         let request = PreviewRequest {
@@ -150,6 +150,7 @@ impl PreviewHostOptions {
                 &document,
                 source,
                 self.design_time_data && self.configuration.design_mode,
+                fixture,
             )?
             .map(|projection| projection.document.source().to_owned()),
             uri: uri.into(),
@@ -173,8 +174,8 @@ impl PreviewHostOptions {
             request.populate(None)
         }
     }
-    pub(crate) fn control(&self, source: &str, uri: &str) -> Result<Ref<Control>, String> {
-        let loaded = self.load(source, uri)?;
+    pub(crate) fn control(&self, source: &str, uri: &str, fixture: Option<&str>) -> Result<Ref<Control>, String> {
+        let loaded = self.load(source, uri, fixture)?;
         if let Some(control) = Ref::<Control>::from_xaml_object(&loaded) {
             if control.cast::<Window>().is_some() {
                 if let Some(factory) = &self.resource_factory {
@@ -232,8 +233,8 @@ impl crate::DesignerSession {
     /// Opens the actual platform Window, including native decorations and registered class
     /// behavior. A non-Window document is hosted inside a normal platform Window.
     pub fn open_native_preview(&mut self) -> Result<Ref<Window>, String> {
-        let source = self.document().valid_source().to_owned();
-        self.preview.open_native(source)
+        let source = self.document.valid_source().to_owned();
+        self.preview.with_workspace_snapshot(&self.document, |preview| preview.open_native(source))
     }
     pub fn close_native_preview(&mut self) {
         self.preview.close_native();
@@ -246,8 +247,8 @@ impl crate::DesignerSession {
     /// The document as a new control for the caller to show in its own view: the preview of a
     /// platform without windows.
     pub fn open_view_preview(&mut self) -> Result<Ref<Control>, String> {
-        let source = self.document().valid_source().to_owned();
-        self.preview.open_in_view(source)
+        let source = self.document.valid_source().to_owned();
+        self.preview.with_workspace_snapshot(&self.document, |preview| preview.open_in_view(source))
     }
 }
 
@@ -261,6 +262,7 @@ pub(crate) struct FactoryReloadTarget {
 #[cfg(debug_assertions)]
 pub(crate) struct FactoryTargetConfiguration {
     options: PreviewHostOptions,
+    fixture: Option<String>,
     fallback: Rc<dyn ferroui_hot_reload::ReloadTarget>,
 }
 #[cfg(debug_assertions)]
@@ -269,11 +271,12 @@ impl FactoryReloadTarget {
         host: &Ref<ContentControl>,
         uri: &str,
         options: PreviewHostOptions,
+        fixture: Option<String>,
         use_factory: Rc<std::cell::Cell<bool>>,
     ) -> Result<Self, String> {
         // The key of the document in the reload session: the text of its URL (C5 of #423).
         let uri = String::from(UriRef::parse_absolute(uri).map_err(|error| error.to_string())?);
-        let configuration = Self::configuration(host, &uri, options);
+        let configuration = Self::configuration(host, &uri, options, fixture);
         Ok(Self {
             host: host.downgrade(),
             uri,
@@ -285,6 +288,7 @@ impl FactoryReloadTarget {
         host: &Ref<ContentControl>,
         uri: &str,
         options: PreviewHostOptions,
+        fixture: Option<String>,
     ) -> FactoryTargetConfiguration {
         let fallback = Rc::new(ferroui_hot_reload::ContentReloadTarget::new(
             host,
@@ -292,15 +296,16 @@ impl FactoryReloadTarget {
             Vec::new(),
             options.configuration.clone(),
         ));
-        FactoryTargetConfiguration { options, fallback }
+        FactoryTargetConfiguration { options, fixture, fallback }
     }
     pub(crate) fn replace_configuration(
         &self,
         host: &Ref<ContentControl>,
         options: PreviewHostOptions,
+        fixture: Option<String>,
     ) -> FactoryTargetConfiguration {
         self.configuration
-            .replace(Self::configuration(host, &self.uri, options))
+            .replace(Self::configuration(host, &self.uri, options, fixture))
     }
     pub(crate) fn restore_configuration(&self, configuration: FactoryTargetConfiguration) {
         self.configuration.replace(configuration);
@@ -325,6 +330,7 @@ impl ferroui_hot_reload::ReloadTarget for FactoryReloadTarget {
         let configuration = self.configuration.borrow();
         let fallback = configuration.fallback.clone();
         let options = configuration.options.clone();
+        let fixture = configuration.fixture.clone();
         drop(configuration);
         if !self.use_factory.get() {
             return fallback.prepare(sources);
@@ -337,7 +343,7 @@ impl ferroui_hot_reload::ReloadTarget for FactoryReloadTarget {
             .get(&self.uri)
             .ok_or_else(|| ReloadError::Failed("Missing preview document".into()))?;
         let candidate = options
-            .control(source, &self.uri)
+            .control(source, &self.uri, fixture.as_deref())
             .map_err(ReloadError::Failed)?;
         Ok(Box::new(FactoryChange {
             before: host.content(),

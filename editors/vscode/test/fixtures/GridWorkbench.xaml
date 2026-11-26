@@ -1,0 +1,7 @@
+<Grid xmlns="https://github.com/ferroui" Name="CustomerGrid" ColumnDefinitions="*,*">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" MinHeight="10" />
+        <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <TextBlock Name="Cell" Text="Customer details" Grid.Row="1" Grid.Column="1" />
+</Grid>

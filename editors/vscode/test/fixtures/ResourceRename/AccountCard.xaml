@@ -1,0 +1,12 @@
+<Border xmlns="https://github.com/ferroui" Width="248" Height="128">
+  <Border.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Palette.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Border.Resources>
+  <Border Background="{StaticResource BrandInk}" Padding="16">
+    <TextBlock Text="Customer accounts" Foreground="#FFFFFF" />
+  </Border>
+</Border>

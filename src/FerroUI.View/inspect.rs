@@ -203,7 +203,7 @@ fn inspector_view() -> Element {
     let count = rows.len();
     let source = ItemsSource::from_items(rows.into_iter().map(|row| Some(Rc::new(row) as BoxedValue)));
     let item_template = use_hook(|| {
-        template_of(INSPECTOR_ORIGIN, |row: Row| {
+        template_of(INSPECTOR_ORIGIN, None, |row: Row| {
             crate::generated::builders::text_block()
                 .text(row.label)
                 .margin((row.depth as f64 * 14.0, 0.0, 0.0, 0.0))

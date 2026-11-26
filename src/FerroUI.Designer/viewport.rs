@@ -29,7 +29,7 @@ impl Default for CanvasViewport {
 }
 
 impl CanvasViewport {
-    pub const MIN_ZOOM: f64 = 0.01;
+    pub const MIN_ZOOM: f64 = ferroui_designer_tools::CANVAS_MIN_ZOOM;
     pub const MAX_ZOOM: f64 = 16.0;
     // Large enough for authoring, while keeping native bounds and inverse transforms useful.
     const MAX_OFFSET: f64 = 1.0e12;

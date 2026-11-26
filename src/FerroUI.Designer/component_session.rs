@@ -95,7 +95,7 @@ fn property_framework_extension(document: &Document, node: NodeId, name: &str) -
         })
 }
 
-fn property_schema() -> &'static ferroui_designer_language::Schema {
+pub(crate) fn property_schema() -> &'static ferroui_designer_language::Schema {
     static SCHEMA: std::sync::OnceLock<ferroui_designer_language::Schema> =
         std::sync::OnceLock::new();
     SCHEMA.get_or_init(ferroui_designer_language::Schema::ferroui)
@@ -172,18 +172,7 @@ impl DesignerSession {
             current = self.document().ast().node(id).and_then(|node| node.parent);
         }
         let theme = theme.or_else(|| self.preview.host.actual_theme_variant());
-        let mut context = ComponentResourceContext::default();
-        if let Some(theme) = theme {
-            context.theme = Some(theme.key().as_str()?.to_owned());
-            let mut inherited = theme.inherit_variant();
-            while let Some(variant) = inherited {
-                context
-                    .inherited_themes
-                    .push(variant.key().as_str()?.to_owned());
-                inherited = variant.inherit_variant();
-            }
-        }
-        Some(context)
+        crate::preview_theme::resource_context(theme)
     }
     pub fn component_resource_references(
         &self,

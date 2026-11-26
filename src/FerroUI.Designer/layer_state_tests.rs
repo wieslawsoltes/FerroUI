@@ -88,6 +88,40 @@ fn layer_visibility_is_counted_render_state_and_preserves_layout_properties_and_
 }
 
 #[test]
+fn portable_layers_restore_unnamed_controls_for_exact_source_and_reanchor_named_controls_after_edits() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = SOURCE.replace("Name=\"Second\" ", "").replace("Name=\"First\" ", "");
+    let mut first = DesignerSession::with_uri(&source, ContentControl::new(), URI.into()).unwrap();
+    let group = first.document().ast().find_name("Group").unwrap();
+    let unnamed = first.document().ast().element_children(group)[1];
+    first.set_layers_locked(&[group], true).unwrap();
+    first.set_layers_hidden(&[unnamed], true).unwrap();
+    first.isolate_layers(&[group]).unwrap();
+    let state = first.persist_layer_view();
+    let json = serde_json::to_string(&state).unwrap();
+    let state = serde_json::from_str(&json).unwrap();
+
+    let second_uri = "ferres://FerroUI.Designer/LayerSnapshot.xaml";
+    let mut identical = DesignerSession::with_uri(&source, ContentControl::new(), second_uri.into()).unwrap();
+    identical.restore_persisted_layer_view(&state);
+    let group = identical.document().ast().find_name("Group").unwrap();
+    let children = identical.document().ast().element_children(group);
+    assert!(identical.layer_state(group).locked);
+    assert!(!identical.layer_state(children[0]).hidden);
+    assert!(identical.layer_state(children[1]).hidden);
+    assert_eq!(identical.layer_isolation(), &[group]);
+
+    let edited = source.replace("Content=\"One\"", "Content=\"Updated\"");
+    let mut changed = DesignerSession::with_uri(&edited, ContentControl::new(), "ferres://FerroUI.Designer/UpdatedLayers.xaml".into()).unwrap();
+    changed.restore_persisted_layer_view(&state);
+    let group = changed.document().ast().find_name("Group").unwrap();
+    assert!(changed.layer_state(group).locked);
+    assert!(changed.document().ast().element_children(group).iter().all(|node| !changed.layer_state(*node).hidden));
+    assert_eq!(changed.layer_isolation(), &[group]);
+    assert_eq!(changed.document().source(), edited);
+}
+
+#[test]
 fn layer_locks_inherit_but_source_inspection_and_deliberate_property_edits_remain_available() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut fixture = Fixture::new();
@@ -413,6 +447,39 @@ fn layer_locked_siblings_remain_valid_positional_anchors_for_outline_ordering() 
         fixture.session.document().ast().element_children(group),
         vec![second, first]
     );
+}
+
+#[test]
+fn rust_moves_and_history_keep_flags_on_identical_authored_children() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"rsx! { StackPanel { children([
+        rsx! { Button { content("Review 🧭") } },
+        rsx! { Button { content("Review 🧭") } },
+    ]), } }"#;
+    let mut session = DesignerSession::with_rust_source(
+        source, ContentControl::new(), "file:///LayerIdentity.rs".into(),
+    ).unwrap();
+    let root = session.document().ast().root();
+    let children = session.document().ast().element_children(root);
+    session.set_layers_hidden(&[children[1]], true).unwrap();
+    session.select([children[0]]);
+    session.edit_outline(crate::OutlineCommand::MoveLast).unwrap();
+    let order = [children[1], children[0]];
+    assert_eq!(session.document().ast().element_children(root), order);
+    assert_eq!(session.selection(), &[children[0]]);
+    assert!(session.layer_state(children[1]).hidden);
+    let edited = session.authored_source().to_owned();
+    session.set_layers_locked(&[children[0]], true).unwrap();
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert_eq!(session.document().ast().element_children(root), children);
+    assert!(session.layer_state(children[0]).locked);
+    assert!(session.layer_state(children[1]).hidden);
+    session.redo().unwrap();
+    assert_eq!(session.authored_source(), edited);
+    assert_eq!(session.document().ast().element_children(root), order);
+    assert!(session.layer_state(children[0]).locked);
+    assert!(session.layer_state(children[1]).hidden);
 }
 
 #[test]

@@ -21,6 +21,306 @@ fn write() -> Permissions {
         allow_input: false,
     }
 }
+
+#[test]
+fn studio_mcp_graph_mode_drives_the_native_menu_and_keeps_source_history() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{MenuFlyout, MenuItem};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    workspace.set_timeline_visible(false);
+    let session = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    assert!(!DesignerMcp::new(&session).tools().iter().any(|tool| tool["name"] == "designer_timeline_view"));
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    assert_eq!(before["mode"], "keys");
+    assert_eq!(before["visible"], false);
+    let edit = |uri: &Value, revision: u64, mode: &str, permissions| {
+        provider.call("designer_timeline_set_graph", &json!({"expected_uri":uri,
+            "expected_revision":revision, "graph_mode":mode}), permissions)
+    };
+    let uri = &before["uri"];
+    let revision = before["revision"].as_u64().unwrap();
+    assert!(edit(uri, revision, "velocity", Permissions::default()).unwrap_err().contains("allow_property_writes"));
+    assert!(edit(uri, revision + 1, "velocity", write()).unwrap_err().contains("revision changed"));
+    assert!(edit(&json!("file:///Previous.xaml"), revision, "velocity", write()).is_err());
+    assert_eq!(read(), before);
+
+    let result = edit(uri, revision, "velocity", write()).unwrap();
+    assert_eq!(result["mode"], "velocity");
+    assert_eq!(result["visible"], true);
+    let graph = workspace.control().get_control::<Button>("TimelineCurves");
+    let menu = graph.flyout().unwrap().cast::<MenuFlyout>().unwrap();
+    let items = menu.items().to_vec().into_iter().flatten()
+        .map(|entry| Control::from_boxed(&entry).unwrap().cast::<MenuItem>().unwrap()).collect::<Vec<_>>();
+    assert!(!items[0].is_checked() && !items[1].is_checked() && items[2].is_checked());
+    items[1].raise_event(&RoutedEventArgs::with_event(MenuItem::click_event()));
+    assert_eq!(read()["mode"], "value");
+    assert!(items[1].is_checked() && !items[2].is_checked());
+    workspace.set_timeline_visible(false);
+    workspace.set_timeline_visible(true);
+    assert_eq!(read()["mode"], "value");
+    let session = session.borrow();
+    assert_eq!(session.document().revision(), revision);
+    assert_eq!(session.document().source(), source);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
+fn studio_mcp_layout_shares_the_clip_toggle_and_keeps_the_active_program() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    workspace.set_timeline_visible(false);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    assert_eq!(before["layout"], "tracks");
+    let revision = before["revision"].as_u64().unwrap();
+    let set = |layout: &str, revision, permissions| provider.call("designer_timeline_set_layout", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "layout":layout,
+    }), permissions);
+    assert!(set("clips", revision, Permissions::default()).is_err());
+    assert!(set("clips", revision + 1, write()).is_err());
+    assert_eq!(read(), before);
+
+    let program = owner.borrow().animation_programs()[1].id;
+    {
+        let mut session = owner.borrow_mut();
+        session.select_animation_program(program).unwrap();
+        session.set_recording(true);
+        session.play();
+        assert!(session.is_playing());
+    }
+    let change = set("clips", revision, write()).unwrap();
+    assert_eq!(change["layout"], "clips");
+    assert_eq!(change["visible"], true);
+    let toggle = workspace.control().get_control::<Button>("TimelineClips");
+    assert!(toggle.classes().contains("active"));
+    assert!(!owner.borrow().is_playing() && !owner.borrow().recording());
+    assert_eq!(owner.borrow().active_animation_program(), Some(program));
+    toggle.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(read()["layout"], "tracks");
+    assert!(!toggle.classes().contains("active"));
+    let session = owner.borrow();
+    assert_eq!(session.active_animation_program(), Some(program));
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
+fn studio_mcp_viewport_uses_the_native_ruler_and_keeps_source_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let program = owner.borrow().animation_programs()[0].id;
+    owner.borrow_mut().select_animation_program(program).unwrap();
+    workspace.set_timeline_visible(true);
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let set = |revision, viewport: Value, permissions| provider.call("designer_timeline_set_viewport", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "viewport":viewport,
+    }), permissions);
+    assert_eq!(before["viewport"]["ruler"], "tracks");
+    assert_eq!(before["viewport"]["program"], json!(program));
+    let window = json!({"ruler":"tracks", "program":program, "action":"window", "start":0.1, "end":0.6});
+    assert!(set(revision, window.clone(), Permissions::default()).is_err());
+    assert!(set(revision + 1, window.clone(), write()).is_err());
+    let short = json!({"ruler":"tracks", "program":program, "action":"window", "start":0.25, "end":0.26});
+    assert!(set(revision, short, write()).unwrap_err().contains("within the ruler"));
+    assert_eq!(read(), before);
+    let changed = set(revision, window.clone(), write()).unwrap();
+    assert_eq!(changed["viewport"]["start"], 0.1);
+    assert_eq!(changed["viewport"]["end"], 0.6);
+    assert_eq!(read(), changed);
+    workspace.set_clip_comparison(true);
+    assert!(set(revision, window, write()).unwrap_err().contains("ruler or animation changed"));
+    let clips = set(revision, json!({"ruler":"clips", "action":"window", "start":0.5, "end":1.5}), write()).unwrap();
+    assert_eq!(clips["viewport"]["end"], 1.5);
+    let fit = set(revision, json!({"ruler":"clips", "action":"fit"}), write()).unwrap();
+    assert_eq!(fit["viewport"]["start"], 0.0);
+    assert_eq!(fit["viewport"]["end"], fit["viewport"]["duration"]);
+    let session = owner.borrow();
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
+fn studio_mcp_track_controls_use_the_native_header_and_component_picker() {
+    use ferroui_controls::{automation::AutomationProperties, ComboBox};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml")
+        .replacen(
+            r#"<Setter Property="Opacity" Value="0.2" />"#,
+            r#"<Setter Property="Opacity" Value="0.2" /><Setter Property="CornerRadius" Value="8,10,12,14" />"#,
+            1,
+        )
+        .replacen(
+            r#"<Setter Property="Opacity" Value="1" />"#,
+            r#"<Setter Property="Opacity" Value="1" /><Setter Property="CornerRadius" Value="18,20,22,24" />"#,
+            1,
+        );
+    let workspace = DesignerWorkspace::new(&source).unwrap();
+    let owner = workspace.session();
+    let programs = owner.borrow().animation_programs().to_vec();
+    owner.borrow_mut().select_animation_program(programs[0].id).unwrap();
+    workspace.set_timeline_visible(true);
+    workspace.set_timeline_curves(Some(ferroui_designer_animation::CurveMetric::Value));
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let component_track = |state: &Value| {
+        state["track_view"]["tracks"].as_array().unwrap().iter()
+            .find(|track| track["property"] == "CornerRadius").unwrap().clone()
+    };
+    let track = component_track(&before);
+    assert_eq!(track["canChooseChannel"], true);
+    let set = |revision, track: &Value, permissions| provider.call("designer_timeline_track_action", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "track":track,
+    }), permissions);
+    let mut select = json!({
+        "action":"select", "program":programs[0].id, "target":track["target"], "property":"CornerRadius",
+    });
+    assert!(set(revision, &select, Permissions::default()).is_err());
+    assert!(set(revision + 1, &select, write()).is_err());
+    select["program"] = json!(programs[1].id);
+    assert!(set(revision, &select, write()).unwrap_err().contains("current program"));
+    assert_eq!(read(), before);
+    select["program"] = json!(programs[0].id);
+    let playhead = owner.borrow().time();
+    let selected = set(revision, &select, write()).unwrap();
+    assert_eq!(selected["track_view"]["selected"]["property"], "CornerRadius");
+    assert_eq!(owner.borrow().time(), playhead);
+
+    select["action"] = json!("channel");
+    select["channel"] = json!("red");
+    assert!(set(revision, &select, write()).unwrap_err().contains("component from the visible curve"));
+    select["channel"] = json!("bottom_right");
+    let updated = set(revision, &select, write()).unwrap();
+    assert_eq!(component_track(&updated)["channel"], "bottom_right");
+    let picker = workspace.control().get_logical_descendants().filter_map(|item| item.cast::<ComboBox>())
+        .find(|picker| AutomationProperties::get_name(picker).as_deref() == Some("CornerRadius curve channel"))
+        .unwrap();
+    assert_eq!(picker.selected_index(), 2);
+    picker.set_selected_index(1);
+    assert_eq!(component_track(&read())["channel"], "top_right");
+    workspace.set_clip_comparison(true);
+    assert!(read()["track_view"].is_null());
+    assert!(set(revision, &select, write()).is_err());
+    let session = owner.borrow();
+    assert_eq!(session.authored_source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.can_undo());
+}
+
+#[test]
+fn studio_mcp_work_area_and_snap_use_the_native_toolbar() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{automation::AutomationProperties, ComboBox};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let program = owner.borrow().animation_programs()[0].id;
+    owner.borrow_mut().select_animation_program(program).unwrap();
+    workspace.set_timeline_visible(true);
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let area = |work_area: Value, rev, permissions| provider.call("designer_timeline_set_work_area", &json!({
+        "expected_uri":before["uri"], "expected_revision":rev, "work_area":work_area,
+    }), permissions);
+    let snap = |frame_rate: u32| provider.call("designer_timeline_set_frame_rate", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision,
+        "frame_snap":{"program":program,"frame_rate":frame_rate},
+    }), write());
+    let range = json!({"start":0.15,"end":0.6,"loop":false});
+    let program_range = json!({"scope":"program","program":program,"action":"set","range":range});
+    assert!(area(program_range.clone(), revision, Permissions::default()).is_err());
+    assert!(area(program_range.clone(), revision + 1, write()).is_err());
+    assert_eq!(read(), before);
+    let configured = area(program_range.clone(), revision, write()).unwrap();
+    assert_eq!(configured["work_area"]["range"], range);
+    assert_eq!(configured["work_area"]["clock"], "authored");
+    assert!(snap(25).unwrap_err().contains("frame rate listed"));
+    assert_eq!(snap(24).unwrap()["frame_snap"]["frame_rate"], 24);
+    let picker = workspace.control().get_logical_descendants().filter_map(|item| item.cast::<ComboBox>())
+        .find(|picker| AutomationProperties::get_name(picker).as_deref() == Some("Timeline snap unit")).unwrap();
+    assert_eq!(picker.selected_index(), 1);
+    picker.set_selected_index(2);
+    assert_eq!(read()["frame_snap"]["frame_rate"], 30);
+
+    workspace.set_clip_comparison(true);
+    assert!(read()["frame_snap"].is_null());
+    assert!(area(program_range, revision, write()).unwrap_err().contains("visible Timeline clock"));
+    let clips = json!({"scope":"clips","action":"set","range":{"start":0.35,"end":1.4,"loop":false}});
+    let configured = area(clips.clone(), revision, write()).unwrap();
+    assert_eq!(configured["work_area"]["clock"], "elapsed");
+    assert_eq!(configured["work_area"]["range"], clips["range"]);
+    workspace.control().get_control::<Button>("Play")
+        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(owner.borrow().time(), 0.35);
+    assert_eq!(read()["work_area"]["editable"], false);
+    let disable = json!({"scope":"clips","action":"disable"});
+    assert!(area(disable.clone(), revision, write()).unwrap_err().contains("Pause playback"));
+    owner.borrow_mut().advance(2.0).unwrap();
+    assert_eq!(owner.borrow().time(), 1.4);
+    let held = read();
+    assert_eq!(held["work_area"]["playhead"], 1.4);
+    assert_eq!(held["work_area"]["editable"], true);
+    assert_eq!(area(disable, revision, write()).unwrap()["work_area"]["enabled"], false);
+    workspace.set_clip_comparison(false);
+    assert_eq!(read()["work_area"]["range"], range);
+    assert_eq!(read()["frame_snap"]["frame_rate"], 30);
+    let session = owner.borrow();
+    assert_eq!(session.document().revision(), revision);
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
+}
+
+#[test]
+fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let session = Rc::new(RefCell::new(DesignerSession::new(original, ContentControl::new()).unwrap()));
+    let provider = DesignerMcp::new(&session);
+    let marker = "designer_timeline_marker_edit";
+    let program = session.borrow().animation_programs()[0].id;
+    let set = json!({"expected_revision":0,"action":"set","program":program,"name":"Review","time":0.6});
+    assert!(provider.call(marker, &set, Permissions::default()).is_err());
+    assert_eq!(provider.call(marker, &set, write()).unwrap()["markers"][0]["time"], 0.6);
+    let shared = json!({"expected_revision":0,"all":true,"action":"set","name":"Review","time":1.25});
+    assert_eq!(provider.call(marker, &shared, write()).unwrap()["markers"][0]["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), original);
+    assert!(!session.borrow().can_undo());
+    let changed = original.replace("Client onboarding", "Customer onboarding");
+    session.borrow_mut().update_source(&changed);
+    assert!(provider.call(marker, &set, write()).unwrap_err().contains("revision changed"));
+    let revision = session.borrow().document().revision();
+    let program = session.borrow().animation_programs()[0].id;
+    let list = provider.call("designer_timeline_markers", &json!({"expected_revision":revision,"program":program}), Permissions::default()).unwrap();
+    assert_eq!(list["markers"][0]["time"], 0.6);
+    let seek = json!({"expected_revision":revision,"all":true,"action":"seek","name":"Review"});
+    assert_eq!(provider.call(marker, &seek, write()).unwrap()["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), changed);
+    session.borrow_mut().open_document(original.into(), "memory://unrelated.xaml".into()).unwrap();
+    assert!(session.borrow().preview_markers(None, true).unwrap().is_empty());
+}
 fn call_edit(
     session: &Rc<RefCell<DesignerSession>>,
     provider: &DesignerMcp,
@@ -782,6 +1082,69 @@ fn language_tools_rename_across_project_tabs_atomically_with_version_and_revisio
     );
     assert_eq!(session.borrow().document_uri(), usage_uri);
     assert!(session.borrow().can_undo());
+}
+
+#[test]
+fn project_library_tools_open_an_unopened_dictionary_in_its_authored_scope() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Files::new();
+    let original = r#"<Button xmlns="https://github.com/ferroui" Name="Target"/>"#;
+    let start = files.write("View.xaml", original);
+    let source = concat!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n",
+        "  <DataTemplate x:Key='CustomerCard'><TextBlock Text='Card'/></DataTemplate>\n",
+        "</ResourceDictionary>",
+    );
+    let uri = files.write("Cards.xaml", source);
+    let workspace = DesignerWorkspace::with_uri(original, start.clone()).unwrap();
+    workspace.set_solution(ferroui_designer_project::Solution::discover(&files.0).unwrap()).unwrap();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let page = provider.call("ferroui_project_library", &json!({"query":"customer cards", "limit":1}), Permissions::default()).unwrap();
+    let entry = page["entries"][0].clone();
+    assert_eq!(page["total"], 1);
+    assert_eq!(entry["path"], "Cards.xaml");
+    assert!(!workspace.document_uris().contains(&uri));
+    let mut args = json!({"entry":entry, "destination":"preview"});
+    assert!(provider.call("designer_open_project_definition", &args, Permissions::default()).is_err());
+    args["entry"]["definition"]["name"] = json!("RetiredCard");
+    assert!(provider.call("designer_open_project_definition", &args, write()).is_err());
+    assert_eq!(workspace.session().borrow().document_uri(), start);
+    args["entry"]["definition"]["name"] = json!("CustomerCard");
+    let opened = provider.call("designer_open_project_definition", &args, write()).unwrap();
+    assert_eq!(opened["uri"], uri);
+    let session = workspace.session();
+    assert!(session.borrow().definition_scope().is_some());
+    assert_eq!(session.borrow().document().source(), source);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
+fn project_setup_creates_the_reviewed_files_only_with_write_permission() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Files::new();
+    let source = "<Button xmlns=\"https://github.com/ferroui\" />";
+    let uri = files.write("Existing.xaml", source);
+    let workspace = DesignerWorkspace::with_uri(source, uri.clone()).unwrap();
+    workspace.set_solution(ferroui_designer_project::Solution::discover(&files.0).unwrap()).unwrap();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let catalog = provider.call("ferroui_project_templates", &json!({}), Permissions::default()).unwrap();
+    assert_eq!(catalog["templates"].as_array().unwrap().len(), 2);
+    let mut args = json!({"template":"desktopXaml","name":"customer-starter"});
+    let plan = provider.call("ferroui_project_plan_new", &args, Permissions::default()).unwrap();
+    assert_eq!(plan["entry"], "Views/MainView.xaml");
+    assert!(!files.0.join("customer-starter").exists());
+    args["review"] = plan["review"].clone();
+    assert!(provider.call("ferroui_project_create", &args, Permissions::default()).is_err());
+    let created = provider.call("ferroui_project_create", &args, write()).unwrap();
+    let root = std::path::PathBuf::from(created["root"].as_str().unwrap());
+    for file in plan["files"].as_array().unwrap() {
+        assert_eq!(std::fs::read_to_string(root.join(file["path"].as_str().unwrap())).unwrap(),
+            file["source"].as_str().unwrap());
+    }
+    assert!(provider.call("ferroui_project_create", &args, write()).is_err());
+    assert!(provider.call("ferroui_project_plan_new", &json!({"template":"desktopRsx","name":"outside","checkout":".."}),
+        Permissions::default()).is_err());
+    assert_eq!(workspace.session().borrow().document_uri(), uri);
 }
 
 #[test]

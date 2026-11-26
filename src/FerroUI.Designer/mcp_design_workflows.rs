@@ -10,6 +10,7 @@ pub(super) fn handles(name: &str) -> bool {
     matches!(
         name,
         "designer_design_data"
+            | "designer_design_fixtures"
             | "designer_design_data_edit"
             | "designer_focus_order"
             | "designer_focus_edit"
@@ -36,6 +37,12 @@ pub(super) fn tools() -> Vec<Value> {
         s::action(name, properties, &required, true)
     };
     vec![
+        s::tool(
+            "designer_design_fixtures",
+            "Read the view root's named typed design fixtures, authored default, and current preview override.",
+            s::object(json!({}), &[]),
+            false,
+        ),
         s::tool(
             "designer_design_data",
             "Read design-time overrides for an authored node, preview enablement and design size. Omitted node uses the first selected node or document root. Source and preview are unchanged.",
@@ -70,13 +77,19 @@ pub(super) fn tools() -> Vec<Value> {
                     &["enabled"],
                     true,
                 ),
+                s::action(
+                    "fixture",
+                    json!({"name":s::nullable(s::string())}),
+                    &["name"],
+                    true,
+                ),
             ],
             true,
         ),
         s::tool(
             "designer_focus_order",
-            "Read accepted native keyboard-navigation groups, authored/generated entries, label targets and model token. Runtime group IDs and model are ephemeral; obtain a new model after any preview change.",
-            s::object(json!({}), &[]),
+            "Read accepted native keyboard-navigation groups, authored/generated entries, label targets and model token. Set overlay to include measured focus badges, navigation links and label connections. Runtime group IDs and model are ephemeral; obtain a new model after any preview change.",
+            s::object(json!({"overlay":{"type":"boolean"}}), &[]),
             false,
         ),
         s::actions(
@@ -188,6 +201,12 @@ pub(super) fn call(
     args: &Value,
 ) -> Result<Value, String> {
     match name {
+        "designer_design_fixtures" => Ok(json!({
+            "node": session.document().ast().root(),
+            "manifest": ferroui_designer_core::design_fixtures::DesignFixtures::from_document(session.document())?,
+            "selected": session.design_fixture(),
+            "enabled": session.design_time_enabled(),
+        })),
         "designer_design_data" => {
             let node = args["node"]
                 .as_u64()
@@ -220,6 +239,10 @@ pub(super) fn call(
                     session.set_design_time_enabled(args["enabled"].as_bool().unwrap())?;
                     None
                 }
+                "fixture" => {
+                    session.set_design_fixture(args["name"].as_str().map(str::to_owned))?;
+                    None
+                }
                 _ => return Err("Unknown design-data action".into()),
             };
             if let Some(command) = command {
@@ -228,10 +251,13 @@ pub(super) fn call(
             Ok(state(session))
         }
         "designer_focus_order" => {
-            let catalog = focus_catalog(&session.focus_order_catalog()?);
-            Ok(
-                json!({"revision":session.document().revision(),"scope_epoch":session.definition_scope_epoch(),"model":model_token(session,&catalog),"catalog":catalog}),
-            )
+            let order = session.focus_order_catalog()?;
+            let catalog = focus_catalog(&order);
+            let mut result = json!({"revision":session.document().revision(),"scope_epoch":session.definition_scope_epoch(),"model":model_token(session,&catalog),"catalog":catalog});
+            if args["overlay"].as_bool() == Some(true) {
+                result["overlay"] = json!(session.focus_order_overlay(&order));
+            }
+            Ok(result)
         }
         "designer_focus_edit" => {
             let snapshot = session.focus_order_snapshot()?;

@@ -173,16 +173,7 @@ pub(crate) fn apply_stage_states(
             .iter()
             .find(|state| owner.classes().contains(&group.class_name(&state.name)))
             .map(|state| state.name.as_str());
-        let transition = group
-            .transitions
-            .iter()
-            .find(|transition| transition.to == state.name && transition.from.as_deref() == from)
-            .or_else(|| {
-                group
-                    .transitions
-                    .iter()
-                    .find(|transition| transition.to == state.name && transition.from.is_none())
-            });
+        let transition = group.transition(from, &state.name);
         let duration = transition.map_or(0.000_000_1, |transition| {
             transition.duration.max(0.000_000_1)
         });

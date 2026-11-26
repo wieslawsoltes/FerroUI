@@ -1,5 +1,6 @@
 //! Explicit UI-thread source snapshots for native loaders in every build profile.
 //! Global reload-session publication is available only in development builds.
+use ferroui_base::{platform::IAssetLoader, FerroLocator, LocatorExtensions};
 use std::{
     cell::RefCell,
     collections::{BTreeMap, BTreeSet},
@@ -16,6 +17,13 @@ pub struct SourceSnapshot {
     sources: Rc<Sources>,
     unavailable: Rc<BTreeMap<String, String>>,
     requested: Rc<RefCell<BTreeSet<String>>>,
+    assets: Option<AssetScope>,
+}
+
+#[derive(Clone)]
+struct AssetScope {
+    registered: Rc<dyn IAssetLoader>,
+    scoped: Rc<dyn IAssetLoader>,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -30,7 +38,24 @@ impl SourceSnapshot {
             sources: Rc::new(sources),
             unavailable: Rc::new(unavailable),
             requested: Rc::new(RefCell::new(BTreeSet::new())),
+            assets: None,
         }
+    }
+
+    /// Attach the asset loader used by this isolated source view. An inner
+    /// snapshot decorates the registered services, never another document's assets.
+    pub fn with_asset_loader(
+        mut self,
+        decorate: impl FnOnce(Rc<dyn IAssetLoader>) -> Rc<dyn IAssetLoader>,
+    ) -> Self {
+        let registered = capture_snapshot()
+            .and_then(|snapshot| snapshot.assets.map(|scope| scope.registered))
+            .or_else(|| FerroLocator::current().get_service::<dyn IAssetLoader>());
+        if let Some(registered) = registered {
+            let scoped = decorate(registered.clone());
+            self.assets = Some(AssetScope { registered, scoped });
+        }
+        self
     }
 
     /// Activate this snapshot for construction or deferred native loading. Nested
@@ -42,7 +67,15 @@ impl SourceSnapshot {
                 SNAPSHOT.with(|slot| *slot.borrow_mut() = self.0.take());
             }
         }
-        let _restore = Restore(SNAPSHOT.with(|slot| slot.replace(Some(self.clone()))));
+        let previous = SNAPSHOT.with(|slot| slot.replace(Some(self.clone())));
+        let asset_loader = self.assets.as_ref().map(|scope| scope.scoped.clone())
+            .or_else(|| previous.as_ref()?.assets.as_ref().map(|scope| scope.registered.clone()));
+        let _restore = Restore(previous);
+        let _asset_scope = asset_loader.map(|loader| {
+            let scope = FerroLocator::enter_scope();
+            FerroLocator::current_mutable().bind::<dyn IAssetLoader>().to_constant(loader);
+            scope
+        });
         with_sources(self.sources.clone(), action)
     }
 
@@ -61,27 +94,23 @@ pub(crate) fn capture_snapshot() -> Option<SourceSnapshot> {
 
 /// Native includes preserve errors as errors instead of silently reading older
 /// assets when an explicitly supplied source is temporarily unavailable.
-pub(crate) fn try_source(uri: &str) -> Result<Option<String>, String> {
-    if let Some(snapshot) = capture_snapshot() {
+pub fn try_source(uri: &str) -> Result<Option<String>, String> {
+    let snapshot = capture_snapshot();
+    if let Some(snapshot) = &snapshot {
         snapshot.record_request(uri);
         if let Some(message) = snapshot.unavailable.get(uri) {
             return Err(message.clone());
         }
     }
-    Ok(source(uri))
+    let current = CURRENT.with(|slot| slot.borrow().get(uri).cloned())
+        .or_else(|| snapshot.as_ref().and_then(|snapshot| snapshot.sources.get(uri).cloned()));
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    let current = current.or_else(|| publication::published_source(uri));
+    Ok(current)
 }
 
 pub fn source(uri: &str) -> Option<String> {
-    if let Some(snapshot) = capture_snapshot() {
-        snapshot.record_request(uri);
-        if snapshot.unavailable.contains_key(uri) {
-            return None;
-        }
-    }
-    let current = CURRENT.with(|slot| slot.borrow().get(uri).cloned());
-    #[cfg(all(feature = "hot-reload", debug_assertions))]
-    let current = current.or_else(|| publication::published_source(uri));
-    current
+    try_source(uri).ok().flatten()
 }
 /// Restores the prior snapshot on normal return and unwind. Never transfers UI objects across threads.
 pub fn with_sources<T>(sources: Rc<Sources>, action: impl FnOnce() -> T) -> T {
@@ -204,6 +233,23 @@ mod publication {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn explicit_includes_survive_the_authored_document_transaction() {
+        let primary = "file:///workspace/View.xaml";
+        let included = "file:///workspace/Colors.xaml";
+        let invalid = "file:///workspace/Broken.xaml";
+        let snapshot = SourceSnapshot::new(
+            Sources::from([(included.into(), "draft resources".into())]),
+            BTreeMap::from([(invalid.into(), "included source needs repair".into())]),
+        );
+        snapshot.run(|| with_sources(Rc::new(Sources::from([(primary.into(), "view".into())])), || {
+            assert_eq!(try_source(primary).unwrap().as_deref(), Some("view"));
+            assert_eq!(try_source(included).unwrap().as_deref(), Some("draft resources"));
+            assert_eq!(try_source(invalid).unwrap_err(), "included source needs repair");
+        }));
+        assert!(try_source(included).unwrap().is_none());
+    }
 
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     #[test]

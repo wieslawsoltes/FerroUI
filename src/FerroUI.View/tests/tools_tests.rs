@@ -70,7 +70,7 @@ fn hot_reload_changes_the_literals_of_a_component_and_keeps_its_controls() {
     let owner = Owner::new_root();
     let panel = owner.with(|| {
         rerender(|| {
-            let element: Element = rsx! {
+            let element: crate::Element = rsx! {
                 StackPanel { spacing: 4.0,
                     TextBlock { name: "Label", text: "HOT_A", width: 80.0 }
                     "HOT_TEXT_A"

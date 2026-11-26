@@ -19,6 +19,9 @@ pub(super) fn number() -> Value {
 pub(super) fn time() -> Value {
     json!({"type":"number","minimum":0})
 }
+pub(super) fn preview_range() -> Value {
+    object(json!({"start":time(),"end":time(),"loop":{"type":"boolean"}}), &["start","end","loop"])
+}
 pub(super) fn nullable(schema: Value) -> Value {
     json!({"anyOf":[schema,{"type":"null"}]})
 }
@@ -81,6 +84,34 @@ pub(super) fn animation_value() -> Value {
             &["kind", "value"],
         )
     };
+    let effect_form = json!({"enum":["literal","object","property_element"]});
+    let argb = json!({"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer","minimum":0,"maximum":255}});
+    let box_shadow = object(json!({"offset_x":number(),"offset_y":number(),"blur":number(),"spread":number(),"argb":argb,"inset":{"type":"boolean"}}),
+        &["offset_x","offset_y","blur","spread","argb","inset"]);
+    let coefficients = |count| json!({"type":"array","minItems":count,"maxItems":count,"items":number()});
+    let transform_operation = json!({"oneOf":[
+        value("translate",coefficients(2)), value("rotate",number()), value("scale",coefficients(2)),
+        value("skew",coefficients(2)), value("matrix",coefficients(6))
+    ]});
+    let transform = object(json!({"operations":array(transform_operation,100_000)}), &["operations"]);
+    let point = object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"]);
+    let distance = object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"]);
+    let shapes = json!({"oneOf":[
+        object(json!({"kind":{"const":"linear"},"start":point,"end":point}), &["kind","start","end"]),
+        object(json!({"kind":{"const":"radial"},"center":point,"origin":point,"radius_x":distance,"radius_y":distance}),
+            &["kind","center","origin","radius_x","radius_y"]),
+        object(json!({"kind":{"const":"conic"},"center":point,"angle":number()}), &["kind","center","angle"])
+    ]});
+    let stop = object(json!({"argb":argb,"offset":number()}), &["argb","offset"]);
+    let optional_transform = json!({"anyOf":[transform,{"type":"null"}]});
+    let gradient = object(json!({"shape":shapes,"stops":array(stop,100_000),"opacity":number(),
+        "spread":{"enum":["Pad","Reflect","Repeat"]},"transform_origin":point,
+        "transform":optional_transform,"relative_transform":optional_transform
+    }), &["shape","stops","opacity","spread","transform_origin"]);
+    let brush = json!({"oneOf":[
+        object(json!({"Gradient":object(json!({"value":gradient,"wrapped":{"type":"boolean"}}), &["value"])}), &["Gradient"]),
+        object(json!({"Solid":object(json!({"argb":argb,"opacity":number(),"form":effect_form}), &["argb","opacity"])}), &["Solid"])
+    ]});
     json!({"oneOf":[
         value("Number",number()), value("Color",components(&["a","r","g","b"],true)),
         value("Point",components(&["x","y"],false)),
@@ -91,6 +122,17 @@ pub(super) fn animation_value() -> Value {
         value("CornerRadius",components(&["top_left","top_right","bottom_right","bottom_left"],false)),
         value("RelativePoint",object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"])),
         value("RelativeScalar",object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"])),
+        value("BoxShadows",object(json!({"layers":{"type":"array","items":box_shadow}}), &["layers"])),
+        value("TransformList",transform), value("Brush",brush),
+        value("Effect",json!({"oneOf":[
+            object(json!({"kind":{"const":"blur"},"radius":number(),"form":effect_form}), &["kind","radius"]),
+            object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":number(),
+                "argb":argb,"opacity":number(),"form":effect_form}), &["kind","offset_x","offset_y","blur_radius","argb"]),
+            object(json!({"kind":{"const":"directional_drop_shadow"},"direction":number(),"shadow_depth":number(),"blur_radius":number(),
+                "argb":argb,"opacity":number(),"form":{"enum":["object","property_element"]}}),
+                &["kind","direction","shadow_depth","blur_radius","argb","opacity","form"]),
+            object(json!({"kind":{"const":"registered"},"source":string()}), &["kind","source"])
+        ]})),
         value("Discrete",string())
     ]})
 }
@@ -102,22 +144,28 @@ pub(super) fn easing() -> Value {
         object(json!({"kind":{"const":"Spring"},"value":object(json!({"mass":{"type":"number","exclusiveMinimum":0},"stiffness":{"type":"number","exclusiveMinimum":0},"damping":time(),"initial_velocity":number()}), &["mass","stiffness","damping","initial_velocity"])}), &["kind","value"])
     ]})
 }
-pub(super) fn timeline() -> Value {
-    let keyframe = object(
+fn keyframe() -> Value {
+    object(
         json!({"time":time(),"value":animation_value(),"easing":easing()}),
         &["time", "value", "easing"],
-    );
+    )
+}
+pub(super) fn keyframe_paste() -> Value {
+    let track = object(json!({"property":string(),"keyframes":array(keyframe(),4096)}), &["property","keyframes"]);
+    let clipboard = object(json!({"format":{"const":"ferroui.keyframes.v1"},"tracks":array(track,4096)}), &["format","tracks"]);
+    let destination = object(json!({"target":id(),"property":string()}), &["target","property"]);
+    object(json!({"clipboard":clipboard,"destinations":array(destination,4096),"time":time(),"reverse":{"type":"boolean"}}),
+        &["clipboard","destinations","time"])
+}
+pub(super) fn timeline() -> Value {
     let track = object(
-        json!({"target":id(),"property":string(),"keyframes":array(keyframe,100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
+        json!({"target":id(),"property":string(),"keyframes":array(keyframe(),100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
         &["target", "property", "keyframes", "muted"],
     );
-    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    let mut properties = timing_properties();
+    properties["tracks"] = array(track, 4096);
     object(
-        json!({
-            "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
-            "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
-            "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing(),"tracks":array(track,4096)
-        }),
+        properties,
         &[
             "duration",
             "delay",
@@ -129,6 +177,20 @@ pub(super) fn timeline() -> Value {
             "tracks",
         ],
     )
+}
+fn timing_properties() -> Value {
+    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    json!({
+        "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
+        "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
+        "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing()
+    })
+}
+pub(super) fn timing_edit() -> Value {
+    let mut properties = timing_properties();
+    properties["repeat"] = json!({"type":"string","description":"Repeat count as a decimal integer, or Infinite."});
+    properties["easing"] = json!({"type":"string","description":"Native FerroUI easing name, cubic Bézier coordinates, or spring settings."});
+    object(properties, &[])
 }
 pub(super) fn state_group() -> Value {
     let setter = object(
@@ -153,8 +215,8 @@ fn variant(name: &str, fields: Value, required: &[&str]) -> Value {
     properties.insert(name.into(), object(fields, required));
     object(Value::Object(properties), &[name])
 }
-pub(super) fn behavior() -> Value {
-    let action = json!({"oneOf":[
+pub(super) fn behavior_action() -> Value {
+    json!({"oneOf":[
         variant("ChangeProperty",json!({"target":nullable(string()),"property":string(),"value":string()}), &["property","value"]),
         variant("InvokeCommand",json!({"command":string(),"parameter":nullable(string())}), &["command"]),
         variant("CallMethod",json!({"target":nullable(string()),"method":string()}), &["method"]),
@@ -162,31 +224,48 @@ pub(super) fn behavior() -> Value {
         variant("RemoveClass",json!({"target":nullable(string()),"class":string()}), &["class"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string()),"children":string()}), &["type_name","properties","children"]),
         variant("Markup",json!({"source":string()}), &["source"])
-    ]});
-    let trigger = json!({"oneOf":[
+    ]})
+}
+pub(super) fn behavior_trigger() -> Value {
+    json!({"oneOf":[
         variant("Event",json!({"event":string(),"source":nullable(string())}), &["event"]),
         variant("Data",json!({"binding":string(),"comparison":string(),"value":string(),"revert_on_false":{"type":"boolean"}}), &["binding","comparison","value","revert_on_false"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string())}), &["type_name","properties"])
-    ]});
+    ]})
+}
+pub(super) fn behavior() -> Value {
     object(
-        json!({"id":nullable(id()),"owner":id(),"trigger":trigger,"actions":array(action,4096)}),
+        json!({"id":nullable(id()),"owner":id(),"trigger":behavior_trigger(),"actions":array(behavior_action(),4096)}),
         &["owner", "trigger", "actions"],
     )
 }
 pub(super) fn formatting() -> Value {
     object(
-        json!({"tabSize":{"type":"integer","minimum":1,"maximum":16},"insertSpaces":{"type":"boolean"},"trimTrailingWhitespace":{"type":"boolean"},"insertFinalNewline":{"type":"boolean"}}),
+        json!({
+            "tabSize":{"type":"integer","minimum":1,"maximum":16},
+            "insertSpaces":{"type":"boolean"},
+            "trimTrailingWhitespace":{"type":"boolean"},
+            "insertFinalNewline":{"type":"boolean"},
+            "trimFinalNewlines":{"type":"boolean"},
+            "preserveBlankLines":{"type":"boolean"},
+            "attributeLayout":{"enum":["preserve","inline","onePerLine","wrap"]},
+            "wrapColumn":{"type":"integer","minimum":20,"maximum":240},
+            "closingBracketOnNewLine":{"type":"boolean"},
+            "selfClosingSpace":{"enum":["preserve","space","none"]}
+        }),
         &[],
     )
 }
-pub(super) fn workspace_edit() -> Value {
+pub(super) fn source_range() -> Value {
     let position = object(
         json!({"line":revision(),"character":revision()}),
         &["line", "character"],
     );
-    let range = object(json!({"start":position,"end":position}), &["start", "end"]);
+    object(json!({"start":position,"end":position}), &["start", "end"])
+}
+pub(super) fn workspace_edit() -> Value {
     let edit = object(
-        json!({"range":range,"newText":string()}),
+        json!({"range":source_range(),"newText":string()}),
         &["range", "newText"],
     );
     let document = object(

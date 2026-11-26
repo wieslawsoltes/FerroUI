@@ -53,6 +53,32 @@ fn rsx_children_from_expressions_conditions_and_loops() {
     owner.dispose();
 }
 
+#[test]
+fn inline_rsx_collections_and_braced_children_run_the_original_builders() {
+    let computed: Element = rsx! { TextBlock { text("Computed") } };
+    let element = rsx! { StackPanel {
+        StackPanel {
+            children([
+                rsx! { TextBlock { text("Array") } },
+                computed,
+            ]),
+        }
+        StackPanel {
+            children: ::std::vec![rsx! { TextBlock { text("Vector") } }],
+        }
+        { rsx! { TextBlock { text("Moved") } } }
+    } };
+    let (control, owner) = element.mount_root();
+    let panel = control.cast::<StackPanel>().unwrap();
+    let children = panel.children().to_vec();
+    let array = children[0].cast::<StackPanel>().unwrap();
+    let vector = children[1].cast::<StackPanel>().unwrap();
+    assert_eq!(array.children().count(), 2);
+    assert_eq!(vector.children().count(), 1);
+    assert_eq!(children[2].cast::<TextBlock>().unwrap().text().as_deref(), Some("Moved"));
+    owner.dispose();
+}
+
 /// A labelled value.
 #[component]
 fn Labelled(label: String, #[prop(default = 2)] digits: usize, value: f64) -> Element {

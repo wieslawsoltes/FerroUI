@@ -735,6 +735,18 @@ impl ValueStore {
         self.get_stored_base_value::<T::Storage>(property).map(T::from_storage)
     }
 
+    pub(crate) fn unanimated_value<T: StyledValue>(
+        &self, owner: &FerroObject, property: &'static StyledProperty<T>,
+    ) -> T {
+        self.get_base_value(property).unwrap_or_else(|| {
+            if property.inherits() {
+                self.inherited_or_default(owner, property)
+            } else {
+                property.get_default_value_for(owner)
+            }
+        })
+    }
+
     fn get_stored_base_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
         let effective = self.get_effective_value(property)?;
         cast_effective_value::<S>(&*effective).try_get_base_value()

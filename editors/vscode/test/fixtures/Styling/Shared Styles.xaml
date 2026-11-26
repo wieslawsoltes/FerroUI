@@ -1,0 +1,6 @@
+<Styles xmlns="https://github.com/ferroui">
+  <!-- Shared account styles. -->
+  <Style Selector="Border.account">
+    <Setter Property="Background" Value="#FF476188" />
+  </Style>
+</Styles>

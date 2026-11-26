@@ -1,0 +1,33 @@
+.toolbox { padding: 0 8px 8px; }
+.toolbox-search {
+    position: sticky;
+    z-index: 1;
+    inset-block-start: 0;
+    display: grid;
+    align-items: center;
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+    padding-block: 5px;
+    background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
+.toolbox-search > .codicon { position: absolute; inset-inline-start: 7px; color: var(--muted); pointer-events: none; }
+.toolbox-search input { padding-inline-start: 27px; }
+.toolbox .dock-message { margin-inline: 1px; }
+#asset-list h2 { font-size: inherit; font-weight: 600; margin: 10px 2px 3px; color: var(--muted); }
+.assets { display: grid; }
+.asset {
+    display: flex;
+    align-items: center;
+    text-align: start;
+    gap: 7px;
+    min-inline-size: 0;
+    padding-inline: 5px;
+    cursor: grab;
+    user-select: none;
+}
+.asset svg { inline-size: 16px; block-size: 16px; flex: 0 0 auto; fill: currentColor; fill-rule: evenodd; }
+.asset span { overflow: hidden; text-overflow: ellipsis; }
+.asset[aria-disabled=true] { opacity: .55; cursor: default; }
+.tiles .assets { grid-template-columns: repeat(auto-fill, minmax(min(94px, 100%), 1fr)); gap: 3px; }
+.tiles .asset { flex-direction: column; justify-content: center; min-block-size: 53px; border-color: var(--line); }
+.tiles .asset span { max-inline-size: 100%; }

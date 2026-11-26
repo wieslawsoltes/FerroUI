@@ -3,6 +3,12 @@ name: Hot reload acceptance
 # Keep this explicit until both native paths pass on all three platforms.
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: Hot reload acceptance suite
+        type: choice
+        default: all
+        options: [all, native-patch, catalog]
 
 permissions:
   contents: read
@@ -10,6 +16,7 @@ permissions:
 jobs:
   native-patch:
     name: Native patch (${{ matrix.os }})
+    if: inputs.suite != 'catalog'
     strategy:
       fail-fast: false
       matrix:
@@ -57,6 +64,7 @@ jobs:
 
   catalog:
     name: Catalog XAML (${{ matrix.os }})
+    if: inputs.suite != 'native-patch'
     strategy:
       fail-fast: false
       matrix:

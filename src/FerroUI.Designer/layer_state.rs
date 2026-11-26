@@ -10,6 +10,10 @@ use ferroui_designer_core::{Ast, NodeId, NodeKind};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
+#[path = "layer_persistence.rs"]
+mod persistence;
+pub use persistence::LayerViewState;
+
 /// Source-row presentation. Direct flags can be changed on this row; inherited flags
 /// require changing their ancestor. Isolation preserves visible ancestor context.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

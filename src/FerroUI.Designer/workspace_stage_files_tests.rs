@@ -1,4 +1,5 @@
 //! Real TopLevel storage-provider calls, with controllable picker/read completion.
+use crate::PreviewStageManifest;
 use super::*;
 use crate::{PreviewEnvironment, PreviewStageConfiguration, PreviewStageId, PreviewStageStatus};
 use ferroui_base::input::LocalBoxFuture;
@@ -504,7 +505,7 @@ fn invalid_or_oversized_manifests_leave_accepted_stages_and_source_intact() {
     let authored = Authored::capture(workspace);
     for invalid in [
         "{broken".to_owned(),
-        r#"{"version":4,"stages":[],"active":null}"#.to_owned(),
+        r#"{"version":5,"stages":[],"active":null}"#.to_owned(),
         " ".repeat(1_048_577),
     ] {
         *fixture.file.bytes.borrow_mut() = invalid.into_bytes();

@@ -34,6 +34,24 @@ pub enum OutlineCommand {
     Outdent,
 }
 
+/// Positions relative to an authored outline row, shared by designer hosts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutlinePlacement {
+    Inside,
+    Before,
+    After,
+}
+
+impl From<OutlinePlacement> for DropPosition {
+    fn from(placement: OutlinePlacement) -> Self {
+        match placement {
+            OutlinePlacement::Inside => Self::Inside,
+            OutlinePlacement::Before => Self::Before,
+            OutlinePlacement::After => Self::After,
+        }
+    }
+}
+
 impl OutlineCommand {
     fn label(self) -> &'static str {
         match self {
@@ -269,6 +287,12 @@ impl OutlineDrag {
     ) -> Result<(), String> {
         let edits = self.plan(session, target, position)?;
         if !edits.is_empty() {
+            if session.uses_rust_source() {
+                let after = (position == DropPosition::After).then_some(target);
+                return session.apply_rust_placement(
+                    self.revision, "Move outline selection", edits, after, &self.nodes,
+                );
+            }
             session
                 .apply_at(self.revision, "Move outline selection", edits)
                 .map_err(|error| error.to_string())?;
@@ -375,6 +399,60 @@ impl OutlineDrag {
 }
 
 impl DesignerSession {
+    /// Whether a source row belongs to a content slot that the outline can move.
+    pub fn can_move_outline_node(&self, node: NodeId) -> bool {
+        self.can_manipulate()
+            && self.ensure_layer_manipulable(node).is_ok()
+            && ContentHost::of_child(self, node).is_ok()
+    }
+
+    /// Whether a source row currently has room for another authored child.
+    pub fn can_insert_outline_child(&self, node: NodeId) -> bool {
+        self.can_manipulate() && self.validate_content_insertion(node).is_ok()
+    }
+
+    /// Plan an outline move against the same content rules as the native tree.
+    pub fn plan_outline_move(
+        &self,
+        node: NodeId,
+        target: NodeId,
+        position: OutlinePlacement,
+    ) -> Result<Vec<Edit>, String> {
+        self.plan_outline_move_many(&[node], target, position)
+    }
+
+    /// A group uses the same normalized source order and content rules as Studio.
+    pub fn plan_outline_move_many(&self, nodes: &[NodeId], target: NodeId, position: OutlinePlacement) -> Result<Vec<Edit>, String> {
+        OutlineDrag::capture(self, nodes.iter().copied())?.plan(self, target, position.into())
+    }
+
+    /// Plan an asset insertion at an authored outline boundary without applying it.
+    pub fn plan_outline_insert(
+        &self,
+        source: &str,
+        target: NodeId,
+        position: OutlinePlacement,
+    ) -> Result<Vec<Edit>, String> {
+        ensure_editable(self)?;
+        let host = match position {
+            OutlinePlacement::Inside => ContentHost::of_target(self, target)?,
+            _ => ContentHost::of_child(self, target)?,
+        };
+        self.validate_content_insertion(host.owner)?;
+        let document = self.document();
+        let children = document.ast().element_children(host.container);
+        let index = match position {
+            OutlinePlacement::Inside => children.len(),
+            _ => children.iter().position(|id| *id == target)
+                .ok_or("The insertion anchor no longer belongs to the target collection")?
+                + usize::from(position == OutlinePlacement::After),
+        };
+        let (source, declaration) = crate::preview_source::embed_native_fragment(document, source)?;
+        let mut edits = declaration.into_iter().collect::<Vec<_>>();
+        edits.push(Edit::InsertChild { parent: host.container, index, source });
+        Ok(edits)
+    }
+
     pub(crate) fn content_target_container(&self, owner: NodeId) -> Result<NodeId, String> {
         ContentHost::of_owner(self, owner).map(|host| host.container)
     }
@@ -383,6 +461,16 @@ impl DesignerSession {
         self.ensure_layer_manipulable(owner)?;
         let host = ContentHost::of_owner(self, owner)?;
         host.validate_capacity_with_count(self.document(), &BTreeSet::new(), 1)
+    }
+
+    pub(crate) fn wrapped_layout_child(&self, owner: NodeId) -> Option<NodeId> {
+        self.ensure_layer_manipulable(owner).ok()?;
+        let host = ContentHost::of_owner(self, owner).ok()?;
+        let children = self.document().ast().element_children(host.container);
+        let [child] = children.as_slice() else {
+            return None;
+        };
+        (!host.multiple).then_some(*child)
     }
 
     /// Plans identity-preserving content movement at a boundary in the original AST child
@@ -412,6 +500,9 @@ impl DesignerSession {
         let snapshot = OutlineDrag::capture(self, self.selection().iter().copied())?;
         let edits = snapshot.plan_command(self, command)?;
         if !edits.is_empty() {
+            if self.uses_rust_source() {
+                return self.apply_rust_placement(snapshot.revision, command.label(), edits, None, &snapshot.nodes);
+            }
             self.apply_at(snapshot.revision, command.label(), edits)
                 .map_err(|error| error.to_string())?;
             self.select(snapshot.nodes);
@@ -457,6 +548,9 @@ impl ContentHost {
             .ok_or("The content host no longer exists")?;
         if element.kind != NodeKind::Element {
             return Err("A property declaration is not a content host".into());
+        }
+        if session.rust_map().is_some_and(|map| !map.editable_children(element.span.start)) {
+            return Err("Edit this computed Rust child slot in source".into());
         }
         let capabilities = session
             .runtime_layout_capabilities(owner)

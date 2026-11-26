@@ -43,6 +43,7 @@ fn projected_resource_scopes_use_expanded_property_identity_and_qualified_target
     let projection = project(
         &document,
         &scope_for(&document, theme, Default::default(), vec![]).unwrap(),
+        None,
     )
     .unwrap();
     assert!(!projection.document.source().contains("Unrelated"));
@@ -57,7 +58,7 @@ fn dictionary_preview_does_not_sample_resources_private_to_a_theme() {
     let source = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ControlTheme x:Key="Action" TargetType="Button"><ControlTheme.Resources><SolidColorBrush x:Key="PrivateBrush" Color="Red"/></ControlTheme.Resources><Setter Property="Background" Value="{StaticResource PrivateBrush}"/></ControlTheme><SolidColorBrush x:Key="PublicBrush" Color="Blue"/></ResourceDictionary>"#;
     let document = Document::new(source).unwrap();
     let scope = scope_for(&document, document.ast().root(), Default::default(), vec![]).unwrap();
-    let projection = project(&document, &scope).unwrap();
+    let projection = project(&document, &scope, None).unwrap();
     assert!(
         projection.document.source().contains("PrivateBrush"),
         "Private resources remain inside their authored theme"
@@ -85,7 +86,7 @@ fn untyped_templates_keep_their_targets_when_copied_under_the_design_host() {
         ..Default::default()
     };
     let scope = scope_for(&document, content_template, options, vec![]).unwrap();
-    let projection = project(&document, &scope).unwrap();
+    let projection = project(&document, &scope, None).unwrap();
     let templates = projection
         .document
         .ast()
@@ -124,7 +125,7 @@ fn definition_projection_closes_namespaces_and_keeps_only_original_scope_identit
     let document = Document::new(SOURCE).unwrap();
     let node = definition(&document, "CardTheme");
     let scope = scope_for(&document, node, Default::default(), vec![]).unwrap();
-    let projection = project(&document, &scope).unwrap();
+    let projection = project(&document, &scope, None).unwrap();
     assert!(projection.document.is_valid());
     assert!(projection
         .document
@@ -160,7 +161,7 @@ fn definition_target_infers_inline_control_and_preserves_resource_layers() {
         (FRAMEWORK.into(), "Button".into())
     );
     let scope = scope_for(&document, template.id, Default::default(), vec![]).unwrap();
-    let projection = project(&document, &scope).unwrap();
+    let projection = project(&document, &scope, None).unwrap();
     assert!(projection.document.source().contains("Color=\"Red\""));
     assert!(projection.document.source().contains("Color=\"Blue\""));
     let count = projection

@@ -13,7 +13,16 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use ferroui_remote_protocol::designer::{
-    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignAnimationAuthoring, DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
+    DesignAnimationCurvePoint, DesignAnimationCurveRequest, DesignAnimationCurveResult,
+    DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
+    DesignAnimationClip, DesignAnimationClipBinding,
+    DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
+    DesignKeyframeComponent, DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
+    DesignPropertyTransitionsRequest, DesignPropertyTransitionsResult, DesignTransitionProperty,
+    DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
+    DesignIncludedSource, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
+    UpdateDesignMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::input::{
     InputEventMessageBase, InputModifiers, Key, KeyEventMessage, MouseButton, PhysicalKey, PointerEventMessageBase,
@@ -148,7 +157,159 @@ fn entities() -> Vec<Message> {
             }),
         }),
         Arc::new(StartDesignerSessionMessage { session_id: Some("a8098c1a-f86e-11da-bd1a-00112444be1e".to_string()) }),
+        Arc::new(StartDesignSourceSessionMessage {
+            session_id: Some("source-session".into()),
+            keyboard_input: Some(true),
+        }),
+        Arc::new(ferroui_remote_protocol::designer::DesignKeyboardRequest {
+            revision: 41, request: 3, key: Some("Shift+Tab".into()), text: None,
+        }),
+        Arc::new(ferroui_remote_protocol::designer::DesignKeyboardResult {
+            revision: 41, request: 3,
+            focus: Some(ferroui_remote_protocol::designer::DesignKeyboardFocus {
+                name: "Order note".into(), role: "Edit".into(),
+            }),
+            error: None,
+        }),
         Arc::new(HtmlTransportStartedMessage { uri: Some("e902893a-9d22-3c7e-a7b8-d6e313b71d9f".to_string()) }),
+        Arc::new(ferroui_remote_protocol::designer::UpdateDesignMessage { revision: 40, fixture: Some("Loading".into()), source: UpdateXamlMessage { xaml: Some("<Border/>".into()), ..Default::default() } }),
+        Arc::new(UpdateDesignSourcesMessage {
+            update: UpdateDesignMessage { revision: 41, fixture: Some("Ready".into()), source: UpdateXamlMessage { xaml: Some("<Grid/>".into()), ..Default::default() } },
+            base_uri: "ferres://test/Preview.xaml".into(),
+            includes: vec![DesignIncludedSource { uri: "ferres://test/Resources/Colors.xaml".into(), xaml: "<ResourceDictionary/>".into() }],
+        }),
+        Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default(), fixtures: Some(vec!["Content".into(), "Loading".into()]) }),
+        Arc::new(ferroui_remote_protocol::designer::DesignPaletteContextMessage {
+            revision: 41, contrast: Some(vec!["HighContrast".into(), "Dark".into()]),
+            assemblies: vec!["FerroUI.Themes.WinUI".into()],
+        }),
+        Arc::new(DesignTemplateCatalogMessage {
+            revision: 41,
+            templates: vec![DesignTemplateUse {
+                owner: DesignTemplateSource {
+                    address: "ferres://test/Preview.xaml".into(), fingerprint: -32, line: 8, column: 5,
+                },
+                type_name: "Button".into(),
+                definition: Some(DesignTemplateSource {
+                    address: "ferres://test/Resources/Controls.xaml".into(), fingerprint: 14, line: 16, column: 11,
+                }),
+                ..Default::default()
+            }],
+        }),
+        Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
+        Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),
+        Arc::new(DesignAnimationCatalogMessage {
+            revision: 40,
+            programs: vec![DesignAnimationProgram {
+                id: 6,
+                name: "Round review card".into(),
+                selector: "Border#ReviewCard".into(),
+                duration: 2.0,
+                total_duration: Some(2.5),
+                default_targets: vec![12],
+                compatible_targets: vec![12, 14],
+                source_utf16: 71,
+                custom_animator: true,
+                authoring: Some(DesignAnimationAuthoring {
+                    codec: "project.review".into(),
+                    component_batch: Some(true),
+                    tracks: vec![DesignAnimationTrack {
+                        target: 12,
+                        property: "CornerRadius".into(),
+                        keys: vec![DesignAnimationKeyframe {
+                            time: 1.25, value: "16".into(), easing: "Linear".into(),
+                            value_kind: "CornerRadius".into(),
+                            curve_values: Some(vec![
+                                DesignKeyframeComponent { channel: "top_left".into(), value: 16.0, step: None },
+                                DesignKeyframeComponent { channel: "effect_parameter/outline/quality/value".into(), value: 2.0, step: Some("integer".into()) },
+                            ]),
+                        }],
+                        curve_channels: None,
+                        can_sample: Some(true),
+                    }],
+                }),
+                curve_tracks: Some(vec![DesignAnimationTrack {
+                    target: 12, property: "RenderTransformOrigin".into(),
+                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "50%,20%".into(), value_kind: "RelativePoint".into(), easing: "Linear".into(), curve_values: None }],
+                    curve_channels: Some(vec!["percent_x".into(), "percent_y".into()]),
+                    can_sample: None,
+                }]),
+                clip: Some(DesignAnimationClip { delay: 0.5, speed_ratio: 1.0, editable: true }),
+            }],
+            targets: vec![DesignAnimationTarget { id: 12, label: "ReviewCard".into(), type_name: "Border".into() }],
+            keyframe_selection: Some(true),
+            clip_authoring: Some(true),
+            state_authoring: Some(true),
+            property_transition_owners: Some(vec![DesignAnimationTarget {
+                id: 12, label: "ReviewCard".into(), type_name: "Border".into(),
+            }]),
+        }),
+        Arc::new(DesignAnimationRequestMessage {
+            revision: 40, request: 31, program: None, targets: None, elapsed: 1.25, restart: true,
+            clips: Some(vec![
+                DesignAnimationClipBinding { program: 6, targets: Some(vec![12]) },
+                DesignAnimationClipBinding { program: 7, targets: None },
+            ]),
+        }),
+        Arc::new(DesignAnimationResultMessage {
+            revision: 40, request: 31, elapsed: 1.25, completed: true, after_sequence: 9,
+            error: Some("Portable BSON result".into()),
+        }),
+        Arc::new(DesignAnimationAuthoringRequest {
+            revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
+            previous: Some(1.25), time: 1.25, easing: "Linear".into(),
+            components: Some(vec![
+                DesignKeyframeComponent { channel: "top_left".into(), value: 18.0, step: None },
+                DesignKeyframeComponent { channel: "bottom_left".into(), value: 12.0, step: None },
+            ]),
+            ..Default::default()
+        }),
+        Arc::new(DesignAnimationAuthoringResult {
+            revision: 40, request: 32, samples: vec![0.0, 0.5, 1.0], value_kind: "CornerRadius".into(),
+            patch: Some(DesignAnimationSourcePatch { start: 62, end: 64, expected: "16".into(), replacement: "18".into() }),
+            sampled_key: Some(DesignAnimationKeyframe {
+                time: 1.0, value: "8,8,8,8".into(), easing: "LinearEasing".into(), value_kind: "CornerRadius".into(),
+                curve_values: None,
+            }),
+            resolved_key: Some(DesignAnimationKeyframe {
+                time: 1.25, value: "18,16,16,16".into(), easing: "LinearEasing".into(),
+                value_kind: "CornerRadius".into(), curve_values: None,
+            }),
+            error: None,
+        }),
+        Arc::new(DesignAnimationCurveRequest {
+            revision: 40, request: 33, program: 6, target: 12, property: "CornerRadius".into(),
+            channel: Some("top_left".into()),
+            start: 0.2, end: 1.8,
+        }),
+        Arc::new(DesignKeyframeSelectionRequest {
+            revision: 40, request: 34, program: 6,
+            command: r#"{"action":"copy_keyframes","keyframes":[]}"#.into(), projected: true,
+        }),
+        Arc::new(DesignKeyframeSelectionResult {
+            revision: 40, request: 34, clipboard: Some("typed clipboard".into()),
+            timeline: Some("typed timeline".into()), ..Default::default()
+        }),
+        Arc::new(DesignPropertyTransitionsRequest {
+            revision: 40, request: 35, owner: 12, target_type: Some("Border".into()),
+            command: Some(r#"{"action":"remove","transition":13}"#.into()),
+        }),
+        Arc::new(DesignPropertyTransitionsResult {
+            revision: 40, request: 35,
+            properties: vec![DesignTransitionProperty {
+                property: "Opacity".into(), label: "Opacity".into(), type_name: "DoubleTransition".into(),
+            }],
+            patch: Some(DesignAnimationSourcePatch {
+                start: 30, end: 31, expected: "1".into(), replacement: "2".into(),
+            }),
+            error: Some("Portable transition result".into()),
+        }),
+        Arc::new(DesignAnimationCurveResult {
+            revision: 40, request: 33,
+            points: vec![DesignAnimationCurvePoint { time: 0.5, value: 0.7, break_before: None },
+                DesignAnimationCurvePoint { time: 1.5, value: 0.5, break_before: Some(true) }],
+            error: Some("Portable curve result".into()),
+        }),
     ]
 }
 

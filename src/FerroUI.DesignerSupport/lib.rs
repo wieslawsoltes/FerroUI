@@ -30,8 +30,12 @@
 //! }
 //! ```
 
+mod animation_codecs;
 mod design_window_loader;
+mod preview_fixtures;
 
 pub mod remote;
 
+pub use animation_codecs::register_preview_animation_codec;
 pub use design_window_loader::DesignWindowLoader;
+pub use preview_fixtures::{PreviewFixture, register_preview_fixture};

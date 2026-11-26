@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:Fixtures='{"default":"Customers","fixtures":[{"name":"Customers","data":{"Customers":[{"Name":"Alpine &amp; Co."},{"Name":"Juniper Studio"}]}}]}'>
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Templates/Copy Rows.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <SolidColorBrush x:Key="CustomerInk" Color="#FF8B2746" />
+      <SolidColorBrush x:Key="CustomerRow_CustomerInk" Color="#FF8B2746" />
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <StackPanel Margin="24" Spacing="8">
+    <TextBlock Text="Customer directory" FontSize="24" />
+    <ListBox Name="Directory" Height="128" ItemsSource="{Binding Customers}" ItemTemplate="{StaticResource CustomerRow}" />
+    <TextBlock Text="Review queue" FontSize="16" />
+    <ListBox Name="ReviewQueue" Height="110" ItemsSource="{Binding Customers}" ItemTemplate="{StaticResource CustomerRow}" />
+  </StackPanel>
+</UserControl>

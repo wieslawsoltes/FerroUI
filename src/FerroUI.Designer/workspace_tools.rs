@@ -41,6 +41,25 @@ pub(crate) fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
 /// Discoverable native fallback: unknown Panel subclasses retain their layout algorithm;
 /// manipulation authors a render adjustment, while child insertion/order uses Panel.Children.
 impl DesignerSession {
+    /// Plan translation when an artboard drag stays within its current layout owner.
+    pub fn plan_artboard_translation(
+        &self,
+        node: NodeId,
+        position: ferroui_base::Point,
+        delta: ferroui_base::Point,
+    ) -> Result<Vec<Edit>, String> {
+        let owner = parent(self, node)?;
+        if crate::workspace_layout_helpers::layout_target(self, position, &[node]) != Some(owner) {
+            return Err("Choose a valid drop target inside the artboard".into());
+        }
+        plan_moves(self, BTreeMap::from([(node, Point::new(delta.x, delta.y))]))
+    }
+
+    pub(crate) fn plan_selection_translation(&self, nodes: &[NodeId], delta: Point) -> Result<Vec<Edit>, String> {
+        delta.validate().map_err(|error| error.to_string())?;
+        plan_moves(self, outermost(self.document(), nodes).into_iter().map(|node| (node, delta)).collect())
+    }
+
     /// Plans a panel-specific edit against the current, measured native preview.
     /// The returned edits share the same coordinate and expression rules as pointer tools.
     pub fn plan_layout_action(&self, action: LayoutAction) -> Result<Vec<Edit>, String> {
@@ -734,6 +753,67 @@ fn plan_moves(
     Ok(snapshot_edits_first(edits))
 }
 
+pub(crate) fn resize_edits(
+    session: &DesignerSession,
+    node: NodeId,
+    before: ferroui_base::Rect,
+    after: ferroui_base::Rect,
+) -> Result<(Vec<Edit>, bool), String> {
+    session.ensure_layer_manipulable(node)?;
+    let measured = measure(session, parent(session, node)?, Some(node))?;
+    let transform = measured.to_artboard;
+    let visual = session
+        .preview
+        .visual(node)
+        .ok_or("No live layout for selected element")?;
+    let own = affine(
+        visual
+            .transform_to_visual(&measured.visual)
+            .ok_or("Detached element")?,
+    )?;
+    if transform.m12.abs() > 1e-9
+        || transform.m21.abs() > 1e-9
+        || transform.m11 <= 0.0
+        || transform.m22 <= 0.0
+        || own.m12.abs() > 1e-9
+        || own.m21.abs() > 1e-9
+        || (own.m11 - 1.0).abs() > 1e-9
+        || (own.m22 - 1.0).abs() > 1e-9
+    {
+        if before.width <= 0.0
+            || before.height <= 0.0
+            || after.width <= 0.0
+            || after.height <= 0.0
+        {
+            return Err("Resize dimensions must be positive".into());
+        }
+        let adjustment = Matrix::create_translation(-before.x, -before.y)
+            * Matrix::create_scale(
+                after.width / before.width,
+                after.height / before.height,
+            )
+            * Matrix::create_translation(after.x, after.y);
+        let edits = visual_adjustment(session, node, adjustment)?;
+        return Ok((edits, true));
+    }
+    let original = *measured
+        .bounds
+        .get(&node)
+        .ok_or("Missing measured layout")?;
+    let delta = measured.delta(Point::new(after.x - before.x, after.y - before.y))?;
+    let after = Rect::new(
+        original.x + delta.x,
+        original.y + delta.y,
+        after.width / transform.m11,
+        after.height / transform.m22,
+    );
+    let edits = session.layout_tools().plan(
+        &measured.context(session.document()),
+        LayoutAction::Resize { node, before: original, after },
+    ).map_err(|error| error.to_string())?;
+    Ok((edits, false))
+}
+
 pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> Result<(), String> {
     if !session.can_manipulate() {
         return Err(
@@ -741,86 +821,29 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                 .into(),
         );
     }
+    let geometry_program = session.active_animation_program().filter(|_| {
+        session.recording()
+            && matches!(
+                &gesture,
+                DesignGesture::Move { .. }
+                    | DesignGesture::Resize { .. }
+                    | DesignGesture::ResizeLocal { .. }
+            )
+    });
     let mut edits = Vec::new();
     match gesture {
         DesignGesture::LayoutEdit { preview } => {
             return session.commit_layout_preview(&preview);
         }
         DesignGesture::Move { nodes, delta } => {
-            edits.extend(plan_moves(
-                session,
-                outermost(session.document(), &nodes)
-                    .into_iter()
-                    .map(|node| (node, Point::new(delta.x, delta.y)))
-                    .collect(),
-            )?);
+            edits.extend(session.plan_selection_translation(&nodes, Point::new(delta.x, delta.y))?);
         }
-        DesignGesture::Resize {
-            node,
-            before,
-            after,
-        } => {
-            session.ensure_layer_manipulable(node)?;
-            let measured = measure(session, parent(session, node)?, Some(node))?;
-            let transform = measured.to_artboard;
-            let visual = session
-                .preview
-                .visual(node)
-                .ok_or("No live layout for selected element")?;
-            let own = affine(
-                visual
-                    .transform_to_visual(&measured.visual)
-                    .ok_or("Detached element")?,
-            )?;
-            if transform.m12.abs() > 1e-9
-                || transform.m21.abs() > 1e-9
-                || transform.m11 <= 0.0
-                || transform.m22 <= 0.0
-                || own.m12.abs() > 1e-9
-                || own.m21.abs() > 1e-9
-                || (own.m11 - 1.0).abs() > 1e-9
-                || (own.m22 - 1.0).abs() > 1e-9
-            {
-                if before.width <= 0.0
-                    || before.height <= 0.0
-                    || after.width <= 0.0
-                    || after.height <= 0.0
-                {
-                    return Err("Resize dimensions must be positive".into());
-                }
-                let adjustment = Matrix::create_translation(-before.x, -before.y)
-                    * Matrix::create_scale(
-                        after.width / before.width,
-                        after.height / before.height,
-                    )
-                    * Matrix::create_translation(after.x, after.y);
-                let edits = visual_adjustment(session, node, adjustment)?;
-                return session.apply_visual("Resize transformed selection", edits);
+        DesignGesture::Resize { node, before, after } => {
+            let (planned, transformed) = resize_edits(session, node, before, after)?;
+            if transformed && geometry_program.is_none() {
+                return session.apply_visual("Resize transformed selection", planned);
             }
-            let original = *measured
-                .bounds
-                .get(&node)
-                .ok_or("Missing measured layout")?;
-            let delta = measured.delta(Point::new(after.x - before.x, after.y - before.y))?;
-            let after = Rect::new(
-                original.x + delta.x,
-                original.y + delta.y,
-                after.width / transform.m11,
-                after.height / transform.m22,
-            );
-            edits.extend(
-                session
-                    .layout_tools()
-                    .plan(
-                        &measured.context(session.document()),
-                        LayoutAction::Resize {
-                            node,
-                            before: original,
-                            after,
-                        },
-                    )
-                    .map_err(|e| e.to_string())?,
-            );
+            edits.extend(planned);
         }
         DesignGesture::ResizeLocal { node, after } => {
             session.ensure_layer_manipulable(node)?;
@@ -980,6 +1003,10 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
         }
     }
     if !edits.is_empty() {
+        if let Some(program) = geometry_program {
+            let edits = session.animation_geometry_edits(edits)?;
+            return session.record_geometry(program, session.time(), "Record canvas geometry", edits);
+        }
         session.apply_visual("Manipulate selection", edits)?;
     }
     Ok(())
@@ -1003,23 +1030,21 @@ fn artboard_bounds(session: &DesignerSession) -> Result<Vec<(NodeId, Rect)>, Str
         })
         .collect()
 }
-fn apply_deltas(
-    session: &mut DesignerSession,
-    deltas: BTreeMap<NodeId, Point>,
-    label: &str,
-) -> Result<(), String> {
-    let edits = plan_moves(session, deltas)?;
-    session.apply_visual(label, edits)
-}
-pub(crate) fn align(session: &mut DesignerSession, alignment: Alignment) -> Result<(), String> {
+pub(crate) fn plan_alignment(session: &DesignerSession, alignment: Alignment) -> Result<Vec<Edit>, String> {
     let deltas = ferroui_designer_tools::align(&artboard_bounds(session)?, alignment)
         .map_err(|e| e.to_string())?;
-    apply_deltas(session, deltas, "Align selection")
+    plan_moves(session, deltas)
 }
-pub(crate) fn distribute(session: &mut DesignerSession, axis: Axis) -> Result<(), String> {
+pub(crate) fn plan_distribution(session: &DesignerSession, axis: Axis) -> Result<Vec<Edit>, String> {
     let deltas = ferroui_designer_tools::distribute(&artboard_bounds(session)?, axis)
         .map_err(|e| e.to_string())?;
-    apply_deltas(session, deltas, "Distribute selection")
+    plan_moves(session, deltas)
+}
+pub(crate) fn align(session: &mut DesignerSession, alignment: Alignment) -> Result<(), String> {
+    session.apply_visual("Align selection", plan_alignment(session, alignment)?)
+}
+pub(crate) fn distribute(session: &mut DesignerSession, axis: Axis) -> Result<(), String> {
+    session.apply_visual("Distribute selection", plan_distribution(session, axis)?)
 }
 fn outermost(document: &Document, nodes: &[NodeId]) -> Vec<NodeId> {
     let selected = nodes.iter().copied().collect::<BTreeSet<_>>();

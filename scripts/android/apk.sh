@@ -4,6 +4,7 @@
 # manifest, zipalign and apksigner. No Gradle (docs/porting/android-platform.md, section 9).
 #
 #   scripts/android/apk.sh smoke   [options]    the smoke application of ferroui-android
+#   scripts/android/apk.sh inspector [options]  the VS Code Live App example
 #   scripts/android/apk.sh catalog [options]    the ControlCatalog (samples/ControlCatalog.Android)
 #   scripts/android/apk.sh safearea [options]   the SafeAreaDemo (samples/SafeAreaDemo.Android)
 #   scripts/android/apk.sh sandbox [options]    the SingleProjectSandbox (samples/SingleProjectSandbox)
@@ -17,6 +18,7 @@
 #                       (default: $FERROUI_ANDROID_BUILD_DIR, else <cargo target directory>/android)
 #   --no-strip          package the library with its symbol table
 #   --no-cargo          package the library that is already built
+#   --debugger          include the NDK LLDB server in a debuggable APK
 #   --features LIST     cargo features of the build, for example ferroui-android/vulkan (the Vulkan
 #                       rendering mode with the Skia binary that has Ganesh on Vulkan as well)
 #
@@ -34,7 +36,8 @@
 #   --permission NAME        a permission of the manifest (repeatable)
 #   --java-source-dir DIR    Java sources of an optional framework crate (repeatable)
 #
-# Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; see scripts/android/env.sh for
+# Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; FERROUI_ANDROID_DEBUG_KEYSTORE
+# can share a debug signing key across output directories. See scripts/android/env.sh for
 # the pinned versions of the NDK, the build tools and the platform. The native library is built with
 # the stable Rust toolchain and its target (rustup target add aarch64-linux-android).
 #
@@ -51,6 +54,7 @@ abi="arm64-v8a"
 out=""
 strip=1
 run_cargo=1
+debugger=0
 features=""
 host_package=""
 package_label=""
@@ -59,7 +63,7 @@ package_permissions=()
 extra_java_sources=()
 while [ $# -gt 0 ]; do
     case "$1" in
-        smoke|catalog|safearea|sandbox) app="$1" ;;
+        smoke|inspector|catalog|safearea|sandbox) app="$1" ;;
         package) app="$1" ;;
         --package) host_package="${2:?--package needs a value}"; shift ;;
         --label) package_label="${2:?--label needs a value}"; shift ;;
@@ -72,6 +76,7 @@ while [ $# -gt 0 ]; do
         --out) out="${2:?--out needs a value}"; shift ;;
         --no-strip) strip=0 ;;
         --no-cargo) run_cargo=0 ;;
+        --debugger) debugger=1 ;;
         --features) features="${2:?--features needs a value}"; shift ;;
         -h|--help) usage; exit 0 ;;
         *) echo "unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -82,6 +87,10 @@ if [ -z "$app" ]; then
     usage >&2
     exit 2
 fi
+if [ "$debugger" = 1 ] && [ "$profile" != dev ]; then
+    echo "--debugger requires the debuggable dev profile" >&2
+    exit 2
+fi
 
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 # shellcheck source=scripts/android/env.sh
@@ -90,8 +99,8 @@ repo="$(cd "$(dirname "$0")/../.." && pwd)"
 workspace="$(cd "${FERROUI_ANDROID_WORKSPACE:-$repo}" && pwd)"
 
 case "$abi" in
-    arm64-v8a) target="aarch64-linux-android" ;;
-    x86_64) target="x86_64-linux-android" ;;
+    arm64-v8a) target="aarch64-linux-android"; debugger_arch="aarch64" ;;
+    x86_64) target="x86_64-linux-android"; debugger_arch="x86_64" ;;
     *) echo "unknown ABI: $abi (arm64-v8a or x86_64)" >&2; exit 2 ;;
 esac
 
@@ -104,6 +113,14 @@ case "$app" in
         library_dir="examples"
         application_id="org.ferroui.smoke"
         label="FerroUI smoke"
+        ;;
+    inspector)
+        cargo_args=(-p ferroui-android --example android_inspector --features inspector-example)
+        library="android_inspector"
+        library_dir="examples"
+        application_id="org.ferroui.androidinspector"
+        label="Service Review"
+        permissions='    <uses-permission android:name="android.permission.INTERNET" />'
         ;;
     catalog)
         cargo_args=(-p control-catalog-android --lib)
@@ -191,7 +208,14 @@ if [ "$run_cargo" = 1 ]; then
         echo "the Rust target $target is not installed: rustup target add $target" >&2
         exit 1
     fi
-    (cd "$workspace" && cargo build "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
+    cargo_command=build
+    linker_args=()
+    if [ "$debugger" = 1 ]; then
+        cargo_command=rustc
+        linker_args+=(-- -Cdebuginfo=2 -Cstrip=none -Clink-arg=-Wl,--build-id=sha1)
+    fi
+    (cd "$workspace" && cargo "$cargo_command" "${cargo_args[@]}" --target "$target" \
+        ${profile_args[@]+"${profile_args[@]}"} ${linker_args[@]+"${linker_args[@]}"})
 fi
 built="$cargo_target_dir/$target/$profile_dir/${library_dir:+$library_dir/}lib$library.so"
 if [ ! -f "$built" ]; then
@@ -207,7 +231,7 @@ if [ "$strip" = 1 ]; then
 else
     cp "$built" "$work/stage/lib/$abi/lib$library.so"
 fi
-# The library needs nothing but libraries of the system: the package carries no other library.
+# The application library needs only Android system libraries.
 needed="$("$FERROUI_ANDROID_TOOLCHAIN/llvm-readelf" -d "$work/stage/lib/$abi/lib$library.so" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' | tr '\n' ' ')"
 for needed_library in $needed; do
     case "$needed_library" in
@@ -219,6 +243,15 @@ done
 if ! "$FERROUI_ANDROID_TOOLCHAIN/llvm-nm" -D --defined-only "$work/stage/lib/$abi/lib$library.so" | grep -q ' JNI_OnLoad$'; then
     echo "lib$library.so does not export JNI_OnLoad (the application lacks ferroui_android::android_application!)" >&2
     exit 1
+fi
+if [ "$debugger" = 1 ]; then
+    if ! "$FERROUI_ANDROID_TOOLCHAIN/llvm-readelf" -n "$built" | grep -q 'Build ID:'; then
+        echo "the native library needs an ELF build ID for LLDB to match its symbols; rebuild with --debugger" >&2
+        exit 1
+    fi
+    debugger_server="$("$FERROUI_ANDROID_TOOLCHAIN/clang" --print-resource-dir)/lib/linux/$debugger_arch/lldb-server"
+    if [ ! -f "$debugger_server" ]; then echo "missing NDK LLDB server: $debugger_server" >&2; exit 1; fi
+    "$FERROUI_ANDROID_TOOLCHAIN/llvm-strip" --strip-unneeded -o "$work/stage/lib/$abi/libferroui_lldb_server.so" "$debugger_server"
 fi
 
 # 2. The Java layer: classes, then one dex file.
@@ -282,10 +315,17 @@ apk="$out/$app-$abi-$profile_dir.apk"
 rm -f "$apk"
 "$FERROUI_ANDROID_BUILD_TOOLS/zipalign" -f 4 "$work/unaligned.apk" "$apk"
 
-keystore="$out/debug.keystore"
+keystore="${FERROUI_ANDROID_DEBUG_KEYSTORE:-$out/debug.keystore}"
 if [ ! -f "$keystore" ]; then
-    keytool -genkeypair -keystore "$keystore" -storepass android -keypass android -alias androiddebugkey \
-        -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+    (
+        signing_parent="$(dirname "$keystore")"
+        mkdir -p "$signing_parent"
+        signing_stage="$(mktemp -d "$signing_parent/.ferroui-android-key.XXXXXX")"
+        trap 'rm -rf -- "$signing_stage"' EXIT
+        keytool -genkeypair -keystore "$signing_stage/debug.keystore" -storepass android -keypass android -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+        ln "$signing_stage/debug.keystore" "$keystore" 2>/dev/null || test -f "$keystore"
+    )
 fi
 "$FERROUI_ANDROID_BUILD_TOOLS/apksigner" sign --ks "$keystore" --ks-pass pass:android --key-pass pass:android \
     --ks-key-alias androiddebugkey "$apk"

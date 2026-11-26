@@ -6,6 +6,16 @@
 //! (`rust_emitter::XamlMetadata`, private to it); this one keeps numbers,
 //! which the type model has (the values of enumeration members).
 
+use std::ops::Range;
+
+/// The lexical ranges of a top-level object member, including string delimiters.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MemberRange {
+    pub name: String,
+    pub key: Range<usize>,
+    pub value: Range<usize>,
+}
+
 /// A JSON value. An object keeps the order of its members.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Json {
@@ -102,6 +112,19 @@ impl Json {
             }
         }
     }
+}
+
+/// Read the member ranges with the same grammar as the model reader.
+pub fn member_ranges(text: &str) -> Result<Vec<MemberRange>, String> {
+    let mut parser = Parser { text: text.as_bytes(), at: 0 };
+    let mut members = Vec::new();
+    parser.whitespace();
+    parser.object(0, |name, key, value| members.push(MemberRange { name: name.to_owned(), key, value }))?;
+    parser.whitespace();
+    if parser.at != parser.text.len() {
+        return Err(parser.error("text after the object"));
+    }
+    Ok(members)
 }
 
 fn indent(text: &mut String, depth: usize) {
@@ -307,34 +330,7 @@ impl Parser<'_> {
         }
         self.whitespace();
         match self.text.get(self.at) {
-            Some(b'{') => {
-                self.at += 1;
-                let mut members = Vec::new();
-                self.whitespace();
-                if self.text.get(self.at) == Some(&b'}') {
-                    self.at += 1;
-                    return Ok(Json::Object(members));
-                }
-                loop {
-                    self.whitespace();
-                    let name = self.string()?;
-                    self.whitespace();
-                    if self.text.get(self.at) != Some(&b':') {
-                        return Err(self.error("expected ':'"));
-                    }
-                    self.at += 1;
-                    members.push((name, self.value(depth + 1)?));
-                    self.whitespace();
-                    match self.text.get(self.at) {
-                        Some(b',') => self.at += 1,
-                        Some(b'}') => {
-                            self.at += 1;
-                            return Ok(Json::Object(members));
-                        }
-                        _ => return Err(self.error("expected ',' or '}'")),
-                    }
-                }
-            }
+            Some(b'{') => self.object(depth, |_, _, _| {}),
             Some(b'[') => {
                 self.at += 1;
                 let mut items = Vec::new();
@@ -373,6 +369,48 @@ impl Parser<'_> {
             }
             Some(_) => Err(self.error("unexpected character")),
             None => Err(self.error("unexpected end")),
+        }
+    }
+
+    fn object(
+        &mut self,
+        depth: usize,
+        mut record: impl FnMut(&str, Range<usize>, Range<usize>),
+    ) -> Result<Json, String> {
+        if self.text.get(self.at) != Some(&b'{') {
+            return Err(self.error("expected an object"));
+        }
+        self.at += 1;
+        let mut members = Vec::new();
+        self.whitespace();
+        if self.text.get(self.at) == Some(&b'}') {
+            self.at += 1;
+            return Ok(Json::Object(members));
+        }
+        loop {
+            self.whitespace();
+            let key_start = self.at;
+            let name = self.string()?;
+            let key = key_start..self.at;
+            self.whitespace();
+            if self.text.get(self.at) != Some(&b':') {
+                return Err(self.error("expected ':'"));
+            }
+            self.at += 1;
+            self.whitespace();
+            let value_start = self.at;
+            let value = self.value(depth + 1)?;
+            record(&name, key, value_start..self.at);
+            members.push((name, value));
+            self.whitespace();
+            match self.text.get(self.at) {
+                Some(b',') => self.at += 1,
+                Some(b'}') => {
+                    self.at += 1;
+                    return Ok(Json::Object(members));
+                }
+                _ => return Err(self.error("expected ',' or '}'")),
+            }
         }
     }
 

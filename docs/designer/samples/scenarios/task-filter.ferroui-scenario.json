@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "name": "Task filter",
+    "document": "TaskFilter.xaml",
+    "viewport": { "width": 320, "height": 112 },
+    "steps": [
+        { "action": "expectAccessible", "name": "Task filter", "role": "Edit" },
+        { "action": "expectScreenshot", "baseline": "Baselines/task-filter.png", "channelTolerance": 2 },
+        { "action": "click", "selector": "#Filter" },
+        { "action": "typeText", "selector": "#Filter", "text": "Łódź" },
+        { "action": "expectProperty", "selector": "#Filter", "property": "Text", "value": "Łódź" }
+    ]
+}

@@ -8,7 +8,8 @@
 //! generator over it. Here each test is a module of this crate, with its view models, views and
 //! locator, and the build script runs the generator over the crate, as an application's does. Every
 //! locator sees the view models of every module (the view models of a compilation), so a module
-//! names its types so that the conventions of the other modules do not map them.
+//! names its types so that the conventions of the other modules do not map them. The resolution
+//! test runs its allocation measurement in a separate process.
 
 /// What the fixtures name.
 pub mod prelude {
@@ -111,57 +112,5 @@ pub(crate) mod support {
     /// The name of the class of a control (`GetType().Name`).
     pub fn class_name(control: &Ref<Control>) -> &'static str {
         control.get_type().name()
-    }
-
-    pub mod allocations {
-        use std::alloc::{GlobalAlloc, Layout, System};
-        use std::cell::Cell;
-
-        ferroui_base::ferro_thread_local! {
-            static ALLOCATIONS: Cell<u64> = const { Cell::new(0) };
-        }
-
-        fn count() {
-            // A thread that is ending has no counter anymore.
-            let _ = ALLOCATIONS.try_with(|allocations| allocations.set(allocations.get() + 1));
-        }
-
-        /// The allocations of the thread so far (`GC.GetAllocatedBytesForCurrentThread`, in
-        /// allocations).
-        pub fn current() -> u64 {
-            ALLOCATIONS.try_with(Cell::get).unwrap_or(0)
-        }
-
-        struct CountingAllocator;
-
-        // SAFETY: every member forwards to the system allocator with the arguments it was
-        // given; the counter is a plain thread-local cell that does not allocate.
-        unsafe impl GlobalAlloc for CountingAllocator {
-            unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-                count();
-                // SAFETY: the caller upholds the contract of `alloc`.
-                unsafe { System.alloc(layout) }
-            }
-
-            unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-                count();
-                // SAFETY: the caller upholds the contract of `alloc_zeroed`.
-                unsafe { System.alloc_zeroed(layout) }
-            }
-
-            unsafe fn dealloc(&self, pointer: *mut u8, layout: Layout) {
-                // SAFETY: the caller upholds the contract of `dealloc`.
-                unsafe { System.dealloc(pointer, layout) }
-            }
-
-            unsafe fn realloc(&self, pointer: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-                count();
-                // SAFETY: the caller upholds the contract of `realloc`.
-                unsafe { System.realloc(pointer, layout, new_size) }
-            }
-        }
-
-        #[global_allocator]
-        static ALLOCATOR: CountingAllocator = CountingAllocator;
     }
 }

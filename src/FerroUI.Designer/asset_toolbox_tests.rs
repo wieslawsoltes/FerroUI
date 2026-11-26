@@ -41,7 +41,7 @@ fn native_toolbox_filters_terms_categories_and_registered_controls() {
     toolbox.set_query("missing");
     assert_eq!(
         toolbox.count.text().as_deref(),
-        Some("No matching controls")
+        Some("No matching assets")
     );
     toolbox.set_query("");
     toolbox.set_category(None);
@@ -55,10 +55,10 @@ fn registering_assets_replaces_by_id_and_validates_custom_vectors_without_mutati
     let mut replacement = custom_asset();
     replacement.title = "Revenue chart".into();
     // A category label may equal the UI's "all" label without losing its identity.
-    replacement.category = "All controls".into();
+    replacement.category = "All assets".into();
     toolbox.register(replacement.clone()).unwrap();
     assert_eq!(toolbox.assets(), [replacement.clone()]);
-    assert!(toolbox.set_category(Some("All controls")));
+    assert!(toolbox.set_category(Some("All assets")));
     assert_eq!(toolbox.visible_asset_ids(), ["Project.Chart"]);
     replacement.icon = AssetIcon::CustomPath("this is not a vector".into());
     assert!(toolbox.register(replacement).is_err());

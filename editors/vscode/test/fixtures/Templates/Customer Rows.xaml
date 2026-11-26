@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="CustomerInk" Color="#FF17465D" />
+  <DataTemplate x:Key="CustomerRow">
+    <Border Name="CustomerCard" Background="#FFEAF2F7" CornerRadius="8" Padding="14,9" Margin="0,0,0,6" MinWidth="230">
+      <StackPanel Spacing="3">
+        <TextBlock Name="CustomerName" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource CustomerInk}" Text="{Binding Name}" />
+        <TextBlock FontSize="12" Foreground="#FF456478" Text="{Binding Tier}" />
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+  <DataTemplate x:Key="CompactCustomer">
+    <TextBlock Margin="8,4" Foreground="{StaticResource CustomerInk}" Text="{Binding Name}" />
+  </DataTemplate>
+</ResourceDictionary>

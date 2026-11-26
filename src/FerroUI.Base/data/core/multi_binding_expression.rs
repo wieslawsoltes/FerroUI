@@ -75,7 +75,9 @@ impl MultiBindingExpression {
 
         match &self.converter {
             Some(converter) => {
-                let culture = self.converter_culture.clone().unwrap_or_else(CultureInfo::current_formatting);
+                let culture = self.converter_culture.clone().unwrap_or_else(|| {
+                    crate::diagnostics::DesignTextEnvironment::formatting_for(|| self.base.try_get_target())
+                });
                 let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
                 {
                     Ok(v) => v,

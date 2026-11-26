@@ -36,11 +36,21 @@ points/scalars, thicknesses and discrete values. RGB interpolation occurs
 in linear light and alpha is linear, matching FerroUI's `ColorAnimator`. Cubic Bezier interpolation
 solves the X polynomial rather than treating the progress as the curve parameter. Thirty named
 easing variants match FerroUI's polynomial, sine, circular, exponential, back, bounce and elastic
-families. A keyframe's easing belongs to the incoming segment. Effects, gradient brushes,
-shadow collections, transform components and arbitrary object payloads remain available through
-source editing or extension codecs; their preview uses the native framework animator when
-running in the designer. The portable timeline does not invent interpolation semantics for
-runtime-specific values.
+families. A keyframe's easing belongs to the incoming segment. Native-value codecs add typed
+effects, box shadow lists, ordered transform lists, and gradient brushes. Runtime-specific
+payloads use source editing or application codecs. The designer previews them with the framework
+animator.
+
+## Transfer keyframes
+
+`Timeline::copy_keyframes` returns a versioned `KeyframeClipboard` with typed values,
+relative seconds, and incoming easing. Its text representation can travel between hosts.
+Pass it to `Timeline::with_pasted_keyframes` with a distinct existing destination for each
+copied track and the authored playhead time. The planner checks value types, duration,
+and collisions at native 100 ns precision. With `reverse` set, the reflected first key
+lands at the playhead. `Timeline::with_mirrored_keyframes` reflects a selection around an
+authored pivot and leaves unselected keys in place. Both methods return the replacement
+timeline and accepted positions for the host’s source transaction.
 
 ## Native XAML
 
@@ -123,18 +133,51 @@ editable even when no portable codec can decode them. Native previews use elapse
 time, including delays, easing, repeat and fill. Typed timeline scrubbing uses its iteration
 edit position as described above.
 
+Numeric transform component keys retain their qualified property names in the
+typed timeline. The native sampler resolves the same transform object as
+playback and reads its underlying value for implicit endpoints. Sampling a
+control without a render transform uses detached defaults, and playback creates
+the group at animation priority. XAML authoring and the mapped Rust getters keep
+the component track and its declared keys in source.
+
+The typed `TransformList` value uses the framework’s transform parser and the same interpolation
+kernel as `TransformOperationsTransition`. Curves project operation slots or combined affine
+matrix coefficients from the native animator. The animator uses the underlying property for
+implicit endpoints.
+Whole-list keys and redirected component keys apply to the same render property, so each clip
+uses one form. Explicitly registered animators retain their normal precedence.
+
+The `Brush` value codec supports literal linear, radial, and conic gradients and literal solid
+brush keys on the same track. It distinguishes brush geometry, interpolation units, opacity,
+spread, transforms, and ordered stops. The native clock resolves implicit endpoints and solid
+promotion for the entire clip. Curve sampling uses the actual brush produced by the loaded
+animator. A change of shape starts a new segment, and an absent stop or geometry field leaves
+a gap. Empty stop lists use the native discrete fallback.
+
+The `BoxShadows` value codec delegates text conversion and list interpolation to FerroUI. The native
+graph samples the loaded property and exposes channels such as `box_shadow/2/spread` using one-based
+layer indices. Samples separate intervals where a layer is absent or switches between inset and
+outset. Key authoring samples the complete list. The native animator reads underlying values for
+implicit endpoints, even while the preview is scrubbed.
+
+The native codec also accepts registered effect strings when the host provides its effect
+resolver. The portable timeline preserves the source literal. The native animator supplies
+interpolation and the registered value supplies its parameter types. The catalog adds named
+channels in the form `effect_parameter/<type>/<parameter>/<component>` alongside the existing
+property channels. An app-hosted Rust projection can forward a mapped effect string to the
+app's registry and apply its checked response to the original literal.
+
 `Animation::apply_for_preview` isolates playback metadata and retains native final fill and
 automatically created transforms at disposable animation priority. Stop, program selection,
 source reload and failed source acceptance dispose the runs and restore underlying values
 and bindings. Completed fill retains its original priority frame, and overlapping component
 programs share the lifetime of any temporary transform they create. Native clock errors are
-surfaced as diagnostics. A program must have a loaded
-source object and live preview targets; the designer never binds a program from another
-compiled source merely because its selector or resource name matches. Whole CSS
-`TransformOperations` keyframes are not a built-in native keyframe animator; use native
-transform-component properties or a registered animator for those values. The native component
-animator also cannot animate an existing CSS operation list; preview reports that limitation
-explicitly and permits a registered replacement animator.
+surfaced as diagnostics. A program must have a loaded source object and live preview targets.
+Source provenance ties the program to its compiled document. While a Timeline owns playback,
+the preview clock freezes style animations from construction and explicit seeks use the native
+playback clock. The component animator redirects keys into a mutable native transform. Use a whole
+`RenderTransform` key to animate an existing CSS-style operation list, or register an application
+animator for a specialized representation.
 
 A standalone `ResourceDictionary` can use a resource preview factory that installs the loaded
 dictionary on a real control. An animation without authored targets then previews on that
@@ -149,6 +192,26 @@ Corner-radius two-value shorthand means top/bottom. Relative values retain absol
 units; unlike-unit transitions switch at 50%, matching the native animators. The native session
 uses the live property's type metadata when selecting a value codec. Nonfinite components are
 rejected before preview or source changes.
+
+The curve channels for relative values keep percentages and logical pixels separate. Percent
+channels return percentages, and their velocity returns percentage points per authored second.
+Native sampling retains the registered animator's unit at each time. Each `CurvePoint` with
+`break_before` starts a new run after the other unit was active. Velocity uses only adjacent
+samples within a run. An implicit endpoint can use the live target's underlying units.
+
+`CurveChannel` projects color values into red, green, blue, and alpha on a normalized
+0–1 scale. The native sampler reads the registered animator's `Color` or solid brush
+result, including its byte precision. Velocity uses these same samples. The key plan
+retains the complete typed color.
+
+`AnimationEffect` supports literal blur and offset shadows, plus native blur, offset-shadow and
+directional-shadow objects. `EffectForm` keeps the distinction between an attribute, a direct
+object, and a `Setter.Value` property element through retiming and transfer. Older literal
+clipboard values decode with their original form. Native hosts resolve named and functional
+colors using the runtime converter. Direction uses degrees, and radius, offsets, and depth use
+logical pixels. Shadow opacity and tint alpha are independent channels. With `native-preview`,
+the graph and key sampler use the same animator as playback. Missing or unsupported samples
+mark gaps. Native export keeps implicit endpoints for the target to resolve.
 
 Global easing accepts native named curves, the default `SplineEasing`, spline property elements
 and parameterized `SpringEasing`. The editor syntax `Spring(mass,stiffness,damping,velocity)`

@@ -51,6 +51,8 @@ pub enum Diagnostic {
         /// How many literals now differ from the build.
         literals: usize,
     },
+    /// A named behavior source or destination was absent or ambiguous at attachment.
+    BehaviorTarget { name: String },
     /// A run of a component below an error boundary panicked: the nearest
     /// boundary shows its fallback (see [`error_boundary`](fn@crate::error_boundary)).
     ErrorCaught {
@@ -83,6 +85,7 @@ impl fmt::Display for Diagnostic {
                 write!(f, "{file}:{line}: the rsx! changed more than its literals; hot reload applies literals only, rebuild to see the change")
             }
             Diagnostic::HotReloaded { file, literals } => write!(f, "{file}: hot reload, {literals} literals differ from the build"),
+            Diagnostic::BehaviorTarget { name } => write!(f, "behavior needs a unique control named {name:?} in its scope"),
             Diagnostic::ErrorCaught { component, message } => {
                 write!(f, "the component {component} panicked ({message}); the nearest error boundary shows its fallback")
             }

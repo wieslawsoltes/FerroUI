@@ -272,6 +272,115 @@ fn insert_child_expands_self_closing_parent_and_inherits_namespaces() {
 }
 
 #[test]
+fn child_moves_and_insertions_use_the_destination_lines() {
+    let mut doc = Document::new(concat!(
+        "<Grid>\r\n",
+        "  <StackPanel>\r\n    <Button Name='move'/>\r\n  </StackPanel>\r\n",
+        "  <StackPanel Name='destination'>\r\n    <TextBlock/>\r\n  </StackPanel>\r\n",
+        "</Grid>\r\n",
+    )).unwrap();
+    let parent = named(&doc, "destination");
+    let node = named(&doc, "move");
+    doc.apply("Place controls", vec![
+        Edit::InsertChild { parent, index: 0, source: "<Border/>".into() },
+        Edit::MoveNode { node, parent, index: 2 },
+    ]).unwrap();
+    assert_eq!(
+        doc.source(),
+        concat!(
+            "<Grid>\r\n",
+            "  <StackPanel>\r\n  </StackPanel>\r\n",
+            "  <StackPanel Name='destination'>\r\n",
+            "    <Border/>\r\n    <TextBlock/>\r\n    <Button Name='move'/>\r\n",
+            "  </StackPanel>\r\n</Grid>\r\n",
+        ),
+    );
+    assert_eq!(named(&doc, "move"), node);
+
+    let mut mixed = Document::new("<TextBlock xml:space='preserve'>\nInline\n</TextBlock>").unwrap();
+    mixed.apply("Add inline", vec![Edit::InsertChild { parent: mixed.ast().root(), index: 0, source: "<Run/>".into() }]).unwrap();
+    assert_eq!(mixed.source(), "<TextBlock xml:space='preserve'>\nInline\n<Run/></TextBlock>");
+}
+
+#[test]
+fn moving_selection_removes_only_its_own_lines() {
+    let source = concat!(
+        "<StackPanel>\r\n",
+        "\t<TextBlock/>\r\n",
+        "\t<Button Name='open'/>  \r\n",
+        "\t<Button Name='review'/>\r\n",
+        "\r\n\t<!-- Keep this gap and comment -->\r\n",
+        "</StackPanel>\r\n",
+    );
+    let mut doc = Document::new(source).unwrap();
+    let parent = doc.ast().root();
+    let open = named(&doc, "open");
+    let review = named(&doc, "review");
+    doc.apply(
+        "Move selection",
+        vec![
+            Edit::MoveNode {
+                node: open,
+                parent,
+                index: 0,
+            },
+            Edit::MoveNode {
+                node: review,
+                parent,
+                index: 1,
+            },
+        ],
+    )
+    .unwrap();
+    assert_eq!(
+        doc.source(),
+        concat!(
+            "<StackPanel>\r\n",
+            "\t<Button Name='open'/>\r\n",
+            "\t<Button Name='review'/>\r\n",
+            "\t<TextBlock/>\r\n",
+            "\r\n\t<!-- Keep this gap and comment -->\r\n",
+            "</StackPanel>\r\n",
+        ),
+    );
+    assert_eq!(doc.ast().element_children(parent)[..2], [open, review]);
+    doc.undo().unwrap();
+    assert_eq!(doc.source(), source);
+}
+
+#[test]
+fn moving_keeps_whitespace_in_mixed_content_and_lines_with_comments() {
+    for (source, expected) in [
+        (
+            "<StackPanel>\n  <Button/> <!-- Keep -->\n  <TextBlock/>\n</StackPanel>",
+            "<StackPanel>\n   <!-- Keep -->\n  <TextBlock/>\n  <Button/>\n</StackPanel>",
+        ),
+        (
+            "<TextBlock>\n  <Run/>\n  Caption\n  <Run Text='tail'/>\n</TextBlock>",
+            "<TextBlock>\n  \n  Caption\n  <Run Text='tail'/>\n<Run/></TextBlock>",
+        ),
+        (
+            "<TextBlock xml:space='preserve'>\n  <Run/>\n  <Run Text='tail'/>\n</TextBlock>",
+            "<TextBlock xml:space='preserve'>\n  \n  <Run Text='tail'/>\n<Run/></TextBlock>",
+        ),
+    ] {
+        let mut doc = Document::new(source).unwrap();
+        let parent = doc.ast().root();
+        let node = doc.ast().element_children(parent)[0];
+        doc.apply(
+            "Move",
+            vec![Edit::MoveNode {
+                node,
+                parent,
+                index: 1,
+            }],
+        )
+        .unwrap();
+        assert_eq!(doc.source(), expected);
+    }
+}
+
+#[test]
 fn child_indices_ignore_comments_and_whitespace() {
     let mut doc =
         Document::new("<Grid>\n<!-- first --><Button/>\n<!-- last --><TextBlock/>\n</Grid>")

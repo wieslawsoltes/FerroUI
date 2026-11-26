@@ -1,4 +1,4 @@
-use super::{Ast, Attribute, Node, NodeId, NodeKind, SourceSpan};
+use super::{xml_text::decode_xml, Ast, Attribute, Node, NodeId, NodeKind, SourceSpan};
 use crate::DesignerError;
 use std::collections::{BTreeMap, HashMap};
 
@@ -252,52 +252,6 @@ fn tag_end(source: &str, start: usize) -> usize {
         }
     }
     unreachable!("validated XML opening tag")
-}
-
-pub(crate) fn decode_xml(source: &str, attribute: bool) -> String {
-    if !source.contains(['&', '\r']) && (!attribute || !source.contains(['\n', '\t'])) {
-        return source.to_owned();
-    }
-    let mut out = String::with_capacity(source.len());
-    let mut cursor = 0;
-    while cursor < source.len() {
-        let remaining = &source[cursor..];
-        if remaining.starts_with('&') {
-            let end = remaining.find(';').expect("validated XML reference");
-            let name = &remaining[1..end];
-            let ch = match name {
-                "amp" => '&',
-                "lt" => '<',
-                "gt" => '>',
-                "quot" => '"',
-                "apos" => '\'',
-                _ if name.starts_with("#x") => {
-                    char::from_u32(u32::from_str_radix(&name[2..], 16).unwrap()).unwrap()
-                }
-                _ if name.starts_with('#') => char::from_u32(name[1..].parse().unwrap()).unwrap(),
-                _ => unreachable!("DTD is disabled"),
-            };
-            out.push(ch);
-            cursor += end + 1;
-        } else {
-            let ch = remaining.chars().next().unwrap();
-            if ch == '\r' {
-                cursor += 1;
-                if source.as_bytes().get(cursor) == Some(&b'\n') {
-                    cursor += 1;
-                }
-                out.push(if attribute { ' ' } else { '\n' });
-            } else {
-                cursor += ch.len_utf8();
-                out.push(if attribute && matches!(ch, '\n' | '\t') {
-                    ' '
-                } else {
-                    ch
-                });
-            }
-        }
-    }
-    out
 }
 
 /// XML end-of-line normalization applies to every lexical text token, including

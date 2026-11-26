@@ -1,0 +1,83 @@
+.guide-overlay {
+    --guide: var(--vscode-editorInfo-foreground, var(--vscode-focusBorder));
+    position: absolute;
+    inset: 0 auto auto 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.designer-content:has(#guide-overlay:not([hidden])) .status { inset-block-start: var(--canvas-ruler-size, 0px); }
+.canvas-ruler, .ruler-origin {
+    position: absolute;
+    inset: 0 auto auto 0;
+    background: var(--vscode-editorWidget-background, var(--vscode-sideBar-background));
+    color: var(--vscode-editorLineNumber-activeForeground, var(--vscode-foreground));
+    font-family: var(--vscode-font-family);
+}
+#ruler-top { inline-size: 100%; block-size: var(--rail-size); border-block-end: 1px solid var(--line); }
+#ruler-left { inline-size: var(--rail-size); block-size: 100%; border-inline-end: 1px solid var(--line); }
+.ruler-origin {
+    display: grid;
+    place-items: center;
+    inline-size: var(--rail-size);
+    block-size: var(--rail-size);
+    border: solid var(--line);
+    border-width: 0 1px 1px 0;
+    font-size: 10px;
+    color: var(--muted);
+}
+.guide-line {
+    position: absolute;
+    display: block;
+    color: var(--guide);
+    min-block-size: 0;
+    min-inline-size: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: currentColor;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--vscode-editor-background) 35%, transparent);
+    pointer-events: none;
+}
+.guide-line[data-axis="Horizontal"] { left: var(--rail-size); right: 0; top: var(--guide-pixel); block-size: 1px; }
+.guide-line[data-axis="Vertical"] { top: var(--rail-size); bottom: 0; left: var(--guide-pixel); inline-size: 1px; }
+.guide-line:focus-visible, .guide-ghost { outline: 1px solid var(--guide); outline-offset: 0; z-index: 1; }
+.guide-line > span {
+    display: none;
+    position: absolute;
+    inset: 4px auto auto 4px;
+    padding: 2px 5px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.guide-line:focus > span, .guide-ghost > span { display: block; }
+.guide-line[data-axis="Horizontal"][data-flip-label] > span { top: auto; bottom: 4px; }
+.guide-line[data-axis="Vertical"][data-flip-label] > span { left: auto; right: 4px; }
+.canvas[data-guide-cursor="Horizontal"][data-mode="select"]:not([data-pan="ready"], [data-pan="dragging"]),
+.canvas[data-guide-cursor="Horizontal"][data-mode="select"]:not([data-pan="ready"], [data-pan="dragging"]) #frame { cursor: ns-resize; }
+.canvas[data-guide-cursor="Vertical"][data-mode="select"]:not([data-pan="ready"], [data-pan="dragging"]),
+.canvas[data-guide-cursor="Vertical"][data-mode="select"]:not([data-pan="ready"], [data-pan="dragging"]) #frame { cursor: ew-resize; }
+
+#guides-button[data-active="true"] { color: var(--vscode-textLink-foreground, var(--focus)); }
+.guides-menu { --popover-width: 290px; padding: 9px; }
+.guide-menu-heading, .guide-visibility, .guide-position-heading, .guide-menu-tools, .guide-menu-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.guide-menu-heading, .guide-position-heading { justify-content: space-between; }
+#guides-scope, #guide-positions-label { color: var(--muted); font-size: 11px; }
+.guide-visibility { gap: 16px; padding-block: 7px; border-block-end: 1px solid var(--line); }
+.guide-visibility label { display: flex; align-items: center; gap: 3px; }
+.guide-position-heading { min-block-size: 30px; }
+#guide-positions { display: grid; gap: 3px; max-block-size: min(180px, 35vh); overflow: auto; padding: 2px; }
+.guide-position-row { display: flex; align-items: center; gap: 4px; min-inline-size: 0; }
+.guide-position-row label { display: flex; flex: 1; align-items: center; gap: 5px; min-inline-size: 0; }
+.guide-position-row label > .codicon { color: var(--muted); }
+.guide-position-row input { flex: 1; min-inline-size: 0; font-variant-numeric: tabular-nums; }
+.guide-menu-actions { justify-content: flex-end; margin-block-start: 7px; }
+#guides-error { color: var(--vscode-errorForeground); margin: 5px 0 0; }

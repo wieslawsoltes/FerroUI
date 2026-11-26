@@ -57,23 +57,28 @@ impl RuntimeXamlLoaderConfiguration {
     /// Whether source information (document, line, position) is attached to
     /// the objects the loader creates.
     ///
-    /// When it was not set explicitly, the default comes from the metadata
-    /// of the local assembly ([`MarkupAssembly::CREATE_SOURCE_INFO`], parsed
-    /// as a boolean); it is `false` without a local assembly, without the
-    /// entry and for a value that is not a boolean.
+    /// When left unset, the loader honors the local assembly's
+    /// [`MarkupAssembly::CREATE_SOURCE_INFO`] flag and development editor launches.
     pub fn create_source_info(&self) -> bool {
-        if self.create_source_info.is_none() {
-            if let Some(asm) = self.local_assembly {
-                let create_source_info = asm.metadata_value(MarkupAssembly::CREATE_SOURCE_INFO);
-                return create_source_info.is_some_and(parse_bool);
-            }
-        }
-        self.create_source_info.unwrap_or(false)
+        self.create_source_info.unwrap_or_else(|| {
+            self.local_assembly
+                .and_then(|asm| asm.metadata_value(MarkupAssembly::CREATE_SOURCE_INFO))
+                .is_some_and(parse_bool)
+                || editor_source_enabled()
+        })
     }
 
     pub fn set_create_source_info(&mut self, value: bool) {
         self.create_source_info = Some(value);
     }
+}
+
+fn editor_source_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    cfg!(debug_assertions) && *ENABLED.get_or_init(|| {
+        ["FERROUI_EDITOR_RELOAD", "FERROUI_EDITOR_SOURCE"].iter()
+            .any(|name| std::env::var_os(name).as_deref() == Some("1".as_ref()))
+    })
 }
 
 /// `bool.TryParse(text, out value) && value`: `true` in any casing, with
