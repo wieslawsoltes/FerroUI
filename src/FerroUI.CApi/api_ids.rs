@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -6682138528347034761;
+pub(crate) const API_FINGERPRINT: i64 = -6145580077105799268;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 508] = [
+pub(crate) static TYPE_NAMES: [&str; 511] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -76,6 +76,7 @@ pub(crate) static TYPE_NAMES: [&str; 508] = [
     "ContainerQuery",
     "ContentControl",
     "ContentControlAutomationPeer",
+    "ContentDialog",
     "ContentPage",
     "ContentPageAutomationPeer",
     "ContentPresenter",
@@ -378,6 +379,8 @@ pub(crate) static TYPE_NAMES: [&str; 508] = [
     "SelectingItemsControlAutomationPeer",
     "SelectingMultiPage",
     "SelectionIndicator",
+    "SelectorBar",
+    "SelectorBarItem",
     "Separator",
     "Shadow",
     "Shape",
@@ -520,7 +523,7 @@ pub(crate) static TYPE_NAMES: [&str; 508] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -666,6 +669,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "CloseButtonCommand",
     "CloseButtonCommandParameter",
     "CloseButtonStyle",
+    "CloseButtonText",
     "ClosedPaneHeight",
     "ClosedPaneWidth",
     "ClosingBehavior",
@@ -714,6 +718,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "DayTitleTemplate",
     "DayVisible",
     "DecreaseButton",
+    "DefaultButton",
     "DefaultFocusAdorner",
     "DefaultFrameThickness",
     "DefaultLabelPosition",
@@ -827,6 +832,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "FrameSize",
     "FrameThickness",
     "From",
+    "FullSizeDesired",
     "Geometry",
     "Geometry1",
     "Geometry2",
@@ -952,8 +958,10 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "IsPointerOver",
     "IsPressed",
     "IsPreviousButtonVisible",
+    "IsPrimaryButtonEnabled",
     "IsReadOnly",
     "IsScrollInertiaEnabled",
+    "IsSecondaryButtonEnabled",
     "IsSelected",
     "IsSettingsVisible",
     "IsSnapToTickEnabled",
@@ -1187,6 +1195,9 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "PreviousButtonStyle",
     "PreviousButtonTheme",
     "PreviousButtonVisibility",
+    "PrimaryButtonCommand",
+    "PrimaryButtonCommandParameter",
+    "PrimaryButtonText",
     "PrimaryCommands",
     "ProfilePicture",
     "Progress",
@@ -1266,6 +1277,9 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "ScrollViewer.VerticalSnapPointsType",
     "SearchText",
     "SecondIncrement",
+    "SecondaryButtonCommand",
+    "SecondaryButtonCommandParameter",
+    "SecondaryButtonText",
     "SecondaryCommands",
     "Segments",
     "SelectedContent",
@@ -1317,6 +1331,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "SmallChange",
     "SmallDisplayPicture",
     "SmallerPaneToggleButtonWidth",
+    "SnapsTo",
     "SnapsToDevicePixels",
     "Source",
     "SourceDisplayPicture",
@@ -1330,6 +1345,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "StartAngle",
     "StartPoint",
     "StaysOpenOnClick",
+    "StepFrequency",
     "Storyboard.TargetName",
     "Storyboard.TargetProperty",
     "Stretch",
@@ -1550,6 +1566,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "WindowStartupLocation",
     "WindowState",
     "Wrap",
+    "WrapMode",
     "WrapSelection",
     "X",
     "X11Properties.NetWmWindowType",
