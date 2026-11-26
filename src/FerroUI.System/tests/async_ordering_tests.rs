@@ -6,8 +6,6 @@
 #![allow(deprecated)]
 
 use crate::threading::tasks::{run_pending_wakes, spawn_local, TaskCompletionSource, TaskStatus};
-#[allow(deprecated)]
-use crate::threading::CancellationTokenSource;
 use crate::threading::CancellationToken;
 use crate::ObservableError;
 use std::cell::RefCell;
@@ -67,18 +65,17 @@ fn a_future_awaiting_a_dropped_completion_source_stays_pending() {
 }
 
 #[test]
-#[allow(deprecated)]
 fn a_cancellation_runs_its_callbacks_once_in_registration_order_on_the_cancelling_thread() {
-    let source = CancellationTokenSource::new();
-    let token = source.token();
+    let source = CancellationToken::new();
+    let token = source.clone();
     let calls = Arc::new(Mutex::new(Vec::new()));
     let mut registrations = Vec::new();
     for n in 0..4 {
         let calls = calls.clone();
-        registrations.push(token.register_handle(move || calls.lock().unwrap().push((n, thread::current().id()))));
+        registrations.push(token.register(move || calls.lock().unwrap().push((n, thread::current().id()))));
     }
     // Removing one keeps the order of the others.
-    registrations[1].dispose();
+    registrations.remove(1).dispose();
 
     let canceller = thread::spawn(move || {
         source.cancel();
@@ -87,12 +84,12 @@ fn a_cancellation_runs_its_callbacks_once_in_registration_order_on_the_cancellin
     })
     .join()
     .unwrap();
-    assert!(token.is_cancellation_requested());
+    assert!(token.is_cancelled());
     assert_eq!(*calls.lock().unwrap(), [(0, canceller), (2, canceller), (3, canceller)]);
 
     // A callback registered after the cancellation runs at once, on the thread that registers it.
     let c = calls.clone();
-    let _late = token.register_handle(move || c.lock().unwrap().push((4, thread::current().id())));
+    let _late = token.register(move || c.lock().unwrap().push((4, thread::current().id())));
     assert_eq!(calls.lock().unwrap().last(), Some(&(4, thread::current().id())));
 }
 

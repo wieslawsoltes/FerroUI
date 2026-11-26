@@ -1,13 +1,11 @@
 //! Tests of `threading::CancellationToken` in the shape of `tokio_util` (step A4 of phase C4 of
 //! #423, docs/idiomatic-rust-async.md, section 3.7): the callbacks and their guards, the local
 //! callbacks, child tokens, the future of the cancellation, the drop guard, reentrant callbacks,
-//! the source over the token, and the conversions of the cancellation errors.
+//! and the conversions of the cancellation errors.
 
 use crate::task::{block_on, run_pending, Canceled};
 #[allow(deprecated)]
 use crate::threading::tasks::TaskCanceledError;
-#[allow(deprecated)]
-use crate::threading::CancellationTokenSource;
 use crate::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
 use std::cell::RefCell;
 use std::future::Future;
@@ -75,7 +73,6 @@ fn the_token_and_its_guards_are_send() {
 }
 
 #[test]
-#[allow(deprecated)]
 fn a_new_token_is_canceled_once_and_runs_its_callbacks_in_the_order_of_registration() {
     let token = CancellationToken::new();
     assert!(token.can_be_cancelled());
@@ -95,7 +92,6 @@ fn a_new_token_is_canceled_once_and_runs_its_callbacks_in_the_order_of_registrat
     });
     canceller.join().unwrap();
     assert!(token.is_cancelled());
-    assert!(token.is_cancellation_requested());
     assert_eq!(*log.lock().unwrap(), [0, 2, 3]);
 
     // The guards of callbacks that ran do nothing.
@@ -327,34 +323,6 @@ fn a_local_callback_runs_on_its_thread_and_its_guard_removes_it_from_any_thread(
         let _late = token.register_local(move || l.borrow_mut().push("late"));
         assert_eq!(*log.borrow(), ["kept", "late"]);
     });
-}
-
-#[test]
-#[allow(deprecated)]
-fn a_source_is_a_token_that_can_be_canceled_and_its_registrations_stay_when_dropped() {
-    let source = CancellationTokenSource::new();
-    let token = source.token();
-    assert!(token.can_be_canceled());
-    let count = Arc::new(AtomicUsize::new(0));
-    let c = count.clone();
-    // Dropping the registration of `register_handle` keeps the callback.
-    drop(token.register_handle(move || {
-        c.fetch_add(1, Ordering::SeqCst);
-    }));
-    let child = token.child_token();
-    let wait = token.cancelled();
-
-    source.cancel();
-    assert!(source.is_cancellation_requested());
-    assert!(token.is_cancelled());
-    assert!(child.is_cancelled());
-    assert_eq!(count.load(Ordering::SeqCst), 1);
-    block_on(wait);
-
-    // The token cancels its source as well.
-    let source = CancellationTokenSource::new();
-    source.token().cancel();
-    assert!(source.is_cancellation_requested());
 }
 
 #[test]

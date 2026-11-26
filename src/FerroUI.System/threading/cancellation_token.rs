@@ -382,7 +382,6 @@ impl fmt::Debug for DropGuard {
 }
 
 #[cfg(test)]
-#[allow(deprecated)]
 mod tests {
     use super::*;
     use std::sync::atomic::AtomicUsize;
@@ -390,33 +389,36 @@ mod tests {
     #[test]
     fn none_cannot_be_canceled() {
         let token = CancellationToken::none();
-        assert!(!token.can_be_canceled());
-        assert!(!token.is_cancellation_requested());
+        assert!(!token.can_be_cancelled());
+        assert!(!token.is_cancelled());
     }
 
     #[test]
     fn cancel_runs_callbacks_once() {
         let count = Arc::new(AtomicUsize::new(0));
-        let source = CancellationTokenSource::new();
-        let token = source.token();
+        let token = CancellationToken::new();
         let c = count.clone();
-        token.register_handle(move || {
-            c.fetch_add(1, Ordering::SeqCst);
-        });
+        token
+            .register(move || {
+                c.fetch_add(1, Ordering::SeqCst);
+            })
+            .detach();
         let c = count.clone();
-        let removed = token.register_handle(move || {
+        let removed = token.register(move || {
             c.fetch_add(10, Ordering::SeqCst);
         });
         removed.dispose();
-        source.cancel();
-        source.cancel();
-        assert!(token.is_cancellation_requested());
+        token.cancel();
+        token.cancel();
+        assert!(token.is_cancelled());
         assert_eq!(count.load(Ordering::SeqCst), 1);
 
         let c = count.clone();
-        token.register_handle(move || {
-            c.fetch_add(100, Ordering::SeqCst);
-        });
+        token
+            .register(move || {
+                c.fetch_add(100, Ordering::SeqCst);
+            })
+            .detach();
         assert_eq!(count.load(Ordering::SeqCst), 101);
     }
 }
