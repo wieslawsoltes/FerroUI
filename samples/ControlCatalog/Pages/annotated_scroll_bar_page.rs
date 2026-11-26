@@ -50,7 +50,7 @@ impl AnnotatedScrollBarPage {
             for line in 1..=SECTION_LINES {
                 let text = TextBlock::new();
                 text.set_height(LINE_HEIGHT);
-                text.set_text(Some(format!("{letter} {line}")));
+                text.set_text(Some(&format!("{letter} {line}")));
                 lines.children().add(text.upcast::<Control>());
             }
             let content: BoxedValue = Rc::new(letter.to_string());
@@ -65,7 +65,7 @@ impl AnnotatedScrollBarPage {
         let text = self.get_control::<TextBlock>("Scrolling").downgrade();
         bar.scrolling(move |_, args| {
             if let Some(text) = text.upgrade() {
-                text.set_text(Some(format!(
+                text.set_text(Some(&format!(
                     "Scrolling: {:?} to {:.0}",
                     args.scrolling_event_kind(),
                     args.scroll_offset()
