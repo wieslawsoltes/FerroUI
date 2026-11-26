@@ -50,7 +50,7 @@ The work comes from pull request #286 (branch `feat/winui-gallery-compat`), whic
 | Automation peers of the controls above | `controls/dev/*/*AutomationPeer.cpp` | | New peers in `ferroui_controls::automation::peers`. | W4 to W8 |
 | WinUI XAML importer, `x:Bind` | (FerroUI) | | `ferroui-markup-xaml-winui` (the importer); `x:Bind` is the x:Bind core of `ferroui-markup-xaml` since #525 ([x-bind.md](x-bind.md)). | W9 |
 
-Gallery pages that use existing FerroUI controls (ColorPicker as `ColorView`, FlipView as `Carousel` with `PipsPager`, `ConnectedAnimationService`) add no control.
+Gallery pages that use existing FerroUI controls (FlipView as `Carousel` with `PipsPager`, `ConnectedAnimationService`) add no control. WinUI's inline ColorPicker is FerroUI's `ColorPicker` with `DisplayMode="Inline"` (#1266): the drop down stays the default, and the inline template has WinUI's layout and its `IsMoreButtonVisible`, `IsAlphaSliderVisible` and `IsAlphaTextInputVisible`.
 
 ## 4. Where WinUI compatibility lives
 
@@ -437,7 +437,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 
 | Page | Examples | State | Rust | Tests |
 |---|---:|---|---|---|
-| AccessibilityColorContrast | the page (no catalog example): partial, no WinUI ColorPicker (a ColorView) | partial | `accessibility_samples.rs`, `contrast.rs` | `tests.rs` |
+| AccessibilityColorContrast | the page (no catalog example): ported, the flyouts hold the inline ColorPicker (#1266) | ported | `accessibility_samples.rs`, `contrast.rs` | `tests.rs` |
 | AccessibilityKeyboard | 4 ported, 2 partial: no Key Tips (access keys are letters of the header), no accelerator tooltips | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | AccessibilityScreenReader | 9 ported, 2 partial: no FullDescription (HelpText), no Custom landmark or LocalizedLandmarkType, no TextBox Header (LabeledBy) | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | Clipboard | 4 ported, 2 partial: no clipboard history, roaming or ContentChanged | partial | `platform_samples.rs` | `tests.rs` |

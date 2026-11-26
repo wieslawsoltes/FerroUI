@@ -113,6 +113,16 @@ impl FerroObjectImpl for ColorView {
             this.set_current_value(Self::hsv_color_property(), this.on_coerce_hsv_color(this.hsv_color()));
         }
 
+        // Not from upstream: the hex text shows the alpha component only when alpha is enabled
+        // and visible, at its position, so it is formatted again when one of them changes, as
+        // WinUI's ColorPicker does when IsAlphaEnabled changes (#1266).
+        if change.property() == Self::is_alpha_enabled_property().as_property()
+            || change.property() == Self::is_alpha_visible_property().as_property()
+            || change.property() == Self::hex_input_alpha_position_property().as_property()
+        {
+            this.set_color_to_hex_text_box();
+        }
+
         Self::parent_on_property_changed(this, change);
     }
 }

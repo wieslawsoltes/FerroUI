@@ -54,15 +54,15 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 35 |
-| partial | 37 |
-| ported | 54 |
+| partial | 35 |
+| ported | 56 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
 
 | Page | Category | State | Catalog examples |
 |---|---|---|---:|
-| AccessibilityColorContrast | Accessibility | partial | 0 |
+| AccessibilityColorContrast | Accessibility | ported | 0 |
 | AccessibilityKeyboard | Accessibility | partial | 6 |
 | AccessibilityScreenReader | Accessibility | partial | 11 |
 | Acrylic | Styles | ported | 3 |
@@ -89,7 +89,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | CheckBox | Basic input | ported | 3 |
 | Clipboard | System | partial | 6 |
 | Color | Design | partial | 0 |
-| ColorPicker | Basic input | partial | 1 |
+| ColorPicker | Basic input | ported | 1 |
 | ComboBox | Basic input | partial | 3 |
 | CommandBar | Menus & toolbars | ported | 1 |
 | CommandBarFlyout | Menus & toolbars | pending | 1 |

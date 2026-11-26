@@ -4,12 +4,13 @@
   "coverage_rule": "The complete catalog and source browser do not establish page or API parity. A page is ported when every catalog example of it has a native adaptation with its events and bindings, or a recorded reason (not-applicable, with the Windows-only API) why it cannot; otherwise it is partial. Runtime load tests establish constructibility; only named interaction tests establish their bounded behaviors; rendering parity against Windows is a separate check.",
   "pages": {
     "AccessibilityColorContrast": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/AccessibilityColorContrast.xaml",
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/accessibility_samples.rs",
-        "samples/WinUIGallery/contrast.rs"
+        "samples/WinUIGallery/contrast.rs",
+        "src/FerroUI.Controls.ColorPicker/color_picker/color_picker.rs"
       ],
       "tests": [
         {
@@ -25,7 +26,7 @@
           "name": "contrast_pickers_update_the_ratio_the_checks_and_the_preview"
         }
       ],
-      "notes": "The catalog has no sample definition for the page; the page itself is ported with the code behind of AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker in Rust (accessibility_samples.rs, the calculation in contrast.rs): the texts, the text and background pickers (Black and White), RecalculateContrastRatio with the source's rounding (21:1, 4.48:1) and SetCheckState of the three checks, and the preview's background, texts and shapes (the source's x:Bind of the pickers' ColorBrush). Each InlineColorPicker is its composition: the header, a SplitButton with the color preview whose flyout holds the color picker (Picker_ColorChanged, PickerFlyout_Opened), and the hex box (ColorHex_TextChanged, other text ignored). WinUI's inline ColorPicker is not a FerroUI control: the flyout's picker is a ColorView, as on the ColorPicker page, so the page is partial. ThemeResource is DynamicResource and GalleryTileGridStyle is a Border with the card brushes.",
+      "notes": "The catalog has no sample definition for the page; the page itself is ported with the code behind of AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker in Rust (accessibility_samples.rs, the calculation in contrast.rs): the texts, the text and background pickers (Black and White), RecalculateContrastRatio with the source's rounding (21:1, 4.48:1) and SetCheckState of the three checks, and the preview's background, texts and shapes (the source's x:Bind of the pickers' ColorBrush). Each InlineColorPicker is its composition: the header, a SplitButton with the color preview whose flyout holds WinUI's inline ColorPicker (ColorPicker with DisplayMode=\"Inline\", #1266, without the More button, the hex and the channel inputs, as the source; Picker_ColorChanged, PickerFlyout_Opened), and the hex box (ColorHex_TextChanged, other text ignored). ThemeResource is DynamicResource and GalleryTileGridStyle is a Border with the card brushes.",
       "examples": []
     },
     "AccessibilityKeyboard": {
@@ -2288,7 +2289,7 @@
       ]
     },
     "ColorPicker": {
-      "status": "partial",
+      "status": "ported",
       "source_page": {
         "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml",
         "sha256": "c54a47d38687419d48edad04450ac6e0aac92ccc1ec109aa98dd9f96bd04de5e"
@@ -2300,41 +2301,21 @@
       "implementation": [
         "samples/WinUIGallery/Pages/ColorPicker.xaml",
         "samples/WinUIGallery/color_picker_samples.rs",
-        "src/FerroUI.Controls.ColorPicker/color_view/color_view.rs",
-        "src/FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"
+        "src/FerroUI.Controls.ColorPicker/color_picker/color_picker.rs",
+        "src/FerroUI.Controls.ColorPicker/Themes/Fluent/ColorPicker.xaml"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_preserves_source_option_defaults_with_native_inline_views"
+          "name": "color_picker_page_preserves_source_option_defaults_with_the_inline_picker"
         },
         {
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_maps_visibility_options_and_box_ring_handler"
+          "name": "color_picker_page_maps_every_option_and_the_shape_handler"
         },
         {
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_keeps_alpha_visibility_independent_and_more_expansion_state"
-        },
-        {
-          "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_synchronizes_views_alpha_input_and_rectangle_preview"
-        },
-        {
-          "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_rejects_invalid_alpha_without_changing_selected_color"
-        },
-        {
-          "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_preserves_alpha_when_disabled_and_switches_hex_representation"
-        },
-        {
-          "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_parses_live_argb_and_rgb_hex_without_css_shorthand"
-        },
-        {
-          "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_page_preserves_live_text_and_rolls_invalid_edits_back_on_focus_loss"
+          "name": "color_picker_page_keeps_alpha_when_the_alpha_option_is_off_and_previews_the_color"
         },
         {
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
@@ -2342,48 +2323,36 @@
         },
         {
           "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-          "name": "color_picker_tab_icons_follow_winui_theme_changes"
+          "name": "color_picker_page_presents_the_inline_picker_under_the_winui_theme"
+        },
+        {
+          "path": "src/FerroUI.Controls.ColorPicker/tests/theme_tests.rs",
+          "name": "fluent_inline_color_picker"
+        },
+        {
+          "path": "src/FerroUI.Controls.ColorPicker/tests/theme_tests.rs",
+          "name": "simple_inline_color_picker"
         }
       ],
-      "notes": "The original inline ColorPicker maps to a composition of existing native ColorView, ColorSlider, TextBox, ToggleButton and RadioButtons controls; the native ColorPicker dropdown API remains unchanged. Two ColorViews present spectrum and component editing together. Page-scoped dynamic foreground resources bridge the existing ColorView Fluent tab theme to WinUITheme colors. A feature-gated test realizes the native icon paths across light/dark switches and native tab selection. All seven source options, Box/Ring selection and the Rectangle preview are wired with weak Rust callbacks. Source x:Bind expressions and the single-control layout are explicit sample adaptations. Component text editing retains native NumericUpDown behavior. Exact visual layout, localization and host pointer, keyboard and accessibility acceptance remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
+      "notes": "The single example is WinUI's inline ColorPicker: FerroUI's ColorPicker with DisplayMode=\"Inline\" (#1266), whose template lays out the spectrum with the color preview, the third component and alpha sliders, the More button and the color model, hex, channel and alpha inputs, with keyboard editing on the spectrum, the sliders and the inputs, and automation names for each part. The source's x:Bind of the seven options and the Rectangle preview, and ColorSpectrumShapeRadioButtons_SelectionChanged, are wired in Rust with weak callbacks. Names that differ: IsColorSliderVisible is IsColorSpectrumSliderVisible and IsColorChannelTextInputVisible is IsComponentTextInputVisible; the source's IsAlphaEnabled, which hides the alpha editors and keeps Color.A, is IsAlphaVisible (a disabled native alpha coerces Color.A to 255), and the hex input is #AARRGGBB (HexInputAlphaPosition Leading). Native channel and alpha inputs are NumericUpDown (the alpha in percent, as the source). Rendering parity against Windows remains pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/ColorPicker/ColorPickerProperties.txt",
           "source_sha256": "ab8569f648eb3d7f389e6e89f74e0189a6583cb85c8d10dd16d00adcb76dbaf7",
-          "status": "partial",
+          "status": "ported",
           "target_control": "ColorPickerExample1",
           "tests": [
             {
               "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_preserves_source_option_defaults_with_native_inline_views"
+              "name": "color_picker_page_preserves_source_option_defaults_with_the_inline_picker"
             },
             {
               "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_maps_visibility_options_and_box_ring_handler"
+              "name": "color_picker_page_maps_every_option_and_the_shape_handler"
             },
             {
               "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_keeps_alpha_visibility_independent_and_more_expansion_state"
-            },
-            {
-              "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_synchronizes_views_alpha_input_and_rectangle_preview"
-            },
-            {
-              "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_rejects_invalid_alpha_without_changing_selected_color"
-            },
-            {
-              "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_preserves_alpha_when_disabled_and_switches_hex_representation"
-            },
-            {
-              "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_parses_live_argb_and_rgb_hex_without_css_shorthand"
-            },
-            {
-              "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_page_preserves_live_text_and_rolls_invalid_edits_back_on_focus_loss"
+              "name": "color_picker_page_keeps_alpha_when_the_alpha_option_is_off_and_previews_the_color"
             },
             {
               "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
@@ -2391,10 +2360,18 @@
             },
             {
               "path": "samples/WinUIGallery/color_picker_samples_tests.rs",
-              "name": "color_picker_tab_icons_follow_winui_theme_changes"
+              "name": "color_picker_page_presents_the_inline_picker_under_the_winui_theme"
+            },
+            {
+              "path": "src/FerroUI.Controls.ColorPicker/tests/theme_tests.rs",
+              "name": "fluent_inline_color_picker"
+            },
+            {
+              "path": "src/FerroUI.Controls.ColorPicker/tests/theme_tests.rs",
+              "name": "simple_inline_color_picker"
             }
           ],
-          "notes": "Original option defaults, independent alpha slider/text visibility, More expansion state, Box/Ring handler and live Rectangle color are retained. Both native ColorViews keep alpha support enabled internally because disabling native IsAlphaEnabled coerces alpha to 255, whereas the source option preserves Color.A. External editors adapt source-style RGB/ARGB integer hex and integer 0..100% alpha text, including intermediate edits and invalid-edit rollback on focus loss. Native alpha slider values use 0..255 rather than the source 0..100. Separate RGB/HSV RadioButtons replace the Fluent model buttons whose sizing depends on the hidden internal hex editor. A local dynamic TabItem foreground resource bridge preserves tab icon contrast under WinUITheme without altering either native theme. Windows wcstoul negative/overflow quirks, exact component-edit behavior, single-control layout, localization and host input/visual/accessibility parity remain pending."
+          "notes": "The single example is WinUI's inline ColorPicker: FerroUI's ColorPicker with DisplayMode=\"Inline\" (#1266), whose template lays out the spectrum with the color preview, the third component and alpha sliders, the More button and the color model, hex, channel and alpha inputs, with keyboard editing on the spectrum, the sliders and the inputs, and automation names for each part. The source's x:Bind of the seven options and the Rectangle preview, and ColorSpectrumShapeRadioButtons_SelectionChanged, are wired in Rust with weak callbacks. Names that differ: IsColorSliderVisible is IsColorSpectrumSliderVisible and IsColorChannelTextInputVisible is IsComponentTextInputVisible; the source's IsAlphaEnabled, which hides the alpha editors and keeps Color.A, is IsAlphaVisible (a disabled native alpha coerces Color.A to 255), and the hex input is #AARRGGBB (HexInputAlphaPosition Leading). Native channel and alpha inputs are NumericUpDown (the alpha in percent, as the source). Rendering parity against Windows remains pending."
         }
       ],
       "markup_examples": [
@@ -2403,7 +2380,7 @@
           "name": "Example1",
           "sample_definition": "WinUIGallery/Samples/ColorPicker/ColorPickerProperties.txt",
           "source_sha256": "ab8569f648eb3d7f389e6e89f74e0189a6583cb85c8d10dd16d00adcb76dbaf7",
-          "status": "partial",
+          "status": "ported",
           "target_control": "ColorPickerExample1"
         }
       ]

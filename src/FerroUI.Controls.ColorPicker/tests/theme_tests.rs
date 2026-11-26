@@ -243,6 +243,12 @@ fn check_inline_color_picker(theme: Theme) {
     enter.key = Key::Enter;
     hex.raise_event(&enter);
     assert_eq!(Colors::BLUE, picker.color());
+    // The hex text is formatted again when the alpha component is hidden or moved.
+    picker.set_is_alpha_visible(false);
+    assert_eq!(Some("0000FF".to_string()), hex.text());
+    picker.set_is_alpha_visible(true);
+    picker.set_hex_input_alpha_position(crate::AlphaComponentPosition::Leading);
+    assert_eq!(Some("FF0000FF".to_string()), hex.text());
 
     // The keyboard moves the selection on the spectrum (the hue on the horizontal axis).
     let spectrum = find("ColorSpectrum").cast::<ColorSpectrum>().expect("the spectrum");
