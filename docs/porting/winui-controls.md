@@ -144,6 +144,7 @@ When one of these fails, the WinUI control is a separate type. The additions (W7
 | `NumericUpDown` | `LargeChange: Option<Decimal>` with PageUp and PageDown | `None`: the keys stay unhandled and bubble, as upstream | `NumberBox.LargeChange` |
 | `NumericUpDown` | `IsWrapEnabled: bool` | `false`: no wrapping | `NumberBox.IsWrapEnabled` |
 | `AutoCompleteBox` | `QuerySubmitted` (routed, bubbling) with `AutoCompleteBoxQuerySubmittedEventArgs` | no handler: nothing changes; Enter is marked handled only when the drop-down is open, as upstream | `AutoSuggestBox.QuerySubmitted` |
+| `TextBox` | `IsSpellCheckEnabled: bool` with the underlines and the proofing items of section 10.15 | `true` (WinUI's default), and no spell checker is registered unless the application asks for one: nothing is checked or drawn | `TextBox.IsSpellCheckEnabled` |
 
 Not added: the WinUI text-changed reason of AutoSuggestBox (AutoCompleteBox's routed `TextChanged` keeps its upstream arguments), the NaN semantics and validation mode of NumberBox, and the header and description of NumberBox (they belong to the layout of the upstream templates).
 
@@ -466,7 +467,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
 | TextBlock | 5 of 5; the selectable text is a `SelectableTextBlock` with `IsTextSelectionEnabled` | ported | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
-| TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBox | 4 ported: the multi-line box checks its spelling (section 10.15) | ported | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
 | NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
 | ProgressBar | 1 ported, 1 partial: no ShowPaused or ShowError | partial | `status_samples.rs` | `status_samples_tests.rs` |
@@ -553,3 +554,31 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.15 TextBox spell checking (#1261)
+
+`src/FerroUI.Base/platform/i_spell_checker.rs` (the contract), `src/FerroUI.Controls/text_box_spell_check.rs`
+(the checks, the edits that keep the underlines, the proofing items) and the underlines of
+`presenters/text_presenter.rs`; the checkers of the platforms are `MacOSSpellChecker`
+(`ferroui-native`, `NSSpellChecker`), `Win32SpellChecker` (`ferroui-win32`, the spell checking API
+of Windows: `ISpellCheckerFactory`, `win32_com/spellcheck.idl`) and `IosSpellChecker`
+(`ferroui-ios`, `UITextChecker`). Tests: `text_box_spell_check_tests` (`ferroui-controls`, with a
+checker of the tests), `tests/spell_checker.rs` of `ferroui-native` (AppKit on the main thread),
+`text_box_examples_keep_the_source_properties` (gallery).
+
+An application asks for the checker of its platform with `use_platform_spell_checker()` of
+`AppBuilderDesktopExtensions` (macOS, Windows) or of `IosApplicationExtensions`, or registers any
+`ISpellChecker` with `ferroui_base::platform::register_spell_checker`; nothing registers one by
+default, so an application that does not check spelling links no checker and starts as before.
+`ferroui_base::platform::spell_checker()` is `None` where spell checking is not available.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit checks the spelling through the text services of Windows while the text changes. | The text box checks its committed text through the registered checker at the background priority of the dispatcher after a change (the changes before it runs make one check); an edit keeps the underlines of the words it does not touch, moved, until the result arrives; the word the caret ends while the box has the focus is not underlined (it is still being typed). The language is `TextElement.Language` (a checker without that language uses the language of the user's settings). | The checkers of the platforms are services of their own; the result of a check is for the text it was asked for. |
+| Spell checking is on by default (`m_isSpellCheckEnabled = true`), off for the input scope `PersonalFullName`. | `true`; never for a password box (a `PasswordChar`) or a read-only box. | FerroUI's TextBox has no input scope of its own; a password is never sent to a checker. |
+| RichEdit draws the red wavy underline. | The presenter strokes one wavy line (period 4, amplitude 1, the red `#E81123`) under the rectangles of the misspelled words through the drawing context: the GPU path of every backend. A word the pre-edit text of an input method splits is not underlined while it is there. | The underline is part of the presenter's drawing. |
+| `ProofingMenuFlyout`: up to three suggestions, a separator, "Add to dictionary" and "Ignore", opened from the proofing button of `TextCommandBarFlyout`. | The same items at the top of the text box's context menu flyout (a `MenuFlyout`), followed by a separator, while it is open for a misspelled word at the pointer (or at the caret, for the keyboard); they are removed when it closes. No `ProofingMenuFlyout` property. The strings are the theme strings `StringTextFlyoutAddToDictionaryText` and `StringTextFlyoutIgnoreText`, or their English text. | FerroUI's themes have no command bar flyout (section 5.1); the menu flyout of the theme is shared by the text boxes, so the items are added for one opening. |
+| "Ignore" ignores the word in the text services of Windows; "Add to dictionary" adds it to the user's dictionary. | `ISpellChecker::ignore_word` (for the session: the spell document of `NSSpellChecker`, the `ISpellChecker` of Windows, the `UITextChecker`) and `add_to_dictionary` (`learnWord`, `ISpellChecker::Add`, `UITextChecker.learnWord`). | The services of the platforms. |
+| Repeated words ("Delete repeated word") and autocorrection ("Stop correcting"). | Not ported: the checkers report misspelled words only (Windows' repeated words are left out). | The other platforms do not report them. |
+| Every platform of WinUI is Windows. | No checker on Linux (X11 has no spell checking service; a library such as Enchant is not a service of the platform) and in the browser (the DOM checks only the elements it shows, and FerroUI draws its text itself); Android's `SpellCheckerSession` answers asynchronously and is not connected yet. There `spell_checker()` is `None` and a text box checks nothing. | Where the platform has no checker, spell checking is not available. |
+

@@ -21,6 +21,20 @@ mod win32 {
 
 pub use win32::*;
 
+/// The spell checking API of Windows (`spellcheck.idl`, #1261).
+#[allow(
+    clippy::all,
+    non_snake_case,
+    non_upper_case_globals,
+    dead_code,
+    missing_docs,
+    unused_unsafe,
+    unsafe_op_in_unsafe_fn
+)]
+pub mod spellcheck {
+    include!(concat!(env!("OUT_DIR"), "/spellcheck.rs"));
+}
+
 #[cfg(test)]
 mod tests {
     use crate::interop::unmanaged_methods::{DVASPECT, FORMATETC, STGMEDIUM, TYMED};

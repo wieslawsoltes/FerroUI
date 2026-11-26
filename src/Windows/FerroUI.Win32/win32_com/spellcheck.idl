@@ -1,0 +1,81 @@
+// The COM interfaces of the spell checking API of Windows (spellcheck.h, Windows 8 and later) that
+// the spell checker of the backend calls (#1261), for the MicroCom generator
+// (src/tools/MicroCom.CodeGenerator). Not from the reference. The methods return the raw HRESULT
+// where the system answers S_FALSE (the end of an enumeration).
+@rust-map BOOL i32
+@rust-map ULONG u32
+@rust-map DWORD u32
+@rust-map BYTE u8
+@rust-map LPCWSTR *const u16
+@rust-map LPWSTR *mut u16
+
+[
+    object,
+    uuid(00000101-0000-0000-C000-000000000046),
+    pointer_default(unique)
+]
+interface IEnumString : IUnknown
+{
+    int Next([in] ULONG celt, LPWSTR* rgelt, ULONG* pceltFetched);
+    HRESULT Skip([in] ULONG celt);
+    HRESULT Reset();
+    HRESULT Clone([out] IEnumString** ppenum);
+}
+
+[
+    object,
+    uuid(B7C82D61-FBE8-4B47-9B27-6C0D2E0DE0A3),
+    pointer_default(unique)
+]
+interface ISpellingError : IUnknown
+{
+    HRESULT get_StartIndex([out] ULONG* value);
+    HRESULT get_Length([out] ULONG* value);
+    HRESULT get_CorrectiveAction([out] int* value);
+    HRESULT get_Replacement([out] LPWSTR* value);
+}
+
+[
+    object,
+    uuid(803E3BD4-2828-4410-8290-418D1D73C762),
+    pointer_default(unique)
+]
+interface IEnumSpellingError : IUnknown
+{
+    int Next(void** value);
+}
+
+[
+    object,
+    uuid(B6FD0B71-E2BC-4653-8D05-F197E412770B),
+    pointer_default(unique)
+]
+interface ISpellChecker : IUnknown
+{
+    HRESULT get_LanguageTag([out] LPWSTR* value);
+    HRESULT Check([in] LPCWSTR text, [out] IEnumSpellingError** value);
+    HRESULT Suggest([in] LPCWSTR word, [out] IEnumString** value);
+    HRESULT Add([in] LPCWSTR word);
+    HRESULT Ignore([in] LPCWSTR word);
+    HRESULT AutoCorrect([in] LPCWSTR from, [in] LPCWSTR to);
+    HRESULT GetOptionValue([in] LPCWSTR optionId, [out] BYTE* value);
+    HRESULT get_OptionIds([out] IEnumString** value);
+    HRESULT get_Id([out] LPWSTR* value);
+    HRESULT get_LocalizedName([out] LPWSTR* value);
+    int add_SpellCheckerChanged(void* handler, DWORD* eventCookie);
+    HRESULT remove_SpellCheckerChanged([in] DWORD eventCookie);
+    int GetOptionDescription(LPCWSTR optionId, void** value);
+    HRESULT ComprehensiveCheck([in] LPCWSTR text, [out] IEnumSpellingError** value);
+}
+
+[
+    object,
+    uuid(8E018A9D-2415-4677-BF08-794EA61F94BB),
+    pointer_default(unique)
+]
+interface ISpellCheckerFactory : IUnknown
+{
+    HRESULT get_SupportedLanguages([out] IEnumString** value);
+    HRESULT IsSupported([in] LPCWSTR languageTag, [out] BOOL* value);
+    HRESULT CreateSpellChecker([in] LPCWSTR languageTag, [out] ISpellChecker** value);
+}

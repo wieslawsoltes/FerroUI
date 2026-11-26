@@ -109,6 +109,7 @@ mod i_cursor_impl;
 mod i_mac_os_top_level_platform_handle;
 mod i_platform_handle;
 mod i_platform_settings;
+mod i_spell_checker;
 mod leased_platform_handle;
 mod platform_color_values;
 mod platform_handle;
@@ -119,6 +120,9 @@ pub use i_cursor_impl::ICursorImpl;
 pub use i_mac_os_top_level_platform_handle::IMacOSTopLevelPlatformHandle;
 pub use i_platform_handle::IPlatformHandle;
 pub use i_platform_settings::IPlatformSettings;
+pub use i_spell_checker::{
+    register_spell_checker, spell_checker, ISpellChecker, SpellCheckCompletion, SpellingError,
+};
 pub use leased_platform_handle::LeasedPlatformHandle;
 pub use platform_color_values::{
     AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant, SystemColors,

@@ -1783,7 +1783,7 @@
       "examples": []
     },
     "TextBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/TextBox.xaml",
         "samples/WinUIGallery/examples.rs"
@@ -1798,7 +1798,7 @@
           "name": "text_box_examples_keep_the_source_properties"
         }
       ],
-      "notes": "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. FerroUI's TextBox has no IsSpellCheckEnabled, so the multi-line box does not check spelling and the page is partial.",
+      "notes": "All four source examples use native TextBox: the simple box, the box with its header (composed above the box, whose automation name it is) and placeholder, the read-only box with the source's font, foreground and character spacing (CharacterSpacing 200, thousandths of an em, is a LetterSpacing of 4.8 at 24), and the multi-line box with AcceptsReturn, wrapping and the green SelectionBrush (SelectionHighlightColor). The page has no code-behind upstream. The multi-line box has IsSpellCheckEnabled: it checks its spelling through the spell checker of the platform the gallery registers (NSSpellChecker on macOS, the spell checking API of Windows; Linux and the browser have none, where it is not available), underlines the misspelled words and puts the suggestions, Add to dictionary and Ignore into its context menu.",
       "examples": []
     },
     "TimePicker": {

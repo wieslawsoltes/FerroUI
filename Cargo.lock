@@ -2651,6 +2651,8 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "microcom-codegen",
+ "objc2",
+ "objc2-foundation",
  "url",
 ]
 

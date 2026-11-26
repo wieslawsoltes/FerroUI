@@ -26,6 +26,13 @@ ferroui-opengl.workspace = true
 # The URLs of the storage and the activation (C5 of #423).
 url.workspace = true
 
+# The spell checker of AppKit (`spell_checker.rs`, #1261), reached through the Objective-C runtime.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = { version = "0.6.3" }
+objc2-foundation = { version = "0.3.2", default-features = false, features = [
+    "std", "NSArray", "NSEnumerator", "NSObjCRuntime", "NSRange", "NSString",
+] }
+
 [dev-dependencies]
 ferroui-harfbuzz.workspace = true
 # The example of a window and the accessibility test draw with the Skia backend.
@@ -54,6 +61,12 @@ harness = false
 [[test]]
 name = "text_input_options"
 path = "tests/text_input_options.rs"
+harness = false
+
+# The spell checker of AppKit on the main thread (#1261).
+[[test]]
+name = "spell_checker"
+path = "tests/spell_checker.rs"
 harness = false
 
 # The paints of a window that is shown and resized, counted on the real AppKit view

@@ -14,6 +14,8 @@ use ferroui_base::media::{
     FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
     TextWrapping, Typeface,
 };
+use ferroui_base::media::{Geometry, StreamGeometry};
+use ferroui_base::platform::{IGeometryContext, SpellingError};
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::{HandlerList, MathUtilities, ReadOnlyMemory, ValueSpan};
@@ -32,6 +34,40 @@ use std::time::Duration;
 /// when its ranges or run properties change. A span supplies complete run
 /// properties; unspanned text uses the control's defaults.
 pub type TextStyleOverrides = Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>;
+
+/// The colour of the wavy underline of a misspelled word (the red of the proofing marks of
+/// WinUI's text controls).
+const SPELLING_ERROR_COLOR: Color = Color::from_rgb(0xE8, 0x11, 0x23);
+
+/// The wavy line under each rectangle of misspelled text (its bottom edge, one pixel up), in a
+/// period of four device-independent pixels; `None` when there is none.
+pub(crate) fn spelling_error_geometry(rects: &[Rect], origin: Point) -> Option<Ref<Geometry>> {
+    const AMPLITUDE: f64 = 1.0;
+    const HALF_PERIOD: f64 = 2.0;
+    let rects: Vec<&Rect> = rects.iter().filter(|rect| rect.width > 0.0).collect();
+    if rects.is_empty() {
+        return None;
+    }
+    let geometry = StreamGeometry::new();
+    {
+        let mut context = geometry.open();
+        for rect in rects {
+            let left = origin.x + rect.x;
+            let right = left + rect.width;
+            let y = origin.y + rect.bottom() - AMPLITUDE - 1.0;
+            context.begin_figure(Point::new(left, y), false);
+            let mut x = left;
+            let mut up = true;
+            while x < right {
+                x = (x + HALF_PERIOD).min(right);
+                context.line_to(Point::new(x, if up { y - AMPLITUDE } else { y + AMPLITUDE }), true);
+                up = !up;
+            }
+            context.end_figure(false);
+        }
+    }
+    Some(geometry.upcast())
+}
 
 /// The control that displays the text of a text box: the text, the
 /// selection, the pre-edit text of an input method and the caret.
@@ -70,6 +106,9 @@ pub struct TextPresenter {
     utf16_text: RefCell<Option<Option<ReadOnlyMemory<u16>>>>,
     /// The subscription to the changes of the `FontFeatures` collection.
     font_features_subscription: RefCell<Option<Subscription>>,
+    /// The misspelled words of `Text` the presenter underlines (#1261): set by the text box
+    /// that checks its spelling, `None` while it does not.
+    spelling_errors: RefCell<Option<Rc<[SpellingError]>>>,
 }
 
 impl Drop for TextPresenter {
@@ -556,6 +595,7 @@ impl TextPresenter {
             current_im_client: RefCell::new(None),
             utf16_text: RefCell::new(None),
             font_features_subscription: RefCell::new(None),
+            spelling_errors: RefCell::new(None),
         }
     }
 
@@ -956,6 +996,51 @@ impl TextPresenter {
         }
 
         text_layout.draw(context, Point::new(left, top));
+
+        self.render_spelling_errors(context, &text_layout, Point::new(left, top));
+    }
+
+    /// The misspelled words of `Text` the presenter underlines, in UTF-16 code units of the
+    /// committed text (#1261).
+    pub fn spelling_errors(&self) -> Option<Rc<[SpellingError]>> {
+        self.spelling_errors.borrow().clone()
+    }
+
+    /// Sets the misspelled words the presenter underlines (`None` or empty: none).
+    pub(crate) fn set_spelling_errors(&self, value: Option<Rc<[SpellingError]>>) {
+        let value = value.filter(|errors| !errors.is_empty());
+        let changed = match (&*self.spelling_errors.borrow(), &value) {
+            (None, None) => false,
+            (Some(old), Some(new)) => old[..] != new[..],
+            _ => true,
+        };
+        if changed {
+            *self.spelling_errors.borrow_mut() = value;
+            self.invalidate_visual();
+        }
+    }
+
+    /// Underlines the misspelled words with a wavy line under each line of each word, stroked
+    /// as one geometry through the drawing context (the GPU path of every backend). A word
+    /// that the pre-edit text of an input method splits is not underlined while it is there.
+    fn render_spelling_errors(&self, context: &mut DrawingContext, text_layout: &TextLayout, origin: Point) {
+        let Some(errors) = self.spelling_errors() else { return };
+        let preedit_length = self.preedit_text().map_or(0, |text| text.encode_utf16().count());
+        let caret_index = self.caret_index().max(0) as usize;
+        let mut rects = Vec::new();
+        for error in errors.iter() {
+            let (start, end) = match preedit_length {
+                0 => (error.start, error.end()),
+                _ if error.end() <= caret_index => (error.start, error.end()),
+                _ if error.start >= caret_index => (error.start + preedit_length, error.end() + preedit_length),
+                _ => continue,
+            };
+            rects.extend(text_layout.hit_test_text_range(start as i32, (end - start) as i32));
+        }
+        let Some(geometry) = spelling_error_geometry(&rects, origin) else { return };
+        let brush: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::new(SPELLING_ERROR_COLOR));
+        let pen: Rc<dyn IPen> = Rc::new(ImmutablePen::with_brush(Some(brush), 1.0));
+        context.draw_geometry(None, Some(&pen), &geometry);
     }
 
     /// The end points of the line the caret is drawn as.

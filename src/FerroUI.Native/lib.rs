@@ -98,6 +98,8 @@ mod predicate_callback;
 #[cfg(target_os = "macos")]
 mod screen_impl;
 #[cfg(target_os = "macos")]
+mod spell_checker;
+#[cfg(target_os = "macos")]
 mod storage_item;
 
 #[cfg(target_os = "macos")]
@@ -143,6 +145,7 @@ pub use self::{
     platform_behavior_inhibition::PlatformBehaviorInhibition,
     popup_impl::PopupImpl,
     screen_impl::{NativeScreen, ScreenImpl},
+    spell_checker::MacOSSpellChecker,
     top_level_impl::{MacOSTopLevelHandle, TopLevelFramebufferSurface, TopLevelImpl},
     tray_icon_impl::TrayIconImpl,
     window_impl::WindowImpl,
