@@ -12,7 +12,7 @@ use crate::primitives::{
 use crate::presenters::ContentPresenter;
 use crate::templates::IDataTemplate;
 use crate::{
-    Button, ColumnDefinition, Control, ControlImpl, GridLength, GridUnitType, ItemsChangedEventArgs,
+    Button, ColumnDefinition, Control, ControlImpl, Grid, GridLength, GridUnitType, ItemsChangedEventArgs,
     ItemsSource, ListViewItem, RepeatButton, ScrollViewer, SelectionChangedEventArgs, ToolTip,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
@@ -448,6 +448,19 @@ impl TemplatedControlImpl for TabView {
                 }
             }));
             parts.add_button = Some(add_button.downgrade());
+        }
+        // The columns of the strip: by name, as WinUI finds them, else the four columns of
+        // TabContainerGrid in WinUI's order (a ColumnDefinition of FerroUI markup has no x:Name).
+        if parts.tab_column.is_none() {
+            if let Some(grid) = scope.find_as::<Grid>("TabContainerGrid") {
+                let columns = grid.column_definitions();
+                if columns.count() >= 4 {
+                    parts.left_content_column = Some(columns.get(0).downgrade());
+                    parts.tab_column = Some(columns.get(1).downgrade());
+                    parts.add_button_column = Some(columns.get(2).downgrade());
+                    parts.right_content_column = Some(columns.get(3).downgrade());
+                }
+            }
         }
         *this.parts.borrow_mut() = parts;
         this.update_list_view_items();

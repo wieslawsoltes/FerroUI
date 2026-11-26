@@ -12,8 +12,9 @@
   where the same source is ported for FerroUI's TabControl (whose control theme keeps the key
   DefaultTabViewStyle: the key of TabView here is its type only).
   Translation notes (docs/porting/winui-theme.md, section 4):
-  - The control finds WinUI's parts by name, as TabView.cpp does: the columns LeftContentColumn,
-    TabColumn, AddButtonColumn and RightContentColumn, TabContainerGrid, TabListView, AddButton,
+  - The control finds WinUI's parts by name, as TabView.cpp does, except the columns
+    LeftContentColumn, TabColumn, AddButtonColumn and RightContentColumn, which are the four
+    columns of TabContainerGrid in that order (a ColumnDefinition has no x:Name here): TabContainerGrid, TabListView, AddButton,
     RightContentPresenter and TabContentPresenter. It gives the list its items
     (TabItemsSource, or TabItems) and its ItemTemplate in code; CanReorderTabs, CanDragTabs and
     AllowDropTabs are not bound (dragging tabs is not ported) and ItemTemplateSelector has no
@@ -165,10 +166,12 @@
         <Grid RowDefinitions="Auto,*">
           <Grid x:Name="TabContainerGrid" Background="{TemplateBinding Background}">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition x:Name="LeftContentColumn" Width="Auto" MinWidth="2" />
-              <ColumnDefinition x:Name="TabColumn" Width="Auto" />
-              <ColumnDefinition x:Name="AddButtonColumn" Width="Auto" />
-              <ColumnDefinition x:Name="RightContentColumn" Width="*" />
+              <!-- LeftContentColumn, TabColumn, AddButtonColumn and RightContentColumn: the control
+                   takes them in this order (a ColumnDefinition has no x:Name in FerroUI). -->
+              <ColumnDefinition Width="Auto" MinWidth="2" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Border x:Name="LeftBottomBorderLine"
                     Background="{DynamicResource TabViewBorderBrush}"
@@ -501,7 +504,7 @@
     </Style>
     <!-- ForegroundSet: the Foreground of the tab replaces the brushes of the states. -->
     <Style Selector="^:foreground-set /template/ ContentPresenter#IconControl, ^:foreground-set /template/ ContentPresenter#ContentPresenter">
-      <Setter Property="Foreground" Value="{TemplateBinding Foreground}" />
+      <Setter Property="Foreground" Value="{Binding $parent[TabViewItem].Foreground}" />
     </Style>
     <!-- The bottom border line beside the selected tab: LeftOfSelectedTab, RightOfSelectedTab,
          NoBottomBorderLine. -->
