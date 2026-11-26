@@ -74,6 +74,7 @@
         <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ScrollView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />

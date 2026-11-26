@@ -310,6 +310,7 @@ control_tests! {
     slider => "Slider";
     split_button => "SplitButton";
     swipe_control => "SwipeControl";
+    scroll_view => "ScrollView";
     toggle_switch => "ToggleSwitch";
     tree_view => "TreeView";
     tree_view_item => "TreeViewItem";
@@ -1237,3 +1238,47 @@ fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
     assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
     window.close();
 }
+
+/// WinUI's ScrollView (`Controls/ScrollView.xaml`; docs/porting/winui-controls.md, section 10.12)
+/// gets its presenter and its two bars from the theme: the vertical bar of content taller than the
+/// view shows, is driven by the presenter's values and scrolls it; the horizontal one of content
+/// that the default vertical orientation keeps in the viewport's width does not show.
+#[test]
+fn the_scroll_view_gets_its_presenter_and_bars_from_the_theme() {
+    use ferroui_controls::primitives::{ScrollBar, ScrollPresenter};
+    use ferroui_controls::{ScrollView, ScrollingAnimationMode, ScrollingScrollOptions};
+
+    let _app = start_themed_application();
+    let view = ScrollView::new();
+    view.set_width(200.0);
+    view.set_height(100.0);
+    let content = Border::new();
+    content.set_height(400.0);
+    view.set_content(Some(content.upcast()));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&view)));
+    window.show();
+    window.update_layout();
+
+    let part = |name: &str| {
+        view.get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of the scroll view"))
+    };
+    let presenter = part("PART_ScrollPresenter").cast::<ScrollPresenter>().expect("a scroll presenter");
+    assert!(view.scroll_presenter().is_some_and(|own| own.ptr_eq(&presenter)));
+    let vertical = part("PART_VerticalScrollBar").cast::<ScrollBar>().expect("a scroll bar");
+    assert!(part("PART_HorizontalScrollBar").cast::<ScrollBar>().is_some());
+    assert!(part("PART_ScrollBarsSeparator").cast::<Border>().is_some());
+    assert_eq!(view.scrollable_height(), 300.0);
+    assert_eq!(view.scrollable_width(), 0.0);
+    assert!(view.computed_vertical_scroll_bar_visibility());
+    assert!(!view.computed_horizontal_scroll_bar_visibility());
+    assert_eq!((vertical.maximum(), vertical.viewport_size()), (300.0, 100.0));
+    view.scroll_to_with(0.0, 120.0, ScrollingScrollOptions::new(ScrollingAnimationMode::Disabled));
+    window.update_layout();
+    assert_eq!(view.vertical_offset(), 120.0);
+    assert_eq!(vertical.value(), 120.0);
+}
+
