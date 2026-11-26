@@ -3,7 +3,7 @@ use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection
 use crate::{Border, Control, ControlImpl, Decorator, TextLayoutRoundingPlacement};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
-use ferroui_base::interactivity::InteractiveImpl;
+use ferroui_base::interactivity::{InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutingStrategies};
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::media::text_formatting::{
     FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, TextCharacters,
@@ -67,6 +67,9 @@ pub struct TextBlock {
     alpha_mask: OnceCell<Box<ferroui_base::rendering::composition::AlphaMask>>,
     /// The subscription to the changes of the `FontFeatures` collection.
     font_features_subscription: OptionCell<Box<Subscription>>,
+    /// Whether the last layout trimmed the text (`IsTextTrimmed`), updated after each measure
+    /// and arrange.
+    is_text_trimmed: Cell<bool>,
 }
 
 ferro_class! {
@@ -290,133 +293,143 @@ impl LayoutableImpl for TextBlock {
     }
 
     fn measure_override(this: &Self, available_size: Size) -> Size {
-        let mut padding = this.padding();
+        // The layout of this measure tells whether the text is trimmed (`IsTextTrimmed`).
+        let size = {
+            let mut padding = this.padding();
 
-        if this.use_layout_rounding() {
-            let scale = LayoutHelper::get_layout_scale(this);
-            padding = LayoutHelper::round_layout_thickness(padding, scale);
-        }
+            if this.use_layout_rounding() {
+                let scale = LayoutHelper::get_layout_scale(this);
+                padding = LayoutHelper::round_layout_thickness(padding, scale);
+            }
 
-        let deflated_size = available_size.deflate(padding);
+            let deflated_size = available_size.deflate(padding);
 
-        if this.constraint.get() != deflated_size {
-            // Reset the text layout when the constraint is not matching.
-            // Deviation (DEVIATIONS.md, Text block): unless the layout is the
-            // one the new constraint would create (`keeps_text_layout_for`).
-            if !this.keeps_text_layout_for(deflated_size) {
+            if this.constraint.get() != deflated_size {
+                // Reset the text layout when the constraint is not matching.
+                // Deviation (DEVIATIONS.md, Text block): unless the layout is the
+                // one the new constraint would create (`keeps_text_layout_for`).
+                if !this.keeps_text_layout_for(deflated_size) {
+                    if this.has_text_layout() {
+                        ferroui_base::perf_count!(TextBlockLayoutDropsMeasureConstraint);
+                    }
+                    this.drop_drawn_text_layout();
+                }
+                this.constraint.set(deflated_size);
+
+                // Force arrange so text will be properly aligned.
+                this.invalidate_arrange();
+            }
+
+            this.ensure_text_runs();
+
+            if this.measure_embedded_controls(deflated_size) {
+                // A line snapshots its metrics when it is formatted, so an
+                // existing layout still reports the width and height the child
+                // had before it was measured again.
                 if this.has_text_layout() {
-                    ferroui_base::perf_count!(TextBlockLayoutDropsMeasureConstraint);
+                    ferroui_base::perf_count!(TextBlockLayoutDropsEmbeddedControls);
                 }
                 this.drop_drawn_text_layout();
             }
-            this.constraint.set(deflated_size);
 
-            // Force arrange so text will be properly aligned.
-            this.invalidate_arrange();
-        }
-
-        this.ensure_text_runs();
-
-        if this.measure_embedded_controls(deflated_size) {
-            // A line snapshots its metrics when it is formatted, so an
-            // existing layout still reports the width and height the child
-            // had before it was measured again.
-            if this.has_text_layout() {
-                ferroui_base::perf_count!(TextBlockLayoutDropsEmbeddedControls);
+            // This implicitly recreates the text layout with a new constraint if
+            // we previously reset it.
+            if !this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
             }
-            this.drop_drawn_text_layout();
-        }
+            let text_layout = this.text_layout();
 
-        // This implicitly recreates the text layout with a new constraint if
-        // we previously reset it.
-        if !this.has_text_layout() {
-            ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
-        }
-        let text_layout = this.text_layout();
-
-        // The text width used here is matching that the text presenter uses
-        // to measure the text.
-        Size::new(text_layout.width_including_trailing_whitespace(), text_layout.height()).inflate(padding)
+            // The text width used here is matching that the text presenter uses
+            // to measure the text.
+            Size::new(text_layout.width_including_trailing_whitespace(), text_layout.height()).inflate(padding)
+        };
+        this.update_is_text_trimmed();
+        size
     }
 
     fn arrange_override(this: &Self, final_size: Size) -> Size {
-        let mut padding = this.padding();
-        let mut layout_scale = None;
+        // An arrange at another width can lay the text out again (`IsTextTrimmed`).
+        let size = {
+            let mut padding = this.padding();
+            let mut layout_scale = None;
 
-        if this.use_layout_rounding() {
-            let scale = LayoutHelper::get_layout_scale(this);
-            padding = LayoutHelper::round_layout_thickness(padding, scale);
-            layout_scale = Some(scale);
-        }
-
-        let available_size = final_size.deflate(padding);
-
-        // Deviation (DEVIATIONS.md, Text block): the layout of the measure is
-        // kept when nothing it depends on differs.
-        // The reference disposes the layout here and creates it again for the
-        // arranged size, reusing the shaped runs of the run cache (a layout
-        // created during measure is left aligned). A layout that was created
-        // for the very same constraint and alignment (and has not been
-        // invalidated since) is that layout already, so it is kept: nothing
-        // is laid out again when the arranged size is the measured one.
-        if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
-            if this.has_text_layout() {
-                ferroui_base::perf_count!(TextBlockLayoutDropsArrangeAlignment);
+            if this.use_layout_rounding() {
+                let scale = LayoutHelper::get_layout_scale(this);
+                padding = LayoutHelper::round_layout_thickness(padding, scale);
+                layout_scale = Some(scale);
             }
-            this.drop_drawn_text_layout();
-            this.constraint.set(available_size);
-        } else if this.constraint.get() != available_size {
-            if !this.keeps_text_layout_for(available_size) {
+
+            let available_size = final_size.deflate(padding);
+
+            // Deviation (DEVIATIONS.md, Text block): the layout of the measure is
+            // kept when nothing it depends on differs.
+            // The reference disposes the layout here and creates it again for the
+            // arranged size, reusing the shaped runs of the run cache (a layout
+            // created during measure is left aligned). A layout that was created
+            // for the very same constraint and alignment (and has not been
+            // invalidated since) is that layout already, so it is kept: nothing
+            // is laid out again when the arranged size is the measured one.
+            if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
                 if this.has_text_layout() {
-                    ferroui_base::perf_count!(TextBlockLayoutDropsArrangeConstraint);
+                    ferroui_base::perf_count!(TextBlockLayoutDropsArrangeAlignment);
                 }
                 this.drop_drawn_text_layout();
-            }
-            this.constraint.set(available_size);
-        }
-
-        // This implicitly recreates the text layout with a new constraint.
-        if !this.has_text_layout() {
-            ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
-        }
-        let text_layout = this.text_layout();
-
-        if this.has_complex_content() {
-            // Clear visual children before complex run arrangement.
-            this.visual_children().clear();
-
-            // A FerroUI addition: the embedded controls move with the text when the height
-            // layout rounding adds is above it (`LayoutRoundingPlacement`).
-            let mut current_y = padding.top + this.layout_rounding_offset_of(&text_layout, padding, layout_scale);
-
-            for text_line in text_layout.text_lines() {
-                let mut current_x = padding.left + text_line.start();
-
-                for run in text_line.text_runs().iter() {
-                    if let Some(drawable) = run.as_drawable() {
-                        if let Some(control_run) = run.downcast_ref::<EmbeddedControlRun>() {
-                            let control = control_run.control();
-
-                            // Add again to prevent clipping.
-                            this.visual_children().add(control.clone().upcast());
-
-                            let offset_y = TextLineImpl::get_baseline_offset(&**text_line, drawable);
-
-                            control.arrange(Rect::from_position_size(
-                                Point::new(current_x, current_y + offset_y),
-                                control.desired_size(),
-                            ));
-                        }
-
-                        current_x += drawable.size().width;
+                this.constraint.set(available_size);
+            } else if this.constraint.get() != available_size {
+                if !this.keeps_text_layout_for(available_size) {
+                    if this.has_text_layout() {
+                        ferroui_base::perf_count!(TextBlockLayoutDropsArrangeConstraint);
                     }
+                    this.drop_drawn_text_layout();
                 }
-
-                current_y += text_line.height();
+                this.constraint.set(available_size);
             }
-        }
 
-        final_size
+            // This implicitly recreates the text layout with a new constraint.
+            if !this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
+            }
+            let text_layout = this.text_layout();
+
+            if this.has_complex_content() {
+                // Clear visual children before complex run arrangement.
+                this.visual_children().clear();
+
+                // A FerroUI addition: the embedded controls move with the text when the height
+                // layout rounding adds is above it (`LayoutRoundingPlacement`).
+                let mut current_y = padding.top + this.layout_rounding_offset_of(&text_layout, padding, layout_scale);
+
+                for text_line in text_layout.text_lines() {
+                    let mut current_x = padding.left + text_line.start();
+
+                    for run in text_line.text_runs().iter() {
+                        if let Some(drawable) = run.as_drawable() {
+                            if let Some(control_run) = run.downcast_ref::<EmbeddedControlRun>() {
+                                let control = control_run.control();
+
+                                // Add again to prevent clipping.
+                                this.visual_children().add(control.clone().upcast());
+
+                                let offset_y = TextLineImpl::get_baseline_offset(&**text_line, drawable);
+
+                                control.arrange(Rect::from_position_size(
+                                    Point::new(current_x, current_y + offset_y),
+                                    control.desired_size(),
+                                ));
+                            }
+
+                            current_x += drawable.size().width;
+                        }
+                    }
+
+                    current_y += text_line.height();
+                }
+            }
+
+            final_size
+        };
+        this.update_is_text_trimmed();
+        size
     }
 }
 
@@ -786,6 +799,18 @@ ferroui_base::ferro_properties! { impl TextBlock {
     );
 
     ferro_property!(
+        /// Defines the `IsTextTrimmed` property: whether the layout trimmed the text, read only.
+        pub fn is_text_trimmed_property() -> DirectProperty<TextBlock, bool> {
+            FerroProperty::register_direct::<TextBlock, _>(
+                "IsTextTrimmed",
+                |o| o.is_text_trimmed(),
+                None,
+                false,
+            )
+        }
+    );
+
+    ferro_property!(
         /// Defines the `Inlines` property.
         pub fn inlines_property() -> DirectProperty<TextBlock, Option<InlineCollection>> {
             FerroProperty::register_direct::<TextBlock, _>(
@@ -836,6 +861,7 @@ impl TextBlock {
             utf16_text: RefCell::new(None),
             alpha_mask: OnceCell::new(),
             font_features_subscription: OptionCell::new(),
+            is_text_trimmed: Cell::new(false),
         }
     }
 
@@ -886,6 +912,32 @@ impl TextBlock {
         self.alpha_mask
             .get_or_init(|| Box::new(ferroui_base::rendering::composition::AlphaMask::new()))
             .get(self.upcast())
+    }
+
+    ferroui_base::ferro_routed_event!(
+        /// Defines the `IsTextTrimmedChanged` routed event, raised on the text block when
+        /// [`is_text_trimmed`](Self::is_text_trimmed) changes.
+        pub fn is_text_trimmed_changed_event() -> RoutedEvent<IsTextTrimmedChangedEventArgs> {
+            RoutedEvent::register::<TextBlock, _>("IsTextTrimmedChanged", RoutingStrategies::DIRECT)
+        }
+    );
+
+    /// Whether the text does not fit and the layout trimmed it (WinUI's `IsTextTrimmed`): a line
+    /// was collapsed by [`text_trimming`](Self::text_trimming). Without trimming the text is
+    /// clipped, and this is false.
+    pub fn is_text_trimmed(&self) -> bool {
+        self.is_text_trimmed.get()
+    }
+
+    /// Takes the state of the layout of the last measure or arrange. The common case, nothing
+    /// changed, is a comparison: the change and the event happen only when the state flips.
+    fn update_is_text_trimmed(&self) {
+        let trimmed = self.text_layout.get().is_some_and(|layout| layout.has_collapsed_lines());
+        if trimmed == self.is_text_trimmed.get() {
+            return;
+        }
+        self.set_and_raise_cell(Self::is_text_trimmed_property(), &self.is_text_trimmed, trimmed);
+        self.raise_event(&IsTextTrimmedChangedEventArgs::new());
     }
 
     /// Initializes a new instance of the `TextBlock` class.
@@ -1751,5 +1803,27 @@ impl TextBlock {
             let text = self.text().or_else(|| inlines.and_then(|inlines| inlines.text()));
             append_optional_value(builder, "Text", text.as_deref());
         }
+    }
+}
+
+/// The arguments of [`TextBlock::is_text_trimmed_changed_event`] (WinUI's
+/// `IsTextTrimmedChangedEventArgs`, which has no members).
+#[derive(Clone)]
+pub struct IsTextTrimmedChangedEventArgs {
+    base: RoutedEventArgs,
+}
+
+ferroui_base::ferro_routed_event_args!(IsTextTrimmedChangedEventArgs: RoutedEventArgs);
+
+impl IsTextTrimmedChangedEventArgs {
+    /// The arguments of a change of `IsTextTrimmed`.
+    pub fn new() -> Self {
+        Self { base: RoutedEventArgs::with_event(TextBlock::is_text_trimmed_changed_event()) }
+    }
+}
+
+impl Default for IsTextTrimmedChangedEventArgs {
+    fn default() -> Self {
+        Self::new()
     }
 }

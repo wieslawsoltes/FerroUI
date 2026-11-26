@@ -3149,7 +3149,7 @@ fn onIsCheckedChanged(message) = AttrOnValue { attrValueEvent: 28, attrValueProp
 // (SelectingItemsControl).
 fn onIsSelectedChanged(message) = AttrOn { attrOnEvent: 29, attrOnMessage: message }
 // onIsTextTrimmedChanged(message: M) -> Attr<M>: sends the message on every
-// IsTextTrimmedChanged (RichTextBlock).
+// IsTextTrimmedChanged (RichTextBlock, TextBlock).
 fn onIsTextTrimmedChanged(message) = AttrOn { attrOnEvent: 30, attrOnMessage: message }
 // onKeyDown(message: M) -> Attr<M>: sends the message on every KeyDown (InputElement).
 fn onKeyDown(message) = AttrOn { attrOnEvent: 31, attrOnMessage: message }

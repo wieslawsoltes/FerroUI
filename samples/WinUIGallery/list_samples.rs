@@ -28,6 +28,7 @@ use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
     Button, CollectionViewGroup, CollectionViewSource, ComboBox, Control, ItemsSource, ItemsStackPanel,
     ListView, ListViewSelectionMode, MenuFlyout, MenuItem, NumberBox, ScrollViewer, TextBlock, TextBox, ToggleSwitch,
+    ToolTip,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -438,6 +439,27 @@ fn contacts_format() -> DataFormatOf<Vec<Rc<Contact>>> {
     DataFormat::create_in_process_format::<Vec<Rc<Contact>>>("WinUIGallery.ListView.contacts")
 }
 
+ferroui_base::ferro_thread_local! {
+    static TRIMMED_DESCRIPTIONS: Cell<bool> = const { Cell::new(false) };
+}
+
+/// `TextBlock_IsTextTrimmedChanged` of the images' `Description`: its whole text is its tooltip
+/// while it is trimmed. The template has no code behind, so one class handler serves every list.
+fn wire_trimmed_descriptions() {
+    if TRIMMED_DESCRIPTIONS.with(|wired| wired.replace(true)) {
+        return;
+    }
+    TextBlock::is_text_trimmed_changed_event()
+        .add_class_handler::<TextBlock>(|description, _| {
+            if description.name().as_deref() != Some("Description") {
+                return;
+            }
+            let tip = description.is_text_trimmed().then(|| description.text()).flatten();
+            ToolTip::set_tip(description, tip.map(|text| Rc::new(text) as BoxedValue));
+        })
+        .detach();
+}
+
 fn wire_list_view(root: &Ref<Control>) {
     // The page's constructor and `OnNavigatedTo`.
     let page = ListViewPage::new();
@@ -451,6 +473,7 @@ fn wire_list_view(root: &Ref<Control>) {
         }
     });
 
+    wire_trimmed_descriptions();
     wire_selection_modes(root);
     wire_drag_and_drop(root, &page);
     wire_grouped(root);

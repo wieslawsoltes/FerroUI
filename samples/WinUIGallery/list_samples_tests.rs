@@ -327,3 +327,29 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
         restore_viewer.offset().y
     );
 }
+
+#[cfg(feature = "theme")]
+#[test]
+fn list_view_trimmed_descriptions_show_their_text_as_a_tooltip() {
+    use ferroui_controls::{ToolTip, Window};
+    let _application = crate::tests::start_winui();
+    let root = page();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let list = root.get_control::<ListView>("Control4");
+    let descriptions: Vec<Ref<TextBlock>> = list
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<TextBlock>())
+        .filter(|text| text.name().as_deref() == Some("Description"))
+        .collect();
+    assert!(!descriptions.is_empty());
+    let trimmed = descriptions.iter().filter(|description| description.is_text_trimmed()).count();
+    assert!(trimmed > 0, "a long description is trimmed");
+    for description in &descriptions {
+        let tip = ToolTip::get_tip(description).and_then(|tip| tip.downcast_ref::<String>().cloned());
+        let expected = description.is_text_trimmed().then(|| description.text()).flatten();
+        assert_eq!(tip, expected);
+    }
+}
