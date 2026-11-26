@@ -104,6 +104,9 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
+| `TabView` | WinUI's TabView: its template is ported from WinUI's TabView.xaml into the WinUI theme | #418 |
+| `TabViewItem` | WinUI's TabViewItem: its template is ported from WinUI's TabView.xaml into the WinUI theme | #418 |
+| `TabViewListView` | WinUI's TabViewListView: its template is ported from WinUI's TabView.xaml into the WinUI theme | #418 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
