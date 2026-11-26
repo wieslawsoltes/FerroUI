@@ -5,10 +5,8 @@
 //! `NavigationViewItemCollapsedEventArgs.cpp` of `controls/dev/NavigationView` of microsoft-ui-xaml,
 //! commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! NOTICE.md).
-//!
-//! Missing (docs/porting/winui-controls.md, section 10.4): `RecommendedNavigationTransitionInfo`
-//! of the selection and invocation arguments, FerroUI has no navigation transitions.
 
+use crate::navigation::NavigationTransitionInfo;
 use crate::NavigationViewItemBase;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
@@ -98,6 +96,7 @@ pub struct NavigationViewSelectionChangedEventArgs {
     pub(crate) selected_item: Option<BoxedValue>,
     pub(crate) selected_item_container: Option<Ref<NavigationViewItemBase>>,
     pub(crate) is_settings_selected: bool,
+    pub(crate) recommended_navigation_transition_info: NavigationTransitionInfo,
     pub(crate) identity: Rc<()>,
 }
 impl PartialEq for NavigationViewSelectionChangedEventArgs {
@@ -115,6 +114,12 @@ impl NavigationViewSelectionChangedEventArgs {
     pub fn is_settings_selected(&self) -> bool {
         self.is_settings_selected
     }
+    /// The transition for the page of the new selection (`CreateNavigationTransitionInfo`): in the
+    /// top pane a slide from the side of the item, or from the right for an item of the overflow
+    /// menu; otherwise `Entrance`. Pass it to [`Frame::navigate_with_transition`](crate::Frame::navigate_with_transition).
+    pub fn recommended_navigation_transition_info(&self) -> NavigationTransitionInfo {
+        self.recommended_navigation_transition_info
+    }
 }
 
 /// The arguments of `NavigationView.ItemInvoked`.
@@ -123,6 +128,7 @@ pub struct NavigationViewItemInvokedEventArgs {
     pub(crate) invoked_item: Option<BoxedValue>,
     pub(crate) invoked_item_container: Option<Ref<NavigationViewItemBase>>,
     pub(crate) is_settings_invoked: bool,
+    pub(crate) recommended_navigation_transition_info: NavigationTransitionInfo,
     pub(crate) identity: Rc<()>,
 }
 impl PartialEq for NavigationViewItemInvokedEventArgs {
@@ -136,6 +142,7 @@ impl Default for NavigationViewItemInvokedEventArgs {
             invoked_item: None,
             invoked_item_container: None,
             is_settings_invoked: false,
+            recommended_navigation_transition_info: NavigationTransitionInfo::Entrance,
             identity: Rc::new(()),
         }
     }
@@ -152,6 +159,11 @@ impl NavigationViewItemInvokedEventArgs {
     }
     pub fn is_settings_invoked(&self) -> bool {
         self.is_settings_invoked
+    }
+    /// The transition for the page of the invoked item, as
+    /// [`NavigationViewSelectionChangedEventArgs::recommended_navigation_transition_info`].
+    pub fn recommended_navigation_transition_info(&self) -> NavigationTransitionInfo {
+        self.recommended_navigation_transition_info
     }
 }
 
