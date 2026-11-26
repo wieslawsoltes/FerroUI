@@ -24,18 +24,21 @@ if (debuggerPath) {
 
 const failedVersions = new Set();
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
-    const executable = await testVSCodeExecutable(supplied, { version });
-    // Cargo records canonical source paths in the test app's debug information.
-    const sandbox = await realpath(await mkdtemp(join(tmpdir(), 'ferroui-installed-')));
-    const workspace = join(sandbox, 'workspace');
-    const profile = join(sandbox, 'profile');
-    const extensions = join(sandbox, 'extensions');
-    const driver = join(sandbox, 'driver');
-    const args = ['--user-data-dir', profile, '--extensions-dir', extensions];
+    let sandbox;
     let runtime;
     try {
-        await Promise.all([mkdir(join(profile, 'User'), { recursive: true }), mkdir(driver),
-            cp(join(extension, 'test/fixtures'), workspace, { recursive: true })]);
+        const executable = await testVSCodeExecutable(supplied, { version });
+        sandbox = await mkdtemp(join(tmpdir(), 'ferroui-installed-'));
+        // Cargo records canonical source paths in the test app's debug information.
+        sandbox = await realpath(sandbox);
+        const workspace = join(sandbox, 'workspace');
+        const profile = join(sandbox, 'profile');
+        const extensions = join(sandbox, 'extensions');
+        const driver = join(sandbox, 'driver');
+        const args = ['--user-data-dir', profile, '--extensions-dir', extensions];
+        await mkdir(join(profile, 'User'), { recursive: true });
+        await mkdir(driver);
+        await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
         if (runtimeEnabled) runtime = await prepareInstalledRuntime(workspace, sandbox, toolkit, Boolean(debuggerPath));
         const contributes = debuggerPath ? {
             breakpoints: [{ language: 'rust' }],
@@ -53,18 +56,21 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
                 FERROUI_TEST_INSTALLED_ROOT: extensions, ...runtime?.environment,
                 FERROUI_TEST_HOSTED_SOURCE: process.env.FERROUI_TEST_HOSTED_SOURCE ?? join(toolkit, 'samples/TodoWorkbench'),
             },
-            launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] })
-            .catch(error => {
-                failedVersions.add(version);
-                console.error(`The installed VS Code ${version} check failed.`, error);
-            });
+            launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] });
+    } catch (error) {
+        failedVersions.add(version);
+        console.error(`The installed VS Code ${version} check failed.`, error);
     } finally {
         try { runtime?.clean(); }
         catch (error) {
             failedVersions.add(version);
             console.error(`The installed VS Code ${version} fixture could not be cleaned.`, error);
         }
-        finally { await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
+        try { if (sandbox) await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
+        catch (error) {
+            failedVersions.add(version);
+            console.error(`The installed VS Code ${version} profile and workspace could not be cleaned.`, error);
+        }
     }
 }
 if (failedVersions.size) throw new Error(`Installed package checks failed for VS Code ${[...failedVersions].join(', ')}.`);
