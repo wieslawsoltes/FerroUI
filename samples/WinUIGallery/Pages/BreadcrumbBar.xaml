@@ -1,0 +1,33 @@
+<!-- Ported from the two pinned BreadcrumbBar examples of WinUI Gallery and the handlers of
+     BreadcrumbBarPage.xaml.cs (control_samples.rs); see ../NOTICE.md. The items sources, the
+     page's FoldersString and Folders, are set by the code behind in Rust; a Folder is its Name, so
+     the content template binds the item itself. The announcement of the reset is a polite live
+     region. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="A BreadcrumbBar control" FontSize="18" />
+    <BreadcrumbBar x:Name="BreadcrumbBar1" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="A BreadcrumbBar control with a custom DataTemplate" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <BreadcrumbBar x:Name="BreadcrumbBar2">
+        <BreadcrumbBar.ItemTemplate>
+          <DataTemplate>
+            <BreadcrumbBarItem>
+              <BreadcrumbBarItem.ContentTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding}" AutomationProperties.Name="{Binding}" />
+                </DataTemplate>
+              </BreadcrumbBarItem.ContentTemplate>
+            </BreadcrumbBarItem>
+          </DataTemplate>
+        </BreadcrumbBar.ItemTemplate>
+      </BreadcrumbBar>
+      <Button x:Name="ResetSampleBtn" Grid.Column="1" Content="Reset sample" />
+    </Grid>
+    <TextBlock x:Name="ResetSampleStatus" AutomationProperties.LiveSetting="Polite" />
+  </StackPanel>
+</StackPanel>

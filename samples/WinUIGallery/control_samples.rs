@@ -3,8 +3,9 @@
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{BoxedValue, ObjectType, Ref};
 use ferroui_controls::primitives::SelectingItemsControl;
+use ferroui_base::collections::FerroList;
 use ferroui_controls::{
-    AutoSuggestBox, AutoSuggestionBoxTextChangeReason, Button, ComboBox, Control,
+    AutoSuggestBox, AutoSuggestionBoxTextChangeReason, BreadcrumbBar, Button, ComboBox, Control,
     HyperlinkButton, Image, InfoBar, InfoBarSeverity, ItemsSource, TextBlock,
 };
 use std::rc::Rc;
@@ -13,6 +14,7 @@ pub(crate) fn wire(root: &Ref<Control>) {
     wire_cats(root);
     wire_control_search(root);
     wire_info_bars(root);
+    wire_breadcrumb_bars(root);
 }
 
 /// The source matches every query word in a title and sorts prefix matches
@@ -237,6 +239,54 @@ fn wire_info_bars(root: &Ref<Control>) {
                 };
                 second.set_action_button(button);
             }
+        }
+    });
+}
+
+/// The page's `FoldersString`, the items of the first BreadcrumbBar.
+pub(crate) const FOLDERS_STRING: &[&str] =
+    &["Home", "Documents", "Design", "Northwind", "Images", "Folder1", "Folder2", "Folder3"];
+
+/// The page's `_defaultFolders`, the items the second BreadcrumbBar starts with and the reset
+/// restores.
+pub(crate) const DEFAULT_FOLDERS: &[&str] = &["Home", "Folder1", "Folder2", "Folder3"];
+
+/// BreadcrumbBarPage.xaml.cs: the first bar shows `FoldersString`; the second shows `Folders`, from
+/// which `BreadcrumbBar2_ItemClicked` removes the items after the clicked one, and
+/// `ResetSampleButton_Click` adds back the default folders that are missing and announces it.
+fn wire_breadcrumb_bars(root: &Ref<Control>) {
+    let Some(first) = find::<BreadcrumbBar>(root, "BreadcrumbBar1") else {
+        return;
+    };
+    first.set_items_source(Some(ItemsSource::from_strs(FOLDERS_STRING.iter().copied())));
+
+    let second = root.get_control::<BreadcrumbBar>("BreadcrumbBar2");
+    let folders = Rc::new(FerroList::<String>::new());
+    folders.add_range(DEFAULT_FOLDERS.iter().map(|folder| folder.to_string()));
+    second.set_items_source(Some(folders.clone().into()));
+    let items = folders.clone();
+    second
+        .item_clicked(move |_, args| {
+            let index = args.index().max(-1);
+            let mut i = items.count() as i32 - 1;
+            while i >= index + 1 {
+                items.remove_at(i as usize);
+                i -= 1;
+            }
+        })
+        .detach();
+
+    let reset = root.get_control::<Button>("ResetSampleBtn");
+    let status = root.get_control::<TextBlock>("ResetSampleStatus").downgrade();
+    reset.click(move |_, _| {
+        for folder in DEFAULT_FOLDERS {
+            if !folders.snapshot().iter().any(|item| item == folder) {
+                folders.add(folder.to_string());
+            }
+        }
+        // UIHelper.AnnounceActionForAccessibility
+        if let Some(status) = status.upgrade() {
+            status.set_text(Some("BreadcrumbBar sample reset successful."));
         }
     });
 }
