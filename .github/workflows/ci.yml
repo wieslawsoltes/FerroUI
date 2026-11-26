@@ -223,6 +223,8 @@ jobs:
       # only shrinks.
       - name: Tests of the idioms inventory
         run: python3 -m unittest discover -s scripts/idioms -p 'test_*.py'
+      - name: Tests of the API gate scripts
+        run: python3 -m unittest discover -s scripts/api-gate -p 'test_*.py'
       - name: No new .NET-shaped infrastructure types
         run: python3 scripts/idioms/inventory.py --check
       # The crates that are published stay publishable (docs/release.md): the manifests state what
