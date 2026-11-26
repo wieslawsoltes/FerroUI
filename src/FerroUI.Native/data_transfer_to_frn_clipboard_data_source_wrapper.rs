@@ -1,6 +1,6 @@
 use crate::data_transfer_item_to_frn_clipboard_data_item_wrapper::DataTransferItemToFrnClipboardDataItemWrapper;
 use crate::interop::*;
-use ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard;
+use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, MAP_ENABLED};
 use ferroui_base::input::{DataFormat, DataFormatKind, IDataTransfer};
 use ferroui_microcom::{ComPtr, HResult};
 use std::cell::RefCell;
@@ -44,7 +44,7 @@ impl DataTransferToFrnClipboardDataSourceWrapper {
         let transfer = self.data_transfer();
         let source_items = transfer.items();
         let clipboard = ChromiumClipboard::MacOs;
-        let mut web_item = if self.publish_web_formats {
+        let mut web_item = if MAP_ENABLED && self.publish_web_formats {
             let mut formats: Vec<_> = transfer
                 .formats()
                 .iter()
