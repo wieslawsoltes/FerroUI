@@ -6,11 +6,7 @@
 //! in which the first three groups of the text form are little-endian and
 //! the last two are in the order of the text. The serializer writes and
 //! reads that layout; the public signatures of the library take and return
-//! `Uuid`. The port type [`Guid`] remains until the release after 0.5,
-//! deprecated.
-
-use std::fmt;
-use std::str::FromStr;
+//! `Uuid`.
 
 use uuid::Uuid;
 
