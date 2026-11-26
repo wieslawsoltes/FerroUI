@@ -86,10 +86,9 @@ fn an_aborted_task_is_canceled() {
 }
 
 #[test]
-#[allow(deprecated)]
-fn a_dispatcher_task_still_makes_a_task() {
+fn a_dispatcher_task_makes_a_task_through_its_join_handle() {
     let _app = start_app();
-    let task = TaskHandle::from_task(Dispatcher::ui_thread().invoke_async_task_local(|| async { 3 }));
+    let task = TaskHandle::from_handle(Dispatcher::ui_thread().invoke_async_task_local(|| async { 3 }).into());
     run_jobs();
     assert!(task.is_completed_successfully());
 }

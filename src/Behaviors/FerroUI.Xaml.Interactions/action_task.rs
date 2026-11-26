@@ -10,7 +10,6 @@
 //! futures run by the dispatcher of the user interface.
 
 #[allow(deprecated)]
-use ferroui_base::threading::DispatcherTask;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinError, JoinHandle};
 use std::any::Any;

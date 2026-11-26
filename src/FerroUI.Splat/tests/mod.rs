@@ -3,6 +3,3 @@
 //! `Splat.Tests/ServiceLocation/GlobalGenericFirst` and `InstanceGenericFirst`.
 
 mod service_location;
-
-// The identifier on top of the `uuid` crate (#423, C1).
-#[allow(deprecated)]
