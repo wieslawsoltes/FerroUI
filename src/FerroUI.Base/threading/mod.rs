@@ -29,8 +29,6 @@ pub use ferroui_system::task::Canceled;
 // it ends without an output: the types of `ferroui-system`, for the crates that use the dispatcher.
 pub use ferroui_system::task::{AbortHandle, JoinError, JoinHandle};
 pub use ferroui_system::threading::{CancellationGuard, CancellationToken, DropGuard, WaitForCancellation};
-#[allow(deprecated)]
-pub use ferroui_system::threading::{CancellationTokenRegistration, CancellationTokenSource};
 pub use dispatcher::{
     Dispatcher, DispatcherUnhandledExceptionEventHandler, DispatcherUnhandledExceptionFilterEventHandler,
 };

@@ -1,7 +1,7 @@
 //! A cooperative cancellation primitive: [`CancellationToken`], in the shape of
 //! `tokio_util::sync::CancellationToken` (step A4 of phase C4 of #423,
-//! docs/idiomatic-rust-async.md, section 3.7), and the deprecated port of `CancellationTokenSource`
-//! over it.
+//! docs/idiomatic-rust-async.md, section 3.7). The port of `CancellationTokenSource` over it,
+//! deprecated in 0.5.0, was removed in 0.7.0 (#625).
 //!
 //! A token is a cheap handle that can be shared across threads. [`CancellationToken::new`] makes
 //! one that can be canceled, by any of its clones ([`CancellationToken::cancel`]);
@@ -153,21 +153,9 @@ impl CancellationToken {
         self.inner.is_some()
     }
 
-    /// Whether this token is capable of being in the canceled state.
-    #[deprecated(since = "0.5.0", note = "use `can_be_cancelled`")]
-    pub fn can_be_canceled(&self) -> bool {
-        self.can_be_cancelled()
-    }
-
     /// Whether the token is canceled.
     pub fn is_cancelled(&self) -> bool {
         self.inner.as_ref().is_some_and(|inner| inner.is_canceled())
-    }
-
-    /// Whether the token is canceled.
-    #[deprecated(since = "0.5.0", note = "use `is_cancelled`")]
-    pub fn is_cancellation_requested(&self) -> bool {
-        self.is_cancelled()
     }
 
     /// Cancels the token and its children, and runs the registered callbacks and wakes the
@@ -233,29 +221,6 @@ impl CancellationToken {
             .and_then(|inner| Some((inner.clone(), inner.add(Box::new(callback))?)));
         CancellationGuard { registration, local: None }
     }
-
-    /// The former name of [`register`](Self::register).
-    #[deprecated(since = "0.5.0", note = "use `register`, which gives the same guard")]
-    pub fn register_guarded(&self, callback: impl FnOnce() + Send + 'static) -> CancellationGuard {
-        self.register(callback)
-    }
-
-    /// Registers a callback that runs when the token is canceled. When the token is already
-    /// canceled the callback runs immediately.
-    ///
-    /// Dropping the returned registration keeps the callback (the `IDisposable` contract).
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `register`, whose guard removes the callback when it is dropped; `detach()` keeps it"
-    )]
-    #[allow(deprecated)]
-    pub fn register_handle(&self, callback: impl FnOnce() + Send + 'static) -> CancellationTokenRegistration {
-        let id = self.inner.as_ref().and_then(|inner| inner.add(Box::new(callback)));
-        match id {
-            Some(id) => CancellationTokenRegistration { inner: self.inner.clone(), id },
-            None => CancellationTokenRegistration { inner: None, id: 0 },
-        }
-    }
 }
 
 impl CancellationToken {
@@ -274,26 +239,6 @@ impl CancellationToken {
             .as_ref()
             .and_then(|inner| Some((inner.clone(), inner.add(Box::new(move || run.run()))?)));
         CancellationGuard { registration, local: Some(local.handle()) }
-    }
-
-    /// The former name of [`register_local`](Self::register_local).
-    #[deprecated(since = "0.5.0", note = "use `register_local`, which gives the same guard")]
-    pub fn register_local_guarded(&self, callback: impl FnOnce() + 'static) -> CancellationGuard {
-        self.register_local(callback)
-    }
-
-    /// Registers a callback that runs on the current thread when the token is canceled, as
-    /// [`register_local`](Self::register_local) does; dropping the returned registration keeps it.
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `register_local`, whose guard removes the callback when it is dropped; `detach()` keeps it"
-    )]
-    #[allow(deprecated)]
-    pub fn register_local_handle(&self, callback: impl FnOnce() + 'static) -> LocalCancellationTokenRegistration {
-        let local = LocalCallback::register(Box::new(callback));
-        let handle = local.handle();
-        let registration = self.register_handle(move || handle.run());
-        LocalCancellationTokenRegistration { registration, local }
     }
 
     /// The number of callbacks, children and waiting futures registered with the token.
@@ -433,118 +378,6 @@ impl Drop for DropGuard {
 impl fmt::Debug for DropGuard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DropGuard").field("token", &self.token).finish()
-    }
-}
-
-/// Signals to one or more [`CancellationToken`]s that they should be canceled.
-///
-/// A source is a [`CancellationToken`] that can be canceled ([`CancellationToken::new`]): its
-/// [`token`](Self::token) is a clone of it, and canceling either cancels both.
-#[deprecated(
-    since = "0.5.0",
-    note = "use `CancellationToken::new()`, which can be canceled, and its clones in the place of `token()`"
-)]
-#[derive(Clone)]
-pub struct CancellationTokenSource {
-    token: CancellationToken,
-}
-
-#[allow(deprecated)]
-impl Default for CancellationTokenSource {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-#[allow(deprecated)]
-impl CancellationTokenSource {
-    pub fn new() -> Self {
-        Self { token: CancellationToken::new() }
-    }
-
-    /// The token observing this source.
-    pub fn token(&self) -> CancellationToken {
-        self.token.clone()
-    }
-
-    pub fn is_cancellation_requested(&self) -> bool {
-        self.token.is_cancelled()
-    }
-
-    /// Requests cancellation and runs the registered callbacks on the
-    /// calling thread. Subsequent calls do nothing.
-    pub fn cancel(&self) {
-        self.token.cancel();
-    }
-}
-
-/// The token of the source.
-#[allow(deprecated)]
-impl From<CancellationTokenSource> for CancellationToken {
-    fn from(source: CancellationTokenSource) -> Self {
-        source.token
-    }
-}
-
-/// A guard of the callback: dropping it removes the callback.
-#[allow(deprecated)]
-impl From<CancellationTokenRegistration> for CancellationGuard {
-    fn from(registration: CancellationTokenRegistration) -> Self {
-        let CancellationTokenRegistration { inner, id } = registration;
-        CancellationGuard { registration: inner.map(|inner| (inner, id)), local: None }
-    }
-}
-
-/// A guard of the callback: dropping it removes the callback.
-#[allow(deprecated)]
-impl From<LocalCancellationTokenRegistration> for CancellationGuard {
-    fn from(registration: LocalCancellationTokenRegistration) -> Self {
-        let LocalCancellationTokenRegistration { registration, local } = registration;
-        let mut guard = CancellationGuard::from(registration);
-        guard.local = Some(local.handle());
-        guard
-    }
-}
-
-/// A callback registered with [`CancellationToken::register_local_handle`]; it belongs to the
-/// thread that registered it.
-#[deprecated(
-    since = "0.5.0",
-    note = "use `CancellationGuard`, from `CancellationToken::register_local`; `detach()` keeps the callback"
-)]
-#[allow(deprecated)]
-pub struct LocalCancellationTokenRegistration {
-    registration: CancellationTokenRegistration,
-    local: LocalCallback,
-}
-
-#[allow(deprecated)]
-impl LocalCancellationTokenRegistration {
-    /// Removes the callback so that it no longer runs on cancellation.
-    pub fn dispose(&self) {
-        self.registration.dispose();
-        self.local.remove();
-    }
-}
-
-/// A callback registered with [`CancellationToken::register_handle`]; dropping it keeps the
-/// callback.
-#[deprecated(
-    since = "0.5.0",
-    note = "use `CancellationGuard`, from `CancellationToken::register`; `detach()` keeps the callback"
-)]
-pub struct CancellationTokenRegistration {
-    inner: Option<Arc<Inner>>,
-    id: u64,
-}
-
-#[allow(deprecated)]
-impl CancellationTokenRegistration {
-    /// Removes the callback so that it no longer runs on cancellation.
-    pub fn dispose(&self) {
-        if let Some(inner) = &self.inner {
-            inner.remove(self.id);
-        }
     }
 }
 

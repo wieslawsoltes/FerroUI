@@ -701,11 +701,6 @@ impl LocalCallback {
     pub(crate) fn handle(&self) -> LocalCallbackHandle {
         LocalCallbackHandle { id: self.id, thread: self.thread, inbox: self.inbox.clone() }
     }
-
-    /// Forgets the callback unless it ran; on the thread of the callback only.
-    pub(crate) fn remove(&self) {
-        forget_callback(self.id);
-    }
 }
 
 /// Asks for a [`LocalCallback`] to run, from any thread; as a [`Waker`], waking it runs it.
