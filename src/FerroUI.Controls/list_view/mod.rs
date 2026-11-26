@@ -9,13 +9,15 @@ mod list_view;
 mod list_view_base;
 
 #[cfg(test)]
+mod grid_view_grouping_tests;
+#[cfg(test)]
 mod grouping_tests;
 #[cfg(test)]
 mod items_updating_scroll_mode_tests;
 #[cfg(test)]
 mod list_view_tests;
 
-pub use grid_view::{GridView, GridViewItem, GridViewItemTemplateSettings};
+pub use grid_view::{GridView, GridViewHeaderItem, GridViewItem, GridViewItemTemplateSettings};
 pub use grouping::{CollectionViewGroup, CollectionViewSource, GroupStyle, GroupedItemsView};
 pub use items_stack_panel::{GroupHeaderPlacement, ItemsStackPanel, ItemsUpdatingScrollMode};
 pub use items_wrap_grid::ItemsWrapGrid;

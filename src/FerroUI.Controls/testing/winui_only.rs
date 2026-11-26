@@ -7,7 +7,7 @@
 
 use crate::{
     AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem,
-    NavigationViewItemHeader, GridView, GridViewItem, ListView, ListViewHeaderItem, ListViewItem,
+    NavigationViewItemHeader, GridView, GridViewHeaderItem, GridViewItem, ListView, ListViewHeaderItem, ListViewItem,
     NavigationViewItemSeparator, NumberBox, PagerControl, PersonPicture, Pivot, PivotHeaderItem, PivotItem,
     ProgressRing, RadioButtons, RatingControl, RichEditBox, SwipeControl, SymbolIcon, TitleBar,
 };
@@ -40,6 +40,10 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     ),
     (ListViewItem::TYPE, "WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes"),
     (GridView::TYPE, "WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme and its derived themes"),
+    (
+        GridViewHeaderItem::TYPE,
+        "WinUI's GridViewHeaderItem: its template is ported from generic.xaml into the WinUI-derived themes",
+    ),
     (GridViewItem::TYPE, "WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes"),
     (Pivot::TYPE, "WinUI's Pivot: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes"),
     (PivotItem::TYPE, "WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes"),

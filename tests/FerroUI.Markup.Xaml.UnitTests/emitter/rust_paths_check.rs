@@ -170,6 +170,7 @@ pub fn classes() -> Vec<(&'static ::ferroui_base::TypeInfo, &'static str)> {
         (<::ferroui_controls::Grid as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::Grid"),
         (<::ferroui_controls::GridSplitter as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GridSplitter"),
         (<::ferroui_controls::GridView as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GridView"),
+        (<::ferroui_controls::GridViewHeaderItem as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GridViewHeaderItem"),
         (<::ferroui_controls::GridViewItem as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GridViewItem"),
         (<::ferroui_controls::GroupBox as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GroupBox"),
         (<::ferroui_controls::GroupStyle as ::ferroui_base::StaticType>::TYPE, "ferroui_controls::GroupStyle"),
