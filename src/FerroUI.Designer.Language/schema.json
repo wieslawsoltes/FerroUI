@@ -21170,6 +21170,403 @@
     ]
   },
   {
+    "name": "ScrollPresenter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::ScrollPresenter",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "ScrollPresenter.Content: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "Background": {
+        "name": "Background",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "ScrollPresenter.Background: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "ContentOrientation": {
+        "name": "ContentOrientation",
+        "type_name": "ScrollingContentOrientation",
+        "documentation": "ScrollPresenter.ContentOrientation: ScrollingContentOrientation",
+        "values": [
+          "Vertical",
+          "Horizontal",
+          "None",
+          "Both"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollChainMode": {
+        "name": "HorizontalScrollChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollPresenter.HorizontalScrollChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "VerticalScrollChainMode": {
+        "name": "VerticalScrollChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollPresenter.VerticalScrollChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollRailMode": {
+        "name": "HorizontalScrollRailMode",
+        "type_name": "ScrollingRailMode",
+        "documentation": "ScrollPresenter.HorizontalScrollRailMode: ScrollingRailMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "VerticalScrollRailMode": {
+        "name": "VerticalScrollRailMode",
+        "type_name": "ScrollingRailMode",
+        "documentation": "ScrollPresenter.VerticalScrollRailMode: ScrollingRailMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollMode": {
+        "name": "HorizontalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollPresenter.HorizontalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "VerticalScrollMode": {
+        "name": "VerticalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollPresenter.VerticalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ComputedHorizontalScrollMode": {
+        "name": "ComputedHorizontalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollPresenter.ComputedHorizontalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ComputedVerticalScrollMode": {
+        "name": "ComputedVerticalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollPresenter.ComputedVerticalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ZoomChainMode": {
+        "name": "ZoomChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollPresenter.ZoomChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "ZoomMode": {
+        "name": "ZoomMode",
+        "type_name": "ScrollingZoomMode",
+        "documentation": "ScrollPresenter.ZoomMode: ScrollingZoomMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "IgnoredInputKinds": {
+        "name": "IgnoredInputKinds",
+        "type_name": "ScrollingInputKinds",
+        "documentation": "ScrollPresenter.IgnoredInputKinds: ScrollingInputKinds",
+        "values": [],
+        "attached": false
+      },
+      "MinZoomFactor": {
+        "name": "MinZoomFactor",
+        "type_name": "f64",
+        "documentation": "ScrollPresenter.MinZoomFactor: f64",
+        "values": [],
+        "attached": false
+      },
+      "MaxZoomFactor": {
+        "name": "MaxZoomFactor",
+        "type_name": "f64",
+        "documentation": "ScrollPresenter.MaxZoomFactor: f64",
+        "values": [],
+        "attached": false
+      },
+      "HorizontalAnchorRatio": {
+        "name": "HorizontalAnchorRatio",
+        "type_name": "f64",
+        "documentation": "ScrollPresenter.HorizontalAnchorRatio: f64",
+        "values": [],
+        "attached": false
+      },
+      "VerticalAnchorRatio": {
+        "name": "VerticalAnchorRatio",
+        "type_name": "f64",
+        "documentation": "ScrollPresenter.VerticalAnchorRatio: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ScrollView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ScrollView",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "ScrollView.Content: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "HorizontalScrollBarVisibility": {
+        "name": "HorizontalScrollBarVisibility",
+        "type_name": "ScrollingScrollBarVisibility",
+        "documentation": "ScrollView.HorizontalScrollBarVisibility: ScrollingScrollBarVisibility",
+        "values": [
+          "Auto",
+          "Visible",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "VerticalScrollBarVisibility": {
+        "name": "VerticalScrollBarVisibility",
+        "type_name": "ScrollingScrollBarVisibility",
+        "documentation": "ScrollView.VerticalScrollBarVisibility: ScrollingScrollBarVisibility",
+        "values": [
+          "Auto",
+          "Visible",
+          "Hidden"
+        ],
+        "attached": false
+      },
+      "ComputedHorizontalScrollBarVisibility": {
+        "name": "ComputedHorizontalScrollBarVisibility",
+        "type_name": "bool",
+        "documentation": "ScrollView.ComputedHorizontalScrollBarVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ComputedVerticalScrollBarVisibility": {
+        "name": "ComputedVerticalScrollBarVisibility",
+        "type_name": "bool",
+        "documentation": "ScrollView.ComputedVerticalScrollBarVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ComputedHorizontalScrollMode": {
+        "name": "ComputedHorizontalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollView.ComputedHorizontalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ComputedVerticalScrollMode": {
+        "name": "ComputedVerticalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollView.ComputedVerticalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ContentOrientation": {
+        "name": "ContentOrientation",
+        "type_name": "ScrollingContentOrientation",
+        "documentation": "ScrollView.ContentOrientation: ScrollingContentOrientation",
+        "values": [
+          "Vertical",
+          "Horizontal",
+          "None",
+          "Both"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollChainMode": {
+        "name": "HorizontalScrollChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollView.HorizontalScrollChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "VerticalScrollChainMode": {
+        "name": "VerticalScrollChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollView.VerticalScrollChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollRailMode": {
+        "name": "HorizontalScrollRailMode",
+        "type_name": "ScrollingRailMode",
+        "documentation": "ScrollView.HorizontalScrollRailMode: ScrollingRailMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "VerticalScrollRailMode": {
+        "name": "VerticalScrollRailMode",
+        "type_name": "ScrollingRailMode",
+        "documentation": "ScrollView.VerticalScrollRailMode: ScrollingRailMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "HorizontalScrollMode": {
+        "name": "HorizontalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollView.HorizontalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "VerticalScrollMode": {
+        "name": "VerticalScrollMode",
+        "type_name": "ScrollingScrollMode",
+        "documentation": "ScrollView.VerticalScrollMode: ScrollingScrollMode",
+        "values": [
+          "Enabled",
+          "Disabled",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "ZoomChainMode": {
+        "name": "ZoomChainMode",
+        "type_name": "ScrollingChainMode",
+        "documentation": "ScrollView.ZoomChainMode: ScrollingChainMode",
+        "values": [
+          "Auto",
+          "Always",
+          "Never"
+        ],
+        "attached": false
+      },
+      "ZoomMode": {
+        "name": "ZoomMode",
+        "type_name": "ScrollingZoomMode",
+        "documentation": "ScrollView.ZoomMode: ScrollingZoomMode",
+        "values": [
+          "Enabled",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "IgnoredInputKinds": {
+        "name": "IgnoredInputKinds",
+        "type_name": "ScrollingInputKinds",
+        "documentation": "ScrollView.IgnoredInputKinds: ScrollingInputKinds",
+        "values": [],
+        "attached": false
+      },
+      "MinZoomFactor": {
+        "name": "MinZoomFactor",
+        "type_name": "f64",
+        "documentation": "ScrollView.MinZoomFactor: f64",
+        "values": [],
+        "attached": false
+      },
+      "MaxZoomFactor": {
+        "name": "MaxZoomFactor",
+        "type_name": "f64",
+        "documentation": "ScrollView.MaxZoomFactor: f64",
+        "values": [],
+        "attached": false
+      },
+      "HorizontalAnchorRatio": {
+        "name": "HorizontalAnchorRatio",
+        "type_name": "f64",
+        "documentation": "ScrollView.HorizontalAnchorRatio: f64",
+        "values": [],
+        "attached": false
+      },
+      "VerticalAnchorRatio": {
+        "name": "VerticalAnchorRatio",
+        "type_name": "f64",
+        "documentation": "ScrollView.VerticalAnchorRatio: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "ScrollViewer",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::ScrollViewer",
@@ -21391,6 +21788,81 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.PullToRefresh",
       "clr-namespace:FerroUI.Controls.PullToRefresh;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ScrollingScrollCompletedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ScrollingScrollCompletedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "CorrelationId": {
+        "name": "CorrelationId",
+        "type_name": "i32",
+        "documentation": "ScrollingScrollCompletedEventArgs.CorrelationId: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ScrollingScrollStartingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ScrollingScrollStartingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "CorrelationId": {
+        "name": "CorrelationId",
+        "type_name": "i32",
+        "documentation": "ScrollingScrollStartingEventArgs.CorrelationId: i32",
+        "values": []
+      },
+      "HorizontalOffset": {
+        "name": "HorizontalOffset",
+        "type_name": "f64",
+        "documentation": "ScrollingScrollStartingEventArgs.HorizontalOffset: f64",
+        "values": []
+      },
+      "VerticalOffset": {
+        "name": "VerticalOffset",
+        "type_name": "f64",
+        "documentation": "ScrollingScrollStartingEventArgs.VerticalOffset: f64",
+        "values": []
+      },
+      "ZoomFactor": {
+        "name": "ZoomFactor",
+        "type_name": "f32",
+        "documentation": "ScrollingScrollStartingEventArgs.ZoomFactor: f32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ScrollingZoomCompletedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ScrollingZoomCompletedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "CorrelationId": {
+        "name": "CorrelationId",
+        "type_name": "i32",
+        "documentation": "ScrollingZoomCompletedEventArgs.CorrelationId: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

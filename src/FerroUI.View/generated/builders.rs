@@ -1544,6 +1544,32 @@ pub fn scroll_content_presenter() -> El<ferroui_controls::presenters::ScrollCont
     El::new()
 }
 
+pub use ferroui_controls::primitives::ScrollPresenter;
+
+impl ViewClass for ferroui_controls::primitives::ScrollPresenter {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::primitives::ScrollPresenter>::new()
+    }
+}
+
+/// Starts an element of [`ScrollPresenter`](ferroui_controls::primitives::ScrollPresenter).
+pub fn scroll_presenter() -> El<ferroui_controls::primitives::ScrollPresenter> {
+    El::new()
+}
+
+pub use ferroui_controls::ScrollView;
+
+impl ViewClass for ferroui_controls::ScrollView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ScrollView>::new()
+    }
+}
+
+/// Starts an element of [`ScrollView`](ferroui_controls::ScrollView).
+pub fn scroll_view() -> El<ferroui_controls::ScrollView> {
+    El::new()
+}
+
 pub use ferroui_controls::ScrollViewer;
 
 impl ViewClass for ferroui_controls::ScrollViewer {
@@ -8142,6 +8168,209 @@ pub trait ScrollGestureRecognizerProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>> ScrollGestureRecognizerProps for El<T> {}
+
+/// The properties and routed events of [`ScrollPresenter`](ferroui_controls::primitives::ScrollPresenter).
+pub trait ScrollPresenterProps: ElementBuilder {
+    /// Sets [`ScrollPresenter::content_property`](ferroui_controls::primitives::ScrollPresenter::content_property).
+    fn content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::content_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::background_property`](ferroui_controls::primitives::ScrollPresenter::background_property).
+    fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::background_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::content_orientation_property`](ferroui_controls::primitives::ScrollPresenter::content_orientation_property).
+    fn content_orientation<M>(self, value: impl IntoProp<ferroui_controls::ScrollingContentOrientation, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::content_orientation_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::horizontal_scroll_chain_mode_property`](ferroui_controls::primitives::ScrollPresenter::horizontal_scroll_chain_mode_property).
+    fn horizontal_scroll_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::horizontal_scroll_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::vertical_scroll_chain_mode_property`](ferroui_controls::primitives::ScrollPresenter::vertical_scroll_chain_mode_property).
+    fn vertical_scroll_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::vertical_scroll_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::horizontal_scroll_rail_mode_property`](ferroui_controls::primitives::ScrollPresenter::horizontal_scroll_rail_mode_property).
+    fn horizontal_scroll_rail_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingRailMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::horizontal_scroll_rail_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::vertical_scroll_rail_mode_property`](ferroui_controls::primitives::ScrollPresenter::vertical_scroll_rail_mode_property).
+    fn vertical_scroll_rail_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingRailMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::vertical_scroll_rail_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::horizontal_scroll_mode_property`](ferroui_controls::primitives::ScrollPresenter::horizontal_scroll_mode_property).
+    fn horizontal_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::horizontal_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::vertical_scroll_mode_property`](ferroui_controls::primitives::ScrollPresenter::vertical_scroll_mode_property).
+    fn vertical_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::vertical_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::computed_horizontal_scroll_mode_property`](ferroui_controls::primitives::ScrollPresenter::computed_horizontal_scroll_mode_property).
+    fn computed_horizontal_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::computed_horizontal_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::computed_vertical_scroll_mode_property`](ferroui_controls::primitives::ScrollPresenter::computed_vertical_scroll_mode_property).
+    fn computed_vertical_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::computed_vertical_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::zoom_chain_mode_property`](ferroui_controls::primitives::ScrollPresenter::zoom_chain_mode_property).
+    fn zoom_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::zoom_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::zoom_mode_property`](ferroui_controls::primitives::ScrollPresenter::zoom_mode_property).
+    fn zoom_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingZoomMode, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::zoom_mode_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::ignored_input_kinds_property`](ferroui_controls::primitives::ScrollPresenter::ignored_input_kinds_property).
+    fn ignored_input_kinds<M>(self, value: impl IntoProp<ferroui_controls::ScrollingInputKinds, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::ignored_input_kinds_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::min_zoom_factor_property`](ferroui_controls::primitives::ScrollPresenter::min_zoom_factor_property).
+    fn min_zoom_factor<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::min_zoom_factor_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::max_zoom_factor_property`](ferroui_controls::primitives::ScrollPresenter::max_zoom_factor_property).
+    fn max_zoom_factor<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::max_zoom_factor_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::horizontal_anchor_ratio_property`](ferroui_controls::primitives::ScrollPresenter::horizontal_anchor_ratio_property).
+    fn horizontal_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::horizontal_anchor_ratio_property(), value)
+    }
+
+    /// Sets [`ScrollPresenter::vertical_anchor_ratio_property`](ferroui_controls::primitives::ScrollPresenter::vertical_anchor_ratio_property).
+    fn vertical_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::ScrollPresenter>::vertical_anchor_ratio_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::ScrollPresenter>> ScrollPresenterProps for El<T> {}
+
+/// The properties and routed events of [`ScrollView`](ferroui_controls::ScrollView).
+pub trait ScrollViewProps: ElementBuilder {
+    /// Sets [`ScrollView::content_property`](ferroui_controls::ScrollView::content_property).
+    fn content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::content_property(), value)
+    }
+
+    /// Sets [`ScrollView::horizontal_scroll_bar_visibility_property`](ferroui_controls::ScrollView::horizontal_scroll_bar_visibility_property).
+    fn horizontal_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollBarVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::horizontal_scroll_bar_visibility_property(), value)
+    }
+
+    /// Sets [`ScrollView::vertical_scroll_bar_visibility_property`](ferroui_controls::ScrollView::vertical_scroll_bar_visibility_property).
+    fn vertical_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollBarVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::vertical_scroll_bar_visibility_property(), value)
+    }
+
+    /// Sets [`ScrollView::computed_horizontal_scroll_bar_visibility_property`](ferroui_controls::ScrollView::computed_horizontal_scroll_bar_visibility_property).
+    fn computed_horizontal_scroll_bar_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::computed_horizontal_scroll_bar_visibility_property(), value)
+    }
+
+    /// Sets [`ScrollView::computed_vertical_scroll_bar_visibility_property`](ferroui_controls::ScrollView::computed_vertical_scroll_bar_visibility_property).
+    fn computed_vertical_scroll_bar_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::computed_vertical_scroll_bar_visibility_property(), value)
+    }
+
+    /// Sets [`ScrollView::computed_horizontal_scroll_mode_property`](ferroui_controls::ScrollView::computed_horizontal_scroll_mode_property).
+    fn computed_horizontal_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::computed_horizontal_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::computed_vertical_scroll_mode_property`](ferroui_controls::ScrollView::computed_vertical_scroll_mode_property).
+    fn computed_vertical_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::computed_vertical_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::content_orientation_property`](ferroui_controls::ScrollView::content_orientation_property).
+    fn content_orientation<M>(self, value: impl IntoProp<ferroui_controls::ScrollingContentOrientation, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::content_orientation_property(), value)
+    }
+
+    /// Sets [`ScrollView::horizontal_scroll_chain_mode_property`](ferroui_controls::ScrollView::horizontal_scroll_chain_mode_property).
+    fn horizontal_scroll_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::horizontal_scroll_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::vertical_scroll_chain_mode_property`](ferroui_controls::ScrollView::vertical_scroll_chain_mode_property).
+    fn vertical_scroll_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::vertical_scroll_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::horizontal_scroll_rail_mode_property`](ferroui_controls::ScrollView::horizontal_scroll_rail_mode_property).
+    fn horizontal_scroll_rail_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingRailMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::horizontal_scroll_rail_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::vertical_scroll_rail_mode_property`](ferroui_controls::ScrollView::vertical_scroll_rail_mode_property).
+    fn vertical_scroll_rail_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingRailMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::vertical_scroll_rail_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::horizontal_scroll_mode_property`](ferroui_controls::ScrollView::horizontal_scroll_mode_property).
+    fn horizontal_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::horizontal_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::vertical_scroll_mode_property`](ferroui_controls::ScrollView::vertical_scroll_mode_property).
+    fn vertical_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingScrollMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::vertical_scroll_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::zoom_chain_mode_property`](ferroui_controls::ScrollView::zoom_chain_mode_property).
+    fn zoom_chain_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingChainMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::zoom_chain_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::zoom_mode_property`](ferroui_controls::ScrollView::zoom_mode_property).
+    fn zoom_mode<M>(self, value: impl IntoProp<ferroui_controls::ScrollingZoomMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::zoom_mode_property(), value)
+    }
+
+    /// Sets [`ScrollView::ignored_input_kinds_property`](ferroui_controls::ScrollView::ignored_input_kinds_property).
+    fn ignored_input_kinds<M>(self, value: impl IntoProp<ferroui_controls::ScrollingInputKinds, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::ignored_input_kinds_property(), value)
+    }
+
+    /// Sets [`ScrollView::min_zoom_factor_property`](ferroui_controls::ScrollView::min_zoom_factor_property).
+    fn min_zoom_factor<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::min_zoom_factor_property(), value)
+    }
+
+    /// Sets [`ScrollView::max_zoom_factor_property`](ferroui_controls::ScrollView::max_zoom_factor_property).
+    fn max_zoom_factor<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::max_zoom_factor_property(), value)
+    }
+
+    /// Sets [`ScrollView::horizontal_anchor_ratio_property`](ferroui_controls::ScrollView::horizontal_anchor_ratio_property).
+    fn horizontal_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::horizontal_anchor_ratio_property(), value)
+    }
+
+    /// Sets [`ScrollView::vertical_anchor_ratio_property`](ferroui_controls::ScrollView::vertical_anchor_ratio_property).
+    fn vertical_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollView>::vertical_anchor_ratio_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ScrollView>> ScrollViewProps for El<T> {}
 
 /// The properties and routed events of [`ScrollViewer`](ferroui_controls::ScrollViewer).
 pub trait ScrollViewerProps: ElementBuilder {
