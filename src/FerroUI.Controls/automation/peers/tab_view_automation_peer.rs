@@ -8,6 +8,7 @@ use super::{
     ControlAutomationPeerImpl, ListViewItemAutomationPeer,
 };
 use crate::automation::provider::{ISelectionProvider, ProviderAdapter};
+use crate::automation::AutomationProperties;
 use crate::{TabView, TabViewItem};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, FerroObjectImpl, Ref};
@@ -97,11 +98,18 @@ impl AutomationPeerImpl for TabViewItemAutomationPeer {
         "TabViewItem".to_string()
     }
 
+    /// `AutomationProperties.Name`, else the header (WinUI's base peer has no name from the content;
+    /// the base peer of the port names a list item by its content, so the header comes first).
     fn get_name_core(this: &Self) -> Option<String> {
-        Self::parent_get_name_core(this).filter(|name| !name.is_empty()).or_else(|| {
-            let owner = ControlAutomationPeer::owner(this).cast::<TabViewItem>()?;
-            owner.header().map(|header| ValueTypes::to_display_string(Some(&header)))
-        })
+        let owner = ControlAutomationPeer::owner(this);
+        if let Some(name) = AutomationProperties::get_name(&owner).filter(|name| !name.trim().is_empty()) {
+            return Some(name);
+        }
+        let header = owner.cast::<TabViewItem>().and_then(|tab| tab.header());
+        header
+            .map(|header| ValueTypes::to_display_string(Some(&header)))
+            .filter(|name| !name.is_empty())
+            .or_else(|| Self::parent_get_name_core(this))
     }
 }
 

@@ -317,9 +317,10 @@ ferro_properties! { impl TabView {
     );
 
     ferro_property!(
-        /// Defines the `SelectedIndex` property.
+        /// Defines the `SelectedIndex` property. It defaults to 0, so the first tab is selected when
+        /// the list loads (WinUI: `MUX_DEFAULT_VALUE("0")`).
         pub fn selected_index_property() -> StyledProperty<i32> {
-            FerroProperty::register::<TabView, _>("SelectedIndex", -1)
+            FerroProperty::register::<TabView, _>("SelectedIndex", 0)
         }
     );
 
