@@ -115,11 +115,6 @@ impl<T: 'static> Shared<T> {
         }
     }
 
-    /// Runs `f` with the outcome, `None` while it has not ended.
-    pub(crate) fn with_outcome<R>(&self, f: impl FnOnce(Option<&Result<T, JoinError>>) -> R) -> R {
-        f(self.inner.outcome.borrow().as_ref())
-    }
-
     /// Whether it has ended, and its observers have been told.
     pub fn is_finished(&self) -> bool {
         self.inner.outcome.borrow().is_some()
