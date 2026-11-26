@@ -1354,6 +1354,34 @@
       "notes": "The source example uses native ScrollViewer with the source's cliff.jpg and the code behind of ScrollViewerPage.xaml.cs in Rust (scroll_samples.rs): the constructor's ZoomToFactor(4) (once the scroll viewer is first loaded, when it has its presenter), ZoomModeComboBox_SelectionChanged (the zoom mode, the slider enabled only with zooming, the factor 2 otherwise), ZoomSlider_ValueChanged (ChangeView), ScrollViewerControl_ViewChanged (the slider follows a change of ZoomFactor) and the four scroll mode and bar visibility handlers; the slider keeps the source's OneWay x:Bind of MinZoomFactor and MaxZoomFactor (its Header is composed). FerroUI's ScrollViewer has no HorizontalScrollMode or VerticalScrollMode: a Disabled scroll mode is the bar's Disabled visibility, which turns the scrolling of the axis off, and Enabled and Auto keep the visibility of the bar's box. IsVerticalScrollChainingEnabled is IsScrollChainingEnabled.",
       "examples": []
     },
+    "AnnotatedScrollBar": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AnnotatedScrollBar.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/annotated_scroll_bar_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/annotated_scroll_bar_samples_tests.rs",
+          "name": "annotated_scroll_bar_code_behind_keeps_the_source_s_arithmetic"
+        },
+        {
+          "path": "samples/WinUIGallery/annotated_scroll_bar_samples_tests.rs",
+          "name": "annotated_scroll_bar_page_has_the_source_s_controls_and_labels"
+        },
+        {
+          "path": "samples/WinUIGallery/annotated_scroll_bar_samples_tests.rs",
+          "name": "annotated_scroll_bar_drives_the_view_with_the_winui_theme"
+        }
+      ],
+      "notes": "The source example uses native AnnotatedScrollBar and ScrollView (WinUI's controls in ferroui-controls) with an ItemsRepeater and UniformGridLayout of the source's 250 colored items and the code behind of AnnotatedScrollBarPage.xaml.cs in Rust (annotated_scroll_bar_samples.rs): AnnotatedScrollBarPage_Loaded (the bar becomes the VerticalScrollController of the view's ScrollPresenter), AnnotatedScrollBar_DetailLabelRequested (the color of the section under the pointer), ItemsRepeater_SizeChanged with PopulateLabelCollection (a label at the row of the first item of each color) and the maximum height slider. The items are color names drawn as borders of that color (the source binds SolidColorBrush items); the Header of the slider is a TextBlock above it.",
+      "examples": []
+    },
     "ScrollView": {
       "status": "ported",
       "implementation": [

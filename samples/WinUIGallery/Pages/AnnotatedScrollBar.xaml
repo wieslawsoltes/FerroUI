@@ -1,0 +1,32 @@
+<!-- Ported from the pinned AnnotatedScrollBar example of WinUI Gallery (14061eea) and the code
+     behind of AnnotatedScrollBarPage.xaml.cs (annotated_scroll_bar_samples.rs); see ../NOTICE.md.
+     The colors of the ItemsRepeater, its item template, the labels and the detail label are set by
+     annotated_scroll_bar_samples.rs, which also links the bar to the presenter of the view when the
+     page is loaded. The Header of the slider is a TextBlock above it. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="AnnotatedScrollBar linked to a ScrollView." FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <Grid ColumnDefinitions="*,Auto">
+        <ScrollView x:Name="scrollView" MaxWidth="800" MaxHeight="500" Background="LightGray"
+                    VerticalScrollBarVisibility="Hidden">
+          <ItemsRepeater x:Name="itemsRepeater" Margin="2">
+            <ItemsRepeater.Layout>
+              <UniformGridLayout />
+            </ItemsRepeater.Layout>
+          </ItemsRepeater>
+        </ScrollView>
+        <AnnotatedScrollBar x:Name="annotatedScrollBar" Grid.Column="1" MaxHeight="500" Margin="4,0,48,0"
+                            HorizontalAlignment="Right" />
+      </Grid>
+      <Grid Grid.Column="1" MinWidth="200" RowDefinitions="Auto,Auto,Auto">
+        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                   Text="Changing the AnnotatedScrollBar height refreshes its Labels layout." />
+        <TextBlock Grid.Row="1" Margin="0,10,0,0" Text="AnnotatedScrollBar maximum height:" />
+        <Slider x:Name="maxHeightSlider" Grid.Row="2" AutomationProperties.Name="AnnotatedScrollBar maximum height"
+                Maximum="500" Minimum="100" Value="500" />
+      </Grid>
+    </Grid>
+  </StackPanel>
+</StackPanel>
