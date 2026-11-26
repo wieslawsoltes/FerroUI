@@ -498,6 +498,7 @@ dependencies = [
  "ferroui-media-qr",
  "ferroui-media-video",
  "ferroui-media-video-controls",
+ "ferroui-media3d",
  "ferroui-opengl",
  "ferroui-rendering-benchmarks",
  "ferroui-skia",
@@ -579,6 +580,7 @@ dependencies = [
  "ferroui-media-windows",
  "ferroui-native",
  "ferroui-quartz",
+ "ferroui-skia",
  "ferroui-vello",
  "ferroui-wayland",
  "ferroui-win32",
@@ -1658,6 +1660,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-flip-view",
+ "ferroui-controls-icons",
+ "ferroui-controls-password-box",
+ "ferroui-controls-split-menu",
+ "ferroui-controls-teaching-tip",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-controls-flip-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-icons"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
 name = "ferroui-controls-inking"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -1675,6 +1714,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-items-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-repeater",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-itemsview-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-items-view",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -1684,6 +1748,15 @@ dependencies = [
  "ferroui-controls",
  "ferroui-livecharts",
  "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-controls-password-box"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
 ]
 
 [[package]]
@@ -1697,6 +1770,27 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "rustc-hash 2.1.3",
  "xamlx",
+]
+
+[[package]]
+name = "ferroui-controls-split-menu"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-controls-teaching-tip"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
 ]
 
 [[package]]
@@ -2572,7 +2666,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2606,6 +2702,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 
@@ -2827,6 +2924,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
@@ -3155,6 +3253,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
+ "ferroui-render3d",
 ]
 
 [[package]]
@@ -5272,6 +5371,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
@@ -8010,10 +8110,16 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-flip-view",
+ "ferroui-controls-icons",
  "ferroui-controls-inking",
- "ferroui-controls-livecharts",
+ "ferroui-controls-items-view",
+ "ferroui-controls-password-box",
  "ferroui-controls-repeater",
+ "ferroui-controls-split-menu",
+ "ferroui-controls-teaching-tip",
  "ferroui-desktop",
  "ferroui-harfbuzz",
  "ferroui-headless",

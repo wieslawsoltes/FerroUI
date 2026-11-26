@@ -64,7 +64,7 @@ import json
 import os
 import sys
 
-from ferroui_selection import AppSelection
+from ferroui_selection import AppSelection, selected_names
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = os.path.join(ROOT, "bindings", "model", "ferroui-api.json")
@@ -299,6 +299,13 @@ class Selection:
                            if self.full or any(d["owner"] in self.classes for d in p["declarations"])}
         self.events = {e["name"] for e in model["events"]
                        if self.full or any(d["owner"] in self.classes for d in e["declarations"])}
+        # The lists of the manifest, when it has them, narrow what its classes declare.
+        listed = selected_names(model, manifest, "properties")
+        if listed is not None:
+            self.properties &= listed
+        listed = selected_names(model, manifest, "events")
+        if listed is not None:
+            self.events &= listed
         weight = weights(model)
         self.enums = set()
         for prop in model["properties"]:
