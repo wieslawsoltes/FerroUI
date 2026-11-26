@@ -165,6 +165,8 @@ FerroUI.Controls.Chrome.WindowDrawnDecorations.EnabledParts: DrawnWindowDecorati
 FerroUI.Controls.Chrome.WindowDrawnDecorations.Template: Option<Rc<dyn IWindowDrawnDecorationsTemplate>> = (null); OneWay
 FerroUI.Controls.Chrome.WindowDrawnDecorations.Title: Option<String> = (null); OneWay
 FerroUI.Controls.Chrome.WindowDrawnDecorations.TitleBarDecorations: TitleBarDecorations = All; OneWay; attached
+FerroUI.Controls.CollectionViewSource.IsSourceGrouped: bool = False; OneWay
+FerroUI.Controls.CollectionViewSource.Source: Option<ItemsSource> = (null); OneWay
 FerroUI.Controls.ColumnDefinition.MaxWidth: f64 = inf; OneWay
 FerroUI.Controls.ColumnDefinition.MinWidth: f64 = 0; OneWay
 FerroUI.Controls.ColumnDefinition.Width: GridLength = 1*; OneWay
@@ -403,6 +405,9 @@ FerroUI.Controls.GridSplitter.PreviewContent: Option<Rc<dyn ITemplateOf<Ref<Cont
 FerroUI.Controls.GridSplitter.ResizeBehavior: GridResizeBehavior = BasedOnAlignment; OneWay
 FerroUI.Controls.GridSplitter.ResizeDirection: GridResizeDirection = Auto; OneWay
 FerroUI.Controls.GridSplitter.ShowsPreview: bool = False; OneWay
+FerroUI.Controls.GroupStyle.HeaderContainerStyle: Option<Ref<ControlTheme>> = (null); OneWay
+FerroUI.Controls.GroupStyle.HeaderTemplate: Option<Rc<dyn IDataTemplate>> = (null); OneWay
+FerroUI.Controls.GroupStyle.HidesIfEmpty: bool = False; OneWay
 FerroUI.Controls.HotKeyManager.HotKey: Option<KeyGesture> = (null); OneWay; attached
 FerroUI.Controls.HyperlinkButton.IsVisited: bool = False; OneWay
 FerroUI.Controls.HyperlinkButton.NavigateUri: Option<UriRef> = (null); OneWay

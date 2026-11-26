@@ -80,4 +80,34 @@
   <ControlTheme x:Key="{x:Type ListView}" TargetType="ListView" BasedOn="{StaticResource DefaultListViewStyle}" />
 
   <ControlTheme x:Key="{x:Type ListViewItem}" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}" />
+
+  <!-- The header of a group: the implicit style of ListViewHeaderItem of generic.xaml. -->
+  <ControlTheme x:Key="{x:Type ListViewHeaderItem}" TargetType="ListViewHeaderItem">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="Background" Value="{DynamicResource SystemControlTransparentBrush}" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+    <Setter Property="Padding" Value="12,8,12,0" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Margin="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Rectangle Stroke="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                     StrokeThickness="0.5"
+                     Height="1"
+                     VerticalAlignment="Bottom"
+                     HorizontalAlignment="Stretch"
+                     Margin="12,8,12,0" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
 </ResourceDictionary>

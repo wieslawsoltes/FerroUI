@@ -65,6 +65,39 @@ pub struct VirtualizingStackPanel {
 
     /// The subscription to the property changes of the items control.
     items_control_property_changed: RefCell<Option<Subscription>>,
+    /// What a derived panel draws around its items (the group headers of `ItemsStackPanel`).
+    item_spacing: RefCell<Option<Rc<dyn IItemSpacing>>>,
+}
+
+/// The space a panel keeps around one item for what it draws there itself (#1258).
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub(crate) struct ItemInsets {
+    /// Before the item, along the stack.
+    pub(crate) leading: f64,
+    /// After the item, along the stack.
+    pub(crate) trailing: f64,
+    /// Before the item, across the stack.
+    pub(crate) cross_start: f64,
+    /// After the item, across the stack.
+    pub(crate) cross_end: f64,
+}
+
+impl ItemInsets {
+    /// What the item itself can take of `available`.
+    fn available(self, available: Size, horizontal: bool) -> Size {
+        let cross = self.cross_start + self.cross_end;
+        match (cross == 0.0, horizontal) {
+            (true, _) => available,
+            (false, true) => Size::new(available.width, (available.height - cross).max(0.0)),
+            (false, false) => Size::new((available.width - cross).max(0.0), available.height),
+        }
+    }
+}
+
+/// Gives the insets of the items of a [`VirtualizingStackPanel`].
+pub(crate) trait IItemSpacing {
+    /// The insets of the item at `index`, for a panel with `available` space.
+    fn insets(&self, index: i32, available: Size) -> ItemInsets;
 }
 
 ferro_class!(VirtualizingStackPanel: VirtualizingPanel);
@@ -171,7 +204,14 @@ impl LayoutableImpl for VirtualizingStackPanel {
 
         let realized_elements = this.realized_elements.borrow().clone();
         if let Some(realized_elements) = &realized_elements {
-            realized_elements.validate_start_u(this.orientation());
+            if this.item_spacing.borrow().is_some() {
+                let orientation = this.orientation();
+                realized_elements.validate_start_u_with(&|index, element| {
+                    this.element_size_u(element, index, orientation)
+                });
+            } else {
+                realized_elements.validate_start_u(this.orientation());
+            }
         }
         let realized_elements = match realized_elements {
             Some(realized_elements) => realized_elements,
@@ -255,10 +295,14 @@ impl LayoutableImpl for VirtualizingStackPanel {
             while i < realized_elements.count() {
                 if let Some(e) = realized_elements.element_at(i) {
                     let size_u = realized_elements.size_u_at(i);
+                    let insets = this.item_insets(realized_elements.first_index() + i as i32, final_size);
+                    let item_u = (size_u - insets.leading - insets.trailing).max(0.0);
                     let rect = if orientation == Orientation::Horizontal {
-                        Rect::new(u, 0.0, size_u, final_size.height)
+                        let height = (final_size.height - insets.cross_start - insets.cross_end).max(0.0);
+                        Rect::new(u + insets.leading, insets.cross_start, item_u, height)
                     } else {
-                        Rect::new(0.0, u, final_size.width, size_u)
+                        let width = (final_size.width - insets.cross_start - insets.cross_end).max(0.0);
+                        Rect::new(insets.cross_start, u + insets.leading, width, item_u)
                     };
 
                     e.arrange(rect);
@@ -285,7 +329,7 @@ impl LayoutableImpl for VirtualizingStackPanel {
                         }
                     }
 
-                    u += if orientation == Orientation::Horizontal { rect.width } else { rect.height };
+                    u += size_u;
                 }
 
                 i += 1;
@@ -618,7 +662,8 @@ impl VirtualizingPanelImpl for VirtualizingStackPanel {
             scroll_to_element.measure(Size::INFINITY);
 
             // Get the expected position of the element and put it in place.
-            let anchor_u = this.get_or_estimate_element_u(index);
+            let leading = this.item_insets(index, this.bounds().size()).leading;
+            let anchor_u = this.get_or_estimate_element_u(index) + leading;
             let desired_size = scroll_to_element.desired_size();
             let rect = if this.orientation() == Orientation::Horizontal {
                 Rect::new(anchor_u, 0.0, desired_size.width, desired_size.height)
@@ -794,7 +839,30 @@ impl VirtualizingStackPanel {
             last_measured_extended_viewport: Cell::new(Rect::default()),
             last_known_extended_viewport: Cell::new(Rect::default()),
             items_control_property_changed: RefCell::new(None),
+            item_spacing: RefCell::new(None),
         }
+    }
+
+    /// Sets what keeps space around the items, and lays them out again.
+    pub(crate) fn set_item_spacing(&self, spacing: Option<Rc<dyn IItemSpacing>>) {
+        *self.item_spacing.borrow_mut() = spacing;
+        self.invalidate_measure();
+    }
+
+    /// The space the element at `index` takes along the stack, with its insets.
+    fn element_size_u(&self, element: &Ref<Control>, index: i32, orientation: Orientation) -> f64 {
+        let desired = element.desired_size();
+        let size = if orientation == Orientation::Horizontal { desired.width } else { desired.height };
+        if self.item_spacing.borrow().is_none() {
+            return size;
+        }
+        let insets = self.item_insets(index, self.bounds().size());
+        size + insets.leading + insets.trailing
+    }
+
+    fn item_insets(&self, index: i32, available: Size) -> ItemInsets {
+        let spacing = self.item_spacing.borrow().clone();
+        spacing.map_or_else(ItemInsets::default, |spacing| spacing.insets(index, available))
     }
 
     pub fn new() -> Ref<Self> {
@@ -1133,16 +1201,13 @@ impl VirtualizingStackPanel {
         let mut divisor = 0.0;
 
         // Average the desired size of the realized, measured elements.
-        for element in realized_elements.elements().iter() {
+        let first_index = realized_elements.first_index();
+        for (i, element) in realized_elements.elements().iter().enumerate() {
             let Some(element) = element else { continue };
             if !element.is_measure_valid() {
                 continue;
             }
-            let size_u = if orientation == Orientation::Horizontal {
-                element.desired_size().width
-            } else {
-                element.desired_size().height
-            };
+            let size_u = self.element_size_u(element, first_index + i as i32, orientation);
             total += size_u;
             divisor += 1.0;
         }
@@ -1195,8 +1260,8 @@ impl VirtualizingStackPanel {
                     for (i, element) in elements.iter().enumerate() {
                         let Some(element) = element else { continue };
 
-                        let size_u =
-                            if horizontal { element.desired_size().width } else { element.desired_size().height };
+                        let index = realized_elements.first_index() + i as i32;
+                        let size_u = self.element_size_u(element, index, self.orientation());
                         let end_u = u + size_u;
 
                         if end_u > viewport_start_u && u < viewport_end_u {
@@ -1313,11 +1378,15 @@ impl VirtualizingStackPanel {
             let e = self.get_or_create_element(items, &generator, index);
             *self.realizing_element.borrow_mut() = Some(e.clone());
 
-            e.measure(available_size);
-
+            let insets = self.item_insets(index, available_size);
+            e.measure(insets.available(available_size, horizontal));
             let desired_size = e.desired_size();
-            let size_u = if horizontal { desired_size.width } else { desired_size.height };
-            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            let size_u = insets.leading
+                + insets.trailing
+                + if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = (if horizontal { desired_size.height } else { desired_size.width })
+                + insets.cross_start
+                + insets.cross_end;
 
             if anchor_at_end && index == viewport.anchor_index {
                 u = viewport_end - size_u;
@@ -1341,10 +1410,15 @@ impl VirtualizingStackPanel {
         if focused == Some(index - 1) && index < item_count {
             let e = self.get_or_create_element(items, &generator, index);
 
-            e.measure(available_size);
+            let insets = self.item_insets(index, available_size);
+            e.measure(insets.available(available_size, horizontal));
             let desired_size = e.desired_size();
-            let size_u = if horizontal { desired_size.width } else { desired_size.height };
-            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            let size_u = insets.leading
+                + insets.trailing
+                + if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = (if horizontal { desired_size.height } else { desired_size.width })
+                + insets.cross_start
+                + insets.cross_end;
 
             measure_elements.add(index, e, u, size_u);
             viewport.measured_v = viewport.measured_v.max(size_v);
@@ -1372,10 +1446,15 @@ impl VirtualizingStackPanel {
         while u > viewport.viewport_u_start && index >= 0 {
             let e = self.get_or_create_element(items, &generator, index);
 
-            e.measure(available_size);
+            let insets = self.item_insets(index, available_size);
+            e.measure(insets.available(available_size, horizontal));
             let desired_size = e.desired_size();
-            let size_u = if horizontal { desired_size.width } else { desired_size.height };
-            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            let size_u = insets.leading
+                + insets.trailing
+                + if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = (if horizontal { desired_size.height } else { desired_size.width })
+                + insets.cross_start
+                + insets.cross_end;
             u -= size_u;
 
             measure_elements.add(index, e, u, size_u);
@@ -1388,10 +1467,15 @@ impl VirtualizingStackPanel {
         if focused == Some(index + 1) && index >= 0 {
             let e = self.get_or_create_element(items, &generator, index);
 
-            e.measure(available_size);
+            let insets = self.item_insets(index, available_size);
+            e.measure(insets.available(available_size, horizontal));
             let desired_size = e.desired_size();
-            let size_u = if horizontal { desired_size.width } else { desired_size.height };
-            let size_v = if horizontal { desired_size.height } else { desired_size.width };
+            let size_u = insets.leading
+                + insets.trailing
+                + if horizontal { desired_size.width } else { desired_size.height };
+            let size_v = (if horizontal { desired_size.height } else { desired_size.width })
+                + insets.cross_start
+                + insets.cross_end;
             u -= size_u;
 
             measure_elements.add(index, e, u, size_u);

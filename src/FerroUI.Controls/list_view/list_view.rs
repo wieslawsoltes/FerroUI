@@ -7,7 +7,9 @@ use super::{ItemsStackPanel, ListViewBase};
 use crate::generators::RecycleKey;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::{FuncTemplate, ITemplateOf};
-use crate::{ContentControlImpl, Control, ControlImpl, ItemsControl, ItemsControlImpl, ListBoxItem, Panel};
+use crate::{
+    ContentControl, ContentControlImpl, Control, ControlImpl, ItemsControl, ItemsControlImpl, ListBoxItem, Panel,
+};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -179,5 +181,70 @@ impl ListViewItem {
     /// WinUI's `TemplateSettings`.
     pub fn template_settings(&self) -> ListViewItemTemplateSettings {
         ListViewItemTemplateSettings::default()
+    }
+}
+
+/// The base of the headers of the groups of a list view (WinUI's `ListViewBaseHeaderItem`).
+#[repr(C)]
+pub struct ListViewBaseHeaderItem {
+    base: ContentControl,
+}
+
+ferro_class!(ListViewBaseHeaderItem: ContentControl);
+ferroui_base::ferro_class_info!(ListViewBaseHeaderItem {
+    // No markup constructor: WinUI's constructor is protected (the base of the headers).
+    markup: { namespace: "FerroUI.Controls", content: Content },
+});
+ferro_impl_classes!(
+    ListViewBaseHeaderItem: StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    TemplatedControlImpl,
+    ContentControlImpl,
+    FerroObjectImpl
+);
+
+impl ListViewBaseHeaderItem {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct() -> Self {
+        Self { base: ContentControl::construct() }
+    }
+}
+
+/// The header of a group of a [`ListView`] (WinUI's `ListViewHeaderItem`). It is not an item: it
+/// has no index and cannot be selected.
+#[repr(C)]
+pub struct ListViewHeaderItem {
+    base: ListViewBaseHeaderItem,
+}
+
+ferro_class!(ListViewHeaderItem: ListViewBaseHeaderItem);
+ferroui_base::ferro_class_info!(ListViewHeaderItem {
+    new: ListViewHeaderItem::new,
+    markup: { namespace: "FerroUI.Controls", content: Content },
+});
+ferro_impl_classes!(
+    ListViewHeaderItem: StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl,
+    TemplatedControlImpl,
+    ContentControlImpl,
+    FerroObjectImpl
+);
+
+impl ListViewHeaderItem {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct() -> Self {
+        Self { base: ListViewBaseHeaderItem::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
     }
 }

@@ -480,6 +480,24 @@ impl RealizedStackElements {
         }
     }
 
+    /// [`validate_start_u`](Self::validate_start_u) for a panel that keeps space around its
+    /// elements: `size_u_of` gives what the element at an index takes along the stack.
+    pub fn validate_start_u_with(&self, size_u_of: &dyn Fn(i32, &Ref<Control>) -> f64) {
+        if self.start_u_unstable.get() {
+            return;
+        }
+        let first_index = self.first_index();
+        let elements = self.elements.borrow();
+        let sizes = self.sizes.borrow();
+        for (i, element) in elements.iter().enumerate() {
+            let Some(element) = element else { continue };
+            if size_u_of(first_index + i as i32, element) != sizes[i] {
+                self.start_u_unstable.set(true);
+                break;
+            }
+        }
+    }
+
     /// Removes and returns the element at the specified position of the
     /// realized list, leaving an empty slot.
     #[inline]

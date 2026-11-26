@@ -2536,6 +2536,36 @@
     ]
   },
   {
+    "name": "CollectionViewSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::CollectionViewSource",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Source": {
+        "name": "Source",
+        "type_name": "Option<ItemsSource>",
+        "documentation": "CollectionViewSource.Source: Option<ItemsSource>",
+        "values": [],
+        "attached": false
+      },
+      "IsSourceGrouped": {
+        "name": "IsSourceGrouped",
+        "type_name": "bool",
+        "documentation": "CollectionViewSource.IsSourceGrouped: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "ColorAnimation",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::animation::ColorAnimation",
@@ -8323,6 +8353,43 @@
     ]
   },
   {
+    "name": "GroupStyle",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GroupStyle",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "GroupStyle.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderContainerStyle": {
+        "name": "HeaderContainerStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "GroupStyle.HeaderContainerStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "HidesIfEmpty": {
+        "name": "HidesIfEmpty",
+        "type_name": "bool",
+        "documentation": "GroupStyle.HidesIfEmpty: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "HeaderedContentControl",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::primitives::HeaderedContentControl",
@@ -12645,6 +12712,12 @@
         "documentation": "ListViewBase.DataFetchSize: f64",
         "values": [],
         "attached": false
+      },
+      "GroupStyle": {
+        "name": "GroupStyle",
+        "type_name": "FerroList<Ref<GroupStyle>>",
+        "documentation": "ListViewBase.GroupStyle: FerroList<Ref<GroupStyle>>",
+        "values": []
       }
     },
     "namespace_aliases": [
@@ -12662,6 +12735,18 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewBaseHeaderItem",
+    "base": "ContentControl",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -12686,6 +12771,18 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewHeaderItem",
+    "base": "ListViewBaseHeaderItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

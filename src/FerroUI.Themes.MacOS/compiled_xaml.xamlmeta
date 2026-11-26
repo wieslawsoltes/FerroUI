@@ -1586,9 +1586,9 @@
           "index": 172,
           "documents": ["Controls/ListView.xaml"],
           "keys": ["DefaultListViewStyle"],
-          "type_keys": ["ListView", "ListViewItem"],
-          "references": ["DefaultListViewItemStyle", "DefaultListViewStyle"],
-          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewItem", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
+          "type_keys": ["ListView", "ListViewHeaderItem", "ListViewItem"],
+          "references": ["ContentControlThemeFontFamily", "DefaultListViewItemStyle", "DefaultListViewStyle", "SystemControlForegroundBaseLowBrush", "SystemControlTransparentBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewHeaderItem", "ListViewItem", "Rectangle", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
         },
         {
           "name": "Controls/GridView.xaml",

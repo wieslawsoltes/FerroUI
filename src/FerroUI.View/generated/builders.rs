@@ -907,6 +907,19 @@ pub fn list_view() -> El<ferroui_controls::ListView> {
     El::new()
 }
 
+pub use ferroui_controls::ListViewHeaderItem;
+
+impl ViewClass for ferroui_controls::ListViewHeaderItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ListViewHeaderItem>::new()
+    }
+}
+
+/// Starts an element of [`ListViewHeaderItem`](ferroui_controls::ListViewHeaderItem).
+pub fn list_view_header_item() -> El<ferroui_controls::ListViewHeaderItem> {
+    El::new()
+}
+
 pub use ferroui_controls::ListViewItem;
 
 impl ViewClass for ferroui_controls::ListViewItem {
@@ -3019,6 +3032,20 @@ pub trait CarouselPageProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::CarouselPage>> CarouselPageProps for El<T> {}
 
+/// The properties and routed events of [`CollectionViewSource`](ferroui_controls::CollectionViewSource).
+pub trait CollectionViewSourceProps: ElementBuilder {
+    /// Sets [`CollectionViewSource::source_property`](ferroui_controls::CollectionViewSource::source_property).
+    fn source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::CollectionViewSource>::source_property(), value)
+    }
+
+    /// Sets [`CollectionViewSource::is_source_grouped_property`](ferroui_controls::CollectionViewSource::is_source_grouped_property).
+    fn is_source_grouped<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::CollectionViewSource>::is_source_grouped_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::CollectionViewSource>> CollectionViewSourceProps for El<T> {}
+
 /// The properties and routed events of [`ColorAnimation`](ferroui_controls::animation::ColorAnimation).
 pub trait ColorAnimationProps: ElementBuilder {
     /// Sets [`ColorAnimation::from_property`](ferroui_controls::animation::ColorAnimation::from_property).
@@ -4617,6 +4644,25 @@ pub trait GridSplitterProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::GridSplitter>> GridSplitterProps for El<T> {}
+
+/// The properties and routed events of [`GroupStyle`](ferroui_controls::GroupStyle).
+pub trait GroupStyleProps: ElementBuilder {
+    /// Sets [`GroupStyle::header_template_property`](ferroui_controls::GroupStyle::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::GroupStyle>::header_template_property(), value)
+    }
+
+    /// Sets [`GroupStyle::header_container_style_property`](ferroui_controls::GroupStyle::header_container_style_property).
+    fn header_container_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::GroupStyle>::header_container_style_property(), value)
+    }
+
+    /// Sets [`GroupStyle::hides_if_empty_property`](ferroui_controls::GroupStyle::hides_if_empty_property).
+    fn hides_if_empty<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::GroupStyle>::hides_if_empty_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::GroupStyle>> GroupStyleProps for El<T> {}
 
 /// The properties and routed events of [`HeaderedContentControl`](ferroui_controls::primitives::HeaderedContentControl).
 pub trait HeaderedContentControlProps: ElementBuilder {

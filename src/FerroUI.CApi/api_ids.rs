@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2034746434256777622;
+pub(crate) const API_FINGERPRINT: i64 = -2561546040811144762;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 507] = [
+pub(crate) static TYPE_NAMES: [&str; 511] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -57,6 +57,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "Class1",
     "Class2",
     "Class3",
+    "CollectionViewSource",
     "ColorAnimation",
     "ColorAnimationUsingKeyFrames",
     "ColorKeyFrame",
@@ -151,6 +152,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "GridViewItem",
     "GridViewItemAutomationPeer",
     "GroupBox",
+    "GroupStyle",
     "HeaderedContentControl",
     "HeaderedItemsControl",
     "HeaderedSelectingItemsControl",
@@ -215,8 +217,10 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "ListViewAutomationPeer",
     "ListViewBase",
     "ListViewBaseAutomationPeer",
+    "ListViewBaseHeaderItem",
     "ListViewBaseItem",
     "ListViewBaseItemAutomationPeer",
+    "ListViewHeaderItem",
     "ListViewItem",
     "ListViewItemAutomationPeer",
     "MaskedTextBox",
@@ -519,7 +523,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -852,12 +856,14 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "HasUnrealizedChildren",
     "Header",
     "HeaderBackground",
+    "HeaderContainerStyle",
     "HeaderFocusVisualPlacement",
     "HeaderTemplate",
     "HeaderTheme",
     "Height",
     "HideDelay",
     "HidePromptOnLeave",
+    "HidesIfEmpty",
     "HorizontalAlignment",
     "HorizontalContentAlignment",
     "HorizontalOffset",
@@ -956,6 +962,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "IsSelected",
     "IsSettingsVisible",
     "IsSnapToTickEnabled",
+    "IsSourceGrouped",
     "IsSticky",
     "IsStroked",
     "IsSubMenuOpen",

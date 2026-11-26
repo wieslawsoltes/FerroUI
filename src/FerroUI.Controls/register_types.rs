@@ -271,6 +271,10 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::list_view::ListViewBaseItem,
     crate::list_view::ListViewItem,
     crate::list_view::ItemsStackPanel,
+    crate::list_view::ListViewBaseHeaderItem,
+    crate::list_view::ListViewHeaderItem,
+    crate::list_view::CollectionViewSource,
+    crate::list_view::GroupStyle,
     // --- grid view (WinUI, docs/porting/winui-calculator-gaps.md, LV-2) ---
     crate::list_view::GridView,
     crate::list_view::GridViewItem,
