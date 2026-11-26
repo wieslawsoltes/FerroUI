@@ -47,6 +47,10 @@ pub struct VirtualizingStackPanel {
     realized_elements: RefCell<Option<Rc<RealizedStackElements>>>,
     /// The ancestor that implements the scroll anchor provider contract.
     scroll_anchor_provider: RefCell<Option<WeakRef<Visual>>>,
+    /// Whether the realized elements in the viewport are anchor candidates of that ancestor, so
+    /// that the items in view stay in place when items before them change (off for
+    /// `ItemsUpdatingScrollMode::KeepScrollOffset` of an `ItemsStackPanel`).
+    anchors_items: Cell<bool>,
     viewport: Cell<Rect>,
     recycle_pool: RefCell<HashMap<RecycleKey, Vec<PooledElement>>>,
     focused_element: RefCell<Option<Ref<Control>>>,
@@ -287,7 +291,7 @@ impl LayoutableImpl for VirtualizingStackPanel {
                 u = this.get_or_estimate_element_u(realized_elements.first_index());
             }
 
-            let provider_visual = this.scroll_anchor_provider();
+            let provider_visual = this.scroll_anchor_provider().filter(|_| this.anchors_items.get());
             let provider = provider_visual.as_ref().and_then(|visual| as_scroll_anchor_provider(visual));
             let this_visual: Option<Ref<Visual>> = provider.map(|_| this.to_ref().upcast());
 
@@ -826,6 +830,7 @@ impl VirtualizingStackPanel {
             measure_elements: RefCell::new(None),
             realized_elements: RefCell::new(None),
             scroll_anchor_provider: RefCell::new(None),
+            anchors_items: Cell::new(true),
             viewport: Cell::new(Rect::default()),
             recycle_pool: RefCell::new(HashMap::new()),
             focused_element: RefCell::new(None),
@@ -840,6 +845,20 @@ impl VirtualizingStackPanel {
             last_known_extended_viewport: Cell::new(Rect::default()),
             items_control_property_changed: RefCell::new(None),
             item_spacing: RefCell::new(None),
+        }
+    }
+
+    /// Sets whether the realized elements are anchor candidates of the scroll anchor provider;
+    /// turning it off unregisters the realized elements at once.
+    pub(crate) fn set_anchors_items(&self, value: bool) {
+        if self.anchors_items.replace(value) == value || value {
+            return;
+        }
+        let realized = self.realized_elements.borrow().clone();
+        let Some(realized) = realized else { return };
+        let elements: Vec<Ref<Control>> = realized.elements().iter().flatten().cloned().collect();
+        for element in &elements {
+            self.unregister_anchor_candidate(element);
         }
     }
 
@@ -1284,7 +1303,7 @@ impl VirtualizingStackPanel {
         (start_index, start_index as f64 * estimated_size)
     }
 
-    fn get_or_estimate_element_u(&self, index: i32) -> f64 {
+    pub(crate) fn get_or_estimate_element_u(&self, index: i32) -> f64 {
         let realized_elements = self.realized_elements.borrow().clone();
 
         // Return the position of the existing element if realized.

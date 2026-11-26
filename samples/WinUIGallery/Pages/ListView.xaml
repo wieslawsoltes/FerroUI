@@ -190,7 +190,7 @@
                   ItemTemplate="{StaticResource MessageViewTemplate}">
           <ListView.ItemsPanel>
             <ItemsPanelTemplate>
-              <StackPanel VerticalAlignment="Bottom" />
+              <ItemsStackPanel VerticalAlignment="Bottom" ItemsUpdatingScrollMode="KeepLastItemInView" />
             </ItemsPanelTemplate>
           </ListView.ItemsPanel>
           <ListView.Styles>

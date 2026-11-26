@@ -687,8 +687,8 @@ fn wire_filter(root: &Ref<Control>, page: &Rc<ListViewPage>) {
     }
 }
 
-/// `AddItemToEnd` and `MessageReceived`. The inverted list keeps its last item in view
-/// (`ItemsUpdatingScrollMode="KeepLastItemInView"`).
+/// `AddItemToEnd` and `MessageReceived`. The inverted list keeps its last item in view: its
+/// `ItemsStackPanel` has `ItemsUpdatingScrollMode="KeepLastItemInView"`.
 fn wire_messages(root: &Ref<Control>, page: &Rc<ListViewPage>) {
     let list = root.get_control::<ListView>("InvertedListView");
     set_items(&list, &page.messages);
@@ -698,14 +698,7 @@ fn wire_messages(root: &Ref<Control>, page: &Rc<ListViewPage>) {
         ("ReceiveMessage", HorizontalAlignment::Left),
     ] {
         let page = page.clone();
-        let weak_list = list.downgrade();
-        root.get_control::<Button>(name).click(move |_, _| {
-            let Some(list) = weak_list.upgrade() else {
-                return;
-            };
-            page.add_message(alignment);
-            list.scroll_into_view(page.messages.count() as i32 - 1);
-        });
+        root.get_control::<Button>(name).click(move |_, _| page.add_message(alignment));
     }
 }
 

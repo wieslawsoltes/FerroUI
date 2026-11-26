@@ -7,25 +7,37 @@ use super::{GroupStyle, GroupedItemsView, ListViewBase, ListViewHeaderItem};
 use crate::items_source::ItemsChangedEventArgs;
 use crate::virtualizing_stack_panel::{IItemSpacing, ItemInsets};
 use crate::{
-    Control, ControlImpl, ItemsControl, ItemsSource, ItemsSourceView, PanelImpl, VirtualizingPanelImpl,
+    Control, ControlImpl, ItemsControl, ItemsSource, ItemsSourceView, PanelImpl, ScrollViewer, VirtualizingPanelImpl,
     VirtualizingPanelImplExt,
 };
 use crate::VirtualizingStackPanel;
+use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt, Orientation};
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, ferro_markup_enum, ferro_property, instantiate, FerroObjectImpl, FerroProperty,
-    Rect, Ref, Size, StyledElementImpl, StyledProperty, Thickness, VisualImpl, WeakRef,
+    ferro_class, ferro_impl_classes, ferro_markup_enum, ferro_property, instantiate, FerroObjectImpl,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl,
+    StyledProperty, Thickness, Vector, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::ops::RangeInclusive;
 use std::rc::Rc;
 
-/// What stays in view when items are added or removed (WinUI's `ItemsUpdatingScrollMode`).
-/// Accepted; the panel keeps the scroll offset of the virtualizing stack panel.
+/// What stays in view when items are added or removed (WinUI's `ItemsUpdatingScrollMode`, as
+/// `ModernCollectionBasePanel_ViewportManagement_Partial.cpp` tracks it).
+///
+/// - `KeepItemsInView`: the first visible item stays where it is in the viewport, unless the list
+///   is scrolled to its start.
+/// - `KeepScrollOffset`: the offset stays; the items move when items before them change.
+/// - `KeepLastItemInView`: a list scrolled to its end stays at its end, so that an added last
+///   item comes into view; scrolled elsewhere, the first visible item stays where it is.
+///
+/// The panel keeps the item in place after the layout pass of the change, with the residual
+/// distance the scroll anchoring of the scroll viewer left: virtualization recycles the anchor
+/// when items are added before the realized range.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum ItemsUpdatingScrollMode {
@@ -64,6 +76,27 @@ pub struct ItemsStackPanel {
     base: VirtualizingStackPanel,
     groups: RefCell<Option<Rc<PanelGroups>>>,
     viewport_changed: RefCell<Option<Subscription>>,
+    /// The item kept in place across a change of the items, if any (WinUI's `m_viewportBehavior`).
+    tracked: Cell<Option<Tracked>>,
+    /// The layout pass after a change of the items, while an item is tracked.
+    tracking: RefCell<Option<Subscription>>,
+}
+
+/// What a change of the items keeps in view, for the layout passes left in which an estimated
+/// position is corrected again.
+#[derive(Clone, Copy)]
+struct Tracked {
+    target: TrackedTarget,
+    passes: u8,
+}
+
+#[derive(Clone, Copy)]
+enum TrackedTarget {
+    /// The first visible item: its index after the change and the distance of its start from the
+    /// start of the viewport.
+    Item { index: i32, offset: f64 },
+    /// The end of the list (WinUI's `isTrackingExtentEnd`).
+    End,
 }
 
 /// The headers of the groups of a panel.
@@ -308,6 +341,32 @@ impl PanelGroups {
     }
 }
 
+/// The index of the item at `index` after the change `e`: moved by the items added or removed
+/// before it; a removed item gives its place to the item after the removed ones. `None` after a
+/// reset, or when no item is left at that place.
+fn index_after_change(index: i32, e: &ItemsChangedEventArgs<'_>) -> Option<i32> {
+    let removed = |index: i32| {
+        let (start, count) = (e.old_starting_index, e.old_items.len() as i32);
+        match () {
+            _ if start < 0 => index,
+            _ if start + count <= index => index - count,
+            _ if start <= index => start,
+            _ => index,
+        }
+    };
+    let added = |index: i32| match e.new_starting_index {
+        start if start >= 0 && start <= index => index + e.new_items.len() as i32,
+        _ => index,
+    };
+    match e.action {
+        NotifyCollectionChangedAction::Add => Some(added(index)),
+        NotifyCollectionChangedAction::Remove => Some(removed(index)),
+        NotifyCollectionChangedAction::Replace => Some(index),
+        NotifyCollectionChangedAction::Move => Some(added(removed(index))),
+        NotifyCollectionChangedAction::Reset => None,
+    }
+}
+
 /// The size of a header beside its items, across the stack.
 fn header_across(header: &Ref<ListViewHeaderItem>, horizontal: bool) -> f64 {
     let desired = header.desired_size();
@@ -336,9 +395,18 @@ ferro_impl_classes!(
     InteractiveImpl,
     InputElementImpl,
     ControlImpl,
-    PanelImpl,
-    FerroObjectImpl
+    PanelImpl
 );
+
+impl FerroObjectImpl for ItemsStackPanel {
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+        Self::parent_on_property_changed(this, change);
+        if change.property() == Self::items_updating_scroll_mode_property().as_property() {
+            let mode = change.get_new_value::<ItemsUpdatingScrollMode>();
+            this.set_anchors_items(mode != ItemsUpdatingScrollMode::KeepScrollOffset);
+        }
+    }
+}
 
 impl LayoutableImpl for ItemsStackPanel {
     fn measure_override(this: &Self, available_size: Size) -> Size {
@@ -362,13 +430,25 @@ impl LayoutableImpl for ItemsStackPanel {
 
 impl VirtualizingPanelImpl for ItemsStackPanel {
     fn on_items_changed(this: &Self, items: &Rc<ItemsSourceView>, e: &ItemsChangedEventArgs<'_>) {
+        let keeps_end = this.keeps_end_in_view();
+        let first_visible = if keeps_end { None } else { this.first_visible_position() };
         this.update_groups();
         Self::parent_on_items_changed(this, items, e);
+        if keeps_end {
+            this.scroll_to_end_of_items();
+        } else if let Some((index, offset)) = first_visible {
+            if let Some(index) = index_after_change(index, e) {
+                this.track(TrackedTarget::Item { index, offset });
+            }
+        }
     }
 
     fn on_items_control_changed(this: &Self, old_value: Option<&Ref<ItemsControl>>) {
         Self::parent_on_items_control_changed(this, old_value);
         this.update_groups();
+        if this.keeps_end_in_view() {
+            this.scroll_to_end_of_items();
+        }
     }
 }
 
@@ -421,6 +501,8 @@ impl ItemsStackPanel {
             base: VirtualizingStackPanel::construct(),
             groups: RefCell::new(None),
             viewport_changed: RefCell::new(None),
+            tracked: Cell::new(None),
+            tracking: RefCell::new(None),
         }
     }
 
@@ -467,6 +549,128 @@ impl ItemsStackPanel {
             });
             *self.viewport_changed.borrow_mut() = Some(subscription);
         }
+    }
+
+    /// Whether a change of the items has to bring the end of the list into view: with
+    /// `KeepLastItemInView`, when the viewport reaches the end of the panel, or nothing is laid out
+    /// yet (WinUI's `isTrackingExtentEnd`, and its tracking of the last element after a reset).
+    fn keeps_end_in_view(&self) -> bool {
+        if self.items_updating_scroll_mode() != ItemsUpdatingScrollMode::KeepLastItemInView {
+            return false;
+        }
+        if self.last_realized_index() < 0 {
+            return true;
+        }
+        let (viewport, size) = (self.view_port(), self.bounds().size());
+        let (end, extent) = match self.orientation() {
+            Orientation::Horizontal => (viewport.right(), size.width),
+            Orientation::Vertical => (viewport.bottom(), size.height),
+        };
+        extent <= end + 0.5
+    }
+
+    /// The first visible item and the distance of its start from the start of the viewport, when a
+    /// change of the items has to keep it in place: not with `KeepScrollOffset`, and with
+    /// `KeepItemsInView` not at the start of the list (WinUI's `BeginTrackingFirstVisibleElement`).
+    fn first_visible_position(&self) -> Option<(i32, f64)> {
+        let mode = self.items_updating_scroll_mode();
+        if mode == ItemsUpdatingScrollMode::KeepScrollOffset {
+            return None;
+        }
+        let viewport_start = self.start_of(self.view_port());
+        if mode == ItemsUpdatingScrollMode::KeepItemsInView && viewport_start <= 0.0 {
+            return None;
+        }
+        let index = self.first_visible_index();
+        let container = self.container_from_index(index)?;
+        Some((index, self.start_of(container.bounds()) - viewport_start))
+    }
+
+    /// The start of `rect` along the stack.
+    fn start_of(&self, rect: Rect) -> f64 {
+        match self.orientation() {
+            Orientation::Horizontal => rect.x,
+            Orientation::Vertical => rect.y,
+        }
+    }
+
+    /// Keeps `target` in place after the next layout passes.
+    fn track(&self, target: TrackedTarget) {
+        self.tracked.set(Some(Tracked { target, passes: 3 }));
+        if self.tracking.borrow().is_some() {
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        let subscription = self.layout_updated(move || {
+            if let Some(panel) = weak.upgrade() {
+                panel.correct_tracked();
+            }
+        });
+        *self.tracking.borrow_mut() = Some(subscription);
+    }
+
+    /// Scrolls the tracked item back to its distance from the start of the viewport, or the
+    /// viewport to the end of the list. A position that is only estimated, because the item is not
+    /// realized yet or the extent changes with the realized sizes, is corrected again after the
+    /// next layout passes.
+    fn correct_tracked(&self) {
+        let Some(mut tracked) = self.tracked.take() else {
+            drop(self.tracking.borrow_mut().take());
+            return;
+        };
+        let viewer = self.find_ancestor_of_type::<ScrollViewer>(false);
+        let horizontal = self.orientation() == Orientation::Horizontal;
+        let along = |vector: Vector| if horizontal { vector.x } else { vector.y };
+        let (delta, settled) = match (tracked.target, viewer.as_ref()) {
+            (_, None) => (0.0, true),
+            (TrackedTarget::Item { index, offset }, Some(_)) => {
+                let (start, realized) = match self.container_from_index(index) {
+                    Some(container) => (self.start_of(container.bounds()), true),
+                    None => (self.get_or_estimate_element_u(index), false),
+                };
+                let delta = start - self.start_of(self.view_port()) - offset;
+                (delta, realized && delta.abs() <= 0.5)
+            }
+            (TrackedTarget::End, Some(viewer)) => {
+                let (extent, viewport) = (viewer.extent(), viewer.viewport());
+                let end = if horizontal {
+                    extent.width - viewport.width
+                } else {
+                    extent.height - viewport.height
+                };
+                let delta = end.max(0.0) - along(viewer.offset());
+                (delta, delta.abs() <= 0.5)
+            }
+        };
+        if let Some(viewer) = viewer.filter(|_| delta.abs() > 0.5) {
+            let offset = viewer.offset();
+            let corrected = match horizontal {
+                true => Vector::new(offset.x + delta, offset.y),
+                false => Vector::new(offset.x, offset.y + delta),
+            };
+            viewer.set_current_value(ScrollViewer::offset_property(), corrected);
+        }
+        tracked.passes = tracked.passes.saturating_sub(1);
+        if settled || tracked.passes == 0 {
+            drop(self.tracking.borrow_mut().take());
+        } else {
+            self.tracked.set(Some(tracked));
+        }
+    }
+
+    /// Scrolls the scroll viewer of the panel to its end along the stack. The offset is coerced
+    /// again when the extent grows in the next layout pass, so the end is the new one.
+    fn scroll_to_end_of_items(&self) {
+        let Some(viewer) = self.find_ancestor_of_type::<ScrollViewer>(false) else {
+            return;
+        };
+        let offset = viewer.offset();
+        let end = match self.orientation() {
+            Orientation::Horizontal => Vector::new(f64::INFINITY, offset.y),
+            Orientation::Vertical => Vector::new(offset.x, f64::INFINITY),
+        };
+        viewer.set_current_value(ScrollViewer::offset_property(), end);
+        self.track(TrackedTarget::End);
     }
 
     pub fn items_updating_scroll_mode(&self) -> ItemsUpdatingScrollMode {

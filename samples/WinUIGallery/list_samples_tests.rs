@@ -7,7 +7,11 @@ use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::{Button, ComboBox, Control, ListView, ListViewSelectionMode, TextBlock, TextBox};
+use ferroui_controls::templates::ITemplateOf as _;
+use ferroui_controls::{
+    Button, ComboBox, Control, ItemsStackPanel, ItemsUpdatingScrollMode, ListView, ListViewSelectionMode, TextBlock,
+    TextBox,
+};
 use std::rc::Rc;
 
 fn page() -> Ref<Control> {
@@ -240,6 +244,9 @@ fn list_view_messages_are_sent_and_received_with_their_alignment() {
     );
     let list = root.get_control::<ListView>("InvertedListView");
     assert_eq!(list.selection_mode(), ListViewSelectionMode::None, "the source's SelectionMode None");
+    let panel = list.items_panel().build_typed().and_then(|panel| panel.cast::<ItemsStackPanel>());
+    let mode = panel.map(|panel| panel.items_updating_scroll_mode());
+    assert_eq!(mode, Some(ItemsUpdatingScrollMode::KeepLastItemInView), "the source's ItemsStackPanel");
 }
 
 #[test]
