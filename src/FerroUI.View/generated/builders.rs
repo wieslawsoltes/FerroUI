@@ -3470,6 +3470,11 @@ pub trait ContentControlProps: ElementBuilder {
         self.prop(<ferroui_controls::ContentControl>::content_template_property(), value)
     }
 
+    /// Sets [`ContentControl::content_template_selector_property`](ferroui_controls::ContentControl::content_template_selector_property).
+    fn content_template_selector<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateSelector>>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentControl>::content_template_selector_property(), value)
+    }
+
     /// Sets [`ContentControl::horizontal_content_alignment_property`](ferroui_controls::ContentControl::horizontal_content_alignment_property).
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ContentControl>::horizontal_content_alignment_property(), value)
@@ -3700,6 +3705,11 @@ pub trait ContentPresenterProps: ElementBuilder {
     /// Sets [`ContentPresenter::content_template_property`](ferroui_controls::presenters::ContentPresenter::content_template_property).
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::content_template_property(), value)
+    }
+
+    /// Sets [`ContentPresenter::content_template_selector_property`](ferroui_controls::presenters::ContentPresenter::content_template_selector_property).
+    fn content_template_selector<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateSelector>>, M>) -> Self {
+        self.prop(<ferroui_controls::presenters::ContentPresenter>::content_template_selector_property(), value)
     }
 
     /// Sets [`ContentPresenter::horizontal_content_alignment_property`](ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property).
@@ -5316,6 +5326,11 @@ pub trait ItemsControlProps: ElementBuilder {
     fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::item_template_property(), value)
     }
+
+    /// Sets [`ItemsControl::item_template_selector_property`](ferroui_controls::ItemsControl::item_template_selector_property).
+    fn item_template_selector<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateSelector>>, M>) -> Self {
+        self.prop(<ferroui_controls::ItemsControl>::item_template_selector_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ItemsControl>> ItemsControlProps for El<T> {}
 
@@ -6038,6 +6053,11 @@ pub trait NavigationViewProps: ElementBuilder {
     /// Sets [`NavigationView::menu_item_template_property`](ferroui_controls::NavigationView::menu_item_template_property).
     fn menu_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::menu_item_template_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_item_template_selector_property`](ferroui_controls::NavigationView::menu_item_template_selector_property).
+    fn menu_item_template_selector<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateSelector>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_item_template_selector_property(), value)
     }
 
     /// Sets [`NavigationView::pane_toggle_button_style_property`](ferroui_controls::NavigationView::pane_toggle_button_style_property).
