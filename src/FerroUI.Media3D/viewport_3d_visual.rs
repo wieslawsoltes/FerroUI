@@ -195,6 +195,8 @@ impl Viewport3DVisual {
     fn bump(&self, change: Scene3DChange) {
         let mut generations = self.generations.get();
         match change {
+            // The same scene, with new pixels in what a material samples.
+            Scene3DChange::Output => return,
             Scene3DChange::Structure => generations.structure += 1,
             Scene3DChange::Record => generations.record += 1,
             Scene3DChange::Camera => generations.camera += 1,

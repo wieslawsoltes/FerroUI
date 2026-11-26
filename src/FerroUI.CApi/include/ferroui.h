@@ -453,1186 +453,1198 @@ int64_t ferro_type_content_control(void);
 // Registers `ContentControlAutomationPeer` (without a constructor) and returns its type ID, 67.
 int64_t ferro_type_content_control_automation_peer(void);
 
-// Registers `ContentPage` (with its default constructor) and returns its type ID, 68.
+// Registers `ContentDialog` (with its default constructor) and returns its type ID, 68.
+int64_t ferro_type_content_dialog(void);
+
+// Registers `ContentPage` (with its default constructor) and returns its type ID, 69.
 int64_t ferro_type_content_page(void);
 
-// Registers `ContentPageAutomationPeer` (without a constructor) and returns its type ID, 69.
+// Registers `ContentPageAutomationPeer` (without a constructor) and returns its type ID, 70.
 int64_t ferro_type_content_page_automation_peer(void);
 
-// Registers `ContentPresenter` (with its default constructor) and returns its type ID, 70.
+// Registers `ContentPresenter` (with its default constructor) and returns its type ID, 71.
 int64_t ferro_type_content_presenter(void);
 
-// Registers `ContextMenu` (with its default constructor) and returns its type ID, 71.
+// Registers `ContextMenu` (with its default constructor) and returns its type ID, 72.
 int64_t ferro_type_context_menu(void);
 
-// Registers `Control` (with its default constructor) and returns its type ID, 72.
+// Registers `Control` (with its default constructor) and returns its type ID, 73.
 int64_t ferro_type_control(void);
 
-// Registers `ControlAutomationPeer` (without a constructor) and returns its type ID, 73.
+// Registers `ControlAutomationPeer` (without a constructor) and returns its type ID, 74.
 int64_t ferro_type_control_automation_peer(void);
 
-// Registers `ControlTheme` (with its default constructor) and returns its type ID, 74.
+// Registers `ControlTheme` (with its default constructor) and returns its type ID, 75.
 int64_t ferro_type_control_theme(void);
 
-// Registers `CroppedBitmap` (with its default constructor) and returns its type ID, 75.
+// Registers `CroppedBitmap` (with its default constructor) and returns its type ID, 76.
 int64_t ferro_type_cropped_bitmap(void);
 
-// Registers `CubicEase` (with its default constructor) and returns its type ID, 76.
+// Registers `CubicEase` (with its default constructor) and returns its type ID, 77.
 int64_t ferro_type_cubic_ease(void);
 
-// Registers `DashStyle` (with its default constructor) and returns its type ID, 77.
+// Registers `DashStyle` (with its default constructor) and returns its type ID, 78.
 int64_t ferro_type_dash_style(void);
 
-// Registers `DataValidationErrors` (with its default constructor) and returns its type ID, 78.
+// Registers `DataValidationErrors` (with its default constructor) and returns its type ID, 79.
 int64_t ferro_type_data_validation_errors(void);
 
-// Registers `DatePicker` (with its default constructor) and returns its type ID, 79.
+// Registers `DatePicker` (with its default constructor) and returns its type ID, 80.
 int64_t ferro_type_date_picker(void);
 
-// Registers `DatePickerAutomationPeer` (without a constructor) and returns its type ID, 80.
+// Registers `DatePickerAutomationPeer` (without a constructor) and returns its type ID, 81.
 int64_t ferro_type_date_picker_automation_peer(void);
 
-// Registers `DatePickerPresenter` (with its default constructor) and returns its type ID, 81.
+// Registers `DatePickerPresenter` (with its default constructor) and returns its type ID, 82.
 int64_t ferro_type_date_picker_presenter(void);
 
-// Registers `DateTimePickerPanel` (with its default constructor) and returns its type ID, 82.
+// Registers `DateTimePickerPanel` (with its default constructor) and returns its type ID, 83.
 int64_t ferro_type_date_time_picker_panel(void);
 
-// Registers `Decorator` (with its default constructor) and returns its type ID, 84.
+// Registers `Decorator` (with its default constructor) and returns its type ID, 85.
 int64_t ferro_type_decorator(void);
 
-// Registers `DefinitionBase` (without a constructor) and returns its type ID, 85.
+// Registers `DefinitionBase` (without a constructor) and returns its type ID, 86.
 int64_t ferro_type_definition_base(void);
 
-// Registers `DesktopAcrylicBackdrop` (with its default constructor) and returns its type ID, 86.
+// Registers `DesktopAcrylicBackdrop` (with its default constructor) and returns its type ID, 87.
 int64_t ferro_type_desktop_acrylic_backdrop(void);
 
-// Registers `DiscreteColorKeyFrame` (with its default constructor) and returns its type ID, 87.
+// Registers `DiscreteColorKeyFrame` (with its default constructor) and returns its type ID, 88.
 int64_t ferro_type_discrete_color_key_frame(void);
 
-// Registers `DiscreteDoubleKeyFrame` (with its default constructor) and returns its type ID, 88.
+// Registers `DiscreteDoubleKeyFrame` (with its default constructor) and returns its type ID, 89.
 int64_t ferro_type_discrete_double_key_frame(void);
 
-// Registers `DiscreteObjectKeyFrame` (with its default constructor) and returns its type ID, 89.
+// Registers `DiscreteObjectKeyFrame` (with its default constructor) and returns its type ID, 90.
 int64_t ferro_type_discrete_object_key_frame(void);
 
-// Registers `DiscretePointKeyFrame` (with its default constructor) and returns its type ID, 90.
+// Registers `DiscretePointKeyFrame` (with its default constructor) and returns its type ID, 91.
 int64_t ferro_type_discrete_point_key_frame(void);
 
-// Registers `DockPanel` (with its default constructor) and returns its type ID, 91.
+// Registers `DockPanel` (with its default constructor) and returns its type ID, 92.
 int64_t ferro_type_dock_panel(void);
 
-// Registers `DoubleAnimation` (with its default constructor) and returns its type ID, 92.
+// Registers `DoubleAnimation` (with its default constructor) and returns its type ID, 93.
 int64_t ferro_type_double_animation(void);
 
-// Registers `DoubleAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 93.
+// Registers `DoubleAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 94.
 int64_t ferro_type_double_animation_using_key_frames(void);
 
-// Registers `DoubleKeyFrame` (without a constructor) and returns its type ID, 94.
+// Registers `DoubleKeyFrame` (without a constructor) and returns its type ID, 95.
 int64_t ferro_type_double_key_frame(void);
 
-// Registers `DrawerPage` (with its default constructor) and returns its type ID, 95.
+// Registers `DrawerPage` (with its default constructor) and returns its type ID, 96.
 int64_t ferro_type_drawer_page(void);
 
-// Registers `DrawerPageAutomationPeer` (without a constructor) and returns its type ID, 96.
+// Registers `DrawerPageAutomationPeer` (without a constructor) and returns its type ID, 97.
 int64_t ferro_type_drawer_page_automation_peer(void);
 
-// Registers `Drawing` (without a constructor) and returns its type ID, 97.
+// Registers `Drawing` (without a constructor) and returns its type ID, 98.
 int64_t ferro_type_drawing(void);
 
-// Registers `DrawingBrush` (with its default constructor) and returns its type ID, 98.
+// Registers `DrawingBrush` (with its default constructor) and returns its type ID, 99.
 int64_t ferro_type_drawing_brush(void);
 
-// Registers `DrawingGroup` (with its default constructor) and returns its type ID, 99.
+// Registers `DrawingGroup` (with its default constructor) and returns its type ID, 100.
 int64_t ferro_type_drawing_group(void);
 
-// Registers `DrawingImage` (with its default constructor) and returns its type ID, 100.
+// Registers `DrawingImage` (with its default constructor) and returns its type ID, 101.
 int64_t ferro_type_drawing_image(void);
 
-// Registers `DropDownButton` (with its default constructor) and returns its type ID, 101.
+// Registers `DropDownButton` (with its default constructor) and returns its type ID, 102.
 int64_t ferro_type_drop_down_button(void);
 
-// Registers `DropShadowDirectionEffect` (with its default constructor) and returns its type ID, 102.
+// Registers `DropShadowDirectionEffect` (with its default constructor) and returns its type ID, 103.
 int64_t ferro_type_drop_shadow_direction_effect(void);
 
-// Registers `DropShadowEffect` (with its default constructor) and returns its type ID, 103.
+// Registers `DropShadowEffect` (with its default constructor) and returns its type ID, 104.
 int64_t ferro_type_drop_shadow_effect(void);
 
-// Registers `DropShadowEffectBase` (without a constructor) and returns its type ID, 104.
+// Registers `DropShadowEffectBase` (without a constructor) and returns its type ID, 105.
 int64_t ferro_type_drop_shadow_effect_base(void);
 
-// Registers `EasingColorKeyFrame` (with its default constructor) and returns its type ID, 105.
+// Registers `EasingColorKeyFrame` (with its default constructor) and returns its type ID, 106.
 int64_t ferro_type_easing_color_key_frame(void);
 
-// Registers `EasingDoubleKeyFrame` (with its default constructor) and returns its type ID, 106.
+// Registers `EasingDoubleKeyFrame` (with its default constructor) and returns its type ID, 107.
 int64_t ferro_type_easing_double_key_frame(void);
 
-// Registers `EasingFunctionBase` (without a constructor) and returns its type ID, 107.
+// Registers `EasingFunctionBase` (without a constructor) and returns its type ID, 108.
 int64_t ferro_type_easing_function_base(void);
 
-// Registers `EasingPointKeyFrame` (with its default constructor) and returns its type ID, 108.
+// Registers `EasingPointKeyFrame` (with its default constructor) and returns its type ID, 109.
 int64_t ferro_type_easing_point_key_frame(void);
 
-// Registers `Effect` (without a constructor) and returns its type ID, 109.
+// Registers `Effect` (without a constructor) and returns its type ID, 110.
 int64_t ferro_type_effect(void);
 
-// Registers `ElasticEase` (with its default constructor) and returns its type ID, 110.
+// Registers `ElasticEase` (with its default constructor) and returns its type ID, 111.
 int64_t ferro_type_elastic_ease(void);
 
-// Registers `Ellipse` (with its default constructor) and returns its type ID, 111.
+// Registers `Ellipse` (with its default constructor) and returns its type ID, 112.
 int64_t ferro_type_ellipse(void);
 
-// Registers `EllipseGeometry` (with its default constructor) and returns its type ID, 112.
+// Registers `EllipseGeometry` (with its default constructor) and returns its type ID, 113.
 int64_t ferro_type_ellipse_geometry(void);
 
-// Registers `EmbeddableControlRoot` (with its default constructor) and returns its type ID, 113.
+// Registers `EmbeddableControlRoot` (with its default constructor) and returns its type ID, 114.
 int64_t ferro_type_embeddable_control_root(void);
 
-// Registers `EmbeddableControlRootAutomationPeer` (without a constructor) and returns its type ID, 114.
+// Registers `EmbeddableControlRootAutomationPeer` (without a constructor) and returns its type ID, 115.
 int64_t ferro_type_embeddable_control_root_automation_peer(void);
 
-// Registers `Expander` (with its default constructor) and returns its type ID, 115.
+// Registers `Expander` (with its default constructor) and returns its type ID, 116.
 int64_t ferro_type_expander(void);
 
-// Registers `ExpanderAutomationPeer` (without a constructor) and returns its type ID, 116.
+// Registers `ExpanderAutomationPeer` (without a constructor) and returns its type ID, 117.
 int64_t ferro_type_expander_automation_peer(void);
 
-// Registers `ExperimentalAcrylicBorder` (with its default constructor) and returns its type ID, 117.
+// Registers `ExperimentalAcrylicBorder` (with its default constructor) and returns its type ID, 118.
 int64_t ferro_type_experimental_acrylic_border(void);
 
-// Registers `ExperimentalAcrylicMaterial` (with its default constructor) and returns its type ID, 118.
+// Registers `ExperimentalAcrylicMaterial` (with its default constructor) and returns its type ID, 119.
 int64_t ferro_type_experimental_acrylic_material(void);
 
-// Registers `ExponentialEase` (with its default constructor) and returns its type ID, 119.
+// Registers `ExponentialEase` (with its default constructor) and returns its type ID, 120.
 int64_t ferro_type_exponential_ease(void);
 
-// Registers `FlexPanel` (with its default constructor) and returns its type ID, 120.
+// Registers `FlexPanel` (with its default constructor) and returns its type ID, 121.
 int64_t ferro_type_flex_panel(void);
 
-// Registers `Flyout` (with its default constructor) and returns its type ID, 121.
+// Registers `Flyout` (with its default constructor) and returns its type ID, 122.
 int64_t ferro_type_flyout(void);
 
-// Registers `FlyoutBase` (without a constructor) and returns its type ID, 122.
+// Registers `FlyoutBase` (without a constructor) and returns its type ID, 123.
 int64_t ferro_type_flyout_base(void);
 
-// Registers `FlyoutPresenter` (with its default constructor) and returns its type ID, 123.
+// Registers `FlyoutPresenter` (with its default constructor) and returns its type ID, 124.
 int64_t ferro_type_flyout_presenter(void);
 
-// Registers `FontIcon` (with its default constructor) and returns its type ID, 124.
+// Registers `FontIcon` (with its default constructor) and returns its type ID, 125.
 int64_t ferro_type_font_icon(void);
 
-// Registers `FontIconSource` (with its default constructor) and returns its type ID, 125.
+// Registers `FontIconSource` (with its default constructor) and returns its type ID, 126.
 int64_t ferro_type_font_icon_source(void);
 
-// Registers `Frame` (with its default constructor) and returns its type ID, 126.
+// Registers `Frame` (with its default constructor) and returns its type ID, 127.
 int64_t ferro_type_frame(void);
 
-// Registers `FramePage` (with its default constructor) and returns its type ID, 127.
+// Registers `FramePage` (with its default constructor) and returns its type ID, 128.
 int64_t ferro_type_frame_page(void);
 
-// Registers `Geometry` (without a constructor) and returns its type ID, 128.
+// Registers `Geometry` (without a constructor) and returns its type ID, 129.
 int64_t ferro_type_geometry(void);
 
-// Registers `GeometryDrawing` (with its default constructor) and returns its type ID, 129.
+// Registers `GeometryDrawing` (with its default constructor) and returns its type ID, 130.
 int64_t ferro_type_geometry_drawing(void);
 
-// Registers `GeometryGroup` (with its default constructor) and returns its type ID, 130.
+// Registers `GeometryGroup` (with its default constructor) and returns its type ID, 131.
 int64_t ferro_type_geometry_group(void);
 
-// Registers `GestureRecognizer` (without a constructor) and returns its type ID, 131.
+// Registers `GestureRecognizer` (without a constructor) and returns its type ID, 132.
 int64_t ferro_type_gesture_recognizer(void);
 
-// Registers `GlyphRunDrawing` (with its default constructor) and returns its type ID, 132.
+// Registers `GlyphRunDrawing` (with its default constructor) and returns its type ID, 133.
 int64_t ferro_type_glyph_run_drawing(void);
 
-// Registers `GradientBrush` (without a constructor) and returns its type ID, 133.
+// Registers `GradientBrush` (without a constructor) and returns its type ID, 134.
 int64_t ferro_type_gradient_brush(void);
 
-// Registers `GradientStop` (with its default constructor) and returns its type ID, 134.
+// Registers `GradientStop` (with its default constructor) and returns its type ID, 135.
 int64_t ferro_type_gradient_stop(void);
 
-// Registers `Grid` (with its default constructor) and returns its type ID, 135.
+// Registers `Grid` (with its default constructor) and returns its type ID, 136.
 int64_t ferro_type_grid(void);
 
-// Registers `GridSplitter` (with its default constructor) and returns its type ID, 137.
+// Registers `GridSplitter` (with its default constructor) and returns its type ID, 138.
 int64_t ferro_type_grid_splitter(void);
 
-// Registers `GridView` (with its default constructor) and returns its type ID, 138.
+// Registers `GridView` (with its default constructor) and returns its type ID, 139.
 int64_t ferro_type_grid_view(void);
 
-// Registers `GridViewItem` (with its default constructor) and returns its type ID, 140.
+// Registers `GridViewItem` (with its default constructor) and returns its type ID, 141.
 int64_t ferro_type_grid_view_item(void);
 
-// Registers `GroupBox` (with its default constructor) and returns its type ID, 142.
+// Registers `GroupBox` (with its default constructor) and returns its type ID, 143.
 int64_t ferro_type_group_box(void);
 
-// Registers `HeaderedContentControl` (with its default constructor) and returns its type ID, 143.
+// Registers `HeaderedContentControl` (with its default constructor) and returns its type ID, 144.
 int64_t ferro_type_headered_content_control(void);
 
-// Registers `HeaderedItemsControl` (with its default constructor) and returns its type ID, 144.
+// Registers `HeaderedItemsControl` (with its default constructor) and returns its type ID, 145.
 int64_t ferro_type_headered_items_control(void);
 
-// Registers `HeaderedSelectingItemsControl` (with its default constructor) and returns its type ID, 145.
+// Registers `HeaderedSelectingItemsControl` (with its default constructor) and returns its type ID, 146.
 int64_t ferro_type_headered_selecting_items_control(void);
 
-// Registers `Hyperlink` (with its default constructor) and returns its type ID, 146.
+// Registers `Hyperlink` (with its default constructor) and returns its type ID, 147.
 int64_t ferro_type_hyperlink(void);
 
-// Registers `HyperlinkAutomationPeer` (without a constructor) and returns its type ID, 147.
+// Registers `HyperlinkAutomationPeer` (without a constructor) and returns its type ID, 148.
 int64_t ferro_type_hyperlink_automation_peer(void);
 
-// Registers `HyperlinkButton` (with its default constructor) and returns its type ID, 148.
+// Registers `HyperlinkButton` (with its default constructor) and returns its type ID, 149.
 int64_t ferro_type_hyperlink_button(void);
 
-// Registers `IconElement` (without a constructor) and returns its type ID, 149.
+// Registers `IconElement` (without a constructor) and returns its type ID, 150.
 int64_t ferro_type_icon_element(void);
 
-// Registers `IconSource` (without a constructor) and returns its type ID, 150.
+// Registers `IconSource` (without a constructor) and returns its type ID, 151.
 int64_t ferro_type_icon_source(void);
 
-// Registers `Image` (with its default constructor) and returns its type ID, 151.
+// Registers `Image` (with its default constructor) and returns its type ID, 152.
 int64_t ferro_type_image(void);
 
-// Registers `ImageAutomationPeer` (without a constructor) and returns its type ID, 152.
+// Registers `ImageAutomationPeer` (without a constructor) and returns its type ID, 153.
 int64_t ferro_type_image_automation_peer(void);
 
-// Registers `ImageBrush` (with its default constructor) and returns its type ID, 153.
+// Registers `ImageBrush` (with its default constructor) and returns its type ID, 154.
 int64_t ferro_type_image_brush(void);
 
-// Registers `ImageDrawing` (with its default constructor) and returns its type ID, 154.
+// Registers `ImageDrawing` (with its default constructor) and returns its type ID, 155.
 int64_t ferro_type_image_drawing(void);
 
-// Registers `ImmutableGeometry` (without a constructor) and returns its type ID, 155.
+// Registers `ImmutableGeometry` (without a constructor) and returns its type ID, 156.
 int64_t ferro_type_immutable_geometry(void);
 
-// Registers `InfoBadge` (with its default constructor) and returns its type ID, 156.
+// Registers `InfoBadge` (with its default constructor) and returns its type ID, 157.
 int64_t ferro_type_info_badge(void);
 
-// Registers `InfoBadgeTemplateSettings` (with its default constructor) and returns its type ID, 157.
+// Registers `InfoBadgeTemplateSettings` (with its default constructor) and returns its type ID, 158.
 int64_t ferro_type_info_badge_template_settings(void);
 
-// Registers `InfoBar` (with its default constructor) and returns its type ID, 158.
+// Registers `InfoBar` (with its default constructor) and returns its type ID, 159.
 int64_t ferro_type_info_bar(void);
 
-// Registers `InfoBarAutomationPeer` (without a constructor) and returns its type ID, 159.
+// Registers `InfoBarAutomationPeer` (without a constructor) and returns its type ID, 160.
 int64_t ferro_type_info_bar_automation_peer(void);
 
-// Registers `InfoBarPanel` (with its default constructor) and returns its type ID, 160.
+// Registers `InfoBarPanel` (with its default constructor) and returns its type ID, 161.
 int64_t ferro_type_info_bar_panel(void);
 
-// Registers `InfoBarTemplateSettings` (with its default constructor) and returns its type ID, 161.
+// Registers `InfoBarTemplateSettings` (with its default constructor) and returns its type ID, 162.
 int64_t ferro_type_info_bar_template_settings(void);
 
-// Registers `Inline` (without a constructor) and returns its type ID, 162.
+// Registers `Inline` (without a constructor) and returns its type ID, 163.
 int64_t ferro_type_inline(void);
 
-// Registers `InlineUIContainer` (with its default constructor) and returns its type ID, 163.
+// Registers `InlineUIContainer` (with its default constructor) and returns its type ID, 164.
 int64_t ferro_type_inline_ui_container(void);
 
-// Registers `InputElement` (with its default constructor) and returns its type ID, 164.
+// Registers `InputElement` (with its default constructor) and returns its type ID, 165.
 int64_t ferro_type_input_element(void);
 
-// Registers `InputPaneAwareDecorator` (with its default constructor) and returns its type ID, 165.
+// Registers `InputPaneAwareDecorator` (with its default constructor) and returns its type ID, 166.
 int64_t ferro_type_input_pane_aware_decorator(void);
 
-// Registers `InputScope` (with its default constructor) and returns its type ID, 166.
+// Registers `InputScope` (with its default constructor) and returns its type ID, 167.
 int64_t ferro_type_input_scope(void);
 
-// Registers `InputScopeName` (with its default constructor) and returns its type ID, 167.
+// Registers `InputScopeName` (with its default constructor) and returns its type ID, 168.
 int64_t ferro_type_input_scope_name(void);
 
-// Registers `Interactive` (with its default constructor) and returns its type ID, 168.
+// Registers `Interactive` (with its default constructor) and returns its type ID, 169.
 int64_t ferro_type_interactive(void);
 
-// Registers `InteractiveBurningFlameEffect` (without a constructor) and returns its type ID, 169.
+// Registers `InteractiveBurningFlameEffect` (without a constructor) and returns its type ID, 170.
 int64_t ferro_type_interactive_burning_flame_effect(void);
 
-// Registers `InteractivePointerSpotlightEffect` (without a constructor) and returns its type ID, 170.
+// Registers `InteractivePointerSpotlightEffect` (without a constructor) and returns its type ID, 171.
 int64_t ferro_type_interactive_pointer_spotlight_effect(void);
 
-// Registers `InteractiveReactiveGridEffect` (without a constructor) and returns its type ID, 171.
+// Registers `InteractiveReactiveGridEffect` (without a constructor) and returns its type ID, 172.
 int64_t ferro_type_interactive_reactive_grid_effect(void);
 
-// Registers `InteractiveWaterRippleEffect` (without a constructor) and returns its type ID, 172.
+// Registers `InteractiveWaterRippleEffect` (without a constructor) and returns its type ID, 173.
 int64_t ferro_type_interactive_water_ripple_effect(void);
 
-// Registers `InteropAutomationPeer` (without a constructor) and returns its type ID, 173.
+// Registers `InteropAutomationPeer` (without a constructor) and returns its type ID, 174.
 int64_t ferro_type_interop_automation_peer(void);
 
-// Registers `Italic` (with its default constructor) and returns its type ID, 174.
+// Registers `Italic` (with its default constructor) and returns its type ID, 175.
 int64_t ferro_type_italic(void);
 
-// Registers `ItemsControl` (with its default constructor) and returns its type ID, 175.
+// Registers `ItemsControl` (with its default constructor) and returns its type ID, 176.
 int64_t ferro_type_items_control(void);
 
-// Registers `ItemsControlAutomationPeer` (without a constructor) and returns its type ID, 176.
+// Registers `ItemsControlAutomationPeer` (without a constructor) and returns its type ID, 177.
 int64_t ferro_type_items_control_automation_peer(void);
 
-// Registers `ItemsPresenter` (with its default constructor) and returns its type ID, 177.
+// Registers `ItemsPresenter` (with its default constructor) and returns its type ID, 178.
 int64_t ferro_type_items_presenter(void);
 
-// Registers `ItemsStackPanel` (with its default constructor) and returns its type ID, 178.
+// Registers `ItemsStackPanel` (with its default constructor) and returns its type ID, 179.
 int64_t ferro_type_items_stack_panel(void);
 
-// Registers `ItemsWrapGrid` (with its default constructor) and returns its type ID, 179.
+// Registers `ItemsWrapGrid` (with its default constructor) and returns its type ID, 180.
 int64_t ferro_type_items_wrap_grid(void);
 
-// Registers `KeyBinding` (with its default constructor) and returns its type ID, 180.
+// Registers `KeyBinding` (with its default constructor) and returns its type ID, 181.
 int64_t ferro_type_key_binding(void);
 
-// Registers `KeyFrame` (with its default constructor) and returns its type ID, 181.
+// Registers `KeyFrame` (with its default constructor) and returns its type ID, 182.
 int64_t ferro_type_key_frame(void);
 
-// Registers `KeySpline` (with its default constructor) and returns its type ID, 182.
+// Registers `KeySpline` (with its default constructor) and returns its type ID, 183.
 int64_t ferro_type_key_spline(void);
 
-// Registers `Label` (with its default constructor) and returns its type ID, 183.
+// Registers `Label` (with its default constructor) and returns its type ID, 184.
 int64_t ferro_type_label(void);
 
-// Registers `LabelAutomationPeer` (without a constructor) and returns its type ID, 184.
+// Registers `LabelAutomationPeer` (without a constructor) and returns its type ID, 185.
 int64_t ferro_type_label_automation_peer(void);
 
-// Registers `LayoutTransformControl` (with its default constructor) and returns its type ID, 188.
+// Registers `LayoutTransformControl` (with its default constructor) and returns its type ID, 189.
 int64_t ferro_type_layout_transform_control(void);
 
-// Registers `Layoutable` (with its default constructor) and returns its type ID, 189.
+// Registers `Layoutable` (with its default constructor) and returns its type ID, 190.
 int64_t ferro_type_layoutable(void);
 
-// Registers `LightDismissOverlayLayer` (with its default constructor) and returns its type ID, 190.
+// Registers `LightDismissOverlayLayer` (with its default constructor) and returns its type ID, 191.
 int64_t ferro_type_light_dismiss_overlay_layer(void);
 
-// Registers `Line` (with its default constructor) and returns its type ID, 191.
+// Registers `Line` (with its default constructor) and returns its type ID, 192.
 int64_t ferro_type_line(void);
 
-// Registers `LineBreak` (with its default constructor) and returns its type ID, 192.
+// Registers `LineBreak` (with its default constructor) and returns its type ID, 193.
 int64_t ferro_type_line_break(void);
 
-// Registers `LineGeometry` (with its default constructor) and returns its type ID, 193.
+// Registers `LineGeometry` (with its default constructor) and returns its type ID, 194.
 int64_t ferro_type_line_geometry(void);
 
-// Registers `LineSegment` (with its default constructor) and returns its type ID, 194.
+// Registers `LineSegment` (with its default constructor) and returns its type ID, 195.
 int64_t ferro_type_line_segment(void);
 
-// Registers `LinearColorKeyFrame` (with its default constructor) and returns its type ID, 195.
+// Registers `LinearColorKeyFrame` (with its default constructor) and returns its type ID, 196.
 int64_t ferro_type_linear_color_key_frame(void);
 
-// Registers `LinearDoubleKeyFrame` (with its default constructor) and returns its type ID, 196.
+// Registers `LinearDoubleKeyFrame` (with its default constructor) and returns its type ID, 197.
 int64_t ferro_type_linear_double_key_frame(void);
 
-// Registers `LinearGradientBrush` (with its default constructor) and returns its type ID, 197.
+// Registers `LinearGradientBrush` (with its default constructor) and returns its type ID, 198.
 int64_t ferro_type_linear_gradient_brush(void);
 
-// Registers `LinearPointKeyFrame` (with its default constructor) and returns its type ID, 198.
+// Registers `LinearPointKeyFrame` (with its default constructor) and returns its type ID, 199.
 int64_t ferro_type_linear_point_key_frame(void);
 
-// Registers `ListBox` (with its default constructor) and returns its type ID, 199.
+// Registers `ListBox` (with its default constructor) and returns its type ID, 200.
 int64_t ferro_type_list_box(void);
 
-// Registers `ListBoxAutomationPeer` (without a constructor) and returns its type ID, 200.
+// Registers `ListBoxAutomationPeer` (without a constructor) and returns its type ID, 201.
 int64_t ferro_type_list_box_automation_peer(void);
 
-// Registers `ListBoxItem` (with its default constructor) and returns its type ID, 201.
+// Registers `ListBoxItem` (with its default constructor) and returns its type ID, 202.
 int64_t ferro_type_list_box_item(void);
 
-// Registers `ListItemAutomationPeer` (without a constructor) and returns its type ID, 202.
+// Registers `ListItemAutomationPeer` (without a constructor) and returns its type ID, 203.
 int64_t ferro_type_list_item_automation_peer(void);
 
-// Registers `ListView` (with its default constructor) and returns its type ID, 203.
+// Registers `ListView` (with its default constructor) and returns its type ID, 204.
 int64_t ferro_type_list_view(void);
 
-// Registers `ListViewBase` (without a constructor) and returns its type ID, 205.
+// Registers `ListViewBase` (without a constructor) and returns its type ID, 206.
 int64_t ferro_type_list_view_base(void);
 
-// Registers `ListViewBaseItem` (without a constructor) and returns its type ID, 207.
+// Registers `ListViewBaseItem` (without a constructor) and returns its type ID, 208.
 int64_t ferro_type_list_view_base_item(void);
 
-// Registers `ListViewItem` (with its default constructor) and returns its type ID, 209.
+// Registers `ListViewItem` (with its default constructor) and returns its type ID, 210.
 int64_t ferro_type_list_view_item(void);
 
-// Registers `MaskedTextBox` (with its default constructor) and returns its type ID, 211.
+// Registers `MaskedTextBox` (with its default constructor) and returns its type ID, 212.
 int64_t ferro_type_masked_text_box(void);
 
-// Registers `MatrixTransform` (with its default constructor) and returns its type ID, 212.
+// Registers `MatrixTransform` (with its default constructor) and returns its type ID, 213.
 int64_t ferro_type_matrix_transform(void);
 
-// Registers `Menu` (with its default constructor) and returns its type ID, 213.
+// Registers `Menu` (with its default constructor) and returns its type ID, 214.
 int64_t ferro_type_menu(void);
 
-// Registers `MenuBase` (without a constructor) and returns its type ID, 214.
+// Registers `MenuBase` (without a constructor) and returns its type ID, 215.
 int64_t ferro_type_menu_base(void);
 
-// Registers `MenuFlyout` (with its default constructor) and returns its type ID, 215.
+// Registers `MenuFlyout` (with its default constructor) and returns its type ID, 216.
 int64_t ferro_type_menu_flyout(void);
 
-// Registers `MenuFlyoutPresenter` (with its default constructor) and returns its type ID, 216.
+// Registers `MenuFlyoutPresenter` (with its default constructor) and returns its type ID, 217.
 int64_t ferro_type_menu_flyout_presenter(void);
 
-// Registers `MenuItem` (with its default constructor) and returns its type ID, 217.
+// Registers `MenuItem` (with its default constructor) and returns its type ID, 218.
 int64_t ferro_type_menu_item(void);
 
-// Registers `MenuItemAutomationPeer` (without a constructor) and returns its type ID, 218.
+// Registers `MenuItemAutomationPeer` (without a constructor) and returns its type ID, 219.
 int64_t ferro_type_menu_item_automation_peer(void);
 
-// Registers `MicaBackdrop` (with its default constructor) and returns its type ID, 219.
+// Registers `MicaBackdrop` (with its default constructor) and returns its type ID, 220.
 int64_t ferro_type_mica_backdrop(void);
 
-// Registers `MultiPage` (without a constructor) and returns its type ID, 222.
+// Registers `MultiPage` (without a constructor) and returns its type ID, 223.
 int64_t ferro_type_multi_page(void);
 
-// Registers `NativeControlHost` (with its default constructor) and returns its type ID, 223.
+// Registers `NativeControlHost` (with its default constructor) and returns its type ID, 224.
 int64_t ferro_type_native_control_host(void);
 
-// Registers `NativeControlHostPeer` (without a constructor) and returns its type ID, 224.
+// Registers `NativeControlHostPeer` (without a constructor) and returns its type ID, 225.
 int64_t ferro_type_native_control_host_peer(void);
 
-// Registers `NativeMenu` (with its default constructor) and returns its type ID, 225.
+// Registers `NativeMenu` (with its default constructor) and returns its type ID, 226.
 int64_t ferro_type_native_menu(void);
 
-// Registers `NativeMenuBar` (with its default constructor) and returns its type ID, 226.
+// Registers `NativeMenuBar` (with its default constructor) and returns its type ID, 227.
 int64_t ferro_type_native_menu_bar(void);
 
-// Registers `NativeMenuBarAutomationPeer` (without a constructor) and returns its type ID, 227.
+// Registers `NativeMenuBarAutomationPeer` (without a constructor) and returns its type ID, 228.
 int64_t ferro_type_native_menu_bar_automation_peer(void);
 
-// Registers `NativeMenuItem` (with its default constructor) and returns its type ID, 229.
+// Registers `NativeMenuItem` (with its default constructor) and returns its type ID, 230.
 int64_t ferro_type_native_menu_item(void);
 
-// Registers `NativeMenuItemBase` (without a constructor) and returns its type ID, 230.
+// Registers `NativeMenuItemBase` (without a constructor) and returns its type ID, 231.
 int64_t ferro_type_native_menu_item_base(void);
 
-// Registers `NativeMenuItemSeparator` (with its default constructor) and returns its type ID, 232.
+// Registers `NativeMenuItemSeparator` (with its default constructor) and returns its type ID, 233.
 int64_t ferro_type_native_menu_item_separator(void);
 
-// Registers `NavigationPage` (with its default constructor) and returns its type ID, 233.
+// Registers `NavigationPage` (with its default constructor) and returns its type ID, 234.
 int64_t ferro_type_navigation_page(void);
 
-// Registers `NavigationPageAutomationPeer` (without a constructor) and returns its type ID, 234.
+// Registers `NavigationPageAutomationPeer` (without a constructor) and returns its type ID, 235.
 int64_t ferro_type_navigation_page_automation_peer(void);
 
-// Registers `NavigationView` (with its default constructor) and returns its type ID, 235.
+// Registers `NavigationView` (with its default constructor) and returns its type ID, 236.
 int64_t ferro_type_navigation_view(void);
 
-// Registers `NavigationViewAutomationPeer` (without a constructor) and returns its type ID, 236.
+// Registers `NavigationViewAutomationPeer` (without a constructor) and returns its type ID, 237.
 int64_t ferro_type_navigation_view_automation_peer(void);
 
-// Registers `NavigationViewItem` (with its default constructor) and returns its type ID, 237.
+// Registers `NavigationViewItem` (with its default constructor) and returns its type ID, 238.
 int64_t ferro_type_navigation_view_item(void);
 
-// Registers `NavigationViewItemAutomationPeer` (without a constructor) and returns its type ID, 238.
+// Registers `NavigationViewItemAutomationPeer` (without a constructor) and returns its type ID, 239.
 int64_t ferro_type_navigation_view_item_automation_peer(void);
 
-// Registers `NavigationViewItemBase` (without a constructor) and returns its type ID, 239.
+// Registers `NavigationViewItemBase` (without a constructor) and returns its type ID, 240.
 int64_t ferro_type_navigation_view_item_base(void);
 
-// Registers `NavigationViewItemHeader` (with its default constructor) and returns its type ID, 240.
+// Registers `NavigationViewItemHeader` (with its default constructor) and returns its type ID, 241.
 int64_t ferro_type_navigation_view_item_header(void);
 
-// Registers `NavigationViewItemSeparator` (with its default constructor) and returns its type ID, 241.
+// Registers `NavigationViewItemSeparator` (with its default constructor) and returns its type ID, 242.
 int64_t ferro_type_navigation_view_item_separator(void);
 
-// Registers `NavigationViewTemplateSettings` (with its default constructor) and returns its type ID, 242.
+// Registers `NavigationViewTemplateSettings` (with its default constructor) and returns its type ID, 243.
 int64_t ferro_type_navigation_view_template_settings(void);
 
-// Registers `NoneAutomationPeer` (without a constructor) and returns its type ID, 243.
+// Registers `NoneAutomationPeer` (without a constructor) and returns its type ID, 244.
 int64_t ferro_type_none_automation_peer(void);
 
-// Registers `NotificationCard` (with its default constructor) and returns its type ID, 244.
+// Registers `NotificationCard` (with its default constructor) and returns its type ID, 245.
 int64_t ferro_type_notification_card(void);
 
-// Registers `NumberBox` (with its default constructor) and returns its type ID, 245.
+// Registers `NumberBox` (with its default constructor) and returns its type ID, 246.
 int64_t ferro_type_number_box(void);
 
-// Registers `NumberBoxAutomationPeer` (without a constructor) and returns its type ID, 246.
+// Registers `NumberBoxAutomationPeer` (without a constructor) and returns its type ID, 247.
 int64_t ferro_type_number_box_automation_peer(void);
 
-// Registers `NumericUpDown` (with its default constructor) and returns its type ID, 247.
+// Registers `NumericUpDown` (with its default constructor) and returns its type ID, 248.
 int64_t ferro_type_numeric_up_down(void);
 
-// Registers `NumericUpDownAutomationPeer` (without a constructor) and returns its type ID, 248.
+// Registers `NumericUpDownAutomationPeer` (without a constructor) and returns its type ID, 249.
 int64_t ferro_type_numeric_up_down_automation_peer(void);
 
-// Registers `ObjectAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 249.
+// Registers `ObjectAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 250.
 int64_t ferro_type_object_animation_using_key_frames(void);
 
-// Registers `ObjectKeyFrame` (without a constructor) and returns its type ID, 250.
+// Registers `ObjectKeyFrame` (without a constructor) and returns its type ID, 251.
 int64_t ferro_type_object_key_frame(void);
 
-// Registers `OffscreenTopLevel` (without a constructor) and returns its type ID, 251.
+// Registers `OffscreenTopLevel` (without a constructor) and returns its type ID, 252.
 int64_t ferro_type_offscreen_top_level(void);
 
-// Registers `OverlayLayer` (without a constructor) and returns its type ID, 252.
+// Registers `OverlayLayer` (without a constructor) and returns its type ID, 253.
 int64_t ferro_type_overlay_layer(void);
 
-// Registers `OverlayPopupHost` (without a constructor) and returns its type ID, 253.
+// Registers `OverlayPopupHost` (without a constructor) and returns its type ID, 254.
 int64_t ferro_type_overlay_popup_host(void);
 
-// Registers `Page` (without a constructor) and returns its type ID, 254.
+// Registers `Page` (without a constructor) and returns its type ID, 255.
 int64_t ferro_type_page(void);
 
-// Registers `PageNavigationHost` (with its default constructor) and returns its type ID, 255.
+// Registers `PageNavigationHost` (with its default constructor) and returns its type ID, 256.
 int64_t ferro_type_page_navigation_host(void);
 
-// Registers `PageStackEntry` (without a constructor) and returns its type ID, 256.
+// Registers `PageStackEntry` (without a constructor) and returns its type ID, 257.
 int64_t ferro_type_page_stack_entry(void);
 
-// Registers `PagerControl` (with its default constructor) and returns its type ID, 257.
+// Registers `PagerControl` (with its default constructor) and returns its type ID, 258.
 int64_t ferro_type_pager_control(void);
 
-// Registers `PagerControlAutomationPeer` (without a constructor) and returns its type ID, 258.
+// Registers `PagerControlAutomationPeer` (without a constructor) and returns its type ID, 259.
 int64_t ferro_type_pager_control_automation_peer(void);
 
-// Registers `PagerControlTemplateSettings` (with its default constructor) and returns its type ID, 259.
+// Registers `PagerControlTemplateSettings` (with its default constructor) and returns its type ID, 260.
 int64_t ferro_type_pager_control_template_settings(void);
 
-// Registers `Panel` (with its default constructor) and returns its type ID, 261.
+// Registers `Panel` (with its default constructor) and returns its type ID, 262.
 int64_t ferro_type_panel(void);
 
-// Registers `Paragraph` (with its default constructor) and returns its type ID, 262.
+// Registers `Paragraph` (with its default constructor) and returns its type ID, 263.
 int64_t ferro_type_paragraph(void);
 
-// Registers `Path` (with its default constructor) and returns its type ID, 263.
+// Registers `Path` (with its default constructor) and returns its type ID, 264.
 int64_t ferro_type_path(void);
 
-// Registers `PathFigure` (with its default constructor) and returns its type ID, 264.
+// Registers `PathFigure` (with its default constructor) and returns its type ID, 265.
 int64_t ferro_type_path_figure(void);
 
-// Registers `PathGeometry` (with its default constructor) and returns its type ID, 265.
+// Registers `PathGeometry` (with its default constructor) and returns its type ID, 266.
 int64_t ferro_type_path_geometry(void);
 
-// Registers `PathIcon` (with its default constructor) and returns its type ID, 266.
+// Registers `PathIcon` (with its default constructor) and returns its type ID, 267.
 int64_t ferro_type_path_icon(void);
 
-// Registers `PathIconSource` (with its default constructor) and returns its type ID, 267.
+// Registers `PathIconSource` (with its default constructor) and returns its type ID, 268.
 int64_t ferro_type_path_icon_source(void);
 
-// Registers `PathSegment` (without a constructor) and returns its type ID, 268.
+// Registers `PathSegment` (without a constructor) and returns its type ID, 269.
 int64_t ferro_type_path_segment(void);
 
-// Registers `Pen` (with its default constructor) and returns its type ID, 269.
+// Registers `Pen` (with its default constructor) and returns its type ID, 270.
 int64_t ferro_type_pen(void);
 
-// Registers `PersonPicture` (with its default constructor) and returns its type ID, 270.
+// Registers `PersonPicture` (with its default constructor) and returns its type ID, 271.
 int64_t ferro_type_person_picture(void);
 
-// Registers `PersonPictureAutomationPeer` (without a constructor) and returns its type ID, 271.
+// Registers `PersonPictureAutomationPeer` (without a constructor) and returns its type ID, 272.
 int64_t ferro_type_person_picture_automation_peer(void);
 
-// Registers `PersonPictureTemplateSettings` (with its default constructor) and returns its type ID, 272.
+// Registers `PersonPictureTemplateSettings` (with its default constructor) and returns its type ID, 273.
 int64_t ferro_type_person_picture_template_settings(void);
 
-// Registers `PickerPresenterBase` (without a constructor) and returns its type ID, 273.
+// Registers `PickerPresenterBase` (without a constructor) and returns its type ID, 274.
 int64_t ferro_type_picker_presenter_base(void);
 
-// Registers `PinchGestureRecognizer` (with its default constructor) and returns its type ID, 274.
+// Registers `PinchGestureRecognizer` (with its default constructor) and returns its type ID, 275.
 int64_t ferro_type_pinch_gesture_recognizer(void);
 
-// Registers `PipsPager` (with its default constructor) and returns its type ID, 275.
+// Registers `PipsPager` (with its default constructor) and returns its type ID, 276.
 int64_t ferro_type_pips_pager(void);
 
-// Registers `PipsPagerAutomationPeer` (without a constructor) and returns its type ID, 276.
+// Registers `PipsPagerAutomationPeer` (without a constructor) and returns its type ID, 277.
 int64_t ferro_type_pips_pager_automation_peer(void);
 
-// Registers `PipsPagerTemplateSettings` (without a constructor) and returns its type ID, 277.
+// Registers `PipsPagerTemplateSettings` (without a constructor) and returns its type ID, 278.
 int64_t ferro_type_pips_pager_template_settings(void);
 
-// Registers `Pivot` (with its default constructor) and returns its type ID, 278.
+// Registers `Pivot` (with its default constructor) and returns its type ID, 279.
 int64_t ferro_type_pivot(void);
 
-// Registers `PivotHeaderItem` (with its default constructor) and returns its type ID, 280.
+// Registers `PivotHeaderItem` (with its default constructor) and returns its type ID, 281.
 int64_t ferro_type_pivot_header_item(void);
 
-// Registers `PivotHeaderPanel` (with its default constructor) and returns its type ID, 281.
+// Registers `PivotHeaderPanel` (with its default constructor) and returns its type ID, 282.
 int64_t ferro_type_pivot_header_panel(void);
 
-// Registers `PivotItem` (with its default constructor) and returns its type ID, 282.
+// Registers `PivotItem` (with its default constructor) and returns its type ID, 283.
 int64_t ferro_type_pivot_item(void);
 
-// Registers `PivotPanel` (with its default constructor) and returns its type ID, 284.
+// Registers `PivotPanel` (with its default constructor) and returns its type ID, 285.
 int64_t ferro_type_pivot_panel(void);
 
-// Registers `PlatformGeometry` (without a constructor) and returns its type ID, 285.
+// Registers `PlatformGeometry` (without a constructor) and returns its type ID, 286.
 int64_t ferro_type_platform_geometry(void);
 
-// Registers `PointAnimation` (with its default constructor) and returns its type ID, 286.
+// Registers `PointAnimation` (with its default constructor) and returns its type ID, 287.
 int64_t ferro_type_point_animation(void);
 
-// Registers `PointAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 287.
+// Registers `PointAnimationUsingKeyFrames` (with its default constructor) and returns its type ID, 288.
 int64_t ferro_type_point_animation_using_key_frames(void);
 
-// Registers `PointKeyFrame` (without a constructor) and returns its type ID, 288.
+// Registers `PointKeyFrame` (without a constructor) and returns its type ID, 289.
 int64_t ferro_type_point_key_frame(void);
 
-// Registers `PolyBezierSegment` (with its default constructor) and returns its type ID, 289.
+// Registers `PolyBezierSegment` (with its default constructor) and returns its type ID, 290.
 int64_t ferro_type_poly_bezier_segment(void);
 
-// Registers `PolyLineSegment` (with its default constructor) and returns its type ID, 290.
+// Registers `PolyLineSegment` (with its default constructor) and returns its type ID, 291.
 int64_t ferro_type_poly_line_segment(void);
 
-// Registers `Polygon` (with its default constructor) and returns its type ID, 291.
+// Registers `Polygon` (with its default constructor) and returns its type ID, 292.
 int64_t ferro_type_polygon(void);
 
-// Registers `Polyline` (with its default constructor) and returns its type ID, 292.
+// Registers `Polyline` (with its default constructor) and returns its type ID, 293.
 int64_t ferro_type_polyline(void);
 
-// Registers `PolylineGeometry` (with its default constructor) and returns its type ID, 293.
+// Registers `PolylineGeometry` (with its default constructor) and returns its type ID, 294.
 int64_t ferro_type_polyline_geometry(void);
 
-// Registers `Popup` (with its default constructor) and returns its type ID, 294.
+// Registers `Popup` (with its default constructor) and returns its type ID, 295.
 int64_t ferro_type_popup(void);
 
-// Registers `PopupAutomationPeer` (without a constructor) and returns its type ID, 295.
+// Registers `PopupAutomationPeer` (without a constructor) and returns its type ID, 296.
 int64_t ferro_type_popup_automation_peer(void);
 
-// Registers `PopupFlyoutBase` (without a constructor) and returns its type ID, 296.
+// Registers `PopupFlyoutBase` (without a constructor) and returns its type ID, 297.
 int64_t ferro_type_popup_flyout_base(void);
 
-// Registers `PopupOverlayLayer` (with its default constructor) and returns its type ID, 298.
+// Registers `PopupOverlayLayer` (with its default constructor) and returns its type ID, 299.
 int64_t ferro_type_popup_overlay_layer(void);
 
-// Registers `PopupRoot` (without a constructor) and returns its type ID, 299.
+// Registers `PopupRoot` (without a constructor) and returns its type ID, 300.
 int64_t ferro_type_popup_root(void);
 
-// Registers `PopupRootAutomationPeer` (without a constructor) and returns its type ID, 300.
+// Registers `PopupRootAutomationPeer` (without a constructor) and returns its type ID, 301.
 int64_t ferro_type_popup_root_automation_peer(void);
 
-// Registers `PowerEase` (with its default constructor) and returns its type ID, 301.
+// Registers `PowerEase` (with its default constructor) and returns its type ID, 302.
 int64_t ferro_type_power_ease(void);
 
-// Registers `ProgressBar` (with its default constructor) and returns its type ID, 303.
+// Registers `ProgressBar` (with its default constructor) and returns its type ID, 304.
 int64_t ferro_type_progress_bar(void);
 
-// Registers `ProgressBarAutomationPeer` (without a constructor) and returns its type ID, 304.
+// Registers `ProgressBarAutomationPeer` (without a constructor) and returns its type ID, 305.
 int64_t ferro_type_progress_bar_automation_peer(void);
 
-// Registers `ProgressBarTemplateSettings` (with its default constructor) and returns its type ID, 305.
+// Registers `ProgressBarTemplateSettings` (with its default constructor) and returns its type ID, 306.
 int64_t ferro_type_progress_bar_template_settings(void);
 
-// Registers `ProgressRing` (with its default constructor) and returns its type ID, 306.
+// Registers `ProgressRing` (with its default constructor) and returns its type ID, 307.
 int64_t ferro_type_progress_ring(void);
 
-// Registers `ProgressRingAutomationPeer` (without a constructor) and returns its type ID, 307.
+// Registers `ProgressRingAutomationPeer` (without a constructor) and returns its type ID, 308.
 int64_t ferro_type_progress_ring_automation_peer(void);
 
-// Registers `ProgressRingTemplateSettings` (with its default constructor) and returns its type ID, 308.
+// Registers `ProgressRingTemplateSettings` (with its default constructor) and returns its type ID, 309.
 int64_t ferro_type_progress_ring_template_settings(void);
 
-// Registers `PullGestureRecognizer` (with its default constructor) and returns its type ID, 309.
+// Registers `PullGestureRecognizer` (with its default constructor) and returns its type ID, 310.
 int64_t ferro_type_pull_gesture_recognizer(void);
 
-// Registers `QuadraticBezierSegment` (with its default constructor) and returns its type ID, 310.
+// Registers `QuadraticBezierSegment` (with its default constructor) and returns its type ID, 311.
 int64_t ferro_type_quadratic_bezier_segment(void);
 
-// Registers `QuadraticEase` (with its default constructor) and returns its type ID, 311.
+// Registers `QuadraticEase` (with its default constructor) and returns its type ID, 312.
 int64_t ferro_type_quadratic_ease(void);
 
-// Registers `QuarticEase` (with its default constructor) and returns its type ID, 312.
+// Registers `QuarticEase` (with its default constructor) and returns its type ID, 313.
 int64_t ferro_type_quartic_ease(void);
 
-// Registers `QuinticEase` (with its default constructor) and returns its type ID, 313.
+// Registers `QuinticEase` (with its default constructor) and returns its type ID, 314.
 int64_t ferro_type_quintic_ease(void);
 
-// Registers `RadialGradientBrush` (with its default constructor) and returns its type ID, 314.
+// Registers `RadialGradientBrush` (with its default constructor) and returns its type ID, 315.
 int64_t ferro_type_radial_gradient_brush(void);
 
-// Registers `RadioButton` (with its default constructor) and returns its type ID, 315.
+// Registers `RadioButton` (with its default constructor) and returns its type ID, 316.
 int64_t ferro_type_radio_button(void);
 
-// Registers `RadioButtonAutomationPeer` (without a constructor) and returns its type ID, 316.
+// Registers `RadioButtonAutomationPeer` (without a constructor) and returns its type ID, 317.
 int64_t ferro_type_radio_button_automation_peer(void);
 
-// Registers `RadioButtons` (with its default constructor) and returns its type ID, 317.
+// Registers `RadioButtons` (with its default constructor) and returns its type ID, 318.
 int64_t ferro_type_radio_buttons(void);
 
-// Registers `RadioButtonsAutomationPeer` (without a constructor) and returns its type ID, 318.
+// Registers `RadioButtonsAutomationPeer` (without a constructor) and returns its type ID, 319.
 int64_t ferro_type_radio_buttons_automation_peer(void);
 
-// Registers `RadioButtonsPanel` (with its default constructor) and returns its type ID, 319.
+// Registers `RadioButtonsPanel` (with its default constructor) and returns its type ID, 320.
 int64_t ferro_type_radio_buttons_panel(void);
 
-// Registers `RangeBase` (without a constructor) and returns its type ID, 320.
+// Registers `RangeBase` (without a constructor) and returns its type ID, 321.
 int64_t ferro_type_range_base(void);
 
-// Registers `RangeBaseAutomationPeer` (without a constructor) and returns its type ID, 321.
+// Registers `RangeBaseAutomationPeer` (without a constructor) and returns its type ID, 322.
 int64_t ferro_type_range_base_automation_peer(void);
 
-// Registers `RatingControl` (with its default constructor) and returns its type ID, 322.
+// Registers `RatingControl` (with its default constructor) and returns its type ID, 323.
 int64_t ferro_type_rating_control(void);
 
-// Registers `RatingControlAutomationPeer` (without a constructor) and returns its type ID, 323.
+// Registers `RatingControlAutomationPeer` (without a constructor) and returns its type ID, 324.
 int64_t ferro_type_rating_control_automation_peer(void);
 
-// Registers `RatingItemFontInfo` (with its default constructor) and returns its type ID, 324.
+// Registers `RatingItemFontInfo` (with its default constructor) and returns its type ID, 325.
 int64_t ferro_type_rating_item_font_info(void);
 
-// Registers `RatingItemImageInfo` (with its default constructor) and returns its type ID, 325.
+// Registers `RatingItemImageInfo` (with its default constructor) and returns its type ID, 326.
 int64_t ferro_type_rating_item_image_info(void);
 
-// Registers `RatingItemInfo` (with its default constructor) and returns its type ID, 326.
+// Registers `RatingItemInfo` (with its default constructor) and returns its type ID, 327.
 int64_t ferro_type_rating_item_info(void);
 
-// Registers `Rectangle` (with its default constructor) and returns its type ID, 327.
+// Registers `Rectangle` (with its default constructor) and returns its type ID, 328.
 int64_t ferro_type_rectangle(void);
 
-// Registers `RectangleGeometry` (with its default constructor) and returns its type ID, 328.
+// Registers `RectangleGeometry` (with its default constructor) and returns its type ID, 329.
 int64_t ferro_type_rectangle_geometry(void);
 
-// Registers `RefreshContainer` (with its default constructor) and returns its type ID, 329.
+// Registers `RefreshContainer` (with its default constructor) and returns its type ID, 330.
 int64_t ferro_type_refresh_container(void);
 
-// Registers `RefreshVisualizer` (with its default constructor) and returns its type ID, 331.
+// Registers `RefreshVisualizer` (with its default constructor) and returns its type ID, 332.
 int64_t ferro_type_refresh_visualizer(void);
 
-// Registers `RelativePanel` (with its default constructor) and returns its type ID, 332.
+// Registers `RelativePanel` (with its default constructor) and returns its type ID, 333.
 int64_t ferro_type_relative_panel(void);
 
-// Registers `RepeatButton` (with its default constructor) and returns its type ID, 334.
+// Registers `RepeatButton` (with its default constructor) and returns its type ID, 335.
 int64_t ferro_type_repeat_button(void);
 
-// Registers `ResourceDictionary` (with its default constructor) and returns its type ID, 336.
+// Registers `ResourceDictionary` (with its default constructor) and returns its type ID, 337.
 int64_t ferro_type_resource_dictionary(void);
 
-// Registers `ResourceProvider` (without a constructor) and returns its type ID, 337.
+// Registers `ResourceProvider` (without a constructor) and returns its type ID, 338.
 int64_t ferro_type_resource_provider(void);
 
-// Registers `RevealBackgroundBrush` (with its default constructor) and returns its type ID, 338.
+// Registers `RevealBackgroundBrush` (with its default constructor) and returns its type ID, 339.
 int64_t ferro_type_reveal_background_brush(void);
 
-// Registers `RevealBorderBrush` (with its default constructor) and returns its type ID, 339.
+// Registers `RevealBorderBrush` (with its default constructor) and returns its type ID, 340.
 int64_t ferro_type_reveal_border_brush(void);
 
-// Registers `RevealBorderLight` (with its default constructor) and returns its type ID, 340.
+// Registers `RevealBorderLight` (with its default constructor) and returns its type ID, 341.
 int64_t ferro_type_reveal_border_light(void);
 
-// Registers `RevealBrush` (without a constructor) and returns its type ID, 341.
+// Registers `RevealBrush` (without a constructor) and returns its type ID, 342.
 int64_t ferro_type_reveal_brush(void);
 
-// Registers `RevealHoverLight` (with its default constructor) and returns its type ID, 342.
+// Registers `RevealHoverLight` (with its default constructor) and returns its type ID, 343.
 int64_t ferro_type_reveal_hover_light(void);
 
-// Registers `ReversibleStackPanel` (with its default constructor) and returns its type ID, 343.
+// Registers `ReversibleStackPanel` (with its default constructor) and returns its type ID, 344.
 int64_t ferro_type_reversible_stack_panel(void);
 
-// Registers `RichEditBox` (with its default constructor) and returns its type ID, 344.
+// Registers `RichEditBox` (with its default constructor) and returns its type ID, 345.
 int64_t ferro_type_rich_edit_box(void);
 
-// Registers `RichEditBoxAutomationPeer` (without a constructor) and returns its type ID, 345.
+// Registers `RichEditBoxAutomationPeer` (without a constructor) and returns its type ID, 346.
 int64_t ferro_type_rich_edit_box_automation_peer(void);
 
-// Registers `RichEditBoxTextPresenter` (with its default constructor) and returns its type ID, 346.
+// Registers `RichEditBoxTextPresenter` (with its default constructor) and returns its type ID, 347.
 int64_t ferro_type_rich_edit_box_text_presenter(void);
 
-// Registers `RichEditBoxTextPresenterAutomationPeer` (without a constructor) and returns its type ID, 347.
+// Registers `RichEditBoxTextPresenterAutomationPeer` (without a constructor) and returns its type ID, 348.
 int64_t ferro_type_rich_edit_box_text_presenter_automation_peer(void);
 
-// Registers `RichTextBlock` (with its default constructor) and returns its type ID, 348.
+// Registers `RichTextBlock` (with its default constructor) and returns its type ID, 349.
 int64_t ferro_type_rich_text_block(void);
 
-// Registers `RichTextBlockAutomationPeer` (without a constructor) and returns its type ID, 349.
+// Registers `RichTextBlockAutomationPeer` (without a constructor) and returns its type ID, 350.
 int64_t ferro_type_rich_text_block_automation_peer(void);
 
-// Registers `RichTextBlockOverflow` (with its default constructor) and returns its type ID, 350.
+// Registers `RichTextBlockOverflow` (with its default constructor) and returns its type ID, 351.
 int64_t ferro_type_rich_text_block_overflow(void);
 
-// Registers `Rotate3DTransform` (with its default constructor) and returns its type ID, 351.
+// Registers `Rotate3DTransform` (with its default constructor) and returns its type ID, 352.
 int64_t ferro_type_rotate3_d_transform(void);
 
-// Registers `RotateTransform` (with its default constructor) and returns its type ID, 352.
+// Registers `RotateTransform` (with its default constructor) and returns its type ID, 353.
 int64_t ferro_type_rotate_transform(void);
 
-// Registers `RowDefinition` (with its default constructor) and returns its type ID, 353.
+// Registers `RowDefinition` (with its default constructor) and returns its type ID, 354.
 int64_t ferro_type_row_definition(void);
 
-// Registers `Run` (with its default constructor) and returns its type ID, 354.
+// Registers `Run` (with its default constructor) and returns its type ID, 355.
 int64_t ferro_type_run(void);
 
-// Registers `ScaleTransform` (with its default constructor) and returns its type ID, 356.
+// Registers `ScaleTransform` (with its default constructor) and returns its type ID, 357.
 int64_t ferro_type_scale_transform(void);
 
-// Registers `ScrollBar` (with its default constructor) and returns its type ID, 357.
+// Registers `ScrollBar` (with its default constructor) and returns its type ID, 358.
 int64_t ferro_type_scroll_bar(void);
 
-// Registers `ScrollBarAutomationPeer` (without a constructor) and returns its type ID, 358.
+// Registers `ScrollBarAutomationPeer` (without a constructor) and returns its type ID, 359.
 int64_t ferro_type_scroll_bar_automation_peer(void);
 
-// Registers `ScrollContentPresenter` (with its default constructor) and returns its type ID, 359.
+// Registers `ScrollContentPresenter` (with its default constructor) and returns its type ID, 360.
 int64_t ferro_type_scroll_content_presenter(void);
 
-// Registers `ScrollGestureRecognizer` (with its default constructor) and returns its type ID, 360.
+// Registers `ScrollGestureRecognizer` (with its default constructor) and returns its type ID, 361.
 int64_t ferro_type_scroll_gesture_recognizer(void);
 
-// Registers `ScrollViewer` (with its default constructor) and returns its type ID, 361.
+// Registers `ScrollViewer` (with its default constructor) and returns its type ID, 362.
 int64_t ferro_type_scroll_viewer(void);
 
-// Registers `ScrollViewerAutomationPeer` (without a constructor) and returns its type ID, 362.
+// Registers `ScrollViewerAutomationPeer` (without a constructor) and returns its type ID, 363.
 int64_t ferro_type_scroll_viewer_automation_peer(void);
 
-// Registers `Sector` (with its default constructor) and returns its type ID, 364.
+// Registers `Sector` (with its default constructor) and returns its type ID, 365.
 int64_t ferro_type_sector(void);
 
-// Registers `SelectableTextBlock` (with its default constructor) and returns its type ID, 365.
+// Registers `SelectableTextBlock` (with its default constructor) and returns its type ID, 366.
 int64_t ferro_type_selectable_text_block(void);
 
-// Registers `SelectingItemsControl` (with its default constructor) and returns its type ID, 366.
+// Registers `SelectingItemsControl` (with its default constructor) and returns its type ID, 367.
 int64_t ferro_type_selecting_items_control(void);
 
-// Registers `SelectingItemsControlAutomationPeer` (without a constructor) and returns its type ID, 367.
+// Registers `SelectingItemsControlAutomationPeer` (without a constructor) and returns its type ID, 368.
 int64_t ferro_type_selecting_items_control_automation_peer(void);
 
-// Registers `SelectingMultiPage` (without a constructor) and returns its type ID, 368.
+// Registers `SelectingMultiPage` (without a constructor) and returns its type ID, 369.
 int64_t ferro_type_selecting_multi_page(void);
 
-// Registers `SelectionIndicator` (with its default constructor) and returns its type ID, 369.
+// Registers `SelectionIndicator` (with its default constructor) and returns its type ID, 370.
 int64_t ferro_type_selection_indicator(void);
 
-// Registers `Separator` (with its default constructor) and returns its type ID, 370.
+// Registers `SelectorBar` (with its default constructor) and returns its type ID, 371.
+int64_t ferro_type_selector_bar(void);
+
+// Registers `SelectorBarItem` (with its default constructor) and returns its type ID, 372.
+int64_t ferro_type_selector_bar_item(void);
+
+// Registers `Separator` (with its default constructor) and returns its type ID, 373.
 int64_t ferro_type_separator(void);
 
-// Registers `Shadow` (without a constructor) and returns its type ID, 371.
+// Registers `Shadow` (without a constructor) and returns its type ID, 374.
 int64_t ferro_type_shadow(void);
 
-// Registers `Shape` (without a constructor) and returns its type ID, 372.
+// Registers `Shape` (without a constructor) and returns its type ID, 375.
 int64_t ferro_type_shape(void);
 
-// Registers `SineEase` (with its default constructor) and returns its type ID, 373.
+// Registers `SineEase` (with its default constructor) and returns its type ID, 376.
 int64_t ferro_type_sine_ease(void);
 
-// Registers `SkewTransform` (with its default constructor) and returns its type ID, 374.
+// Registers `SkewTransform` (with its default constructor) and returns its type ID, 377.
 int64_t ferro_type_skew_transform(void);
 
-// Registers `Slider` (with its default constructor) and returns its type ID, 375.
+// Registers `Slider` (with its default constructor) and returns its type ID, 378.
 int64_t ferro_type_slider(void);
 
-// Registers `SliderAutomationPeer` (without a constructor) and returns its type ID, 376.
+// Registers `SliderAutomationPeer` (without a constructor) and returns its type ID, 379.
 int64_t ferro_type_slider_automation_peer(void);
 
-// Registers `SolidColorBrush` (with its default constructor) and returns its type ID, 377.
+// Registers `SolidColorBrush` (with its default constructor) and returns its type ID, 380.
 int64_t ferro_type_solid_color_brush(void);
 
-// Registers `Span` (with its default constructor) and returns its type ID, 378.
+// Registers `Span` (with its default constructor) and returns its type ID, 381.
 int64_t ferro_type_span(void);
 
-// Registers `Spinner` (without a constructor) and returns its type ID, 379.
+// Registers `Spinner` (without a constructor) and returns its type ID, 382.
 int64_t ferro_type_spinner(void);
 
-// Registers `SplineColorKeyFrame` (with its default constructor) and returns its type ID, 380.
+// Registers `SplineColorKeyFrame` (with its default constructor) and returns its type ID, 383.
 int64_t ferro_type_spline_color_key_frame(void);
 
-// Registers `SplineDoubleKeyFrame` (with its default constructor) and returns its type ID, 381.
+// Registers `SplineDoubleKeyFrame` (with its default constructor) and returns its type ID, 384.
 int64_t ferro_type_spline_double_key_frame(void);
 
-// Registers `SplinePointKeyFrame` (with its default constructor) and returns its type ID, 382.
+// Registers `SplinePointKeyFrame` (with its default constructor) and returns its type ID, 385.
 int64_t ferro_type_spline_point_key_frame(void);
 
-// Registers `SplitButton` (with its default constructor) and returns its type ID, 383.
+// Registers `SplitButton` (with its default constructor) and returns its type ID, 386.
 int64_t ferro_type_split_button(void);
 
-// Registers `SplitButtonAutomationPeer` (without a constructor) and returns its type ID, 384.
+// Registers `SplitButtonAutomationPeer` (without a constructor) and returns its type ID, 387.
 int64_t ferro_type_split_button_automation_peer(void);
 
-// Registers `SplitView` (with its default constructor) and returns its type ID, 385.
+// Registers `SplitView` (with its default constructor) and returns its type ID, 388.
 int64_t ferro_type_split_view(void);
 
-// Registers `SplitViewTemplateSettings` (without a constructor) and returns its type ID, 386.
+// Registers `SplitViewTemplateSettings` (without a constructor) and returns its type ID, 389.
 int64_t ferro_type_split_view_template_settings(void);
 
-// Registers `StackPanel` (with its default constructor) and returns its type ID, 387.
+// Registers `StackPanel` (with its default constructor) and returns its type ID, 390.
 int64_t ferro_type_stack_panel(void);
 
-// Registers `StateTrigger` (with its default constructor) and returns its type ID, 388.
+// Registers `StateTrigger` (with its default constructor) and returns its type ID, 391.
 int64_t ferro_type_state_trigger(void);
 
-// Registers `StateTriggerBase` (without a constructor) and returns its type ID, 389.
+// Registers `StateTriggerBase` (without a constructor) and returns its type ID, 392.
 int64_t ferro_type_state_trigger_base(void);
 
-// Registers `Storyboard` (with its default constructor) and returns its type ID, 390.
+// Registers `Storyboard` (with its default constructor) and returns its type ID, 393.
 int64_t ferro_type_storyboard(void);
 
-// Registers `StreamGeometry` (with its default constructor) and returns its type ID, 391.
+// Registers `StreamGeometry` (with its default constructor) and returns its type ID, 394.
 int64_t ferro_type_stream_geometry(void);
 
-// Registers `Style` (with its default constructor) and returns its type ID, 392.
+// Registers `Style` (with its default constructor) and returns its type ID, 395.
 int64_t ferro_type_style(void);
 
-// Registers `StyleBase` (without a constructor) and returns its type ID, 393.
+// Registers `StyleBase` (without a constructor) and returns its type ID, 396.
 int64_t ferro_type_style_base(void);
 
-// Registers `StyledElement` (with its default constructor) and returns its type ID, 395.
+// Registers `StyledElement` (with its default constructor) and returns its type ID, 398.
 int64_t ferro_type_styled_element(void);
 
-// Registers `Styles` (with its default constructor) and returns its type ID, 396.
+// Registers `Styles` (with its default constructor) and returns its type ID, 399.
 int64_t ferro_type_styles(void);
 
-// Registers `SwipeControl` (with its default constructor) and returns its type ID, 397.
+// Registers `SwipeControl` (with its default constructor) and returns its type ID, 400.
 int64_t ferro_type_swipe_control(void);
 
-// Registers `SwipeGestureRecognizer` (with its default constructor) and returns its type ID, 398.
+// Registers `SwipeGestureRecognizer` (with its default constructor) and returns its type ID, 401.
 int64_t ferro_type_swipe_gesture_recognizer(void);
 
-// Registers `SwipeItem` (with its default constructor) and returns its type ID, 399.
+// Registers `SwipeItem` (with its default constructor) and returns its type ID, 402.
 int64_t ferro_type_swipe_item(void);
 
-// Registers `SwipeItems` (with its default constructor) and returns its type ID, 400.
+// Registers `SwipeItems` (with its default constructor) and returns its type ID, 403.
 int64_t ferro_type_swipe_items(void);
 
-// Registers `SymbolIcon` (with its default constructor) and returns its type ID, 401.
+// Registers `SymbolIcon` (with its default constructor) and returns its type ID, 404.
 int64_t ferro_type_symbol_icon(void);
 
-// Registers `SymbolIconSource` (with its default constructor) and returns its type ID, 402.
+// Registers `SymbolIconSource` (with its default constructor) and returns its type ID, 405.
 int64_t ferro_type_symbol_icon_source(void);
 
-// Registers `SystemBackdrop` (without a constructor) and returns its type ID, 403.
+// Registers `SystemBackdrop` (without a constructor) and returns its type ID, 406.
 int64_t ferro_type_system_backdrop(void);
 
-// Registers `TabControl` (with its default constructor) and returns its type ID, 405.
+// Registers `SystemBackdropElement` (with its default constructor) and returns its type ID, 407.
+int64_t ferro_type_system_backdrop_element(void);
+
+// Registers `TabControl` (with its default constructor) and returns its type ID, 409.
 int64_t ferro_type_tab_control(void);
 
-// Registers `TabItem` (with its default constructor) and returns its type ID, 406.
+// Registers `TabItem` (with its default constructor) and returns its type ID, 410.
 int64_t ferro_type_tab_item(void);
 
-// Registers `TabStrip` (with its default constructor) and returns its type ID, 407.
+// Registers `TabStrip` (with its default constructor) and returns its type ID, 411.
 int64_t ferro_type_tab_strip(void);
 
-// Registers `TabStripItem` (with its default constructor) and returns its type ID, 408.
+// Registers `TabStripItem` (with its default constructor) and returns its type ID, 412.
 int64_t ferro_type_tab_strip_item(void);
 
-// Registers `TabbedPage` (with its default constructor) and returns its type ID, 409.
+// Registers `TabbedPage` (with its default constructor) and returns its type ID, 413.
 int64_t ferro_type_tabbed_page(void);
 
-// Registers `TabbedPageAutomationPeer` (without a constructor) and returns its type ID, 410.
+// Registers `TabbedPageAutomationPeer` (without a constructor) and returns its type ID, 414.
 int64_t ferro_type_tabbed_page_automation_peer(void);
 
-// Registers `TableView` (with its default constructor) and returns its type ID, 411.
+// Registers `TableView` (with its default constructor) and returns its type ID, 415.
 int64_t ferro_type_table_view(void);
 
-// Registers `TableViewCell` (with its default constructor) and returns its type ID, 412.
+// Registers `TableViewCell` (with its default constructor) and returns its type ID, 416.
 int64_t ferro_type_table_view_cell(void);
 
-// Registers `TableViewCellsPresenter` (with its default constructor) and returns its type ID, 413.
+// Registers `TableViewCellsPresenter` (with its default constructor) and returns its type ID, 417.
 int64_t ferro_type_table_view_cells_presenter(void);
 
-// Registers `TableViewColumn` (with its default constructor) and returns its type ID, 414.
+// Registers `TableViewColumn` (with its default constructor) and returns its type ID, 418.
 int64_t ferro_type_table_view_column(void);
 
-// Registers `TableViewColumnHeader` (with its default constructor) and returns its type ID, 415.
+// Registers `TableViewColumnHeader` (with its default constructor) and returns its type ID, 419.
 int64_t ferro_type_table_view_column_header(void);
 
-// Registers `TableViewColumnHeadersPresenter` (with its default constructor) and returns its type ID, 416.
+// Registers `TableViewColumnHeadersPresenter` (with its default constructor) and returns its type ID, 420.
 int64_t ferro_type_table_view_column_headers_presenter(void);
 
-// Registers `TableViewRow` (with its default constructor) and returns its type ID, 417.
+// Registers `TableViewRow` (with its default constructor) and returns its type ID, 421.
 int64_t ferro_type_table_view_row(void);
 
-// Registers `TemplatedControl` (with its default constructor) and returns its type ID, 418.
+// Registers `TemplatedControl` (with its default constructor) and returns its type ID, 422.
 int64_t ferro_type_templated_control(void);
 
-// Registers `TextBlock` (with its default constructor) and returns its type ID, 429.
+// Registers `TextBlock` (with its default constructor) and returns its type ID, 433.
 int64_t ferro_type_text_block(void);
 
-// Registers `TextBlockAutomationPeer` (without a constructor) and returns its type ID, 430.
+// Registers `TextBlockAutomationPeer` (without a constructor) and returns its type ID, 434.
 int64_t ferro_type_text_block_automation_peer(void);
 
-// Registers `TextBox` (with its default constructor) and returns its type ID, 431.
+// Registers `TextBox` (with its default constructor) and returns its type ID, 435.
 int64_t ferro_type_text_box(void);
 
-// Registers `TextBoxAutomationPeer` (without a constructor) and returns its type ID, 432.
+// Registers `TextBoxAutomationPeer` (without a constructor) and returns its type ID, 436.
 int64_t ferro_type_text_box_automation_peer(void);
 
-// Registers `TextDecoration` (with its default constructor) and returns its type ID, 433.
+// Registers `TextDecoration` (with its default constructor) and returns its type ID, 437.
 int64_t ferro_type_text_decoration(void);
 
-// Registers `TextElement` (without a constructor) and returns its type ID, 434.
+// Registers `TextElement` (without a constructor) and returns its type ID, 438.
 int64_t ferro_type_text_element(void);
 
-// Registers `TextHighlighter` (with its default constructor) and returns its type ID, 435.
+// Registers `TextHighlighter` (with its default constructor) and returns its type ID, 439.
 int64_t ferro_type_text_highlighter(void);
 
-// Registers `TextPresenter` (with its default constructor) and returns its type ID, 436.
+// Registers `TextPresenter` (with its default constructor) and returns its type ID, 440.
 int64_t ferro_type_text_presenter(void);
 
-// Registers `TextSelectionHandle` (with its default constructor) and returns its type ID, 437.
+// Registers `TextSelectionHandle` (with its default constructor) and returns its type ID, 441.
 int64_t ferro_type_text_selection_handle(void);
 
-// Registers `TextSelectionHandleCanvas` (with its default constructor) and returns its type ID, 438.
+// Registers `TextSelectionHandleCanvas` (with its default constructor) and returns its type ID, 442.
 int64_t ferro_type_text_selection_handle_canvas(void);
 
-// Registers `TextSelectorLayer` (with its default constructor) and returns its type ID, 439.
+// Registers `TextSelectorLayer` (with its default constructor) and returns its type ID, 443.
 int64_t ferro_type_text_selector_layer(void);
 
-// Registers `ThemeShadow` (with its default constructor) and returns its type ID, 440.
+// Registers `ThemeShadow` (with its default constructor) and returns its type ID, 444.
 int64_t ferro_type_theme_shadow(void);
 
-// Registers `ThemeVariantScope` (with its default constructor) and returns its type ID, 441.
+// Registers `ThemeVariantScope` (with its default constructor) and returns its type ID, 445.
 int64_t ferro_type_theme_variant_scope(void);
 
-// Registers `Thumb` (with its default constructor) and returns its type ID, 444.
+// Registers `Thumb` (with its default constructor) and returns its type ID, 448.
 int64_t ferro_type_thumb(void);
 
-// Registers `ThumbAutomationPeer` (without a constructor) and returns its type ID, 445.
+// Registers `ThumbAutomationPeer` (without a constructor) and returns its type ID, 449.
 int64_t ferro_type_thumb_automation_peer(void);
 
-// Registers `TickBar` (with its default constructor) and returns its type ID, 446.
+// Registers `TickBar` (with its default constructor) and returns its type ID, 450.
 int64_t ferro_type_tick_bar(void);
 
-// Registers `TileBrush` (without a constructor) and returns its type ID, 447.
+// Registers `TileBrush` (without a constructor) and returns its type ID, 451.
 int64_t ferro_type_tile_brush(void);
 
-// Registers `TimePicker` (with its default constructor) and returns its type ID, 448.
+// Registers `TimePicker` (with its default constructor) and returns its type ID, 452.
 int64_t ferro_type_time_picker(void);
 
-// Registers `TimePickerAutomationPeer` (without a constructor) and returns its type ID, 449.
+// Registers `TimePickerAutomationPeer` (without a constructor) and returns its type ID, 453.
 int64_t ferro_type_time_picker_automation_peer(void);
 
-// Registers `TimePickerPresenter` (with its default constructor) and returns its type ID, 450.
+// Registers `TimePickerPresenter` (with its default constructor) and returns its type ID, 454.
 int64_t ferro_type_time_picker_presenter(void);
 
-// Registers `Timeline` (without a constructor) and returns its type ID, 451.
+// Registers `Timeline` (without a constructor) and returns its type ID, 455.
 int64_t ferro_type_timeline(void);
 
-// Registers `TitleBar` (with its default constructor) and returns its type ID, 452.
+// Registers `TitleBar` (with its default constructor) and returns its type ID, 456.
 int64_t ferro_type_title_bar(void);
 
-// Registers `TitleBarAutomationPeer` (without a constructor) and returns its type ID, 453.
+// Registers `TitleBarAutomationPeer` (without a constructor) and returns its type ID, 457.
 int64_t ferro_type_title_bar_automation_peer(void);
 
-// Registers `TitleBarTemplateSettings` (with its default constructor) and returns its type ID, 454.
+// Registers `TitleBarTemplateSettings` (with its default constructor) and returns its type ID, 458.
 int64_t ferro_type_title_bar_template_settings(void);
 
-// Registers `ToggleButton` (with its default constructor) and returns its type ID, 455.
+// Registers `ToggleButton` (with its default constructor) and returns its type ID, 459.
 int64_t ferro_type_toggle_button(void);
 
-// Registers `ToggleButtonAutomationPeer` (without a constructor) and returns its type ID, 456.
+// Registers `ToggleButtonAutomationPeer` (without a constructor) and returns its type ID, 460.
 int64_t ferro_type_toggle_button_automation_peer(void);
 
-// Registers `ToggleSplitButton` (with its default constructor) and returns its type ID, 457.
+// Registers `ToggleSplitButton` (with its default constructor) and returns its type ID, 461.
 int64_t ferro_type_toggle_split_button(void);
 
-// Registers `ToggleSplitButtonAutomationPeer` (without a constructor) and returns its type ID, 458.
+// Registers `ToggleSplitButtonAutomationPeer` (without a constructor) and returns its type ID, 462.
 int64_t ferro_type_toggle_split_button_automation_peer(void);
 
-// Registers `ToggleSwitch` (with its default constructor) and returns its type ID, 459.
+// Registers `ToggleSwitch` (with its default constructor) and returns its type ID, 463.
 int64_t ferro_type_toggle_switch(void);
 
-// Registers `ToolTip` (with its default constructor) and returns its type ID, 460.
+// Registers `ToolTip` (with its default constructor) and returns its type ID, 464.
 int64_t ferro_type_tool_tip(void);
 
-// Registers `ToolTipAutomationPeer` (without a constructor) and returns its type ID, 461.
+// Registers `ToolTipAutomationPeer` (without a constructor) and returns its type ID, 465.
 int64_t ferro_type_tool_tip_automation_peer(void);
 
-// Registers `TopLevel` (without a constructor) and returns its type ID, 462.
+// Registers `TopLevel` (without a constructor) and returns its type ID, 466.
 int64_t ferro_type_top_level(void);
 
-// Registers `Track` (with its default constructor) and returns its type ID, 465.
+// Registers `Track` (with its default constructor) and returns its type ID, 469.
 int64_t ferro_type_track(void);
 
-// Registers `Transform` (without a constructor) and returns its type ID, 467.
+// Registers `Transform` (without a constructor) and returns its type ID, 471.
 int64_t ferro_type_transform(void);
 
-// Registers `TransformGroup` (with its default constructor) and returns its type ID, 468.
+// Registers `TransformGroup` (with its default constructor) and returns its type ID, 472.
 int64_t ferro_type_transform_group(void);
 
-// Registers `TransitionBase` (without a constructor) and returns its type ID, 469.
+// Registers `TransitionBase` (without a constructor) and returns its type ID, 473.
 int64_t ferro_type_transition_base(void);
 
-// Registers `TransitioningContentControl` (with its default constructor) and returns its type ID, 470.
+// Registers `TransitioningContentControl` (with its default constructor) and returns its type ID, 474.
 int64_t ferro_type_transitioning_content_control(void);
 
-// Registers `TranslateTransform` (with its default constructor) and returns its type ID, 471.
+// Registers `TranslateTransform` (with its default constructor) and returns its type ID, 475.
 int64_t ferro_type_translate_transform(void);
 
-// Registers `TrayIcon` (with its default constructor) and returns its type ID, 472.
+// Registers `TrayIcon` (with its default constructor) and returns its type ID, 476.
 int64_t ferro_type_tray_icon(void);
 
-// Registers `TreeView` (with its default constructor) and returns its type ID, 473.
+// Registers `TreeView` (with its default constructor) and returns its type ID, 477.
 int64_t ferro_type_tree_view(void);
 
-// Registers `TreeViewAutomationPeer` (without a constructor) and returns its type ID, 474.
+// Registers `TreeViewAutomationPeer` (without a constructor) and returns its type ID, 478.
 int64_t ferro_type_tree_view_automation_peer(void);
 
-// Registers `TreeViewItem` (with its default constructor) and returns its type ID, 475.
+// Registers `TreeViewItem` (with its default constructor) and returns its type ID, 479.
 int64_t ferro_type_tree_view_item(void);
 
-// Registers `TreeViewItemAutomationPeer` (without a constructor) and returns its type ID, 476.
+// Registers `TreeViewItemAutomationPeer` (without a constructor) and returns its type ID, 480.
 int64_t ferro_type_tree_view_item_automation_peer(void);
 
-// Registers `Underline` (with its default constructor) and returns its type ID, 477.
+// Registers `Underline` (with its default constructor) and returns its type ID, 481.
 int64_t ferro_type_underline(void);
 
-// Registers `UniformGrid` (with its default constructor) and returns its type ID, 478.
+// Registers `UniformGrid` (with its default constructor) and returns its type ID, 482.
 int64_t ferro_type_uniform_grid(void);
 
-// Registers `UnrealizedElementAutomationPeer` (without a constructor) and returns its type ID, 480.
+// Registers `UnrealizedElementAutomationPeer` (without a constructor) and returns its type ID, 484.
 int64_t ferro_type_unrealized_element_automation_peer(void);
 
-// Registers `UserControl` (with its default constructor) and returns its type ID, 482.
+// Registers `UserControl` (with its default constructor) and returns its type ID, 486.
 int64_t ferro_type_user_control(void);
 
-// Registers `UserControlAutomationPeer` (without a constructor) and returns its type ID, 483.
+// Registers `UserControlAutomationPeer` (without a constructor) and returns its type ID, 487.
 int64_t ferro_type_user_control_automation_peer(void);
 
-// Registers `Viewbox` (with its default constructor) and returns its type ID, 484.
+// Registers `Viewbox` (with its default constructor) and returns its type ID, 488.
 int64_t ferro_type_viewbox(void);
 
-// Registers `VirtualizingCarouselPanel` (with its default constructor) and returns its type ID, 486.
+// Registers `VirtualizingCarouselPanel` (with its default constructor) and returns its type ID, 490.
 int64_t ferro_type_virtualizing_carousel_panel(void);
 
-// Registers `VirtualizingPanel` (without a constructor) and returns its type ID, 487.
+// Registers `VirtualizingPanel` (without a constructor) and returns its type ID, 491.
 int64_t ferro_type_virtualizing_panel(void);
 
-// Registers `VirtualizingStackPanel` (with its default constructor) and returns its type ID, 488.
+// Registers `VirtualizingStackPanel` (with its default constructor) and returns its type ID, 492.
 int64_t ferro_type_virtualizing_stack_panel(void);
 
-// Registers `Visual` (with its default constructor) and returns its type ID, 490.
+// Registers `Visual` (with its default constructor) and returns its type ID, 494.
 int64_t ferro_type_visual(void);
 
-// Registers `VisualBrush` (with its default constructor) and returns its type ID, 491.
+// Registers `VisualBrush` (with its default constructor) and returns its type ID, 495.
 int64_t ferro_type_visual_brush(void);
 
-// Registers `VisualLayerManager` (with its default constructor) and returns its type ID, 492.
+// Registers `VisualLayerManager` (with its default constructor) and returns its type ID, 496.
 int64_t ferro_type_visual_layer_manager(void);
 
-// Registers `VisualState` (with its default constructor) and returns its type ID, 493.
+// Registers `VisualState` (with its default constructor) and returns its type ID, 497.
 int64_t ferro_type_visual_state(void);
 
-// Registers `VisualStateGroup` (with its default constructor) and returns its type ID, 494.
+// Registers `VisualStateGroup` (with its default constructor) and returns its type ID, 498.
 int64_t ferro_type_visual_state_group(void);
 
-// Registers `VisualStateManager` (with its default constructor) and returns its type ID, 495.
+// Registers `VisualStateManager` (with its default constructor) and returns its type ID, 499.
 int64_t ferro_type_visual_state_manager(void);
 
-// Registers `VisualTransition` (with its default constructor) and returns its type ID, 496.
+// Registers `VisualTransition` (with its default constructor) and returns its type ID, 500.
 int64_t ferro_type_visual_transition(void);
 
-// Registers `Window` (with its default constructor) and returns its type ID, 497.
+// Registers `Window` (with its default constructor) and returns its type ID, 501.
 int64_t ferro_type_window(void);
 
-// Registers `WindowAutomationPeer` (without a constructor) and returns its type ID, 498.
+// Registers `WindowAutomationPeer` (without a constructor) and returns its type ID, 502.
 int64_t ferro_type_window_automation_peer(void);
 
-// Registers `WindowBase` (without a constructor) and returns its type ID, 499.
+// Registers `WindowBase` (without a constructor) and returns its type ID, 503.
 int64_t ferro_type_window_base(void);
 
-// Registers `WindowBaseAutomationPeer` (without a constructor) and returns its type ID, 500.
+// Registers `WindowBaseAutomationPeer` (without a constructor) and returns its type ID, 504.
 int64_t ferro_type_window_base_automation_peer(void);
 
-// Registers `WindowDrawnDecorations` (with its default constructor) and returns its type ID, 501.
+// Registers `WindowDrawnDecorations` (with its default constructor) and returns its type ID, 505.
 int64_t ferro_type_window_drawn_decorations(void);
 
-// Registers `WindowDrawnDecorationsContent` (with its default constructor) and returns its type ID, 502.
+// Registers `WindowDrawnDecorationsContent` (with its default constructor) and returns its type ID, 506.
 int64_t ferro_type_window_drawn_decorations_content(void);
 
-// Registers `WindowNotificationManager` (with its default constructor) and returns its type ID, 503.
+// Registers `WindowNotificationManager` (with its default constructor) and returns its type ID, 507.
 int64_t ferro_type_window_notification_manager(void);
 
-// Registers `WrapPanel` (with its default constructor) and returns its type ID, 504.
+// Registers `WrapPanel` (with its default constructor) and returns its type ID, 508.
 int64_t ferro_type_wrap_panel(void);
 
-// Registers `XamlAmbientLight` (with its default constructor) and returns its type ID, 505.
+// Registers `XamlAmbientLight` (with its default constructor) and returns its type ID, 509.
 int64_t ferro_type_xaml_ambient_light(void);
 
-// Registers `XamlCompositionBrushBase` (without a constructor) and returns its type ID, 506.
+// Registers `XamlCompositionBrushBase` (without a constructor) and returns its type ID, 510.
 int64_t ferro_type_xaml_composition_brush_base(void);
 
-// Registers `XamlLight` (without a constructor) and returns its type ID, 507.
+// Registers `XamlLight` (without a constructor) and returns its type ID, 511.
 int64_t ferro_type_xaml_light(void);
 
 // The message of the last call that failed on the calling thread, as UTF-8 with a NUL at the end;

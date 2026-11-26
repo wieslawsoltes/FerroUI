@@ -15,6 +15,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ToggleButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DropDownButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/PathIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/IconResources.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/FontIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/SymbolIcon.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/CheckBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/ToolTip.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Label.xaml" />
