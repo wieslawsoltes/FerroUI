@@ -24,6 +24,7 @@ mod uniform_grid;
 mod scroll_bar_visibility;
 
 pub use headered_content_control::HeaderedContentControl;
+pub use crate::command_bar_flyout::CommandBarFlyoutCommandBar;
 pub use i_scroll_snap_points_info::{IScrollSnapPointsInfo, SnapPointsChangedHandler};
 pub use adorner_helper::AdornerHelper;
 pub use adorner_layer::AdornerLayer;

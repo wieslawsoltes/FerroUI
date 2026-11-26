@@ -8,16 +8,19 @@
 //! upstream. The command bar owns its layout and overflow; the sample owns only its commands.
 
 use ferroui_base::collections::FerroList;
-use ferroui_base::input::{ICommand, InputElement, Key, KeyGesture, KeyModifiers, PointerEventArgs, PointerType};
+use ferroui_base::controls::ResourceKey;
+use ferroui_base::input::{
+    ContextRequestedEventArgs, ICommand, InputElement, Key, KeyGesture, KeyModifiers, PointerEventArgs, PointerType,
+};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Colors, IBrush};
+use ferroui_base::media::{Colors, IBrush, IImage};
 use ferroui_base::{BoxedValue, Ref, Thickness, WeakRef};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls_icons::BitmapIcon;
 use ferroui_controls::{
-    Button, CommandBar, CommandBarButton, CommandBarSeparator, CommandBarToggleButton, Control, Grid, ListBox,
+    Button, CommandBar, CommandBarButton, CommandBarFlyout, FlyoutShowMode, Image, PlacementMode, CommandBarSeparator, CommandBarToggleButton, Control, Grid, ListBox,
     MenuFlyout, MenuItem, StandardUICommand, StandardUICommandKind, SwipeControl, SwipeItem, SwipeItems, SwipeMode,
     Symbol, SymbolIcon, TextBlock, XamlUICommand,
 };
@@ -33,6 +36,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "CommandBar" => wire_command_bar(root),
         "XamlUICommand" => wire_xaml_ui_command(root),
         "StandardUICommand" => wire_standard_ui_command(root),
+        "CommandBarFlyout" => wire_command_bar_flyout(root),
         _ => {}
     }
 }
@@ -349,4 +353,57 @@ fn wire_standard_ui_command(root: &Ref<Control>) {
         false,
     )));
     list.set_items_source(Some(page.collection.clone().into()));
+}
+
+/// The image of the source's `Image1`: `/Assets/SampleMedia/rainier.jpg`.
+const RAINIER: &str = "ferres://WinUIGallery/Assets/SampleMedia/rainier.jpg";
+
+/// The code behind of `CommandBarFlyoutPage.xaml.cs`: `OnElementClicked` (the clicked button's
+/// label), `MyImageButton_Click` (the flyout transient) and `MyImageButton_ContextRequested` (the
+/// flyout standard), both through `ShowMenu` at RightEdgeAlignedTop of the image.
+fn wire_command_bar_flyout(root: &Ref<Control>) {
+    let image = root.get_control::<Image>("Image1");
+    if let Ok(bitmap) = crate::assets::load_bitmap(RAINIER) {
+        let source: Rc<dyn IImage> = Rc::new(bitmap);
+        image.set_source(Some(source));
+    }
+    let Some(flyout) = root
+        .try_find_resource(&ResourceKey::from("CommandBarFlyout1"), None)
+        .flatten()
+        .and_then(|value| value.downcast_ref::<Ref<CommandBarFlyout>>().cloned())
+    else {
+        return;
+    };
+    let output = root.get_control::<TextBlock>("SelectedOptionText");
+    for element in flyout.primary_commands().snapshot().iter().chain(flyout.secondary_commands().snapshot().iter()) {
+        let Some(button) = element.as_object().and_then(|object| object.to_ref().cast::<CommandBarButton>()) else {
+            continue;
+        };
+        let weak_button = button.downgrade();
+        let weak_output = output.downgrade();
+        button.click(move |_, _| {
+            if let (Some(button), Some(output)) = (weak_button.upgrade(), weak_output.upgrade()) {
+                output.set_text(Some(&format!("You clicked: {}", button.label().unwrap_or_default())));
+            }
+        });
+    }
+    let image_button = root.get_control::<Button>("myImageButton");
+    let show = move |flyout: &Ref<CommandBarFlyout>, image: &Ref<Image>, transient: bool| {
+        flyout.set_show_mode(if transient { FlyoutShowMode::Transient } else { FlyoutShowMode::Standard });
+        flyout.set_placement(PlacementMode::RightEdgeAlignedTop);
+        flyout.show_at(image);
+    };
+    let (click_flyout, click_image) = (flyout.clone(), image.downgrade());
+    image_button.click(move |_, _| {
+        if let Some(image) = click_image.upgrade() {
+            show(&click_flyout, &image, true);
+        }
+    });
+    let context_image = image.downgrade();
+    image_button.add_handler(InputElement::context_requested_event(), move |_, e: &ContextRequestedEventArgs| {
+        if let Some(image) = context_image.upgrade() {
+            show(&flyout, &image, false);
+            e.set_handled(true);
+        }
+    });
 }

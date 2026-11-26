@@ -4617,6 +4617,27 @@
       ],
       "notes": "The source example uses native StandardUICommand (Kind Delete) with the code behind of StandardUICommandPage.xaml.cs in Rust (command_samples.rs): ControlExample_Loaded creates the command with its ExecuteRequested handler (DeleteCommand_ExecuteRequested removes the item of the parameter, or else the selected item) and sets it on the Edit menu's item and on the 15 list items. WinUI's MenuBar, MenuBarItem and MenuFlyoutItem are FerroUI's Menu and MenuItems and the ListView is FerroUI's ListBox; each item has the execute SwipeItem of its SwipeControl, the AppBarButton (CommandBarButton) shown while a mouse or a pen is over the item (the HoveringStates) and the context menu of ListViewRight_ContainerContentChanging, which selects the item when it opens; each takes the command's label, icon, accelerator and description.",
       "examples": []
+    },
+    "CommandBarFlyout": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/CommandBarFlyout.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/command_samples.rs",
+        "samples/WinUIGallery/Assets/SampleMedia/rainier.jpg"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/command_samples_tests.rs",
+          "name": "command_bar_flyout_opens_transient_on_click_and_standard_on_context_request"
+        }
+      ],
+      "notes": "The source example uses native CommandBarFlyout (WinUI's flyout of ferroui-controls) as a page resource with three primary AppBarButtons (FerroUI's CommandBarButtons with SymbolIcons and their tool tips) and two secondary ones, with the code behind of CommandBarFlyoutPage.xaml.cs in Rust (command_samples.rs): OnElementClicked writes the clicked button's label, MyImageButton_Click shows the flyout transient and MyImageButton_ContextRequested standard, both through ShowMenu at RightEdgeAlignedTop of the image (the FlyoutShowOptions are the flyout's ShowMode and Placement). A standard flyout opens its command bar, which shows the secondary commands; a click of a secondary command closes the flyout. The flyout's expand and collapse animations are not ported (docs/porting/winui-controls.md, section 10.17).",
+      "examples": []
     }
   }
 }

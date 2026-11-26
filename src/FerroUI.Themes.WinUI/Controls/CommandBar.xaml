@@ -971,4 +971,22 @@
   </ControlTheme>
 
   <ControlTheme x:Key="{x:Type CommandBar}" TargetType="CommandBar" BasedOn="{StaticResource DefaultCommandBarStyle}" />
+
+  <!-- WinUI's CommandBarFlyoutCommandBar (CommandBarFlyout_themeresources.xaml,
+       DefaultCommandBarFlyoutCommandBarStyle): the setters of the style over the template of the
+       command bar. The flyout's own template (the expand and collapse animations, the secondary
+       commands attached below the row) is not ported; the secondary commands are the bar's
+       overflow (docs/porting/winui-controls.md, section 10.17). -->
+  <ControlTheme x:Key="{x:Type CommandBarFlyoutCommandBar}" TargetType="CommandBarFlyoutCommandBar"
+                BasedOn="{StaticResource DefaultCommandBarStyle}">
+    <Setter Property="Background" Value="{DynamicResource FlyoutPresenterBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FlyoutBorderThemeBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource FlyoutBorderThemeThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="DefaultLabelPosition" Value="Collapsed" />
+    <Setter Property="MaxWidth" Value="440" />
+    <Setter Property="IsDynamicOverflowEnabled" Value="True" />
+  </ControlTheme>
 </ResourceDictionary>

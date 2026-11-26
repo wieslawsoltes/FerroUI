@@ -193,6 +193,7 @@ FerroUI.Controls.CommandBarButton.IsCompact: bool = False; OneWay
 FerroUI.Controls.CommandBarButton.IsInOverflow: bool = False; OneWay
 FerroUI.Controls.CommandBarButton.Label: Option<String> = (null); OneWay
 FerroUI.Controls.CommandBarButton.LabelPosition: CommandBarDefaultLabelPosition = Bottom; OneWay
+FerroUI.Controls.CommandBarFlyout.AlwaysExpanded: bool = False; OneWay
 FerroUI.Controls.CommandBarSeparator.IsCompact: bool = False; OneWay
 FerroUI.Controls.CommandBarSeparator.IsInOverflow: bool = False; OneWay
 FerroUI.Controls.CommandBarToggleButton.DynamicOverflowOrder: i32 = 0; OneWay

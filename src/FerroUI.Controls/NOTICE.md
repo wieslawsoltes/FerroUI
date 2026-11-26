@@ -202,6 +202,10 @@ The files under `ui_command/` (WinUI's `XamlUICommand`, `StandardUICommand`, its
 `CommandingHelpers.cpp` and the English texts of `dxaml/xcp/dxaml/dllsrv/winrt/Microsoft.UI.Xaml.Common.rc`,
 at the same commit), under the same license.
 
+The files under `command_bar_flyout/` (WinUI's `CommandBarFlyout` and `CommandBarFlyoutCommandBar`)
+are ported from the WinUI project directly (`controls/dev/CommandBarFlyout`, at the same commit),
+under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
