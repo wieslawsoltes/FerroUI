@@ -1757,6 +1757,8 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsStackPanel::group_header_placement_property()), "ferroui_controls::ItemsStackPanel::group_header_placement_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsStackPanel::group_padding_property()), "ferroui_controls::ItemsStackPanel::group_padding_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsStackPanel::items_updating_scroll_mode_property()), "ferroui_controls::ItemsStackPanel::items_updating_scroll_mode_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsWrapGrid::group_header_placement_property()), "ferroui_controls::ItemsWrapGrid::group_header_placement_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsWrapGrid::group_padding_property()), "ferroui_controls::ItemsWrapGrid::group_padding_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ItemsWrapGrid::maximum_rows_or_columns_property()), "ferroui_controls::ItemsWrapGrid::maximum_rows_or_columns_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Label::target_property()), "ferroui_controls::Label::target_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::LayoutTransformControl::layout_transform_property()), "ferroui_controls::LayoutTransformControl::layout_transform_property"),
