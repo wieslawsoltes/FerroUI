@@ -19,6 +19,7 @@ pub struct TestScrollable {
     base: Control,
     extent: Cell<Size>,
     offset: Cell<Vector>,
+    offset_writes: RefCell<Vec<Vector>>,
     viewport: Cell<Size>,
     scroll_invalidated: RefCell<Vec<(u64, Rc<dyn Fn()>)>>,
     next_token: Cell<u64>,
@@ -53,6 +54,7 @@ impl TestScrollable {
             base: Control::construct(),
             extent: Cell::new(Size::default()),
             offset: Cell::new(Vector::default()),
+            offset_writes: RefCell::new(Vec::new()),
             viewport: Cell::new(Size::default()),
             scroll_invalidated: RefCell::new(Vec::new()),
             next_token: Cell::new(0),
@@ -107,8 +109,22 @@ impl TestScrollable {
     }
 
     pub fn set_offset(&self, value: Vector) {
+        self.offset_writes.borrow_mut().push(value);
         self.offset.set(value);
         self.raise_scroll_invalidated();
+    }
+
+    /// Publishes one complete child-owned scroll state without calling the
+    /// setter through which the presenter sends scroll requests back.
+    pub fn publish_scroll_state(&self, extent: Size, offset: Vector, viewport: Size) {
+        self.extent.set(extent);
+        self.offset.set(offset);
+        self.viewport.set(viewport);
+        self.raise_scroll_invalidated();
+    }
+
+    pub fn take_offset_writes(&self) -> Vec<Vector> {
+        self.offset_writes.take()
     }
 
     pub fn viewport(&self) -> Size {

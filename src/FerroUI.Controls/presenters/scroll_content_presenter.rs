@@ -40,6 +40,7 @@ pub struct ScrollContentPresenter {
     arranging: Cell<bool>,
     extent: Cell<Size>,
     logical_scroll_subscription: RefCell<Option<Subscription>>,
+    updating_logical_scroll: Cell<bool>,
     viewport: Cell<Size>,
     active_logical_gesture_scrolls: RefCell<Option<HashMap<i32, Vector>>>,
     scroll_gesture_snap_points: RefCell<Option<HashMap<i32, Vector>>>,
@@ -439,6 +440,7 @@ impl ScrollContentPresenter {
             arranging: Cell::new(false),
             extent: Cell::new(Size::default()),
             logical_scroll_subscription: RefCell::new(None),
+            updating_logical_scroll: Cell::new(false),
             viewport: Cell::new(Size::default()),
             active_logical_gesture_scrolls: RefCell::new(None),
             scroll_gesture_snap_points: RefCell::new(None),
@@ -1252,13 +1254,27 @@ impl ScrollContentPresenter {
 
             let target = child.clone();
             let skipped = Cell::new(false);
-            let offset =
-                FerroObjectExtensions::get_observable(fo(&self), Self::offset_property()).subscribe_fn(move |x| {
+            let weak_this = self.to_ref().downgrade();
+            let offset = FerroObjectExtensions::get_observable(fo(&self), Self::offset_property())
+                .subscribe_fn(move |x| {
                     if !skipped.replace(true) {
                         return;
                     }
+                    let Some(this) = weak_this.upgrade() else {
+                        return;
+                    };
+                    if this.updating_logical_scroll.get()
+                        || this
+                            .child()
+                            .as_ref()
+                            .is_none_or(|current| !current.ptr_eq(&target))
+                    {
+                        return;
+                    }
                     if let Some(scrollable) = as_logical_scrollable(&target) {
-                        scrollable.set_offset(x);
+                        if scrollable.offset() != x {
+                            scrollable.set_offset(x);
+                        }
                     }
                 });
 
@@ -1274,6 +1290,19 @@ impl ScrollContentPresenter {
     }
 
     fn update_from_scrollable(&self, child: &Ref<Control>) {
+        if self
+            .child()
+            .as_ref()
+            .is_none_or(|current| !current.ptr_eq(child))
+        {
+            return;
+        }
+        if self.updating_logical_scroll.get() {
+            // The active publication rechecks its source snapshot. A nested
+            // invalidation must not feed a partially updated range back into
+            // the child or let older metrics overwrite newer child state.
+            return;
+        }
         let Some(scrollable) = as_logical_scrollable(child) else {
             return;
         };
@@ -1284,9 +1313,72 @@ impl ScrollContentPresenter {
             self.set_current_value(Self::offset_property(), Vector::default());
             self.invalidate_measure();
         } else if scrollable.is_logical_scroll_enabled() {
-            self.set_viewport(scrollable.viewport());
-            self.set_extent(scrollable.extent());
-            self.set_current_value(Self::offset_property(), scrollable.offset());
+            // Compare snapshots without making a stable NaN loop forever;
+            // the final offset still passes through normal finite coercion.
+            let state_bits = |viewport: Size, extent: Size, offset: Vector| {
+                [
+                    viewport.width.to_bits(),
+                    viewport.height.to_bits(),
+                    extent.width.to_bits(),
+                    extent.height.to_bits(),
+                    offset.x.to_bits(),
+                    offset.y.to_bits(),
+                ]
+            };
+            let original_offset = self.offset();
+            let was_updating = self.updating_logical_scroll.replace(true);
+            let offset = loop {
+                let viewport = scrollable.viewport();
+                let extent = scrollable.extent();
+                let offset = scrollable.offset();
+
+                // Both setters coerce Offset and propagate metrics to the
+                // owning ScrollViewer, whose binding can coerce it again.
+                // Suppress that transient feedback until the range is whole.
+                self.set_viewport(viewport);
+                self.set_extent(extent);
+                self.set_current_value(Self::offset_property(), offset);
+
+                if self
+                    .child()
+                    .as_ref()
+                    .is_none_or(|current| !current.ptr_eq(child))
+                    || !scrollable.is_logical_scroll_enabled()
+                {
+                    break None;
+                }
+                if state_bits(viewport, extent, offset)
+                    == state_bits(
+                        scrollable.viewport(),
+                        scrollable.extent(),
+                        scrollable.offset(),
+                    )
+                {
+                    break Some(self.offset());
+                }
+            };
+            self.updating_logical_scroll.set(was_updating);
+
+            let Some(offset) = offset else {
+                if let Some(current) = self.child() {
+                    self.update_from_scrollable(&current);
+                }
+                return;
+            };
+            // A changed range can already have coerced Offset while feedback
+            // was suppressed, so its final assignment need not raise a change.
+            // If the effective offset is unchanged, preserve the child's
+            // transient wrap/overscroll position: no property change would
+            // normally have sent a scroll request back to the child.
+            if self
+                .child()
+                .as_ref()
+                .is_some_and(|current| current.ptr_eq(child))
+                && original_offset != offset
+                && offset != scrollable.offset()
+            {
+                scrollable.set_offset(offset);
+            }
         }
     }
 

@@ -153,6 +153,14 @@ impl FerroObjectImpl for DateTimePickerPanel {
 
             this.update_helper_info();
             this.has_init.set(false);
+        } else if change.property() == Visual::bounds_property().as_property() {
+            let (old, new) = change.get_old_and_new_value::<Rect>();
+            if old.size() != new.size() {
+                // Bounds is assigned after arrange_override. Publish the real
+                // viewport together with its centered scroll extent, including
+                // later resizes which do not reinitialize the item ring.
+                this.raise_scroll_invalidated();
+            }
         }
     }
 }
@@ -200,18 +208,28 @@ impl LayoutableImpl for DateTimePickerPanel {
 
         let item_height = this.item_height();
         let init_y = (available_size.height / 2.0) - (item_height / 2.0);
-        this.num_items_above_below_selected.set((init_y / item_height).ceil() as i32 + 1);
+        let items_above_below = (init_y / item_height).ceil() as i32 + 1;
+        let window_changed = this
+            .num_items_above_below_selected
+            .replace(items_above_below)
+            != items_above_below;
 
         let children = this.children();
-
+        let previous_count = children.count();
         this.create_or_destroy_items(&children);
 
         for child in children.snapshot().iter() {
             child.measure(available_size);
         }
 
-        if !this.has_init.get() {
+        if !this.has_init.get() || window_changed || children.count() != previous_count {
+            // A resize can move the first realized value or grow the pool
+            // without changing the selection. Rebind retained/new containers
+            // to that window before arranging them, otherwise the selected
+            // value keeps its old slot and moves away from the center.
             this.update_items();
+        }
+        if !this.has_init.get() {
             this.raise_scroll_invalidated();
             this.has_init.set(true);
         }
@@ -666,7 +684,19 @@ impl DateTimePickerPanel {
     }
 
     pub fn extent(&self) -> Size {
-        self.extent.get()
+        let extent = self.extent.get();
+        if self.should_loop() {
+            extent
+        } else {
+            // The first and last items can both occupy the center of the
+            // viewport. Include that leading/trailing space in the public
+            // extent so a ScrollViewer allows every offset from zero through
+            // the last item's index * pitch, even when the viewport is taller
+            // than the item range (for example the two AM/PM values).
+            // Keep the private item extent unchanged for keyboard limits.
+            extent
+                .with_height((extent.height - self.item_height()).max(0.0) + self.viewport().height)
+        }
     }
 
     pub fn viewport(&self) -> Size {

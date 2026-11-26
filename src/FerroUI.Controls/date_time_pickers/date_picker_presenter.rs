@@ -356,6 +356,13 @@ impl DatePickerPresenter {
         self.set_value(Self::date_property(), value)
     }
 
+    /// Starts a new picker transaction from the committed date, including its
+    /// full offset/time and formatting context. Reassigning the same Date does
+    /// not raise a property change after a previous selection was dismissed.
+    pub(super) fn reset_selection(&self) {
+        self.on_date_changed(self.date());
+    }
+
     fn on_date_changed(&self, new_value: DateTimeOffset) {
         self.sync_date.set(new_value);
         self.init_picker();

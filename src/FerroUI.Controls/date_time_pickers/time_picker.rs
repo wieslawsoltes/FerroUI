@@ -540,6 +540,7 @@ impl TimePicker {
         };
 
         presenter.set_time(self.selected_time().unwrap_or_else(|| DateTime::now().time_of_day()));
+        presenter.reset_selection();
 
         popup.set_placement(PlacementMode::AnchorAndGravity);
         popup.set_placement_anchor(PopupAnchor::BOTTOM);
