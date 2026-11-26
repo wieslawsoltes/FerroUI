@@ -23,11 +23,9 @@
 //! sleeps on the default scheduler upstream and waits for an event, and sleeps here on the test
 //! scheduler, which the cancellation does not need to run. `ConfigureAwait(true)` of a
 //! `SchedulerOperation` is `configure_await(true)`, and the context `MySyncCtx` counts the work it
-//! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition.
-//!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! is posted, which `SchedulerAsync_ScheduleAsync_SyncCtx` checks in addition. The context is a
+//! `Schedule` of `ferroui_system::task`, the current schedule and the schedule of the thread (the
+//! `SynchronizationContext` of the port was deprecated in 0.5.0 and removed in 0.7.0, #625).
 
 use ferroui_reactive::concurrency::{
     IScheduler, ISchedulerPeriodic, IStopwatch, IStopwatchProvider, ScheduledAction, Scheduler, SchedulerExt,
@@ -35,10 +33,11 @@ use ferroui_reactive::concurrency::{
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::{IDisposable, IObserver, ObservableError};
 use ferroui_reactive_testing::{assert_messages, assert_throws, duration_to_ticks, ticks_to_duration, ticks_to_time, ReactiveTest as RT, TestScheduler};
-use ferroui_system::task::{Canceled, Shared};
-use ferroui_system::threading::{
-    current_synchronization_context, set_synchronization_context, CancellationToken, SynchronizationContext,
+use ferroui_system::task::{
+    current_schedule, is_current_schedule, set_current_schedule, set_thread_schedule, thread_schedule, Canceled, Schedule,
+    Shared,
 };
+use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -688,10 +687,12 @@ fn scheduler_async_sleep_cancel() {
 #[test]
 fn scheduler_async_schedule_async_sync_ctx() {
     // `try`/`finally`: the previous context is restored when the test ends, also when it fails.
-    let _restore = RestoreContext(current_synchronization_context());
+    let _restore = RestoreContext(current_schedule(), thread_schedule());
 
     let ctx = Arc::new(MySyncCtx::default());
-    set_synchronization_context(Some(ctx.clone()));
+    let schedule: Arc<dyn Schedule> = ctx.clone();
+    set_current_schedule(Some(schedule.clone()));
+    set_thread_schedule(Some(schedule));
 
     let s = TestScheduler::new();
 
@@ -737,38 +738,33 @@ struct MySyncCtx {
     posts: AtomicUsize,
 }
 
-impl SynchronizationContext for MySyncCtx {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+/// `Post`, from any thread and from the thread of the context.
+impl Schedule for MySyncCtx {
+    fn schedule(&self, poll: Box<dyn FnOnce() + Send>) {
         self.posts.fetch_add(1, Ordering::SeqCst);
-        work();
+        poll();
     }
 
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         self.posts.fetch_add(1, Ordering::SeqCst);
-        work();
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
         work();
     }
 }
 
-/// Makes a context current again when it is dropped.
-struct RestoreContext(Option<Arc<dyn SynchronizationContext>>);
+/// Makes the current schedule and the schedule of the thread what they were when it is dropped.
+struct RestoreContext(Option<Arc<dyn Schedule>>, Option<Arc<dyn Schedule>>);
 
 impl Drop for RestoreContext {
     fn drop(&mut self) {
-        set_synchronization_context(self.0.take());
+        set_current_schedule(self.0.take());
+        set_thread_schedule(self.1.take());
     }
 }
 
 /// Whether `ctx` is the current context of the thread (`Assert.Same(ctx, SynchronizationContext.Current)`).
 fn is_current(ctx: &Arc<MySyncCtx>) -> bool {
-    current_synchronization_context().is_some_and(|current| std::ptr::addr_eq(Arc::as_ptr(&current), Arc::as_ptr(ctx)))
+    let schedule: Arc<dyn Schedule> = ctx.clone();
+    is_current_schedule(&schedule)
 }
 
 // Not ported: Scheduler_ArgumentChecks - argument validation

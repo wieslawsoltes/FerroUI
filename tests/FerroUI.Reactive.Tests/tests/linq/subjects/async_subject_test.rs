@@ -7,14 +7,14 @@
 //! with the context cleared, as on the test thread of upstream; the awaiter of the port is a task,
 //! the `Shared` of its result, whose `on_finished` is `OnCompleted`.
 //!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! The context is a `Schedule` of `ferroui_system::task`, the current schedule and the schedule of
+//! the thread (the `SynchronizationContext` of the port was deprecated in 0.5.0 and removed in
+//! 0.7.0, #625).
 
 use ferroui_reactive::subjects::{AsyncSubject, SubjectBase};
 use ferroui_reactive::{IDisposable, IObservable, IObserver, ObservableExt};
 use ferroui_reactive_testing::{assert_messages, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
+use ferroui_system::task::{set_current_schedule, set_thread_schedule, Schedule};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -486,7 +486,7 @@ fn get_result_context() {
         let ctx = Arc::new(MyContext::default());
 
         // `Task.Run`: the awaiter is made, and given its continuation, where `ctx` is current.
-        set_synchronization_context(Some(ctx.clone()));
+        set_context(Some(ctx.clone()));
 
         let e = Rc::new(Cell::new(false));
         let a = x.get_awaiter();
@@ -494,7 +494,7 @@ fn get_result_context() {
         a.on_finished(move |_| set.set(true));
 
         // The subject ends where no context is current, as on the test thread of upstream.
-        set_synchronization_context(None);
+        set_context(None);
 
         x.on_next(42);
         x.on_completed();
@@ -508,28 +508,29 @@ fn get_result_context() {
     assert!(ran);
 }
 
+/// Makes `context` the current context of the thread (`SynchronizationContext.SetSynchronizationContext`):
+/// the current schedule and the schedule of the thread; `None` clears both.
+fn set_context(context: Option<Arc<dyn Schedule>>) {
+    let previous = set_current_schedule(context.clone());
+    drop(previous);
+    set_thread_schedule(context);
+}
+
 /// `MyContext`: runs the work it is posted at once, and records that it ran.
 #[derive(Default)]
 struct MyContext {
     ran: AtomicBool,
 }
 
-impl SynchronizationContext for MyContext {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+/// `Post`, from any thread and from the thread of the context.
+impl Schedule for MyContext {
+    fn schedule(&self, poll: Box<dyn FnOnce() + Send>) {
         self.ran.store(true, Ordering::SeqCst);
-        work();
+        poll();
     }
 
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         self.ran.store(true, Ordering::SeqCst);
-        work();
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
         work();
     }
 }
