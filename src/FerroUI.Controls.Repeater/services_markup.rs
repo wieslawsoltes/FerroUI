@@ -69,18 +69,6 @@ ferro_markup_type!(interface dyn IElementFactory as "IElementFactory" {
     ],
 });
 
-ferro_markup_type!(interface dyn IDataTemplateSelector as "IDataTemplateSelector" {
-    namespace: "FerroUI.Controls.Repeater",
-    handles: [Rc<dyn IDataTemplateSelector>, Option<Rc<dyn IDataTemplateSelector>>],
-    this: Rc<dyn IDataTemplateSelector>,
-    methods: [
-        try fn SelectTemplate(Option<BoxedValue>) -> Option<Rc<dyn IDataTemplate>> =>
-            |selector: &Rc<dyn IDataTemplateSelector>, item: Option<BoxedValue>| selector.try_select_template(item.as_ref()),
-        try fn SelectTemplate(Option<BoxedValue>, Option<Ref<Control>>) -> Option<Rc<dyn IDataTemplate>> =>
-            |selector: &Rc<dyn IDataTemplateSelector>, item: Option<BoxedValue>, owner: Option<Ref<Control>>| selector.try_select_template_with_container(item.as_ref(), owner.as_ref()),
-    ],
-});
-
 ferro_markup_type!(class ItemTemplateWrapper {
     namespace: "FerroUI.Controls.Repeater",
     handles: [Rc<ItemTemplateWrapper>, Option<Rc<ItemTemplateWrapper>>],
@@ -225,7 +213,6 @@ const TYPES: &[&MarkupType] = &[
     <ElementFactoryRecycleArgs as MarkupTyped>::MARKUP,
     <SelectTemplateEventArgs as MarkupTyped>::MARKUP,
     <dyn IElementFactory as MarkupTyped>::MARKUP,
-    <dyn IDataTemplateSelector as MarkupTyped>::MARKUP,
     <ItemTemplateWrapper as MarkupTyped>::MARKUP,
     <ElementFactoryTemplatesMetadata as MarkupTyped>::MARKUP,
     <ItemCollectionTransitionOperation as MarkupTyped>::MARKUP,
@@ -253,7 +240,6 @@ fn register_value_types() {
     ValueTypes::register_nullable::<ElementFactoryRecycleArgs>();
     ValueTypes::register_nullable::<SelectTemplateEventArgs>();
     ValueTypes::register_nullable::<Rc<dyn IElementFactory>>();
-    ValueTypes::register_nullable::<Rc<dyn IDataTemplateSelector>>();
     ValueTypes::register_nullable::<Rc<ItemTemplateWrapper>>();
     ValueTypes::register_nullable::<ElementFactoryTemplates>();
     ValueTypes::register_nullable::<Rc<ItemCollectionTransition>>();

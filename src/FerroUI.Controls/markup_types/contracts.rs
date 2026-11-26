@@ -10,8 +10,8 @@ use crate::chrome::IWindowDrawnDecorationsTemplate;
 use crate::primitives::IPopupHost;
 use crate::selection::ISelectionModel;
 use crate::templates::{
-    IControlTemplate, IDataTemplate, IDataTemplateComponent, IRecyclingDataTemplate, ITemplateOf, ITreeDataTemplate,
-    ITypedDataTemplate,
+    IControlTemplate, IDataTemplate, IDataTemplateComponent, IDataTemplateSelector, IRecyclingDataTemplate, ITemplateOf,
+    ITreeDataTemplate, ITypedDataTemplate,
 };
 use crate::documents::Inline;
 use crate::{Control, Panel};
@@ -56,6 +56,21 @@ ferro_markup_type!(interface AddChildOf<Ref<Inline>> as "IAddChild`1" {
 ferro_markup_type!(interface dyn IDataTemplate as "IDataTemplate" {
     namespace: "FerroUI.Controls.Templates",
     handles: [Rc<dyn IDataTemplate>, Option<Rc<dyn IDataTemplate>>],
+});
+
+// WinUI's `DataTemplateSelector` contract; the class is `DataTemplateSelector`.
+ferro_markup_type!(interface dyn IDataTemplateSelector as "IDataTemplateSelector" {
+    namespace: "FerroUI.Controls.Templates",
+    handles: [Rc<dyn IDataTemplateSelector>, Option<Rc<dyn IDataTemplateSelector>>],
+    this: Rc<dyn IDataTemplateSelector>,
+    methods: [
+        try fn SelectTemplate(Option<BoxedValue>) -> Option<Rc<dyn IDataTemplate>> =>
+            |selector: &Rc<dyn IDataTemplateSelector>, item: Option<BoxedValue>| selector.try_select_template(item.as_ref()),
+        try fn SelectTemplate(Option<BoxedValue>, Option<Ref<Control>>) -> Option<Rc<dyn IDataTemplate>> =>
+            |selector: &Rc<dyn IDataTemplateSelector>, item: Option<BoxedValue>, container: Option<Ref<Control>>| {
+                selector.try_select_template_with_container(item.as_ref(), container.as_ref())
+            },
+    ],
 });
 
 ferro_markup_type!(interface dyn ITreeDataTemplate as "ITreeDataTemplate" {
@@ -198,6 +213,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <AddChildOf<Ref<Control>> as MarkupTyped>::MARKUP,
     <AddChildOf<Ref<Inline>> as MarkupTyped>::MARKUP,
     <dyn IDataTemplate as MarkupTyped>::MARKUP,
+    <dyn IDataTemplateSelector as MarkupTyped>::MARKUP,
     <dyn ITreeDataTemplate as MarkupTyped>::MARKUP,
     <dyn IRecyclingDataTemplate as MarkupTyped>::MARKUP,
     <dyn ITypedDataTemplate as MarkupTyped>::MARKUP,
@@ -221,6 +237,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Control>>>>();
     ValueTypes::register_nullable::<Rc<dyn IAddChild<Ref<Inline>>>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplate>>();
+    ValueTypes::register_nullable::<Rc<dyn IDataTemplateSelector>>();
     ValueTypes::register_nullable::<Rc<dyn IDataTemplateComponent>>();
     ValueTypes::register_nullable::<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>();
     ValueTypes::register_cast::<Rc<dyn ITreeDataTemplate>, Rc<dyn IDataTemplate>>(|t| t.clone());

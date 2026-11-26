@@ -577,6 +577,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // --- x:Bind phasing (WinUI, docs/porting/x-bind.md) ---
     // FerroUI.Controls.Templates
     crate::templates::XamlBindingHelper,
+    // --- template selectors (WinUI, docs/porting/winui-controls.md, section 10.18) ---
+    crate::templates::DataTemplateSelector,
     // --- leftovers ---
 ];
 

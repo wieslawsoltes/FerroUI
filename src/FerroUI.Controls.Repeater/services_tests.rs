@@ -17,7 +17,7 @@ use super::item_collection_transition_provider::{
     ItemCollectionTransitionProvider, ItemCollectionTransitionProviderImpl,
 };
 use super::item_template_wrapper::{
-    factory_from_template, IDataTemplateSelector, ItemTemplateWrapper,
+    factory_from_template, IDataTemplateSelector, ItemTemplateWrapper, TemplateSelectionError,
 };
 use super::items_repeater_scroll_host::ItemsRepeaterScrollHost;
 use super::lined_flow_layout_item_collection_transition_provider::LinedFlowLayoutItemCollectionTransitionProvider;
@@ -2449,7 +2449,7 @@ fn verify_select_template_key_handler_removal() {
 }
 
 struct ErrorSelector {
-    error: Option<ElementFactoryError>,
+    error: Option<TemplateSelectionError>,
     first_error: bool,
     fallback_calls: Cell<usize>,
 }
@@ -2467,7 +2467,7 @@ impl IDataTemplateSelector for ErrorSelector {
     fn try_select_template(
         &self,
         _item: Option<&BoxedValue>,
-    ) -> Result<Option<Rc<dyn IDataTemplate>>, ElementFactoryError> {
+    ) -> Result<Option<Rc<dyn IDataTemplate>>, TemplateSelectionError> {
         if self.first_error {
             Err(self.error.clone().unwrap())
         } else {
@@ -2478,7 +2478,7 @@ impl IDataTemplateSelector for ErrorSelector {
         &self,
         _item: Option<&BoxedValue>,
         container: Option<&Ref<Control>>,
-    ) -> Result<Option<Rc<dyn IDataTemplate>>, ElementFactoryError> {
+    ) -> Result<Option<Rc<dyn IDataTemplate>>, TemplateSelectionError> {
         assert!(container.is_none());
         self.fallback_calls.set(self.fallback_calls.get() + 1);
         self.error.clone().map_or(Ok(None), Err)
@@ -2490,7 +2490,7 @@ fn verify_null_template_from_selector_fails_with_invalid_argument() {
     let _scope = test_scope();
     for error in [
         None,
-        Some(ElementFactoryError::InvalidArgument(
+        Some(TemplateSelectionError::InvalidArgument(
             "Null container".into(),
         )),
     ] {
@@ -2525,7 +2525,7 @@ fn verify_null_template_gives_meaningfull_error() {
 #[test]
 fn verify_selector_error_is_propagated() {
     let _scope = test_scope();
-    let error = ElementFactoryError::TemplateSelection("Selector failure".into());
+    let error = TemplateSelectionError::Failed("Selector failure".into());
     for first_error in [false, true] {
         let selector = Rc::new(ErrorSelector {
             error: Some(error.clone()),
@@ -2535,7 +2535,7 @@ fn verify_selector_error_is_propagated() {
         let wrapper = ItemTemplateWrapper::with_selector(selector.clone());
         assert_eq!(
             wrapper.get_element(&ElementFactoryGetArgs::default()),
-            Err(error.clone())
+            Err(ElementFactoryError::TemplateSelection("Selector failure".into()))
         );
         assert_eq!(selector.fallback_calls.get(), usize::from(!first_error));
     }

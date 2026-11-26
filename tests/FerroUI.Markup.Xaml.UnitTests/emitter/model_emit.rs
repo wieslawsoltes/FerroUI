@@ -59,6 +59,7 @@ const ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED: &[&str] = &[
     "static_resource_element.xaml",
     "static_resource_local.xaml",
     "style_resources.xaml",
+    "template_selectors.xaml",
     "text_block_inlines.xaml",
     "text_block_text_content.xaml",
 ];

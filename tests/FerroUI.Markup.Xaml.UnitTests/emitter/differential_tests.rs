@@ -1257,6 +1257,70 @@ fn a_method_is_a_command_in_both_back_ends() {
     );
 }
 
+/// Not from upstream (#1393). A `DataTemplateSelector` subclass declared as a resource of a
+/// document selects the template of data content and of items, in both back ends: by item for
+/// the presenter and the items control whose selector has no container template, by container
+/// for the content control and the items control whose selector has one. The selector is asked
+/// with the presenter, the content control and the container of the item.
+#[test]
+fn a_template_selector_selects_by_item_and_by_container_in_both_back_ends() {
+    use crate::support::emitter::PickSelector;
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::{ContentControl, ItemsControl, ItemsSource, StackPanel};
+
+    let _base = xaml_test_base();
+    let name = "template_selectors.xaml";
+    let (_, xaml) = DOCUMENTS.iter().find(|(document, _)| *document == name).expect("a corpus document");
+    let run = |root: BoxedValue| -> Vec<String> {
+        let panel = ValueTypes::as_object(&*root).and_then(|object| object.cast::<StackPanel>()).expect("the root is a panel");
+        let children = panel.children().to_vec();
+        let built = |presenter: &Ref<ContentPresenter>| {
+            presenter.update_child();
+            presenter.child().map_or("nothing".to_string(), |child| child.get_type().name().to_string())
+        };
+        let mut seen = Vec::new();
+        let presenter = children[0].cast::<ContentPresenter>().expect("the presenter");
+        seen.push(format!("presenter {}", built(&presenter)));
+        let content = children[1].cast::<ContentControl>().expect("the content control");
+        content.apply_template();
+        seen.push(format!("content {}", built(&content.presenter().expect("the presenter of the template"))));
+        for (index, child) in children[2..].iter().enumerate() {
+            let items = child.cast::<ItemsControl>().expect("an items control");
+            items.set_items_source(Some(ItemsSource::from_strs(["item"])));
+            items.apply_template();
+            items.presenter().expect("the items presenter of the template").apply_template();
+            let container = items
+                .container_from_index(0)
+                .and_then(|container| container.cast::<ContentPresenter>())
+                .expect("the container of the item");
+            seen.push(format!("items {index} {}", built(&container)));
+        }
+        for key in ["ByItem", "ByContainer"] {
+            let resource = panel.try_get_resource(&ResourceKey::from(key), None).flatten().expect("the selector");
+            let selector = ValueTypes::as_object(&*resource)
+                .and_then(|object| object.cast::<PickSelector>())
+                .expect("the resource is the selector");
+            seen.push(format!("{key} asked with {}", selector.containers().join(", ")));
+        }
+        seen
+    };
+    let generated = run(build_generated(name).expect("the document is eligible").expect("the document is built"));
+    let interpreted = run(try_load(xaml).expect("the run-time loader loads the document"));
+    assert_eq!(generated, interpreted);
+    assert_eq!(
+        generated,
+        [
+            "presenter Canvas",
+            "content Border",
+            "items 0 Canvas",
+            "items 1 Border",
+            "ByItem asked with ContentPresenter, ContentPresenter",
+            "ByContainer asked with ContentControl, ContentPresenter",
+        ]
+    );
+}
+
 /// Not from upstream. The container queries of a document are the queries the run-time
 /// loader builds, in both back ends: a width, the upstream reading of `and` with an
 /// alternative after it, and two alternatives, each with the name of its container.

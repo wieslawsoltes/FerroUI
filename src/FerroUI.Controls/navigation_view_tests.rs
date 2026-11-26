@@ -1435,3 +1435,65 @@ fn the_templated_parent_of_the_parts_is_the_navigation_view() {
     let templated: Option<Ref<TemplatedControl>> = split.templated_parent().and_then(|parent| parent.cast());
     assert!(templated.is_some_and(|parent| parent.ptr_eq(&nav)));
 }
+
+
+/// `MenuItemTemplateSelector` as the WinUI Gallery uses it: a selector that overrides the item form
+/// only, choosing a header, a separator or an item.
+struct MenuSelector {
+    calls: Cell<usize>,
+}
+
+impl crate::templates::IDataTemplateSelector for MenuSelector {
+    fn select_template(&self, value: Option<&BoxedValue>) -> Option<Rc<dyn crate::templates::IDataTemplate>> {
+        self.calls.set(self.calls.get() + 1);
+        let data = value.and_then(|value| value.downcast_ref::<String>())?.clone();
+        Some(FuncDataTemplate::for_type::<String>(
+            move |_, _| {
+                if data == "Heading" {
+                    Some(NavigationViewItemHeader::new().upcast())
+                } else if data == "-" {
+                    Some(NavigationViewItemSeparator::new().upcast())
+                } else {
+                    Some(item(&data).upcast())
+                }
+            },
+            false,
+        ))
+    }
+
+    fn select_template_with_container(
+        &self,
+        _item: Option<&BoxedValue>,
+        container: Option<&Ref<crate::Control>>,
+    ) -> Option<Rc<dyn crate::templates::IDataTemplate>> {
+        assert!(container.is_none(), "the items factory asks without a container");
+        None
+    }
+}
+
+#[test]
+fn menu_item_template_selector_chooses_the_container_of_each_data_item() {
+    let _app = start();
+    let nav = NavigationView::new();
+    let selector = Rc::new(MenuSelector { calls: Cell::new(0) });
+    nav.set_menu_item_template_selector(Some(selector.clone()));
+    for data in ["Heading", "-", "A"] {
+        nav.menu_items().add(Some(Rc::new(data.to_owned())));
+    }
+    let heading: Option<BoxedValue> = Some(Rc::new("Heading".to_owned()));
+    let separator: Option<BoxedValue> = Some(Rc::new("-".to_owned()));
+    let data: Option<BoxedValue> = Some(Rc::new("A".to_owned()));
+    assert!(nav.container_from_menu_item(&heading).unwrap().cast::<NavigationViewItemHeader>().is_some());
+    assert!(nav.container_from_menu_item(&separator).unwrap().cast::<NavigationViewItemSeparator>().is_some());
+    assert!(nav.container_from_menu_item(&data).unwrap().cast::<NavigationViewItem>().is_some());
+    assert!(selector.calls.get() >= 3);
+
+    // A menu item template wins over the selector.
+    let calls = selector.calls.get();
+    nav.set_menu_item_template(Some(FuncDataTemplate::for_type::<String>(
+        |data, _| Some(item(data).upcast()),
+        false,
+    )));
+    assert!(nav.container_from_menu_item(&heading).unwrap().cast::<NavigationViewItem>().is_some());
+    assert_eq!(selector.calls.get(), calls);
+}

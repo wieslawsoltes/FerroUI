@@ -63,6 +63,17 @@ impl fmt::Display for ElementFactoryError {
 
 impl std::error::Error for ElementFactoryError {}
 
+/// The error of a template selector, as the repeater reports it.
+impl From<ferroui_controls::templates::TemplateSelectionError> for ElementFactoryError {
+    fn from(error: ferroui_controls::templates::TemplateSelectionError) -> Self {
+        use ferroui_controls::templates::TemplateSelectionError;
+        match error {
+            TemplateSelectionError::InvalidArgument(message) => Self::InvalidArgument(message),
+            TemplateSelectionError::Failed(message) => Self::TemplateSelection(message),
+        }
+    }
+}
+
 /// Arguments passed when the repeater asks a factory to create an element.
 #[derive(Clone)]
 pub struct ElementFactoryGetArgs(Rc<GetArgsData>);

@@ -13,7 +13,7 @@ use crate::primitives::{
     NavigationViewTemplateSettings, Popup, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
     TemplatedControlImplExt,
 };
-use crate::templates::{IControlTemplate, IDataTemplate};
+use crate::templates::{selector_template, IControlTemplate, IDataTemplate, IDataTemplateSelector};
 use crate::{
     AutoSuggestBox, Button, ContentControl, ContentControlImpl, Control, ControlImpl, ItemCollection, ItemsSourceView,
     NavigationViewItem, NavigationViewItemBase, SplitView, SplitViewDisplayMode, StackPanel, Symbol, SymbolIcon,
@@ -171,6 +171,8 @@ pub struct NavigationView {
     menu_items: ItemCollection,
     footer_items: ItemCollection,
     menu_view: RefCell<Option<(Rc<ItemsSourceView>, u64)>>,
+    /// The template that asks `MenuItemTemplateSelector`, made once per selector.
+    selector_template: RefCell<Option<(Rc<dyn IDataTemplateSelector>, Rc<dyn IDataTemplate>)>>,
     footer_view: RefCell<Option<(Rc<ItemsSourceView>, u64)>>,
     roots: RefCell<Vec<Entry>>,
     known_entries: RefCell<Vec<Entry>>,
@@ -442,6 +444,11 @@ ferro_properties! { impl NavigationView {
     pub fn menu_item_template_property() -> StyledProperty<Option<Rc<dyn IDataTemplate>>> {
         FerroProperty::register::<NavigationView, _>("MenuItemTemplate", None)
     }
+    /// Defines the `MenuItemTemplateSelector` property: WinUI's selector of the template of a data
+    /// item, consulted when there is no [`MenuItemTemplate`](Self::menu_item_template_property).
+    pub fn menu_item_template_selector_property() -> StyledProperty<Option<Rc<dyn IDataTemplateSelector>>> {
+        FerroProperty::register::<NavigationView, _>("MenuItemTemplateSelector", None)
+    }
     /// Defines the `PaneToggleButtonStyle` property: the control theme of the pane toggle button
     /// (WinUI's style; the WinUI theme sets `PaneToggleButtonStyle`).
     pub fn pane_toggle_button_style_property() -> StyledProperty<Option<Ref<ControlTheme>>> {
@@ -487,6 +494,7 @@ impl NavigationView {
             menu_items: ItemCollection::new(),
             footer_items: ItemCollection::new(),
             menu_view: RefCell::new(None),
+            selector_template: RefCell::new(None),
             footer_view: RefCell::new(None),
             roots: RefCell::new(Vec::new()),
             known_entries: RefCell::new(Vec::new()),
@@ -715,6 +723,31 @@ impl NavigationView {
     pub fn set_menu_item_template(&self, value: Option<Rc<dyn IDataTemplate>>) {
         self.set_value(Self::menu_item_template_property(), value);
     }
+    pub fn menu_item_template_selector(&self) -> Option<Rc<dyn IDataTemplateSelector>> {
+        self.get_value(Self::menu_item_template_selector_property())
+    }
+    pub fn set_menu_item_template_selector(&self, value: Option<Rc<dyn IDataTemplateSelector>>) {
+        self.set_value(Self::menu_item_template_selector_property(), value);
+    }
+    /// The template of the data items: the menu item template, else the selector's choice per
+    /// item, which WinUI's items factory asks for the item, then for the item without a
+    /// container.
+    fn effective_menu_item_template(&self) -> Option<Rc<dyn IDataTemplate>> {
+        if let Some(template) = self.menu_item_template() {
+            return Some(template);
+        }
+        let mut cached = self.selector_template.borrow_mut();
+        let selector = self.menu_item_template_selector();
+        match selector {
+            None => *cached = None,
+            Some(selector) => {
+                if !cached.as_ref().is_some_and(|(known, _)| **known == *selector) {
+                    *cached = Some((selector.clone(), selector_template(selector)));
+                }
+            }
+        }
+        cached.as_ref().map(|(_, template)| template.clone())
+    }
     pub fn pane_toggle_button_style(&self) -> Option<Ref<ControlTheme>> {
         self.get_value(Self::pane_toggle_button_style_property())
     }
@@ -857,7 +890,9 @@ impl FerroObjectImpl for NavigationView {
             this.reset_source(false);
         } else if property == Self::footer_menu_items_source_property().as_property() {
             this.reset_source(true);
-        } else if property == Self::menu_item_template_property().as_property() {
+        } else if property == Self::menu_item_template_property().as_property()
+            || property == Self::menu_item_template_selector_property().as_property()
+        {
             this.rebuild_items(true);
         } else if property == Self::selected_item_property().as_property() {
             let (old, next) = change.get_old_and_new_value::<Option<BoxedValue>>();
@@ -1822,7 +1857,7 @@ impl NavigationView {
         {
             return container;
         }
-        let built = self.menu_item_template().and_then(|template| template.build(data));
+        let built = self.effective_menu_item_template().and_then(|template| template.build(data));
         if let Some(container) = built.as_ref().and_then(|control| control.cast::<NavigationViewItemBase>()) {
             if data.as_ref().and_then(Control::from_boxed).is_none() {
                 container.set_data_context(data.clone());
@@ -1866,7 +1901,7 @@ impl NavigationView {
                     let container =
                         if let Some(index) = reuse { available.remove(index).container } else { self.build_container(&item) };
                     if let Some(nvi) = container.cast::<NavigationViewItem>() {
-                        nvi.set_menu_item_template(self.menu_item_template());
+                        nvi.set_menu_item_template(self.effective_menu_item_template());
                     }
                     roots.push(Entry { data: item, container, ancestors: Vec::new(), footer });
                 }
