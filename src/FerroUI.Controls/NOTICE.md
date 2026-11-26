@@ -195,6 +195,13 @@ with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
 directly (`controls/dev/NavigationView` with the English texts of its
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
 
+The files under `breadcrumb_bar/`, `primitives/breadcrumb_bar_panel.rs` and
+`automation/peers/breadcrumb_bar_item_automation_peer.rs` (WinUI's `BreadcrumbBar`,
+`BreadcrumbBarItem`, the arguments of `ItemClicked`, `BreadcrumbLayout` as `BreadcrumbBarPanel`
+and the automation peer of the items) are ported from the WinUI project directly
+(`controls/dev/Breadcrumb` with the English texts of its `Strings/en-us/Resources.resw`, at the
+same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
