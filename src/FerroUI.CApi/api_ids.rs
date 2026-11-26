@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 2794213326097157368;
+pub(crate) const API_FINGERPRINT: i64 = 2205112536965758931;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 517] = [
+pub(crate) static TYPE_NAMES: [&str; 520] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -192,6 +192,7 @@ pub(crate) static TYPE_NAMES: [&str; 517] = [
     "KeyBinding",
     "KeyFrame",
     "KeySpline",
+    "KeyboardAccelerator",
     "Label",
     "LabelAutomationPeer",
     "LayerWrapper",
@@ -399,6 +400,7 @@ pub(crate) static TYPE_NAMES: [&str; 517] = [
     "SplitView",
     "SplitViewTemplateSettings",
     "StackPanel",
+    "StandardUICommand",
     "StateTrigger",
     "StateTriggerBase",
     "Storyboard",
@@ -526,13 +528,15 @@ pub(crate) static TYPE_NAMES: [&str; 517] = [
     "XamlAmbientLight",
     "XamlCompositionBrushBase",
     "XamlLight",
+    "XamlUICommand",
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1080] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
+    "AccessKey",
     "AccessKeyHandler.ShowAccessKey",
     "AccessText.ShowAccessKey",
     "ActionButton",
@@ -1021,6 +1025,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "ItemsStretch",
     "ItemsUpdatingScrollMode",
     "JustifyContent",
+    "Key",
     "KeySpline",
     "KeyTime",
     "KeyboardIncrement",
@@ -1099,6 +1104,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "MiterLimit",
     "ModalTransition",
     "Mode",
+    "Modifiers",
     "MonthFormat",
     "MonthVisible",
     "Name",
