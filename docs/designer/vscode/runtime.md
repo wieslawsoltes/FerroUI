@@ -577,13 +577,21 @@ Use **Call Stack** to inspect Rust source locations. The adapter's Rust variable
 
 Live App keeps the last accepted frame visible while it decodes a replacement. **Reconnect and refresh** keeps the selected window while it renews the inspector connection. A window change, a different hierarchy, or a refresh clears the selection while the new tree loads. When you return to its tab, Live App restores the current inspection and resumes polling.
 
-Open Live App from a row in **App Sessions** to pin it to that session. An agent can adjust its window, hierarchy, inspection category, mode, and filters through the same controls. Those changes affect that editor, while app input and source edits use their own permission checks. [Control Live App with MCP](reference.md#control-the-live-app-editor-with-mcp)
+Open Live App from a row in **App Sessions** to pin it to that session. An agent can adjust its window, hierarchy, expanded branches, inspection category, mode, and filters through the same controls. Those changes affect that editor, while app input and source edits use their own permission checks. [Control Live App with MCP](reference.md#control-the-live-app-editor-with-mcp)
 
 ![Customer Accounts in a pinned Live App editor. The agent selected Heading in the visual tree and filtered the selected control's properties to Text.](../images/vscode-live-app-mcp-presentation.png)
 
 Managed debug builds record compiled RSX locations. Set `FERROUI_EDITOR_SOURCE=1` for an externally launched debug build that needs RSX source reveal. XAML source application requires compiled or runtime-loaded source information. If a change is stale or its target is untracked, reload the running app’s compatible revision or edit its authored source directly. [Runtime inspector and permissions](../../mcp.md)
 
 Choose the layers icon beside a property to trace why that value is effective in the running app. The trace shows active and inactive contributors, a current value override, and the base value under an animation when available. Use a source arrow to open a matching location in the workspace. The layers icon appears when the app’s MCP server supports `get_property_trace`. [MCP value trace](reference.md#trace-property-values-with-mcp)
+
+### Browse the inspection tree with the keyboard
+
+1. Pick **Visual tree**, **Logical tree**, or **Accessibility tree**. Tab from **Filter elements** to the tree, or press Down from the filter. Once in the tree, use Up and Down to move among visible elements and Home and End to jump to either end.
+2. Press Right to expand a branch or enter its first child. Press Left to collapse a branch or move to its parent. You can also click a branch's chevron. Type the start of a control name or type to jump to a match.
+3. Press Enter or Space to inspect the focused element. The selection supplies Properties, Styles, Resources, and Diagnostics. Focus stays on the same element during a live repaint. If the element disappears or its branch closes, focus moves to the nearest available parent.
+
+Filter by control type, name, text, or role. Matches keep their parent path. Escape clears the filter and restores the normal branch layout. Branches stay open or closed during updates to the same window and hierarchy. [Tree disclosure with MCP](reference.md#control-the-live-app-editor-with-mcp)
 
 ### Use the keyboard in Live App
 

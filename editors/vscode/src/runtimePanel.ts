@@ -12,6 +12,7 @@ import type { FromRuntime, RuntimeFrame, RuntimeInspectionResult, RuntimeKeyboar
     RuntimeSelection, RuntimeViewChange, RuntimeViewSnapshot, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import type { AppRuntime } from './runtimeTargets';
+import { openRuntimeTree, retainRuntimeBranches, revealRuntimeBranch, runtimeNodePath, setRuntimeBranch, walkRuntimeNodes } from './runtimeTree';
 import { runtimeHtml, webviewOptions } from './view';
 
 const refreshInterval = 500;
@@ -23,7 +24,7 @@ export class RuntimePanel implements vscode.Disposable {
     private client?: RuntimeClient;
     private target?: AppRuntime;
     private generation?: number;
-    private presentation: RuntimePresentation = { hierarchy: 'visual', inspection: 'properties', mode: 'inspect', treeFilter: '', propertyFilter: '' };
+    private presentation: RuntimePresentation = { hierarchy: 'visual', inspection: 'properties', mode: 'inspect', treeFilter: '', propertyFilter: '', disclosure: openRuntimeTree };
     private inspection?: RuntimeInspectionResult & { revision: number };
     private inspectionRequest = 0;
     private windows: RuntimeNode[] = [];
@@ -114,7 +115,7 @@ export class RuntimePanel implements vscode.Disposable {
         if (changed) {
             this.windows = [];
             this.windowId = undefined;
-            this.present({ mode: 'inspect' });
+            this.present({ mode: 'inspect', disclosure: openRuntimeTree });
         }
         this.invalidateFrame();
         this.client?.dispose();
@@ -187,7 +188,7 @@ export class RuntimePanel implements vscode.Disposable {
             const root = windows.find(window => window.node_id === this.windowId) ?? windows[0];
             if (root?.node_id !== this.windowId) {
                 this.windowId = root?.node_id;
-                this.present({ mode: 'inspect' });
+                this.present({ mode: 'inspect', disclosure: openRuntimeTree });
                 this.invalidateFrame();
                 epoch = this.epoch;
             }
@@ -204,6 +205,8 @@ export class RuntimePanel implements vscode.Disposable {
             if (this.frame?.png === png && this.frame.keyboardScope === keyboardScope
                 && JSON.stringify(this.frame.tree) === JSON.stringify(tree)) return;
             this.frame = { token: ++this.nextFrame, root, tree, png, keyboardScope };
+            const disclosure = retainRuntimeBranches(this.presentation.disclosure, tree);
+            if (disclosure !== this.presentation.disclosure) this.present({ disclosure });
             if (this.inspection && !findNode(this.frame, this.inspection.node)) {
                 this.inspection = undefined;
                 this.touch();
@@ -219,7 +222,7 @@ export class RuntimePanel implements vscode.Disposable {
     }
 
     private async updateView(change: RuntimeViewChange, signal?: AbortSignal, echoFilters = true): Promise<void> {
-        if (this.debuggerPaused && change.action !== 'filter' && change.action !== 'mode') throw new Error(continueAppMessage);
+        if (this.debuggerPaused && change.action !== 'filter' && change.action !== 'mode' && change.action !== 'disclosure') throw new Error(continueAppMessage);
         switch (change.action) {
             case 'refresh':
                 this.reset(true);
@@ -234,11 +237,11 @@ export class RuntimePanel implements vscode.Disposable {
                 if (!this.windows.some(window => window.node_id === change.window)) throw new Error('Choose a current Live App window.');
                 if (this.windowId === change.window) return;
                 this.windowId = change.window;
-                this.present({ mode: 'inspect' });
+                this.present({ mode: 'inspect', disclosure: openRuntimeTree });
                 break;
             case 'hierarchy':
                 if (change.hierarchy === this.presentation.hierarchy) return;
-                this.present({ hierarchy: change.hierarchy });
+                this.present({ hierarchy: change.hierarchy, disclosure: openRuntimeTree });
                 break;
             case 'select': {
                 const client = this.client;
@@ -248,6 +251,15 @@ export class RuntimePanel implements vscode.Disposable {
                 if (!await this.inspect(client, frame.token, { node: change.node, view: change.view }, signal)) {
                     throw new Error('The Live App selection changed. Read the current view.');
                 }
+                return;
+            }
+            case 'disclosure': {
+                const frame = this.frame;
+                if (frame?.token !== change.frame) throw new Error('The Live App frame changed. Read the current view.');
+                const branch = runtimeNodePath(frame.tree, change.node)?.at(-1);
+                if (!branch?.children?.length) throw new Error('Choose a branch in the current Live App hierarchy.');
+                const disclosure = setRuntimeBranch(this.presentation.disclosure, this.presentation.treeFilter, change.node, change.expanded);
+                if (disclosure !== this.presentation.disclosure) this.present({ disclosure });
                 return;
             }
         }
@@ -321,7 +333,7 @@ export class RuntimePanel implements vscode.Disposable {
                 this.touch();
                 const native = await client.supports('get_element_at');
                 const hits = native ? await client.call<RuntimeNode[]>('get_element_at', { node_id: frame.root.node_id, x, y })
-                    : flatten(frame.tree).filter(node => {
+                    : Array.from(walkRuntimeNodes(frame.tree), ({ node }) => node).filter(node => {
                     const box = node.bounds_in_root;
                     return node.visible !== false && box && x >= box.x && y >= box.y && x < box.x + box.width && y < box.y + box.height;
                 }).reverse();
@@ -412,7 +424,8 @@ export class RuntimePanel implements vscode.Disposable {
         if (!frame || this.debuggerPaused || epoch !== this.epoch || request !== this.inspectionRequest
             || frame.token !== token && !findNode(frame, selection.node)) return false;
         this.inspection = { ...inspection, revision: request };
-        this.present({ inspection: inspection.view });
+        const disclosure = revealRuntimeBranch(this.presentation.disclosure, this.presentation.treeFilter, frame.tree, inspection.node);
+        this.present({ inspection: inspection.view, ...(disclosure !== this.presentation.disclosure ? { disclosure } : {}) });
         this.postInspection(frame.token);
         return true;
     }
@@ -453,12 +466,8 @@ export class RuntimePanel implements vscode.Disposable {
     }
 }
 
-function flatten(roots: RuntimeNode[]): RuntimeNode[] {
-    return roots.flatMap(node => [node, ...flatten(node.children ?? [])]);
-}
-
 function findNode(frame: RuntimeFrame, id: number): RuntimeNode | undefined {
-    return frame.root.node_id === id ? frame.root : flatten(frame.tree).find(node => node.node_id === id);
+    return frame.root.node_id === id ? frame.root : runtimeNodePath(frame.tree, id)?.at(-1);
 }
 
 function inUnit(number: number): boolean { return number >= 0 && number <= 1; }

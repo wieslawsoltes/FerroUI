@@ -323,9 +323,10 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
         <section class="runtime-inspect-section" aria-label="Application hierarchy">
             <div class="runtime-inspect-toolbar">
                 <select id="runtime-hierarchy" aria-label="Hierarchy type"><option value="visual">Visual tree</option><option value="logical">Logical tree</option><option value="automation">Accessibility tree</option></select>
-                <input id="runtime-filter" type="search" placeholder="Filter elements" aria-label="Filter elements">
+                <input id="runtime-filter" type="search" placeholder="Filter elements" aria-label="Filter elements" aria-controls="runtime-tree">
             </div>
-            <ul id="runtime-tree" aria-label="Application elements"></ul>
+            <ul id="runtime-tree" role="tree" aria-label="Application elements"></ul>
+            <p id="runtime-tree-status" class="dock-message" role="status"></p>
         </section>
         <section class="runtime-inspect-section" aria-label="Selected element">
             <div class="runtime-inspect-toolbar">

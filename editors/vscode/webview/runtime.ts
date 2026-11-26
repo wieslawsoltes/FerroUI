@@ -1,10 +1,12 @@
 import { continueAppMessage } from '../src/debuggerPause';
 import { runtimeFilterLength, type FromRuntime, type RuntimeFrame, type RuntimeHierarchy, type RuntimeInspection,
-    type RuntimeNode, type RuntimeProperty, type RuntimeViewChange, type ToRuntime } from '../src/runtimeProtocol';
+    type RuntimeProperty, type RuntimeViewChange, type ToRuntime } from '../src/runtimeProtocol';
 import type { AppRuntime } from '../src/runtimeTargets';
+import { openRuntimeTree, runtimeNodeLabel } from '../src/runtimeTree';
 import { create, element, iconButton } from './dom';
 import { PreviewBitmap } from './previewBitmap';
 import { RuntimeKeyboard } from './runtimeKeyboard';
+import { RuntimeTree } from './runtimeTree';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
 const vscode = acquireVsCodeApi();
@@ -14,7 +16,6 @@ const hierarchy = element<HTMLSelectElement>('runtime-hierarchy');
 const detail = element<HTMLSelectElement>('runtime-detail');
 const refresh = element<HTMLButtonElement>('runtime-refresh');
 const status = element('runtime-status');
-const tree = element('runtime-tree');
 const filter = element<HTMLInputElement>('runtime-filter');
 const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
 const inspector = element('runtime-details');
@@ -41,6 +42,7 @@ let currentTarget: AppRuntime | undefined;
 let currentGeneration: number | undefined;
 let currentWindow: number | undefined;
 let debuggerPaused = false;
+let disclosure = openRuntimeTree;
 
 const send = (message: FromRuntime) => {
     if (debuggerPaused && 'token' in message) showProblem(continueAppMessage);
@@ -54,12 +56,10 @@ const changeView = (change: RuntimeViewChange) => {
 const inspect = (node: number, view = detail.value as RuntimeInspection) => {
     if (frame) changeView({ action: 'select', frame: frame.token, node, view });
 };
+const tree = new RuntimeTree(element('runtime-tree'), element('runtime-tree-status'), filter, inspect, (node, expanded) => {
+    if (frame) changeView({ action: 'disclosure', frame: frame.token, node, expanded });
+});
 filter.maxLength = propertyFilter.maxLength = runtimeFilterLength;
-
-function label(node: RuntimeNode) {
-    const name = node.name || node.text;
-    return name ? `${node.type} · ${name}` : node.type || `Node ${node.node_id}`;
-}
 
 function setMode(interact: boolean) {
     interaction = interact;
@@ -78,29 +78,6 @@ function updateKeyboard(): void {
 function showProblem(message: string): void {
     problem.textContent = message;
     problem.hidden = false;
-}
-
-function renderTree() {
-    const search = filter.value.toLocaleLowerCase().trim();
-    const items: HTMLLIElement[] = [];
-    const add = (node: RuntimeNode, level: number) => {
-        if (items.length >= 1200) return;
-        const description = label(node);
-        if (!search || description.toLocaleLowerCase().includes(search)) {
-            const row = create('li');
-            const button = create('button', `${'\u00a0\u00a0'.repeat(level)}${description}`);
-            button.dataset.node = String(node.node_id);
-            button.setAttribute('aria-pressed', String(node.node_id === selected));
-            button.addEventListener('click', () => inspect(node.node_id));
-            row.append(button);
-            items.push(row);
-        }
-        (node.children ?? []).forEach(child => add(child, level + 1));
-    };
-    frame?.tree.forEach(node => add(node, 0));
-    const focused = (document.activeElement as HTMLElement | null)?.dataset.node;
-    tree.replaceChildren(...items);
-    if (focused && /^\d+$/.test(focused)) tree.querySelector<HTMLElement>(`[data-node="${focused}"]`)?.focus();
 }
 
 function showProperties(data: RuntimeProperty[], canApply: boolean, canTrace: boolean) {
@@ -152,9 +129,7 @@ function filterProperties(): void {
 
 function updateSelection(): void {
     setMode(interaction);
-    for (const button of tree.querySelectorAll('button')) {
-        button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
-    }
+    tree.select(selected);
 }
 
 function clearSelection(): void {
@@ -173,7 +148,7 @@ function invalidateFrame(): void {
     updateKeyboard();
     main.setAttribute('aria-busy', 'true');
     detail.disabled = true;
-    tree.replaceChildren();
+    tree.update(undefined, disclosure);
     clearSelection();
     problem.hidden = true;
 }
@@ -201,7 +176,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         }
         target.disabled = options.length < 2;
         target.value = message.target ?? '';
-        const windows = message.windows.map(node => new Option(label(node), String(node.node_id)));
+        const windows = message.windows.map(node => new Option(runtimeNodeLabel(node), String(node.node_id)));
         if (windows.length !== windowChoice.options.length || windows.some((option, i) => option.value !== windowChoice.options[i]?.value
             || option.label !== windowChoice.options[i]?.label)) {
             windowChoice.replaceChildren(...windows);
@@ -223,14 +198,14 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         }
         updateKeyboard();
     } else if (message.type === 'presentation') {
-        const { hierarchy: treeKind, inspection, mode, treeFilter, propertyFilter: propertyQuery } = message.presentation;
+        const { hierarchy: treeKind, inspection, mode, treeFilter, propertyFilter: propertyQuery, disclosure: branches } = message.presentation;
         if (treeKind !== undefined) hierarchy.value = treeKind;
         if (inspection !== undefined) detail.value = inspection;
         if (mode !== undefined) setMode(mode === 'interact');
-        if (treeFilter !== undefined && filter.value !== treeFilter) {
-            filter.value = treeFilter;
-            renderTree();
-        }
+        const filterChanged = treeFilter !== undefined && filter.value !== treeFilter;
+        if (filterChanged) filter.value = treeFilter;
+        if (branches) disclosure = branches;
+        if (filterChanged || branches) tree.update(frame?.tree, disclosure);
         if (propertyQuery !== undefined && propertyFilter.value !== propertyQuery) {
             propertyFilter.value = propertyQuery;
             filterProperties();
@@ -264,7 +239,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         main.setAttribute('aria-busy', 'false');
         detail.disabled = debuggerPaused;
         problem.hidden = true;
-        if (changed) renderTree();
+        if (changed) tree.update(frame.tree, disclosure);
         if (pendingInspection?.token === frame.token) showInspection(pendingInspection);
         pendingInspection = undefined;
     } else if (message.type === 'inspection') {
@@ -284,8 +259,19 @@ windowChoice.onchange = () => changeView({ action: 'window', window: Number(wind
 hierarchy.onchange = () => changeView({ action: 'hierarchy', hierarchy: hierarchy.value as RuntimeHierarchy });
 detail.onchange = () => { if (frame) inspect(selected ?? frame.root.node_id); };
 filter.oninput = () => {
-    renderTree();
+    tree.update(frame?.tree, disclosure);
     changeView({ action: 'filter', field: 'treeFilter', query: filter.value });
+};
+filter.onkeydown = event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+    if (event.key === 'ArrowDown' || event.key === 'Enter') {
+        tree.focus();
+    } else if (event.key === 'Escape' && filter.value) {
+        filter.value = '';
+        filter.dispatchEvent(new Event('input'));
+    } else return;
+    event.preventDefault();
+    event.stopPropagation();
 };
 propertyFilter.oninput = () => {
     filterProperties();

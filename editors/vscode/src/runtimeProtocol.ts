@@ -45,12 +45,18 @@ export type RuntimeInspection = typeof runtimeInspections[number];
 export type RuntimeMode = typeof runtimeModes[number];
 export type RuntimeFilter = typeof runtimeFilters[number];
 
+export interface RuntimeTreeDisclosure {
+    collapsed: readonly number[];
+    search?: { query: string; collapsed: readonly number[] };
+}
+
 export interface RuntimePresentation {
     hierarchy: RuntimeHierarchy;
     inspection: RuntimeInspection;
     mode: RuntimeMode;
     treeFilter: string;
     propertyFilter: string;
+    disclosure: RuntimeTreeDisclosure;
 }
 
 export interface RuntimeSelection {
@@ -70,6 +76,7 @@ export type RuntimeViewChange =
     | { action: 'window'; window: number }
     | { action: 'hierarchy'; hierarchy: RuntimeHierarchy }
     | { action: 'select'; node: number; view: RuntimeInspection; frame: number }
+    | { action: 'disclosure'; node: number; expanded: boolean; frame: number }
     | { action: 'mode'; mode: RuntimeMode }
     | { action: 'filter'; field: RuntimeFilter; query: string }
     | { action: 'refresh' };

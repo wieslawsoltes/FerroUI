@@ -2,7 +2,7 @@
 .runtime-targets select { flex: 1 1 104px; max-inline-size: 100%; }
 .runtime-main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(185px, 28%);
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 31%);
     gap: 6px;
     padding: 0 7px 7px;
 }
@@ -41,8 +41,33 @@
 .runtime-inspect-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px; }
 .runtime-inspect-toolbar :is(select, input) { flex: 1 1 88px; }
 #runtime-tree, #runtime-details { min-block-size: 60px; overflow: auto; border-block-start: 1px solid var(--line); }
-#runtime-tree { max-block-size: 31vh; list-style: none; margin: 0; padding: 3px; }
-#runtime-tree button { inline-size: 100%; min-block-size: 23px; text-align: start; text-overflow: ellipsis; overflow: hidden; }
+#runtime-tree { max-block-size: 31vh; padding: 3px; }
+#runtime-tree, #runtime-tree [role=group] { list-style: none; margin: 0; }
+#runtime-tree [role=group] { padding: 0; }
+.runtime-tree-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-block-size: 23px;
+    padding-inline: calc(3px + var(--depth, 0) * 9px) 4px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.runtime-tree-label { min-inline-size: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.runtime-tree-row:hover { background: var(--vscode-list-hoverBackground); }
+#runtime-tree [aria-selected=true] > .runtime-tree-row {
+    background: var(--vscode-list-inactiveSelectionBackground);
+    color: var(--vscode-list-inactiveSelectionForeground, var(--vscode-foreground));
+}
+#runtime-tree:focus-within [aria-selected=true] > .runtime-tree-row {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+#runtime-tree [role=treeitem]:focus { outline: none; }
+#runtime-tree [role=treeitem]:focus-visible > .runtime-tree-row { outline: 1px solid var(--focus); outline-offset: -1px; }
+#runtime-tree .runtime-twisty { flex: 0 0 16px; text-align: center; }
+#runtime-tree .runtime-twisty[data-leaf] { visibility: hidden; }
+#runtime-tree-status:empty { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; margin: 0; padding: 0; clip-path: inset(50%); }
 #runtime-property-filter { inline-size: calc(100% - 10px); margin: 0 5px 5px; }
 #runtime-details { max-block-size: 53vh; }
 #runtime-details pre { margin: 0; padding: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
