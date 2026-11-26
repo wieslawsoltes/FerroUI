@@ -290,7 +290,7 @@ void runApp(void Function() start) {
 
 const int _abiVersion = 1;
 const int _bufferTooSmall = -14;
-const int _apiFingerprint = 2794213326097157368;
+const int _apiFingerprint = 799637752055055205;
 const int _selectionFingerprint = 0;
 
 void _registerTypes() {
@@ -1465,8 +1465,8 @@ extension type Animatable._(int handle) implements FerroObject {
   factory Animatable() => Animatable._(_create(typeId));
   Animatable.of(FerroObject object) : this._(object.handle);
   /// Transitions. Defines the `Transitions` property.
-  String get transitions => _getString(handle, 971);
-  set transitions(String value) => _setString(handle, 971, value);
+  String get transitions => _getString(handle, 972);
+  set transitions(String value) => _setString(handle, 972, value);
 }
 
 /// Extends an [`Animatable`] with the following features: - An inherited `DataContext`. -
@@ -1487,19 +1487,19 @@ extension type StyledElement._(int handle) implements Animatable {
   FerroObject get dataContextObject => FerroObject(_getObject(handle, 192));
   set dataContextObject(FerroObject value) => _setObject(handle, 192, value.handle);
   /// Name. Defines the `Name` property.
-  String get name => _getString(handle, 572);
-  set name(String value) => _setString(handle, 572, value);
+  String get name => _getString(handle, 573);
+  set name(String value) => _setString(handle, 573, value);
   /// Parent. Defines the `Parent` property.
-  FerroObject get parent => FerroObject(_getObject(handle, 640));
+  FerroObject get parent => FerroObject(_getObject(handle, 641));
   /// RequestedThemeVariant. Defines the RequestedThemeVariant property: the theme variant
   /// requested for an element and its descendants.
-  String get requestedThemeVariant => _getString(handle, 721);
-  set requestedThemeVariant(String value) => _setString(handle, 721, value);
+  String get requestedThemeVariant => _getString(handle, 722);
+  set requestedThemeVariant(String value) => _setString(handle, 722, value);
   /// TemplatedParent. Defines the `TemplatedParent` property.
-  FerroObject get templatedParent => FerroObject(_getObject(handle, 877));
+  FerroObject get templatedParent => FerroObject(_getObject(handle, 878));
   /// Theme. Defines the `Theme` property.
-  FerroObject get theme => FerroObject(_getObject(handle, 928));
-  set theme(FerroObject value) => _setObject(handle, 928, value.handle);
+  FerroObject get theme => FerroObject(_getObject(handle, 929));
+  set theme(FerroObject value) => _setObject(handle, 929, value.handle);
 }
 
 /// Base class for controls that provides rendering and related visual properties. The visual
@@ -1527,28 +1527,28 @@ extension type Visual._(int handle) implements StyledElement {
   /// HasMirrorTransform. Defines the `HasMirrorTransform` property.
   bool get hasMirrorTransform => _getBool(handle, 335);
   /// IsVisible. Defines the `IsVisible` property.
-  bool get isVisible => _getBool(handle, 468);
-  set isVisible(bool value) => _setBool(handle, 468, value);
+  bool get isVisible => _getBool(handle, 469);
+  set isVisible(bool value) => _setBool(handle, 469, value);
   /// Opacity. Defines the `Opacity` property.
-  double get opacity => _getF64(handle, 609);
-  set opacity(double value) => _setF64(handle, 609, value);
+  double get opacity => _getF64(handle, 610);
+  set opacity(double value) => _setF64(handle, 610, value);
   /// OpacityMask. Defines the `OpacityMask` property.
-  String get opacityMask => _getString(handle, 610);
-  set opacityMask(String value) => _setString(handle, 610, value);
+  String get opacityMask => _getString(handle, 611);
+  set opacityMask(String value) => _setString(handle, 611, value);
   /// RenderTransform. Defines the `RenderTransform` property.
-  String get renderTransform => _getString(handle, 717);
-  set renderTransform(String value) => _setString(handle, 717, value);
+  String get renderTransform => _getString(handle, 718);
+  set renderTransform(String value) => _setString(handle, 718, value);
   /// RenderTransformOrigin. Defines the `RenderTransformOrigin` property.
-  String get renderTransformOrigin => _getString(handle, 718);
-  set renderTransformOrigin(String value) => _setString(handle, 718, value);
+  String get renderTransformOrigin => _getString(handle, 719);
+  set renderTransformOrigin(String value) => _setString(handle, 719, value);
   /// Visual.FlowDirection (attached). Defines the `FlowDirection` attached property.
-  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1045));
-  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1045, value.value);
+  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1046));
+  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1046, value.value);
   /// VisualParent. Defines the `VisualParent` property.
-  FerroObject get visualParent => FerroObject(_getObject(handle, 1046));
+  FerroObject get visualParent => FerroObject(_getObject(handle, 1047));
   /// ZIndex. Defines the `ZIndex` property.
-  int get zIndex => _getI64(handle, 1075);
-  set zIndex(int value) => _setI64(handle, 1075, value);
+  int get zIndex => _getI64(handle, 1076);
+  set zIndex(int value) => _setI64(handle, 1076, value);
 }
 
 /// Implements layout-related functionality for a control.
@@ -1565,29 +1565,29 @@ extension type Layoutable._(int handle) implements Visual {
   HorizontalAlignment get horizontalAlignment => HorizontalAlignment(_getI64(handle, 349));
   set horizontalAlignment(HorizontalAlignment value) => _setI64(handle, 349, value.value);
   /// Margin. Defines the `Margin` property.
-  String get margin => _getString(handle, 527);
-  set margin(String value) => _setString(handle, 527, value);
+  String get margin => _getString(handle, 528);
+  set margin(String value) => _setString(handle, 528, value);
   /// MaxHeight. Defines the `MaxHeight` property.
-  double get maxHeight => _getF64(handle, 536);
-  set maxHeight(double value) => _setF64(handle, 536, value);
+  double get maxHeight => _getF64(handle, 537);
+  set maxHeight(double value) => _setF64(handle, 537, value);
   /// MaxWidth. Defines the `MaxWidth` property.
-  double get maxWidth => _getF64(handle, 544);
-  set maxWidth(double value) => _setF64(handle, 544, value);
+  double get maxWidth => _getF64(handle, 545);
+  set maxWidth(double value) => _setF64(handle, 545, value);
   /// MinHeight. Defines the `MinHeight` property.
-  double get minHeight => _getF64(handle, 555);
-  set minHeight(double value) => _setF64(handle, 555, value);
+  double get minHeight => _getF64(handle, 556);
+  set minHeight(double value) => _setF64(handle, 556, value);
   /// MinWidth. Defines the `MinWidth` property.
-  double get minWidth => _getF64(handle, 557);
-  set minWidth(double value) => _setF64(handle, 557, value);
+  double get minWidth => _getF64(handle, 558);
+  set minWidth(double value) => _setF64(handle, 558, value);
   /// UseLayoutRounding. Defines the `UseLayoutRounding` property.
-  bool get useLayoutRounding => _getBool(handle, 1026);
-  set useLayoutRounding(bool value) => _setBool(handle, 1026, value);
+  bool get useLayoutRounding => _getBool(handle, 1027);
+  set useLayoutRounding(bool value) => _setBool(handle, 1027, value);
   /// VerticalAlignment. Defines the `VerticalAlignment` property.
-  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1034));
-  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1034, value.value);
+  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1035));
+  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
   /// Width. Defines the `Width` property.
-  double get width => _getF64(handle, 1052);
-  set width(double value) => _setF64(handle, 1052, value);
+  double get width => _getF64(handle, 1053);
+  set width(double value) => _setF64(handle, 1053, value);
 }
 
 /// Base class for objects that raise routed events.
@@ -1627,11 +1627,11 @@ extension type InputElement._(int handle) implements Interactive {
   /// IsPointerOver. Defines the `IsPointerOver` property.
   bool get isPointerOver => _getBool(handle, 440);
   /// IsTabStop. Defines the `IsTabStop` property.
-  bool get isTabStop => _getBool(handle, 456);
-  set isTabStop(bool value) => _setBool(handle, 456, value);
+  bool get isTabStop => _getBool(handle, 457);
+  set isTabStop(bool value) => _setBool(handle, 457, value);
   /// TabIndex. Defines the `TabIndex` property.
-  int get tabIndex => _getI64(handle, 855);
-  set tabIndex(int value) => _setI64(handle, 855, value);
+  int get tabIndex => _getI64(handle, 856);
+  set tabIndex(int value) => _setI64(handle, 856, value);
   /// ContextCanceled: the sender is valid for the call. Provides event data for the
   /// `ContextCanceled` event.
   Subscription onContextCanceled(void Function(InputElement sender) handler) =>
@@ -1761,10 +1761,10 @@ extension type Control._(int handle) implements InputElement {
   FerroObject get contextMenu => FerroObject(_getObject(handle, 181));
   set contextMenu(FerroObject value) => _setObject(handle, 181, value.handle);
   /// Tag. Defines the `Tag` property.
-  String get tag => _getString(handle, 870);
-  set tag(String value) => _setString(handle, 870, value);
-  FerroObject get tagObject => FerroObject(_getObject(handle, 870));
-  set tagObject(FerroObject value) => _setObject(handle, 870, value.handle);
+  String get tag => _getString(handle, 871);
+  set tag(String value) => _setString(handle, 871, value);
+  FerroObject get tagObject => FerroObject(_getObject(handle, 871));
+  set tagObject(FerroObject value) => _setObject(handle, 871, value.handle);
   /// Loaded: the sender is valid for the call. Defines the `Loaded` event.
   Subscription onLoaded(void Function(Control sender) handler) =>
       _subscribe(handle, 33, (sender) => handler(Control._(sender)));
@@ -1813,46 +1813,46 @@ extension type TextBlock._(int handle) implements Control {
   String get inlines => _getString(handle, 379);
   set inlines(String value) => _setString(handle, 379, value);
   /// LetterSpacing. Defines the `LetterSpacing` property.
-  double get letterSpacing => _getF64(handle, 517);
-  set letterSpacing(double value) => _setF64(handle, 517, value);
+  double get letterSpacing => _getF64(handle, 518);
+  set letterSpacing(double value) => _setF64(handle, 518, value);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 619);
-  set padding(String value) => _setString(handle, 619, value);
+  String get padding => _getString(handle, 620);
+  set padding(String value) => _setString(handle, 620, value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextBlock.BaselineOffset (attached). Defines the `BaselineOffset` attached property.
-  static double getBaselineOffset(FerroObject target) => _getF64(target.handle, 880);
-  static void setBaselineOffset(FerroObject target, double value) => _setF64(target.handle, 880, value);
+  static double getBaselineOffset(FerroObject target) => _getF64(target.handle, 881);
+  static void setBaselineOffset(FerroObject target, double value) => _setF64(target.handle, 881, value);
   /// TextBlock.LayoutRoundingPlacement (attached). Defines the `LayoutRoundingPlacement`
   /// attached property: where a text block puts the height layout rounding adds to it (a
   /// FerroUI addition). Inherited, so that a theme sets it once on the top-level.
-  static TextLayoutRoundingPlacement getLayoutRoundingPlacement(FerroObject target) => TextLayoutRoundingPlacement(_getI64(target.handle, 881));
-  static void setLayoutRoundingPlacement(FerroObject target, TextLayoutRoundingPlacement value) => _setI64(target.handle, 881, value.value);
+  static TextLayoutRoundingPlacement getLayoutRoundingPlacement(FerroObject target) => TextLayoutRoundingPlacement(_getI64(target.handle, 882));
+  static void setLayoutRoundingPlacement(FerroObject target, TextLayoutRoundingPlacement value) => _setI64(target.handle, 882, value.value);
   /// TextBlock.LineHeight (attached). Defines the `LineHeight` property.
-  static double getLineHeight(FerroObject target) => _getF64(target.handle, 882);
-  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 882, value);
+  static double getLineHeight(FerroObject target) => _getF64(target.handle, 883);
+  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 883, value);
   /// TextBlock.LineSpacing (attached). Defines the `LineSpacing` property.
-  static double getLineSpacing(FerroObject target) => _getF64(target.handle, 883);
-  static void setLineSpacing(FerroObject target, double value) => _setF64(target.handle, 883, value);
+  static double getLineSpacing(FerroObject target) => _getF64(target.handle, 884);
+  static void setLineSpacing(FerroObject target, double value) => _setF64(target.handle, 884, value);
   /// TextBlock.MaxLines (attached). Defines the `MaxLines` property.
-  static int getMaxLines(FerroObject target) => _getI64(target.handle, 884);
-  static void setMaxLines(FerroObject target, int value) => _setI64(target.handle, 884, value);
+  static int getMaxLines(FerroObject target) => _getI64(target.handle, 885);
+  static void setMaxLines(FerroObject target, int value) => _setI64(target.handle, 885, value);
   /// TextBlock.TextAlignment (attached). Defines the `TextAlignment` property.
-  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 885));
-  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 885, value.value);
+  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 886));
+  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 886, value.value);
   /// TextBlock.TextLineBounds (attached). Defines the `TextLineBounds` attached property: how
   /// the box of each line is bounded above and below (a FerroUI addition after WinUI's
   /// `TextBlock.TextLineBounds`, DEVIATIONS.md, Text block). Inherited, as the other attached
   /// text properties, so that a content presenter sets it for the text of its content.
-  static TextLineBounds getTextLineBounds(FerroObject target) => TextLineBounds(_getI64(target.handle, 886));
-  static void setTextLineBounds(FerroObject target, TextLineBounds value) => _setI64(target.handle, 886, value.value);
+  static TextLineBounds getTextLineBounds(FerroObject target) => TextLineBounds(_getI64(target.handle, 887));
+  static void setTextLineBounds(FerroObject target, TextLineBounds value) => _setI64(target.handle, 887, value.value);
   /// TextBlock.TextWrapping (attached). Defines the `TextWrapping` property.
-  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 888));
-  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 888, value.value);
+  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 889));
+  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 889, value.value);
   /// TextDecorations. Defines the `TextDecorations` property.
-  String get textDecorations => _getString(handle, 893);
-  set textDecorations(String value) => _setString(handle, 893, value);
+  String get textDecorations => _getString(handle, 894);
+  set textDecorations(String value) => _setString(handle, 894, value);
 }
 
 /// A text block that displays a character prefixed with an underscore as an access key.
@@ -1870,17 +1870,17 @@ extension type Brush._(int handle) implements Animatable {
   static const int typeId = 27;
   Brush.of(FerroObject object) : this._(object.handle);
   /// Opacity.
-  double get opacity => _getF64(handle, 609);
-  set opacity(double value) => _setF64(handle, 609, value);
+  double get opacity => _getF64(handle, 610);
+  set opacity(double value) => _setF64(handle, 610, value);
   /// RelativeTransform.
-  String get relativeTransform => _getString(handle, 715);
-  set relativeTransform(String value) => _setString(handle, 715, value);
+  String get relativeTransform => _getString(handle, 716);
+  set relativeTransform(String value) => _setString(handle, 716, value);
   /// Transform.
-  String get transform => _getString(handle, 969);
-  set transform(String value) => _setString(handle, 969, value);
+  String get transform => _getString(handle, 970);
+  set transform(String value) => _setString(handle, 970, value);
   /// TransformOrigin.
-  String get transformOrigin => _getString(handle, 970);
-  set transformOrigin(String value) => _setString(handle, 970, value);
+  String get transformOrigin => _getString(handle, 971);
+  set transformOrigin(String value) => _setString(handle, 971, value);
 }
 
 /// A brush that paints an area with a composition brush (WinUI
@@ -1924,18 +1924,18 @@ extension type AcrylicBrush._(int handle) implements XamlCompositionBrushBase {
   AcrylicBrushBackgroundSource get backgroundSource => AcrylicBrushBackgroundSource(_getI64(handle, 69));
   set backgroundSource(AcrylicBrushBackgroundSource value) => _setI64(handle, 69, value.value);
   /// TintColor. `TintColor` (default `#CCFFFFFF`).
-  String get tintColor => _getString(handle, 938);
-  set tintColor(String value) => _setString(handle, 938, value);
+  String get tintColor => _getString(handle, 939);
+  set tintColor(String value) => _setString(handle, 939, value);
   /// TintLuminosityOpacity. `TintLuminosityOpacity` (default none), coerced to 0..1.
-  double get tintLuminosityOpacity => _getF64(handle, 939);
-  set tintLuminosityOpacity(double value) => _setF64(handle, 939, value);
+  double get tintLuminosityOpacity => _getF64(handle, 940);
+  set tintLuminosityOpacity(double value) => _setF64(handle, 940, value);
   /// TintOpacity. `TintOpacity` (default 1), coerced to 0..1.
-  double get tintOpacity => _getF64(handle, 940);
-  set tintOpacity(double value) => _setF64(handle, 940, value);
+  double get tintOpacity => _getF64(handle, 941);
+  set tintOpacity(double value) => _setF64(handle, 941, value);
   /// TintTransitionDuration. `TintTransitionDuration` (default 500 ms): how long a change of
   /// the tint or of the fallback colour animates.
-  String get tintTransitionDuration => _getString(handle, 941);
-  set tintTransitionDuration(String value) => _setString(handle, 941, value);
+  String get tintTransitionDuration => _getString(handle, 942);
+  set tintTransitionDuration(String value) => _setString(handle, 942, value);
 }
 
 /// The base class of the triggers of a [`VisualState`](super::VisualState): while a trigger of
@@ -1966,12 +1966,12 @@ extension type AdaptiveTrigger._(int handle) implements StateTriggerBase {
   AdaptiveTrigger.of(FerroObject object) : this._(object.handle);
   /// MinWindowHeight. Defines the `MinWindowHeight` property: the smallest window height at
   /// which the trigger applies. Default -1 (no condition on the height).
-  double get minWindowHeight => _getF64(handle, 558);
-  set minWindowHeight(double value) => _setF64(handle, 558, value);
+  double get minWindowHeight => _getF64(handle, 559);
+  set minWindowHeight(double value) => _setF64(handle, 559, value);
   /// MinWindowWidth. Defines the `MinWindowWidth` property: the smallest window width at which
   /// the trigger applies. Default -1 (no condition on the width).
-  double get minWindowWidth => _getF64(handle, 559);
-  set minWindowWidth(double value) => _setF64(handle, 559, value);
+  double get minWindowWidth => _getF64(handle, 560);
+  set minWindowWidth(double value) => _setF64(handle, 560, value);
 }
 
 /// Base class for controls that can contain multiple children. Controls can be added to a panel
@@ -2067,15 +2067,15 @@ extension type TemplatedControl._(int handle) implements Control {
   String get foreground => _getString(handle, 310);
   set foreground(String value) => _setString(handle, 310, value);
   /// LetterSpacing. Defines the `LetterSpacing` property.
-  double get letterSpacing => _getF64(handle, 517);
-  set letterSpacing(double value) => _setF64(handle, 517, value);
+  double get letterSpacing => _getF64(handle, 518);
+  set letterSpacing(double value) => _setF64(handle, 518, value);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 619);
-  set padding(String value) => _setString(handle, 619, value);
+  String get padding => _getString(handle, 620);
+  set padding(String value) => _setString(handle, 620, value);
   /// TemplatedControl.IsTemplateFocusTarget (attached). Defines the `IsTemplateFocusTarget`
   /// attached property.
-  static bool getIsTemplateFocusTarget(FerroObject target) => _getBool(target.handle, 876);
-  static void setIsTemplateFocusTarget(FerroObject target, bool value) => _setBool(target.handle, 876, value);
+  static bool getIsTemplateFocusTarget(FerroObject target) => _getBool(target.handle, 877);
+  static void setIsTemplateFocusTarget(FerroObject target, bool value) => _setBool(target.handle, 877, value);
   /// TemplateApplied: the sender is valid for the call. Defines the `TemplateApplied` routed
   /// event.
   Subscription onTemplateApplied(void Function(TemplatedControl sender) handler) =>
@@ -2091,13 +2091,13 @@ extension type ItemsControl._(int handle) implements TemplatedControl {
   String get displayMemberBinding => _getString(handle, 229);
   set displayMemberBinding(String value) => _setString(handle, 229, value);
   /// ItemContainerTheme. Defines the `ItemContainerTheme` property.
-  FerroObject get itemContainerTheme => FerroObject(_getObject(handle, 473));
-  set itemContainerTheme(FerroObject value) => _setObject(handle, 473, value.handle);
+  FerroObject get itemContainerTheme => FerroObject(_getObject(handle, 474));
+  set itemContainerTheme(FerroObject value) => _setObject(handle, 474, value.handle);
   /// ItemCount. Defines the `ItemCount` property.
-  int get itemCount => _getI64(handle, 474);
+  int get itemCount => _getI64(handle, 475);
   /// ItemsSource. Defines the `ItemsSource` property.
-  String get itemsSource => _getString(handle, 488);
-  set itemsSource(String value) => _setString(handle, 488, value);
+  String get itemsSource => _getString(handle, 489);
+  set itemsSource(String value) => _setString(handle, 489, value);
 }
 
 /// An [`ItemsControl`] that maintains a selection. [`SelectingItemsControl`] provides a base
@@ -2117,37 +2117,37 @@ extension type SelectingItemsControl._(int handle) implements ItemsControl {
   bool get autoScrollToSelectedItem => _getBool(handle, 40);
   set autoScrollToSelectedItem(bool value) => _setBool(handle, 40, value);
   /// IsTextSearchEnabled. Defines the `IsTextSearchEnabled` property.
-  bool get isTextSearchEnabled => _getBool(handle, 459);
-  set isTextSearchEnabled(bool value) => _setBool(handle, 459, value);
+  bool get isTextSearchEnabled => _getBool(handle, 460);
+  set isTextSearchEnabled(bool value) => _setBool(handle, 460, value);
   /// SelectedIndex. Defines the `SelectedIndex` property.
-  int get selectedIndex => _getI64(handle, 772);
-  set selectedIndex(int value) => _setI64(handle, 772, value);
+  int get selectedIndex => _getI64(handle, 773);
+  set selectedIndex(int value) => _setI64(handle, 773, value);
   /// SelectedItem. Defines the `SelectedItem` property.
-  String get selectedItem => _getString(handle, 773);
-  set selectedItem(String value) => _setString(handle, 773, value);
-  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 773));
-  set selectedItemObject(FerroObject value) => _setObject(handle, 773, value.handle);
+  String get selectedItem => _getString(handle, 774);
+  set selectedItem(String value) => _setString(handle, 774, value);
+  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 774));
+  set selectedItemObject(FerroObject value) => _setObject(handle, 774, value.handle);
   /// SelectedItems. Defines the `SelectedItems` property.
-  String get selectedItems => _getString(handle, 774);
-  set selectedItems(String value) => _setString(handle, 774, value);
+  String get selectedItems => _getString(handle, 775);
+  set selectedItems(String value) => _setString(handle, 775, value);
   /// SelectedValue. Defines the `SelectedValue` property.
-  String get selectedValue => _getString(handle, 779);
-  set selectedValue(String value) => _setString(handle, 779, value);
-  FerroObject get selectedValueObject => FerroObject(_getObject(handle, 779));
-  set selectedValueObject(FerroObject value) => _setObject(handle, 779, value.handle);
+  String get selectedValue => _getString(handle, 780);
+  set selectedValue(String value) => _setString(handle, 780, value);
+  FerroObject get selectedValueObject => FerroObject(_getObject(handle, 780));
+  set selectedValueObject(FerroObject value) => _setObject(handle, 780, value.handle);
   /// SelectedValueBinding. Defines the `SelectedValueBinding` property.
-  String get selectedValueBinding => _getString(handle, 780);
-  set selectedValueBinding(String value) => _setString(handle, 780, value);
+  String get selectedValueBinding => _getString(handle, 781);
+  set selectedValueBinding(String value) => _setString(handle, 781, value);
   /// SelectingItemsControl.IsSelected (attached). Defines the `IsSelected` attached property on
   /// a container [`Control`].
-  static bool getIsSelected(FerroObject target) => _getBool(target.handle, 781);
-  static void setIsSelected(FerroObject target, bool value) => _setBool(target.handle, 781, value);
+  static bool getIsSelected(FerroObject target) => _getBool(target.handle, 782);
+  static void setIsSelected(FerroObject target, bool value) => _setBool(target.handle, 782, value);
   /// SelectionMode. Defines the `SelectionMode` property.
-  String get selectionMode => _getString(handle, 791);
-  set selectionMode(String value) => _setString(handle, 791, value);
+  String get selectionMode => _getString(handle, 792);
+  set selectionMode(String value) => _setString(handle, 792, value);
   /// WrapSelection. Defines the `WrapSelection` property.
-  bool get wrapSelection => _getBool(handle, 1065);
-  set wrapSelection(bool value) => _setBool(handle, 1065, value);
+  bool get wrapSelection => _getBool(handle, 1066);
+  set wrapSelection(bool value) => _setBool(handle, 1066, value);
   /// IsSelectedChanged: the sender is valid for the call. Event that should be raised by
   /// containers when their selection state changes to notify the parent
   /// [`SelectingItemsControl`] that their selection state has changed.
@@ -2177,8 +2177,8 @@ extension type Animation._(int handle) implements FerroObject {
   String get easing => _getString(handle, 258);
   set easing(String value) => _setString(handle, 258, value);
   /// SpeedRatio. Defines the `SpeedRatio` property: the speed multiple.
-  double get speedRatio => _getF64(handle, 826);
-  set speedRatio(double value) => _setF64(handle, 826, value);
+  double get speedRatio => _getF64(handle, 827);
+  set speedRatio(double value) => _setF64(handle, 827, value);
 }
 
 /// Defines a key frame that is used for an animator.
@@ -2186,10 +2186,10 @@ extension type AnimatorKeyFrame._(int handle) implements FerroObject {
   static const int typeId = 9;
   AnimatorKeyFrame.of(FerroObject object) : this._(object.handle);
   /// Value. Defines the `Value` property.
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
-  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1032));
-  set valueValueObject(FerroObject value) => _setObject(handle, 1032, value.handle);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
+  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1033));
+  set valueValueObject(FerroObject value) => _setObject(handle, 1033, value.handle);
 }
 
 /// Encapsulates a FerroUI application. The [`Application`] class encapsulates
@@ -2217,12 +2217,12 @@ extension type Application._(int handle) implements FerroObject {
   FerroObject get dataContextObject => FerroObject(_getObject(handle, 192));
   set dataContextObject(FerroObject value) => _setObject(handle, 192, value.handle);
   /// Name. Defines the `Name` property.
-  String get name => _getString(handle, 572);
-  set name(String value) => _setString(handle, 572, value);
+  String get name => _getString(handle, 573);
+  set name(String value) => _setString(handle, 573, value);
   /// RequestedThemeVariant. Defines the `RequestedThemeVariant` property: the UI theme variant
   /// that is requested for the application.
-  String get requestedThemeVariant => _getString(handle, 721);
-  set requestedThemeVariant(String value) => _setString(handle, 721, value);
+  String get requestedThemeVariant => _getString(handle, 722);
+  set requestedThemeVariant(String value) => _setString(handle, 722, value);
 }
 
 /// Provides a base class for shape elements, such as `Ellipse`, `Polygon` and `Rectangle`.
@@ -2233,26 +2233,26 @@ extension type Shape._(int handle) implements Control {
   String get fill => _getString(handle, 278);
   set fill(String value) => _setString(handle, 278, value);
   /// Stretch. Defines the `Stretch` property.
-  Stretch get stretch => Stretch(_getI64(handle, 836));
-  set stretch(Stretch value) => _setI64(handle, 836, value.value);
+  Stretch get stretch => Stretch(_getI64(handle, 837));
+  set stretch(Stretch value) => _setI64(handle, 837, value.value);
   /// Stroke. Defines the `Stroke` property.
-  String get stroke => _getString(handle, 838);
-  set stroke(String value) => _setString(handle, 838, value);
+  String get stroke => _getString(handle, 839);
+  set stroke(String value) => _setString(handle, 839, value);
   /// StrokeDashOffset. Defines the `StrokeDashOffset` property.
-  double get strokeDashOffset => _getF64(handle, 840);
-  set strokeDashOffset(double value) => _setF64(handle, 840, value);
+  double get strokeDashOffset => _getF64(handle, 841);
+  set strokeDashOffset(double value) => _setF64(handle, 841, value);
   /// StrokeJoin. Defines the `StrokeJoin` property.
-  PenLineJoin get strokeJoin => PenLineJoin(_getI64(handle, 841));
-  set strokeJoin(PenLineJoin value) => _setI64(handle, 841, value.value);
+  PenLineJoin get strokeJoin => PenLineJoin(_getI64(handle, 842));
+  set strokeJoin(PenLineJoin value) => _setI64(handle, 842, value.value);
   /// StrokeLineCap. Defines the `StrokeLineCap` property.
-  PenLineCap get strokeLineCap => PenLineCap(_getI64(handle, 842));
-  set strokeLineCap(PenLineCap value) => _setI64(handle, 842, value.value);
+  PenLineCap get strokeLineCap => PenLineCap(_getI64(handle, 843));
+  set strokeLineCap(PenLineCap value) => _setI64(handle, 843, value.value);
   /// StrokeMiterLimit. Defines the `StrokeMiterLimit` property.
-  double get strokeMiterLimit => _getF64(handle, 843);
-  set strokeMiterLimit(double value) => _setF64(handle, 843, value);
+  double get strokeMiterLimit => _getF64(handle, 844);
+  set strokeMiterLimit(double value) => _setF64(handle, 844, value);
   /// StrokeThickness. Defines the `StrokeThickness` property.
-  double get strokeThickness => _getF64(handle, 846);
-  set strokeThickness(double value) => _setF64(handle, 846, value);
+  double get strokeThickness => _getF64(handle, 847);
+  set strokeThickness(double value) => _setF64(handle, 847, value);
 }
 
 /// Represents a circular or elliptical arc (a segment of a curve).
@@ -2261,11 +2261,11 @@ extension type Arc._(int handle) implements Shape {
   factory Arc() => Arc._(_create(typeId));
   Arc.of(FerroObject object) : this._(object.handle);
   /// StartAngle. Defines the `StartAngle` property.
-  double get startAngle => _getF64(handle, 830);
-  set startAngle(double value) => _setF64(handle, 830, value);
+  double get startAngle => _getF64(handle, 831);
+  set startAngle(double value) => _setF64(handle, 831, value);
   /// SweepAngle. Defines the `SweepAngle` property.
-  double get sweepAngle => _getF64(handle, 850);
-  set sweepAngle(double value) => _setF64(handle, 850, value);
+  double get sweepAngle => _getF64(handle, 851);
+  set sweepAngle(double value) => _setF64(handle, 851, value);
 }
 
 /// Represents a segment of a [`PathFigure`](crate::media::PathFigure).
@@ -2273,8 +2273,8 @@ extension type PathSegment._(int handle) implements FerroObject {
   static const int typeId = 269;
   PathSegment.of(FerroObject object) : this._(object.handle);
   /// IsStroked.
-  bool get isStroked => _getBool(handle, 451);
-  set isStroked(bool value) => _setBool(handle, 451, value);
+  bool get isStroked => _getBool(handle, 452);
+  set isStroked(bool value) => _setBool(handle, 452, value);
 }
 
 /// An elliptical arc segment of a path figure.
@@ -2286,17 +2286,17 @@ extension type ArcSegment._(int handle) implements PathSegment {
   bool get isLargeArc => _getBool(handle, 427);
   set isLargeArc(bool value) => _setBool(handle, 427, value);
   /// Point.
-  String get point => _getString(handle, 660);
-  set point(String value) => _setString(handle, 660, value);
+  String get point => _getString(handle, 661);
+  set point(String value) => _setString(handle, 661, value);
   /// RotationAngle.
-  double get rotationAngle => _getF64(handle, 736);
-  set rotationAngle(double value) => _setF64(handle, 736, value);
+  double get rotationAngle => _getF64(handle, 737);
+  set rotationAngle(double value) => _setF64(handle, 737, value);
   /// Size.
-  String get size => _getString(handle, 814);
-  set size(String value) => _setString(handle, 814, value);
+  String get size => _getString(handle, 815);
+  set size(String value) => _setString(handle, 815, value);
   /// SweepDirection.
-  SweepDirection get sweepDirection => SweepDirection(_getI64(handle, 851));
-  set sweepDirection(SweepDirection value) => _setI64(handle, 851, value.value);
+  SweepDirection get sweepDirection => SweepDirection(_getI64(handle, 852));
+  set sweepDirection(SweepDirection value) => _setI64(handle, 852, value.value);
 }
 
 /// Represents a control that provides a text box for user input and a drop-down that contains
@@ -2331,44 +2331,44 @@ extension type AutoCompleteBox._(int handle) implements TemplatedControl {
   bool get isDropDownOpen => _getBool(handle, 404);
   set isDropDownOpen(bool value) => _setBool(handle, 404, value);
   /// IsTextCompletionEnabled. Identifies the `IsTextCompletionEnabled` property.
-  bool get isTextCompletionEnabled => _getBool(handle, 457);
-  set isTextCompletionEnabled(bool value) => _setBool(handle, 457, value);
+  bool get isTextCompletionEnabled => _getBool(handle, 458);
+  set isTextCompletionEnabled(bool value) => _setBool(handle, 458, value);
   /// ItemsSource. Identifies the `ItemsSource` property.
-  String get itemsSource => _getString(handle, 488);
-  set itemsSource(String value) => _setString(handle, 488, value);
+  String get itemsSource => _getString(handle, 489);
+  set itemsSource(String value) => _setString(handle, 489, value);
   /// MaxDropDownHeight. Identifies the `MaxDropDownHeight` property.
-  double get maxDropDownHeight => _getF64(handle, 535);
-  set maxDropDownHeight(double value) => _setF64(handle, 535, value);
+  double get maxDropDownHeight => _getF64(handle, 536);
+  set maxDropDownHeight(double value) => _setF64(handle, 536, value);
   /// MaxLength. Defines the `MaxLength` property.
-  int get maxLength => _getI64(handle, 538);
-  set maxLength(int value) => _setI64(handle, 538, value);
+  int get maxLength => _getI64(handle, 539);
+  set maxLength(int value) => _setI64(handle, 539, value);
   /// MinimumPopulateDelay. Identifies the `MinimumPopulateDelay` property. A `Duration`: a
   /// negative delay, which the reference refuses in its validation
   /// (`IsValidMinimumPopulateDelay`), is not a value of the type.
-  String get minimumPopulateDelay => _getString(handle, 563);
-  set minimumPopulateDelay(String value) => _setString(handle, 563, value);
+  String get minimumPopulateDelay => _getString(handle, 564);
+  set minimumPopulateDelay(String value) => _setString(handle, 564, value);
   /// MinimumPrefixLength. Identifies the `MinimumPrefixLength` property.
-  int get minimumPrefixLength => _getI64(handle, 564);
-  set minimumPrefixLength(int value) => _setI64(handle, 564, value);
+  int get minimumPrefixLength => _getI64(handle, 565);
+  set minimumPrefixLength(int value) => _setI64(handle, 565, value);
   /// PlaceholderForeground. Defines the `PlaceholderForeground` property.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText. Defines the `PlaceholderText` property.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// SearchText. Identifies the `SearchText` property.
-  String get searchText => _getString(handle, 761);
+  String get searchText => _getString(handle, 762);
   /// SelectedItem. Identifies the `SelectedItem` property.
-  String get selectedItem => _getString(handle, 773);
-  set selectedItem(String value) => _setString(handle, 773, value);
-  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 773));
-  set selectedItemObject(FerroObject value) => _setObject(handle, 773, value.handle);
+  String get selectedItem => _getString(handle, 774);
+  set selectedItem(String value) => _setString(handle, 774, value);
+  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 774));
+  set selectedItemObject(FerroObject value) => _setObject(handle, 774, value.handle);
   /// Text. Identifies the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// ValueMemberBinding.
-  String get valueMemberBinding => _getString(handle, 1033);
-  set valueMemberBinding(String value) => _setString(handle, 1033, value);
+  String get valueMemberBinding => _getString(handle, 1034);
+  set valueMemberBinding(String value) => _setString(handle, 1034, value);
   /// QuerySubmitted: the sender is valid for the call. Defines the `QuerySubmitted` event: a
   /// FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`, raised when Enter submits
   /// the text of the box.
@@ -2441,32 +2441,32 @@ extension type AutoSuggestBox._(int handle) implements HeaderedItemsControl {
   set descriptionObject(FerroObject value) => _setObject(handle, 213, value.handle);
   /// IsSuggestionListOpen. Defines the `IsSuggestionListOpen` property: whether the popup of
   /// the suggestions is open.
-  bool get isSuggestionListOpen => _getBool(handle, 453);
-  set isSuggestionListOpen(bool value) => _setBool(handle, 453, value);
+  bool get isSuggestionListOpen => _getBool(handle, 454);
+  set isSuggestionListOpen(bool value) => _setBool(handle, 454, value);
   /// MaxSuggestionListHeight. Defines the `MaxSuggestionListHeight` property: the largest
   /// height of the list of the suggestions; infinite by default, and a negative value is
   /// infinite too.
-  double get maxSuggestionListHeight => _getF64(handle, 542);
-  set maxSuggestionListHeight(double value) => _setF64(handle, 542, value);
+  double get maxSuggestionListHeight => _getF64(handle, 543);
+  set maxSuggestionListHeight(double value) => _setF64(handle, 543, value);
   /// PlaceholderText. Defines the `PlaceholderText` property: the text shown while the box is
   /// empty.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// QueryIcon. Defines the `QueryIcon` property: the icon of the query button; no button
   /// without one (the default).
-  FerroObject get queryIcon => FerroObject(_getObject(handle, 691));
-  set queryIcon(FerroObject value) => _setObject(handle, 691, value.handle);
+  FerroObject get queryIcon => FerroObject(_getObject(handle, 692));
+  set queryIcon(FerroObject value) => _setObject(handle, 692, value.handle);
   /// Text. Defines the `Text` property: the text of the box.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextMemberPath. Defines the `TextMemberPath` property: the path of the text of a chosen
   /// suggestion; the text of the item itself when it is empty (the default).
-  String get textMemberPath => _getString(handle, 916);
-  set textMemberPath(String value) => _setString(handle, 916, value);
+  String get textMemberPath => _getString(handle, 917);
+  set textMemberPath(String value) => _setString(handle, 917, value);
   /// UpdateTextOnSelect. Defines the `UpdateTextOnSelect` property: whether choosing a
   /// suggestion puts its text in the box. `true` by default.
-  bool get updateTextOnSelect => _getBool(handle, 1024);
-  set updateTextOnSelect(bool value) => _setBool(handle, 1024, value);
+  bool get updateTextOnSelect => _getBool(handle, 1025);
+  set updateTextOnSelect(bool value) => _setBool(handle, 1025, value);
 }
 
 /// An automation peer which represents an [`AutoSuggestBox`]: a group whose invoke pattern
@@ -2504,14 +2504,14 @@ extension type BezierSegment._(int handle) implements PathSegment {
   factory BezierSegment() => BezierSegment._(_create(typeId));
   BezierSegment.of(FerroObject object) : this._(object.handle);
   /// Point1.
-  String get point1 => _getString(handle, 661);
-  set point1(String value) => _setString(handle, 661, value);
+  String get point1 => _getString(handle, 662);
+  set point1(String value) => _setString(handle, 662, value);
   /// Point2.
-  String get point2 => _getString(handle, 662);
-  set point2(String value) => _setString(handle, 662, value);
+  String get point2 => _getString(handle, 663);
+  set point2(String value) => _setString(handle, 663, value);
   /// Point3.
-  String get point3 => _getString(handle, 663);
-  set point3(String value) => _setString(handle, 663, value);
+  String get point3 => _getString(handle, 664);
+  set point3(String value) => _setString(handle, 664, value);
 }
 
 /// Evaluates a binding against arbitrary data contexts. The value is untyped;
@@ -2522,10 +2522,10 @@ extension type BindingEvaluator._(int handle) implements StyledElement {
   factory BindingEvaluator() => BindingEvaluator._(_create(typeId));
   BindingEvaluator.of(FerroObject object) : this._(object.handle);
   /// Value. Defines the `Value` property.
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
-  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1032));
-  set valueValueObject(FerroObject value) => _setObject(handle, 1032, value.handle);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
+  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1033));
+  set valueValueObject(FerroObject value) => _setObject(handle, 1033, value.handle);
 }
 
 /// Represents cached content modes for graphics acceleration features.
@@ -2543,11 +2543,11 @@ extension type BitmapCache._(int handle) implements CacheMode {
   bool get enableClearType => _getBool(handle, 265);
   set enableClearType(bool value) => _setBool(handle, 265, value);
   /// RenderAtScale. Defines the `RenderAtScale` property.
-  double get renderAtScale => _getF64(handle, 716);
-  set renderAtScale(double value) => _setF64(handle, 716, value);
+  double get renderAtScale => _getF64(handle, 717);
+  set renderAtScale(double value) => _setF64(handle, 717, value);
   /// SnapsToDevicePixels. Defines the `SnapsToDevicePixels` property.
-  bool get snapsToDevicePixels => _getBool(handle, 820);
-  set snapsToDevicePixels(bool value) => _setBool(handle, 820, value);
+  bool get snapsToDevicePixels => _getBool(handle, 821);
+  set snapsToDevicePixels(bool value) => _setBool(handle, 821, value);
 }
 
 /// `TextElement` is the base class for content in text based controls. It also defines the
@@ -2560,35 +2560,35 @@ extension type TextElement._(int handle) implements StyledElement {
   String get background => _getString(handle, 67);
   set background(String value) => _setString(handle, 67, value);
   /// TextElement.FontFamily (attached). Defines the `FontFamily` property.
-  static String getFontFamily(FerroObject target) => _getString(target.handle, 894);
-  static void setFontFamily(FerroObject target, String value) => _setString(target.handle, 894, value);
+  static String getFontFamily(FerroObject target) => _getString(target.handle, 895);
+  static void setFontFamily(FerroObject target, String value) => _setString(target.handle, 895, value);
   /// TextElement.FontFeatures (attached). Defines the `FontFeatures` property.
-  static String getFontFeatures(FerroObject target) => _getString(target.handle, 895);
-  static void setFontFeatures(FerroObject target, String value) => _setString(target.handle, 895, value);
+  static String getFontFeatures(FerroObject target) => _getString(target.handle, 896);
+  static void setFontFeatures(FerroObject target, String value) => _setString(target.handle, 896, value);
   /// TextElement.FontSize (attached). Defines the `FontSize` property.
-  static double getFontSize(FerroObject target) => _getF64(target.handle, 896);
-  static void setFontSize(FerroObject target, double value) => _setF64(target.handle, 896, value);
+  static double getFontSize(FerroObject target) => _getF64(target.handle, 897);
+  static void setFontSize(FerroObject target, double value) => _setF64(target.handle, 897, value);
   /// TextElement.FontStretch (attached). Defines the `FontStretch` property.
-  static FontStretch getFontStretch(FerroObject target) => FontStretch(_getI64(target.handle, 897));
-  static void setFontStretch(FerroObject target, FontStretch value) => _setI64(target.handle, 897, value.value);
+  static FontStretch getFontStretch(FerroObject target) => FontStretch(_getI64(target.handle, 898));
+  static void setFontStretch(FerroObject target, FontStretch value) => _setI64(target.handle, 898, value.value);
   /// TextElement.FontStyle (attached). Defines the `FontStyle` property.
-  static FontStyle getFontStyle(FerroObject target) => FontStyle(_getI64(target.handle, 898));
-  static void setFontStyle(FerroObject target, FontStyle value) => _setI64(target.handle, 898, value.value);
+  static FontStyle getFontStyle(FerroObject target) => FontStyle(_getI64(target.handle, 899));
+  static void setFontStyle(FerroObject target, FontStyle value) => _setI64(target.handle, 899, value.value);
   /// TextElement.FontWeight (attached). Defines the `FontWeight` property.
-  static String getFontWeight(FerroObject target) => _getString(target.handle, 899);
-  static void setFontWeight(FerroObject target, String value) => _setString(target.handle, 899, value);
+  static String getFontWeight(FerroObject target) => _getString(target.handle, 900);
+  static void setFontWeight(FerroObject target, String value) => _setString(target.handle, 900, value);
   /// TextElement.Foreground (attached). Defines the `Foreground` property.
-  static String getForeground(FerroObject target) => _getString(target.handle, 900);
-  static void setForeground(FerroObject target, String value) => _setString(target.handle, 900, value);
+  static String getForeground(FerroObject target) => _getString(target.handle, 901);
+  static void setForeground(FerroObject target, String value) => _setString(target.handle, 901, value);
   /// TextElement.Language (attached). The inherited text language, a locale. Markup accepts a
   /// BCP-47 language tag (an IETF tag, as for a culture), and an empty tag (the invariant
   /// culture, the unknown locale `und`) resolves to the preferred application language when
   /// text is shaped. A locale is always a valid XML language tag.
-  static String getLanguage(FerroObject target) => _getString(target.handle, 901);
-  static void setLanguage(FerroObject target, String value) => _setString(target.handle, 901, value);
+  static String getLanguage(FerroObject target) => _getString(target.handle, 902);
+  static void setLanguage(FerroObject target, String value) => _setString(target.handle, 902, value);
   /// TextElement.LetterSpacing (attached). Defines the `LetterSpacing` property.
-  static double getLetterSpacing(FerroObject target) => _getF64(target.handle, 902);
-  static void setLetterSpacing(FerroObject target, double value) => _setF64(target.handle, 902, value);
+  static double getLetterSpacing(FerroObject target) => _getF64(target.handle, 903);
+  static void setLetterSpacing(FerroObject target, double value) => _setF64(target.handle, 903, value);
 }
 
 /// Base class for block-level text content. A block owns paragraph formatting; character
@@ -2600,17 +2600,17 @@ extension type Block._(int handle) implements TextElement {
   FlowDirection get flowDirection => FlowDirection(_getI64(handle, 293));
   set flowDirection(FlowDirection value) => _setI64(handle, 293, value.value);
   /// LineHeight.
-  double get lineHeight => _getF64(handle, 520);
-  set lineHeight(double value) => _setF64(handle, 520, value);
+  double get lineHeight => _getF64(handle, 521);
+  set lineHeight(double value) => _setF64(handle, 521, value);
   /// LineStackingStrategy.
-  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 524));
-  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 524, value.value);
+  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 525));
+  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 525, value.value);
   /// Margin.
-  String get margin => _getString(handle, 527);
-  set margin(String value) => _setString(handle, 527, value);
+  String get margin => _getString(handle, 528);
+  set margin(String value) => _setString(handle, 528, value);
   /// TextAlignment.
-  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 879));
-  set textAlignment(TextAlignment value) => _setI64(handle, 879, value.value);
+  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 880));
+  set textAlignment(TextAlignment value) => _setI64(handle, 880, value.value);
 }
 
 /// Base class of the mutable effects.
@@ -2625,8 +2625,8 @@ extension type BlurEffect._(int handle) implements Effect {
   factory BlurEffect() => BlurEffect._(_create(typeId));
   BlurEffect.of(FerroObject object) : this._(object.handle);
   /// Radius.
-  double get radius => _getF64(handle, 692);
-  set radius(double value) => _setF64(handle, 692, value);
+  double get radius => _getF64(handle, 693);
+  set radius(double value) => _setF64(handle, 693, value);
 }
 
 /// `Inline` is the base class for inline text elements. This class is abstract.
@@ -2668,8 +2668,8 @@ extension type Decorator._(int handle) implements Control {
   FerroObject get child => FerroObject(_getObject(handle, 137));
   set child(FerroObject value) => _setObject(handle, 137, value.handle);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 619);
-  set padding(String value) => _setString(handle, 619, value);
+  String get padding => _getString(handle, 620);
+  set padding(String value) => _setString(handle, 620, value);
 }
 
 /// A control which decorates a child with a border and background.
@@ -2725,8 +2725,8 @@ extension type ContentControl._(int handle) implements TemplatedControl {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// A standard button control.
@@ -2779,8 +2779,8 @@ extension type Spinner._(int handle) implements ContentControl {
   static const int typeId = 382;
   Spinner.of(FerroObject object) : this._(object.handle);
   /// ValidSpinDirection. Defines the `ValidSpinDirection` property.
-  String get validSpinDirection => _getString(handle, 1030);
-  set validSpinDirection(String value) => _setString(handle, 1030, value);
+  String get validSpinDirection => _getString(handle, 1031);
+  set validSpinDirection(String value) => _setString(handle, 1031, value);
   /// Spin: the sender is valid for the call. Defines the `Spin` routed event.
   Subscription onSpin(void Function(Spinner sender) handler) =>
       _subscribe(handle, 76, (sender) => handler(Spinner._(sender)));
@@ -2798,8 +2798,8 @@ extension type ButtonSpinner._(int handle) implements Spinner {
   Location get buttonSpinnerLocation => Location(_getI64(handle, 94));
   set buttonSpinnerLocation(Location value) => _setI64(handle, 94, value.value);
   /// ShowButtonSpinner. Defines the `ShowButtonSpinner` property.
-  bool get showButtonSpinner => _getBool(handle, 802);
-  set showButtonSpinner(bool value) => _setBool(handle, 802, value);
+  bool get showButtonSpinner => _getBool(handle, 803);
+  set showButtonSpinner(bool value) => _setBool(handle, 803, value);
 }
 
 /// Represents a control that enables a user to select a date by using a visual calendar
@@ -2847,20 +2847,20 @@ extension type Calendar._(int handle) implements TemplatedControl {
   String get headerBackground => _getString(handle, 342);
   set headerBackground(String value) => _setString(handle, 342, value);
   /// IsTodayHighlighted. Defines the `IsTodayHighlighted` property.
-  bool get isTodayHighlighted => _getBool(handle, 463);
-  set isTodayHighlighted(bool value) => _setBool(handle, 463, value);
+  bool get isTodayHighlighted => _getBool(handle, 464);
+  set isTodayHighlighted(bool value) => _setBool(handle, 464, value);
   /// IsWeekNumberVisible. Defines the `IsWeekNumberVisible` property.
-  bool get isWeekNumberVisible => _getBool(handle, 470);
-  set isWeekNumberVisible(bool value) => _setBool(handle, 470, value);
+  bool get isWeekNumberVisible => _getBool(handle, 471);
+  set isWeekNumberVisible(bool value) => _setBool(handle, 471, value);
   /// SelectedDate. Defines the `SelectedDate` property.
-  String get selectedDate => _getString(handle, 770);
-  set selectedDate(String value) => _setString(handle, 770, value);
+  String get selectedDate => _getString(handle, 771);
+  set selectedDate(String value) => _setString(handle, 771, value);
   /// SelectionMode. Defines the `SelectionMode` property.
-  CalendarSelectionMode get selectionMode => CalendarSelectionMode(_getI64(handle, 791));
-  set selectionMode(CalendarSelectionMode value) => _setI64(handle, 791, value.value);
+  CalendarSelectionMode get selectionMode => CalendarSelectionMode(_getI64(handle, 792));
+  set selectionMode(CalendarSelectionMode value) => _setI64(handle, 792, value.value);
   /// WeekNumberRule. Defines the `WeekNumberRule` property.
-  CalendarWeekRule get weekNumberRule => CalendarWeekRule(_getI64(handle, 1051));
-  set weekNumberRule(CalendarWeekRule value) => _setI64(handle, 1051, value.value);
+  CalendarWeekRule get weekNumberRule => CalendarWeekRule(_getI64(handle, 1052));
+  set weekNumberRule(CalendarWeekRule value) => _setI64(handle, 1052, value.value);
 }
 
 /// An automation peer which represents a [`Calendar`].
@@ -2903,35 +2903,35 @@ extension type CalendarDatePicker._(int handle) implements TemplatedControl {
   bool get isDropDownOpen => _getBool(handle, 404);
   set isDropDownOpen(bool value) => _setBool(handle, 404, value);
   /// IsTodayHighlighted. Defines the `IsTodayHighlighted` property.
-  bool get isTodayHighlighted => _getBool(handle, 463);
-  set isTodayHighlighted(bool value) => _setBool(handle, 463, value);
+  bool get isTodayHighlighted => _getBool(handle, 464);
+  set isTodayHighlighted(bool value) => _setBool(handle, 464, value);
   /// IsWeekNumberVisible. Defines the `IsWeekNumberVisible` property.
-  bool get isWeekNumberVisible => _getBool(handle, 470);
-  set isWeekNumberVisible(bool value) => _setBool(handle, 470, value);
+  bool get isWeekNumberVisible => _getBool(handle, 471);
+  set isWeekNumberVisible(bool value) => _setBool(handle, 471, value);
   /// PlaceholderForeground. Defines the `PlaceholderForeground` property.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText. Defines the `PlaceholderText` property.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// SelectedDate. Defines the `SelectedDate` property.
-  String get selectedDate => _getString(handle, 770);
-  set selectedDate(String value) => _setString(handle, 770, value);
+  String get selectedDate => _getString(handle, 771);
+  set selectedDate(String value) => _setString(handle, 771, value);
   /// SelectedDateFormat. Defines the `SelectedDateFormat` property.
-  CalendarDatePickerFormat get selectedDateFormat => CalendarDatePickerFormat(_getI64(handle, 771));
-  set selectedDateFormat(CalendarDatePickerFormat value) => _setI64(handle, 771, value.value);
+  CalendarDatePickerFormat get selectedDateFormat => CalendarDatePickerFormat(_getI64(handle, 772));
+  set selectedDateFormat(CalendarDatePickerFormat value) => _setI64(handle, 772, value.value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// UseFloatingPlaceholder. Defines the `UseFloatingPlaceholder` property.
-  bool get useFloatingPlaceholder => _getBool(handle, 1025);
-  set useFloatingPlaceholder(bool value) => _setBool(handle, 1025, value);
+  bool get useFloatingPlaceholder => _getBool(handle, 1026);
+  set useFloatingPlaceholder(bool value) => _setBool(handle, 1026, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
   /// WeekNumberRule. Defines the `WeekNumberRule` property.
-  CalendarWeekRule get weekNumberRule => CalendarWeekRule(_getI64(handle, 1051));
-  set weekNumberRule(CalendarWeekRule value) => _setI64(handle, 1051, value.value);
+  CalendarWeekRule get weekNumberRule => CalendarWeekRule(_getI64(handle, 1052));
+  set weekNumberRule(CalendarWeekRule value) => _setI64(handle, 1052, value.value);
 }
 
 /// An automation peer which represents a [`CalendarDatePicker`].
@@ -2970,13 +2970,13 @@ extension type Carousel._(int handle) implements SelectingItemsControl {
   factory Carousel() => Carousel._(_create(typeId));
   Carousel.of(FerroObject object) : this._(object.handle);
   /// IsSwipeEnabled. Defines the `IsSwipeEnabled` property.
-  bool get isSwipeEnabled => _getBool(handle, 454);
-  set isSwipeEnabled(bool value) => _setBool(handle, 454, value);
+  bool get isSwipeEnabled => _getBool(handle, 455);
+  set isSwipeEnabled(bool value) => _setBool(handle, 455, value);
   /// IsSwiping. Defines the `IsSwiping` property.
-  bool get isSwiping => _getBool(handle, 455);
+  bool get isSwiping => _getBool(handle, 456);
   /// ViewportFraction. Defines the `ViewportFraction` property.
-  double get viewportFraction => _getF64(handle, 1041);
-  set viewportFraction(double value) => _setF64(handle, 1041, value);
+  double get viewportFraction => _getF64(handle, 1042);
+  set viewportFraction(double value) => _setF64(handle, 1042, value);
 }
 
 /// Abstract base class for all page types.
@@ -3000,8 +3000,8 @@ extension type Page._(int handle) implements TemplatedControl {
   bool get isInNavigationPage => _getBool(handle, 418);
   set isInNavigationPage(bool value) => _setBool(handle, 418, value);
   /// SafeAreaPadding. Defines the `SafeAreaPadding` property.
-  String get safeAreaPadding => _getString(handle, 739);
-  set safeAreaPadding(String value) => _setString(handle, 739, value);
+  String get safeAreaPadding => _getString(handle, 740);
+  set safeAreaPadding(String value) => _setString(handle, 740, value);
   /// PageNavigationSystemBackButtonPressed: the sender is valid for the call. Defines the
   /// routed event raised when the system back button is pressed.
   Subscription onPageNavigationSystemBackButtonPressed(void Function(Page sender) handler) =>
@@ -3013,11 +3013,11 @@ extension type MultiPage._(int handle) implements Page {
   static const int typeId = 223;
   MultiPage.of(FerroObject object) : this._(object.handle);
   /// ItemsSource. Defines the `ItemsSource` property.
-  String get itemsSource => _getString(handle, 488);
-  set itemsSource(String value) => _setString(handle, 488, value);
+  String get itemsSource => _getString(handle, 489);
+  set itemsSource(String value) => _setString(handle, 489, value);
   /// Pages. Defines the `Pages` property.
-  String get pages => _getString(handle, 624);
-  set pages(String value) => _setString(handle, 624, value);
+  String get pages => _getString(handle, 625);
+  set pages(String value) => _setString(handle, 625, value);
 }
 
 /// Base class for multi-page controls with index-based selection. This class is abstract: its
@@ -3026,10 +3026,10 @@ extension type SelectingMultiPage._(int handle) implements MultiPage {
   static const int typeId = 369;
   SelectingMultiPage.of(FerroObject object) : this._(object.handle);
   /// SelectedIndex. Defines the `SelectedIndex` property.
-  int get selectedIndex => _getI64(handle, 772);
-  set selectedIndex(int value) => _setI64(handle, 772, value);
+  int get selectedIndex => _getI64(handle, 773);
+  set selectedIndex(int value) => _setI64(handle, 773, value);
   /// SelectedPage. Defines the `SelectedPage` property.
-  FerroObject get selectedPage => FerroObject(_getObject(handle, 775));
+  FerroObject get selectedPage => FerroObject(_getObject(handle, 776));
   /// SelectionChanged: the sender is valid for the call. Defines the `SelectionChanged` routed
   /// event.
   Subscription onSelectionChanged(void Function(SelectingMultiPage sender) handler) =>
@@ -3066,8 +3066,8 @@ extension type ToggleButton._(int handle) implements Button {
   bool get isChecked => _getBool(handle, 395);
   set isChecked(bool value) => _setBool(handle, 395, value);
   /// IsThreeState. Defines the `IsThreeState` property.
-  bool get isThreeState => _getBool(handle, 462);
-  set isThreeState(bool value) => _setBool(handle, 462, value);
+  bool get isThreeState => _getBool(handle, 463);
+  set isThreeState(bool value) => _setBool(handle, 463, value);
   /// IsCheckedChanged: the sender is valid for the call. Defines the `IsCheckedChanged` event.
   Subscription onIsCheckedChanged(void Function(ToggleButton sender) handler) =>
       _subscribe(handle, 28, (sender) => handler(ToggleButton._(sender)));
@@ -3142,12 +3142,12 @@ extension type Timeline._(int handle) implements FerroObject {
   FillBehavior get fillBehavior => FillBehavior(_getI64(handle, 279));
   set fillBehavior(FillBehavior value) => _setI64(handle, 279, value.value);
   /// RepeatBehavior. Defines the `RepeatBehavior` property. Default one iteration (`1x`).
-  String get repeatBehavior => _getString(handle, 720);
-  set repeatBehavior(String value) => _setString(handle, 720, value);
+  String get repeatBehavior => _getString(handle, 721);
+  set repeatBehavior(String value) => _setString(handle, 721, value);
   /// SpeedRatio. Defines the `SpeedRatio` property: the rate of the time of the timeline
   /// relative to its parent (a ratio that is not positive is 1). Default 1.
-  double get speedRatio => _getF64(handle, 826);
-  set speedRatio(double value) => _setF64(handle, 826, value);
+  double get speedRatio => _getF64(handle, 827);
+  set speedRatio(double value) => _setF64(handle, 827, value);
 }
 
 /// Animates a [`Color`] property (WinUI's `ColorAnimation`), channel by channel. It animates
@@ -3174,8 +3174,8 @@ extension type ColorAnimation._(int handle) implements Timeline {
   String get from => _getString(handle, 315);
   set from(String value) => _setString(handle, 315, value);
   /// To. Defines the `To` property: the end value. Default `None`.
-  String get to => _getString(handle, 946);
-  set to(String value) => _setString(handle, 946, value);
+  String get to => _getString(handle, 947);
+  set to(String value) => _setString(handle, 947, value);
 }
 
 /// Animates a `Color` property through its `KeyFrames` (WinUI's
@@ -3200,11 +3200,11 @@ extension type ColorKeyFrame._(int handle) implements FerroObject {
   ColorKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeyTime. Defines the `KeyTime` property: when the value is reached, from the start of the
   /// animation. Default zero.
-  String get keyTime => _getString(handle, 493);
-  set keyTime(String value) => _setString(handle, 493, value);
+  String get keyTime => _getString(handle, 494);
+  set keyTime(String value) => _setString(handle, 494, value);
   /// Value. Defines the `Value` property: the value of the key frame.
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
 }
 
 /// Provides the core functionality used internally by `Grid` and the column and row definition
@@ -3227,14 +3227,14 @@ extension type ColumnDefinition._(int handle) implements DefinitionBase {
   factory ColumnDefinition() => ColumnDefinition._(_create(typeId));
   ColumnDefinition.of(FerroObject object) : this._(object.handle);
   /// MaxWidth. Defines the `MaxWidth` property.
-  double get maxWidth => _getF64(handle, 544);
-  set maxWidth(double value) => _setF64(handle, 544, value);
+  double get maxWidth => _getF64(handle, 545);
+  set maxWidth(double value) => _setF64(handle, 545, value);
   /// MinWidth. Defines the `MinWidth` property.
-  double get minWidth => _getF64(handle, 557);
-  set minWidth(double value) => _setF64(handle, 557, value);
+  double get minWidth => _getF64(handle, 558);
+  set minWidth(double value) => _setF64(handle, 558, value);
   /// Width. Defines the `Width` property.
-  String get width => _getString(handle, 1052);
-  set width(String value) => _setString(handle, 1052, value);
+  String get width => _getString(handle, 1053);
+  set width(String value) => _setString(handle, 1053, value);
 }
 
 /// Defines a geometric shape.
@@ -3242,8 +3242,8 @@ extension type Geometry._(int handle) implements FerroObject {
   static const int typeId = 129;
   Geometry.of(FerroObject object) : this._(object.handle);
   /// Transform.
-  FerroObject get transform => FerroObject(_getObject(handle, 969));
-  set transform(FerroObject value) => _setObject(handle, 969, value.handle);
+  FerroObject get transform => FerroObject(_getObject(handle, 970));
+  set transform(FerroObject value) => _setObject(handle, 970, value.handle);
 }
 
 /// Represents a 2-D geometric shape defined by the combination of two geometry objects.
@@ -3277,23 +3277,23 @@ extension type ComboBox._(int handle) implements SelectingItemsControl {
   bool get isEditable => _getBool(handle, 406);
   set isEditable(bool value) => _setBool(handle, 406, value);
   /// MaxDropDownHeight. Defines the `MaxDropDownHeight` property.
-  double get maxDropDownHeight => _getF64(handle, 535);
-  set maxDropDownHeight(double value) => _setF64(handle, 535, value);
+  double get maxDropDownHeight => _getF64(handle, 536);
+  set maxDropDownHeight(double value) => _setF64(handle, 536, value);
   /// PlaceholderForeground. Defines the `PlaceholderForeground` property.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText. Defines the `PlaceholderText` property.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// SelectionBoxItem. Defines the `SelectionBoxItem` property.
-  String get selectionBoxItem => _getString(handle, 783);
-  FerroObject get selectionBoxItemObject => FerroObject(_getObject(handle, 783));
+  String get selectionBoxItem => _getString(handle, 784);
+  FerroObject get selectionBoxItemObject => FerroObject(_getObject(handle, 784));
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// An automation peer which represents an [`ItemsControl`].
@@ -3356,26 +3356,26 @@ extension type CommandBar._(int handle) implements TemplatedControl {
   /// IsOverflowButtonVisible. Defines the `IsOverflowButtonVisible` property.
   bool get isOverflowButtonVisible => _getBool(handle, 436);
   /// IsSticky. Defines the `IsSticky` property.
-  bool get isSticky => _getBool(handle, 450);
-  set isSticky(bool value) => _setBool(handle, 450, value);
+  bool get isSticky => _getBool(handle, 451);
+  set isSticky(bool value) => _setBool(handle, 451, value);
   /// ItemWidthBottom. Defines the `ItemWidthBottom` property.
-  double get itemWidthBottom => _getF64(handle, 483);
-  set itemWidthBottom(double value) => _setF64(handle, 483, value);
+  double get itemWidthBottom => _getF64(handle, 484);
+  set itemWidthBottom(double value) => _setF64(handle, 484, value);
   /// ItemWidthCollapsed. Defines the `ItemWidthCollapsed` property.
-  double get itemWidthCollapsed => _getF64(handle, 484);
-  set itemWidthCollapsed(double value) => _setF64(handle, 484, value);
+  double get itemWidthCollapsed => _getF64(handle, 485);
+  set itemWidthCollapsed(double value) => _setF64(handle, 485, value);
   /// ItemWidthRight. Defines the `ItemWidthRight` property.
-  double get itemWidthRight => _getF64(handle, 485);
-  set itemWidthRight(double value) => _setF64(handle, 485, value);
+  double get itemWidthRight => _getF64(handle, 486);
+  set itemWidthRight(double value) => _setF64(handle, 486, value);
   /// OverflowButtonVisibility. Defines the `OverflowButtonVisibility` property.
-  CommandBarOverflowButtonVisibility get overflowButtonVisibility => CommandBarOverflowButtonVisibility(_getI64(handle, 614));
-  set overflowButtonVisibility(CommandBarOverflowButtonVisibility value) => _setI64(handle, 614, value.value);
+  CommandBarOverflowButtonVisibility get overflowButtonVisibility => CommandBarOverflowButtonVisibility(_getI64(handle, 615));
+  set overflowButtonVisibility(CommandBarOverflowButtonVisibility value) => _setI64(handle, 615, value.value);
   /// PrimaryCommands. Defines the `PrimaryCommands` property.
-  String get primaryCommands => _getString(handle, 684);
-  set primaryCommands(String value) => _setString(handle, 684, value);
+  String get primaryCommands => _getString(handle, 685);
+  set primaryCommands(String value) => _setString(handle, 685, value);
   /// SecondaryCommands. Defines the `SecondaryCommands` property.
-  String get secondaryCommands => _getString(handle, 766);
-  set secondaryCommands(String value) => _setString(handle, 766, value);
+  String get secondaryCommands => _getString(handle, 767);
+  set secondaryCommands(String value) => _setString(handle, 767, value);
   /// Closed: the sender is valid for the call. Defines the `Closed` routed event.
   Subscription onClosed(void Function(CommandBar sender) handler) =>
       _subscribe(handle, 5, (sender) => handler(CommandBar._(sender)));
@@ -3410,11 +3410,11 @@ extension type CommandBarButton._(int handle) implements Button {
   bool get isInOverflow => _getBool(handle, 419);
   set isInOverflow(bool value) => _setBool(handle, 419, value);
   /// Label. Defines the `Label` property.
-  String get label => _getString(handle, 501);
-  set label(String value) => _setString(handle, 501, value);
+  String get label => _getString(handle, 502);
+  set label(String value) => _setString(handle, 502, value);
   /// LabelPosition. Defines the `LabelPosition` property.
-  CommandBarDefaultLabelPosition get labelPosition => CommandBarDefaultLabelPosition(_getI64(handle, 502));
-  set labelPosition(CommandBarDefaultLabelPosition value) => _setI64(handle, 502, value.value);
+  CommandBarDefaultLabelPosition get labelPosition => CommandBarDefaultLabelPosition(_getI64(handle, 503));
+  set labelPosition(CommandBarDefaultLabelPosition value) => _setI64(handle, 503, value.value);
 }
 
 /// A separator control.
@@ -3457,11 +3457,11 @@ extension type CommandBarToggleButton._(int handle) implements ToggleButton {
   bool get isInOverflow => _getBool(handle, 419);
   set isInOverflow(bool value) => _setBool(handle, 419, value);
   /// Label. Defines the `Label` property.
-  String get label => _getString(handle, 501);
-  set label(String value) => _setString(handle, 501, value);
+  String get label => _getString(handle, 502);
+  set label(String value) => _setString(handle, 502, value);
   /// LabelPosition. Defines the `LabelPosition` property.
-  CommandBarDefaultLabelPosition get labelPosition => CommandBarDefaultLabelPosition(_getI64(handle, 502));
-  set labelPosition(CommandBarDefaultLabelPosition value) => _setI64(handle, 502, value.value);
+  CommandBarDefaultLabelPosition get labelPosition => CommandBarDefaultLabelPosition(_getI64(handle, 503));
+  set labelPosition(CommandBarDefaultLabelPosition value) => _setI64(handle, 503, value.value);
 }
 
 /// Base class for brushes that draw with a gradient.
@@ -3472,8 +3472,8 @@ extension type GradientBrush._(int handle) implements Brush {
   String get gradientStops => _getString(handle, 325);
   set gradientStops(String value) => _setString(handle, 325, value);
   /// SpreadMethod.
-  GradientSpreadMethod get spreadMethod => GradientSpreadMethod(_getI64(handle, 828));
-  set spreadMethod(GradientSpreadMethod value) => _setI64(handle, 828, value.value);
+  GradientSpreadMethod get spreadMethod => GradientSpreadMethod(_getI64(handle, 829));
+  set spreadMethod(GradientSpreadMethod value) => _setI64(handle, 829, value.value);
 }
 
 /// Paints an area with a swept circular gradient.
@@ -3494,8 +3494,8 @@ extension type ConnectedAnimationProxy._(int handle) implements Border {
   factory ConnectedAnimationProxy() => ConnectedAnimationProxy._(_create(typeId));
   ConnectedAnimationProxy.of(FerroObject object) : this._(object.handle);
   /// Progress. Defines the `Progress` property.
-  double get progress => _getF64(handle, 686);
-  set progress(double value) => _setF64(handle, 686, value);
+  double get progress => _getF64(handle, 687);
+  set progress(double value) => _setF64(handle, 687, value);
 }
 
 /// Coordinates connected animations across views. Each [`TopLevel`] window has its own
@@ -3530,8 +3530,8 @@ extension type Contact._(int handle) implements FerroObject {
   String get id => _getString(handle, 360);
   set id(String value) => _setString(handle, 360, value);
   /// LastName. Defines the `LastName` property.
-  String get lastName => _getString(handle, 510);
-  set lastName(String value) => _setString(handle, 510, value);
+  String get lastName => _getString(handle, 511);
+  set lastName(String value) => _setString(handle, 511, value);
 }
 
 /// Base class for [`Style`](super::Style), [`ControlTheme`](super::ControlTheme) and
@@ -3575,26 +3575,26 @@ extension type ContentDialog._(int handle) implements ContentControl {
   bool get isSecondaryButtonEnabled => _getBool(handle, 446);
   set isSecondaryButtonEnabled(bool value) => _setBool(handle, 446, value);
   /// PrimaryButtonCommandParameter. Defines the `PrimaryButtonCommandParameter` property.
-  String get primaryButtonCommandParameter => _getString(handle, 682);
-  set primaryButtonCommandParameter(String value) => _setString(handle, 682, value);
-  FerroObject get primaryButtonCommandParameterObject => FerroObject(_getObject(handle, 682));
-  set primaryButtonCommandParameterObject(FerroObject value) => _setObject(handle, 682, value.handle);
+  String get primaryButtonCommandParameter => _getString(handle, 683);
+  set primaryButtonCommandParameter(String value) => _setString(handle, 683, value);
+  FerroObject get primaryButtonCommandParameterObject => FerroObject(_getObject(handle, 683));
+  set primaryButtonCommandParameterObject(FerroObject value) => _setObject(handle, 683, value.handle);
   /// PrimaryButtonText. Defines the `PrimaryButtonText` property.
-  String get primaryButtonText => _getString(handle, 683);
-  set primaryButtonText(String value) => _setString(handle, 683, value);
+  String get primaryButtonText => _getString(handle, 684);
+  set primaryButtonText(String value) => _setString(handle, 684, value);
   /// SecondaryButtonCommandParameter. Defines the `SecondaryButtonCommandParameter` property.
-  String get secondaryButtonCommandParameter => _getString(handle, 764);
-  set secondaryButtonCommandParameter(String value) => _setString(handle, 764, value);
-  FerroObject get secondaryButtonCommandParameterObject => FerroObject(_getObject(handle, 764));
-  set secondaryButtonCommandParameterObject(FerroObject value) => _setObject(handle, 764, value.handle);
+  String get secondaryButtonCommandParameter => _getString(handle, 765);
+  set secondaryButtonCommandParameter(String value) => _setString(handle, 765, value);
+  FerroObject get secondaryButtonCommandParameterObject => FerroObject(_getObject(handle, 765));
+  set secondaryButtonCommandParameterObject(FerroObject value) => _setObject(handle, 765, value.handle);
   /// SecondaryButtonText. Defines the `SecondaryButtonText` property.
-  String get secondaryButtonText => _getString(handle, 765);
-  set secondaryButtonText(String value) => _setString(handle, 765, value);
+  String get secondaryButtonText => _getString(handle, 766);
+  set secondaryButtonText(String value) => _setString(handle, 766, value);
   /// Title. Defines the `Title` property.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
-  FerroObject get titleObject => FerroObject(_getObject(handle, 942));
-  set titleObject(FerroObject value) => _setObject(handle, 942, value.handle);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
+  FerroObject get titleObject => FerroObject(_getObject(handle, 943));
+  set titleObject(FerroObject value) => _setObject(handle, 943, value.handle);
 }
 
 /// A page that displays a single piece of content with optional top and bottom command bars.
@@ -3620,13 +3620,13 @@ extension type ContentPage._(int handle) implements Page {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// TopCommandBar. Defines the `TopCommandBar` property.
-  String get topCommandBar => _getString(handle, 962);
-  set topCommandBar(String value) => _setString(handle, 962, value);
-  FerroObject get topCommandBarObject => FerroObject(_getObject(handle, 962));
-  set topCommandBarObject(FerroObject value) => _setObject(handle, 962, value.handle);
+  String get topCommandBar => _getString(handle, 963);
+  set topCommandBar(String value) => _setString(handle, 963, value);
+  FerroObject get topCommandBarObject => FerroObject(_getObject(handle, 963));
+  set topCommandBarObject(FerroObject value) => _setObject(handle, 963, value.handle);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// An automation peer which represents a [`ContentPage`].
@@ -3687,29 +3687,29 @@ extension type ContentPresenter._(int handle) implements Control {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// LetterSpacing. Defines the `LetterSpacing` property.
-  double get letterSpacing => _getF64(handle, 517);
-  set letterSpacing(double value) => _setF64(handle, 517, value);
+  double get letterSpacing => _getF64(handle, 518);
+  set letterSpacing(double value) => _setF64(handle, 518, value);
   /// LineHeight. Defines the `LineHeight` property.
-  double get lineHeight => _getF64(handle, 520);
-  set lineHeight(double value) => _setF64(handle, 520, value);
+  double get lineHeight => _getF64(handle, 521);
+  set lineHeight(double value) => _setF64(handle, 521, value);
   /// MaxLines. Defines the `MaxLines` property.
-  int get maxLines => _getI64(handle, 539);
-  set maxLines(int value) => _setI64(handle, 539, value);
+  int get maxLines => _getI64(handle, 540);
+  set maxLines(int value) => _setI64(handle, 540, value);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 619);
-  set padding(String value) => _setString(handle, 619, value);
+  String get padding => _getString(handle, 620);
+  set padding(String value) => _setString(handle, 620, value);
   /// RecognizesAccessKey. Defines the `RecognizesAccessKey` property.
-  bool get recognizesAccessKey => _getBool(handle, 695);
-  set recognizesAccessKey(bool value) => _setBool(handle, 695, value);
+  bool get recognizesAccessKey => _getBool(handle, 696);
+  set recognizesAccessKey(bool value) => _setBool(handle, 696, value);
   /// TextAlignment. Defines the `TextAlignment` property.
-  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 879));
-  set textAlignment(TextAlignment value) => _setI64(handle, 879, value.value);
+  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 880));
+  set textAlignment(TextAlignment value) => _setI64(handle, 880, value.value);
   /// TextWrapping. Defines the `TextWrapping` property.
-  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 927));
-  set textWrapping(TextWrapping value) => _setI64(handle, 927, value.value);
+  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 928));
+  set textWrapping(TextWrapping value) => _setI64(handle, 928, value.value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// Base class for menu controls.
@@ -3738,30 +3738,30 @@ extension type ContextMenu._(int handle) implements MenuBase {
   double get horizontalOffset => _getF64(handle, 351);
   set horizontalOffset(double value) => _setF64(handle, 351, value);
   /// Placement. Defines the `Placement` property.
-  PlacementMode get placement => PlacementMode(_getI64(handle, 652));
-  set placement(PlacementMode value) => _setI64(handle, 652, value.value);
+  PlacementMode get placement => PlacementMode(_getI64(handle, 653));
+  set placement(PlacementMode value) => _setI64(handle, 653, value.value);
   /// PlacementAnchor. Defines the `PlacementAnchor` property.
-  String get placementAnchor => _getString(handle, 653);
-  set placementAnchor(String value) => _setString(handle, 653, value);
+  String get placementAnchor => _getString(handle, 654);
+  set placementAnchor(String value) => _setString(handle, 654, value);
   /// PlacementConstraintAdjustment. Defines the `PlacementConstraintAdjustment` property.
-  String get placementConstraintAdjustment => _getString(handle, 654);
-  set placementConstraintAdjustment(String value) => _setString(handle, 654, value);
+  String get placementConstraintAdjustment => _getString(handle, 655);
+  set placementConstraintAdjustment(String value) => _setString(handle, 655, value);
   /// PlacementGravity. Defines the `PlacementGravity` property.
-  String get placementGravity => _getString(handle, 655);
-  set placementGravity(String value) => _setString(handle, 655, value);
+  String get placementGravity => _getString(handle, 656);
+  set placementGravity(String value) => _setString(handle, 656, value);
   /// PlacementRect. Defines the `PlacementRect` property.
-  String get placementRect => _getString(handle, 656);
-  set placementRect(String value) => _setString(handle, 656, value);
+  String get placementRect => _getString(handle, 657);
+  set placementRect(String value) => _setString(handle, 657, value);
   /// PlacementTarget. Defines the `PlacementTarget` property. The menu does not own its
   /// placement target, so the value is an element reference.
-  FerroObject get placementTarget => FerroObject(_getObject(handle, 657));
-  set placementTarget(FerroObject value) => _setObject(handle, 657, value.handle);
+  FerroObject get placementTarget => FerroObject(_getObject(handle, 658));
+  set placementTarget(FerroObject value) => _setObject(handle, 658, value.handle);
   /// VerticalOffset. Defines the `VerticalOffset` property.
-  double get verticalOffset => _getF64(handle, 1036);
-  set verticalOffset(double value) => _setF64(handle, 1036, value);
+  double get verticalOffset => _getF64(handle, 1037);
+  set verticalOffset(double value) => _setF64(handle, 1037, value);
   /// WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.
-  bool get windowManagerAddShadowHint => _getBool(handle, 1060);
-  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1060, value);
+  bool get windowManagerAddShadowHint => _getBool(handle, 1061);
+  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1061, value);
 }
 
 /// Defines a switchable theme for a control.
@@ -3777,11 +3777,11 @@ extension type CroppedBitmap._(int handle) implements FerroObject {
   factory CroppedBitmap() => CroppedBitmap._(_create(typeId));
   CroppedBitmap.of(FerroObject object) : this._(object.handle);
   /// Source. Defines the `Source` property.
-  String get source => _getString(handle, 821);
-  set source(String value) => _setString(handle, 821, value);
+  String get source => _getString(handle, 822);
+  set source(String value) => _setString(handle, 822, value);
   /// SourceRect. Defines the `SourceRect` property.
-  String get sourceRect => _getString(handle, 824);
-  set sourceRect(String value) => _setString(handle, 824, value);
+  String get sourceRect => _getString(handle, 825);
+  set sourceRect(String value) => _setString(handle, 825, value);
 }
 
 /// The curve `t^3` (WinUI's `CubicEase`).
@@ -3798,8 +3798,8 @@ extension type DashStyle._(int handle) implements Animatable {
   factory DashStyle() => DashStyle._(_create(typeId));
   DashStyle.of(FerroObject object) : this._(object.handle);
   /// Offset.
-  double get offset => _getF64(handle, 604);
-  set offset(double value) => _setF64(handle, 604, value);
+  double get offset => _getF64(handle, 605);
+  set offset(double value) => _setF64(handle, 605, value);
 }
 
 /// A control which displays an error notifier when there is a data validation error. Provides
@@ -3824,8 +3824,8 @@ extension type DataValidationErrors._(int handle) implements ContentControl {
   /// does not own, so the value is an element reference where the managed property holds the
   /// control. The themes make it the `DataContext` of a part of the template
   /// (`DataContext="{TemplateBinding Owner}"`), which holds the reference as it is.
-  FerroObject get owner => FerroObject(_getObject(handle, 618));
-  set owner(FerroObject value) => _setObject(handle, 618, value.handle);
+  FerroObject get owner => FerroObject(_getObject(handle, 619));
+  set owner(FerroObject value) => _setObject(handle, 619, value.handle);
 }
 
 /// A control to allow the user to select a date.
@@ -3840,29 +3840,29 @@ extension type DatePicker._(int handle) implements TemplatedControl {
   bool get dayVisible => _getBool(handle, 200);
   set dayVisible(bool value) => _setBool(handle, 200, value);
   /// MaxYear. Defines the `MaxYear` property.
-  String get maxYear => _getString(handle, 545);
-  set maxYear(String value) => _setString(handle, 545, value);
+  String get maxYear => _getString(handle, 546);
+  set maxYear(String value) => _setString(handle, 546, value);
   /// MinYear. Defines the `MinYear` property.
-  String get minYear => _getString(handle, 560);
-  set minYear(String value) => _setString(handle, 560, value);
+  String get minYear => _getString(handle, 561);
+  set minYear(String value) => _setString(handle, 561, value);
   /// MonthFormat. Defines the `MonthFormat` property.
-  String get monthFormat => _getString(handle, 570);
-  set monthFormat(String value) => _setString(handle, 570, value);
+  String get monthFormat => _getString(handle, 571);
+  set monthFormat(String value) => _setString(handle, 571, value);
   /// MonthVisible. Defines the `MonthVisible` property.
-  bool get monthVisible => _getBool(handle, 571);
-  set monthVisible(bool value) => _setBool(handle, 571, value);
+  bool get monthVisible => _getBool(handle, 572);
+  set monthVisible(bool value) => _setBool(handle, 572, value);
   /// SelectedDate. Defines the `SelectedDate` property.
-  String get selectedDate => _getString(handle, 770);
-  set selectedDate(String value) => _setString(handle, 770, value);
+  String get selectedDate => _getString(handle, 771);
+  set selectedDate(String value) => _setString(handle, 771, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
   /// YearFormat. Defines the `YearFormat` property.
-  String get yearFormat => _getString(handle, 1073);
-  set yearFormat(String value) => _setString(handle, 1073, value);
+  String get yearFormat => _getString(handle, 1074);
+  set yearFormat(String value) => _setString(handle, 1074, value);
   /// YearVisible. Defines the `YearVisible` property.
-  bool get yearVisible => _getBool(handle, 1074);
-  set yearVisible(bool value) => _setBool(handle, 1074, value);
+  bool get yearVisible => _getBool(handle, 1075);
+  set yearVisible(bool value) => _setBool(handle, 1075, value);
 }
 
 /// An automation peer which represents a [`DatePicker`].
@@ -3892,23 +3892,23 @@ extension type DatePickerPresenter._(int handle) implements PickerPresenterBase 
   bool get dayVisible => _getBool(handle, 200);
   set dayVisible(bool value) => _setBool(handle, 200, value);
   /// MaxYear. Defines the `MaxYear` property.
-  String get maxYear => _getString(handle, 545);
-  set maxYear(String value) => _setString(handle, 545, value);
+  String get maxYear => _getString(handle, 546);
+  set maxYear(String value) => _setString(handle, 546, value);
   /// MinYear. Defines the `MinYear` property.
-  String get minYear => _getString(handle, 560);
-  set minYear(String value) => _setString(handle, 560, value);
+  String get minYear => _getString(handle, 561);
+  set minYear(String value) => _setString(handle, 561, value);
   /// MonthFormat. Defines the `MonthFormat` property.
-  String get monthFormat => _getString(handle, 570);
-  set monthFormat(String value) => _setString(handle, 570, value);
+  String get monthFormat => _getString(handle, 571);
+  set monthFormat(String value) => _setString(handle, 571, value);
   /// MonthVisible. Defines the `MonthVisible` property.
-  bool get monthVisible => _getBool(handle, 571);
-  set monthVisible(bool value) => _setBool(handle, 571, value);
+  bool get monthVisible => _getBool(handle, 572);
+  set monthVisible(bool value) => _setBool(handle, 572, value);
   /// YearFormat. Defines the `YearFormat` property.
-  String get yearFormat => _getString(handle, 1073);
-  set yearFormat(String value) => _setString(handle, 1073, value);
+  String get yearFormat => _getString(handle, 1074);
+  set yearFormat(String value) => _setString(handle, 1074, value);
   /// YearVisible. Defines the `YearVisible` property.
-  bool get yearVisible => _getBool(handle, 1074);
-  set yearVisible(bool value) => _setBool(handle, 1074, value);
+  bool get yearVisible => _getBool(handle, 1075);
+  set yearVisible(bool value) => _setBool(handle, 1075, value);
 }
 
 /// The looping, virtualizing panel that shows the values of one unit of a date or time picker.
@@ -3917,17 +3917,17 @@ extension type DateTimePickerPanel._(int handle) implements Panel {
   factory DateTimePickerPanel() => DateTimePickerPanel._(_create(typeId));
   DateTimePickerPanel.of(FerroObject object) : this._(object.handle);
   /// ItemFormat. Defines the `ItemFormat` property.
-  String get itemFormat => _getString(handle, 476);
-  set itemFormat(String value) => _setString(handle, 476, value);
+  String get itemFormat => _getString(handle, 477);
+  set itemFormat(String value) => _setString(handle, 477, value);
   /// ItemHeight. Defines the `ItemHeight` property.
-  double get itemHeight => _getF64(handle, 477);
-  set itemHeight(double value) => _setF64(handle, 477, value);
+  double get itemHeight => _getF64(handle, 478);
+  set itemHeight(double value) => _setF64(handle, 478, value);
   /// PanelType. Defines the `PanelType` property.
-  DateTimePickerPanelType get panelType => DateTimePickerPanelType(_getI64(handle, 639));
-  set panelType(DateTimePickerPanelType value) => _setI64(handle, 639, value.value);
+  DateTimePickerPanelType get panelType => DateTimePickerPanelType(_getI64(handle, 640));
+  set panelType(DateTimePickerPanelType value) => _setI64(handle, 640, value.value);
   /// ShouldLoop. Defines the `ShouldLoop` property.
-  bool get shouldLoop => _getBool(handle, 799);
-  set shouldLoop(bool value) => _setBool(handle, 799, value);
+  bool get shouldLoop => _getBool(handle, 800);
+  set shouldLoop(bool value) => _setBool(handle, 800, value);
 }
 
 extension type DecorationsOverlaysAutomationPeer._(int handle) implements AutomationPeer {
@@ -3969,11 +3969,11 @@ extension type DoubleKeyFrame._(int handle) implements FerroObject {
   DoubleKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeyTime. Defines the `KeyTime` property: when the value is reached, from the start of the
   /// animation. Default zero.
-  String get keyTime => _getString(handle, 493);
-  set keyTime(String value) => _setString(handle, 493, value);
+  String get keyTime => _getString(handle, 494);
+  set keyTime(String value) => _setString(handle, 494, value);
   /// Value. Defines the `Value` property: the value of the key frame.
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
 }
 
 /// Holds the value before it until its key time, then jumps.
@@ -3991,13 +3991,13 @@ extension type ObjectKeyFrame._(int handle) implements FerroObject {
   ObjectKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeyTime. Defines the `KeyTime` property: when the value is set, from the start of the
   /// animation. Default zero.
-  String get keyTime => _getString(handle, 493);
-  set keyTime(String value) => _setString(handle, 493, value);
+  String get keyTime => _getString(handle, 494);
+  set keyTime(String value) => _setString(handle, 494, value);
   /// Value. Defines the `Value` property. Default `None` (null).
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
-  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1032));
-  set valueValueObject(FerroObject value) => _setObject(handle, 1032, value.handle);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
+  FerroObject get valueValueObject => FerroObject(_getObject(handle, 1033));
+  set valueValueObject(FerroObject value) => _setObject(handle, 1033, value.handle);
 }
 
 /// Sets its value at its key time (WinUI's `DiscreteObjectKeyFrame`).
@@ -4014,11 +4014,11 @@ extension type PointKeyFrame._(int handle) implements FerroObject {
   PointKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeyTime. Defines the `KeyTime` property: when the value is reached, from the start of the
   /// animation. Default zero.
-  String get keyTime => _getString(handle, 493);
-  set keyTime(String value) => _setString(handle, 493, value);
+  String get keyTime => _getString(handle, 494);
+  set keyTime(String value) => _setString(handle, 494, value);
   /// Value. Defines the `Value` property: the value of the key frame.
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
 }
 
 /// Holds the value before it until its key time, then jumps.
@@ -4040,11 +4040,11 @@ extension type DockPanel._(int handle) implements Panel {
   double get horizontalSpacing => _getF64(handle, 353);
   set horizontalSpacing(double value) => _setF64(handle, 353, value);
   /// LastChildFill. Defines the `LastChildFill` property.
-  bool get lastChildFill => _getBool(handle, 509);
-  set lastChildFill(bool value) => _setBool(handle, 509, value);
+  bool get lastChildFill => _getBool(handle, 510);
+  set lastChildFill(bool value) => _setBool(handle, 510, value);
   /// VerticalSpacing. Defines the `VerticalSpacing` property.
-  double get verticalSpacing => _getF64(handle, 1038);
-  set verticalSpacing(double value) => _setF64(handle, 1038, value);
+  double get verticalSpacing => _getF64(handle, 1039);
+  set verticalSpacing(double value) => _setF64(handle, 1039, value);
 }
 
 /// Animates a `f64` property (WinUI's `DoubleAnimation`). It animates from `From` (or the value
@@ -4071,8 +4071,8 @@ extension type DoubleAnimation._(int handle) implements Timeline {
   double get from => _getF64(handle, 315);
   set from(double value) => _setF64(handle, 315, value);
   /// To. Defines the `To` property: the end value. Default `None`.
-  double get to => _getF64(handle, 946);
-  set to(double value) => _setF64(handle, 946, value);
+  double get to => _getF64(handle, 947);
+  set to(double value) => _setF64(handle, 947, value);
 }
 
 /// Animates a `f64` property through its `KeyFrames` (WinUI's `DoubleAnimationUsingKeyFrames`).
@@ -4168,8 +4168,8 @@ extension type DrawerPage._(int handle) implements Page {
   bool get isOpen => _getBool(handle, 435);
   set isOpen(bool value) => _setBool(handle, 435, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
   /// Closed: the sender is valid for the call. Defines the `Closed` routed event.
   Subscription onClosed(void Function(DrawerPage sender) handler) =>
       _subscribe(handle, 5, (sender) => handler(DrawerPage._(sender)));
@@ -4207,14 +4207,14 @@ extension type TileBrush._(int handle) implements Brush {
   String get destinationRect => _getString(handle, 220);
   set destinationRect(String value) => _setString(handle, 220, value);
   /// SourceRect.
-  String get sourceRect => _getString(handle, 824);
-  set sourceRect(String value) => _setString(handle, 824, value);
+  String get sourceRect => _getString(handle, 825);
+  set sourceRect(String value) => _setString(handle, 825, value);
   /// Stretch.
-  Stretch get stretch => Stretch(_getI64(handle, 836));
-  set stretch(Stretch value) => _setI64(handle, 836, value.value);
+  Stretch get stretch => Stretch(_getI64(handle, 837));
+  set stretch(Stretch value) => _setI64(handle, 837, value.value);
   /// TileMode.
-  TileMode get tileMode => TileMode(_getI64(handle, 936));
-  set tileMode(TileMode value) => _setI64(handle, 936, value.value);
+  TileMode get tileMode => TileMode(_getI64(handle, 937));
+  set tileMode(TileMode value) => _setI64(handle, 937, value.value);
 }
 
 /// Paints an area with a [`Drawing`].
@@ -4242,14 +4242,14 @@ extension type DrawingGroup._(int handle) implements Drawing {
   String get effect => _getString(handle, 261);
   set effect(String value) => _setString(handle, 261, value);
   /// Opacity. Defines the `Opacity` property.
-  double get opacity => _getF64(handle, 609);
-  set opacity(double value) => _setF64(handle, 609, value);
+  double get opacity => _getF64(handle, 610);
+  set opacity(double value) => _setF64(handle, 610, value);
   /// OpacityMask. Defines the `OpacityMask` property.
-  String get opacityMask => _getString(handle, 610);
-  set opacityMask(String value) => _setString(handle, 610, value);
+  String get opacityMask => _getString(handle, 611);
+  set opacityMask(String value) => _setString(handle, 611, value);
   /// Transform. Defines the `Transform` property.
-  FerroObject get transform => FerroObject(_getObject(handle, 969));
-  set transform(FerroObject value) => _setObject(handle, 969, value.handle);
+  FerroObject get transform => FerroObject(_getObject(handle, 970));
+  set transform(FerroObject value) => _setObject(handle, 970, value.handle);
 }
 
 /// An image that uses a [`Drawing`] for content.
@@ -4261,8 +4261,8 @@ extension type DrawingImage._(int handle) implements FerroObject {
   FerroObject get drawing => FerroObject(_getObject(handle, 255));
   set drawing(FerroObject value) => _setObject(handle, 255, value.handle);
   /// Viewbox. Defines the `Viewbox` property.
-  String get viewbox => _getString(handle, 1039);
-  set viewbox(String value) => _setString(handle, 1039, value);
+  String get viewbox => _getString(handle, 1040);
+  set viewbox(String value) => _setString(handle, 1040, value);
 }
 
 /// A button with an added drop-down chevron to visually indicate it has a flyout with
@@ -4284,8 +4284,8 @@ extension type DropShadowEffectBase._(int handle) implements Effect {
   String get color => _getString(handle, 157);
   set color(String value) => _setString(handle, 157, value);
   /// Opacity.
-  double get opacity => _getF64(handle, 609);
-  set opacity(double value) => _setF64(handle, 609, value);
+  double get opacity => _getF64(handle, 610);
+  set opacity(double value) => _setF64(handle, 610, value);
 }
 
 /// An effect that draws a shadow behind its content, positioned by a direction and a depth.
@@ -4297,8 +4297,8 @@ extension type DropShadowDirectionEffect._(int handle) implements DropShadowEffe
   double get direction => _getF64(handle, 222);
   set direction(double value) => _setF64(handle, 222, value);
   /// ShadowDepth.
-  double get shadowDepth => _getF64(handle, 797);
-  set shadowDepth(double value) => _setF64(handle, 797, value);
+  double get shadowDepth => _getF64(handle, 798);
+  set shadowDepth(double value) => _setF64(handle, 798, value);
 }
 
 /// An effect that draws a shadow behind its content, positioned by an offset.
@@ -4307,11 +4307,11 @@ extension type DropShadowEffect._(int handle) implements DropShadowEffectBase {
   factory DropShadowEffect() => DropShadowEffect._(_create(typeId));
   DropShadowEffect.of(FerroObject object) : this._(object.handle);
   /// OffsetX.
-  double get offsetX => _getF64(handle, 605);
-  set offsetX(double value) => _setF64(handle, 605, value);
+  double get offsetX => _getF64(handle, 606);
+  set offsetX(double value) => _setF64(handle, 606, value);
   /// OffsetY.
-  double get offsetY => _getF64(handle, 606);
-  set offsetY(double value) => _setF64(handle, 606, value);
+  double get offsetY => _getF64(handle, 607);
+  set offsetY(double value) => _setF64(handle, 607, value);
 }
 
 /// Interpolates with an easing function from the value before it (WinUI's
@@ -4353,11 +4353,11 @@ extension type ElasticEase._(int handle) implements EasingFunctionBase {
   factory ElasticEase() => ElasticEase._(_create(typeId));
   ElasticEase.of(FerroObject object) : this._(object.handle);
   /// Oscillations. Defines the `Oscillations` property: the number of oscillations. Default 3.
-  int get oscillations => _getI64(handle, 613);
-  set oscillations(int value) => _setI64(handle, 613, value);
+  int get oscillations => _getI64(handle, 614);
+  set oscillations(int value) => _setI64(handle, 614, value);
   /// Springiness. Defines the `Springiness` property: the stiffness of the spring. Default 3.
-  double get springiness => _getF64(handle, 829);
-  set springiness(double value) => _setF64(handle, 829, value);
+  double get springiness => _getF64(handle, 830);
+  set springiness(double value) => _setF64(handle, 830, value);
 }
 
 /// Represents an ellipse which fills its bounds.
@@ -4376,14 +4376,14 @@ extension type EllipseGeometry._(int handle) implements Geometry {
   String get center => _getString(handle, 132);
   set center(String value) => _setString(handle, 132, value);
   /// RadiusX.
-  double get radiusX => _getF64(handle, 693);
-  set radiusX(double value) => _setF64(handle, 693, value);
+  double get radiusX => _getF64(handle, 694);
+  set radiusX(double value) => _setF64(handle, 694, value);
   /// RadiusY.
-  double get radiusY => _getF64(handle, 694);
-  set radiusY(double value) => _setF64(handle, 694, value);
+  double get radiusY => _getF64(handle, 695);
+  set radiusY(double value) => _setF64(handle, 695, value);
   /// Rect.
-  String get rect => _getString(handle, 696);
-  set rect(String value) => _setString(handle, 696, value);
+  String get rect => _getString(handle, 697);
+  set rect(String value) => _setString(handle, 697, value);
 }
 
 /// Base class for top-level widgets. This class acts as a base for top level widget. It handles
@@ -4400,17 +4400,17 @@ extension type TopLevel._(int handle) implements ContentControl {
   String get frameSize => _getString(handle, 313);
   /// TopLevel.AutoSafeAreaPadding (attached). Defines the AutoSafeAreaPadding attached
   /// property.
-  static bool getAutoSafeAreaPadding(FerroObject target) => _getBool(target.handle, 964);
-  static void setAutoSafeAreaPadding(FerroObject target, bool value) => _setBool(target.handle, 964, value);
+  static bool getAutoSafeAreaPadding(FerroObject target) => _getBool(target.handle, 965);
+  static void setAutoSafeAreaPadding(FerroObject target, bool value) => _setBool(target.handle, 965, value);
   /// TopLevel.SystemBarColor (attached). Defines the SystemBarColor attached property.
-  static FerroObject getSystemBarColor(FerroObject target) => FerroObject(_getObject(target.handle, 965));
-  static void setSystemBarColor(FerroObject target, FerroObject value) => _setObject(target.handle, 965, value.handle);
+  static FerroObject getSystemBarColor(FerroObject target) => FerroObject(_getObject(target.handle, 966));
+  static void setSystemBarColor(FerroObject target, FerroObject value) => _setObject(target.handle, 966, value.handle);
   /// TransparencyBackgroundFallback. Defines the `TransparencyBackgroundFallback` property.
-  String get transparencyBackgroundFallback => _getString(handle, 973);
-  set transparencyBackgroundFallback(String value) => _setString(handle, 973, value);
+  String get transparencyBackgroundFallback => _getString(handle, 974);
+  set transparencyBackgroundFallback(String value) => _setString(handle, 974, value);
   /// TransparencyLevelHint. Defines the `TransparencyLevelHint` property.
-  String get transparencyLevelHint => _getString(handle, 974);
-  set transparencyLevelHint(String value) => _setString(handle, 974, value);
+  String get transparencyLevelHint => _getString(handle, 975);
+  set transparencyLevelHint(String value) => _setString(handle, 975, value);
   /// BackRequested: the sender is valid for the call. Defines the `BackRequested` event.
   Subscription onBackRequested(void Function(TopLevel sender) handler) =>
       _subscribe(handle, 3, (sender) => handler(TopLevel._(sender)));
@@ -4485,8 +4485,8 @@ extension type ExperimentalAcrylicBorder._(int handle) implements Decorator {
   String get cornerRadius => _getString(handle, 182);
   set cornerRadius(String value) => _setString(handle, 182, value);
   /// Material. Defines the `Material` property.
-  FerroObject get material => FerroObject(_getObject(handle, 531));
-  set material(FerroObject value) => _setObject(handle, 531, value.handle);
+  FerroObject get material => FerroObject(_getObject(handle, 532));
+  set material(FerroObject value) => _setObject(handle, 532, value.handle);
 }
 
 /// An experimental acrylic-like material.
@@ -4501,18 +4501,18 @@ extension type ExperimentalAcrylicMaterial._(int handle) implements FerroObject 
   String get fallbackColor => _getString(handle, 276);
   set fallbackColor(String value) => _setString(handle, 276, value);
   /// MaterialOpacity. Defines the `MaterialOpacity` property.
-  double get materialOpacity => _getF64(handle, 532);
-  set materialOpacity(double value) => _setF64(handle, 532, value);
+  double get materialOpacity => _getF64(handle, 533);
+  set materialOpacity(double value) => _setF64(handle, 533, value);
   /// PlatformTransparencyCompensationLevel. Defines the `PlatformTransparencyCompensationLevel`
   /// property.
-  double get platformTransparencyCompensationLevel => _getF64(handle, 659);
-  set platformTransparencyCompensationLevel(double value) => _setF64(handle, 659, value);
+  double get platformTransparencyCompensationLevel => _getF64(handle, 660);
+  set platformTransparencyCompensationLevel(double value) => _setF64(handle, 660, value);
   /// TintColor. Defines the `TintColor` property.
-  String get tintColor => _getString(handle, 938);
-  set tintColor(String value) => _setString(handle, 938, value);
+  String get tintColor => _getString(handle, 939);
+  set tintColor(String value) => _setString(handle, 939, value);
   /// TintOpacity. Defines the `TintOpacity` property.
-  double get tintOpacity => _getF64(handle, 940);
-  set tintOpacity(double value) => _setF64(handle, 940, value);
+  double get tintOpacity => _getF64(handle, 941);
+  set tintOpacity(double value) => _setF64(handle, 941, value);
 }
 
 /// An exponential curve (WinUI's `ExponentialEase`).
@@ -4546,14 +4546,14 @@ extension type FlexPanel._(int handle) implements Panel {
   FlexDirection get direction => FlexDirection(_getI64(handle, 222));
   set direction(FlexDirection value) => _setI64(handle, 222, value.value);
   /// JustifyContent. Defines the `JustifyContent` property.
-  FlexJustifyContent get justifyContent => FlexJustifyContent(_getI64(handle, 491));
-  set justifyContent(FlexJustifyContent value) => _setI64(handle, 491, value.value);
+  FlexJustifyContent get justifyContent => FlexJustifyContent(_getI64(handle, 492));
+  set justifyContent(FlexJustifyContent value) => _setI64(handle, 492, value.value);
   /// RowSpacing. Defines the `RowSpacing` property.
-  double get rowSpacing => _getF64(handle, 737);
-  set rowSpacing(double value) => _setF64(handle, 737, value);
+  double get rowSpacing => _getF64(handle, 738);
+  set rowSpacing(double value) => _setF64(handle, 738, value);
   /// Wrap. Defines the `Wrap` property.
-  FlexWrap get wrap => FlexWrap(_getI64(handle, 1063));
-  set wrap(FlexWrap value) => _setI64(handle, 1063, value.value);
+  FlexWrap get wrap => FlexWrap(_getI64(handle, 1064));
+  set wrap(FlexWrap value) => _setI64(handle, 1064, value.value);
 }
 
 /// The base class of flyouts. This class is abstract: only its subclasses can be created.
@@ -4567,7 +4567,7 @@ extension type FlyoutBase._(int handle) implements FerroObject {
   bool get isOpen => _getBool(handle, 435);
   set isOpen(bool value) => _setBool(handle, 435, value);
   /// Target. Defines the `Target` property.
-  FerroObject get target => FerroObject(_getObject(handle, 871));
+  FerroObject get target => FerroObject(_getObject(handle, 872));
 }
 
 /// The base class of flyouts that are shown in a [`Popup`]. This class is abstract: only its
@@ -4582,26 +4582,26 @@ extension type PopupFlyoutBase._(int handle) implements FlyoutBase {
   double get horizontalOffset => _getF64(handle, 351);
   set horizontalOffset(double value) => _setF64(handle, 351, value);
   /// OverlayDismissEventPassThrough. Defines the `OverlayDismissEventPassThrough` property.
-  bool get overlayDismissEventPassThrough => _getBool(handle, 616);
-  set overlayDismissEventPassThrough(bool value) => _setBool(handle, 616, value);
+  bool get overlayDismissEventPassThrough => _getBool(handle, 617);
+  set overlayDismissEventPassThrough(bool value) => _setBool(handle, 617, value);
   /// Placement. Defines the `Placement` property.
-  PlacementMode get placement => PlacementMode(_getI64(handle, 652));
-  set placement(PlacementMode value) => _setI64(handle, 652, value.value);
+  PlacementMode get placement => PlacementMode(_getI64(handle, 653));
+  set placement(PlacementMode value) => _setI64(handle, 653, value.value);
   /// PlacementAnchor. Defines the `PlacementAnchor` property.
-  String get placementAnchor => _getString(handle, 653);
-  set placementAnchor(String value) => _setString(handle, 653, value);
+  String get placementAnchor => _getString(handle, 654);
+  set placementAnchor(String value) => _setString(handle, 654, value);
   /// PlacementConstraintAdjustment. Defines the `PlacementConstraintAdjustment` property.
-  String get placementConstraintAdjustment => _getString(handle, 654);
-  set placementConstraintAdjustment(String value) => _setString(handle, 654, value);
+  String get placementConstraintAdjustment => _getString(handle, 655);
+  set placementConstraintAdjustment(String value) => _setString(handle, 655, value);
   /// PlacementGravity. Defines the `PlacementGravity` property.
-  String get placementGravity => _getString(handle, 655);
-  set placementGravity(String value) => _setString(handle, 655, value);
+  String get placementGravity => _getString(handle, 656);
+  set placementGravity(String value) => _setString(handle, 656, value);
   /// ShowMode. Defines the `ShowMode` property.
-  FlyoutShowMode get showMode => FlyoutShowMode(_getI64(handle, 807));
-  set showMode(FlyoutShowMode value) => _setI64(handle, 807, value.value);
+  FlyoutShowMode get showMode => FlyoutShowMode(_getI64(handle, 808));
+  set showMode(FlyoutShowMode value) => _setI64(handle, 808, value.value);
   /// VerticalOffset. Defines the `VerticalOffset` property.
-  double get verticalOffset => _getF64(handle, 1036);
-  set verticalOffset(double value) => _setF64(handle, 1036, value);
+  double get verticalOffset => _getF64(handle, 1037);
+  set verticalOffset(double value) => _setF64(handle, 1037, value);
 }
 
 /// A flyout that displays arbitrary content.
@@ -4651,8 +4651,8 @@ extension type FontIcon._(int handle) implements IconElement {
   set glyph(String value) => _setString(handle, 322, value);
   /// MirroredWhenRightToLeft. Defines the `MirroredWhenRightToLeft` property: whether the glyph
   /// is mirrored when the flow direction is right to left. `false` by default.
-  bool get mirroredWhenRightToLeft => _getBool(handle, 566);
-  set mirroredWhenRightToLeft(bool value) => _setBool(handle, 566, value);
+  bool get mirroredWhenRightToLeft => _getBool(handle, 567);
+  set mirroredWhenRightToLeft(bool value) => _setBool(handle, 567, value);
 }
 
 /// The base class of the descriptions of an icon that can be shared (WinUI's `IconSource`):
@@ -4694,8 +4694,8 @@ extension type FontIconSource._(int handle) implements IconSource {
   String get glyph => _getString(handle, 322);
   set glyph(String value) => _setString(handle, 322, value);
   /// MirroredWhenRightToLeft. Defines the `MirroredWhenRightToLeft` property.
-  bool get mirroredWhenRightToLeft => _getBool(handle, 566);
-  set mirroredWhenRightToLeft(bool value) => _setBool(handle, 566, value);
+  bool get mirroredWhenRightToLeft => _getBool(handle, 567);
+  set mirroredWhenRightToLeft(bool value) => _setBool(handle, 567, value);
 }
 
 /// A content control that navigates between pages of the WinUI model (WinUI's `Frame`): it
@@ -4741,8 +4741,8 @@ extension type Frame._(int handle) implements ContentControl {
   /// SourcePageType. Defines the `SourcePageType` property: the type of the page of the last
   /// navigation; setting it navigates to a page of the type. An invalid value is logged and
   /// ignored (WinUI's setter fails with the error of `Navigate`).
-  String get sourcePageType => _getString(handle, 823);
-  set sourcePageType(String value) => _setString(handle, 823, value);
+  String get sourcePageType => _getString(handle, 824);
+  set sourcePageType(String value) => _setString(handle, 824, value);
 }
 
 /// Provides the base class for defining a new control that encapsulates related existing
@@ -4769,8 +4769,8 @@ extension type FramePage._(int handle) implements UserControl {
   FerroObject get frame => FerroObject(_getObject(handle, 312));
   /// NavigationCacheMode. Defines the `NavigationCacheMode` property: whether the frame keeps
   /// the page to show it again. `Disabled` by default.
-  NavigationCacheMode get navigationCacheMode => NavigationCacheMode(_getI64(handle, 580));
-  set navigationCacheMode(NavigationCacheMode value) => _setI64(handle, 580, value.value);
+  NavigationCacheMode get navigationCacheMode => NavigationCacheMode(_getI64(handle, 581));
+  set navigationCacheMode(NavigationCacheMode value) => _setI64(handle, 581, value.value);
 }
 
 /// Represents a drawing of a [`Geometry`] with a brush and a pen.
@@ -4827,8 +4827,8 @@ extension type GradientStop._(int handle) implements FerroObject {
   String get color => _getString(handle, 157);
   set color(String value) => _setString(handle, 157, value);
   /// Offset.
-  double get offset => _getF64(handle, 604);
-  set offset(double value) => _setF64(handle, 604, value);
+  double get offset => _getF64(handle, 605);
+  set offset(double value) => _setF64(handle, 605, value);
 }
 
 /// Defines a flexible grid area that consists of columns and rows.
@@ -4868,13 +4868,13 @@ extension type Grid._(int handle) implements Panel {
   static int getRowSpan(FerroObject target) => _getI64(target.handle, 330);
   static void setRowSpan(FerroObject target, int value) => _setI64(target.handle, 330, value);
   /// RowSpacing. Defines the `RowSpacing` property.
-  double get rowSpacing => _getF64(handle, 737);
-  set rowSpacing(double value) => _setF64(handle, 737, value);
+  double get rowSpacing => _getF64(handle, 738);
+  set rowSpacing(double value) => _setF64(handle, 738, value);
   /// ShowGridLines. Defines the `ShowGridLines` property. This property is used mostly for the
   /// simplification of visual debugging. When it is set to true, grid lines are drawn to
   /// visualize the location of the grid lines.
-  bool get showGridLines => _getBool(handle, 805);
-  set showGridLines(bool value) => _setBool(handle, 805, value);
+  bool get showGridLines => _getBool(handle, 806);
+  set showGridLines(bool value) => _setBool(handle, 806, value);
 }
 
 extension type GridLinesRenderer._(int handle) implements Control {
@@ -4908,17 +4908,17 @@ extension type GridSplitter._(int handle) implements Thumb {
   double get dragIncrement => _getF64(handle, 236);
   set dragIncrement(double value) => _setF64(handle, 236, value);
   /// KeyboardIncrement. Defines the `KeyboardIncrement` property.
-  double get keyboardIncrement => _getF64(handle, 494);
-  set keyboardIncrement(double value) => _setF64(handle, 494, value);
+  double get keyboardIncrement => _getF64(handle, 495);
+  set keyboardIncrement(double value) => _setF64(handle, 495, value);
   /// ResizeBehavior. Defines the `ResizeBehavior` property.
-  GridResizeBehavior get resizeBehavior => GridResizeBehavior(_getI64(handle, 725));
-  set resizeBehavior(GridResizeBehavior value) => _setI64(handle, 725, value.value);
+  GridResizeBehavior get resizeBehavior => GridResizeBehavior(_getI64(handle, 726));
+  set resizeBehavior(GridResizeBehavior value) => _setI64(handle, 726, value.value);
   /// ResizeDirection. Defines the `ResizeDirection` property.
-  GridResizeDirection get resizeDirection => GridResizeDirection(_getI64(handle, 726));
-  set resizeDirection(GridResizeDirection value) => _setI64(handle, 726, value.value);
+  GridResizeDirection get resizeDirection => GridResizeDirection(_getI64(handle, 727));
+  set resizeDirection(GridResizeDirection value) => _setI64(handle, 727, value.value);
   /// ShowsPreview. Defines the `ShowsPreview` property.
-  bool get showsPreview => _getBool(handle, 811);
-  set showsPreview(bool value) => _setBool(handle, 811, value);
+  bool get showsPreview => _getBool(handle, 812);
+  set showsPreview(bool value) => _setBool(handle, 812, value);
 }
 
 /// The base of [`ListView`](super::ListView) and `GridView` (WinUI's `ListViewBase`): a
@@ -4968,22 +4968,22 @@ extension type ListViewBase._(int handle) implements SelectingItemsControl {
   bool get isMultiSelectCheckBoxEnabled => _getBool(handle, 431);
   set isMultiSelectCheckBoxEnabled(bool value) => _setBool(handle, 431, value);
   /// IsSwipeEnabled. Defines the `IsSwipeEnabled` property. A no-op, as in WinUI 3.
-  bool get isSwipeEnabled => _getBool(handle, 454);
-  set isSwipeEnabled(bool value) => _setBool(handle, 454, value);
+  bool get isSwipeEnabled => _getBool(handle, 455);
+  set isSwipeEnabled(bool value) => _setBool(handle, 455, value);
   /// ReorderMode. Defines the `ReorderMode` property. Accepted; reordering is not ported.
-  ListViewReorderMode get reorderMode => ListViewReorderMode(_getI64(handle, 719));
-  set reorderMode(ListViewReorderMode value) => _setI64(handle, 719, value.value);
+  ListViewReorderMode get reorderMode => ListViewReorderMode(_getI64(handle, 720));
+  set reorderMode(ListViewReorderMode value) => _setI64(handle, 720, value.value);
   /// SelectionMode. Defines the `SelectionMode` property (WinUI's `ListViewSelectionMode`).
-  ListViewSelectionMode get selectionMode => ListViewSelectionMode(_getI64(handle, 791));
-  set selectionMode(ListViewSelectionMode value) => _setI64(handle, 791, value.value);
+  ListViewSelectionMode get selectionMode => ListViewSelectionMode(_getI64(handle, 792));
+  set selectionMode(ListViewSelectionMode value) => _setI64(handle, 792, value.value);
   /// ShowsScrollingPlaceholders. Defines the `ShowsScrollingPlaceholders` property. Accepted;
   /// FerroUI shows no placeholders.
-  bool get showsScrollingPlaceholders => _getBool(handle, 812);
-  set showsScrollingPlaceholders(bool value) => _setBool(handle, 812, value);
+  bool get showsScrollingPlaceholders => _getBool(handle, 813);
+  set showsScrollingPlaceholders(bool value) => _setBool(handle, 813, value);
   /// SingleSelectionFollowsFocus. Defines the `SingleSelectionFollowsFocus` property: with
   /// `Single`, moving the focus selects (WinUI's default `true`).
-  bool get singleSelectionFollowsFocus => _getBool(handle, 813);
-  set singleSelectionFollowsFocus(bool value) => _setBool(handle, 813, value);
+  bool get singleSelectionFollowsFocus => _getBool(handle, 814);
+  set singleSelectionFollowsFocus(bool value) => _setBool(handle, 814, value);
 }
 
 /// A grid of items (WinUI's `GridView`): a [`ListViewBase`] whose items panel is an
@@ -5072,23 +5072,23 @@ extension type Hyperlink._(int handle) implements Span {
   bool get isEnabled => _getBool(handle, 408);
   set isEnabled(bool value) => _setBool(handle, 408, value);
   /// IsTabStop.
-  bool get isTabStop => _getBool(handle, 456);
-  set isTabStop(bool value) => _setBool(handle, 456, value);
+  bool get isTabStop => _getBool(handle, 457);
+  set isTabStop(bool value) => _setBool(handle, 457, value);
   /// IsVisited.
-  bool get isVisited => _getBool(handle, 469);
-  set isVisited(bool value) => _setBool(handle, 469, value);
+  bool get isVisited => _getBool(handle, 470);
+  set isVisited(bool value) => _setBool(handle, 470, value);
   /// NavigateUri.
-  String get navigateUri => _getString(handle, 578);
-  set navigateUri(String value) => _setString(handle, 578, value);
+  String get navigateUri => _getString(handle, 579);
+  set navigateUri(String value) => _setString(handle, 579, value);
   /// TabIndex.
-  int get tabIndex => _getI64(handle, 855);
-  set tabIndex(int value) => _setI64(handle, 855, value);
+  int get tabIndex => _getI64(handle, 856);
+  set tabIndex(int value) => _setI64(handle, 856, value);
   /// TargetName.
-  String get targetName => _getString(handle, 872);
-  set targetName(String value) => _setString(handle, 872, value);
+  String get targetName => _getString(handle, 873);
+  set targetName(String value) => _setString(handle, 873, value);
   /// UnderlineStyle.
-  UnderlineStyle get underlineStyle => UnderlineStyle(_getI64(handle, 1020));
-  set underlineStyle(UnderlineStyle value) => _setI64(handle, 1020, value.value);
+  UnderlineStyle get underlineStyle => UnderlineStyle(_getI64(handle, 1021));
+  set underlineStyle(UnderlineStyle value) => _setI64(handle, 1021, value.value);
 }
 
 /// Accessibility for a nonvisual hyperlink in a rich document. The owner/name, Invoke and
@@ -5105,11 +5105,11 @@ extension type HyperlinkButton._(int handle) implements Button {
   factory HyperlinkButton() => HyperlinkButton._(_create(typeId));
   HyperlinkButton.of(FerroObject object) : this._(object.handle);
   /// IsVisited. Defines the `IsVisited` property.
-  bool get isVisited => _getBool(handle, 469);
-  set isVisited(bool value) => _setBool(handle, 469, value);
+  bool get isVisited => _getBool(handle, 470);
+  set isVisited(bool value) => _setBool(handle, 470, value);
   /// NavigateUri. Defines the `NavigateUri` property.
-  String get navigateUri => _getString(handle, 578);
-  set navigateUri(String value) => _setString(handle, 578, value);
+  String get navigateUri => _getString(handle, 579);
+  set navigateUri(String value) => _setString(handle, 579, value);
 }
 
 /// Displays an [`IImage`].
@@ -5121,14 +5121,14 @@ extension type Image._(int handle) implements Control {
   BitmapBlendingMode get blendMode => BitmapBlendingMode(_getI64(handle, 81));
   set blendMode(BitmapBlendingMode value) => _setI64(handle, 81, value.value);
   /// Source. Defines the `Source` property.
-  String get source => _getString(handle, 821);
-  set source(String value) => _setString(handle, 821, value);
+  String get source => _getString(handle, 822);
+  set source(String value) => _setString(handle, 822, value);
   /// Stretch. Defines the `Stretch` property.
-  Stretch get stretch => Stretch(_getI64(handle, 836));
-  set stretch(Stretch value) => _setI64(handle, 836, value.value);
+  Stretch get stretch => Stretch(_getI64(handle, 837));
+  set stretch(Stretch value) => _setI64(handle, 837, value.value);
   /// StretchDirection. Defines the `StretchDirection` property.
-  StretchDirection get stretchDirection => StretchDirection(_getI64(handle, 837));
-  set stretchDirection(StretchDirection value) => _setI64(handle, 837, value.value);
+  StretchDirection get stretchDirection => StretchDirection(_getI64(handle, 838));
+  set stretchDirection(StretchDirection value) => _setI64(handle, 838, value.value);
 }
 
 /// An automation peer which represents an image.
@@ -5153,8 +5153,8 @@ extension type ImageDrawing._(int handle) implements Drawing {
   String get imageSource => _getString(handle, 363);
   set imageSource(String value) => _setString(handle, 363, value);
   /// Rect. Defines the `Rect` property.
-  String get rect => _getString(handle, 696);
-  set rect(String value) => _setString(handle, 696, value);
+  String get rect => _getString(handle, 697);
+  set rect(String value) => _setString(handle, 697, value);
 }
 
 /// A geometry with a fixed platform implementation.
@@ -5186,11 +5186,11 @@ extension type InfoBadge._(int handle) implements TemplatedControl {
   set iconSource(FerroObject value) => _setObject(handle, 358, value.handle);
   /// TemplateSettings. Defines the `TemplateSettings` property: the values the template binds
   /// to (read-only).
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// Value. Defines the `Value` property: the number the badge shows when it is 0 or more; -1
   /// (the default) shows the icon or the dot. A value below -1 is coerced to -1.
-  int get valueValue => _getI64(handle, 1032);
-  set valueValue(int value) => _setI64(handle, 1032, value);
+  int get valueValue => _getI64(handle, 1033);
+  set valueValue(int value) => _setI64(handle, 1033, value);
 }
 
 /// The values the template of an [`InfoBadge`](crate::InfoBadge) binds to: the corner radius of
@@ -5259,18 +5259,18 @@ extension type InfoBar._(int handle) implements ContentControl {
   bool get isOpen => _getBool(handle, 435);
   set isOpen(bool value) => _setBool(handle, 435, value);
   /// Message. Defines the `Message` property: the text of the message.
-  String get message => _getString(handle, 554);
-  set message(String value) => _setString(handle, 554, value);
+  String get message => _getString(handle, 555);
+  set message(String value) => _setString(handle, 555, value);
   /// Severity. Defines the `Severity` property: the kind of the message, which selects its icon
   /// and colours. `Informational` by default.
-  InfoBarSeverity get severity => InfoBarSeverity(_getI64(handle, 795));
-  set severity(InfoBarSeverity value) => _setI64(handle, 795, value.value);
+  InfoBarSeverity get severity => InfoBarSeverity(_getI64(handle, 796));
+  set severity(InfoBarSeverity value) => _setI64(handle, 796, value.value);
   /// TemplateSettings. Defines the `TemplateSettings` property: the values the template binds
   /// to (read-only).
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// Title. Defines the `Title` property: the title of the message.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
 }
 
 /// The automation peer of an [`InfoBar`]: a status bar, as in WinUI. WinUI raises UI Automation
@@ -5311,8 +5311,8 @@ extension type InfoBarPanel._(int handle) implements Panel {
   static String getVerticalOrientationMargin(FerroObject target) => _getString(target.handle, 374);
   static void setVerticalOrientationMargin(FerroObject target, String value) => _setString(target.handle, 374, value);
   /// VerticalOrientationPadding. Defines the `VerticalOrientationPadding` property.
-  String get verticalOrientationPadding => _getString(handle, 1037);
-  set verticalOrientationPadding(String value) => _setString(handle, 1037, value);
+  String get verticalOrientationPadding => _getString(handle, 1038);
+  set verticalOrientationPadding(String value) => _setString(handle, 1038, value);
 }
 
 /// The values the template of an [`InfoBar`](crate::InfoBar) binds to: the icon element created
@@ -5364,8 +5364,8 @@ extension type InputScopeName._(int handle) implements FerroObject {
   factory InputScopeName() => InputScopeName._(_create(typeId));
   InputScopeName.of(FerroObject object) : this._(object.handle);
   /// NameValue.
-  InputScopeNameValue get nameValue => InputScopeNameValue(_getI64(handle, 574));
-  set nameValue(InputScopeNameValue value) => _setI64(handle, 574, value.value);
+  InputScopeNameValue get nameValue => InputScopeNameValue(_getI64(handle, 575));
+  set nameValue(InputScopeNameValue value) => _setI64(handle, 575, value.value);
 }
 
 /// The burning flame as an interactive effect class (Effector's `BurningFlameShaderEffect`, the
@@ -5460,8 +5460,8 @@ extension type VirtualizingStackPanel._(int handle) implements VirtualizingPanel
   double get cacheLength => _getF64(handle, 96);
   set cacheLength(double value) => _setF64(handle, 96, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// HorizontalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `HorizontalSnapPointsChanged` event.
   Subscription onHorizontalSnapPointsChanged(void Function(VirtualizingStackPanel sender) handler) =>
@@ -5492,8 +5492,8 @@ extension type ItemsStackPanel._(int handle) implements VirtualizingStackPanel {
   String get groupPadding => _getString(handle, 333);
   set groupPadding(String value) => _setString(handle, 333, value);
   /// ItemsUpdatingScrollMode. Defines the `ItemsUpdatingScrollMode` property.
-  ItemsUpdatingScrollMode get itemsUpdatingScrollMode => ItemsUpdatingScrollMode(_getI64(handle, 490));
-  set itemsUpdatingScrollMode(ItemsUpdatingScrollMode value) => _setI64(handle, 490, value.value);
+  ItemsUpdatingScrollMode get itemsUpdatingScrollMode => ItemsUpdatingScrollMode(_getI64(handle, 491));
+  set itemsUpdatingScrollMode(ItemsUpdatingScrollMode value) => _setI64(handle, 491, value.value);
 }
 
 /// Positions child elements in sequential position from left to right, breaking content to the
@@ -5504,26 +5504,26 @@ extension type WrapPanel._(int handle) implements Panel {
   factory WrapPanel() => WrapPanel._(_create(typeId));
   WrapPanel.of(FerroObject object) : this._(object.handle);
   /// ItemHeight. Defines the `ItemHeight` property.
-  double get itemHeight => _getF64(handle, 477);
-  set itemHeight(double value) => _setF64(handle, 477, value);
+  double get itemHeight => _getF64(handle, 478);
+  set itemHeight(double value) => _setF64(handle, 478, value);
   /// ItemSpacing. Defines the `ItemSpacing` property.
-  double get itemSpacing => _getF64(handle, 480);
-  set itemSpacing(double value) => _setF64(handle, 480, value);
+  double get itemSpacing => _getF64(handle, 481);
+  set itemSpacing(double value) => _setF64(handle, 481, value);
   /// ItemWidth. Defines the `ItemWidth` property.
-  double get itemWidth => _getF64(handle, 482);
-  set itemWidth(double value) => _setF64(handle, 482, value);
+  double get itemWidth => _getF64(handle, 483);
+  set itemWidth(double value) => _setF64(handle, 483, value);
   /// ItemsAlignment. Defines the `ItemsAlignment` property.
-  WrapPanelItemsAlignment get itemsAlignment => WrapPanelItemsAlignment(_getI64(handle, 486));
-  set itemsAlignment(WrapPanelItemsAlignment value) => _setI64(handle, 486, value.value);
+  WrapPanelItemsAlignment get itemsAlignment => WrapPanelItemsAlignment(_getI64(handle, 487));
+  set itemsAlignment(WrapPanelItemsAlignment value) => _setI64(handle, 487, value.value);
   /// ItemsStretch. Defines the `ItemsStretch` property.
-  WrapPanelItemsStretch get itemsStretch => WrapPanelItemsStretch(_getI64(handle, 489));
-  set itemsStretch(WrapPanelItemsStretch value) => _setI64(handle, 489, value.value);
+  WrapPanelItemsStretch get itemsStretch => WrapPanelItemsStretch(_getI64(handle, 490));
+  set itemsStretch(WrapPanelItemsStretch value) => _setI64(handle, 490, value.value);
   /// LineSpacing. Defines the `LineSpacing` property.
-  double get lineSpacing => _getF64(handle, 522);
-  set lineSpacing(double value) => _setF64(handle, 522, value);
+  double get lineSpacing => _getF64(handle, 523);
+  set lineSpacing(double value) => _setF64(handle, 523, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
 }
 
 /// The items panel of a grid view (WinUI's `ItemsWrapGrid`): the items in cells of one size, in
@@ -5540,8 +5540,8 @@ extension type ItemsWrapGrid._(int handle) implements WrapPanel {
   ItemsWrapGrid.of(FerroObject object) : this._(object.handle);
   /// MaximumRowsOrColumns. Defines the `MaximumRowsOrColumns` property: the items of a row (or
   /// a column) at most; -1 (WinUI's default) wraps at the edge only.
-  int get maximumRowsOrColumns => _getI64(handle, 548);
-  set maximumRowsOrColumns(int value) => _setI64(handle, 548, value);
+  int get maximumRowsOrColumns => _getI64(handle, 549);
+  set maximumRowsOrColumns(int value) => _setI64(handle, 549, value);
 }
 
 /// Binds a key gesture to a command.
@@ -5619,11 +5619,11 @@ extension type LayoutTransformControl._(int handle) implements Decorator {
   factory LayoutTransformControl() => LayoutTransformControl._(_create(typeId));
   LayoutTransformControl.of(FerroObject object) : this._(object.handle);
   /// LayoutTransform. Defines the `LayoutTransform` property.
-  String get layoutTransform => _getString(handle, 511);
-  set layoutTransform(String value) => _setString(handle, 511, value);
+  String get layoutTransform => _getString(handle, 512);
+  set layoutTransform(String value) => _setString(handle, 512, value);
   /// UseRenderTransform. Defines the `UseRenderTransform` property.
-  bool get useRenderTransform => _getBool(handle, 1028);
-  set useRenderTransform(bool value) => _setBool(handle, 1028, value);
+  bool get useRenderTransform => _getBool(handle, 1029);
+  set useRenderTransform(bool value) => _setBool(handle, 1029, value);
 }
 
 /// A layer that is used to dismiss a popup when the user clicks outside (internal upstream).
@@ -5642,8 +5642,8 @@ extension type Line._(int handle) implements Shape {
   String get endPoint => _getString(handle, 267);
   set endPoint(String value) => _setString(handle, 267, value);
   /// StartPoint. Defines the `StartPoint` property.
-  String get startPoint => _getString(handle, 831);
-  set startPoint(String value) => _setString(handle, 831, value);
+  String get startPoint => _getString(handle, 832);
+  set startPoint(String value) => _setString(handle, 832, value);
 }
 
 /// Information about a potential line break position
@@ -5662,8 +5662,8 @@ extension type LineGeometry._(int handle) implements Geometry {
   String get endPoint => _getString(handle, 267);
   set endPoint(String value) => _setString(handle, 267, value);
   /// StartPoint.
-  String get startPoint => _getString(handle, 831);
-  set startPoint(String value) => _setString(handle, 831, value);
+  String get startPoint => _getString(handle, 832);
+  set startPoint(String value) => _setString(handle, 832, value);
 }
 
 /// A line segment of a path figure.
@@ -5672,8 +5672,8 @@ extension type LineSegment._(int handle) implements PathSegment {
   factory LineSegment() => LineSegment._(_create(typeId));
   LineSegment.of(FerroObject object) : this._(object.handle);
   /// Point.
-  String get point => _getString(handle, 660);
-  set point(String value) => _setString(handle, 660, value);
+  String get point => _getString(handle, 661);
+  set point(String value) => _setString(handle, 661, value);
 }
 
 /// Interpolates linearly from the value before it.
@@ -5699,8 +5699,8 @@ extension type LinearGradientBrush._(int handle) implements GradientBrush {
   String get endPoint => _getString(handle, 267);
   set endPoint(String value) => _setString(handle, 267, value);
   /// StartPoint.
-  String get startPoint => _getString(handle, 831);
-  set startPoint(String value) => _setString(handle, 831, value);
+  String get startPoint => _getString(handle, 832);
+  set startPoint(String value) => _setString(handle, 832, value);
 }
 
 /// Interpolates linearly from the value before it.
@@ -5716,7 +5716,7 @@ extension type ListBox._(int handle) implements SelectingItemsControl {
   factory ListBox() => ListBox._(_create(typeId));
   ListBox.of(FerroObject object) : this._(object.handle);
   /// Scroll. Defines the `Scroll` property.
-  FerroObject get scroll => FerroObject(_getObject(handle, 742));
+  FerroObject get scroll => FerroObject(_getObject(handle, 743));
 }
 
 /// An automation peer which represents a [`ListBox`].
@@ -5808,71 +5808,76 @@ extension type TextBox._(int handle) implements TemplatedControl {
   /// IsReadOnly. Defines the `IsReadOnly` property.
   bool get isReadOnly => _getBool(handle, 444);
   set isReadOnly(bool value) => _setBool(handle, 444, value);
+  /// IsSpellCheckEnabled. Defines the `IsSpellCheckEnabled` property (WinUI's default: `true`).
+  /// The spelling is checked only through the spell checker the application registered
+  /// ([`ferroui_base::platform::register_spell_checker`]).
+  bool get isSpellCheckEnabled => _getBool(handle, 450);
+  set isSpellCheckEnabled(bool value) => _setBool(handle, 450, value);
   /// IsUndoEnabled. Defines the `IsUndoEnabled` property.
-  bool get isUndoEnabled => _getBool(handle, 466);
-  set isUndoEnabled(bool value) => _setBool(handle, 466, value);
+  bool get isUndoEnabled => _getBool(handle, 467);
+  set isUndoEnabled(bool value) => _setBool(handle, 467, value);
   /// MaxLength. Defines the `MaxLength` property.
-  int get maxLength => _getI64(handle, 538);
-  set maxLength(int value) => _setI64(handle, 538, value);
+  int get maxLength => _getI64(handle, 539);
+  set maxLength(int value) => _setI64(handle, 539, value);
   /// MaxLines. Defines the `MaxLines` property.
-  int get maxLines => _getI64(handle, 539);
-  set maxLines(int value) => _setI64(handle, 539, value);
+  int get maxLines => _getI64(handle, 540);
+  set maxLines(int value) => _setI64(handle, 540, value);
   /// MinLines. Defines the `MinLines` property.
-  int get minLines => _getI64(handle, 556);
-  set minLines(int value) => _setI64(handle, 556, value);
+  int get minLines => _getI64(handle, 557);
+  set minLines(int value) => _setI64(handle, 557, value);
   /// NewLine. Defines the `NewLine` property.
-  String get newLine => _getString(handle, 589);
-  set newLine(String value) => _setString(handle, 589, value);
+  String get newLine => _getString(handle, 590);
+  set newLine(String value) => _setString(handle, 590, value);
   /// PlaceholderForeground. Defines the `PlaceholderForeground` property.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText. Defines the `PlaceholderText` property.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// RevealPassword. Defines the `RevealPassword` property.
-  bool get revealPassword => _getBool(handle, 729);
-  set revealPassword(bool value) => _setBool(handle, 729, value);
+  bool get revealPassword => _getBool(handle, 730);
+  set revealPassword(bool value) => _setBool(handle, 730, value);
   /// SelectionBrush. Defines the `SelectionBrush` property.
-  String get selectionBrush => _getString(handle, 785);
-  set selectionBrush(String value) => _setString(handle, 785, value);
+  String get selectionBrush => _getString(handle, 786);
+  set selectionBrush(String value) => _setString(handle, 786, value);
   /// SelectionEnd. Defines the `SelectionEnd` property.
-  int get selectionEnd => _getI64(handle, 786);
-  set selectionEnd(int value) => _setI64(handle, 786, value);
+  int get selectionEnd => _getI64(handle, 787);
+  set selectionEnd(int value) => _setI64(handle, 787, value);
   /// SelectionForegroundBrush. Defines the `SelectionForegroundBrush` property.
-  String get selectionForegroundBrush => _getString(handle, 788);
-  set selectionForegroundBrush(String value) => _setString(handle, 788, value);
+  String get selectionForegroundBrush => _getString(handle, 789);
+  set selectionForegroundBrush(String value) => _setString(handle, 789, value);
   /// SelectionStart. Defines the `SelectionStart` property.
-  int get selectionStart => _getI64(handle, 792);
-  set selectionStart(int value) => _setI64(handle, 792, value);
+  int get selectionStart => _getI64(handle, 793);
+  set selectionStart(int value) => _setI64(handle, 793, value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextBox.LineHeight (attached). Defines the `LineHeight` property.
-  static double getLineHeight(FerroObject target) => _getF64(target.handle, 889);
-  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 889, value);
+  static double getLineHeight(FerroObject target) => _getF64(target.handle, 890);
+  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 890, value);
   /// TextBox.TextAlignment (attached). Defines the `TextAlignment` property.
-  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 890));
-  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 890, value.value);
+  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 891));
+  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 891, value.value);
   /// TextBox.TextWrapping (attached). Defines the `TextWrapping` property.
-  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 891));
-  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 891, value.value);
+  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 892));
+  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 892, value.value);
   /// TextParagraphStyles. Defines immutable UTF-16 paragraph formatting. Templates bind this to
   /// TextPresenter, keeping rendering, IME and caret geometry shared.
-  String get textParagraphStyles => _getString(handle, 917);
-  set textParagraphStyles(String value) => _setString(handle, 917, value);
+  String get textParagraphStyles => _getString(handle, 918);
+  set textParagraphStyles(String value) => _setString(handle, 918, value);
   /// TextStyleOverrides. Defines the `TextStyleOverrides` property. Control templates bind this
   /// to the presenter's property, just like `Text` and `TextWrapping`.
-  String get textStyleOverrides => _getString(handle, 925);
-  set textStyleOverrides(String value) => _setString(handle, 925, value);
+  String get textStyleOverrides => _getString(handle, 926);
+  set textStyleOverrides(String value) => _setString(handle, 926, value);
   /// UndoLimit. Defines the `UndoLimit` property.
-  int get undoLimit => _getI64(handle, 1021);
-  set undoLimit(int value) => _setI64(handle, 1021, value);
+  int get undoLimit => _getI64(handle, 1022);
+  set undoLimit(int value) => _setI64(handle, 1022, value);
   /// UseFloatingPlaceholder. Defines the `UseFloatingPlaceholder` property.
-  bool get useFloatingPlaceholder => _getBool(handle, 1025);
-  set useFloatingPlaceholder(bool value) => _setBool(handle, 1025, value);
+  bool get useFloatingPlaceholder => _getBool(handle, 1026);
+  set useFloatingPlaceholder(bool value) => _setBool(handle, 1026, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
   /// CopyingToClipboard: the sender is valid for the call. Defines the `CopyingToClipboard`
   /// event.
   Subscription onCopyingToClipboard(void Function(TextBox sender) handler) =>
@@ -5908,18 +5913,18 @@ extension type MaskedTextBox._(int handle) implements TextBox {
   bool get hidePromptOnLeave => _getBool(handle, 348);
   set hidePromptOnLeave(bool value) => _setBool(handle, 348, value);
   /// Mask. Defines the `Mask` property.
-  String get mask => _getString(handle, 528);
-  set mask(String value) => _setString(handle, 528, value);
+  String get mask => _getString(handle, 529);
+  set mask(String value) => _setString(handle, 529, value);
   /// MaskCompleted. Defines the `MaskCompleted` property.
-  bool get maskCompleted => _getBool(handle, 529);
+  bool get maskCompleted => _getBool(handle, 530);
   /// MaskFull. Defines the `MaskFull` property.
-  bool get maskFull => _getBool(handle, 530);
+  bool get maskFull => _getBool(handle, 531);
   /// ResetOnPrompt. Defines the `ResetOnPrompt` property.
-  bool get resetOnPrompt => _getBool(handle, 723);
-  set resetOnPrompt(bool value) => _setBool(handle, 723, value);
+  bool get resetOnPrompt => _getBool(handle, 724);
+  set resetOnPrompt(bool value) => _setBool(handle, 724, value);
   /// ResetOnSpace. Defines the `ResetOnSpace` property.
-  bool get resetOnSpace => _getBool(handle, 724);
-  set resetOnSpace(bool value) => _setBool(handle, 724, value);
+  bool get resetOnSpace => _getBool(handle, 725);
+  set resetOnSpace(bool value) => _setBool(handle, 725, value);
 }
 
 /// Represents a transform on a visual or brush. Abstract base class of the mutable transforms.
@@ -5934,8 +5939,8 @@ extension type MatrixTransform._(int handle) implements Transform {
   factory MatrixTransform() => MatrixTransform._(_create(typeId));
   MatrixTransform.of(FerroObject object) : this._(object.handle);
   /// Matrix.
-  String get matrix => _getString(handle, 533);
-  set matrix(String value) => _setString(handle, 533, value);
+  String get matrix => _getString(handle, 534);
+  set matrix(String value) => _setString(handle, 534, value);
 }
 
 /// A top-level menu control.
@@ -5954,11 +5959,11 @@ extension type MenuFlyout._(int handle) implements PopupFlyoutBase {
   FerroObject get flyoutPresenterTheme => FerroObject(_getObject(handle, 296));
   set flyoutPresenterTheme(FerroObject value) => _setObject(handle, 296, value.handle);
   /// ItemContainerTheme. Defines the `ItemContainerTheme` property.
-  FerroObject get itemContainerTheme => FerroObject(_getObject(handle, 473));
-  set itemContainerTheme(FerroObject value) => _setObject(handle, 473, value.handle);
+  FerroObject get itemContainerTheme => FerroObject(_getObject(handle, 474));
+  set itemContainerTheme(FerroObject value) => _setObject(handle, 474, value.handle);
   /// ItemsSource. Defines the `ItemsSource` property.
-  String get itemsSource => _getString(handle, 488);
-  set itemsSource(String value) => _setString(handle, 488, value);
+  String get itemsSource => _getString(handle, 489);
+  set itemsSource(String value) => _setString(handle, 489, value);
 }
 
 /// The control that hosts the items of a menu flyout.
@@ -5996,14 +6001,14 @@ extension type MenuItem._(int handle) implements HeaderedSelectingItemsControl {
   bool get isChecked => _getBool(handle, 395);
   set isChecked(bool value) => _setBool(handle, 395, value);
   /// IsSubMenuOpen. Defines the `IsSubMenuOpen` property.
-  bool get isSubMenuOpen => _getBool(handle, 452);
-  set isSubMenuOpen(bool value) => _setBool(handle, 452, value);
+  bool get isSubMenuOpen => _getBool(handle, 453);
+  set isSubMenuOpen(bool value) => _setBool(handle, 453, value);
   /// StaysOpenOnClick. Defines the `StaysOpenOnClick` property.
-  bool get staysOpenOnClick => _getBool(handle, 832);
-  set staysOpenOnClick(bool value) => _setBool(handle, 832, value);
+  bool get staysOpenOnClick => _getBool(handle, 833);
+  set staysOpenOnClick(bool value) => _setBool(handle, 833, value);
   /// ToggleType. Defines the `ToggleType` property.
-  MenuItemToggleType get toggleType => MenuItemToggleType(_getI64(handle, 947));
-  set toggleType(MenuItemToggleType value) => _setI64(handle, 947, value.value);
+  MenuItemToggleType get toggleType => MenuItemToggleType(_getI64(handle, 948));
+  set toggleType(MenuItemToggleType value) => _setI64(handle, 948, value.value);
   /// Click: the sender is valid for the call. Defines the `Click` event.
   Subscription onClick(void Function(MenuItem sender) handler) =>
       _subscribe(handle, 4, (sender) => handler(MenuItem._(sender)));
@@ -6033,8 +6038,8 @@ extension type MicaBackdrop._(int handle) implements SystemBackdrop {
   factory MicaBackdrop() => MicaBackdrop._(_create(typeId));
   MicaBackdrop.of(FerroObject object) : this._(object.handle);
   /// Kind. `Kind` (default `Base`).
-  MicaKind get kind => MicaKind(_getI64(handle, 499));
-  set kind(MicaKind value) => _setI64(handle, 499, value.value);
+  MicaKind get kind => MicaKind(_getI64(handle, 500));
+  set kind(MicaKind value) => _setI64(handle, 500, value.value);
 }
 
 extension type MockHostParent._(int handle) implements Control {
@@ -6069,7 +6074,7 @@ extension type NativeMenu._(int handle) implements FerroObject {
   factory NativeMenu() => NativeMenu._(_create(typeId));
   NativeMenu.of(FerroObject object) : this._(object.handle);
   /// Parent. Defines the `Parent` property.
-  FerroObject get parent => FerroObject(_getObject(handle, 640));
+  FerroObject get parent => FerroObject(_getObject(handle, 641));
 }
 
 /// Shows the native menu of the top-level it is in when the platform does not export the menu.
@@ -6096,7 +6101,7 @@ extension type NativeMenuItemBase._(int handle) implements FerroObject {
   static const int typeId = 231;
   NativeMenuItemBase.of(FerroObject object) : this._(object.handle);
   /// Parent. Defines the `Parent` property.
-  FerroObject get parent => FerroObject(_getObject(handle, 640));
+  FerroObject get parent => FerroObject(_getObject(handle, 641));
 }
 
 /// An item of a [`NativeMenu`].
@@ -6126,17 +6131,17 @@ extension type NativeMenuItem._(int handle) implements NativeMenuItemBase {
   bool get isEnabled => _getBool(handle, 408);
   set isEnabled(bool value) => _setBool(handle, 408, value);
   /// IsVisible. Defines the `IsVisible` property.
-  bool get isVisible => _getBool(handle, 468);
-  set isVisible(bool value) => _setBool(handle, 468, value);
+  bool get isVisible => _getBool(handle, 469);
+  set isVisible(bool value) => _setBool(handle, 469, value);
   /// Menu. Defines the `Menu` property.
-  FerroObject get menu => FerroObject(_getObject(handle, 549));
-  set menu(FerroObject value) => _setObject(handle, 549, value.handle);
+  FerroObject get menu => FerroObject(_getObject(handle, 550));
+  set menu(FerroObject value) => _setObject(handle, 550, value.handle);
   /// ToggleType. Defines the `ToggleType` property.
-  MenuItemToggleType get toggleType => MenuItemToggleType(_getI64(handle, 947));
-  set toggleType(MenuItemToggleType value) => _setI64(handle, 947, value.value);
+  MenuItemToggleType get toggleType => MenuItemToggleType(_getI64(handle, 948));
+  set toggleType(MenuItemToggleType value) => _setI64(handle, 948, value.value);
   /// ToolTip. Defines the `ToolTip` property.
-  String get toolTip => _getString(handle, 948);
-  set toolTip(String value) => _setString(handle, 948, value);
+  String get toolTip => _getString(handle, 949);
+  set toolTip(String value) => _setString(handle, 949, value);
 }
 
 extension type NativeMenuItemPresenter._(int handle) implements MenuItem {
@@ -6184,34 +6189,34 @@ extension type NavigationPage._(int handle) implements MultiPage {
   bool get isNavigating => _getBool(handle, 432);
   /// NavigationPage.BackButtonContent (attached). Defines the `BackButtonContent` attached
   /// property.
-  static String getBackButtonContent(FerroObject target) => _getString(target.handle, 581);
-  static void setBackButtonContent(FerroObject target, String value) => _setString(target.handle, 581, value);
+  static String getBackButtonContent(FerroObject target) => _getString(target.handle, 582);
+  static void setBackButtonContent(FerroObject target, String value) => _setString(target.handle, 582, value);
   /// NavigationPage.BarHeightOverride (attached). Defines the `BarHeightOverride` attached
   /// property.
-  static double getBarHeightOverride(FerroObject target) => _getF64(target.handle, 582);
-  static void setBarHeightOverride(FerroObject target, double value) => _setF64(target.handle, 582, value);
+  static double getBarHeightOverride(FerroObject target) => _getF64(target.handle, 583);
+  static void setBarHeightOverride(FerroObject target, double value) => _setF64(target.handle, 583, value);
   /// NavigationPage.BarLayoutBehavior (attached). Defines the `BarLayoutBehavior` attached
   /// property.
-  static BarLayoutBehavior getBarLayoutBehavior(FerroObject target) => BarLayoutBehavior(_getI64(target.handle, 583));
-  static void setBarLayoutBehavior(FerroObject target, BarLayoutBehavior value) => _setI64(target.handle, 583, value.value);
+  static BarLayoutBehavior getBarLayoutBehavior(FerroObject target) => BarLayoutBehavior(_getI64(target.handle, 584));
+  static void setBarLayoutBehavior(FerroObject target, BarLayoutBehavior value) => _setI64(target.handle, 584, value.value);
   /// NavigationPage.BottomCommandBar (attached). Defines the `BottomCommandBar` attached
   /// property.
-  static FerroObject getBottomCommandBar(FerroObject target) => FerroObject(_getObject(target.handle, 584));
-  static void setBottomCommandBar(FerroObject target, FerroObject value) => _setObject(target.handle, 584, value.handle);
+  static FerroObject getBottomCommandBar(FerroObject target) => FerroObject(_getObject(target.handle, 585));
+  static void setBottomCommandBar(FerroObject target, FerroObject value) => _setObject(target.handle, 585, value.handle);
   /// NavigationPage.HasBackButton (attached). Defines the `HasBackButton` attached property.
-  static bool getHasBackButton(FerroObject target) => _getBool(target.handle, 585);
-  static void setHasBackButton(FerroObject target, bool value) => _setBool(target.handle, 585, value);
+  static bool getHasBackButton(FerroObject target) => _getBool(target.handle, 586);
+  static void setHasBackButton(FerroObject target, bool value) => _setBool(target.handle, 586, value);
   /// NavigationPage.HasNavigationBar (attached). Defines the `HasNavigationBar` attached
   /// property.
-  static bool getHasNavigationBar(FerroObject target) => _getBool(target.handle, 586);
-  static void setHasNavigationBar(FerroObject target, bool value) => _setBool(target.handle, 586, value);
+  static bool getHasNavigationBar(FerroObject target) => _getBool(target.handle, 587);
+  static void setHasNavigationBar(FerroObject target, bool value) => _setBool(target.handle, 587, value);
   /// NavigationPage.IsBackButtonEnabled (attached). Defines the `IsBackButtonEnabled` attached
   /// property.
-  static bool getIsBackButtonEnabled(FerroObject target) => _getBool(target.handle, 587);
-  static void setIsBackButtonEnabled(FerroObject target, bool value) => _setBool(target.handle, 587, value);
+  static bool getIsBackButtonEnabled(FerroObject target) => _getBool(target.handle, 588);
+  static void setIsBackButtonEnabled(FerroObject target, bool value) => _setBool(target.handle, 588, value);
   /// NavigationPage.TopCommandBar (attached). Defines the `TopCommandBar` attached property.
-  static FerroObject getTopCommandBar(FerroObject target) => FerroObject(_getObject(target.handle, 588));
-  static void setTopCommandBar(FerroObject target, FerroObject value) => _setObject(target.handle, 588, value.handle);
+  static FerroObject getTopCommandBar(FerroObject target) => FerroObject(_getObject(target.handle, 589));
+  static void setTopCommandBar(FerroObject target, FerroObject value) => _setObject(target.handle, 589, value.handle);
 }
 
 /// An automation peer which represents a [`NavigationPage`].
@@ -6306,52 +6311,52 @@ extension type NavigationView._(int handle) implements ContentControl {
   set isSettingsVisible(bool value) => _setBool(handle, 448, value);
   /// MenuItemContainerStyle. Defines the `MenuItemContainerStyle` property: the control theme
   /// of the containers.
-  FerroObject get menuItemContainerStyle => FerroObject(_getObject(handle, 550));
-  set menuItemContainerStyle(FerroObject value) => _setObject(handle, 550, value.handle);
+  FerroObject get menuItemContainerStyle => FerroObject(_getObject(handle, 551));
+  set menuItemContainerStyle(FerroObject value) => _setObject(handle, 551, value.handle);
   /// MenuItems. Defines the `MenuItems` property (read-only; the collection is writable).
-  String get menuItems => _getString(handle, 552);
+  String get menuItems => _getString(handle, 553);
   /// MenuItemsSource. Defines the `MenuItemsSource` property.
-  String get menuItemsSource => _getString(handle, 553);
-  set menuItemsSource(String value) => _setString(handle, 553, value);
+  String get menuItemsSource => _getString(handle, 554);
+  set menuItemsSource(String value) => _setString(handle, 554, value);
   /// OpenPaneLength. Defines the `OpenPaneLength` property: the width of the open pane. 320 by
   /// default.
-  double get openPaneLength => _getF64(handle, 611);
-  set openPaneLength(double value) => _setF64(handle, 611, value);
+  double get openPaneLength => _getF64(handle, 612);
+  set openPaneLength(double value) => _setF64(handle, 612, value);
   /// PaneCustomContent. Defines the `PaneCustomContent` property.
-  FerroObject get paneCustomContent => FerroObject(_getObject(handle, 628));
-  set paneCustomContent(FerroObject value) => _setObject(handle, 628, value.handle);
+  FerroObject get paneCustomContent => FerroObject(_getObject(handle, 629));
+  set paneCustomContent(FerroObject value) => _setObject(handle, 629, value.handle);
   /// PaneDisplayMode. Defines the `PaneDisplayMode` property. `Auto` by default.
-  NavigationViewPaneDisplayMode get paneDisplayMode => NavigationViewPaneDisplayMode(_getI64(handle, 629));
-  set paneDisplayMode(NavigationViewPaneDisplayMode value) => _setI64(handle, 629, value.value);
+  NavigationViewPaneDisplayMode get paneDisplayMode => NavigationViewPaneDisplayMode(_getI64(handle, 630));
+  set paneDisplayMode(NavigationViewPaneDisplayMode value) => _setI64(handle, 630, value.value);
   /// PaneFooter. Defines the `PaneFooter` property.
-  FerroObject get paneFooter => FerroObject(_getObject(handle, 630));
-  set paneFooter(FerroObject value) => _setObject(handle, 630, value.handle);
+  FerroObject get paneFooter => FerroObject(_getObject(handle, 631));
+  set paneFooter(FerroObject value) => _setObject(handle, 631, value.handle);
   /// PaneHeader. Defines the `PaneHeader` property.
-  FerroObject get paneHeader => FerroObject(_getObject(handle, 631));
-  set paneHeader(FerroObject value) => _setObject(handle, 631, value.handle);
+  FerroObject get paneHeader => FerroObject(_getObject(handle, 632));
+  set paneHeader(FerroObject value) => _setObject(handle, 632, value.handle);
   /// PaneTitle. Defines the `PaneTitle` property: the title of the pane.
-  String get paneTitle => _getString(handle, 635);
-  set paneTitle(String value) => _setString(handle, 635, value);
+  String get paneTitle => _getString(handle, 636);
+  set paneTitle(String value) => _setString(handle, 636, value);
   /// PaneToggleButtonStyle. Defines the `PaneToggleButtonStyle` property: the control theme of
   /// the pane toggle button (WinUI's style; the WinUI theme sets `PaneToggleButtonStyle`).
-  FerroObject get paneToggleButtonStyle => FerroObject(_getObject(handle, 636));
-  set paneToggleButtonStyle(FerroObject value) => _setObject(handle, 636, value.handle);
+  FerroObject get paneToggleButtonStyle => FerroObject(_getObject(handle, 637));
+  set paneToggleButtonStyle(FerroObject value) => _setObject(handle, 637, value.handle);
   /// SelectedItem. Defines the `SelectedItem` property: the selected menu item (the data item
   /// or the container).
-  String get selectedItem => _getString(handle, 773);
-  set selectedItem(String value) => _setString(handle, 773, value);
-  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 773));
-  set selectedItemObject(FerroObject value) => _setObject(handle, 773, value.handle);
+  String get selectedItem => _getString(handle, 774);
+  set selectedItem(String value) => _setString(handle, 774, value);
+  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 774));
+  set selectedItemObject(FerroObject value) => _setObject(handle, 774, value.handle);
   /// SelectionFollowsFocus. Defines the `SelectionFollowsFocus` property. `Disabled` by
   /// default.
-  NavigationViewSelectionFollowsFocus get selectionFollowsFocus => NavigationViewSelectionFollowsFocus(_getI64(handle, 787));
-  set selectionFollowsFocus(NavigationViewSelectionFollowsFocus value) => _setI64(handle, 787, value.value);
+  NavigationViewSelectionFollowsFocus get selectionFollowsFocus => NavigationViewSelectionFollowsFocus(_getI64(handle, 788));
+  set selectionFollowsFocus(NavigationViewSelectionFollowsFocus value) => _setI64(handle, 788, value.value);
   /// SettingsItem. Defines the `SettingsItem` property: the settings item (read-only).
-  String get settingsItem => _getString(handle, 794);
-  FerroObject get settingsItemObject => FerroObject(_getObject(handle, 794));
+  String get settingsItem => _getString(handle, 795);
+  FerroObject get settingsItemObject => FerroObject(_getObject(handle, 795));
   /// TemplateSettings. Defines the `TemplateSettings` property: the values the template binds
   /// to (read-only).
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
 }
 
 /// The automation peer of a [`NavigationView`]: the selection pattern over its realized
@@ -6411,15 +6416,15 @@ extension type NavigationViewItem._(int handle) implements NavigationViewItemBas
   set isExpanded(bool value) => _setBool(handle, 409, value);
   /// MenuItems. Defines the `MenuItems` property: the child items (read-only; the collection is
   /// writable).
-  String get menuItems => _getString(handle, 552);
+  String get menuItems => _getString(handle, 553);
   /// MenuItemsSource. Defines the `MenuItemsSource` property: the source of the child items,
   /// which takes precedence over `MenuItems` while it is set.
-  String get menuItemsSource => _getString(handle, 553);
-  set menuItemsSource(String value) => _setString(handle, 553, value);
+  String get menuItemsSource => _getString(handle, 554);
+  set menuItemsSource(String value) => _setString(handle, 554, value);
   /// SelectsOnInvoked. Defines the `SelectsOnInvoked` property: whether invoking the item
   /// selects it. `true` by default.
-  bool get selectsOnInvoked => _getBool(handle, 793);
-  set selectsOnInvoked(bool value) => _setBool(handle, 793, value);
+  bool get selectsOnInvoked => _getBool(handle, 794);
+  set selectsOnInvoked(bool value) => _setBool(handle, 794, value);
 }
 
 /// The automation peer of a [`NavigationViewItem`]: a list item (a tab item in the top pane)
@@ -6467,42 +6472,42 @@ extension type NavigationViewTemplateSettings._(int handle) implements FerroObje
   set backButtonVisibility(bool value) => _setBool(handle, 64, value);
   /// LeftPaneVisibility. Defines the `LeftPaneVisibility` property: whether the left pane is
   /// shown.
-  bool get leftPaneVisibility => _getBool(handle, 516);
-  set leftPaneVisibility(bool value) => _setBool(handle, 516, value);
+  bool get leftPaneVisibility => _getBool(handle, 517);
+  set leftPaneVisibility(bool value) => _setBool(handle, 517, value);
   /// OpenPaneLength. Defines the `OpenPaneLength` property: the open pane length, at most the
   /// width of the navigation view.
-  double get openPaneLength => _getF64(handle, 611);
-  set openPaneLength(double value) => _setF64(handle, 611, value);
+  double get openPaneLength => _getF64(handle, 612);
+  set openPaneLength(double value) => _setF64(handle, 612, value);
   /// OverflowButtonVisibility. Defines the `OverflowButtonVisibility` property: whether the
   /// overflow button of the top pane is shown: some top-level items of the top pane are in its
   /// overflow menu.
-  bool get overflowButtonVisibility => _getBool(handle, 614);
-  set overflowButtonVisibility(bool value) => _setBool(handle, 614, value);
+  bool get overflowButtonVisibility => _getBool(handle, 615);
+  set overflowButtonVisibility(bool value) => _setBool(handle, 615, value);
   /// PaneToggleButtonVisibility. Defines the `PaneToggleButtonVisibility` property: whether the
   /// pane toggle button is shown.
-  bool get paneToggleButtonVisibility => _getBool(handle, 637);
-  set paneToggleButtonVisibility(bool value) => _setBool(handle, 637, value);
+  bool get paneToggleButtonVisibility => _getBool(handle, 638);
+  set paneToggleButtonVisibility(bool value) => _setBool(handle, 638, value);
   /// PaneToggleButtonWidth. Defines the `PaneToggleButtonWidth` property: the width of the pane
   /// toggle button, the compact pane length.
-  double get paneToggleButtonWidth => _getF64(handle, 638);
-  set paneToggleButtonWidth(double value) => _setF64(handle, 638, value);
+  double get paneToggleButtonWidth => _getF64(handle, 639);
+  set paneToggleButtonWidth(double value) => _setF64(handle, 639, value);
   /// SingleSelectionFollowsFocus. Defines the `SingleSelectionFollowsFocus` property: whether
   /// the selection follows the focus.
-  bool get singleSelectionFollowsFocus => _getBool(handle, 813);
-  set singleSelectionFollowsFocus(bool value) => _setBool(handle, 813, value);
+  bool get singleSelectionFollowsFocus => _getBool(handle, 814);
+  set singleSelectionFollowsFocus(bool value) => _setBool(handle, 814, value);
   /// SmallerPaneToggleButtonWidth. Defines the `SmallerPaneToggleButtonWidth` property: the
   /// compact pane length less 8, the width of the back button and of the icon column of the
   /// items.
-  double get smallerPaneToggleButtonWidth => _getF64(handle, 818);
-  set smallerPaneToggleButtonWidth(double value) => _setF64(handle, 818, value);
+  double get smallerPaneToggleButtonWidth => _getF64(handle, 819);
+  set smallerPaneToggleButtonWidth(double value) => _setF64(handle, 819, value);
   /// TopPadding. Defines the `TopPadding` property: the height above the pane and the content
   /// (the title bar of WinUI's window when the content extends into it; 0 in FerroUI).
-  double get topPadding => _getF64(handle, 966);
-  set topPadding(double value) => _setF64(handle, 966, value);
+  double get topPadding => _getF64(handle, 967);
+  set topPadding(double value) => _setF64(handle, 967, value);
   /// TopPaneVisibility. Defines the `TopPaneVisibility` property: whether the top pane is
   /// shown.
-  bool get topPaneVisibility => _getBool(handle, 967);
-  set topPaneVisibility(bool value) => _setBool(handle, 967, value);
+  bool get topPaneVisibility => _getBool(handle, 968);
+  set topPaneVisibility(bool value) => _setBool(handle, 968, value);
 }
 
 /// An automation peer which represents an element that is exposed to automation as non-
@@ -6523,11 +6528,11 @@ extension type NotificationCard._(int handle) implements ContentControl {
   /// IsClosing. Defines the `IsClosing` property.
   bool get isClosing => _getBool(handle, 400);
   /// NotificationCard.CloseOnClick (attached). Defines the `CloseOnClick` attached property.
-  static bool getCloseOnClick(FerroObject target) => _getBool(target.handle, 594);
-  static void setCloseOnClick(FerroObject target, bool value) => _setBool(target.handle, 594, value);
+  static bool getCloseOnClick(FerroObject target) => _getBool(target.handle, 595);
+  static void setCloseOnClick(FerroObject target, bool value) => _setBool(target.handle, 595, value);
   /// NotificationType. Defines the `NotificationType` property.
-  NotificationType get notificationType => NotificationType(_getI64(handle, 595));
-  set notificationType(NotificationType value) => _setI64(handle, 595, value.value);
+  NotificationType get notificationType => NotificationType(_getI64(handle, 596));
+  set notificationType(NotificationType value) => _setI64(handle, 596, value.value);
   /// NotificationClosed: the sender is valid for the call. Defines the `NotificationClosed`
   /// event.
   Subscription onNotificationClosed(void Function(NotificationCard sender) handler) =>
@@ -6571,45 +6576,45 @@ extension type NumberBox._(int handle) implements TemplatedControl {
   set headerObject(FerroObject value) => _setObject(handle, 341, value.handle);
   /// IsWrapEnabled. Defines the `IsWrapEnabled` property: whether a step past one end of the
   /// range goes to the other end. `false` by default.
-  bool get isWrapEnabled => _getBool(handle, 471);
-  set isWrapEnabled(bool value) => _setBool(handle, 471, value);
+  bool get isWrapEnabled => _getBool(handle, 472);
+  set isWrapEnabled(bool value) => _setBool(handle, 472, value);
   /// LargeChange. Defines the `LargeChange` property: the step of PageUp and PageDown. 10 by
   /// default.
-  double get largeChange => _getF64(handle, 504);
-  set largeChange(double value) => _setF64(handle, 504, value);
+  double get largeChange => _getF64(handle, 505);
+  set largeChange(double value) => _setF64(handle, 505, value);
   /// Maximum. Defines the `Maximum` property: the largest value. The largest `f64` by default.
-  double get maximum => _getF64(handle, 547);
-  set maximum(double value) => _setF64(handle, 547, value);
+  double get maximum => _getF64(handle, 548);
+  set maximum(double value) => _setF64(handle, 548, value);
   /// Minimum. Defines the `Minimum` property: the smallest value. The largest negative `f64` by
   /// default.
-  double get minimum => _getF64(handle, 562);
-  set minimum(double value) => _setF64(handle, 562, value);
+  double get minimum => _getF64(handle, 563);
+  set minimum(double value) => _setF64(handle, 563, value);
   /// PlaceholderText. Defines the `PlaceholderText` property: the text shown while the box is
   /// empty.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// SmallChange. Defines the `SmallChange` property: the step of the arrow keys, the spin
   /// buttons and the mouse wheel. 1 by default.
-  double get smallChange => _getF64(handle, 816);
-  set smallChange(double value) => _setF64(handle, 816, value);
+  double get smallChange => _getF64(handle, 817);
+  set smallChange(double value) => _setF64(handle, 817, value);
   /// SpinButtonPlacementMode. Defines the `SpinButtonPlacementMode` property. `Hidden` by
   /// default.
-  NumberBoxSpinButtonPlacementMode get spinButtonPlacementMode => NumberBoxSpinButtonPlacementMode(_getI64(handle, 827));
-  set spinButtonPlacementMode(NumberBoxSpinButtonPlacementMode value) => _setI64(handle, 827, value.value);
+  NumberBoxSpinButtonPlacementMode get spinButtonPlacementMode => NumberBoxSpinButtonPlacementMode(_getI64(handle, 828));
+  set spinButtonPlacementMode(NumberBoxSpinButtonPlacementMode value) => _setI64(handle, 828, value.value);
   /// Text. Defines the `Text` property: the text of the value. Setting it commits it as input.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextAlignment. Defines the `TextAlignment` property: the alignment of the text. Left by
   /// default.
-  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 879));
-  set textAlignment(TextAlignment value) => _setI64(handle, 879, value.value);
+  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 880));
+  set textAlignment(TextAlignment value) => _setI64(handle, 880, value.value);
   /// ValidationMode. Defines the `ValidationMode` property. `InvalidInputOverwritten` by
   /// default.
-  NumberBoxValidationMode get validationMode => NumberBoxValidationMode(_getI64(handle, 1031));
-  set validationMode(NumberBoxValidationMode value) => _setI64(handle, 1031, value.value);
+  NumberBoxValidationMode get validationMode => NumberBoxValidationMode(_getI64(handle, 1032));
+  set validationMode(NumberBoxValidationMode value) => _setI64(handle, 1032, value.value);
   /// Value. Defines the `Value` property: the number, NaN when the box is empty (the default).
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
 }
 
 /// An automation peer which represents a [`NumberBox`]: a spinner with the range value pattern,
@@ -6668,43 +6673,43 @@ extension type NumericUpDown._(int handle) implements TemplatedControl {
   /// IsWrapEnabled. Defines the `IsWrapEnabled` property: a FerroUI addition after WinUI's
   /// `NumberBox.IsWrapEnabled`. With it, a step past `Maximum` goes to `Minimum` and a step
   /// below `Minimum` to `Maximum`. `false` by default: a step stops at the bounds, as upstream.
-  bool get isWrapEnabled => _getBool(handle, 471);
-  set isWrapEnabled(bool value) => _setBool(handle, 471, value);
+  bool get isWrapEnabled => _getBool(handle, 472);
+  set isWrapEnabled(bool value) => _setBool(handle, 472, value);
   /// LargeChange. Defines the `LargeChange` property: a FerroUI addition after WinUI's
   /// `NumberBox.LargeChange`, the step of PageUp and PageDown. `None` by default: the keys are
   /// not handled and bubble (to a scroll viewer), as upstream.
-  String get largeChange => _getString(handle, 504);
-  set largeChange(String value) => _setString(handle, 504, value);
+  String get largeChange => _getString(handle, 505);
+  set largeChange(String value) => _setString(handle, 505, value);
   /// Maximum. Defines the `Maximum` property.
-  String get maximum => _getString(handle, 547);
-  set maximum(String value) => _setString(handle, 547, value);
+  String get maximum => _getString(handle, 548);
+  set maximum(String value) => _setString(handle, 548, value);
   /// Minimum. Defines the `Minimum` property.
-  String get minimum => _getString(handle, 562);
-  set minimum(String value) => _setString(handle, 562, value);
+  String get minimum => _getString(handle, 563);
+  set minimum(String value) => _setString(handle, 563, value);
   /// NumericUpDown.TextAlignment (attached). Defines the `TextAlignment` property.
-  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 600));
-  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 600, value.value);
+  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 601));
+  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 601, value.value);
   /// ParsingNumberStyle. Defines the `ParsingNumberStyle` property.
-  String get parsingNumberStyle => _getString(handle, 641);
-  set parsingNumberStyle(String value) => _setString(handle, 641, value);
+  String get parsingNumberStyle => _getString(handle, 642);
+  set parsingNumberStyle(String value) => _setString(handle, 642, value);
   /// PlaceholderForeground. Defines the `PlaceholderForeground` property.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText. Defines the `PlaceholderText` property.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// ShowButtonSpinner. Defines the `ShowButtonSpinner` property.
-  bool get showButtonSpinner => _getBool(handle, 802);
-  set showButtonSpinner(bool value) => _setBool(handle, 802, value);
+  bool get showButtonSpinner => _getBool(handle, 803);
+  set showButtonSpinner(bool value) => _setBool(handle, 803, value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// Value. Defines the `Value` property.
-  String get valueValue => _getString(handle, 1032);
-  set valueValue(String value) => _setString(handle, 1032, value);
+  String get valueValue => _getString(handle, 1033);
+  set valueValue(String value) => _setString(handle, 1033, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
   /// ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.
   Subscription onValueChanged(void Function(NumericUpDown sender) handler) =>
       _subscribe(handle, 93, (sender) => handler(NumericUpDown._(sender)));
@@ -6743,8 +6748,8 @@ extension type OverlayPopupHost._(int handle) implements ContentControl {
   static const int typeId = 254;
   OverlayPopupHost.of(FerroObject object) : this._(object.handle);
   /// Transform. Defines the `Transform` property.
-  FerroObject get transform => FerroObject(_getObject(handle, 969));
-  set transform(FerroObject value) => _setObject(handle, 969, value.handle);
+  FerroObject get transform => FerroObject(_getObject(handle, 970));
+  set transform(FerroObject value) => _setObject(handle, 970, value.handle);
 }
 
 /// Hosts a page as the root of a top-level: forwards the safe-area padding and the system back
@@ -6754,8 +6759,8 @@ extension type PageNavigationHost._(int handle) implements ContentControl {
   factory PageNavigationHost() => PageNavigationHost._(_create(typeId));
   PageNavigationHost.of(FerroObject object) : this._(object.handle);
   /// Page. Defines the `Page` property.
-  FerroObject get page => FerroObject(_getObject(handle, 620));
-  set page(FerroObject value) => _setObject(handle, 620, value.handle);
+  FerroObject get page => FerroObject(_getObject(handle, 621));
+  set page(FerroObject value) => _setObject(handle, 621, value.handle);
 }
 
 /// An entry of the journal of a [`Frame`]: the type of a page and the parameter of its
@@ -6805,48 +6810,48 @@ extension type PagerControl._(int handle) implements TemplatedControl {
   set firstButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 284, value.value);
   /// LastButtonStyle. Defines the `LastButtonStyle` property: the control theme of the button
   /// to the last page.
-  FerroObject get lastButtonStyle => FerroObject(_getObject(handle, 507));
-  set lastButtonStyle(FerroObject value) => _setObject(handle, 507, value.handle);
+  FerroObject get lastButtonStyle => FerroObject(_getObject(handle, 508));
+  set lastButtonStyle(FerroObject value) => _setObject(handle, 508, value.handle);
   /// LastButtonVisibility. Defines the `LastButtonVisibility` property: when the button to the
   /// last page is shown.
-  PagerControlButtonVisibility get lastButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 508));
-  set lastButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 508, value.value);
+  PagerControlButtonVisibility get lastButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 509));
+  set lastButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 509, value.value);
   /// NextButtonStyle. Defines the `NextButtonStyle` property: the control theme of the button
   /// to the next page.
-  FerroObject get nextButtonStyle => FerroObject(_getObject(handle, 591));
-  set nextButtonStyle(FerroObject value) => _setObject(handle, 591, value.handle);
+  FerroObject get nextButtonStyle => FerroObject(_getObject(handle, 592));
+  set nextButtonStyle(FerroObject value) => _setObject(handle, 592, value.handle);
   /// NextButtonVisibility. Defines the `NextButtonVisibility` property: when the button to the
   /// next page is shown.
-  PagerControlButtonVisibility get nextButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 593));
-  set nextButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 593, value.value);
+  PagerControlButtonVisibility get nextButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 594));
+  set nextButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 594, value.value);
   /// NumberOfPages. Defines the `NumberOfPages` property: the number of pages, -1 while it is
   /// not known. 0 by default.
-  int get numberOfPages => _getI64(handle, 598);
-  set numberOfPages(int value) => _setI64(handle, 598, value);
+  int get numberOfPages => _getI64(handle, 599);
+  set numberOfPages(int value) => _setI64(handle, 599, value);
   /// PrefixText. Defines the `PrefixText` property: the text before the combo box or the number
   /// box ("Page" when the template is applied without one).
-  String get prefixText => _getString(handle, 675);
-  set prefixText(String value) => _setString(handle, 675, value);
+  String get prefixText => _getString(handle, 676);
+  set prefixText(String value) => _setString(handle, 676, value);
   /// PreviousButtonStyle. Defines the `PreviousButtonStyle` property: the control theme of the
   /// button to the previous page.
-  FerroObject get previousButtonStyle => FerroObject(_getObject(handle, 678));
-  set previousButtonStyle(FerroObject value) => _setObject(handle, 678, value.handle);
+  FerroObject get previousButtonStyle => FerroObject(_getObject(handle, 679));
+  set previousButtonStyle(FerroObject value) => _setObject(handle, 679, value.handle);
   /// PreviousButtonVisibility. Defines the `PreviousButtonVisibility` property: when the button
   /// to the previous page is shown.
-  PagerControlButtonVisibility get previousButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 680));
-  set previousButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 680, value.value);
+  PagerControlButtonVisibility get previousButtonVisibility => PagerControlButtonVisibility(_getI64(handle, 681));
+  set previousButtonVisibility(PagerControlButtonVisibility value) => _setI64(handle, 681, value.value);
   /// SelectedPageIndex. Defines the `SelectedPageIndex` property: the index of the selected
   /// page, from 0.
-  int get selectedPageIndex => _getI64(handle, 776);
-  set selectedPageIndex(int value) => _setI64(handle, 776, value);
+  int get selectedPageIndex => _getI64(handle, 777);
+  set selectedPageIndex(int value) => _setI64(handle, 777, value);
   /// SuffixText. Defines the `SuffixText` property: the text after the combo box or the number
   /// box, before the number of pages ("of" when the template is applied without one).
-  String get suffixText => _getString(handle, 849);
-  set suffixText(String value) => _setString(handle, 849, value);
+  String get suffixText => _getString(handle, 850);
+  set suffixText(String value) => _setString(handle, 850, value);
   /// TemplateSettings. Defines the `TemplateSettings` property: the page numbers and the number
   /// panel items the template binds to.
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
-  set templateSettings(FerroObject value) => _setObject(handle, 875, value.handle);
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
+  set templateSettings(FerroObject value) => _setObject(handle, 876, value.handle);
 }
 
 /// The automation peer of a [`PagerControl`]: a menu with the selection pattern, as in WinUI.
@@ -6882,23 +6887,23 @@ extension type Paragraph._(int handle) implements Block {
   double get defaultTabStop => _getF64(handle, 207);
   set defaultTabStop(double value) => _setF64(handle, 207, value);
   /// LeftIndent.
-  double get leftIndent => _getF64(handle, 514);
-  set leftIndent(double value) => _setF64(handle, 514, value);
+  double get leftIndent => _getF64(handle, 515);
+  set leftIndent(double value) => _setF64(handle, 515, value);
   /// LineSpacing.
-  double get lineSpacing => _getF64(handle, 522);
-  set lineSpacing(double value) => _setF64(handle, 522, value);
+  double get lineSpacing => _getF64(handle, 523);
+  set lineSpacing(double value) => _setF64(handle, 523, value);
   /// LineSpacingRule.
-  LineSpacingRule get lineSpacingRule => LineSpacingRule(_getI64(handle, 523));
-  set lineSpacingRule(LineSpacingRule value) => _setI64(handle, 523, value.value);
+  LineSpacingRule get lineSpacingRule => LineSpacingRule(_getI64(handle, 524));
+  set lineSpacingRule(LineSpacingRule value) => _setI64(handle, 524, value.value);
   /// RightIndent.
-  double get rightIndent => _getF64(handle, 734);
-  set rightIndent(double value) => _setF64(handle, 734, value);
+  double get rightIndent => _getF64(handle, 735);
+  set rightIndent(double value) => _setF64(handle, 735, value);
   /// TabStops.
-  String get tabStops => _getString(handle, 860);
-  set tabStops(String value) => _setString(handle, 860, value);
+  String get tabStops => _getString(handle, 861);
+  set tabStops(String value) => _setString(handle, 861, value);
   /// TextIndent.
-  double get textIndent => _getF64(handle, 904);
-  set textIndent(double value) => _setF64(handle, 904, value);
+  double get textIndent => _getF64(handle, 905);
+  set textIndent(double value) => _setF64(handle, 905, value);
 }
 
 /// Draws a [`Geometry`].
@@ -6923,11 +6928,11 @@ extension type PathFigure._(int handle) implements FerroObject {
   bool get isFilled => _getBool(handle, 411);
   set isFilled(bool value) => _setBool(handle, 411, value);
   /// Segments.
-  String get segments => _getString(handle, 767);
-  set segments(String value) => _setString(handle, 767, value);
+  String get segments => _getString(handle, 768);
+  set segments(String value) => _setString(handle, 768, value);
   /// StartPoint.
-  String get startPoint => _getString(handle, 831);
-  set startPoint(String value) => _setString(handle, 831, value);
+  String get startPoint => _getString(handle, 832);
+  set startPoint(String value) => _setString(handle, 832, value);
 }
 
 /// Represents the geometry of an arbitrarily complex shape.
@@ -6981,17 +6986,17 @@ extension type Pen._(int handle) implements FerroObject {
   String get brush => _getString(handle, 92);
   set brush(String value) => _setString(handle, 92, value);
   /// LineCap.
-  PenLineCap get lineCap => PenLineCap(_getI64(handle, 519));
-  set lineCap(PenLineCap value) => _setI64(handle, 519, value.value);
+  PenLineCap get lineCap => PenLineCap(_getI64(handle, 520));
+  set lineCap(PenLineCap value) => _setI64(handle, 520, value.value);
   /// LineJoin.
-  PenLineJoin get lineJoin => PenLineJoin(_getI64(handle, 521));
-  set lineJoin(PenLineJoin value) => _setI64(handle, 521, value.value);
+  PenLineJoin get lineJoin => PenLineJoin(_getI64(handle, 522));
+  set lineJoin(PenLineJoin value) => _setI64(handle, 522, value.value);
   /// MiterLimit.
-  double get miterLimit => _getF64(handle, 567);
-  set miterLimit(double value) => _setF64(handle, 567, value);
+  double get miterLimit => _getF64(handle, 568);
+  set miterLimit(double value) => _setF64(handle, 568, value);
   /// Thickness.
-  double get thickness => _getF64(handle, 929);
-  set thickness(double value) => _setF64(handle, 929, value);
+  double get thickness => _getF64(handle, 930);
+  set thickness(double value) => _setF64(handle, 930, value);
 }
 
 /// A picture of a person or a group (WinUI's `PersonPicture`): the profile picture, else the
@@ -7037,12 +7042,12 @@ extension type PersonPicture._(int handle) implements TemplatedControl {
   set isGroup(bool value) => _setBool(handle, 414, value);
   /// PreferSmallImage. Defines the `PreferSmallImage` property: whether the small picture of
   /// the contact is shown before the large one.
-  bool get preferSmallImage => _getBool(handle, 674);
-  set preferSmallImage(bool value) => _setBool(handle, 674, value);
+  bool get preferSmallImage => _getBool(handle, 675);
+  set preferSmallImage(bool value) => _setBool(handle, 675, value);
   /// TemplateSettings. Defines the `TemplateSettings` property: the initials and the brush the
   /// template binds to.
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
-  set templateSettings(FerroObject value) => _setObject(handle, 875, value.handle);
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
+  set templateSettings(FerroObject value) => _setObject(handle, 876, value.handle);
 }
 
 /// The automation peer of a [`PersonPicture`]: text, whose name is the automation name the
@@ -7088,34 +7093,34 @@ extension type PipsPager._(int handle) implements TemplatedControl {
   bool get isPreviousButtonVisible => _getBool(handle, 442);
   set isPreviousButtonVisible(bool value) => _setBool(handle, 442, value);
   /// MaxVisiblePips. Defines the `MaxVisiblePips` property.
-  int get maxVisiblePips => _getI64(handle, 543);
-  set maxVisiblePips(int value) => _setI64(handle, 543, value);
+  int get maxVisiblePips => _getI64(handle, 544);
+  set maxVisiblePips(int value) => _setI64(handle, 544, value);
   /// NextButtonTheme. Defines the `NextButtonTheme` property.
-  FerroObject get nextButtonTheme => FerroObject(_getObject(handle, 592));
-  set nextButtonTheme(FerroObject value) => _setObject(handle, 592, value.handle);
+  FerroObject get nextButtonTheme => FerroObject(_getObject(handle, 593));
+  set nextButtonTheme(FerroObject value) => _setObject(handle, 593, value.handle);
   /// NextButtonVisibility. Defines the `NextButtonVisibility` property.
-  PipsPagerButtonVisibility get nextButtonVisibility => PipsPagerButtonVisibility(_getI64(handle, 593));
-  set nextButtonVisibility(PipsPagerButtonVisibility value) => _setI64(handle, 593, value.value);
+  PipsPagerButtonVisibility get nextButtonVisibility => PipsPagerButtonVisibility(_getI64(handle, 594));
+  set nextButtonVisibility(PipsPagerButtonVisibility value) => _setI64(handle, 594, value.value);
   /// NumberOfPages. Defines the `NumberOfPages` property.
-  int get numberOfPages => _getI64(handle, 598);
-  set numberOfPages(int value) => _setI64(handle, 598, value);
+  int get numberOfPages => _getI64(handle, 599);
+  set numberOfPages(int value) => _setI64(handle, 599, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// PreviousButtonTheme. Defines the `PreviousButtonTheme` property.
-  FerroObject get previousButtonTheme => FerroObject(_getObject(handle, 679));
-  set previousButtonTheme(FerroObject value) => _setObject(handle, 679, value.handle);
+  FerroObject get previousButtonTheme => FerroObject(_getObject(handle, 680));
+  set previousButtonTheme(FerroObject value) => _setObject(handle, 680, value.handle);
   /// PreviousButtonVisibility. Defines the `PreviousButtonVisibility` property.
-  PipsPagerButtonVisibility get previousButtonVisibility => PipsPagerButtonVisibility(_getI64(handle, 680));
-  set previousButtonVisibility(PipsPagerButtonVisibility value) => _setI64(handle, 680, value.value);
+  PipsPagerButtonVisibility get previousButtonVisibility => PipsPagerButtonVisibility(_getI64(handle, 681));
+  set previousButtonVisibility(PipsPagerButtonVisibility value) => _setI64(handle, 681, value.value);
   /// SelectedPageIndex. Defines the `SelectedPageIndex` property.
-  int get selectedPageIndex => _getI64(handle, 776);
-  set selectedPageIndex(int value) => _setI64(handle, 776, value);
+  int get selectedPageIndex => _getI64(handle, 777);
+  set selectedPageIndex(int value) => _setI64(handle, 777, value);
   /// TemplateSettings. Defines the `TemplateSettings` property.
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// WrapMode. Defines the `WrapMode` property.
-  PipsPagerWrapMode get wrapMode => PipsPagerWrapMode(_getI64(handle, 1064));
-  set wrapMode(PipsPagerWrapMode value) => _setI64(handle, 1064, value.value);
+  PipsPagerWrapMode get wrapMode => PipsPagerWrapMode(_getI64(handle, 1065));
+  set wrapMode(PipsPagerWrapMode value) => _setI64(handle, 1065, value.value);
   /// SelectedIndexChanged: the sender is valid for the call. Defines the `SelectedIndexChanged`
   /// event.
   Subscription onSelectedIndexChanged(void Function(PipsPager sender) handler) =>
@@ -7165,24 +7170,24 @@ extension type Pivot._(int handle) implements SelectingItemsControl {
   bool get isLocked => _getBool(handle, 429);
   set isLocked(bool value) => _setBool(handle, 429, value);
   /// LeftHeader. Defines the `LeftHeader` property: the content left of the headers.
-  String get leftHeader => _getString(handle, 512);
-  set leftHeader(String value) => _setString(handle, 512, value);
-  FerroObject get leftHeaderObject => FerroObject(_getObject(handle, 512));
-  set leftHeaderObject(FerroObject value) => _setObject(handle, 512, value.handle);
+  String get leftHeader => _getString(handle, 513);
+  set leftHeader(String value) => _setString(handle, 513, value);
+  FerroObject get leftHeaderObject => FerroObject(_getObject(handle, 513));
+  set leftHeaderObject(FerroObject value) => _setObject(handle, 513, value.handle);
   /// Pivot.SlideInAnimationGroup (attached). Defines the attached `SlideInAnimationGroup`
   /// property of the elements of a pivot item.
-  static PivotSlideInAnimationGroup getSlideInAnimationGroup(FerroObject target) => PivotSlideInAnimationGroup(_getI64(target.handle, 646));
-  static void setSlideInAnimationGroup(FerroObject target, PivotSlideInAnimationGroup value) => _setI64(target.handle, 646, value.value);
+  static PivotSlideInAnimationGroup getSlideInAnimationGroup(FerroObject target) => PivotSlideInAnimationGroup(_getI64(target.handle, 647));
+  static void setSlideInAnimationGroup(FerroObject target, PivotSlideInAnimationGroup value) => _setI64(target.handle, 647, value.value);
   /// RightHeader. Defines the `RightHeader` property: the content right of the headers.
-  String get rightHeader => _getString(handle, 732);
-  set rightHeader(String value) => _setString(handle, 732, value);
-  FerroObject get rightHeaderObject => FerroObject(_getObject(handle, 732));
-  set rightHeaderObject(FerroObject value) => _setObject(handle, 732, value.handle);
+  String get rightHeader => _getString(handle, 733);
+  set rightHeader(String value) => _setString(handle, 733, value);
+  FerroObject get rightHeaderObject => FerroObject(_getObject(handle, 733));
+  set rightHeaderObject(FerroObject value) => _setObject(handle, 733, value.handle);
   /// Title. Defines the `Title` property: the content shown above the headers.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
-  FerroObject get titleObject => FerroObject(_getObject(handle, 942));
-  set titleObject(FerroObject value) => _setObject(handle, 942, value.handle);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
+  FerroObject get titleObject => FerroObject(_getObject(handle, 943));
+  set titleObject(FerroObject value) => _setObject(handle, 943, value.handle);
 }
 
 /// The automation peer of a [`Pivot`]: a Tab with the Selection pattern.
@@ -7288,8 +7293,8 @@ extension type PointAnimation._(int handle) implements Timeline {
   String get from => _getString(handle, 315);
   set from(String value) => _setString(handle, 315, value);
   /// To. Defines the `To` property: the end value. Default `None`.
-  String get to => _getString(handle, 946);
-  set to(String value) => _setString(handle, 946, value);
+  String get to => _getString(handle, 947);
+  set to(String value) => _setString(handle, 947, value);
 }
 
 /// Animates a `Point` property through its `KeyFrames` (WinUI's
@@ -7314,8 +7319,8 @@ extension type PolyBezierSegment._(int handle) implements PathSegment {
   factory PolyBezierSegment() => PolyBezierSegment._(_create(typeId));
   PolyBezierSegment.of(FerroObject object) : this._(object.handle);
   /// Points.
-  String get points => _getString(handle, 668);
-  set points(String value) => _setString(handle, 668, value);
+  String get points => _getString(handle, 669);
+  set points(String value) => _setString(handle, 669, value);
 }
 
 /// Represents a set of line segments defined by a points collection with each point specifying
@@ -7325,8 +7330,8 @@ extension type PolyLineSegment._(int handle) implements PathSegment {
   factory PolyLineSegment() => PolyLineSegment._(_create(typeId));
   PolyLineSegment.of(FerroObject object) : this._(object.handle);
   /// Points.
-  String get points => _getString(handle, 668);
-  set points(String value) => _setString(handle, 668, value);
+  String get points => _getString(handle, 669);
+  set points(String value) => _setString(handle, 669, value);
 }
 
 /// Represents a closed figure made of straight lines between points.
@@ -7338,8 +7343,8 @@ extension type Polygon._(int handle) implements Shape {
   FillRule get fillRule => FillRule(_getI64(handle, 280));
   set fillRule(FillRule value) => _setI64(handle, 280, value.value);
   /// Points. Defines the `Points` property.
-  String get points => _getString(handle, 668);
-  set points(String value) => _setString(handle, 668, value);
+  String get points => _getString(handle, 669);
+  set points(String value) => _setString(handle, 669, value);
 }
 
 /// Represents an open figure made of straight lines between points.
@@ -7351,8 +7356,8 @@ extension type Polyline._(int handle) implements Shape {
   FillRule get fillRule => FillRule(_getI64(handle, 280));
   set fillRule(FillRule value) => _setI64(handle, 280, value.value);
   /// Points. Defines the `Points` property.
-  String get points => _getString(handle, 668);
-  set points(String value) => _setString(handle, 668, value);
+  String get points => _getString(handle, 669);
+  set points(String value) => _setString(handle, 669, value);
 }
 
 /// Represents the geometry of a polyline or polygon.
@@ -7364,8 +7369,8 @@ extension type PolylineGeometry._(int handle) implements Geometry {
   bool get isFilled => _getBool(handle, 411);
   set isFilled(bool value) => _setBool(handle, 411, value);
   /// Points.
-  String get points => _getString(handle, 668);
-  set points(String value) => _setString(handle, 668, value);
+  String get points => _getString(handle, 669);
+  set points(String value) => _setString(handle, 669, value);
 }
 
 /// Displays a popup window.
@@ -7392,49 +7397,49 @@ extension type Popup._(int handle) implements Control {
   bool get isOpen => _getBool(handle, 435);
   set isOpen(bool value) => _setBool(handle, 435, value);
   /// IsUsingOverlayLayer. Defines the `IsUsingOverlayLayer` property.
-  bool get isUsingOverlayLayer => _getBool(handle, 467);
+  bool get isUsingOverlayLayer => _getBool(handle, 468);
   /// OverlayDismissEventPassThrough. Defines the `OverlayDismissEventPassThrough` property.
-  bool get overlayDismissEventPassThrough => _getBool(handle, 616);
-  set overlayDismissEventPassThrough(bool value) => _setBool(handle, 616, value);
+  bool get overlayDismissEventPassThrough => _getBool(handle, 617);
+  set overlayDismissEventPassThrough(bool value) => _setBool(handle, 617, value);
   /// OverlayInputPassThroughElement. Defines the `OverlayInputPassThroughElement` property.
-  FerroObject get overlayInputPassThroughElement => FerroObject(_getObject(handle, 617));
-  set overlayInputPassThroughElement(FerroObject value) => _setObject(handle, 617, value.handle);
+  FerroObject get overlayInputPassThroughElement => FerroObject(_getObject(handle, 618));
+  set overlayInputPassThroughElement(FerroObject value) => _setObject(handle, 618, value.handle);
   /// Placement. Defines the `Placement` property.
-  PlacementMode get placement => PlacementMode(_getI64(handle, 652));
-  set placement(PlacementMode value) => _setI64(handle, 652, value.value);
+  PlacementMode get placement => PlacementMode(_getI64(handle, 653));
+  set placement(PlacementMode value) => _setI64(handle, 653, value.value);
   /// PlacementAnchor. Defines the `PlacementAnchor` property.
-  String get placementAnchor => _getString(handle, 653);
-  set placementAnchor(String value) => _setString(handle, 653, value);
+  String get placementAnchor => _getString(handle, 654);
+  set placementAnchor(String value) => _setString(handle, 654, value);
   /// PlacementConstraintAdjustment. Defines the `PlacementConstraintAdjustment` property.
-  String get placementConstraintAdjustment => _getString(handle, 654);
-  set placementConstraintAdjustment(String value) => _setString(handle, 654, value);
+  String get placementConstraintAdjustment => _getString(handle, 655);
+  set placementConstraintAdjustment(String value) => _setString(handle, 655, value);
   /// PlacementGravity. Defines the `PlacementGravity` property.
-  String get placementGravity => _getString(handle, 655);
-  set placementGravity(String value) => _setString(handle, 655, value);
+  String get placementGravity => _getString(handle, 656);
+  set placementGravity(String value) => _setString(handle, 656, value);
   /// PlacementRect. Defines the `PlacementRect` property.
-  String get placementRect => _getString(handle, 656);
-  set placementRect(String value) => _setString(handle, 656, value);
+  String get placementRect => _getString(handle, 657);
+  set placementRect(String value) => _setString(handle, 657, value);
   /// PlacementTarget. Defines the `PlacementTarget` property. The popup does not own its
   /// placement target (it is usually an ancestor of the popup), so the value is an element
   /// reference.
-  FerroObject get placementTarget => FerroObject(_getObject(handle, 657));
-  set placementTarget(FerroObject value) => _setObject(handle, 657, value.handle);
+  FerroObject get placementTarget => FerroObject(_getObject(handle, 658));
+  set placementTarget(FerroObject value) => _setObject(handle, 658, value.handle);
   /// Popup.TakesFocusFromNativeControl (attached). Defines the `TakesFocusFromNativeControl`
   /// property.
-  static bool getTakesFocusFromNativeControl(FerroObject target) => _getBool(target.handle, 669);
-  static void setTakesFocusFromNativeControl(FerroObject target, bool value) => _setBool(target.handle, 669, value);
+  static bool getTakesFocusFromNativeControl(FerroObject target) => _getBool(target.handle, 670);
+  static void setTakesFocusFromNativeControl(FerroObject target, bool value) => _setBool(target.handle, 670, value);
   /// ShouldUseOverlayLayer. Defines the `ShouldUseOverlayLayer` property.
-  bool get shouldUseOverlayLayer => _getBool(handle, 800);
-  set shouldUseOverlayLayer(bool value) => _setBool(handle, 800, value);
+  bool get shouldUseOverlayLayer => _getBool(handle, 801);
+  set shouldUseOverlayLayer(bool value) => _setBool(handle, 801, value);
   /// Topmost. Defines the `Topmost` property.
-  bool get topmost => _getBool(handle, 968);
-  set topmost(bool value) => _setBool(handle, 968, value);
+  bool get topmost => _getBool(handle, 969);
+  set topmost(bool value) => _setBool(handle, 969, value);
   /// VerticalOffset. Defines the `VerticalOffset` property.
-  double get verticalOffset => _getF64(handle, 1036);
-  set verticalOffset(double value) => _setF64(handle, 1036, value);
+  double get verticalOffset => _getF64(handle, 1037);
+  set verticalOffset(double value) => _setF64(handle, 1037, value);
   /// WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.
-  bool get windowManagerAddShadowHint => _getBool(handle, 1060);
-  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1060, value);
+  bool get windowManagerAddShadowHint => _getBool(handle, 1061);
+  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1061, value);
 }
 
 /// An automation peer which represents a [`Popup`].
@@ -7464,10 +7469,10 @@ extension type WindowBase._(int handle) implements TopLevel {
   /// IsActive. Defines the `IsActive` property.
   bool get isActive => _getBool(handle, 387);
   /// Owner. Defines the `Owner` property.
-  FerroObject get owner => FerroObject(_getObject(handle, 618));
+  FerroObject get owner => FerroObject(_getObject(handle, 619));
   /// Topmost. Defines the `Topmost` property.
-  bool get topmost => _getBool(handle, 968);
-  set topmost(bool value) => _setBool(handle, 968, value);
+  bool get topmost => _getBool(handle, 969);
+  set topmost(bool value) => _setBool(handle, 969, value);
 }
 
 /// The root window of a [`Popup`].
@@ -7475,11 +7480,11 @@ extension type PopupRoot._(int handle) implements WindowBase {
   static const int typeId = 300;
   PopupRoot.of(FerroObject object) : this._(object.handle);
   /// Transform. Defines the `Transform` property.
-  FerroObject get transform => FerroObject(_getObject(handle, 969));
-  set transform(FerroObject value) => _setObject(handle, 969, value.handle);
+  FerroObject get transform => FerroObject(_getObject(handle, 970));
+  set transform(FerroObject value) => _setObject(handle, 970, value.handle);
   /// WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.
-  bool get windowManagerAddShadowHint => _getBool(handle, 1060);
-  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1060, value);
+  bool get windowManagerAddShadowHint => _getBool(handle, 1061);
+  set windowManagerAddShadowHint(bool value) => _setBool(handle, 1061, value);
 }
 
 /// An automation peer which represents a [`WindowBase`]: the root of an automation tree.
@@ -7500,8 +7505,8 @@ extension type PowerEase._(int handle) implements EasingFunctionBase {
   factory PowerEase() => PowerEase._(_create(typeId));
   PowerEase.of(FerroObject object) : this._(object.handle);
   /// Power. Defines the `Power` property (a negative power is 0). Default 2.
-  double get power => _getF64(handle, 671);
-  set power(double value) => _setF64(handle, 671, value);
+  double get power => _getF64(handle, 672);
+  set power(double value) => _setF64(handle, 672, value);
 }
 
 extension type PreviewAdorner._(int handle) implements Decorator {
@@ -7515,20 +7520,20 @@ extension type RangeBase._(int handle) implements TemplatedControl {
   static const int typeId = 321;
   RangeBase.of(FerroObject object) : this._(object.handle);
   /// LargeChange. Defines the `LargeChange` property.
-  double get largeChange => _getF64(handle, 504);
-  set largeChange(double value) => _setF64(handle, 504, value);
+  double get largeChange => _getF64(handle, 505);
+  set largeChange(double value) => _setF64(handle, 505, value);
   /// Maximum. Defines the `Maximum` property.
-  double get maximum => _getF64(handle, 547);
-  set maximum(double value) => _setF64(handle, 547, value);
+  double get maximum => _getF64(handle, 548);
+  set maximum(double value) => _setF64(handle, 548, value);
   /// Minimum. Defines the `Minimum` property.
-  double get minimum => _getF64(handle, 562);
-  set minimum(double value) => _setF64(handle, 562, value);
+  double get minimum => _getF64(handle, 563);
+  set minimum(double value) => _setF64(handle, 563, value);
   /// SmallChange. Defines the `SmallChange` property.
-  double get smallChange => _getF64(handle, 816);
-  set smallChange(double value) => _setF64(handle, 816, value);
+  double get smallChange => _getF64(handle, 817);
+  set smallChange(double value) => _setF64(handle, 817, value);
   /// Value. Defines the `Value` property.
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
   /// ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.
   Subscription onValueChanged(void Function(RangeBase sender) handler) =>
       _subscribe(handle, 93, (sender) => handler(RangeBase._(sender)));
@@ -7543,22 +7548,22 @@ extension type ProgressBar._(int handle) implements RangeBase {
   bool get isIndeterminate => _getBool(handle, 421);
   set isIndeterminate(bool value) => _setBool(handle, 421, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// Percentage. Defines the `Percentage` property.
-  double get percentage => _getF64(handle, 644);
+  double get percentage => _getF64(handle, 645);
   /// ProgressTextFormat. Defines the `ProgressTextFormat` property.
-  String get progressTextFormat => _getString(handle, 687);
-  set progressTextFormat(String value) => _setString(handle, 687, value);
+  String get progressTextFormat => _getString(handle, 688);
+  set progressTextFormat(String value) => _setString(handle, 688, value);
   /// ShowError. Defines the `ShowError` property.
-  bool get showError => _getBool(handle, 804);
-  set showError(bool value) => _setBool(handle, 804, value);
+  bool get showError => _getBool(handle, 805);
+  set showError(bool value) => _setBool(handle, 805, value);
   /// ShowPaused. Defines the `ShowPaused` property.
-  bool get showPaused => _getBool(handle, 808);
-  set showPaused(bool value) => _setBool(handle, 808, value);
+  bool get showPaused => _getBool(handle, 809);
+  set showPaused(bool value) => _setBool(handle, 809, value);
   /// ShowProgressText. Defines the `ShowProgressText` property.
-  bool get showProgressText => _getBool(handle, 809);
-  set showProgressText(bool value) => _setBool(handle, 809, value);
+  bool get showProgressText => _getBool(handle, 810);
+  set showProgressText(bool value) => _setBool(handle, 810, value);
 }
 
 /// The base class of the automation peers which represent a [`RangeBase`].
@@ -7638,18 +7643,18 @@ extension type ProgressRing._(int handle) implements TemplatedControl {
   bool get isIndeterminate => _getBool(handle, 421);
   set isIndeterminate(bool value) => _setBool(handle, 421, value);
   /// Maximum. Defines the `Maximum` property. 100 by default.
-  double get maximum => _getF64(handle, 547);
-  set maximum(double value) => _setF64(handle, 547, value);
+  double get maximum => _getF64(handle, 548);
+  set maximum(double value) => _setF64(handle, 548, value);
   /// Minimum. Defines the `Minimum` property. 0 by default.
-  double get minimum => _getF64(handle, 562);
-  set minimum(double value) => _setF64(handle, 562, value);
+  double get minimum => _getF64(handle, 563);
+  set minimum(double value) => _setF64(handle, 563, value);
   /// TemplateSettings. Defines the `TemplateSettings` property: the values the template binds
   /// to (read-only).
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// Value. Defines the `Value` property: the progress between `Minimum` and `Maximum`. 0 by
   /// default.
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
 }
 
 /// The automation peer of a [`ProgressRing`]: a progress bar with the range value pattern while
@@ -7672,7 +7677,7 @@ extension type ProgressRingTemplateSettings._(int handle) implements FerroObject
   /// EllipseOffset. Defines the `EllipseOffset` property (read-only).
   String get ellipseOffset => _getString(handle, 264);
   /// MaxSideLength. Defines the `MaxSideLength` property (read-only).
-  double get maxSideLength => _getF64(handle, 541);
+  double get maxSideLength => _getF64(handle, 542);
 }
 
 /// Recognizes the pull gesture: a drag from an edge of the target, as used by pull-to-refresh.
@@ -7681,8 +7686,8 @@ extension type PullGestureRecognizer._(int handle) implements GestureRecognizer 
   factory PullGestureRecognizer() => PullGestureRecognizer._(_create(typeId));
   PullGestureRecognizer.of(FerroObject object) : this._(object.handle);
   /// PullDirection. Defines the `PullDirection` property.
-  PullDirection get pullDirection => PullDirection(_getI64(handle, 690));
-  set pullDirection(PullDirection value) => _setI64(handle, 690, value.value);
+  PullDirection get pullDirection => PullDirection(_getI64(handle, 691));
+  set pullDirection(PullDirection value) => _setI64(handle, 691, value.value);
 }
 
 /// A quadratic Bezier curve segment of a path figure.
@@ -7691,11 +7696,11 @@ extension type QuadraticBezierSegment._(int handle) implements PathSegment {
   factory QuadraticBezierSegment() => QuadraticBezierSegment._(_create(typeId));
   QuadraticBezierSegment.of(FerroObject object) : this._(object.handle);
   /// Point1.
-  String get point1 => _getString(handle, 661);
-  set point1(String value) => _setString(handle, 661, value);
+  String get point1 => _getString(handle, 662);
+  set point1(String value) => _setString(handle, 662, value);
   /// Point2.
-  String get point2 => _getString(handle, 662);
-  set point2(String value) => _setString(handle, 662, value);
+  String get point2 => _getString(handle, 663);
+  set point2(String value) => _setString(handle, 663, value);
 }
 
 /// The curve `t^2` (WinUI's `QuadraticEase`).
@@ -7731,11 +7736,11 @@ extension type RadialGradientBrush._(int handle) implements GradientBrush {
   String get gradientOrigin => _getString(handle, 324);
   set gradientOrigin(String value) => _setString(handle, 324, value);
   /// RadiusX.
-  String get radiusX => _getString(handle, 693);
-  set radiusX(String value) => _setString(handle, 693, value);
+  String get radiusX => _getString(handle, 694);
+  set radiusX(String value) => _setString(handle, 694, value);
   /// RadiusY.
-  String get radiusY => _getString(handle, 694);
-  set radiusY(String value) => _setString(handle, 694, value);
+  String get radiusY => _getString(handle, 695);
+  set radiusY(String value) => _setString(handle, 695, value);
 }
 
 /// Represents a button that allows a user to select a single option from a group of options.
@@ -7786,8 +7791,8 @@ extension type RadioButtons._(int handle) implements HeaderedSelectingItemsContr
   RadioButtons.of(FerroObject object) : this._(object.handle);
   /// MaxColumns. Defines the `MaxColumns` property: the largest number of columns. 1 by
   /// default; a value less than 1 is 1 (WinUI rejects it with an exception).
-  int get maxColumns => _getI64(handle, 534);
-  set maxColumns(int value) => _setI64(handle, 534, value);
+  int get maxColumns => _getI64(handle, 535);
+  set maxColumns(int value) => _setI64(handle, 535, value);
 }
 
 /// An automation peer which represents a [`RadioButtons`]: a group named by its header when it
@@ -7818,8 +7823,8 @@ extension type RadioButtonsPanel._(int handle) implements Panel {
   set columnSpacing(double value) => _setF64(handle, 159, value);
   /// RowSpacing. Defines the `RowSpacing` property: the space between the rows. 0 by default;
   /// the WinUI theme sets `RadioButtonsRowSpacing` (8).
-  double get rowSpacing => _getF64(handle, 737);
-  set rowSpacing(double value) => _setF64(handle, 737, value);
+  double get rowSpacing => _getF64(handle, 738);
+  set rowSpacing(double value) => _setF64(handle, 738, value);
 }
 
 /// A control to rate with stars (WinUI's `RatingControl`): a value from 1 to `MaxRating`, or -1
@@ -7860,20 +7865,20 @@ extension type RatingControl._(int handle) implements TemplatedControl {
   bool get isReadOnly => _getBool(handle, 444);
   set isReadOnly(bool value) => _setBool(handle, 444, value);
   /// ItemInfo. Defines the `ItemInfo` property: the glyphs or the images of the items.
-  FerroObject get itemInfo => FerroObject(_getObject(handle, 478));
-  set itemInfo(FerroObject value) => _setObject(handle, 478, value.handle);
+  FerroObject get itemInfo => FerroObject(_getObject(handle, 479));
+  set itemInfo(FerroObject value) => _setObject(handle, 479, value.handle);
   /// MaxRating. Defines the `MaxRating` property: the number of items. 5 by default; a value
   /// less than 1 is 1.
-  int get maxRating => _getI64(handle, 540);
-  set maxRating(int value) => _setI64(handle, 540, value);
+  int get maxRating => _getI64(handle, 541);
+  set maxRating(int value) => _setI64(handle, 541, value);
   /// PlaceholderValue. Defines the `PlaceholderValue` property: the rating shown while the
   /// rating is not set (a community rating), -1 for none (the default). From 0 to `MaxRating`.
-  double get placeholderValue => _getF64(handle, 651);
-  set placeholderValue(double value) => _setF64(handle, 651, value);
+  double get placeholderValue => _getF64(handle, 652);
+  set placeholderValue(double value) => _setF64(handle, 652, value);
   /// Value. Defines the `Value` property: the rating, from 1 to `MaxRating`, or -1 while it is
   /// not set (the default).
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
 }
 
 /// An automation peer which represents a [`RatingControl`]: a slider with the value pattern
@@ -7906,17 +7911,17 @@ extension type RatingItemFontInfo._(int handle) implements RatingItemInfo {
   String get glyph => _getString(handle, 322);
   set glyph(String value) => _setString(handle, 322, value);
   /// PlaceholderGlyph.
-  String get placeholderGlyph => _getString(handle, 648);
-  set placeholderGlyph(String value) => _setString(handle, 648, value);
+  String get placeholderGlyph => _getString(handle, 649);
+  set placeholderGlyph(String value) => _setString(handle, 649, value);
   /// PointerOverGlyph.
-  String get pointerOverGlyph => _getString(handle, 664);
-  set pointerOverGlyph(String value) => _setString(handle, 664, value);
+  String get pointerOverGlyph => _getString(handle, 665);
+  set pointerOverGlyph(String value) => _setString(handle, 665, value);
   /// PointerOverPlaceholderGlyph.
-  String get pointerOverPlaceholderGlyph => _getString(handle, 666);
-  set pointerOverPlaceholderGlyph(String value) => _setString(handle, 666, value);
+  String get pointerOverPlaceholderGlyph => _getString(handle, 667);
+  set pointerOverPlaceholderGlyph(String value) => _setString(handle, 667, value);
   /// UnsetGlyph.
-  String get unsetGlyph => _getString(handle, 1022);
-  set unsetGlyph(String value) => _setString(handle, 1022, value);
+  String get unsetGlyph => _getString(handle, 1023);
+  set unsetGlyph(String value) => _setString(handle, 1023, value);
 }
 
 /// The images of the items of a rating control in each state (WinUI's `RatingItemImageInfo`),
@@ -7932,17 +7937,17 @@ extension type RatingItemImageInfo._(int handle) implements RatingItemInfo {
   String get image => _getString(handle, 362);
   set image(String value) => _setString(handle, 362, value);
   /// PlaceholderImage.
-  String get placeholderImage => _getString(handle, 649);
-  set placeholderImage(String value) => _setString(handle, 649, value);
+  String get placeholderImage => _getString(handle, 650);
+  set placeholderImage(String value) => _setString(handle, 650, value);
   /// PointerOverImage.
-  String get pointerOverImage => _getString(handle, 665);
-  set pointerOverImage(String value) => _setString(handle, 665, value);
+  String get pointerOverImage => _getString(handle, 666);
+  set pointerOverImage(String value) => _setString(handle, 666, value);
   /// PointerOverPlaceholderImage.
-  String get pointerOverPlaceholderImage => _getString(handle, 667);
-  set pointerOverPlaceholderImage(String value) => _setString(handle, 667, value);
+  String get pointerOverPlaceholderImage => _getString(handle, 668);
+  set pointerOverPlaceholderImage(String value) => _setString(handle, 668, value);
   /// UnsetImage.
-  String get unsetImage => _getString(handle, 1023);
-  set unsetImage(String value) => _setString(handle, 1023, value);
+  String get unsetImage => _getString(handle, 1024);
+  set unsetImage(String value) => _setString(handle, 1024, value);
 }
 
 /// Represents a rectangle with optional rounded corners.
@@ -7951,11 +7956,11 @@ extension type Rectangle._(int handle) implements Shape {
   factory Rectangle() => Rectangle._(_create(typeId));
   Rectangle.of(FerroObject object) : this._(object.handle);
   /// RadiusX. Defines the `RadiusX` property.
-  double get radiusX => _getF64(handle, 693);
-  set radiusX(double value) => _setF64(handle, 693, value);
+  double get radiusX => _getF64(handle, 694);
+  set radiusX(double value) => _setF64(handle, 694, value);
   /// RadiusY. Defines the `RadiusY` property.
-  double get radiusY => _getF64(handle, 694);
-  set radiusY(double value) => _setF64(handle, 694, value);
+  double get radiusY => _getF64(handle, 695);
+  set radiusY(double value) => _setF64(handle, 695, value);
 }
 
 /// Represents the geometry of a rectangle.
@@ -7964,14 +7969,14 @@ extension type RectangleGeometry._(int handle) implements Geometry {
   factory RectangleGeometry() => RectangleGeometry._(_create(typeId));
   RectangleGeometry.of(FerroObject object) : this._(object.handle);
   /// RadiusX.
-  double get radiusX => _getF64(handle, 693);
-  set radiusX(double value) => _setF64(handle, 693, value);
+  double get radiusX => _getF64(handle, 694);
+  set radiusX(double value) => _setF64(handle, 694, value);
   /// RadiusY.
-  double get radiusY => _getF64(handle, 694);
-  set radiusY(double value) => _setF64(handle, 694, value);
+  double get radiusY => _getF64(handle, 695);
+  set radiusY(double value) => _setF64(handle, 695, value);
   /// Rect.
-  String get rect => _getString(handle, 696);
-  set rect(String value) => _setString(handle, 696, value);
+  String get rect => _getString(handle, 697);
+  set rect(String value) => _setString(handle, 697, value);
 }
 
 /// Represents a container control that provides a [`RefreshVisualizer`] and pull-to-refresh
@@ -7985,11 +7990,11 @@ extension type RefreshContainer._(int handle) implements ContentControl {
   bool get isMouseEnabled => _getBool(handle, 430);
   set isMouseEnabled(bool value) => _setBool(handle, 430, value);
   /// PullDirection. Defines the `PullDirection` property.
-  PullDirection get pullDirection => PullDirection(_getI64(handle, 690));
-  set pullDirection(PullDirection value) => _setI64(handle, 690, value.value);
+  PullDirection get pullDirection => PullDirection(_getI64(handle, 691));
+  set pullDirection(PullDirection value) => _setI64(handle, 691, value.value);
   /// Visualizer. Defines the `Visualizer` property.
-  FerroObject get visualizer => FerroObject(_getObject(handle, 1049));
-  set visualizer(FerroObject value) => _setObject(handle, 1049, value.handle);
+  FerroObject get visualizer => FerroObject(_getObject(handle, 1050));
+  set visualizer(FerroObject value) => _setObject(handle, 1050, value.handle);
   /// RefreshRequested: the sender is valid for the call. Defines the `RefreshRequested` event.
   Subscription onRefreshRequested(void Function(RefreshContainer sender) handler) =>
       _subscribe(handle, 64, (sender) => handler(RefreshContainer._(sender)));
@@ -8009,11 +8014,11 @@ extension type RefreshInfoProvider._(int handle) implements Interactive {
   bool get isInteractingForRefresh => _getBool(handle, 422);
   set isInteractingForRefresh(bool value) => _setBool(handle, 422, value);
   /// PullDirection.
-  PullDirection get pullDirection => PullDirection(_getI64(handle, 690));
-  set pullDirection(PullDirection value) => _setI64(handle, 690, value.value);
+  PullDirection get pullDirection => PullDirection(_getI64(handle, 691));
+  set pullDirection(PullDirection value) => _setI64(handle, 691, value.value);
   /// RefreshVisualizerSize.
-  String get refreshVisualizerSize => _getString(handle, 697);
-  set refreshVisualizerSize(String value) => _setString(handle, 697, value);
+  String get refreshVisualizerSize => _getString(handle, 698);
+  set refreshVisualizerSize(String value) => _setString(handle, 698, value);
   /// RefreshCompleted: the sender is valid for the call. Defines the `RefreshCompleted` event.
   Subscription onRefreshCompleted(void Function(RefreshInfoProvider sender) handler) =>
       _subscribe(handle, 63, (sender) => handler(RefreshInfoProvider._(sender)));
@@ -8028,10 +8033,10 @@ extension type RefreshVisualizer._(int handle) implements ContentControl {
   factory RefreshVisualizer() => RefreshVisualizer._(_create(typeId));
   RefreshVisualizer.of(FerroObject object) : this._(object.handle);
   /// Orientation. Defines the `Orientation` property.
-  RefreshVisualizerOrientation get orientation => RefreshVisualizerOrientation(_getI64(handle, 612));
-  set orientation(RefreshVisualizerOrientation value) => _setI64(handle, 612, value.value);
+  RefreshVisualizerOrientation get orientation => RefreshVisualizerOrientation(_getI64(handle, 613));
+  set orientation(RefreshVisualizerOrientation value) => _setI64(handle, 613, value.value);
   /// RefreshVisualizerState. Defines the `RefreshVisualizerState` property.
-  RefreshVisualizerState get refreshVisualizerState => RefreshVisualizerState(_getI64(handle, 698));
+  RefreshVisualizerState get refreshVisualizerState => RefreshVisualizerState(_getI64(handle, 699));
   /// RefreshRequested: the sender is valid for the call. Defines the `RefreshRequested` event.
   Subscription onRefreshRequested(void Function(RefreshVisualizer sender) handler) =>
       _subscribe(handle, 64, (sender) => handler(RefreshVisualizer._(sender)));
@@ -8043,61 +8048,61 @@ extension type RelativePanel._(int handle) implements Panel {
   factory RelativePanel() => RelativePanel._(_create(typeId));
   RelativePanel.of(FerroObject object) : this._(object.handle);
   /// RelativePanel.Above (attached). Defines the `Above` attached property.
-  static String getAbove(FerroObject target) => _getString(target.handle, 699);
-  static void setAbove(FerroObject target, String value) => _setString(target.handle, 699, value);
+  static String getAbove(FerroObject target) => _getString(target.handle, 700);
+  static void setAbove(FerroObject target, String value) => _setString(target.handle, 700, value);
   /// RelativePanel.AlignBottomWith (attached). Defines the `AlignBottomWith` attached property.
-  static String getAlignBottomWith(FerroObject target) => _getString(target.handle, 700);
-  static void setAlignBottomWith(FerroObject target, String value) => _setString(target.handle, 700, value);
+  static String getAlignBottomWith(FerroObject target) => _getString(target.handle, 701);
+  static void setAlignBottomWith(FerroObject target, String value) => _setString(target.handle, 701, value);
   /// RelativePanel.AlignBottomWithPanel (attached). Defines the `AlignBottomWithPanel` attached
   /// property.
-  static bool getAlignBottomWithPanel(FerroObject target) => _getBool(target.handle, 701);
-  static void setAlignBottomWithPanel(FerroObject target, bool value) => _setBool(target.handle, 701, value);
+  static bool getAlignBottomWithPanel(FerroObject target) => _getBool(target.handle, 702);
+  static void setAlignBottomWithPanel(FerroObject target, bool value) => _setBool(target.handle, 702, value);
   /// RelativePanel.AlignHorizontalCenterWith (attached). Defines the
   /// `AlignHorizontalCenterWith` attached property.
-  static String getAlignHorizontalCenterWith(FerroObject target) => _getString(target.handle, 702);
-  static void setAlignHorizontalCenterWith(FerroObject target, String value) => _setString(target.handle, 702, value);
+  static String getAlignHorizontalCenterWith(FerroObject target) => _getString(target.handle, 703);
+  static void setAlignHorizontalCenterWith(FerroObject target, String value) => _setString(target.handle, 703, value);
   /// RelativePanel.AlignHorizontalCenterWithPanel (attached). Defines the
   /// `AlignHorizontalCenterWithPanel` attached property.
-  static bool getAlignHorizontalCenterWithPanel(FerroObject target) => _getBool(target.handle, 703);
-  static void setAlignHorizontalCenterWithPanel(FerroObject target, bool value) => _setBool(target.handle, 703, value);
+  static bool getAlignHorizontalCenterWithPanel(FerroObject target) => _getBool(target.handle, 704);
+  static void setAlignHorizontalCenterWithPanel(FerroObject target, bool value) => _setBool(target.handle, 704, value);
   /// RelativePanel.AlignLeftWith (attached). Defines the `AlignLeftWith` attached property.
-  static String getAlignLeftWith(FerroObject target) => _getString(target.handle, 704);
-  static void setAlignLeftWith(FerroObject target, String value) => _setString(target.handle, 704, value);
+  static String getAlignLeftWith(FerroObject target) => _getString(target.handle, 705);
+  static void setAlignLeftWith(FerroObject target, String value) => _setString(target.handle, 705, value);
   /// RelativePanel.AlignLeftWithPanel (attached). Defines the `AlignLeftWithPanel` attached
   /// property.
-  static bool getAlignLeftWithPanel(FerroObject target) => _getBool(target.handle, 705);
-  static void setAlignLeftWithPanel(FerroObject target, bool value) => _setBool(target.handle, 705, value);
+  static bool getAlignLeftWithPanel(FerroObject target) => _getBool(target.handle, 706);
+  static void setAlignLeftWithPanel(FerroObject target, bool value) => _setBool(target.handle, 706, value);
   /// RelativePanel.AlignRightWith (attached). Defines the `AlignRightWith` attached property.
-  static String getAlignRightWith(FerroObject target) => _getString(target.handle, 706);
-  static void setAlignRightWith(FerroObject target, String value) => _setString(target.handle, 706, value);
+  static String getAlignRightWith(FerroObject target) => _getString(target.handle, 707);
+  static void setAlignRightWith(FerroObject target, String value) => _setString(target.handle, 707, value);
   /// RelativePanel.AlignRightWithPanel (attached). Defines the `AlignRightWithPanel` attached
   /// property.
-  static bool getAlignRightWithPanel(FerroObject target) => _getBool(target.handle, 707);
-  static void setAlignRightWithPanel(FerroObject target, bool value) => _setBool(target.handle, 707, value);
+  static bool getAlignRightWithPanel(FerroObject target) => _getBool(target.handle, 708);
+  static void setAlignRightWithPanel(FerroObject target, bool value) => _setBool(target.handle, 708, value);
   /// RelativePanel.AlignTopWith (attached). Defines the `AlignTopWith` attached property.
-  static String getAlignTopWith(FerroObject target) => _getString(target.handle, 708);
-  static void setAlignTopWith(FerroObject target, String value) => _setString(target.handle, 708, value);
+  static String getAlignTopWith(FerroObject target) => _getString(target.handle, 709);
+  static void setAlignTopWith(FerroObject target, String value) => _setString(target.handle, 709, value);
   /// RelativePanel.AlignTopWithPanel (attached). Defines the `AlignTopWithPanel` attached
   /// property.
-  static bool getAlignTopWithPanel(FerroObject target) => _getBool(target.handle, 709);
-  static void setAlignTopWithPanel(FerroObject target, bool value) => _setBool(target.handle, 709, value);
+  static bool getAlignTopWithPanel(FerroObject target) => _getBool(target.handle, 710);
+  static void setAlignTopWithPanel(FerroObject target, bool value) => _setBool(target.handle, 710, value);
   /// RelativePanel.AlignVerticalCenterWith (attached). Defines the `AlignVerticalCenterWith`
   /// attached property.
-  static String getAlignVerticalCenterWith(FerroObject target) => _getString(target.handle, 710);
-  static void setAlignVerticalCenterWith(FerroObject target, String value) => _setString(target.handle, 710, value);
+  static String getAlignVerticalCenterWith(FerroObject target) => _getString(target.handle, 711);
+  static void setAlignVerticalCenterWith(FerroObject target, String value) => _setString(target.handle, 711, value);
   /// RelativePanel.AlignVerticalCenterWithPanel (attached). Defines the
   /// `AlignVerticalCenterWithPanel` attached property.
-  static bool getAlignVerticalCenterWithPanel(FerroObject target) => _getBool(target.handle, 711);
-  static void setAlignVerticalCenterWithPanel(FerroObject target, bool value) => _setBool(target.handle, 711, value);
+  static bool getAlignVerticalCenterWithPanel(FerroObject target) => _getBool(target.handle, 712);
+  static void setAlignVerticalCenterWithPanel(FerroObject target, bool value) => _setBool(target.handle, 712, value);
   /// RelativePanel.Below (attached). Defines the `Below` attached property.
-  static String getBelow(FerroObject target) => _getString(target.handle, 712);
-  static void setBelow(FerroObject target, String value) => _setString(target.handle, 712, value);
+  static String getBelow(FerroObject target) => _getString(target.handle, 713);
+  static void setBelow(FerroObject target, String value) => _setString(target.handle, 713, value);
   /// RelativePanel.LeftOf (attached). Defines the `LeftOf` attached property.
-  static String getLeftOf(FerroObject target) => _getString(target.handle, 713);
-  static void setLeftOf(FerroObject target, String value) => _setString(target.handle, 713, value);
+  static String getLeftOf(FerroObject target) => _getString(target.handle, 714);
+  static void setLeftOf(FerroObject target, String value) => _setString(target.handle, 714, value);
   /// RelativePanel.RightOf (attached). Defines the `RightOf` attached property.
-  static String getRightOf(FerroObject target) => _getString(target.handle, 714);
-  static void setRightOf(FerroObject target, String value) => _setString(target.handle, 714, value);
+  static String getRightOf(FerroObject target) => _getString(target.handle, 715);
+  static void setRightOf(FerroObject target, String value) => _setString(target.handle, 715, value);
 }
 
 /// Shows the frames received from a connection of the remote protocol. (Internal upstream;
@@ -8155,16 +8160,16 @@ extension type RevealBrush._(int handle) implements XamlCompositionBrushBase {
   set color(String value) => _setString(handle, 157, value);
   /// RevealBrush.IsContainer (attached). `IsContainer` (attached, internal in WinUI): the
   /// element holds a hover and a press light.
-  static bool getIsContainer(FerroObject target) => _getBool(target.handle, 727);
-  static void setIsContainer(FerroObject target, bool value) => _setBool(target.handle, 727, value);
+  static bool getIsContainer(FerroObject target) => _getBool(target.handle, 728);
+  static void setIsContainer(FerroObject target, bool value) => _setBool(target.handle, 728, value);
   /// RevealBrush.State (attached). `State` (attached): the Reveal state of an element, which
   /// drives its hover and press lights.
-  static RevealBrushState getState(FerroObject target) => RevealBrushState(_getI64(target.handle, 728));
-  static void setState(FerroObject target, RevealBrushState value) => _setI64(target.handle, 728, value.value);
+  static RevealBrushState getState(FerroObject target) => RevealBrushState(_getI64(target.handle, 729));
+  static void setState(FerroObject target, RevealBrushState value) => _setI64(target.handle, 729, value.value);
   /// TargetTheme. `TargetTheme` (default light): the theme the brush is drawn for; the border
   /// light of the light theme darkens.
-  ApplicationTheme get targetTheme => ApplicationTheme(_getI64(handle, 873));
-  set targetTheme(ApplicationTheme value) => _setI64(handle, 873, value.value);
+  ApplicationTheme get targetTheme => ApplicationTheme(_getI64(handle, 874));
+  set targetTheme(ApplicationTheme value) => _setI64(handle, 874, value.value);
 }
 
 /// The Reveal brush of backgrounds (WinUI `Microsoft.UI.Xaml.Media.RevealBackgroundBrush`): lit
@@ -8235,11 +8240,11 @@ extension type StackPanel._(int handle) implements Panel {
   bool get areVerticalSnapPointsRegular => _getBool(handle, 35);
   set areVerticalSnapPointsRegular(bool value) => _setBool(handle, 35, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// Spacing. Defines the `Spacing` property.
-  double get spacing => _getF64(handle, 825);
-  set spacing(double value) => _setF64(handle, 825, value);
+  double get spacing => _getF64(handle, 826);
+  set spacing(double value) => _setF64(handle, 826, value);
   /// HorizontalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `HorizontalSnapPointsChanged` event.
   Subscription onHorizontalSnapPointsChanged(void Function(StackPanel sender) handler) =>
@@ -8257,8 +8262,8 @@ extension type ReversibleStackPanel._(int handle) implements StackPanel {
   factory ReversibleStackPanel() => ReversibleStackPanel._(_create(typeId));
   ReversibleStackPanel.of(FerroObject object) : this._(object.handle);
   /// ReverseOrder. Defines the `ReverseOrder` property.
-  bool get reverseOrder => _getBool(handle, 730);
-  set reverseOrder(bool value) => _setBool(handle, 730, value);
+  bool get reverseOrder => _getBool(handle, 731);
+  set reverseOrder(bool value) => _setBool(handle, 731, value);
 }
 
 /// A structured rich-text editor rendered by FerroUI's text layout, drawing, and input APIs.
@@ -8326,78 +8331,78 @@ extension type RichEditBox._(int handle) implements TemplatedControl {
   bool get isReadOnly => _getBool(handle, 444);
   set isReadOnly(bool value) => _setBool(handle, 444, value);
   /// IsTextPredictionEnabled.
-  bool get isTextPredictionEnabled => _getBool(handle, 458);
-  set isTextPredictionEnabled(bool value) => _setBool(handle, 458, value);
+  bool get isTextPredictionEnabled => _getBool(handle, 459);
+  set isTextPredictionEnabled(bool value) => _setBool(handle, 459, value);
   /// IsTextSelectionEnabled.
-  bool get isTextSelectionEnabled => _getBool(handle, 460);
-  set isTextSelectionEnabled(bool value) => _setBool(handle, 460, value);
+  bool get isTextSelectionEnabled => _getBool(handle, 461);
+  set isTextSelectionEnabled(bool value) => _setBool(handle, 461, value);
   /// IsUnderlined.
-  bool get isUnderlined => _getBool(handle, 465);
+  bool get isUnderlined => _getBool(handle, 466);
   /// IsUndoEnabled.
-  bool get isUndoEnabled => _getBool(handle, 466);
-  set isUndoEnabled(bool value) => _setBool(handle, 466, value);
+  bool get isUndoEnabled => _getBool(handle, 467);
+  set isUndoEnabled(bool value) => _setBool(handle, 467, value);
   /// ItalicState.
-  bool get italicState => _getBool(handle, 472);
+  bool get italicState => _getBool(handle, 473);
   /// LetterSpacing.
-  double get letterSpacing => _getF64(handle, 517);
-  set letterSpacing(double value) => _setF64(handle, 517, value);
+  double get letterSpacing => _getF64(handle, 518);
+  set letterSpacing(double value) => _setF64(handle, 518, value);
   /// LineHeight.
-  double get lineHeight => _getF64(handle, 520);
-  set lineHeight(double value) => _setF64(handle, 520, value);
+  double get lineHeight => _getF64(handle, 521);
+  set lineHeight(double value) => _setF64(handle, 521, value);
   /// LineStackingStrategy.
-  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 524));
-  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 524, value.value);
+  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 525));
+  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 525, value.value);
   /// MaxLength.
-  int get maxLength => _getI64(handle, 538);
-  set maxLength(int value) => _setI64(handle, 538, value);
+  int get maxLength => _getI64(handle, 539);
+  set maxLength(int value) => _setI64(handle, 539, value);
   /// PlaceholderForeground.
-  String get placeholderForeground => _getString(handle, 647);
-  set placeholderForeground(String value) => _setString(handle, 647, value);
+  String get placeholderForeground => _getString(handle, 648);
+  set placeholderForeground(String value) => _setString(handle, 648, value);
   /// PlaceholderText.
-  String get placeholderText => _getString(handle, 650);
-  set placeholderText(String value) => _setString(handle, 650, value);
+  String get placeholderText => _getString(handle, 651);
+  set placeholderText(String value) => _setString(handle, 651, value);
   /// RichDocument. The shared document the editor edits (`RichDocument`, a FerroUI addition,
   /// D3). WinUI's `Document` is the text object model: [`RichEditBox::document`].
-  String get richDocument => _getString(handle, 731);
-  set richDocument(String value) => _setString(handle, 731, value);
+  String get richDocument => _getString(handle, 732);
+  set richDocument(String value) => _setString(handle, 732, value);
   /// SelectedText.
-  String get selectedText => _getString(handle, 777);
-  set selectedText(String value) => _setString(handle, 777, value);
+  String get selectedText => _getString(handle, 778);
+  set selectedText(String value) => _setString(handle, 778, value);
   /// SelectionEnd.
-  int get selectionEnd => _getI64(handle, 786);
-  set selectionEnd(int value) => _setI64(handle, 786, value);
+  int get selectionEnd => _getI64(handle, 787);
+  set selectionEnd(int value) => _setI64(handle, 787, value);
   /// SelectionForegroundBrush.
-  String get selectionForegroundBrush => _getString(handle, 788);
-  set selectionForegroundBrush(String value) => _setString(handle, 788, value);
+  String get selectionForegroundBrush => _getString(handle, 789);
+  set selectionForegroundBrush(String value) => _setString(handle, 789, value);
   /// SelectionHighlightColor.
-  String get selectionHighlightColor => _getString(handle, 789);
-  set selectionHighlightColor(String value) => _setString(handle, 789, value);
+  String get selectionHighlightColor => _getString(handle, 790);
+  set selectionHighlightColor(String value) => _setString(handle, 790, value);
   /// SelectionHighlightColorWhenNotFocused.
-  String get selectionHighlightColorWhenNotFocused => _getString(handle, 790);
-  set selectionHighlightColorWhenNotFocused(String value) => _setString(handle, 790, value);
+  String get selectionHighlightColorWhenNotFocused => _getString(handle, 791);
+  set selectionHighlightColorWhenNotFocused(String value) => _setString(handle, 791, value);
   /// SelectionStart.
-  int get selectionStart => _getI64(handle, 792);
-  set selectionStart(int value) => _setI64(handle, 792, value);
+  int get selectionStart => _getI64(handle, 793);
+  set selectionStart(int value) => _setI64(handle, 793, value);
   /// Text.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextAlignment.
-  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 879));
-  set textAlignment(TextAlignment value) => _setI64(handle, 879, value.value);
+  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 880));
+  set textAlignment(TextAlignment value) => _setI64(handle, 880, value.value);
   /// TextDecorations.
-  String get textDecorations => _getString(handle, 893);
-  set textDecorations(String value) => _setString(handle, 893, value);
+  String get textDecorations => _getString(handle, 894);
+  set textDecorations(String value) => _setString(handle, 894, value);
   /// TextIndent.
-  double get textIndent => _getF64(handle, 904);
-  set textIndent(double value) => _setF64(handle, 904, value);
+  double get textIndent => _getF64(handle, 905);
+  set textIndent(double value) => _setF64(handle, 905, value);
   /// TextWrapping.
-  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 927));
-  set textWrapping(TextWrapping value) => _setI64(handle, 927, value.value);
+  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 928));
+  set textWrapping(TextWrapping value) => _setI64(handle, 928, value.value);
   /// UnderlineState.
-  bool get underlineState => _getBool(handle, 1019);
+  bool get underlineState => _getBool(handle, 1020);
   /// UndoLimit.
-  int get undoLimit => _getI64(handle, 1021);
-  set undoLimit(int value) => _setI64(handle, 1021, value);
+  int get undoLimit => _getI64(handle, 1022);
+  set undoLimit(int value) => _setI64(handle, 1022, value);
   /// ContextMenuOpening: the sender is valid for the call. Raised synchronously before a
   /// pointer, holding, or keyboard context request opens a menu. `Handled` cancels that
   /// request.
@@ -8479,62 +8484,62 @@ extension type RichTextBlock._(int handle) implements Control {
   /// HasOverflowContent.
   bool get hasOverflowContent => _getBool(handle, 336);
   /// IsTextSelectionEnabled.
-  bool get isTextSelectionEnabled => _getBool(handle, 460);
-  set isTextSelectionEnabled(bool value) => _setBool(handle, 460, value);
+  bool get isTextSelectionEnabled => _getBool(handle, 461);
+  set isTextSelectionEnabled(bool value) => _setBool(handle, 461, value);
   /// IsTextTrimmed.
-  bool get isTextTrimmed => _getBool(handle, 461);
+  bool get isTextTrimmed => _getBool(handle, 462);
   /// LetterSpacing.
-  double get letterSpacing => _getF64(handle, 517);
-  set letterSpacing(double value) => _setF64(handle, 517, value);
+  double get letterSpacing => _getF64(handle, 518);
+  set letterSpacing(double value) => _setF64(handle, 518, value);
   /// LineHeight.
-  double get lineHeight => _getF64(handle, 520);
-  set lineHeight(double value) => _setF64(handle, 520, value);
+  double get lineHeight => _getF64(handle, 521);
+  set lineHeight(double value) => _setF64(handle, 521, value);
   /// LineStackingStrategy.
-  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 524));
-  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 524, value.value);
+  LineStackingStrategy get lineStackingStrategy => LineStackingStrategy(_getI64(handle, 525));
+  set lineStackingStrategy(LineStackingStrategy value) => _setI64(handle, 525, value.value);
   /// MaxLines.
-  int get maxLines => _getI64(handle, 539);
-  set maxLines(int value) => _setI64(handle, 539, value);
+  int get maxLines => _getI64(handle, 540);
+  set maxLines(int value) => _setI64(handle, 540, value);
   /// OverflowContentTarget.
-  FerroObject get overflowContentTarget => FerroObject(_getObject(handle, 615));
-  set overflowContentTarget(FerroObject value) => _setObject(handle, 615, value.handle);
+  FerroObject get overflowContentTarget => FerroObject(_getObject(handle, 616));
+  set overflowContentTarget(FerroObject value) => _setObject(handle, 616, value.handle);
   /// Padding.
-  String get padding => _getString(handle, 619);
-  set padding(String value) => _setString(handle, 619, value);
+  String get padding => _getString(handle, 620);
+  set padding(String value) => _setString(handle, 620, value);
   /// RichDocument. The shared document the view shows: a FerroUI addition (WinUI's
   /// RichTextBlock has only `Blocks`), named `RichDocument` so that it never reads as the text
   /// object model `RichEditBox.Document` is (`docs/porting/winui-rich-text.md`, D3).
-  String get richDocument => _getString(handle, 731);
-  set richDocument(String value) => _setString(handle, 731, value);
+  String get richDocument => _getString(handle, 732);
+  set richDocument(String value) => _setString(handle, 732, value);
   /// SelectedText.
-  String get selectedText => _getString(handle, 777);
+  String get selectedText => _getString(handle, 778);
   /// SelectionEnd.
-  int get selectionEnd => _getI64(handle, 786);
-  set selectionEnd(int value) => _setI64(handle, 786, value);
+  int get selectionEnd => _getI64(handle, 787);
+  set selectionEnd(int value) => _setI64(handle, 787, value);
   /// SelectionForegroundBrush.
-  String get selectionForegroundBrush => _getString(handle, 788);
-  set selectionForegroundBrush(String value) => _setString(handle, 788, value);
+  String get selectionForegroundBrush => _getString(handle, 789);
+  set selectionForegroundBrush(String value) => _setString(handle, 789, value);
   /// SelectionHighlightColor.
-  String get selectionHighlightColor => _getString(handle, 789);
-  set selectionHighlightColor(String value) => _setString(handle, 789, value);
+  String get selectionHighlightColor => _getString(handle, 790);
+  set selectionHighlightColor(String value) => _setString(handle, 790, value);
   /// SelectionStart.
-  int get selectionStart => _getI64(handle, 792);
-  set selectionStart(int value) => _setI64(handle, 792, value);
+  int get selectionStart => _getI64(handle, 793);
+  set selectionStart(int value) => _setI64(handle, 793, value);
   /// TextAlignment.
-  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 879));
-  set textAlignment(TextAlignment value) => _setI64(handle, 879, value.value);
+  TextAlignment get textAlignment => TextAlignment(_getI64(handle, 880));
+  set textAlignment(TextAlignment value) => _setI64(handle, 880, value.value);
   /// TextDecorations.
-  String get textDecorations => _getString(handle, 893);
-  set textDecorations(String value) => _setString(handle, 893, value);
+  String get textDecorations => _getString(handle, 894);
+  set textDecorations(String value) => _setString(handle, 894, value);
   /// TextIndent.
-  double get textIndent => _getF64(handle, 904);
-  set textIndent(double value) => _setF64(handle, 904, value);
+  double get textIndent => _getF64(handle, 905);
+  set textIndent(double value) => _setF64(handle, 905, value);
   /// TextLineBounds.
-  TextLineBounds get textLineBounds => TextLineBounds(_getI64(handle, 915));
-  set textLineBounds(TextLineBounds value) => _setI64(handle, 915, value.value);
+  TextLineBounds get textLineBounds => TextLineBounds(_getI64(handle, 916));
+  set textLineBounds(TextLineBounds value) => _setI64(handle, 916, value.value);
   /// TextWrapping.
-  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 927));
-  set textWrapping(TextWrapping value) => _setI64(handle, 927, value.value);
+  TextWrapping get textWrapping => TextWrapping(_getI64(handle, 928));
+  set textWrapping(TextWrapping value) => _setI64(handle, 928, value.value);
   /// ContextMenuOpening: the sender is valid for the call. Raised synchronously before this
   /// view opens a configured context menu or flyout. `Handled` cancels the associated request.
   /// Native overflow views do not raise this event for the modern context-flyout path. Their
@@ -8640,11 +8645,11 @@ extension type RowDefinition._(int handle) implements DefinitionBase {
   String get height => _getString(handle, 346);
   set height(String value) => _setString(handle, 346, value);
   /// MaxHeight. Defines the `MaxHeight` property.
-  double get maxHeight => _getF64(handle, 536);
-  set maxHeight(double value) => _setF64(handle, 536, value);
+  double get maxHeight => _getF64(handle, 537);
+  set maxHeight(double value) => _setF64(handle, 537, value);
   /// MinHeight. Defines the `MinHeight` property.
-  double get minHeight => _getF64(handle, 555);
-  set minHeight(double value) => _setF64(handle, 555, value);
+  double get minHeight => _getF64(handle, 556);
+  set minHeight(double value) => _setF64(handle, 556, value);
 }
 
 /// A terminal element in text flow hierarchy - contains a uniformatted run of unicode
@@ -8654,8 +8659,8 @@ extension type Run._(int handle) implements Inline {
   factory Run() => Run._(_create(typeId));
   Run.of(FerroObject object) : this._(object.handle);
   /// Text. Dependency property backing `Text`.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
 }
 
 extension type SampleApplication._(int handle) implements Application {
@@ -8669,11 +8674,11 @@ extension type ScaleTransform._(int handle) implements Transform {
   factory ScaleTransform() => ScaleTransform._(_create(typeId));
   ScaleTransform.of(FerroObject object) : this._(object.handle);
   /// ScaleX.
-  double get scaleX => _getF64(handle, 740);
-  set scaleX(double value) => _setF64(handle, 740, value);
+  double get scaleX => _getF64(handle, 741);
+  set scaleX(double value) => _setF64(handle, 741, value);
   /// ScaleY.
-  double get scaleY => _getF64(handle, 741);
-  set scaleY(double value) => _setF64(handle, 741, value);
+  double get scaleY => _getF64(handle, 742);
+  set scaleY(double value) => _setF64(handle, 742, value);
 }
 
 /// A scrollbar control.
@@ -8690,17 +8695,17 @@ extension type ScrollBar._(int handle) implements RangeBase {
   /// IsExpanded. Defines the `IsExpanded` property.
   bool get isExpanded => _getBool(handle, 409);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// ShowDelay. Defines the `ShowDelay` property.
-  String get showDelay => _getString(handle, 803);
-  set showDelay(String value) => _setString(handle, 803, value);
+  String get showDelay => _getString(handle, 804);
+  set showDelay(String value) => _setString(handle, 804, value);
   /// ViewportSize. Defines the `ViewportSize` property.
-  double get viewportSize => _getF64(handle, 1042);
-  set viewportSize(double value) => _setF64(handle, 1042, value);
+  double get viewportSize => _getF64(handle, 1043);
+  set viewportSize(double value) => _setF64(handle, 1043, value);
   /// Visibility. Defines the `Visibility` property.
-  ScrollBarVisibility get visibility => ScrollBarVisibility(_getI64(handle, 1043));
-  set visibility(ScrollBarVisibility value) => _setI64(handle, 1043, value.value);
+  ScrollBarVisibility get visibility => ScrollBarVisibility(_getI64(handle, 1044));
+  set visibility(ScrollBarVisibility value) => _setI64(handle, 1044, value.value);
 }
 
 /// An automation peer which represents a [`ScrollBar`].
@@ -8724,31 +8729,31 @@ extension type ScrollContentPresenter._(int handle) implements ContentPresenter 
   String get extent => _getString(handle, 275);
   set extent(String value) => _setString(handle, 275, value);
   /// Offset. Defines the `Offset` property.
-  String get offset => _getString(handle, 604);
-  set offset(String value) => _setString(handle, 604, value);
+  String get offset => _getString(handle, 605);
+  set offset(String value) => _setString(handle, 605, value);
   /// ScrollContentPresenter.HorizontalSnapPointsAlignment (attached). Defines the
   /// `HorizontalSnapPointsAlignment` property.
-  static SnapPointsAlignment getHorizontalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 744));
-  static void setHorizontalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 744, value.value);
+  static SnapPointsAlignment getHorizontalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 745));
+  static void setHorizontalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 745, value.value);
   /// ScrollContentPresenter.HorizontalSnapPointsType (attached). Defines the
   /// `HorizontalSnapPointsType` property.
-  static SnapPointsType getHorizontalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 745));
-  static void setHorizontalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 745, value.value);
+  static SnapPointsType getHorizontalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 746));
+  static void setHorizontalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 746, value.value);
   /// ScrollContentPresenter.IsScrollChainingEnabled (attached). Defines the
   /// `IsScrollChainingEnabled` property.
-  static bool getIsScrollChainingEnabled(FerroObject target) => _getBool(target.handle, 746);
-  static void setIsScrollChainingEnabled(FerroObject target, bool value) => _setBool(target.handle, 746, value);
+  static bool getIsScrollChainingEnabled(FerroObject target) => _getBool(target.handle, 747);
+  static void setIsScrollChainingEnabled(FerroObject target, bool value) => _setBool(target.handle, 747, value);
   /// ScrollContentPresenter.VerticalSnapPointsAlignment (attached). Defines the
   /// `VerticalSnapPointsAlignment` property.
-  static SnapPointsAlignment getVerticalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 747));
-  static void setVerticalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 747, value.value);
+  static SnapPointsAlignment getVerticalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 748));
+  static void setVerticalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 748, value.value);
   /// ScrollContentPresenter.VerticalSnapPointsType (attached). Defines the
   /// `VerticalSnapPointsType` property.
-  static SnapPointsType getVerticalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 748));
-  static void setVerticalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 748, value.value);
+  static SnapPointsType getVerticalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 749));
+  static void setVerticalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 749, value.value);
   /// Viewport. Defines the `Viewport` property.
-  String get viewport => _getString(handle, 1040);
-  set viewport(String value) => _setString(handle, 1040, value);
+  String get viewport => _getString(handle, 1041);
+  set viewport(String value) => _setString(handle, 1041, value);
 }
 
 /// Recognizes the scroll gesture: a touch or pen drag, optionally followed by inertia.
@@ -8769,14 +8774,14 @@ extension type ScrollGestureRecognizer._(int handle) implements GestureRecognize
   bool get isScrollInertiaEnabled => _getBool(handle, 445);
   set isScrollInertiaEnabled(bool value) => _setBool(handle, 445, value);
   /// Offset. Defines the `Offset` property.
-  String get offset => _getString(handle, 604);
-  set offset(String value) => _setString(handle, 604, value);
+  String get offset => _getString(handle, 605);
+  set offset(String value) => _setString(handle, 605, value);
   /// ScrollStartDistance. Defines the `ScrollStartDistance` property.
-  int get scrollStartDistance => _getI64(handle, 749);
-  set scrollStartDistance(int value) => _setI64(handle, 749, value);
+  int get scrollStartDistance => _getI64(handle, 750);
+  set scrollStartDistance(int value) => _setI64(handle, 750, value);
   /// Viewport. Defines the `Viewport` property.
-  String get viewport => _getString(handle, 1040);
-  set viewport(String value) => _setString(handle, 1040, value);
+  String get viewport => _getString(handle, 1041);
+  set viewport(String value) => _setString(handle, 1041, value);
 }
 
 /// A control which scrolls its content if the content is bigger than the space available.
@@ -8790,72 +8795,72 @@ extension type ScrollViewer._(int handle) implements ContentControl {
   bool get isExpanded => _getBool(handle, 409);
   set isExpanded(bool value) => _setBool(handle, 409, value);
   /// LargeChange. Defines the `LargeChange` property.
-  String get largeChange => _getString(handle, 504);
+  String get largeChange => _getString(handle, 505);
   /// MaxZoomFactor. Defines the `MaxZoomFactor` property (WinUI, not upstream).
-  double get maxZoomFactor => _getF64(handle, 546);
-  set maxZoomFactor(double value) => _setF64(handle, 546, value);
+  double get maxZoomFactor => _getF64(handle, 547);
+  set maxZoomFactor(double value) => _setF64(handle, 547, value);
   /// MinZoomFactor. Defines the `MinZoomFactor` property (WinUI, not upstream).
-  double get minZoomFactor => _getF64(handle, 561);
-  set minZoomFactor(double value) => _setF64(handle, 561, value);
+  double get minZoomFactor => _getF64(handle, 562);
+  set minZoomFactor(double value) => _setF64(handle, 562, value);
   /// Offset. Defines the `Offset` property.
-  String get offset => _getString(handle, 604);
-  set offset(String value) => _setString(handle, 604, value);
+  String get offset => _getString(handle, 605);
+  set offset(String value) => _setString(handle, 605, value);
   /// ScrollBarMaximum. Defines the `ScrollBarMaximum` property.
-  String get scrollBarMaximum => _getString(handle, 743);
+  String get scrollBarMaximum => _getString(handle, 744);
   /// ScrollViewer.AllowAutoHide (attached). Defines the `AllowAutoHide` property.
-  static bool getAllowAutoHide(FerroObject target) => _getBool(target.handle, 750);
-  static void setAllowAutoHide(FerroObject target, bool value) => _setBool(target.handle, 750, value);
+  static bool getAllowAutoHide(FerroObject target) => _getBool(target.handle, 751);
+  static void setAllowAutoHide(FerroObject target, bool value) => _setBool(target.handle, 751, value);
   /// ScrollViewer.BringIntoViewOnFocusChange (attached). Defines the
   /// `BringIntoViewOnFocusChange` property.
-  static bool getBringIntoViewOnFocusChange(FerroObject target) => _getBool(target.handle, 751);
-  static void setBringIntoViewOnFocusChange(FerroObject target, bool value) => _setBool(target.handle, 751, value);
+  static bool getBringIntoViewOnFocusChange(FerroObject target) => _getBool(target.handle, 752);
+  static void setBringIntoViewOnFocusChange(FerroObject target, bool value) => _setBool(target.handle, 752, value);
   /// ScrollViewer.HorizontalScrollBarVisibility (attached). Defines the
   /// `HorizontalScrollBarVisibility` property.
-  static ScrollBarVisibility getHorizontalScrollBarVisibility(FerroObject target) => ScrollBarVisibility(_getI64(target.handle, 752));
-  static void setHorizontalScrollBarVisibility(FerroObject target, ScrollBarVisibility value) => _setI64(target.handle, 752, value.value);
+  static ScrollBarVisibility getHorizontalScrollBarVisibility(FerroObject target) => ScrollBarVisibility(_getI64(target.handle, 753));
+  static void setHorizontalScrollBarVisibility(FerroObject target, ScrollBarVisibility value) => _setI64(target.handle, 753, value.value);
   /// ScrollViewer.HorizontalSnapPointsAlignment (attached). Defines the
   /// `HorizontalSnapPointsAlignment` property.
-  static SnapPointsAlignment getHorizontalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 753));
-  static void setHorizontalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 753, value.value);
+  static SnapPointsAlignment getHorizontalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 754));
+  static void setHorizontalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 754, value.value);
   /// ScrollViewer.HorizontalSnapPointsType (attached). Defines the `HorizontalSnapPointsType`
   /// property.
-  static SnapPointsType getHorizontalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 754));
-  static void setHorizontalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 754, value.value);
+  static SnapPointsType getHorizontalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 755));
+  static void setHorizontalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 755, value.value);
   /// ScrollViewer.IsDeferredScrollingEnabled (attached). Defines the
   /// `IsDeferredScrollingEnabled` property.
-  static bool getIsDeferredScrollingEnabled(FerroObject target) => _getBool(target.handle, 755);
-  static void setIsDeferredScrollingEnabled(FerroObject target, bool value) => _setBool(target.handle, 755, value);
+  static bool getIsDeferredScrollingEnabled(FerroObject target) => _getBool(target.handle, 756);
+  static void setIsDeferredScrollingEnabled(FerroObject target, bool value) => _setBool(target.handle, 756, value);
   /// ScrollViewer.IsScrollChainingEnabled (attached). Defines the `IsScrollChainingEnabled`
   /// property.
-  static bool getIsScrollChainingEnabled(FerroObject target) => _getBool(target.handle, 756);
-  static void setIsScrollChainingEnabled(FerroObject target, bool value) => _setBool(target.handle, 756, value);
+  static bool getIsScrollChainingEnabled(FerroObject target) => _getBool(target.handle, 757);
+  static void setIsScrollChainingEnabled(FerroObject target, bool value) => _setBool(target.handle, 757, value);
   /// ScrollViewer.IsScrollInertiaEnabled (attached). Defines the `IsScrollInertiaEnabled`
   /// property.
-  static bool getIsScrollInertiaEnabled(FerroObject target) => _getBool(target.handle, 757);
-  static void setIsScrollInertiaEnabled(FerroObject target, bool value) => _setBool(target.handle, 757, value);
+  static bool getIsScrollInertiaEnabled(FerroObject target) => _getBool(target.handle, 758);
+  static void setIsScrollInertiaEnabled(FerroObject target, bool value) => _setBool(target.handle, 758, value);
   /// ScrollViewer.VerticalScrollBarVisibility (attached). Defines the
   /// `VerticalScrollBarVisibility` property.
-  static ScrollBarVisibility getVerticalScrollBarVisibility(FerroObject target) => ScrollBarVisibility(_getI64(target.handle, 758));
-  static void setVerticalScrollBarVisibility(FerroObject target, ScrollBarVisibility value) => _setI64(target.handle, 758, value.value);
+  static ScrollBarVisibility getVerticalScrollBarVisibility(FerroObject target) => ScrollBarVisibility(_getI64(target.handle, 759));
+  static void setVerticalScrollBarVisibility(FerroObject target, ScrollBarVisibility value) => _setI64(target.handle, 759, value.value);
   /// ScrollViewer.VerticalSnapPointsAlignment (attached). Defines the
   /// `VerticalSnapPointsAlignment` property.
-  static SnapPointsAlignment getVerticalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 759));
-  static void setVerticalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 759, value.value);
+  static SnapPointsAlignment getVerticalSnapPointsAlignment(FerroObject target) => SnapPointsAlignment(_getI64(target.handle, 760));
+  static void setVerticalSnapPointsAlignment(FerroObject target, SnapPointsAlignment value) => _setI64(target.handle, 760, value.value);
   /// ScrollViewer.VerticalSnapPointsType (attached). Defines the `VerticalSnapPointsType`
   /// property.
-  static SnapPointsType getVerticalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 760));
-  static void setVerticalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 760, value.value);
+  static SnapPointsType getVerticalSnapPointsType(FerroObject target) => SnapPointsType(_getI64(target.handle, 761));
+  static void setVerticalSnapPointsType(FerroObject target, SnapPointsType value) => _setI64(target.handle, 761, value.value);
   /// SmallChange. Defines the `SmallChange` property.
-  String get smallChange => _getString(handle, 816);
+  String get smallChange => _getString(handle, 817);
   /// Viewport. Defines the `Viewport` property.
-  String get viewport => _getString(handle, 1040);
+  String get viewport => _getString(handle, 1041);
   /// ZoomFactor. Defines the `ZoomFactor` property (WinUI, not upstream): the zoom of the
   /// content, changed with [`change_view`](ScrollViewer::change_view) or by the user.
-  double get zoomFactor => _getF64(handle, 1076);
+  double get zoomFactor => _getF64(handle, 1077);
   /// ZoomMode. Defines the `ZoomMode` property (WinUI `ScrollViewer.ZoomMode`, not upstream):
   /// whether the user can zoom the content.
-  ZoomMode get zoomMode => ZoomMode(_getI64(handle, 1077));
-  set zoomMode(ZoomMode value) => _setI64(handle, 1077, value.value);
+  ZoomMode get zoomMode => ZoomMode(_getI64(handle, 1078));
+  set zoomMode(ZoomMode value) => _setI64(handle, 1078, value.value);
   /// ScrollChanged: the sender is valid for the call. Defines the `ScrollChanged` event.
   Subscription onScrollChanged(void Function(ScrollViewer sender) handler) =>
       _subscribe(handle, 68, (sender) => handler(ScrollViewer._(sender)));
@@ -8873,8 +8878,8 @@ extension type ScrollablePullGestureRecognizer._(int handle) implements GestureR
   factory ScrollablePullGestureRecognizer() => ScrollablePullGestureRecognizer._(_create(typeId));
   ScrollablePullGestureRecognizer.of(FerroObject object) : this._(object.handle);
   /// PullDirection. Defines the `PullDirection` property.
-  PullDirection get pullDirection => PullDirection(_getI64(handle, 690));
-  set pullDirection(PullDirection value) => _setI64(handle, 690, value.value);
+  PullDirection get pullDirection => PullDirection(_getI64(handle, 691));
+  set pullDirection(PullDirection value) => _setI64(handle, 691, value.value);
 }
 
 /// Represents a circular or elliptical sector (a pie-shaped closed region of a circle or
@@ -8884,11 +8889,11 @@ extension type Sector._(int handle) implements Shape {
   factory Sector() => Sector._(_create(typeId));
   Sector.of(FerroObject object) : this._(object.handle);
   /// StartAngle. Defines the `StartAngle` property.
-  double get startAngle => _getF64(handle, 830);
-  set startAngle(double value) => _setF64(handle, 830, value);
+  double get startAngle => _getF64(handle, 831);
+  set startAngle(double value) => _setF64(handle, 831, value);
   /// SweepAngle. Defines the `SweepAngle` property.
-  double get sweepAngle => _getF64(handle, 850);
-  set sweepAngle(double value) => _setF64(handle, 850, value);
+  double get sweepAngle => _getF64(handle, 851);
+  set sweepAngle(double value) => _setF64(handle, 851, value);
 }
 
 /// A control that displays a block of formatted text whose content can be selected and copied.
@@ -8901,22 +8906,22 @@ extension type SelectableTextBlock._(int handle) implements TextBlock {
   set canCopy(bool value) => _setBool(handle, 99, value);
   /// IsTextSelectionEnabled. Defines the `IsTextSelectionEnabled` property (WinUI's
   /// `TextBlock.IsTextSelectionEnabled`).
-  bool get isTextSelectionEnabled => _getBool(handle, 460);
-  set isTextSelectionEnabled(bool value) => _setBool(handle, 460, value);
+  bool get isTextSelectionEnabled => _getBool(handle, 461);
+  set isTextSelectionEnabled(bool value) => _setBool(handle, 461, value);
   /// SelectedText. Defines the `SelectedText` property.
-  String get selectedText => _getString(handle, 777);
+  String get selectedText => _getString(handle, 778);
   /// SelectionBrush. Defines the `SelectionBrush` property.
-  String get selectionBrush => _getString(handle, 785);
-  set selectionBrush(String value) => _setString(handle, 785, value);
+  String get selectionBrush => _getString(handle, 786);
+  set selectionBrush(String value) => _setString(handle, 786, value);
   /// SelectionEnd. Defines the `SelectionEnd` property.
-  int get selectionEnd => _getI64(handle, 786);
-  set selectionEnd(int value) => _setI64(handle, 786, value);
+  int get selectionEnd => _getI64(handle, 787);
+  set selectionEnd(int value) => _setI64(handle, 787, value);
   /// SelectionForegroundBrush. Defines the `SelectionForegroundBrush` property.
-  String get selectionForegroundBrush => _getString(handle, 788);
-  set selectionForegroundBrush(String value) => _setString(handle, 788, value);
+  String get selectionForegroundBrush => _getString(handle, 789);
+  set selectionForegroundBrush(String value) => _setString(handle, 789, value);
   /// SelectionStart. Defines the `SelectionStart` property.
-  int get selectionStart => _getI64(handle, 792);
-  set selectionStart(int value) => _setI64(handle, 792, value);
+  int get selectionStart => _getI64(handle, 793);
+  set selectionStart(int value) => _setI64(handle, 793, value);
   /// CopyingToClipboard: the sender is valid for the call. Defines the `CopyingToClipboard`
   /// event.
   Subscription onCopyingToClipboard(void Function(SelectableTextBlock sender) handler) =>
@@ -8961,8 +8966,8 @@ extension type SelectorBarItem._(int handle) implements TabStripItem {
   FerroObject get icon => FerroObject(_getObject(handle, 356));
   set icon(FerroObject value) => _setObject(handle, 356, value.handle);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
 }
 
 /// The base class of the shadows an element can cast (WinUI `Microsoft.UI.Xaml.Media.Shadow`).
@@ -9005,23 +9010,23 @@ extension type Slider._(int handle) implements RangeBase {
   bool get isSnapToTickEnabled => _getBool(handle, 449);
   set isSnapToTickEnabled(bool value) => _setBool(handle, 449, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// SnapsTo. Defines the `SnapsTo` property.
-  SliderSnapsTo get snapsTo => SliderSnapsTo(_getI64(handle, 819));
-  set snapsTo(SliderSnapsTo value) => _setI64(handle, 819, value.value);
+  SliderSnapsTo get snapsTo => SliderSnapsTo(_getI64(handle, 820));
+  set snapsTo(SliderSnapsTo value) => _setI64(handle, 820, value.value);
   /// StepFrequency. Defines the `StepFrequency` property.
-  double get stepFrequency => _getF64(handle, 833);
-  set stepFrequency(double value) => _setF64(handle, 833, value);
+  double get stepFrequency => _getF64(handle, 834);
+  set stepFrequency(double value) => _setF64(handle, 834, value);
   /// TickFrequency. Defines the `TickFrequency` property.
-  double get tickFrequency => _getF64(handle, 933);
-  set tickFrequency(double value) => _setF64(handle, 933, value);
+  double get tickFrequency => _getF64(handle, 934);
+  set tickFrequency(double value) => _setF64(handle, 934, value);
   /// TickPlacement. Defines the `TickPlacement` property.
-  TickPlacement get tickPlacement => TickPlacement(_getI64(handle, 934));
-  set tickPlacement(TickPlacement value) => _setI64(handle, 934, value.value);
+  TickPlacement get tickPlacement => TickPlacement(_getI64(handle, 935));
+  set tickPlacement(TickPlacement value) => _setI64(handle, 935, value.value);
   /// Ticks. Defines the `Ticks` property.
-  String get ticks => _getString(handle, 935);
-  set ticks(String value) => _setString(handle, 935, value);
+  String get ticks => _getString(handle, 936);
+  set ticks(String value) => _setString(handle, 936, value);
 }
 
 /// An automation peer which represents a [`Slider`].
@@ -9047,8 +9052,8 @@ extension type SplineColorKeyFrame._(int handle) implements ColorKeyFrame {
   SplineColorKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeySpline. Defines the `KeySpline` property: the Bezier curve of the progress. Default
   /// `None` (linear).
-  FerroObject get keySpline => FerroObject(_getObject(handle, 492));
-  set keySpline(FerroObject value) => _setObject(handle, 492, value.handle);
+  FerroObject get keySpline => FerroObject(_getObject(handle, 493));
+  set keySpline(FerroObject value) => _setObject(handle, 493, value.handle);
 }
 
 /// Interpolates along a `KeySpline` from the value before it (WinUI's `SplineDoubleKeyFrame`).
@@ -9058,8 +9063,8 @@ extension type SplineDoubleKeyFrame._(int handle) implements DoubleKeyFrame {
   SplineDoubleKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeySpline. Defines the `KeySpline` property: the Bezier curve of the progress. Default
   /// `None` (linear).
-  FerroObject get keySpline => FerroObject(_getObject(handle, 492));
-  set keySpline(FerroObject value) => _setObject(handle, 492, value.handle);
+  FerroObject get keySpline => FerroObject(_getObject(handle, 493));
+  set keySpline(FerroObject value) => _setObject(handle, 493, value.handle);
 }
 
 /// Interpolates along a `KeySpline` from the value before it (WinUI's `SplinePointKeyFrame`).
@@ -9069,8 +9074,8 @@ extension type SplinePointKeyFrame._(int handle) implements PointKeyFrame {
   SplinePointKeyFrame.of(FerroObject object) : this._(object.handle);
   /// KeySpline. Defines the `KeySpline` property: the Bezier curve of the progress. Default
   /// `None` (linear).
-  FerroObject get keySpline => FerroObject(_getObject(handle, 492));
-  set keySpline(FerroObject value) => _setObject(handle, 492, value.handle);
+  FerroObject get keySpline => FerroObject(_getObject(handle, 493));
+  set keySpline(FerroObject value) => _setObject(handle, 493, value.handle);
 }
 
 /// A button with primary and secondary parts that can each be pressed separately. The primary
@@ -9116,24 +9121,24 @@ extension type SplitView._(int handle) implements ContentControl {
   bool get isPaneOpen => _getBool(handle, 437);
   set isPaneOpen(bool value) => _setBool(handle, 437, value);
   /// OpenPaneLength. Defines the `OpenPaneLength` property.
-  double get openPaneLength => _getF64(handle, 611);
-  set openPaneLength(double value) => _setF64(handle, 611, value);
+  double get openPaneLength => _getF64(handle, 612);
+  set openPaneLength(double value) => _setF64(handle, 612, value);
   /// Pane. Defines the `Pane` property.
-  String get pane => _getString(handle, 625);
-  set pane(String value) => _setString(handle, 625, value);
-  FerroObject get paneObject => FerroObject(_getObject(handle, 625));
-  set paneObject(FerroObject value) => _setObject(handle, 625, value.handle);
+  String get pane => _getString(handle, 626);
+  set pane(String value) => _setString(handle, 626, value);
+  FerroObject get paneObject => FerroObject(_getObject(handle, 626));
+  set paneObject(FerroObject value) => _setObject(handle, 626, value.handle);
   /// PaneBackground. Defines the `PaneBackground` property.
-  String get paneBackground => _getString(handle, 626);
-  set paneBackground(String value) => _setString(handle, 626, value);
+  String get paneBackground => _getString(handle, 627);
+  set paneBackground(String value) => _setString(handle, 627, value);
   /// PanePlacement. Defines the `PanePlacement` property.
-  SplitViewPanePlacement get panePlacement => SplitViewPanePlacement(_getI64(handle, 632));
-  set panePlacement(SplitViewPanePlacement value) => _setI64(handle, 632, value.value);
+  SplitViewPanePlacement get panePlacement => SplitViewPanePlacement(_getI64(handle, 633));
+  set panePlacement(SplitViewPanePlacement value) => _setI64(handle, 633, value.value);
   /// TemplateSettings. Defines the `TemplateSettings` property.
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// UseLightDismissOverlayMode. Defines the `UseLightDismissOverlayMode` property.
-  bool get useLightDismissOverlayMode => _getBool(handle, 1027);
-  set useLightDismissOverlayMode(bool value) => _setBool(handle, 1027, value);
+  bool get useLightDismissOverlayMode => _getBool(handle, 1028);
+  set useLightDismissOverlayMode(bool value) => _setBool(handle, 1028, value);
   /// PaneClosed: the sender is valid for the call. Defines the `PaneClosed` event.
   Subscription onPaneClosed(void Function(SplitView sender) handler) =>
       _subscribe(handle, 40, (sender) => handler(SplitView._(sender)));
@@ -9161,11 +9166,11 @@ extension type SplitViewTemplateSettings._(int handle) implements FerroObject {
   double get closedPaneWidth => _getF64(handle, 155);
   set closedPaneWidth(double value) => _setF64(handle, 155, value);
   /// PaneColumnGridLength. Defines the `PaneColumnGridLength` property.
-  String get paneColumnGridLength => _getString(handle, 627);
-  set paneColumnGridLength(String value) => _setString(handle, 627, value);
+  String get paneColumnGridLength => _getString(handle, 628);
+  set paneColumnGridLength(String value) => _setString(handle, 628, value);
   /// PaneRowGridLength. Defines the `PaneRowGridLength` property.
-  String get paneRowGridLength => _getString(handle, 633);
-  set paneRowGridLength(String value) => _setString(handle, 633, value);
+  String get paneRowGridLength => _getString(handle, 634);
+  set paneRowGridLength(String value) => _setString(handle, 634, value);
 }
 
 /// A trigger that is active while its [`is_active`](Self::is_active) is `true` (WinUI's
@@ -9196,13 +9201,13 @@ extension type Storyboard._(int handle) implements Timeline {
   Storyboard.of(FerroObject object) : this._(object.handle);
   /// Storyboard.TargetName (attached). Defines the attached `TargetName` property: the name of
   /// the object the animation (or the animations of a storyboard) animates.
-  static String getTargetName(FerroObject target) => _getString(target.handle, 834);
-  static void setTargetName(FerroObject target, String value) => _setString(target.handle, 834, value);
+  static String getTargetName(FerroObject target) => _getString(target.handle, 835);
+  static void setTargetName(FerroObject target, String value) => _setString(target.handle, 835, value);
   /// Storyboard.TargetProperty (attached). Defines the attached `TargetProperty` property: the
   /// path of the animated property (`Opacity`, `(Grid.Row)`,
   /// `(Visual.RenderTransform).(ScaleTransform.ScaleX)`).
-  static String getTargetProperty(FerroObject target) => _getString(target.handle, 835);
-  static void setTargetProperty(FerroObject target, String value) => _setString(target.handle, 835, value);
+  static String getTargetProperty(FerroObject target) => _getString(target.handle, 836);
+  static void setTargetProperty(FerroObject target, String value) => _setString(target.handle, 836, value);
 }
 
 /// Defines a style.
@@ -9246,14 +9251,14 @@ extension type SwipeControl._(int handle) implements ContentControl {
   FerroObject get bottomItems => FerroObject(_getObject(handle, 87));
   set bottomItems(FerroObject value) => _setObject(handle, 87, value.handle);
   /// LeftItems. Defines the `LeftItems` property: the items revealed by swiping to the right.
-  FerroObject get leftItems => FerroObject(_getObject(handle, 515));
-  set leftItems(FerroObject value) => _setObject(handle, 515, value.handle);
+  FerroObject get leftItems => FerroObject(_getObject(handle, 516));
+  set leftItems(FerroObject value) => _setObject(handle, 516, value.handle);
   /// RightItems. Defines the `RightItems` property: the items revealed by swiping to the left.
-  FerroObject get rightItems => FerroObject(_getObject(handle, 735));
-  set rightItems(FerroObject value) => _setObject(handle, 735, value.handle);
+  FerroObject get rightItems => FerroObject(_getObject(handle, 736));
+  set rightItems(FerroObject value) => _setObject(handle, 736, value.handle);
   /// TopItems. Defines the `TopItems` property: the items revealed by swiping down.
-  FerroObject get topItems => FerroObject(_getObject(handle, 963));
-  set topItems(FerroObject value) => _setObject(handle, 963, value.handle);
+  FerroObject get topItems => FerroObject(_getObject(handle, 964));
+  set topItems(FerroObject value) => _setObject(handle, 964, value.handle);
 }
 
 /// A gesture recognizer that detects swipe gestures and raises the swipe gesture event
@@ -9275,8 +9280,8 @@ extension type SwipeGestureRecognizer._(int handle) implements GestureRecognizer
   bool get isMouseEnabled => _getBool(handle, 430);
   set isMouseEnabled(bool value) => _setBool(handle, 430, value);
   /// Threshold. Defines the `Threshold` property.
-  double get threshold => _getF64(handle, 930);
-  set threshold(double value) => _setF64(handle, 930, value);
+  double get threshold => _getF64(handle, 931);
+  set threshold(double value) => _setF64(handle, 931, value);
 }
 
 /// A command of a side of a [`SwipeControl`] (WinUI's `SwipeItem`): drawn as a button with its
@@ -9309,8 +9314,8 @@ extension type SwipeItem._(int handle) implements FerroObject {
   FerroObject get iconSource => FerroObject(_getObject(handle, 358));
   set iconSource(FerroObject value) => _setObject(handle, 358, value.handle);
   /// Text. Defines the `Text` property: the label of the item. Default empty.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
 }
 
 /// The items of a side of a [`SwipeControl`] with their [`mode`](Self::mode) (WinUI's
@@ -9324,8 +9329,8 @@ extension type SwipeItems._(int handle) implements FerroObject {
   factory SwipeItems() => SwipeItems._(_create(typeId));
   SwipeItems.of(FerroObject object) : this._(object.handle);
   /// Mode. Defines the `Mode` property. Default [`SwipeMode::Reveal`].
-  SwipeMode get mode => SwipeMode(_getI64(handle, 569));
-  set mode(SwipeMode value) => _setI64(handle, 569, value.value);
+  SwipeMode get mode => SwipeMode(_getI64(handle, 570));
+  set mode(SwipeMode value) => _setI64(handle, 570, value.value);
 }
 
 /// Represents an icon that uses a glyph of the symbol font of the theme as its content (WinUI's
@@ -9344,8 +9349,8 @@ extension type SymbolIcon._(int handle) implements IconElement {
   SymbolIcon.of(FerroObject object) : this._(object.handle);
   /// Symbol. Defines the `Symbol` property: the symbol the icon shows. `Emoji` by default, as
   /// in WinUI (`CSymbolIcon::m_nSymbol`).
-  Symbol get symbol => Symbol(_getI64(handle, 852));
-  set symbol(Symbol value) => _setI64(handle, 852, value.value);
+  Symbol get symbol => Symbol(_getI64(handle, 853));
+  set symbol(Symbol value) => _setI64(handle, 853, value.value);
 }
 
 /// The description of a [`SymbolIcon`] (WinUI's `SymbolIconSource`).
@@ -9354,8 +9359,8 @@ extension type SymbolIconSource._(int handle) implements IconSource {
   factory SymbolIconSource() => SymbolIconSource._(_create(typeId));
   SymbolIconSource.of(FerroObject object) : this._(object.handle);
   /// Symbol. Defines the `Symbol` property: `Emoji` by default, as `SymbolIcon`.
-  Symbol get symbol => Symbol(_getI64(handle, 852));
-  set symbol(Symbol value) => _setI64(handle, 852, value.value);
+  Symbol get symbol => Symbol(_getI64(handle, 853));
+  set symbol(Symbol value) => _setI64(handle, 853, value.value);
 }
 
 /// An element that hosts a system backdrop (WinUI
@@ -9369,8 +9374,8 @@ extension type SystemBackdropElement._(int handle) implements Control {
   String get cornerRadius => _getString(handle, 182);
   set cornerRadius(String value) => _setString(handle, 182, value);
   /// SystemBackdrop. Defines the `SystemBackdrop` property.
-  FerroObject get systemBackdrop => FerroObject(_getObject(handle, 853));
-  set systemBackdrop(FerroObject value) => _setObject(handle, 853, value.handle);
+  FerroObject get systemBackdrop => FerroObject(_getObject(handle, 854));
+  set systemBackdrop(FerroObject value) => _setObject(handle, 854, value.handle);
 }
 
 extension type SystemBackdropHostBrush._(int handle) implements XamlCompositionBrushBase {
@@ -9387,14 +9392,14 @@ extension type TabControl._(int handle) implements SelectingItemsControl {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// SelectedContent. Defines the `SelectedContent` property.
-  String get selectedContent => _getString(handle, 768);
-  FerroObject get selectedContentObject => FerroObject(_getObject(handle, 768));
+  String get selectedContent => _getString(handle, 769);
+  FerroObject get selectedContentObject => FerroObject(_getObject(handle, 769));
   /// TabStripPlacement. Defines the `TabStripPlacement` property.
-  Dock get tabStripPlacement => Dock(_getI64(handle, 865));
-  set tabStripPlacement(Dock value) => _setI64(handle, 865, value.value);
+  Dock get tabStripPlacement => Dock(_getI64(handle, 866));
+  set tabStripPlacement(Dock value) => _setI64(handle, 866, value.value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// An item in a `TabControl`.
@@ -9411,7 +9416,7 @@ extension type TabItem._(int handle) implements HeaderedContentControl {
   bool get isSelected => _getBool(handle, 447);
   set isSelected(bool value) => _setBool(handle, 447, value);
   /// TabStripPlacement. Defines the `TabStripPlacement` property.
-  Dock get tabStripPlacement => Dock(_getI64(handle, 865));
+  Dock get tabStripPlacement => Dock(_getI64(handle, 866));
 }
 
 /// A row of tabs over the content of the selected one (WinUI's `TabView`): the tabs are a
@@ -9462,33 +9467,33 @@ extension type TabView._(int handle) implements TemplatedControl {
   set isAddTabButtonVisible(bool value) => _setBool(handle, 388, value);
   /// SelectedIndex. Defines the `SelectedIndex` property. It defaults to 0, so the first tab is
   /// selected when the list loads (WinUI: `MUX_DEFAULT_VALUE("0")`).
-  int get selectedIndex => _getI64(handle, 772);
-  set selectedIndex(int value) => _setI64(handle, 772, value);
+  int get selectedIndex => _getI64(handle, 773);
+  set selectedIndex(int value) => _setI64(handle, 773, value);
   /// SelectedItem. Defines the `SelectedItem` property.
-  String get selectedItem => _getString(handle, 773);
-  set selectedItem(String value) => _setString(handle, 773, value);
-  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 773));
-  set selectedItemObject(FerroObject value) => _setObject(handle, 773, value.handle);
+  String get selectedItem => _getString(handle, 774);
+  set selectedItem(String value) => _setString(handle, 774, value);
+  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 774));
+  set selectedItemObject(FerroObject value) => _setObject(handle, 774, value.handle);
   /// TabItems. Defines the `TabItems` property: the items of the tabs, when `TabItemsSource` is
   /// not set.
-  String get tabItems => _getString(handle, 857);
+  String get tabItems => _getString(handle, 858);
   /// TabItemsSource. Defines the `TabItemsSource` property: the items the tabs show, in place
   /// of `TabItems`.
-  String get tabItemsSource => _getString(handle, 858);
-  set tabItemsSource(String value) => _setString(handle, 858, value);
+  String get tabItemsSource => _getString(handle, 859);
+  set tabItemsSource(String value) => _setString(handle, 859, value);
   /// TabStripFooter. Defines the `TabStripFooter` property.
-  String get tabStripFooter => _getString(handle, 861);
-  set tabStripFooter(String value) => _setString(handle, 861, value);
-  FerroObject get tabStripFooterObject => FerroObject(_getObject(handle, 861));
-  set tabStripFooterObject(FerroObject value) => _setObject(handle, 861, value.handle);
+  String get tabStripFooter => _getString(handle, 862);
+  set tabStripFooter(String value) => _setString(handle, 862, value);
+  FerroObject get tabStripFooterObject => FerroObject(_getObject(handle, 862));
+  set tabStripFooterObject(FerroObject value) => _setObject(handle, 862, value.handle);
   /// TabStripHeader. Defines the `TabStripHeader` property.
-  String get tabStripHeader => _getString(handle, 863);
-  set tabStripHeader(String value) => _setString(handle, 863, value);
-  FerroObject get tabStripHeaderObject => FerroObject(_getObject(handle, 863));
-  set tabStripHeaderObject(FerroObject value) => _setObject(handle, 863, value.handle);
+  String get tabStripHeader => _getString(handle, 864);
+  set tabStripHeader(String value) => _setString(handle, 864, value);
+  FerroObject get tabStripHeaderObject => FerroObject(_getObject(handle, 864));
+  set tabStripHeaderObject(FerroObject value) => _setObject(handle, 864, value.handle);
   /// TabWidthMode. Defines the `TabWidthMode` property.
-  TabViewWidthMode get tabWidthMode => TabViewWidthMode(_getI64(handle, 867));
-  set tabWidthMode(TabViewWidthMode value) => _setI64(handle, 867, value.value);
+  TabViewWidthMode get tabWidthMode => TabViewWidthMode(_getI64(handle, 868));
+  set tabWidthMode(TabViewWidthMode value) => _setI64(handle, 868, value.value);
 }
 
 /// The automation peer of a [`TabView`]: a Tab with the Selection pattern, one tab selected.
@@ -9522,7 +9527,7 @@ extension type TabViewItem._(int handle) implements ListViewItem {
   bool get isClosable => _getBool(handle, 398);
   set isClosable(bool value) => _setBool(handle, 398, value);
   /// TabViewTemplateSettings. Defines the `TabViewTemplateSettings` property, read only.
-  FerroObject get tabViewTemplateSettings => FerroObject(_getObject(handle, 866));
+  FerroObject get tabViewTemplateSettings => FerroObject(_getObject(handle, 867));
 }
 
 /// The automation peer of a [`TabViewItem`]: a TabItem, named by its header when it has no
@@ -9543,8 +9548,8 @@ extension type TabViewItemTemplateSettings._(int handle) implements FerroObject 
   FerroObject get iconElement => FerroObject(_getObject(handle, 357));
   set iconElement(FerroObject value) => _setObject(handle, 357, value.handle);
   /// TabGeometry. Defines the `TabGeometry` property: the outline of the selected tab.
-  FerroObject get tabGeometry => FerroObject(_getObject(handle, 854));
-  set tabGeometry(FerroObject value) => _setObject(handle, 854, value.handle);
+  FerroObject get tabGeometry => FerroObject(_getObject(handle, 855));
+  set tabGeometry(FerroObject value) => _setObject(handle, 855, value.handle);
 }
 
 /// The list of the tabs of a [`TabView`] (WinUI's `TabViewListView`, a primitive of its
@@ -9570,11 +9575,11 @@ extension type TabbedPage._(int handle) implements SelectingMultiPage {
   bool get isKeyboardNavigationEnabled => _getBool(handle, 426);
   set isKeyboardNavigationEnabled(bool value) => _setBool(handle, 426, value);
   /// TabPlacement. Defines the `TabPlacement` property.
-  TabPlacement get tabPlacement => TabPlacement(_getI64(handle, 859));
-  set tabPlacement(TabPlacement value) => _setI64(handle, 859, value.value);
+  TabPlacement get tabPlacement => TabPlacement(_getI64(handle, 860));
+  set tabPlacement(TabPlacement value) => _setI64(handle, 860, value.value);
   /// TabbedPage.IsTabEnabled (attached). Defines the `IsTabEnabled` attached property.
-  static bool getIsTabEnabled(FerroObject target) => _getBool(target.handle, 868);
-  static void setIsTabEnabled(FerroObject target, bool value) => _setBool(target.handle, 868, value);
+  static bool getIsTabEnabled(FerroObject target) => _getBool(target.handle, 869);
+  static void setIsTabEnabled(FerroObject target, bool value) => _setBool(target.handle, 869, value);
 }
 
 /// An automation peer which represents a [`TabbedPage`].
@@ -9641,14 +9646,14 @@ extension type TableViewColumn._(int handle) implements StyledElement {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// IsVisible. Defines the `IsVisible` property.
-  bool get isVisible => _getBool(handle, 468);
-  set isVisible(bool value) => _setBool(handle, 468, value);
+  bool get isVisible => _getBool(handle, 469);
+  set isVisible(bool value) => _setBool(handle, 469, value);
   /// TableView. Defines the `TableView` property. The column does not own its table view: the
   /// value is held weakly and read as a handle.
-  FerroObject get tableView => FerroObject(_getObject(handle, 869));
+  FerroObject get tableView => FerroObject(_getObject(handle, 870));
   /// Width. Defines the `Width` property.
-  String get width => _getString(handle, 1052);
-  set width(String value) => _setString(handle, 1052, value);
+  String get width => _getString(handle, 1053);
+  set width(String value) => _setString(handle, 1053, value);
 }
 
 /// Represents the header of a [`TableViewColumn`].
@@ -9745,29 +9750,29 @@ extension type TextDecoration._(int handle) implements FerroObject {
   factory TextDecoration() => TextDecoration._(_create(typeId));
   TextDecoration.of(FerroObject object) : this._(object.handle);
   /// Location. Defines the `Location` property.
-  TextDecorationLocation get location => TextDecorationLocation(_getI64(handle, 525));
-  set location(TextDecorationLocation value) => _setI64(handle, 525, value.value);
+  TextDecorationLocation get location => TextDecorationLocation(_getI64(handle, 526));
+  set location(TextDecorationLocation value) => _setI64(handle, 526, value.value);
   /// Stroke. Defines the `Stroke` property.
-  String get stroke => _getString(handle, 838);
-  set stroke(String value) => _setString(handle, 838, value);
+  String get stroke => _getString(handle, 839);
+  set stroke(String value) => _setString(handle, 839, value);
   /// StrokeDashOffset. Defines the `StrokeDashOffset` property.
-  double get strokeDashOffset => _getF64(handle, 840);
-  set strokeDashOffset(double value) => _setF64(handle, 840, value);
+  double get strokeDashOffset => _getF64(handle, 841);
+  set strokeDashOffset(double value) => _setF64(handle, 841, value);
   /// StrokeLineCap. Defines the `StrokeLineCap` property.
-  PenLineCap get strokeLineCap => PenLineCap(_getI64(handle, 842));
-  set strokeLineCap(PenLineCap value) => _setI64(handle, 842, value.value);
+  PenLineCap get strokeLineCap => PenLineCap(_getI64(handle, 843));
+  set strokeLineCap(PenLineCap value) => _setI64(handle, 843, value.value);
   /// StrokeOffset. Defines the `StrokeOffset` property.
-  double get strokeOffset => _getF64(handle, 844);
-  set strokeOffset(double value) => _setF64(handle, 844, value);
+  double get strokeOffset => _getF64(handle, 845);
+  set strokeOffset(double value) => _setF64(handle, 845, value);
   /// StrokeOffsetUnit. Defines the `StrokeOffsetUnit` property.
-  TextDecorationUnit get strokeOffsetUnit => TextDecorationUnit(_getI64(handle, 845));
-  set strokeOffsetUnit(TextDecorationUnit value) => _setI64(handle, 845, value.value);
+  TextDecorationUnit get strokeOffsetUnit => TextDecorationUnit(_getI64(handle, 846));
+  set strokeOffsetUnit(TextDecorationUnit value) => _setI64(handle, 846, value.value);
   /// StrokeThickness. Defines the `StrokeThickness` property.
-  double get strokeThickness => _getF64(handle, 846);
-  set strokeThickness(double value) => _setF64(handle, 846, value);
+  double get strokeThickness => _getF64(handle, 847);
+  set strokeThickness(double value) => _setF64(handle, 847, value);
   /// StrokeThicknessUnit. Defines the `StrokeThicknessUnit` property.
-  TextDecorationUnit get strokeThicknessUnit => TextDecorationUnit(_getI64(handle, 847));
-  set strokeThicknessUnit(TextDecorationUnit value) => _setI64(handle, 847, value.value);
+  TextDecorationUnit get strokeThicknessUnit => TextDecorationUnit(_getI64(handle, 848));
+  set strokeThicknessUnit(TextDecorationUnit value) => _setI64(handle, 848, value.value);
 }
 
 /// Paints foreground and background over its ranges without editing text. A null brush uses the
@@ -9806,50 +9811,50 @@ extension type TextPresenter._(int handle) implements Control {
   int get caretIndex => _getI64(handle, 129);
   set caretIndex(int value) => _setI64(handle, 129, value);
   /// PreeditText. Defines the `PreeditText` property.
-  String get preeditText => _getString(handle, 672);
-  set preeditText(String value) => _setString(handle, 672, value);
+  String get preeditText => _getString(handle, 673);
+  set preeditText(String value) => _setString(handle, 673, value);
   /// PreeditTextCursorPosition. Defines the `PreeditTextCursorPosition` property.
-  int get preeditTextCursorPosition => _getI64(handle, 673);
-  set preeditTextCursorPosition(int value) => _setI64(handle, 673, value);
+  int get preeditTextCursorPosition => _getI64(handle, 674);
+  set preeditTextCursorPosition(int value) => _setI64(handle, 674, value);
   /// RevealPassword. Defines the `RevealPassword` property.
-  bool get revealPassword => _getBool(handle, 729);
-  set revealPassword(bool value) => _setBool(handle, 729, value);
+  bool get revealPassword => _getBool(handle, 730);
+  set revealPassword(bool value) => _setBool(handle, 730, value);
   /// SelectionBrush. Defines the `SelectionBrush` property.
-  String get selectionBrush => _getString(handle, 785);
-  set selectionBrush(String value) => _setString(handle, 785, value);
+  String get selectionBrush => _getString(handle, 786);
+  set selectionBrush(String value) => _setString(handle, 786, value);
   /// SelectionEnd. Defines the `SelectionEnd` property.
-  int get selectionEnd => _getI64(handle, 786);
-  set selectionEnd(int value) => _setI64(handle, 786, value);
+  int get selectionEnd => _getI64(handle, 787);
+  set selectionEnd(int value) => _setI64(handle, 787, value);
   /// SelectionForegroundBrush. Defines the `SelectionForegroundBrush` property.
-  String get selectionForegroundBrush => _getString(handle, 788);
-  set selectionForegroundBrush(String value) => _setString(handle, 788, value);
+  String get selectionForegroundBrush => _getString(handle, 789);
+  set selectionForegroundBrush(String value) => _setString(handle, 789, value);
   /// SelectionStart. Defines the `SelectionStart` property.
-  int get selectionStart => _getI64(handle, 792);
-  set selectionStart(int value) => _setI64(handle, 792, value);
+  int get selectionStart => _getI64(handle, 793);
+  set selectionStart(int value) => _setI64(handle, 793, value);
   /// ShowSelectionHighlight. Defines the `ShowSelectionHighlight` property.
-  bool get showSelectionHighlight => _getBool(handle, 810);
-  set showSelectionHighlight(bool value) => _setBool(handle, 810, value);
+  bool get showSelectionHighlight => _getBool(handle, 811);
+  set showSelectionHighlight(bool value) => _setBool(handle, 811, value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 878);
-  set text(String value) => _setString(handle, 878, value);
+  String get text => _getString(handle, 879);
+  set text(String value) => _setString(handle, 879, value);
   /// TextParagraphStyles. Defines the `TextParagraphStyles` property.
-  String get textParagraphStyles => _getString(handle, 917);
-  set textParagraphStyles(String value) => _setString(handle, 917, value);
+  String get textParagraphStyles => _getString(handle, 918);
+  set textParagraphStyles(String value) => _setString(handle, 918, value);
   /// TextPresenter.LetterSpacing (attached). Defines the `LetterSpacing` property.
-  static double getLetterSpacing(FerroObject target) => _getF64(target.handle, 918);
-  static void setLetterSpacing(FerroObject target, double value) => _setF64(target.handle, 918, value);
+  static double getLetterSpacing(FerroObject target) => _getF64(target.handle, 919);
+  static void setLetterSpacing(FerroObject target, double value) => _setF64(target.handle, 919, value);
   /// TextPresenter.LineHeight (attached). Defines the `LineHeight` property.
-  static double getLineHeight(FerroObject target) => _getF64(target.handle, 919);
-  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 919, value);
+  static double getLineHeight(FerroObject target) => _getF64(target.handle, 920);
+  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 920, value);
   /// TextPresenter.TextAlignment (attached). Defines the `TextAlignment` property.
-  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 920));
-  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 920, value.value);
+  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 921));
+  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 921, value.value);
   /// TextPresenter.TextWrapping (attached). Defines the `TextWrapping` property.
-  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 921));
-  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 921, value.value);
+  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 922));
+  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 922, value.value);
   /// TextStyleOverrides. Defines the `TextStyleOverrides` property.
-  String get textStyleOverrides => _getString(handle, 925);
-  set textStyleOverrides(String value) => _setString(handle, 925, value);
+  String get textStyleOverrides => _getString(handle, 926);
+  set textStyleOverrides(String value) => _setString(handle, 926, value);
 }
 
 /// A control that enables easy control over text selection using touch based input.
@@ -9926,26 +9931,26 @@ extension type TickBar._(int handle) implements Control {
   bool get isDirectionReversed => _getBool(handle, 403);
   set isDirectionReversed(bool value) => _setBool(handle, 403, value);
   /// Maximum. Defines the `Maximum` property.
-  double get maximum => _getF64(handle, 547);
-  set maximum(double value) => _setF64(handle, 547, value);
+  double get maximum => _getF64(handle, 548);
+  set maximum(double value) => _setF64(handle, 548, value);
   /// Minimum. Defines the `Minimum` property.
-  double get minimum => _getF64(handle, 562);
-  set minimum(double value) => _setF64(handle, 562, value);
+  double get minimum => _getF64(handle, 563);
+  set minimum(double value) => _setF64(handle, 563, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// Placement. Defines the `Placement` property.
-  TickBarPlacement get placement => TickBarPlacement(_getI64(handle, 652));
-  set placement(TickBarPlacement value) => _setI64(handle, 652, value.value);
+  TickBarPlacement get placement => TickBarPlacement(_getI64(handle, 653));
+  set placement(TickBarPlacement value) => _setI64(handle, 653, value.value);
   /// ReservedSpace. Defines the `ReservedSpace` property.
-  String get reservedSpace => _getString(handle, 722);
-  set reservedSpace(String value) => _setString(handle, 722, value);
+  String get reservedSpace => _getString(handle, 723);
+  set reservedSpace(String value) => _setString(handle, 723, value);
   /// TickFrequency. Defines the `TickFrequency` property.
-  double get tickFrequency => _getF64(handle, 933);
-  set tickFrequency(double value) => _setF64(handle, 933, value);
+  double get tickFrequency => _getF64(handle, 934);
+  set tickFrequency(double value) => _setF64(handle, 934, value);
   /// Ticks. Defines the `Ticks` property.
-  String get ticks => _getString(handle, 935);
-  set ticks(String value) => _setString(handle, 935, value);
+  String get ticks => _getString(handle, 936);
+  set ticks(String value) => _setString(handle, 936, value);
 }
 
 /// A control to allow the user to select a time.
@@ -9957,20 +9962,20 @@ extension type TimePicker._(int handle) implements TemplatedControl {
   String get clockIdentifier => _getString(handle, 148);
   set clockIdentifier(String value) => _setString(handle, 148, value);
   /// MinuteIncrement. Defines the `MinuteIncrement` property.
-  int get minuteIncrement => _getI64(handle, 565);
-  set minuteIncrement(int value) => _setI64(handle, 565, value);
+  int get minuteIncrement => _getI64(handle, 566);
+  set minuteIncrement(int value) => _setI64(handle, 566, value);
   /// SecondIncrement. Defines the `SecondIncrement` property.
-  int get secondIncrement => _getI64(handle, 762);
-  set secondIncrement(int value) => _setI64(handle, 762, value);
+  int get secondIncrement => _getI64(handle, 763);
+  set secondIncrement(int value) => _setI64(handle, 763, value);
   /// SelectedTime. Defines the `SelectedTime` property.
-  String get selectedTime => _getString(handle, 778);
-  set selectedTime(String value) => _setString(handle, 778, value);
+  String get selectedTime => _getString(handle, 779);
+  set selectedTime(String value) => _setString(handle, 779, value);
   /// UseSeconds. Defines the `UseSeconds` property.
-  bool get useSeconds => _getBool(handle, 1029);
-  set useSeconds(bool value) => _setBool(handle, 1029, value);
+  bool get useSeconds => _getBool(handle, 1030);
+  set useSeconds(bool value) => _setBool(handle, 1030, value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1036));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
 }
 
 /// An automation peer which represents a [`TimePicker`].
@@ -9989,17 +9994,17 @@ extension type TimePickerPresenter._(int handle) implements PickerPresenterBase 
   String get clockIdentifier => _getString(handle, 148);
   set clockIdentifier(String value) => _setString(handle, 148, value);
   /// MinuteIncrement. Defines the `MinuteIncrement` property.
-  int get minuteIncrement => _getI64(handle, 565);
-  set minuteIncrement(int value) => _setI64(handle, 565, value);
+  int get minuteIncrement => _getI64(handle, 566);
+  set minuteIncrement(int value) => _setI64(handle, 566, value);
   /// SecondIncrement. Defines the `SecondIncrement` property.
-  int get secondIncrement => _getI64(handle, 762);
-  set secondIncrement(int value) => _setI64(handle, 762, value);
+  int get secondIncrement => _getI64(handle, 763);
+  set secondIncrement(int value) => _setI64(handle, 763, value);
   /// Time. Defines the `Time` property.
-  String get time => _getString(handle, 937);
-  set time(String value) => _setString(handle, 937, value);
+  String get time => _getString(handle, 938);
+  set time(String value) => _setString(handle, 938, value);
   /// UseSeconds. Defines the `UseSeconds` property.
-  bool get useSeconds => _getBool(handle, 1029);
-  set useSeconds(bool value) => _setBool(handle, 1029, value);
+  bool get useSeconds => _getBool(handle, 1030);
+  set useSeconds(bool value) => _setBool(handle, 1030, value);
 }
 
 /// The title bar of a window (WinUI's `TitleBar`): a back button, a pane toggle button, a left
@@ -10053,28 +10058,28 @@ extension type TitleBar._(int handle) implements TemplatedControl {
   set isPaneToggleButtonVisible(bool value) => _setBool(handle, 438, value);
   /// LeftHeader. Defines the `LeftHeader` property: an element after the buttons, before the
   /// icon.
-  FerroObject get leftHeader => FerroObject(_getObject(handle, 512));
-  set leftHeader(FerroObject value) => _setObject(handle, 512, value.handle);
+  FerroObject get leftHeader => FerroObject(_getObject(handle, 513));
+  set leftHeader(FerroObject value) => _setObject(handle, 513, value.handle);
   /// RightHeader. Defines the `RightHeader` property: an element at the right of the bar,
   /// before the caption buttons.
-  FerroObject get rightHeader => FerroObject(_getObject(handle, 732));
-  set rightHeader(FerroObject value) => _setObject(handle, 732, value.handle);
+  FerroObject get rightHeader => FerroObject(_getObject(handle, 733));
+  set rightHeader(FerroObject value) => _setObject(handle, 733, value.handle);
   /// Subtitle. Defines the `Subtitle` property: the text beside the title.
-  String get subtitle => _getString(handle, 848);
-  set subtitle(String value) => _setString(handle, 848, value);
+  String get subtitle => _getString(handle, 849);
+  set subtitle(String value) => _setString(handle, 849, value);
   /// TemplateSettings. Defines the `TemplateSettings` property: the values the template binds
   /// to (read-only).
-  FerroObject get templateSettings => FerroObject(_getObject(handle, 875));
+  FerroObject get templateSettings => FerroObject(_getObject(handle, 876));
   /// Title. Defines the `Title` property: the title the bar shows, which is also the title of
   /// its window.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
   /// TitleBar.IsDragRegion (attached). Defines the `IsDragRegion` attached property of an
   /// element of the content: `Some(true)` drags the window (and, on a control, its whole area),
   /// `Some(false)` takes the input, and `None` (the default) leaves it to the bar, which makes
   /// the enabled controls take the input.
-  static bool getIsDragRegion(FerroObject target) => _getBool(target.handle, 943);
-  static void setIsDragRegion(FerroObject target, bool value) => _setBool(target.handle, 943, value);
+  static bool getIsDragRegion(FerroObject target) => _getBool(target.handle, 944);
+  static void setIsDragRegion(FerroObject target, bool value) => _setBool(target.handle, 944, value);
 }
 
 /// The automation peer of a [`TitleBar`]: a title bar whose name is its title when the
@@ -10122,18 +10127,18 @@ extension type ToggleSwitch._(int handle) implements ToggleButton {
   factory ToggleSwitch() => ToggleSwitch._(_create(typeId));
   ToggleSwitch.of(FerroObject object) : this._(object.handle);
   /// KnobTransitions. Defines the `KnobTransitions` property.
-  String get knobTransitions => _getString(handle, 500);
-  set knobTransitions(String value) => _setString(handle, 500, value);
+  String get knobTransitions => _getString(handle, 501);
+  set knobTransitions(String value) => _setString(handle, 501, value);
   /// Off. Defines the `OffContent` property.
-  String get off => _getString(handle, 601);
-  set off(String value) => _setString(handle, 601, value);
-  FerroObject get offObject => FerroObject(_getObject(handle, 601));
-  set offObject(FerroObject value) => _setObject(handle, 601, value.handle);
+  String get off => _getString(handle, 602);
+  set off(String value) => _setString(handle, 602, value);
+  FerroObject get offObject => FerroObject(_getObject(handle, 602));
+  set offObject(FerroObject value) => _setObject(handle, 602, value.handle);
   /// On. Defines the `OnContent` property.
-  String get onValue => _getString(handle, 607);
-  set onValue(String value) => _setString(handle, 607, value);
-  FerroObject get onValueObject => FerroObject(_getObject(handle, 607));
-  set onValueObject(FerroObject value) => _setObject(handle, 607, value.handle);
+  String get onValue => _getString(handle, 608);
+  set onValue(String value) => _setString(handle, 608, value);
+  FerroObject get onValueObject => FerroObject(_getObject(handle, 608));
+  set onValueObject(FerroObject value) => _setObject(handle, 608, value.handle);
 }
 
 /// A control which pops up a hint when a control is hovered. You will probably not want to
@@ -10146,45 +10151,45 @@ extension type ToolTip._(int handle) implements ContentControl {
   factory ToolTip() => ToolTip._(_create(typeId));
   ToolTip.of(FerroObject object) : this._(object.handle);
   /// ToolTip.BetweenShowDelay (attached). Defines the `ToolTip.BetweenShowDelay` property.
-  static int getBetweenShowDelay(FerroObject target) => _getI64(target.handle, 949);
-  static void setBetweenShowDelay(FerroObject target, int value) => _setI64(target.handle, 949, value);
+  static int getBetweenShowDelay(FerroObject target) => _getI64(target.handle, 950);
+  static void setBetweenShowDelay(FerroObject target, int value) => _setI64(target.handle, 950, value);
   /// ToolTip.CustomPopupPlacementCallback (attached). Defines the
   /// `ToolTip.CustomPopupPlacementCallback` property; see
   /// [`Popup::custom_popup_placement_callback_property`].
-  static String getCustomPopupPlacementCallback(FerroObject target) => _getString(target.handle, 950);
-  static void setCustomPopupPlacementCallback(FerroObject target, String value) => _setString(target.handle, 950, value);
+  static String getCustomPopupPlacementCallback(FerroObject target) => _getString(target.handle, 951);
+  static void setCustomPopupPlacementCallback(FerroObject target, String value) => _setString(target.handle, 951, value);
   /// ToolTip.HorizontalOffset (attached). Defines the `ToolTip.HorizontalOffset` property.
-  static double getHorizontalOffset(FerroObject target) => _getF64(target.handle, 951);
-  static void setHorizontalOffset(FerroObject target, double value) => _setF64(target.handle, 951, value);
+  static double getHorizontalOffset(FerroObject target) => _getF64(target.handle, 952);
+  static void setHorizontalOffset(FerroObject target, double value) => _setF64(target.handle, 952, value);
   /// ToolTip.IsOpen (attached). Defines the `ToolTip.IsOpen` attached property.
-  static bool getIsOpen(FerroObject target) => _getBool(target.handle, 952);
-  static void setIsOpen(FerroObject target, bool value) => _setBool(target.handle, 952, value);
+  static bool getIsOpen(FerroObject target) => _getBool(target.handle, 953);
+  static void setIsOpen(FerroObject target, bool value) => _setBool(target.handle, 953, value);
   /// ToolTip.Placement (attached). Defines the `ToolTip.Placement` property.
-  static PlacementMode getPlacement(FerroObject target) => PlacementMode(_getI64(target.handle, 953));
-  static void setPlacement(FerroObject target, PlacementMode value) => _setI64(target.handle, 953, value.value);
+  static PlacementMode getPlacement(FerroObject target) => PlacementMode(_getI64(target.handle, 954));
+  static void setPlacement(FerroObject target, PlacementMode value) => _setI64(target.handle, 954, value.value);
   /// ToolTip.ServiceEnabled (attached). Defines the `ToolTip.ServiceEnabled` property.
-  static bool getServiceEnabled(FerroObject target) => _getBool(target.handle, 954);
-  static void setServiceEnabled(FerroObject target, bool value) => _setBool(target.handle, 954, value);
+  static bool getServiceEnabled(FerroObject target) => _getBool(target.handle, 955);
+  static void setServiceEnabled(FerroObject target, bool value) => _setBool(target.handle, 955, value);
   /// ToolTip.ShouldUseOverlayLayer (attached). Defines the `ToolTip.ShouldUseOverlayLayer`
   /// property; see [`Popup::should_use_overlay_layer`].
-  static bool getShouldUseOverlayLayer(FerroObject target) => _getBool(target.handle, 955);
-  static void setShouldUseOverlayLayer(FerroObject target, bool value) => _setBool(target.handle, 955, value);
+  static bool getShouldUseOverlayLayer(FerroObject target) => _getBool(target.handle, 956);
+  static void setShouldUseOverlayLayer(FerroObject target, bool value) => _setBool(target.handle, 956, value);
   /// ToolTip.ShowDelay (attached). Defines the `ToolTip.ShowDelay` property.
-  static int getShowDelay(FerroObject target) => _getI64(target.handle, 956);
-  static void setShowDelay(FerroObject target, int value) => _setI64(target.handle, 956, value);
+  static int getShowDelay(FerroObject target) => _getI64(target.handle, 957);
+  static void setShowDelay(FerroObject target, int value) => _setI64(target.handle, 957, value);
   /// ToolTip.ShowOnDisabled (attached). Defines the `ToolTip.ShowOnDisabled` property.
-  static bool getShowOnDisabled(FerroObject target) => _getBool(target.handle, 957);
-  static void setShowOnDisabled(FerroObject target, bool value) => _setBool(target.handle, 957, value);
+  static bool getShowOnDisabled(FerroObject target) => _getBool(target.handle, 958);
+  static void setShowOnDisabled(FerroObject target, bool value) => _setBool(target.handle, 958, value);
   /// ToolTip.Tip (attached). Defines the `ToolTip.Tip` attached property.
-  static String getTip(FerroObject target) => _getString(target.handle, 958);
-  static void setTip(FerroObject target, String value) => _setString(target.handle, 958, value);
+  static String getTip(FerroObject target) => _getString(target.handle, 959);
+  static void setTip(FerroObject target, String value) => _setString(target.handle, 959, value);
   /// ToolTip.ToolTip (attached). Stores the current [`ToolTip`] instance in the control
   /// (internal upstream).
-  static FerroObject getToolTip(FerroObject target) => FerroObject(_getObject(target.handle, 959));
-  static void setToolTip(FerroObject target, FerroObject value) => _setObject(target.handle, 959, value.handle);
+  static FerroObject getToolTip(FerroObject target) => FerroObject(_getObject(target.handle, 960));
+  static void setToolTip(FerroObject target, FerroObject value) => _setObject(target.handle, 960, value.handle);
   /// ToolTip.VerticalOffset (attached). Defines the `ToolTip.VerticalOffset` property.
-  static double getVerticalOffset(FerroObject target) => _getF64(target.handle, 960);
-  static void setVerticalOffset(FerroObject target, double value) => _setF64(target.handle, 960, value);
+  static double getVerticalOffset(FerroObject target) => _getF64(target.handle, 961);
+  static void setVerticalOffset(FerroObject target, double value) => _setF64(target.handle, 961, value);
   /// ToolTipClosing: the sender is valid for the call. The event raised when a tooltip on an
   /// element that was shown should now be hidden. Marking the `ToolTipClosing` event as handled
   /// does not cancel closing the tooltip. Once the tooltip is displayed, closing the tooltip is
@@ -10245,23 +10250,23 @@ extension type Track._(int handle) implements Control {
   bool get isDirectionReversed => _getBool(handle, 403);
   set isDirectionReversed(bool value) => _setBool(handle, 403, value);
   /// Maximum. Defines the `Maximum` property.
-  double get maximum => _getF64(handle, 547);
-  set maximum(double value) => _setF64(handle, 547, value);
+  double get maximum => _getF64(handle, 548);
+  set maximum(double value) => _setF64(handle, 548, value);
   /// Minimum. Defines the `Minimum` property.
-  double get minimum => _getF64(handle, 562);
-  set minimum(double value) => _setF64(handle, 562, value);
+  double get minimum => _getF64(handle, 563);
+  set minimum(double value) => _setF64(handle, 563, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 612));
-  set orientation(Orientation value) => _setI64(handle, 612, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 613));
+  set orientation(Orientation value) => _setI64(handle, 613, value.value);
   /// Thumb. Defines the `Thumb` property.
-  FerroObject get thumb => FerroObject(_getObject(handle, 931));
-  set thumb(FerroObject value) => _setObject(handle, 931, value.handle);
+  FerroObject get thumb => FerroObject(_getObject(handle, 932));
+  set thumb(FerroObject value) => _setObject(handle, 932, value.handle);
   /// Value. Defines the `Value` property.
-  double get valueValue => _getF64(handle, 1032);
-  set valueValue(double value) => _setF64(handle, 1032, value);
+  double get valueValue => _getF64(handle, 1033);
+  set valueValue(double value) => _setF64(handle, 1033, value);
   /// ViewportSize. Defines the `ViewportSize` property.
-  double get viewportSize => _getF64(handle, 1042);
-  set viewportSize(double value) => _setF64(handle, 1042, value);
+  double get viewportSize => _getF64(handle, 1043);
+  set viewportSize(double value) => _setF64(handle, 1043, value);
 }
 
 extension type TrackingPage._(int handle) implements ContentPage {
@@ -10301,8 +10306,8 @@ extension type TransitioningContentControl._(int handle) implements ContentContr
   factory TransitioningContentControl() => TransitioningContentControl._(_create(typeId));
   TransitioningContentControl.of(FerroObject object) : this._(object.handle);
   /// IsTransitionReversed. Defines the `IsTransitionReversed` property.
-  bool get isTransitionReversed => _getBool(handle, 464);
-  set isTransitionReversed(bool value) => _setBool(handle, 464, value);
+  bool get isTransitionReversed => _getBool(handle, 465);
+  set isTransitionReversed(bool value) => _setBool(handle, 465, value);
   /// TransitionCompleted: the sender is valid for the call. Defines the `TransitionCompleted`
   /// routed event.
   Subscription onTransitionCompleted(void Function(TransitioningContentControl sender) handler) =>
@@ -10315,11 +10320,11 @@ extension type TranslateTransform._(int handle) implements Transform {
   factory TranslateTransform() => TranslateTransform._(_create(typeId));
   TranslateTransform.of(FerroObject object) : this._(object.handle);
   /// X.
-  double get x => _getF64(handle, 1066);
-  set x(double value) => _setF64(handle, 1066, value);
+  double get x => _getF64(handle, 1067);
+  set x(double value) => _setF64(handle, 1067, value);
   /// Y.
-  double get y => _getF64(handle, 1072);
-  set y(double value) => _setF64(handle, 1072, value);
+  double get y => _getF64(handle, 1073);
+  set y(double value) => _setF64(handle, 1073, value);
 }
 
 /// An icon in the notification area of the platform.
@@ -10333,14 +10338,14 @@ extension type TrayIcon._(int handle) implements FerroObject {
   FerroObject get commandParameterObject => FerroObject(_getObject(handle, 162));
   set commandParameterObject(FerroObject value) => _setObject(handle, 162, value.handle);
   /// IsVisible. Defines the `IsVisible` property.
-  bool get isVisible => _getBool(handle, 468);
-  set isVisible(bool value) => _setBool(handle, 468, value);
+  bool get isVisible => _getBool(handle, 469);
+  set isVisible(bool value) => _setBool(handle, 469, value);
   /// Menu. Defines the `Menu` property.
-  FerroObject get menu => FerroObject(_getObject(handle, 549));
-  set menu(FerroObject value) => _setObject(handle, 549, value.handle);
+  FerroObject get menu => FerroObject(_getObject(handle, 550));
+  set menu(FerroObject value) => _setObject(handle, 550, value.handle);
   /// ToolTipText. Defines the `ToolTipText` property.
-  String get toolTipText => _getString(handle, 961);
-  set toolTipText(String value) => _setString(handle, 961, value);
+  String get toolTipText => _getString(handle, 962);
+  set toolTipText(String value) => _setString(handle, 962, value);
 }
 
 /// Displays a hierarchical tree of data.
@@ -10352,16 +10357,16 @@ extension type TreeView._(int handle) implements ItemsControl {
   bool get autoScrollToSelectedItem => _getBool(handle, 40);
   set autoScrollToSelectedItem(bool value) => _setBool(handle, 40, value);
   /// SelectedItem. Defines the `SelectedItem` property.
-  String get selectedItem => _getString(handle, 773);
-  set selectedItem(String value) => _setString(handle, 773, value);
-  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 773));
-  set selectedItemObject(FerroObject value) => _setObject(handle, 773, value.handle);
+  String get selectedItem => _getString(handle, 774);
+  set selectedItem(String value) => _setString(handle, 774, value);
+  FerroObject get selectedItemObject => FerroObject(_getObject(handle, 774));
+  set selectedItemObject(FerroObject value) => _setObject(handle, 774, value.handle);
   /// SelectedItems. Defines the `SelectedItems` property.
-  String get selectedItems => _getString(handle, 774);
-  set selectedItems(String value) => _setString(handle, 774, value);
+  String get selectedItems => _getString(handle, 775);
+  set selectedItems(String value) => _setString(handle, 775, value);
   /// SelectionMode. Defines the `SelectionMode` property.
-  String get selectionMode => _getString(handle, 791);
-  set selectionMode(String value) => _setString(handle, 791, value);
+  String get selectionMode => _getString(handle, 792);
+  set selectionMode(String value) => _setString(handle, 792, value);
 }
 
 /// An automation peer which represents a [`TreeView`].
@@ -10382,7 +10387,7 @@ extension type TreeViewItem._(int handle) implements HeaderedItemsControl {
   bool get isSelected => _getBool(handle, 447);
   set isSelected(bool value) => _setBool(handle, 447, value);
   /// Level. Defines the `Level` property.
-  int get level => _getI64(handle, 518);
+  int get level => _getI64(handle, 519);
   /// Collapsed: the sender is valid for the call. Defines the `Collapsed` event.
   Subscription onCollapsed(void Function(TreeViewItem sender) handler) =>
       _subscribe(handle, 7, (sender) => handler(TreeViewItem._(sender)));
@@ -10421,11 +10426,11 @@ extension type UniformGrid._(int handle) implements Panel {
   int get firstColumn => _getI64(handle, 285);
   set firstColumn(int value) => _setI64(handle, 285, value);
   /// RowSpacing. Defines the `RowSpacing` property.
-  double get rowSpacing => _getF64(handle, 737);
-  set rowSpacing(double value) => _setF64(handle, 737, value);
+  double get rowSpacing => _getF64(handle, 738);
+  set rowSpacing(double value) => _setF64(handle, 738, value);
   /// Rows. Defines the `Rows` property.
-  int get rows => _getI64(handle, 738);
-  set rows(int value) => _setI64(handle, 738, value);
+  int get rows => _getI64(handle, 739);
+  set rows(int value) => _setI64(handle, 739, value);
 }
 
 /// The application of unit tests: it registers the services of a [`TestServices`] instead of
@@ -10461,11 +10466,11 @@ extension type Viewbox._(int handle) implements Control {
   FerroObject get child => FerroObject(_getObject(handle, 137));
   set child(FerroObject value) => _setObject(handle, 137, value.handle);
   /// Stretch. Defines the `Stretch` property.
-  Stretch get stretch => Stretch(_getI64(handle, 836));
-  set stretch(Stretch value) => _setI64(handle, 836, value.value);
+  Stretch get stretch => Stretch(_getI64(handle, 837));
+  set stretch(Stretch value) => _setI64(handle, 837, value.value);
   /// StretchDirection. Defines the `StretchDirection` property.
-  StretchDirection get stretchDirection => StretchDirection(_getI64(handle, 837));
-  set stretchDirection(StretchDirection value) => _setI64(handle, 837, value.value);
+  StretchDirection get stretchDirection => StretchDirection(_getI64(handle, 838));
+  set stretchDirection(StretchDirection value) => _setI64(handle, 838, value.value);
 }
 
 extension type ViewboxContainer._(int handle) implements Control {
@@ -10491,8 +10496,8 @@ extension type VisualBrush._(int handle) implements TileBrush {
   factory VisualBrush() => VisualBrush._(_create(typeId));
   VisualBrush.of(FerroObject object) : this._(object.handle);
   /// Visual.
-  FerroObject get visual => FerroObject(_getObject(handle, 1044));
-  set visual(FerroObject value) => _setObject(handle, 1044, value.handle);
+  FerroObject get visual => FerroObject(_getObject(handle, 1045));
+  set visual(FerroObject value) => _setObject(handle, 1045, value.handle);
 }
 
 /// A control that manages multiple layers such as adorners, overlays, text selectors, and
@@ -10546,15 +10551,15 @@ extension type VisualStateManager._(int handle) implements FerroObject {
   /// VisualStateManager.CustomVisualStateManager (attached). Defines the attached
   /// `CustomVisualStateManager` property: the manager that changes the states of the groups of
   /// the element it is set on.
-  static FerroObject getCustomVisualStateManager(FerroObject target) => FerroObject(_getObject(target.handle, 1047));
-  static void setCustomVisualStateManager(FerroObject target, FerroObject value) => _setObject(target.handle, 1047, value.handle);
+  static FerroObject getCustomVisualStateManager(FerroObject target) => FerroObject(_getObject(target.handle, 1048));
+  static void setCustomVisualStateManager(FerroObject target, FerroObject value) => _setObject(target.handle, 1048, value.handle);
   /// VisualStateManager.VisualStateGroups (attached). Defines the attached `VisualStateGroups`
   /// property: the groups of visual states of an element.
   /// [`get_visual_state_groups`](VisualStateManager::get_visual_state_groups) creates the
   /// collection when the element has none, which is what markup's property element syntax
   /// (`<VisualStateManager.VisualStateGroups>`) adds the groups to.
-  static String getVisualStateGroups(FerroObject target) => _getString(target.handle, 1048);
-  static void setVisualStateGroups(FerroObject target, String value) => _setString(target.handle, 1048, value);
+  static String getVisualStateGroups(FerroObject target) => _getString(target.handle, 1049);
+  static void setVisualStateGroups(FerroObject target, String value) => _setString(target.handle, 1049, value);
 }
 
 /// How a [`VisualStateGroup`](super::VisualStateGroup) changes from one state to another when
@@ -10599,34 +10604,34 @@ extension type Window._(int handle) implements WindowBase {
   /// IsExtendedIntoWindowDecorations. Defines the `IsExtendedIntoWindowDecorations` property.
   bool get isExtendedIntoWindowDecorations => _getBool(handle, 410);
   /// OffScreenMargin. Defines the `OffScreenMargin` property.
-  String get offScreenMargin => _getString(handle, 603);
+  String get offScreenMargin => _getString(handle, 604);
   /// ShowActivated. Defines the `ShowActivated` property.
-  bool get showActivated => _getBool(handle, 801);
-  set showActivated(bool value) => _setBool(handle, 801, value);
+  bool get showActivated => _getBool(handle, 802);
+  set showActivated(bool value) => _setBool(handle, 802, value);
   /// ShowInTaskbar. Enables or disables the taskbar icon.
-  bool get showInTaskbar => _getBool(handle, 806);
-  set showInTaskbar(bool value) => _setBool(handle, 806, value);
+  bool get showInTaskbar => _getBool(handle, 807);
+  set showInTaskbar(bool value) => _setBool(handle, 807, value);
   /// SizeToContent. Defines the `SizeToContent` property.
-  String get sizeToContent => _getString(handle, 815);
-  set sizeToContent(String value) => _setString(handle, 815, value);
+  String get sizeToContent => _getString(handle, 816);
+  set sizeToContent(String value) => _setString(handle, 816, value);
   /// Title. Defines the `Title` property.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
   /// WindowDecorationMargin. Defines the `WindowDecorationMargin` property.
-  String get windowDecorationMargin => _getString(handle, 1055);
+  String get windowDecorationMargin => _getString(handle, 1056);
   /// WindowDecorations. Defines the `WindowDecorations` property.
-  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1057));
-  set windowDecorations(WindowDecorations value) => _setI64(handle, 1057, value.value);
+  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1058));
+  set windowDecorations(WindowDecorations value) => _setI64(handle, 1058, value.value);
   /// WindowDecorationsTheme. Defines the `WindowDecorationsTheme` property.
-  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1058));
-  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1058, value.handle);
+  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1059));
+  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1059, value.handle);
   /// WindowStartupLocation. Defines the `WindowStartupLocation` property.
-  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1061));
-  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1061, value.value);
+  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1062));
+  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1062, value.value);
   /// WindowState. Represents the currently effective window state (normal, minimized,
   /// maximized).
-  WindowState get windowState => WindowState(_getI64(handle, 1062));
-  set windowState(WindowState value) => _setI64(handle, 1062, value.value);
+  WindowState get windowState => WindowState(_getI64(handle, 1063));
+  set windowState(WindowState value) => _setI64(handle, 1063, value.value);
   /// WindowClosed: the sender is valid for the call. Routed event that can be used for global
   /// tracking of window destruction.
   Subscription onWindowClosed(void Function(Window sender) handler) =>
@@ -10671,16 +10676,16 @@ extension type WindowDrawnDecorations._(int handle) implements StyledElement {
   /// HasTitleBar. Defines the `HasTitleBar` property.
   bool get hasTitleBar => _getBool(handle, 339);
   /// ShadowThickness. Defines the `ShadowThickness` property.
-  String get shadowThickness => _getString(handle, 798);
+  String get shadowThickness => _getString(handle, 799);
   /// Title. Defines the `Title` property.
-  String get title => _getString(handle, 942);
-  set title(String value) => _setString(handle, 942, value);
+  String get title => _getString(handle, 943);
+  set title(String value) => _setString(handle, 943, value);
   /// TitleBarHeight. Defines the `TitleBarHeight` property.
-  double get titleBarHeight => _getF64(handle, 944);
+  double get titleBarHeight => _getF64(handle, 945);
   /// WindowDrawnDecorations.TitleBarDecorations (attached). Defines the `TitleBarDecorations`
   /// attached property.
-  static String getTitleBarDecorations(FerroObject target) => _getString(target.handle, 1059);
-  static void setTitleBarDecorations(FerroObject target, String value) => _setString(target.handle, 1059, value);
+  static String getTitleBarDecorations(FerroObject target) => _getString(target.handle, 1060);
+  static void setTitleBarDecorations(FerroObject target, String value) => _setString(target.handle, 1060, value);
 }
 
 /// Holds the template content for [`WindowDrawnDecorations`](super::WindowDrawnDecorations).
@@ -10697,11 +10702,11 @@ extension type WindowNotificationManager._(int handle) implements TemplatedContr
   factory WindowNotificationManager() => WindowNotificationManager._(_create(typeId));
   WindowNotificationManager.of(FerroObject object) : this._(object.handle);
   /// MaxItems. Defines the `MaxItems` property.
-  int get maxItems => _getI64(handle, 537);
-  set maxItems(int value) => _setI64(handle, 537, value);
+  int get maxItems => _getI64(handle, 538);
+  set maxItems(int value) => _setI64(handle, 538, value);
   /// Position. Defines the `Position` property.
-  NotificationPosition get position => NotificationPosition(_getI64(handle, 670));
-  set position(NotificationPosition value) => _setI64(handle, 670, value.value);
+  NotificationPosition get position => NotificationPosition(_getI64(handle, 671));
+  set position(NotificationPosition value) => _setI64(handle, 671, value.value);
 }
 
 /// The ambient light of Reveal (WinUI's internal `XamlAmbientLight`), also usable on its own:
@@ -10717,6 +10722,6 @@ extension type XamlAmbientLight._(int handle) implements XamlLight {
   set color(String value) => _setString(handle, 157, value);
   /// XamlAmbientLight.IsTarget (attached). `IsTarget` (attached): the ambient lights light the
   /// element or brush it is set on.
-  static bool getIsTarget(FerroObject target) => _getBool(target.handle, 1070);
-  static void setIsTarget(FerroObject target, bool value) => _setBool(target.handle, 1070, value);
+  static bool getIsTarget(FerroObject target) => _getBool(target.handle, 1071);
+  static void setIsTarget(FerroObject target, bool value) => _setBool(target.handle, 1071, value);
 }

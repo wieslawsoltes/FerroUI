@@ -9696,6 +9696,11 @@ pub trait TextBoxProps: ElementBuilder {
         self.prop(<ferroui_controls::TextBox>::is_undo_enabled_property(), value)
     }
 
+    /// Sets [`TextBox::is_spell_check_enabled_property`](ferroui_controls::TextBox::is_spell_check_enabled_property).
+    fn is_spell_check_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TextBox>::is_spell_check_enabled_property(), value)
+    }
+
     /// Sets [`TextBox::undo_limit_property`](ferroui_controls::TextBox::undo_limit_property).
     fn undo_limit<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::undo_limit_property(), value)
