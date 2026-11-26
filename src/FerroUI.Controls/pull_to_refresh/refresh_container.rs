@@ -98,6 +98,14 @@ impl FerroObjectImpl for RefreshContainer {
             }
 
             if let Some(refresh_visualizer) = refresh_visualizer {
+                // `set_visualizer` removed the handler of a replaced visualizer; a handler left
+                // here is on this visualizer, whose change the template raises again when the
+                // visualizer was set before the template was applied (markup sets
+                // `RefreshContainer.Visualizer` first). Without this, each request was forwarded
+                // twice.
+                if let Some(token) = this.visualizer_refresh_requested.take() {
+                    refresh_visualizer.remove_handler(RefreshVisualizer::refresh_requested_event(), token);
+                }
                 let weak = this.to_ref().downgrade();
                 this.visualizer_refresh_requested.set(Some(refresh_visualizer.refresh_requested(move |_, e| {
                     if let Some(this) = weak.upgrade() {
