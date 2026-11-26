@@ -19,15 +19,32 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
         assert.ok(session && tracker.sessions.has(session.id), 'The accepted process still has its native debugger');
         return session;
     };
+    const accept = async (pid: number) => {
+        const previous = session;
+        const replacement = await tracker.accept(previous?.id);
+        assert.equal(replacement.configuration.pid, pid, 'LLDB follows the accepted app PID');
+        if (previous) await until(() => !tracker.sessions.has(previous.id));
+        session = replacement;
+    };
+    const runtimeFor = (current: vscode.DebugSession) => {
+        assert.ok(inspectedApp && inspectedApp.pid === current.configuration.pid, 'Use the accepted App Sessions target');
+        return inspectedApp.runtime;
+    };
+    const attach = (current: vscode.DebugSession) => vscode.commands.executeCommand('ferroui.appSessions.debug', runtimeFor(current));
     return {
-        async accept(pid: number) {
-            const previous = session;
-            const replacement = await tracker.accept(previous?.id);
-            assert.equal(replacement.configuration.pid, pid, 'LLDB follows the accepted app PID');
-            if (previous) await until(() => !tracker.sessions.has(previous.id));
-            session = replacement;
-        },
+        accept,
         attached,
+        async repeatAttach() {
+            const current = attached();
+            await attach(current);
+            assert.equal(attached().id, current.id, 'Repeated attach keeps the existing LLDB session');
+        },
+        async reattach() {
+            const current = session;
+            assert.ok(current && !tracker.sessions.has(current.id), 'Reattach after the old debugger has detached');
+            await attach(current);
+            await accept(current.configuration.pid);
+        },
         async click(action: () => Promise<unknown>) {
             const current = attached();
             const input = action().then(() => undefined, (error: unknown) => error);
@@ -41,6 +58,10 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
                 assert.ok(resumed, 'The FerroUI command continued the paused application');
                 assert.equal(resumed.pid, current.configuration.pid);
                 assert.equal(resumed.debuggerPaused, false);
+                if (inspectedApp && inspectedApp.pid === resumed.pid) {
+                    assert.equal(resumed.generation, inspectedApp.generation, 'Debugger reattach keeps the inspector generation');
+                    assert.equal(resumed.debuggerGeneration, inspectedApp.debuggerGeneration, 'Debugger reattach keeps the process generation');
+                }
                 inspectedApp = resumed;
             } catch (error) {
                 await current.customRequest('continue', { threadId }).then(undefined, () => {});
@@ -51,8 +72,7 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
         },
         async detach() {
             const current = attached();
-            assert.ok(inspectedApp && inspectedApp.pid === current.configuration.pid, 'Detach the accepted App Sessions target');
-            await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', inspectedApp.runtime);
+            await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', runtimeFor(current));
             await until(() => !tracker.sessions.has(current.id)).catch(error => {
                 throw new Error(`LLDB did not detach from PID ${current.configuration.pid}. ${JSON.stringify(tracker.disconnectStatus(current))}`, { cause: error });
             });

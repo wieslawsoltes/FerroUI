@@ -72,8 +72,9 @@ export class HotReload implements vscode.Disposable {
             })),
             vscode.commands.registerCommand('ferroui.hotReload.debug', (id?: string) => this.interactive(async () => {
                 const run = this.require(id);
+                const generation = run.processGeneration;
                 const configuration = await selectDebugConfiguration(run.folder);
-                if (configuration && this.live.get(run.id) === run) await run.attach(configuration);
+                if (configuration && this.live.get(run.id) === run) await run.attach(configuration, generation);
             })),
             vscode.commands.registerCommand('ferroui.hotReload.processId', () => {
                 const pid = this.require().pid;

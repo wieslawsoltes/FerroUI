@@ -307,6 +307,8 @@ Use the current session ID and generation for the target. These debugger actions
 
 For managed Windows LLDB DAP sessions, the tool waits for the adapter to acknowledge disconnect. A timeout reports an error. Read the current session status before retrying.
 
+To reattach to a managed process, call `ferroui_reload_control` with `action: "attach_debug"` and the current `app_session` and `expected_process_generation`. If several attach configurations match, pass the exact name in `debug_configuration`. A repeated request for the current configuration keeps its debugger. A configuration change waits for the prior debugger to release the app and checks the process generation again before attaching.
+
 | App | Detach action |
 | --- | --- |
 | Managed Cargo or registered Rust patches | Read `ferroui_reload_status` with `app_session`. Call `ferroui_reload_control` with `action: "detach_debug"`, that `app_session`, and its `process_generation` as `expected_process_generation`. Use the process generation even for an app without an inspector. |

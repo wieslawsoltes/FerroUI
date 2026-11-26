@@ -14,6 +14,8 @@ interface DebuggerOptions {
     programForGeneration?(generation: number): string | undefined;
 }
 
+interface RunningDebugTarget { pid: number; generation: number; requireCurrent(): void }
+
 export class ReloadDebugger implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private attachment?: Attachment;
@@ -56,6 +58,25 @@ export class ReloadDebugger implements vscode.Disposable {
         await this.activate(target, undefined, generation);
     }
 
+    async attachToRunningApp(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration,
+        target: RunningDebugTarget, host: NodeJS.Platform = process.platform): Promise<void> {
+        target.requireCurrent();
+        const existing = this.attachment;
+        if (existing?.generation === target.generation) {
+            if (!this.active) {
+                await this.transition;
+                target.requireCurrent();
+                if (this.attachment !== existing) throw new Error('The debugger changed. Choose the current FerroUI app session.');
+            }
+            if (this.disconnecting) throw new Error('Wait for the debugger to detach.');
+            if (matchesConfiguration(existing, folder, configuration)) return;
+            if (!this.active) throw new Error('Wait for the debugger to attach.');
+            await this.detachFromRunningApp(host);
+            target.requireCurrent();
+        }
+        await this.attach(folder, configuration, target.pid, target.generation);
+    }
+
     prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
         if (this.disconnecting) throw new Error('Wait for the debugger to detach.');
         this.detach();
@@ -65,8 +86,7 @@ export class ReloadDebugger implements vscode.Disposable {
     prepareIfIdle(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
         if (!this.attachment) {
             this.prepare(folder, configuration);
-        } else if (this.attachment.folder.uri.toString() !== folder.uri.toString()
-            || !isDeepStrictEqual(this.attachment.configuration, configuration)) {
+        } else if (!matchesConfiguration(this.attachment, folder, configuration)) {
             throw new Error('Stop the current debugger before choosing another attach configuration.');
         }
     }
@@ -198,6 +218,10 @@ export class ReloadDebugger implements vscode.Disposable {
     }
 
     dispose(): void { void this.close(); }
+}
+
+function matchesConfiguration(attachment: Attachment, folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): boolean {
+    return attachment.folder.uri.toString() === folder.uri.toString() && isDeepStrictEqual(attachment.configuration, configuration);
 }
 
 async function acknowledgeDetach(session: vscode.DebugSession): Promise<void> {

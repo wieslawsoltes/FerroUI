@@ -107,12 +107,15 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         assert.equal(source.revision, revision(Buffer.from(rust.getText())), 'The replacement inspector maps the saved RSX revision');
         await until(() => !processExists(pid));
         if (debug) {
+            await debug.repeatAttach();
             await approve(updated);
-            const disconnect = await debug.detach();
-            await expectDetachedRuntime(updated, replacement, disconnect);
-            assert.equal(await runningPid(), replacement);
-            if (process.platform === 'win32') assert.equal(disconnect.disconnect?.success, true, JSON.stringify(disconnect));
-            console.log('Installed LLDB verified Rust breakpoints, retained failed candidates, followed the new PID and detached from the live app.');
+            await detachAndInspect(debug, updated, replacement, 3);
+            await approve(updated, false);
+            await expectText(updated, 'SavedCount', 'Reviews saved: 4');
+            await debug.reattach();
+            await approve(updated);
+            await detachAndInspect(debug, updated, replacement, 5);
+            console.log('Installed LLDB verified Rust breakpoints, retained failed candidates, followed the new PID, and reattached to the same live app after detach.');
         }
         assert.ok(liveTab());
         assert.deepEqual(tabChanges, [], 'Live App stays open through the accepted replacement');
@@ -127,10 +130,10 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         if (tab) await vscode.window.tabGroups.close(tab);
     }
 
-    async function approve(app: RuntimeClient) {
+    async function approve(app: RuntimeClient, withDebugger = true) {
         const [button] = await app.call<RuntimeNode[]>('find_elements', { name: 'ReviewRecord' });
         const click = () => app.call('click', { node_id: button.node_id });
-        if (debug) await debug.click(click);
+        if (debug && withDebugger) await debug.click(click);
         else await click();
     }
 }
@@ -180,14 +183,15 @@ async function expectText(client: RuntimeClient, name: string, text: string): Pr
     });
 }
 
-async function expectDetachedRuntime(client: RuntimeClient, pid: number, debuggerStatus: object): Promise<void> {
+async function detachAndInspect(debug: ReturnType<typeof installedRuntimeDebug>, client: RuntimeClient, pid: number, count: number): Promise<void> {
+    const debuggerStatus = await debug.detach();
     let transportError: unknown;
     try {
         await until(async () => {
             assert.ok(processExists(pid), 'Debugger disconnect keeps the accepted native process alive');
             try {
                 const [counter] = await client.call<RuntimeNode[]>('find_elements', { name: 'SavedCount' });
-                return counter?.text === 'Reviews saved: 3';
+                return counter?.text === `Reviews saved: ${count}`;
             } catch (error) {
                 // Connection recovery after resuming the target can take another poll.
                 if (!(error instanceof TypeError) || error.message !== 'fetch failed') throw error;
@@ -200,6 +204,8 @@ async function expectDetachedRuntime(client: RuntimeClient, pid: number, debugge
         const detail = { pid, alive: processExists(pid), debugger: debuggerStatus, network };
         throw new Error(`The accepted inspector did not respond after debugger disconnect. ${JSON.stringify(detail)}`, { cause: error });
     }
+    assert.equal(await runningPid(), pid);
+    if (process.platform === 'win32') assert.equal(debuggerStatus.disconnect?.success, true, JSON.stringify(debuggerStatus));
 }
 
 async function verifyWindowKeyboard(client: RuntimeClient): Promise<void> {

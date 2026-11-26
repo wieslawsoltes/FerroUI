@@ -159,6 +159,8 @@ The XAML app must register a `ReloadManifest` and a `HotReloadSession` and ackno
 3. Use a row’s rebuild or stop icon to act on that app. The row’s context menu opens its build output, attaches a configured debugger, or makes it the managed app used by the status bar and Diagnostics. **Detach Debugger from This App** ends that app’s debugger connection and stops following future replacements. The app and its Live App editor stay connected. **Stop All Hot Reload Applications** stops every managed session. [Debugger controls for agents](reference.md#detach-a-debugger-with-mcp)
 
 For a managed Windows app using LLDB DAP, use **Detach Debugger from This App** when the app should keep running. FerroUI waits for LLDB to acknowledge disconnect before closing the debug session. The request reports an error if LLDB fails to acknowledge within 15 seconds.
+
+Use **Attach Debugger to This App** to reconnect to the same running process. Requesting its current configuration again keeps the active debugger. Selecting a different configuration detaches the current debugger first and checks that the selected process is still current before attaching.
 4. To attach an independently launched app or Designer Studio, choose the connection icon in **App Sessions** and enter its loopback MCP address and bearer token. A successful connection adds a row. Disconnect from that row to close the inspector connection. The independently launched process keeps running. The Live App editor requires a server with native window inspection.
 
 ![App Sessions offers debugger detachment for Account Desk while both native apps are running](../images/vscode-app-session-detach.png)

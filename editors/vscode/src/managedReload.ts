@@ -79,7 +79,9 @@ export class ManagedReload {
         if (generation !== undefined) this.requireProcess(generation);
         const pid = this.pid;
         const currentGeneration = this.processGeneration;
-        if (pid && currentGeneration !== undefined) await this.debugger.attach(this.folder, configuration, pid, currentGeneration);
+        if (pid && currentGeneration !== undefined) await this.debugger.attachToRunningApp(this.folder, configuration, {
+            pid, generation: currentGeneration, requireCurrent: () => this.requireProcess(currentGeneration),
+        });
         else this.debugger.prepare(this.folder, configuration);
     }
 
