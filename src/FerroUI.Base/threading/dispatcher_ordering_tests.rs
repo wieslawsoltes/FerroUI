@@ -6,14 +6,13 @@
 //! A child module of `dispatcher_tests`, whose simulated platform implementation, helpers and
 //! services it uses.
 //!
-//! The tasks and completion sources of `threading::tasks` that the tests of G9 drive are
-//! deprecated since 0.5.0 (step A7) and keep their behaviour: the tests stay on them unchanged.
-#![allow(deprecated)]
+//! The tests of G9 drive the tasks of `ferroui-system` (`ferroui_system::task::spawn_local`) and
+//! the completion of a `Shared` (`Shared::channel`), which took the place of the tasks and
+//! completion sources of `threading::tasks` (deprecated in 0.5.0, removed in 0.7.0, #625).
 
 use super::*;
 use crate::threading::DispatcherProcessingDisabled;
-use ferroui_system::threading::tasks::{spawn_local as spawn_system_task, TaskCompletionSource};
-use ferroui_system::ObservableError;
+use ferroui_system::task::{spawn_local as spawn_system_task, Shared};
 
 /// What the callbacks of a test did, in order; shared by local and `Send` callbacks.
 #[derive(Clone, Default)]
@@ -256,33 +255,32 @@ fn a_resumption_at_another_priority_changes_the_priority_of_one_continuation_onl
 #[test]
 fn a_completion_source_runs_its_continuations_and_system_tasks_inline_and_queues_dispatcher_tasks() {
     // The two executors of a dispatcher thread today: a task of `ferroui-system`
-    // (`tasks::spawn_local`) is polled again inside the call that wakes it, a task of the
-    // dispatcher in a job queued at its priority. Continuations (`continue_with`) run first, then
+    // (`task::spawn_local`) is polled again inside the call that wakes it, a task of the
+    // dispatcher in a job queued at its priority. Continuations (`on_finished`) run first, then
     // the awaiting futures are woken in the order they awaited.
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = TaskCompletionSource::<i32>::new();
+    let (sender, source) = Shared::<i32>::channel();
 
-    let (l, awaited) = (log.clone(), source.task());
-    let system_task = spawn_system_task(async move {
-        let value = awaited.await?;
+    let (l, awaited) = (log.clone(), source.clone());
+    let mut system_task = spawn_system_task(async move {
+        let value = awaited.await.unwrap();
         l.push(format!("system task resumed with {value}"));
-        Ok::<_, ObservableError>(())
     });
-    let (l, awaited) = (log.clone(), source.task());
+    let (l, awaited) = (log.clone(), source.clone());
     let mut dispatcher_task =
         t.ui_thread.start_local_with_priority(async move {
             let value = awaited.await.unwrap();
             l.push(format!("dispatcher task resumed with {value}"));
         }, DispatcherPriority::NORMAL);
     let l = log.clone();
-    let _ = source.task().continue_with(move |task| l.push(format!("continuation saw {}", task.result().unwrap())));
+    let _ = source.on_finished(move |outcome| l.push(format!("continuation saw {}", outcome.as_ref().unwrap())));
 
-    let (l, completing) = (log.clone(), source.clone());
+    let l = log.clone();
     t.ui_thread.post_local(
         move || {
             l.push("completing");
-            completing.set_result(7);
+            sender.send(7);
             l.push("completed");
         },
         DispatcherPriority::NORMAL,
@@ -301,7 +299,7 @@ fn a_completion_source_runs_its_continuations_and_system_tasks_inline_and_queues
             "dispatcher task resumed with 7"
         ]
     );
-    assert!(system_task.is_completed_successfully());
+    assert_eq!(outcome_of(&mut system_task).as_deref(), Some("()"));
     assert_eq!(outcome_of(&mut dispatcher_task).as_deref(), Some("()"));
 }
 

@@ -6,20 +6,35 @@
 //! completion (in a job of another priority, outside of a job, from another thread) queues a job
 //! at its priority. A task spawned outside of a job stays in the queue of the thread and resumes
 //! inside the completing call on the thread (G9); its wakes from other threads, and the callbacks
-//! that other threads send to the thread, are jobs at `Default`, without `run_pending_wakes`.
+//! that other threads send to the thread, are jobs at `Default`, without `run_pending`.
 //!
 //! A child module of `dispatcher_tests`, whose simulated platform implementation, helpers and
 //! services it uses.
 //!
-//! The tasks and completion sources of `threading::tasks` that these tests drive are deprecated
-//! since 0.5.0 (step A7) and keep their behaviour: the tests stay on them, so that what they pin
-//! (the rule of F3 for the tasks of `ferroui-system`, G9) is unchanged.
-#![allow(deprecated)]
+//! The tests drive the tasks of `ferroui-system` (`ferroui_system::task::spawn_local`) and the
+//! completion of a `Shared` (`Shared::channel`), which took the place of the tasks and completion
+//! sources of `threading::tasks` (deprecated in 0.5.0, removed in 0.7.0, #625); what they pin (the
+//! rule of F3 for the tasks of `ferroui-system`, G9) is unchanged.
 
 use super::*;
-use ferroui_system::task::{current_schedule, is_current_schedule, thread_schedule};
-use ferroui_system::threading::tasks::{run, spawn_local as spawn_system_task, Task, TaskCompletionSource};
+use ferroui_system::task::{
+    current_schedule, is_current_schedule, spawn_local as spawn_system_task, thread_schedule, Shared, SharedSender,
+};
+use ferroui_system::threading::tasks::run;
 use ferroui_system::ObservableError;
+
+/// A task of `ferroui-system` that logs where it resumed.
+type SystemTask = JoinHandle<Result<(), ObservableError>>;
+
+/// A completion source (`TaskCompletionSource<int>`): the sender of a `Shared` and the `Shared`.
+fn completion_source() -> (SharedSender<Result<i32, ObservableError>>, Shared<Result<i32, ObservableError>>) {
+    Shared::channel()
+}
+
+/// Whether the task has ended with the output of its future, `Ok(())`.
+fn ran_to_completion(task: &mut SystemTask) -> bool {
+    matches!(poll_once(task, &CountingWaker::new()), Poll::Ready(Ok(Ok(()))))
+}
 
 /// What the callbacks of a test did, in order.
 #[derive(Clone, Default)]
@@ -41,7 +56,7 @@ impl Log {
 
 /// Spawns a task of `ferroui-system` that awaits `awaited` and logs `name`, the value and the
 /// priority it resumed at.
-fn log_resumption(log: &Log, name: &'static str, awaited: impl std::future::Future<Output = Result<i32, ObservableError>> + 'static) -> Task<()> {
+fn log_resumption(log: &Log, name: &'static str, awaited: impl std::future::Future<Output = Result<i32, ObservableError>> + 'static) -> SystemTask {
     let log = log.clone();
     spawn_system_task(async move {
         let value = awaited.await?;
@@ -50,13 +65,20 @@ fn log_resumption(log: &Log, name: &'static str, awaited: impl std::future::Futu
     })
 }
 
-/// Posts a job at `priority` that completes `source` with `value`, logging around it.
-fn post_completion(dispatcher: &Dispatcher, log: &Log, source: &TaskCompletionSource<i32>, value: i32, priority: DispatcherPriority) {
-    let (log, source) = (log.clone(), source.clone());
+/// Posts a job at `priority` that completes the `Shared` of `sender` with `value`, logging around
+/// it.
+fn post_completion(
+    dispatcher: &Dispatcher,
+    log: &Log,
+    sender: SharedSender<Result<i32, ObservableError>>,
+    value: i32,
+    priority: DispatcherPriority,
+) {
+    let log = log.clone();
     dispatcher.post_local(
         move || {
             log.push(format!("completing at {priority}"));
-            source.set_result(value);
+            sender.send(Ok(value));
             log.push("completed");
         },
         priority,
@@ -144,7 +166,7 @@ fn the_dispatcher_is_the_schedule_of_its_thread_until_it_shuts_down() {
 // ---------------------------------------------------------------------------
 
 #[test]
-fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_run_pending_wakes() {
+fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_run_pending() {
     let t = DispatcherTests::new();
     let log = Log::new();
     let (release_outside, gate_outside) = std::sync::mpsc::channel::<()>();
@@ -152,7 +174,7 @@ fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_r
 
     // Spawned outside of a job: the wake from the worker goes through the schedule of the thread,
     // a job at Default.
-    let outside = log_resumption(
+    let mut outside = log_resumption(
         &log,
         "spawned outside of a job",
         run(move || {
@@ -192,8 +214,8 @@ fn a_system_task_woken_from_another_thread_resumes_in_a_dispatcher_job_without_r
     let mut entries = log.entries();
     entries.sort();
     assert_eq!(entries, ["spawned at Background resumed with 2 at Background", "spawned outside of a job resumed with 1 at Default"]);
-    assert!(outside.is_completed_successfully());
-    assert!(inside.borrow().as_ref().is_some_and(Task::is_completed_successfully));
+    assert!(ran_to_completion(&mut outside));
+    assert!(inside.borrow_mut().as_mut().is_some_and(ran_to_completion));
 }
 
 #[test]
@@ -219,16 +241,16 @@ fn a_local_cancellation_callback_canceled_on_another_thread_runs_in_a_dispatcher
 fn a_system_task_spawned_in_a_job_resumes_inside_a_completion_in_a_job_of_its_priority() {
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = TaskCompletionSource::<i32>::new();
+    let (sender, source) = completion_source();
     let task = Rc::new(RefCell::new(None));
     {
-        let (l, awaited, slot) = (log.clone(), source.task(), task.clone());
+        let (l, awaited, slot) = (log.clone(), source.flatten(), task.clone());
         t.ui_thread.post_local(
             move || *slot.borrow_mut() = Some(log_resumption(&l, "the task", awaited)),
             DispatcherPriority::NORMAL,
         );
     }
-    post_completion(&t.ui_thread, &log, &source, 7, DispatcherPriority::NORMAL);
+    post_completion(&t.ui_thread, &log, sender, 7, DispatcherPriority::NORMAL);
     let l = log.clone();
     t.ui_thread.post_local(move || l.push("queued after the completing job"), DispatcherPriority::NORMAL);
 
@@ -239,17 +261,17 @@ fn a_system_task_spawned_in_a_job_resumes_inside_a_completion_in_a_job_of_its_pr
         log.entries(),
         ["completing at Normal", "the task resumed with 7 at Normal", "completed", "queued after the completing job"]
     );
-    assert!(task.borrow().as_ref().is_some_and(Task::is_completed_successfully));
+    assert!(task.borrow_mut().as_mut().is_some_and(ran_to_completion));
 }
 
 #[test]
 fn a_system_task_spawned_in_a_job_resumes_in_a_job_of_its_priority_when_completed_at_another() {
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = TaskCompletionSource::<i32>::new();
+    let (sender, source) = completion_source();
     let task = Rc::new(RefCell::new(None));
     {
-        let (l, awaited, slot) = (log.clone(), source.task(), task.clone());
+        let (l, awaited, slot) = (log.clone(), source.flatten(), task.clone());
         t.ui_thread.post_local(
             move || *slot.borrow_mut() = Some(log_resumption(&l, "the task", awaited)),
             DispatcherPriority::BACKGROUND,
@@ -258,7 +280,7 @@ fn a_system_task_spawned_in_a_job_resumes_in_a_job_of_its_priority_when_complete
     t.ui_thread.run_jobs(None);
     let l = log.clone();
     t.ui_thread.post_local(move || l.push("Background job queued before the completion"), DispatcherPriority::BACKGROUND);
-    post_completion(&t.ui_thread, &log, &source, 7, DispatcherPriority::NORMAL);
+    post_completion(&t.ui_thread, &log, sender, 7, DispatcherPriority::NORMAL);
 
     t.ui_thread.run_jobs(None);
     // A completion in a job of another priority posts the continuation: a job at the task's
@@ -272,17 +294,17 @@ fn a_system_task_spawned_in_a_job_resumes_in_a_job_of_its_priority_when_complete
             "the task resumed with 7 at Background"
         ]
     );
-    assert!(task.borrow().as_ref().is_some_and(Task::is_completed_successfully));
+    assert!(task.borrow_mut().as_mut().is_some_and(ran_to_completion));
 }
 
 #[test]
 fn a_system_task_spawned_in_a_job_and_completed_outside_of_one_resumes_in_a_job() {
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = TaskCompletionSource::<i32>::new();
+    let (sender, source) = completion_source();
     let task = Rc::new(RefCell::new(None));
     {
-        let (l, awaited, slot) = (log.clone(), source.task(), task.clone());
+        let (l, awaited, slot) = (log.clone(), source.flatten(), task.clone());
         t.ui_thread.post_local(
             move || *slot.borrow_mut() = Some(log_resumption(&l, "the task", awaited)),
             DispatcherPriority::NORMAL,
@@ -290,11 +312,11 @@ fn a_system_task_spawned_in_a_job_and_completed_outside_of_one_resumes_in_a_job(
     }
     t.ui_thread.run_jobs(None);
 
-    source.set_result(3);
+    sender.send(Ok(3));
     assert!(log.entries().is_empty());
     t.ui_thread.run_jobs(None);
     assert_eq!(log.entries(), ["the task resumed with 3 at Normal"]);
-    assert!(task.borrow().as_ref().is_some_and(Task::is_completed_successfully));
+    assert!(task.borrow_mut().as_mut().is_some_and(ran_to_completion));
 }
 
 #[test]
@@ -303,13 +325,13 @@ fn a_system_task_spawned_outside_of_a_job_resumes_inside_the_completion_wherever
     // the queue of the thread, which resumes it inside the completing call.
     let t = DispatcherTests::new();
     let log = Log::new();
-    let source = TaskCompletionSource::<i32>::new();
-    let task = log_resumption(&log, "the task", source.task());
-    post_completion(&t.ui_thread, &log, &source, 5, DispatcherPriority::BACKGROUND);
+    let (sender, source) = completion_source();
+    let mut task = log_resumption(&log, "the task", source.flatten());
+    post_completion(&t.ui_thread, &log, sender, 5, DispatcherPriority::BACKGROUND);
 
     t.ui_thread.run_jobs(None);
     assert_eq!(log.entries(), ["completing at Background", "the task resumed with 5 at Background", "completed"]);
-    assert!(task.is_completed_successfully());
+    assert!(ran_to_completion(&mut task));
 }
 
 #[test]
@@ -320,12 +342,11 @@ fn a_system_task_spawned_in_a_job_resumes_in_a_nested_frame_by_the_rule_of_its_p
     let log = Log::new();
     let outer = CancellationToken::new();
     let nested = DispatcherFrame::new();
-    let (first, second) = (TaskCompletionSource::<i32>::new(), TaskCompletionSource::<i32>::new());
+    let ((first, a), (second, b)) = (completion_source(), completion_source());
     let task = Rc::new(RefCell::new(None));
     {
         let (l, d, frame, outer, slot) = (log.clone(), disp.clone(), nested.clone(), outer.clone(), task.clone());
-        let (a, b) = (first.task(), second.task());
-        let (first, second) = (first.clone(), second.clone());
+        let (a, b) = (a.flatten(), b.flatten());
         disp.post_local(
             move || {
                 let lt = l.clone();
@@ -337,8 +358,8 @@ fn a_system_task_spawned_in_a_job_resumes_in_a_nested_frame_by_the_rule_of_its_p
                     Ok::<_, ObservableError>(())
                 }));
                 l.push("J pushes a frame (Normal)");
-                post_completion(&d, &l, &first, 1, DispatcherPriority::NORMAL);
-                post_completion(&d, &l, &second, 2, DispatcherPriority::BACKGROUND);
+                post_completion(&d, &l, first, 1, DispatcherPriority::NORMAL);
+                post_completion(&d, &l, second, 2, DispatcherPriority::BACKGROUND);
                 {
                     let (l, frame) = (l.clone(), frame.clone());
                     d.post_local(
@@ -375,5 +396,5 @@ fn a_system_task_spawned_in_a_job_resumes_in_a_nested_frame_by_the_rule_of_its_p
             "J ends"
         ]
     );
-    assert!(task.borrow().as_ref().is_some_and(Task::is_completed_successfully));
+    assert!(task.borrow_mut().as_mut().is_some_and(ran_to_completion));
 }
