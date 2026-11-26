@@ -184,11 +184,11 @@ fn a_task_awaiting_an_operation_resumes_in_a_job_queued_at_its_priority_when_the
     let log = Log::new();
     let operation = t.ui_thread.invoke_async_local_with_priority(log.add("operation"), DispatcherPriority::NORMAL);
     let l = log.clone();
-    let task = t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::NORMAL).start_local(async move {
+    let mut task = t.ui_thread.start_local_with_priority(async move {
         l.push("task started");
         operation.await.unwrap();
         l.push("task resumed");
-    });
+    }, DispatcherPriority::NORMAL);
     t.ui_thread.post_local(log.add("queued after the operation"), DispatcherPriority::NORMAL);
     // `start_local` polls the future up to its first pending await before it returns.
     assert_eq!(log.entries(), ["task started"]);
@@ -197,7 +197,7 @@ fn a_task_awaiting_an_operation_resumes_in_a_job_queued_at_its_priority_when_the
     // The completion does not resume the task inline: it queues a poll at the task's priority,
     // behind the work that was queued before the operation completed.
     assert_eq!(log.entries(), ["task started", "operation", "queued after the operation", "task resumed"]);
-    assert!(task.is_completed_successfully());
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("()"));
 }
 
 #[test]
@@ -212,11 +212,11 @@ fn tasks_woken_together_resume_in_the_order_they_awaited_each_at_its_own_priorit
         ("t3", DispatcherPriority::NORMAL),
     ] {
         let (l, awaited) = (log.clone(), operation.clone());
-        tasks.push(t.ui_thread.to_task_scheduler_with_priority(priority).start_local(async move {
+        tasks.push(t.ui_thread.start_local_with_priority(async move {
             awaited.await.unwrap();
             // The current context of a poll is the one of the task's priority.
             l.push(format!("{name} resumed at {}", current_priority()));
-        }));
+        }, priority));
     }
     t.ui_thread.post_local(log.add("queued after the operation"), DispatcherPriority::NORMAL);
 
@@ -231,7 +231,7 @@ fn tasks_woken_together_resume_in_the_order_they_awaited_each_at_its_own_priorit
             "t1 resumed at Background"
         ]
     );
-    assert!(tasks.iter().all(DispatcherTask::is_completed_successfully));
+    assert!(tasks.iter_mut().all(|task| outcome_of(task).as_deref() == Some("()")));
 }
 
 #[test]
@@ -240,17 +240,17 @@ fn a_resumption_at_another_priority_changes_the_priority_of_one_continuation_onl
     let log = Log::new();
     let d = t.ui_thread.clone();
     let l = log.clone();
-    let task = t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::BACKGROUND).start_local(async move {
+    let mut task = t.ui_thread.start_local_with_priority(async move {
         d.resume_with_priority(DispatcherPriority::SEND).await;
         l.push(format!("after resume_with_priority: {}", current_priority()));
         let operation = d.invoke_async_local_with_priority(|| {}, DispatcherPriority::NORMAL);
         operation.await.unwrap();
         l.push(format!("after an awaited operation: {}", current_priority()));
-    });
+    }, DispatcherPriority::BACKGROUND);
 
     t.ui_thread.run_jobs(None);
     assert_eq!(log.entries(), ["after resume_with_priority: Send", "after an awaited operation: Background"]);
-    assert!(task.is_completed_successfully());
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("()"));
 }
 
 #[test]
@@ -270,11 +270,11 @@ fn a_completion_source_runs_its_continuations_and_system_tasks_inline_and_queues
         Ok::<_, ObservableError>(())
     });
     let (l, awaited) = (log.clone(), source.task());
-    let dispatcher_task =
-        t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::NORMAL).start_local(async move {
+    let mut dispatcher_task =
+        t.ui_thread.start_local_with_priority(async move {
             let value = awaited.await.unwrap();
             l.push(format!("dispatcher task resumed with {value}"));
-        });
+        }, DispatcherPriority::NORMAL);
     let l = log.clone();
     let _ = source.task().continue_with(move |task| l.push(format!("continuation saw {}", task.result().unwrap())));
 
@@ -302,7 +302,7 @@ fn a_completion_source_runs_its_continuations_and_system_tasks_inline_and_queues
         ]
     );
     assert!(system_task.is_completed_successfully());
-    assert!(dispatcher_task.is_completed_successfully());
+    assert_eq!(outcome_of(&mut dispatcher_task).as_deref(), Some("()"));
 }
 
 // ---------------------------------------------------------------------------
@@ -489,10 +489,10 @@ fn a_canceled_operation_leaves_the_queue_and_its_awaiter_resumes_in_its_own_job(
     let a = aborted_on.clone();
     let _aborted = canceled.aborted(move || *a.lock().unwrap() = Some(thread::current().id()));
     let (l, awaited) = (log.clone(), canceled.clone());
-    let task = t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::NORMAL).start_local(async move {
+    let mut task = t.ui_thread.start_local_with_priority(async move {
         let outcome = awaited.await;
         l.push(format!("the awaiting task saw {outcome:?}"));
-    });
+    }, DispatcherPriority::NORMAL);
 
     let canceller = thread::spawn(move || {
         source.cancel();
@@ -512,7 +512,7 @@ fn a_canceled_operation_leaves_the_queue_and_its_awaiter_resumes_in_its_own_job(
         ["first", "last", "the awaiting task saw Err(Canceled)"]
     );
     assert_eq!(canceled.result(), Err(Canceled));
-    assert!(task.is_completed_successfully());
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("()"));
 }
 
 #[test]
@@ -541,20 +541,19 @@ fn a_panic_of_an_awaited_operation_faults_the_awaiting_task_in_its_own_job() {
         .ui_thread
         .invoke_async_local_with_priority(|| -> i32 { panic!("the operation panics") }, DispatcherPriority::NORMAL);
     let l = log.clone();
-    let task = t.ui_thread.to_task_scheduler_with_priority(DispatcherPriority::NORMAL).start_local(async move {
+    let mut task = t.ui_thread.start_local_with_priority(async move {
         l.push("awaiting");
         let _ = operation.await;
         l.push("not reached");
-    });
+    }, DispatcherPriority::NORMAL);
     t.ui_thread.post_local(log.add("queued after the operation"), DispatcherPriority::NORMAL);
 
     // The panic of an `invoke_async` callback is kept for whoever observes the operation; the
     // queue goes on.
     t.ui_thread.run_jobs(None);
     assert_eq!(log.entries(), ["awaiting", "queued after the operation"]);
-    assert!(task.is_faulted());
-    let result = catch_unwind(AssertUnwindSafe(|| task.wait()));
-    assert_eq!(message_of(&*result.unwrap_err()), Some("the operation panics"));
+    // The panic is the outcome of the task, a value.
+    assert_eq!(outcome_of(&mut task).as_deref(), Some("the task panicked: the operation panics"));
 }
 
 #[test]

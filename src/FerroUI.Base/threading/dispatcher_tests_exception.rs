@@ -397,10 +397,10 @@ fn nested_frame_does_not_filter_the_same_exception_twice() {
 }
 
 #[test]
-#[allow(deprecated)]
 fn sync_context_exception_can_be_handled_with_post() {
+    // The context of the reference posts at its priority: the posts of the dispatcher at that
+    // priority.
     let t = DispatcherTests::new();
-    let sync_context = t.ui_thread.get_context_with_priority(DispatcherPriority::BACKGROUND);
 
     let handled = Rc::new(Cell::new(false));
     let executed = Rc::new(Cell::new(false));
@@ -410,9 +410,9 @@ fn sync_context_exception_can_be_handled_with_post() {
         args.set_handled(true);
     });
 
-    sync_context.post(throw_an_exception);
+    t.ui_thread.post(throw_an_exception, DispatcherPriority::BACKGROUND);
     let e = executed.clone();
-    sync_context.post_local(move || e.set(true));
+    t.ui_thread.post_local(move || e.set(true), DispatcherPriority::BACKGROUND);
 
     t.ui_thread.run_jobs_with_cancellation(None, &CancellationToken::none());
 
