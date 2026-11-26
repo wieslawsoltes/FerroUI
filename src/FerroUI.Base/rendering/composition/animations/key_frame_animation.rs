@@ -248,6 +248,13 @@ macro_rules! key_frame_animation_classes {
                     key_frames.insert(normalized_progress_key, value, easing)
                 })
             }
+
+            /// A copy of the key frames, in the order of their keys (not WinUI): for code
+            /// that evaluates the animation on the UI thread, such as the scroll presenter of
+            /// `ferroui-controls`, whose offsets drive the layout.
+            pub fn key_frames(&self) -> Vec<super::KeyFrame<$ty>> {
+                self.base.with_key_frames::<$ty, _>(|key_frames| key_frames.items().to_vec())
+            }
         }
 
         impl super::ICompositionAnimationBase for $name {

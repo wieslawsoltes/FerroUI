@@ -85,13 +85,23 @@ mod toggle_button_tests;
 
 mod range_base;
 mod range_base_value_changed_event_args;
+mod i_scroll_controller;
 mod scroll_bar;
+mod scroll_presenter;
 mod scroll_event_type;
 mod thumb;
 mod track;
 pub use range_base::RangeBase;
 pub use range_base_value_changed_event_args::RangeBaseValueChangedEventArgs;
+pub use i_scroll_controller::{
+    AddScrollVelocityRequestedHandler, IScrollController, ScrollByRequestedHandler, ScrollControllerAddScrollVelocityRequestedEventArgs,
+    ScrollControllerRequests, ScrollControllerScrollByRequestedEventArgs, ScrollControllerScrollToRequestedEventArgs,
+    ScrollToRequestedHandler,
+};
 pub use scroll_bar::{ScrollBar, ScrollEventArgs};
+pub use scroll_presenter::ScrollPresenter;
+#[cfg(test)]
+pub(crate) use scroll_presenter::sample_key_frames as scroll_presenter_sample;
 pub use scroll_event_type::ScrollEventType;
 pub use track::{Track, TrackImpl, TrackImplExt, TrackVTable};
 pub use thumb::{Thumb, ThumbImpl, ThumbImplExt, ThumbVTable};

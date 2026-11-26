@@ -246,10 +246,18 @@ mod tick_bar_tests;
 
 mod i_scroll_anchor_provider;
 mod scroll_changed_event_args;
+mod scroll_view;
 mod scroll_viewer;
 mod zoom_mode;
 pub use i_scroll_anchor_provider::{as_scroll_anchor_provider, register_scroll_anchor_provider, IScrollAnchorProvider};
 pub use scroll_changed_event_args::ScrollChangedEventArgs;
+pub use scroll_view::{
+    ScrollView, ScrollingAnimationMode, ScrollingChainMode, ScrollingContentOrientation, ScrollingInputKinds,
+    ScrollingInteractionState, ScrollingRailMode, ScrollingScrollAnimationStartingEventArgs, ScrollingScrollBarVisibility,
+    ScrollingScrollCompletedEventArgs, ScrollingScrollMode, ScrollingScrollOptions, ScrollingScrollStartingEventArgs,
+    ScrollingSnapPointsMode, ScrollingZoomAnimationStartingEventArgs, ScrollingZoomCompletedEventArgs, ScrollingZoomMode,
+    ScrollingZoomOptions, ScrollingZoomStartingEventArgs,
+};
 pub use scroll_viewer::{ScrollViewer, ScrollViewerImpl, ScrollViewerImplExt, ScrollViewerVTable};
 pub use zoom_mode::ZoomMode;
 #[cfg(test)]
