@@ -19,7 +19,7 @@ use crate::media::{
     ISolidColorBrush, ITileBrush, ITransform, PenLineCap, PenLineJoin, Stretch, TileMode,
 };
 use crate::platform::SharedBitmapImpl;
-use crate::rendering::scene3d::Scene3DBrushContent;
+use crate::rendering::scene3d::{Scene3DBrushContent, Scene3DFrameSlot};
 use crate::utilities::RefCounted;
 use crate::{Matrix, RelativePoint, RelativeRect, RelativeScalar};
 use std::any::Any;
@@ -41,6 +41,8 @@ enum Kind {
     Image { tile: Tile, bitmap: Option<RefCounted<SharedBitmapImpl>> },
     /// The recorded content of a visual or drawing brush of a 3D material (#608).
     Content { tile: Tile, content: Scene3DBrushContent },
+    /// The frames of a video or a camera of a 3D material (#608, step D7).
+    Frame { tile: Tile, slot: Arc<Scene3DFrameSlot> },
 }
 
 struct Gradient {
@@ -149,6 +151,38 @@ impl SharedBrush {
         })))
     }
 
+    /// The shared form of a brush of a 3D material that samples the frames in `slot`, with the
+    /// tile settings, opacity and transforms of `brush` (`docs/porting/media3d.md`, section 3.11).
+    /// The 2D backends do not draw this form. `None` when `brush` is not a tile brush.
+    pub fn from_frame_slot(brush: &dyn IBrush, slot: Arc<Scene3DFrameSlot>) -> Option<SharedBrush> {
+        let tile = brush.as_tile_brush()?;
+        Some(SharedBrush(Arc::new(BrushValues {
+            opacity: brush.opacity(),
+            transform: brush.transform().map(|transform| transform.value()),
+            transform_origin: brush.transform_origin(),
+            relative_transform: brush.relative_transform().map(|transform| transform.value()),
+            kind: Kind::Frame {
+                tile: Tile {
+                    alignment_x: tile.alignment_x(),
+                    alignment_y: tile.alignment_y(),
+                    destination_rect: tile.destination_rect(),
+                    source_rect: tile.source_rect(),
+                    stretch: tile.stretch(),
+                    tile_mode: tile.tile_mode(),
+                },
+                slot,
+            },
+        })))
+    }
+
+    /// The slot of a brush made by [`from_frame_slot`](Self::from_frame_slot).
+    pub fn frame_slot(&self) -> Option<&Arc<Scene3DFrameSlot>> {
+        match &self.0.kind {
+            Kind::Frame { slot, .. } => Some(slot),
+            _ => None,
+        }
+    }
+
     /// The recorded content of a scene brush made by [`from_scene_content`](Self::from_scene_content).
     pub fn scene_content(&self) -> Option<&Scene3DBrushContent> {
         match &self.0.kind {
@@ -168,7 +202,7 @@ impl SharedBrush {
 
     fn tile(&self) -> &Tile {
         match &self.0.kind {
-            Kind::Image { tile, .. } | Kind::Content { tile, .. } => tile,
+            Kind::Image { tile, .. } | Kind::Content { tile, .. } | Kind::Frame { tile, .. } => tile,
             _ => unreachable!("the tile view is given for an image or a scene content only"),
         }
     }
@@ -220,7 +254,8 @@ impl IBrush for SharedBrush {
     }
 
     fn as_tile_brush(&self) -> Option<&dyn ITileBrush> {
-        matches!(self.0.kind, Kind::Image { .. } | Kind::Content { .. }).then_some(self as &dyn ITileBrush)
+        matches!(self.0.kind, Kind::Image { .. } | Kind::Content { .. } | Kind::Frame { .. })
+            .then_some(self as &dyn ITileBrush)
     }
 
     fn as_image_brush(&self) -> Option<&dyn IImageBrush> {
