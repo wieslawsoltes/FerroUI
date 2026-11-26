@@ -271,7 +271,18 @@ pub(crate) fn image_brush(
     source: ferroui_base::RelativeRect,
 ) -> ferroui_base::media::immutable::ImmutableImageBrush {
     let shared: Arc<ferroui_base::platform::SharedBitmapImpl> = bitmap.clone();
-    let bitmap = std::rc::Rc::new(ferroui_base::media::imaging::Bitmap::from_impl(shared));
+    image_brush_of(shared, stretch, tile_mode, destination, source)
+}
+
+/// [`image_brush`] of any bitmap: one without pixels to read too.
+pub(crate) fn image_brush_of(
+    bitmap: Arc<ferroui_base::platform::SharedBitmapImpl>,
+    stretch: ferroui_base::media::Stretch,
+    tile_mode: ferroui_base::media::TileMode,
+    destination: ferroui_base::RelativeRect,
+    source: ferroui_base::RelativeRect,
+) -> ferroui_base::media::immutable::ImmutableImageBrush {
+    let bitmap = std::rc::Rc::new(ferroui_base::media::imaging::Bitmap::from_impl(bitmap));
     ferroui_base::media::immutable::ImmutableImageBrush::new(
         Some(bitmap),
         ferroui_base::media::AlignmentX::Center,

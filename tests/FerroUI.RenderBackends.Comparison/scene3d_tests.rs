@@ -531,3 +531,8 @@ fn a_new_version_of_a_bitmap_uploads_only_its_texture() {
         }
     }
 }
+
+/// Skia on Graphite (Metal), which draws 3D scenes with the Metal executor (step D5).
+#[cfg(target_os = "macos")]
+#[path = "scene3d_graphite_tests.rs"]
+mod graphite;
