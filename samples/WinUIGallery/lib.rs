@@ -49,6 +49,9 @@ mod scroll_samples;
 mod shape_samples;
 mod sizing_sample;
 mod split_view_samples;
+mod content_dialog_samples;
+mod scratch_pad_samples;
+mod selector_bar_samples;
 mod status_samples;
 mod text_input_samples;
 mod text_samples;
@@ -124,6 +127,12 @@ mod layout_samples_tests;
 #[cfg(test)]
 mod text_input_samples_tests;
 
+#[cfg(test)]
+mod content_dialog_samples_tests;
+#[cfg(test)]
+mod scratch_pad_samples_tests;
+#[cfg(test)]
+mod selector_bar_samples_tests;
 #[cfg(test)]
 mod status_samples_tests;
 

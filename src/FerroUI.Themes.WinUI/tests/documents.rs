@@ -245,6 +245,7 @@ document_tests! {
     controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml";
     controls_notification_card => "/Controls/NotificationCard.xaml";
     controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_content_dialog => "/Controls/ContentDialog.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
