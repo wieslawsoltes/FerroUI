@@ -23893,6 +23893,33 @@
     ]
   },
   {
+    "name": "SystemBackdropElement",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SystemBackdropElement",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "SystemBackdrop": {
+        "name": "SystemBackdrop",
+        "type_name": "Option<Ref<SystemBackdrop>>",
+        "documentation": "SystemBackdropElement.SystemBackdrop: Option<Ref<SystemBackdrop>>",
+        "values": [],
+        "attached": false
+      },
+      "CornerRadius": {
+        "name": "CornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "SystemBackdropElement.CornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SystemBackdropHostBrush",
     "namespace": "https://github.com/ferroui",
     "documentation": "SystemBackdropHostBrush",
@@ -30419,6 +30446,16 @@
           "Justify",
           "Stretch",
           "StretchAll"
+        ],
+        "attached": false
+      },
+      "ItemsStretch": {
+        "name": "ItemsStretch",
+        "type_name": "WrapPanelItemsStretch",
+        "documentation": "WrapPanel.ItemsStretch: WrapPanelItemsStretch",
+        "values": [
+          "None",
+          "Last"
         ],
         "attached": false
       },
