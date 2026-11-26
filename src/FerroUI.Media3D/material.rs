@@ -12,13 +12,17 @@
 //! marks it dirty and is a change of a record; every other snapshot takes the kept recording,
 //! with the same identity and generation, so that the renderers keep the texture they rendered of
 //! it.
+//!
+//! A `VisualBrush` over an element that shows the frames of a video or a camera is not recorded:
+//! it samples the frame ([`IScene3DFrameProvider`], step D7), and a new frame is only a new
+//! drawing of the scene ([`Scene3DChange::Output`]).
 
 use crate::change::{ListLink, Notifier, Notifying, Scene3DChange};
 use crate::MaterialCollection;
 use ferroui_base::animation::Animatable;
-use ferroui_base::media::{shared_brush_of, subscribe_invalidated, Color, IBrush, SharedBrush};
+use ferroui_base::media::{shared_brush_of, subscribe_invalidated, Color, IBrush, ISceneBrush, SharedBrush};
 use ferroui_base::reactive::{IDisposable, Subscription};
-use ferroui_base::rendering::scene3d::Scene3DBrushContent;
+use ferroui_base::rendering::scene3d::{find_frame_provider, IScene3DFrameProvider, Scene3DBrushContent};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty,
@@ -42,6 +46,18 @@ pub struct Material {
     content_dirty: Rc<Cell<bool>>,
     /// The recorded content of a visual or drawing brush.
     content: RefCell<Option<KeptContent>>,
+    /// The frames a visual brush over a video or a camera samples instead of a recording.
+    frames: RefCell<Option<KeptFrames>>,
+}
+
+/// The frames of an element a visual brush paints with.
+struct KeptFrames {
+    /// The address of the brush.
+    brush: usize,
+    shared: SharedBrush,
+    /// Keeps the provider, and follows its new frames.
+    _provider: Rc<dyn IScene3DFrameProvider>,
+    _subscription: Subscription,
 }
 
 /// The recording of a visual or drawing brush a material keeps.
@@ -75,6 +91,7 @@ impl Material {
             content_subscription: RefCell::new(None),
             content_dirty: Rc::new(Cell::new(true)),
             content: RefCell::new(None),
+            frames: RefCell::new(None),
         }
     }
 
@@ -88,6 +105,9 @@ impl Material {
         }
         let scene = brush.as_scene_brush()?;
         let identity = Rc::as_ptr(brush) as *const () as usize;
+        if let Some(shared) = self.frame_brush(brush, scene, identity) {
+            return Some(shared);
+        }
         let mut kept = self.content.borrow_mut();
         let same_brush = kept.as_ref().is_some_and(|kept| kept.brush == identity);
         if !same_brush || self.content_dirty.get() {
@@ -101,6 +121,39 @@ impl Material {
             self.content_dirty.set(false);
         }
         kept.as_ref().and_then(|kept| kept.shared.clone())
+    }
+
+    /// The form of `brush` that samples the frames of the element it paints with, when that
+    /// element shows a video or a camera. Looked for again only when the brush is dirty.
+    fn frame_brush(
+        &self,
+        brush: &Rc<dyn IBrush>,
+        scene: &dyn ISceneBrush,
+        identity: usize,
+    ) -> Option<SharedBrush> {
+        let mut kept = self.frames.borrow_mut();
+        if !self.content_dirty.get() {
+            if let Some(frames) = kept.as_ref().filter(|frames| frames.brush == identity) {
+                return Some(frames.shared.clone());
+            }
+        }
+        *kept = None;
+        let provider = find_frame_provider(&scene.scene_visual()?)?;
+        let shared = SharedBrush::from_frame_slot(&**brush, provider.frame_slot())?;
+        let notifier = Rc::downgrade(&self.notifier);
+        let subscription = provider.subscribe_frames(Rc::new(move || {
+            if let Some(notifier) = notifier.upgrade() {
+                notifier.raise(Scene3DChange::Output);
+            }
+        }));
+        *kept = Some(KeptFrames {
+            brush: identity,
+            shared: shared.clone(),
+            _provider: provider,
+            _subscription: subscription,
+        });
+        self.content_dirty.set(false);
+        Some(shared)
     }
 
     /// Calls `handler` on every change of the material, until the returned guard is dropped.

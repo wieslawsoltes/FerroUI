@@ -149,6 +149,7 @@ ferroui_base::ferro_rust_paths! {
         crate::SwipeItems,
         crate::SymbolIcon,
         crate::SymbolIconSource,
+        crate::SystemBackdropElement,
         crate::TabControl,
         crate::TabItem,
         crate::TabbedPage,

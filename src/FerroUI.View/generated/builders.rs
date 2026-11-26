@@ -1700,6 +1700,19 @@ pub fn symbol_icon() -> El<ferroui_controls::SymbolIcon> {
     El::new()
 }
 
+pub use ferroui_controls::SystemBackdropElement;
+
+impl ViewClass for ferroui_controls::SystemBackdropElement {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SystemBackdropElement>::new()
+    }
+}
+
+/// Starts an element of [`SystemBackdropElement`](ferroui_controls::SystemBackdropElement).
+pub fn system_backdrop_element() -> El<ferroui_controls::SystemBackdropElement> {
+    El::new()
+}
+
 pub use ferroui_controls::TabControl;
 
 impl ViewClass for ferroui_controls::TabControl {
@@ -8820,6 +8833,20 @@ pub trait SymbolIconSourceProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourceProps for El<T> {}
+
+/// The properties and routed events of [`SystemBackdropElement`](ferroui_controls::SystemBackdropElement).
+pub trait SystemBackdropElementProps: ElementBuilder {
+    /// Sets [`SystemBackdropElement::system_backdrop_property`](ferroui_controls::SystemBackdropElement::system_backdrop_property).
+    fn system_backdrop<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::media::SystemBackdrop>>, M>) -> Self {
+        self.prop(<ferroui_controls::SystemBackdropElement>::system_backdrop_property(), value)
+    }
+
+    /// Sets [`SystemBackdropElement::corner_radius_property`](ferroui_controls::SystemBackdropElement::corner_radius_property).
+    fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
+        self.prop(<ferroui_controls::SystemBackdropElement>::corner_radius_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SystemBackdropElement>> SystemBackdropElementProps for El<T> {}
 
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {

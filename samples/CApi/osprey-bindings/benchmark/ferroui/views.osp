@@ -23,7 +23,7 @@ fn button(attrs, children) = Element { elementType: 28, elementAttrs: attrs, ele
 fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 430, elementAttrs: attrs, elementChildren: [] }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
@@ -65,7 +65,7 @@ fn commandParameter(value) = AttrText { attrTextProperty: 154, attrTextValue: va
 // ContentPresenter, DrawerPage, Flyout, NavigationPage, TitleBar).
 fn content(value) = AttrText { attrTextProperty: 167, attrTextValue: value }
 // cornerRadius(value: string) -> Attr<M>: sets CornerRadius (Border, ContentPresenter,
-// ExperimentalAcrylicBorder, TemplatedControl).
+// ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl).
 fn cornerRadius(value) = AttrText { attrTextProperty: 174, attrTextValue: value }
 // dataContext(value: string) -> Attr<M>: sets DataContext (Application, StyledElement).
 fn dataContext(value) = AttrText { attrTextProperty: 184, attrTextValue: value }
