@@ -808,6 +808,62 @@ fn refresh_sample_inserts_source_item_and_completes_its_deferral() {
 }
 
 #[test]
+fn custom_refresh_sample_uses_its_visualizer_and_inserts_a_new_friend() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::pull_to_refresh::{RefreshContainer, RefreshVisualizer, RefreshVisualizerState};
+    use ferroui_controls::{Control, ListBox, SymbolIcon, Window};
+    let _application = start();
+    let root = examples::create(examples::find("PullToRefresh").unwrap()).unwrap();
+    let window = Window::new();
+    ferroui_controls::testing::add_pull_to_refresh_themes(&window.styles());
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    let refresh = root.get_control::<RefreshContainer>("CustomRefresh");
+    let items = root.get_control::<ListBox>("CustomRefreshItems");
+    let visualizer = refresh.visualizer().expect("the custom visualizer");
+    assert!(visualizer == root.get_control::<RefreshVisualizer>("CustomVisualizer"));
+    assert!(visualizer
+        .content()
+        .and_then(|content| Control::from_boxed(&content))
+        .and_then(|content| content.cast::<SymbolIcon>())
+        .is_some());
+    assert_eq!(items.items().count(), 8);
+    let states = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+    {
+        let states = states.clone();
+        visualizer.refresh_state_changed(move |_, e| states.borrow_mut().push(e.new_state()));
+    }
+    for n in 0..2 {
+        root.get_control::<Button>("RequestCustomRefresh")
+            .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+        assert_eq!(visualizer.state(), RefreshVisualizerState::Refreshing);
+        Dispatcher::ui_thread().run_jobs(None);
+        assert_eq!(visualizer.state(), RefreshVisualizerState::Idle);
+        assert_eq!(
+            items
+                .items()
+                .get_at(0)
+                .unwrap()
+                .downcast_ref::<String>()
+                .map(String::as_str),
+            Some(format!("New Friend {n}").as_str())
+        );
+    }
+    assert_eq!(items.items().count(), 10);
+    // A request goes from Idle to Refreshing through a peek, and back (one request each, also
+    // for a visualizer set in markup before the template).
+    use RefreshVisualizerState::*;
+    assert_eq!(*states.borrow(), [Peeking, Refreshing, Idle, Peeking, Refreshing, Idle]);
+    assert_eq!(
+        root.get_control::<TextBlock>("CustomRefreshOutput")
+            .text()
+            .as_deref(),
+        Some("New Friend 1 inserted; refresh completed.")
+    );
+    window.close();
+}
+
+#[test]
 fn autosuggest_filter_preserves_all_source_names_and_word_matching() {
     use crate::control_samples::cats_for_query;
     assert_eq!(crate::cat_data::CATS.len(), 97);
