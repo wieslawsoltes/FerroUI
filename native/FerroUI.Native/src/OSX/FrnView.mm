@@ -196,14 +196,6 @@
         return;
     }
 
-    parent->TopLevelEvents->RunRenderPriorityJobs();
-
-    parent = _parent.tryGet();
-    if (parent == nullptr)
-    {
-        return;
-    }
-
     bool wasPainting = _painting;
     _painting = true;
     parent->TopLevelEvents->Paint();

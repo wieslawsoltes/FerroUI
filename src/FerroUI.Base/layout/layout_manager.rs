@@ -167,7 +167,7 @@ impl LayoutManager {
         }
 
         self.processing_bring_into_view_requests.set(true);
-        let _guard = RunningGuard(&self.processing_bring_into_view_requests);
+        let _guard = RunningGuard::flag(&self.processing_bring_into_view_requests);
 
         let is_at = |requests: &Option<Vec<Rc<dyn BringIntoViewRequest>>>, i: usize, request: &Rc<dyn BringIntoViewRequest>| {
             requests
@@ -486,7 +486,7 @@ impl ILayoutManager for LayoutManager {
 
             self.running.set(true);
             {
-                let _guard = RunningGuard(&self.running);
+                let _guard = RunningGuard::new(&self.running);
                 self.total_pass_count.set(self.total_pass_count.get() + 1);
 
                 for _ in 0..MAX_PASSES {
@@ -561,7 +561,7 @@ impl ILayoutManager for LayoutManager {
 
         self.running.set(true);
         {
-            let _guard = RunningGuard(&self.running);
+            let _guard = RunningGuard::new(&self.running);
             Self::measure(&root);
             Self::arrange(&root);
         }
@@ -632,10 +632,41 @@ impl IBringIntoViewLayoutManager for LayoutManager {
     }
 }
 
-struct RunningGuard<'a>(&'a Cell<bool>);
+crate::ferro_thread_local! {
+    /// The layout passes in progress on this thread, of any layout manager.
+    static LAYOUT_PASSES_RUNNING: Cell<u32> = const { Cell::new(0) };
+}
+
+/// Whether any layout manager of this thread is inside a layout pass.
+pub(crate) fn any_layout_pass_running() -> bool {
+    LAYOUT_PASSES_RUNNING.with(|running| running.get() > 0)
+}
+
+/// Clears a flag when dropped; a guard of a layout pass also counts the pass as running on the
+/// thread while it lives ([`any_layout_pass_running`]).
+struct RunningGuard<'a> {
+    flag: &'a Cell<bool>,
+    counts_pass: bool,
+}
+
+impl<'a> RunningGuard<'a> {
+    /// The guard of a layout pass.
+    fn new(running: &'a Cell<bool>) -> Self {
+        LAYOUT_PASSES_RUNNING.with(|count| count.set(count.get() + 1));
+        Self { flag: running, counts_pass: true }
+    }
+
+    /// A guard of a flag only, that is not a layout pass.
+    fn flag(flag: &'a Cell<bool>) -> Self {
+        Self { flag, counts_pass: false }
+    }
+}
 
 impl Drop for RunningGuard<'_> {
     fn drop(&mut self) {
-        self.0.set(false);
+        if self.counts_pass {
+            LAYOUT_PASSES_RUNNING.with(|count| count.set(count.get() - 1));
+        }
+        self.flag.set(false);
     }
 }
