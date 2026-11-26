@@ -219,6 +219,7 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "SwipeMode",
     "SwipeBehaviorOnInvoked",
     "SwipeItemInvokedEventArgs",
+    "BreadcrumbBarItemClickedEventArgs",
     "InfoBarCloseReason",
     "InfoBarClosingEventArgs",
     "InfoBarClosedEventArgs",

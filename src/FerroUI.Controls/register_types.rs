@@ -151,6 +151,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::automation::peers::DatePickerAutomationPeer,
     crate::automation::peers::DrawerPageAutomationPeer,
     crate::automation::peers::InfoBarAutomationPeer,
+    crate::automation::peers::BreadcrumbBarItemAutomationPeer,
     crate::automation::peers::TitleBarAutomationPeer,
     crate::automation::peers::ItemsControlAutomationPeer,
     crate::automation::peers::ListBoxAutomationPeer,
@@ -396,6 +397,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::primitives::TitleBarTemplateSettings,
     crate::primitives::InfoBarPanel,
     crate::primitives::InfoBarTemplateSettings,
+    crate::primitives::BreadcrumbBarPanel,
     crate::primitives::PersonPictureTemplateSettings,
     crate::primitives::PagerControlTemplateSettings,
     crate::primitives::LightDismissOverlayLayer,
@@ -512,6 +514,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- breadcrumb bar (WinUI, docs/porting/winui-controls.md, section 10.11) ---
+    crate::breadcrumb_bar::BreadcrumbBar,
+    crate::breadcrumb_bar::BreadcrumbBarItem,
     // --- swipe (WinUI, docs/porting/winui-calculator-gaps.md, SW-1) ---
     crate::swipe_control::SwipeControl,
     crate::swipe_control::SwipeItems,
