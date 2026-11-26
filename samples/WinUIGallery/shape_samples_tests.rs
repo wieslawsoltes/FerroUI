@@ -9,7 +9,8 @@ use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Point, Ref};
 use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::shapes::{Ellipse, Line, Path, Polygon, Rectangle};
-use ferroui_controls::{Button, Control, Flyout, Slider, TextBlock};
+use ferroui_controls_teaching_tip::TeachingTip;
+use ferroui_controls::{Button, Control, Slider, TextBlock};
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap_or_else(|error| panic!("{id}: {error}"))
@@ -106,26 +107,16 @@ fn geometry_page_shows_the_theme_image_tips_and_copy_buttons() {
         header_image_uri(None).ends_with("Geometry.dark.png"),
         "the Default theme dictionary"
     );
-    for (button, title) in [
-        ("ShowGeometryButton1", "8px"),
-        ("ShowGeometryButton2", "0px"),
-        ("ShowGeometryButton3", "4px"),
+    for (index, title, subtitle) in [
+        (1, "8px", Some("OverlayCornerRadius")),
+        (2, "0px", None),
+        (3, "4px", Some("ControlCornerRadius")),
     ] {
-        let flyout = root
-            .get_control::<Button>(button)
-            .flyout()
-            .and_then(|flyout| flyout.cast::<Flyout>())
-            .unwrap_or_else(|| panic!("{button} has the tip"));
-        let content = flyout.content().expect("the tip's content");
-        let text = Control::from_boxed(&content).expect("a control");
-        let first = text
-            .cast::<TextBlock>()
-            .or_else(|| {
-                text.cast::<ferroui_controls::StackPanel>()
-                    .and_then(|panel| panel.children().get(0).cast::<TextBlock>())
-            })
-            .expect("the tip's title");
-        assert_eq!(first.text().as_deref(), Some(title));
+        let button = root.get_control::<Button>(&format!("ShowGeometryButton{index}"));
+        let tip = root.get_control::<TeachingTip>(&format!("ShowGeometryInfoTooltip{index}"));
+        assert_eq!(tip.title().as_deref(), Some(title));
+        assert_eq!(tip.subtitle().as_deref(), subtitle);
+        assert!(tip.target() == Some(button.upcast::<Control>()));
     }
     // Outside a window there is no clipboard: the button says so.
     let (name, _) = COPIED_RESOURCES[1];
