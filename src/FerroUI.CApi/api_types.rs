@@ -2065,13 +2065,13 @@ pub extern "C" fn ferro_type_selection_indicator() -> i64 {
 /// Registers `SelectorBar` (with its default constructor) and returns its type ID, 371.
 #[no_mangle]
 pub extern "C" fn ferro_type_selector_bar() -> i64 {
-    entry::<::ferroui_controls::SelectorBar>(371, units!())
+    entry::<::ferroui_controls::SelectorBar>(371, units!(THEME_UNIT_27, THEME_UNIT_30, THEME_UNIT_53, THEME_UNIT_54))
 }
 
 /// Registers `SelectorBarItem` (with its default constructor) and returns its type ID, 372.
 #[no_mangle]
 pub extern "C" fn ferro_type_selector_bar_item() -> i64 {
-    entry::<::ferroui_controls::SelectorBarItem>(372, units!())
+    entry::<::ferroui_controls::SelectorBarItem>(372, units!(THEME_UNIT_27, THEME_UNIT_30, THEME_UNIT_53, THEME_UNIT_54))
 }
 
 /// Registers `Separator` (with its default constructor) and returns its type ID, 373.
