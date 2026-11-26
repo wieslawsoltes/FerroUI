@@ -1,4 +1,5 @@
 use super::{RefreshInfoProvider, RefreshVisualizer, RefreshVisualizerOrientation, RefreshVisualizerState};
+use ferroui_base::interactivity::RoutingStrategies;
 use crate::test_support::{test_scope, TestRoot};
 use crate::testing::refresh_visualizer_template;
 use crate::{Border, Control, Grid};
@@ -440,5 +441,132 @@ fn content_animations_run_on_the_compositor() {
         deferral.complete();
     }
     assert_eq!(visualizer.refresh_visualizer_state(), RefreshVisualizerState::Idle);
+    window.close();
+}
+
+/// Not from upstream (WinUI's `RefreshStateChanged`, #1265): the event reports each change of
+/// the state with the state left and the state entered, on the visualizer alone, and `State` is
+/// the state.
+#[test]
+fn refresh_state_changed_reports_each_change_with_the_old_and_the_new_state() {
+    let _scope = test_scope();
+    let provider = provider();
+    let visualizer = RefreshVisualizer::new();
+    visualizer.set_refresh_info_provider(Some(provider.clone()));
+    assert_eq!(RefreshVisualizer::refresh_state_changed_event().routing_strategies(), RoutingStrategies::DIRECT);
+
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    {
+        let (changes, weak) = (changes.clone(), visualizer.downgrade());
+        visualizer.refresh_state_changed(move |_, e| {
+            let visualizer = weak.upgrade().expect("the visualizer is alive");
+            // Raised after the state changed.
+            assert_eq!(visualizer.state(), e.new_state());
+            assert_eq!(visualizer.refresh_visualizer_state(), e.new_state());
+            changes.borrow_mut().push((e.old_state(), e.new_state()));
+        });
+    }
+    let state_values = Rc::new(RefCell::new(Vec::new()));
+    let object: &FerroObject = &visualizer;
+    let _subscription = {
+        let state_values = state_values.clone();
+        FerroObjectExtensions::get_observable(object, RefreshVisualizer::state_property())
+            .subscribe_fn(move |state| state_values.borrow_mut().push(state))
+    };
+
+    let deferral = Rc::new(RefCell::new(None));
+    {
+        let deferral = deferral.clone();
+        visualizer.refresh_requested(move |_, e| *deferral.borrow_mut() = Some(e.get_deferral()));
+    }
+    pull(&provider, 40.0);
+    pull(&provider, 60.0);
+    pull(&provider, 95.0);
+    release(&provider);
+    deferral.borrow_mut().take().expect("deferral").complete();
+
+    use RefreshVisualizerState::*;
+    assert_eq!(
+        *changes.borrow(),
+        [(Idle, Interacting), (Interacting, Pending), (Pending, Peeking), (Peeking, Refreshing), (Refreshing, Idle)]
+    );
+    assert_eq!(*state_values.borrow(), [Idle, Interacting, Pending, Peeking, Refreshing, Idle]);
+}
+
+/// Not from upstream (#1265): over a compositing renderer, custom content of the visualizer
+/// follows the pull: its rotation is the share of the pull past the starting angle, it is dimmed
+/// while interacting and opaque once a release would refresh, and a handler of
+/// `RefreshStateChanged` sees the rotation that a refresh starts and can stop it (the custom
+/// visualizer of the WinUI Gallery).
+#[test]
+fn custom_content_follows_the_pull_and_the_refresh_states_on_the_compositor() {
+    use crate::testing::{CompositorTestServices, MockWindowingPlatform, TestServices};
+    use crate::Window;
+    use ferroui_base::rendering::composition::{ElementComposition, ICompositionObjectAnimations};
+    use std::f64::consts::PI;
+
+    let services = CompositorTestServices::start(TestServices::styled_window());
+    let visualizer = RefreshVisualizer::new();
+    visualizer.set_template(Some(refresh_visualizer_template()));
+    let content = Border::new();
+    content.set_width(35.0);
+    content.set_height(35.0);
+    visualizer.set_content(Some(Control::boxed(content.clone())));
+    let host = Border::new();
+    host.set_child(Some(visualizer.clone().upcast()));
+
+    let window_impl = MockWindowingPlatform::create_window_mock();
+    services.setup(&window_impl);
+    let window = Window::with_impl(window_impl);
+    window.set_content(Some(Control::boxed(host.clone())));
+    window.show();
+    services.run_jobs();
+
+    let provider = RefreshInfoProvider::new(
+        PullDirection::TopToBottom,
+        Some(Size::new(100.0, 100.0)),
+        ElementComposition::get_element_visual(&host),
+    );
+    visualizer.set_refresh_info_provider(Some(provider.clone()));
+    services.run_jobs();
+    let content_visual = ElementComposition::get_element_visual(&content).expect("the content is composited");
+
+    pull(&provider, 25.0);
+    assert_eq!(visualizer.state(), RefreshVisualizerState::Interacting);
+    assert!((content_visual.rotation_angle() as f64 - 0.25 * 2.0 * PI).abs() < 1e-5);
+    assert_eq!(content_visual.opacity(), 0.4);
+    pull(&provider, 50.0);
+    assert!((content_visual.rotation_angle() as f64 - PI).abs() < 1e-5);
+
+    pull(&provider, 90.0);
+    assert_eq!(visualizer.state(), RefreshVisualizerState::Pending);
+    assert_eq!(content_visual.opacity(), 1.0);
+
+    let stopped = Rc::new(Cell::new(false));
+    {
+        let (stopped, content) = (stopped.clone(), content.clone());
+        visualizer.refresh_state_changed(move |_, e| {
+            if e.new_state() == RefreshVisualizerState::Refreshing {
+                let visual = ElementComposition::get_element_visual(&content).expect("composited");
+                // The rotation of the refresh has been started for the new state.
+                assert!(visual.object().pending_animations().count() >= 1);
+                visual.stop_animation("RotationAngle");
+                stopped.set(true);
+            }
+        });
+    }
+    let deferral = Rc::new(RefCell::new(None));
+    {
+        let deferral = deferral.clone();
+        visualizer.refresh_requested(move |_, e| *deferral.borrow_mut() = Some(e.get_deferral()));
+    }
+    release(&provider);
+    assert_eq!(visualizer.state(), RefreshVisualizerState::Refreshing);
+    assert!(stopped.get());
+    services.run_jobs();
+
+    deferral.borrow_mut().take().expect("deferral").complete();
+    assert_eq!(visualizer.state(), RefreshVisualizerState::Idle);
+    assert_eq!(content_visual.rotation_angle(), 0.0);
     window.close();
 }
