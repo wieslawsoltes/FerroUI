@@ -1,13 +1,14 @@
 //! The DatePicker, TimePicker, CalendarDatePicker and CalendarView pages: the source's examples
 //! with their code behind (`date_samples.rs`).
 
-use crate::date_samples::{calendar_selection_mode, time_of_day};
+use crate::date_samples::{calendar_selection_mode, time_of_day, CALENDAR_LANGUAGES};
 use crate::{examples, tests::start};
 use ferroui_base::animation::SignedDuration;
 use ferroui_base::utilities::{DateTime, DateTimeOffset};
 use ferroui_base::Ref;
 use ferroui_controls::{
-    Calendar, CalendarDatePicker, CalendarSelectionMode, ComboBox, Control, DatePicker, TimePicker,
+    Calendar, CalendarDatePicker, CalendarIdentifiers, CalendarSelectionMode, CheckBox, ComboBox, Control, DatePicker,
+    TimePicker,
 };
 
 fn page(id: &str) -> Ref<Control> {
@@ -83,4 +84,34 @@ fn calendar_view_selection_mode_option_sets_the_calendar_mode() {
     modes.set_selected_index(1);
     assert_eq!(calendar.selection_mode(), CalendarSelectionMode::SingleDate);
     assert_eq!(calendar_selection_mode("Range"), None);
+}
+
+#[test]
+fn calendar_view_identifier_language_and_out_of_scope_options_set_the_calendar() {
+    let _application = start();
+    let root = page("CalendarView");
+    let calendar = root.get_control::<Calendar>("Control1");
+    assert_eq!(calendar.calendar_identifier(), CalendarIdentifiers::GREGORIAN);
+    // The first language of the list (English) is selected, and so set, at first.
+    assert_eq!(calendar.language().to_string(), "en");
+
+    let identifiers = root.get_control::<ComboBox>("calendarIdentifier");
+    assert_eq!(identifiers.item_count() as usize, CalendarIdentifiers::ALL.len());
+    identifiers.set_selected_index(1);
+    assert_eq!(calendar.calendar_identifier(), CalendarIdentifiers::HEBREW);
+    identifiers.set_selected_index(9);
+    assert_eq!(calendar.calendar_identifier(), CalendarIdentifiers::UM_AL_QURA);
+
+    let languages = root.get_control::<ComboBox>("calendarLanguages");
+    assert_eq!(languages.item_count() as usize, CALENDAR_LANGUAGES.len());
+    let french = CALENDAR_LANGUAGES.iter().position(|(_, tag)| *tag == "fr").unwrap();
+    languages.set_selected_index(french as i32);
+    assert_eq!(calendar.language().to_string(), "fr");
+
+    let out_of_scope = root.get_control::<CheckBox>("isOutOfScopeEnabled");
+    assert!(calendar.is_out_of_scope_enabled());
+    out_of_scope.set_is_checked(Some(false));
+    assert!(!calendar.is_out_of_scope_enabled());
+    out_of_scope.set_is_checked(Some(true));
+    assert!(calendar.is_out_of_scope_enabled());
 }

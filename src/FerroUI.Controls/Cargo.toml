@@ -33,6 +33,10 @@ bitflags.workspace = true
 encoding_rs = { workspace = true, optional = true }
 # `url::Url`, the font source of `AppBuilder::with_system_font_source` (C5 of #423).
 url.workspace = true
+# The calendar systems of `Calendar.CalendarIdentifier` and the names of its `Language`, with the
+# feature `calendar-systems` (`calendar/calendar_system.rs`).
+icu_calendar = { workspace = true, optional = true }
+icu_datetime = { workspace = true, optional = true }
 
 [features]
 # Test doubles (mock windowing platform, unit-test application) for the tests
@@ -45,6 +49,11 @@ perf-counters = ["ferroui-base/perf-counters"]
 # through `encoding_rs`. Without it RTF text bytes are read in the code page 1252 only
 # (docs/porting/winui-rich-text.md, decision D2).
 rtf-codepages = ["dep:encoding_rs"]
+# The calendar systems other than the Gregorian one (Hebrew, Hijri, Japanese, Julian, Korean,
+# Persian, Taiwan, Thai, Umm al-Qura) and the names of an explicit `Language` of `Calendar`,
+# from ICU's compiled data. Without it every `CalendarIdentifier` is the Gregorian calendar of the
+# current culture, and nothing of ICU's calendar or date formatting data is linked.
+calendar-systems = ["dep:icu_calendar", "dep:icu_datetime"]
 
 [dev-dependencies]
 # The unit tests look the types of this crate up by name, which needs the tables of types

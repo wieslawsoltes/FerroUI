@@ -9,8 +9,9 @@
 use super::calendar_item::date_of;
 use super::{
     CalendarBlackoutDatesCollection, CalendarButton, CalendarDateRange, CalendarDayButton, CalendarExtensions,
-    CalendarItem, DateTimeHelper, SelectedDatesCollection,
+    CalendarIdentifiers, CalendarItem, CalendarSystem, DateTimeHelper, SelectedDatesCollection,
 };
+use crate::documents::TextElement;
 use crate::primitives::{SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl};
 use crate::{ControlImpl, Panel, SelectionChangedEventArgs};
 use ferroui_base::data::BindingMode;
@@ -22,7 +23,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
-use ferroui_base::utilities::{CalendarWeekRule, DateTime, DayOfWeek, HandlerList};
+use ferroui_base::utilities::{CalendarWeekRule, DateTime, DayOfWeek, HandlerList, Locale};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event_args, instantiate,
     BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl, StyledProperty,
@@ -224,6 +225,8 @@ pub struct Calendar {
     removed_items: RefCell<Vec<DateTime>>,
     last_selected_date_internal: Cell<Option<DateTime>>,
     display_date_internal: Cell<DateTime>,
+    /// The arithmetic and names of `CalendarIdentifier` and `Language`.
+    calendar_system: RefCell<CalendarSystem>,
 
     hover_start: Cell<Option<DateTime>>,
     hover_start_index: Cell<Option<i32>>,
@@ -311,7 +314,7 @@ impl InputElementImpl for Calendar {
                 let focus_date;
                 match this.last_selected_date() {
                     Some(last_selected_date)
-                        if DateTimeHelper::compare_year_month(this.display_date_internal(), last_selected_date) == 0 =>
+                        if this.system().compare_year_month(this.display_date_internal(), last_selected_date) == 0 =>
                     {
                         focus_date = last_selected_date;
                     }
@@ -462,6 +465,29 @@ ferro_properties! {
                 StyledPropertyOptions::new(None).default_binding_mode(BindingMode::TwoWay),
             )
         }
+
+        /// Defines the `CalendarIdentifier` property: the calendar system of the views, one of
+        /// [`CalendarIdentifiers`] (WinUI's `CalendarView.CalendarIdentifier`).
+        pub fn calendar_identifier_property() -> StyledProperty<String> {
+            FerroProperty::register::<Calendar, _>(
+                "CalendarIdentifier",
+                String::from(CalendarIdentifiers::GREGORIAN),
+            )
+        }
+
+        /// Defines the `Language` property: the inherited language of the text
+        /// ([`TextElement::language_property`]). Set on the calendar, it is also the language
+        /// of the names of its months, days and years (WinUI's `FrameworkElement.Language`).
+        pub fn language_property() -> StyledProperty<Locale> {
+            TextElement::language_property().add_owner::<Calendar>()
+        }
+
+        /// Defines the `IsOutOfScopeEnabled` property: whether the days of the month view that
+        /// are not in the displayed month are drawn as inactive (WinUI's
+        /// `CalendarView.IsOutOfScopeEnabled`). The default is true.
+        pub fn is_out_of_scope_enabled_property() -> StyledProperty<bool> {
+            FerroProperty::register::<Calendar, _>("IsOutOfScopeEnabled", true)
+        }
     }
 }
 
@@ -483,6 +509,18 @@ impl Calendar {
         Self::is_today_highlighted_property()
             .changed()
             .add_class_handler::<Calendar>(|x, _| x.on_is_today_highlighted_changed())
+            .detach();
+        Self::calendar_identifier_property()
+            .changed()
+            .add_class_handler::<Calendar>(|x, _| x.on_calendar_system_changed())
+            .detach();
+        Self::language_property()
+            .changed()
+            .add_class_handler::<Calendar>(|x, _| x.on_calendar_system_changed())
+            .detach();
+        Self::is_out_of_scope_enabled_property()
+            .changed()
+            .add_class_handler::<Calendar>(|x, _| x.update_months())
             .detach();
         Self::display_mode_property().changed().add_class_handler::<Calendar>(|x, e| {
             let (old_mode, mode) = e.get_old_and_new_value::<CalendarMode>();
@@ -534,6 +572,7 @@ impl Calendar {
             removed_items: RefCell::new(Vec::new()),
             last_selected_date_internal: Cell::new(None),
             display_date_internal: Cell::new(DateTime::MIN_VALUE),
+            calendar_system: RefCell::new(CalendarSystem::default()),
             hover_start: Cell::new(None),
             hover_start_index: Cell::new(None),
             hover_end_internal: Cell::new(None),
@@ -630,9 +669,55 @@ impl Calendar {
         self.set_value(Self::is_today_highlighted_property(), value)
     }
 
+    /// Gets or sets the calendar system of the views, one of [`CalendarIdentifiers`]. An
+    /// unknown identifier is the Gregorian calendar. The default is
+    /// [`CalendarIdentifiers::GREGORIAN`].
+    pub fn calendar_identifier(&self) -> String {
+        self.get_value(Self::calendar_identifier_property())
+    }
+
+    pub fn set_calendar_identifier(&self, value: impl Into<String>) {
+        self.set_value(Self::calendar_identifier_property(), value.into())
+    }
+
+    /// Gets or sets the language of the text; set on the calendar, the language of its names.
+    pub fn language(&self) -> Locale {
+        self.get_value(Self::language_property())
+    }
+
+    pub fn set_language(&self, value: Locale) {
+        self.set_value(Self::language_property(), value)
+    }
+
+    /// Gets or sets whether the days outside the displayed month are drawn as inactive. The
+    /// default is true.
+    pub fn is_out_of_scope_enabled(&self) -> bool {
+        self.get_value(Self::is_out_of_scope_enabled_property())
+    }
+
+    pub fn set_is_out_of_scope_enabled(&self, value: bool) {
+        self.set_value(Self::is_out_of_scope_enabled_property(), value)
+    }
+
+    /// The arithmetic and names of the calendar system of the views.
+    pub(crate) fn system(&self) -> CalendarSystem {
+        self.calendar_system.borrow().clone()
+    }
+
+    /// `CalendarIdentifier` or a `Language` set on the calendar changed: the views move to the
+    /// month and year that contain the display date in the new system.
+    fn on_calendar_system_changed(&self) {
+        let language = self.is_set(Self::language_property().as_property()).then(|| self.language());
+        let system = CalendarSystem::new(&self.calendar_identifier(), language.as_ref());
+        self.display_date_internal.set(system.discard_day_time(self.display_date()));
+        self.selected_month.set(system.discard_day_time(self.selected_month.get()));
+        *self.calendar_system.borrow_mut() = system;
+        self.update_months();
+    }
+
     /// IsTodayHighlightedProperty property changed handler.
     fn on_is_today_highlighted_changed(&self) {
-        let i = DateTimeHelper::compare_year_month(self.display_date_internal(), DateTime::today());
+        let i = self.system().compare_year_month(self.display_date_internal(), DateTime::today());
 
         if i > -2 && i < 2 {
             self.update_months();
@@ -945,16 +1030,16 @@ impl Calendar {
     }
 
     pub(crate) fn set_selected_month(&self, value: DateTime) {
-        let month_difference_start = DateTimeHelper::compare_year_month(value, self.display_date_range_start());
-        let month_difference_end = DateTimeHelper::compare_year_month(value, self.display_date_range_end());
+        let month_difference_start = self.system().compare_year_month(value, self.display_date_range_start());
+        let month_difference_end = self.system().compare_year_month(value, self.display_date_range_end());
 
         if month_difference_start >= 0 && month_difference_end <= 0 {
-            self.selected_month.set(DateTimeHelper::discard_day_time(value));
+            self.selected_month.set(self.system().discard_day_time(value));
         } else if month_difference_start < 0 {
-            self.selected_month.set(DateTimeHelper::discard_day_time(self.display_date_range_start()));
+            self.selected_month.set(self.system().discard_day_time(self.display_date_range_start()));
         } else {
             debug_assert!(month_difference_end > 0, "monthDifferenceEnd should be greater than 0!");
-            self.selected_month.set(DateTimeHelper::discard_day_time(self.display_date_range_end()));
+            self.selected_month.set(self.system().discard_day_time(self.display_date_range_end()));
         }
     }
 
@@ -963,9 +1048,10 @@ impl Calendar {
     }
 
     pub(crate) fn set_selected_year(&self, value: DateTime) {
-        if value.year() < self.display_date_range_start().year() {
+        let system = self.system();
+        if system.year(value) < system.year(self.display_date_range_start()) {
             self.selected_year.set(self.display_date_range_start());
-        } else if value.year() > self.display_date_range_end().year() {
+        } else if system.year(value) > system.year(self.display_date_range_end()) {
             self.selected_year.set(self.display_date_range_end());
         } else {
             self.selected_year.set(value);
@@ -1006,7 +1092,7 @@ impl Calendar {
             return;
         }
 
-        c.display_date_internal.set(DateTimeHelper::discard_day_time(added_date));
+        c.display_date_internal.set(c.system().discard_day_time(added_date));
         c.update_months();
         c.on_display_date(&CalendarDateChangedEventArgs::new(Some(removed_date), Some(added_date)));
     }
@@ -1048,7 +1134,7 @@ impl Calendar {
 
                 // If DisplayDate < DisplayDateStart,
                 // DisplayDate = DisplayDateStart
-                if DateTimeHelper::compare_year_month(new_value, self.display_date_internal()) > 0 {
+                if self.system().compare_year_month(new_value, self.display_date_internal()) > 0 {
                     self.set_current_value(Self::display_date_property(), new_value);
                 }
             }
@@ -1123,7 +1209,7 @@ impl Calendar {
 
                 // If DisplayDate > DisplayDateEnd,
                 // DisplayDate = DisplayDateEnd
-                if DateTimeHelper::compare_year_month(new_value, self.display_date_internal()) < 0 {
+                if self.system().compare_year_month(new_value, self.display_date_internal()) < 0 {
                     self.set_current_value(Self::display_date_property(), new_value);
                 }
             }
@@ -1404,11 +1490,11 @@ impl Calendar {
 
     pub(crate) fn on_previous_click(&self) {
         if self.display_mode() == CalendarMode::Month {
-            let d = DateTimeHelper::add_months(DateTimeHelper::discard_day_time(self.display_date()), -1);
+            let d = self.system().add_months(self.system().discard_day_time(self.display_date()), -1);
             if let Some(d) = d {
                 if !self
                     .last_selected_date()
-                    .is_some_and(|last_selected_date| DateTimeHelper::compare_year_month(last_selected_date, d) == 0)
+                    .is_some_and(|last_selected_date| self.system().compare_year_month(last_selected_date, d) == 0)
                 {
                     self.set_last_selected_date(Some(d));
                 }
@@ -1416,23 +1502,23 @@ impl Calendar {
             }
         } else {
             if self.display_mode() == CalendarMode::Year {
-                let d = DateTimeHelper::add_years(DateTime::new(self.selected_month().year(), 1, 1), -1);
+                let d = self.system().add_years(self.system().first_of_year(self.selected_month()), -1);
 
                 match d {
                     Some(d) => self.set_selected_month(d),
-                    None => self.set_selected_month(DateTimeHelper::discard_day_time(self.display_date_range_start())),
+                    None => self.set_selected_month(self.system().discard_day_time(self.display_date_range_start())),
                 }
             } else {
                 debug_assert!(self.display_mode() == CalendarMode::Decade, "DisplayMode should be Decade!");
 
-                let d = DateTimeHelper::add_years(DateTime::new(self.selected_year().year(), 1, 1), -10);
+                let d = self.system().add_years(self.system().first_of_year(self.selected_year()), -10);
 
                 match d {
                     Some(d) => {
-                        let decade = DateTimeHelper::decade_of_date(d).max(1);
-                        self.set_selected_year(DateTime::new(decade, 1, 1));
+                        let decade = self.system().decade_of_date(d).max(1);
+                        self.set_selected_year(self.system().year_start(decade));
                     }
-                    None => self.set_selected_year(DateTimeHelper::discard_day_time(self.display_date_range_start())),
+                    None => self.set_selected_year(self.system().discard_day_time(self.display_date_range_start())),
                 }
             }
             self.update_months();
@@ -1441,11 +1527,11 @@ impl Calendar {
 
     pub(crate) fn on_next_click(&self) {
         if self.display_mode() == CalendarMode::Month {
-            let d = DateTimeHelper::add_months(DateTimeHelper::discard_day_time(self.display_date()), 1);
+            let d = self.system().add_months(self.system().discard_day_time(self.display_date()), 1);
             if let Some(d) = d {
                 if !self
                     .last_selected_date()
-                    .is_some_and(|last_selected_date| DateTimeHelper::compare_year_month(last_selected_date, d) == 0)
+                    .is_some_and(|last_selected_date| self.system().compare_year_month(last_selected_date, d) == 0)
                 {
                     self.set_last_selected_date(Some(d));
                 }
@@ -1453,23 +1539,23 @@ impl Calendar {
             }
         } else {
             if self.display_mode() == CalendarMode::Year {
-                let d = DateTimeHelper::add_years(DateTime::new(self.selected_month().year(), 1, 1), 1);
+                let d = self.system().add_years(self.system().first_of_year(self.selected_month()), 1);
 
                 match d {
                     Some(d) => self.set_selected_month(d),
-                    None => self.set_selected_month(DateTimeHelper::discard_day_time(self.display_date_range_end())),
+                    None => self.set_selected_month(self.system().discard_day_time(self.display_date_range_end())),
                 }
             } else {
                 debug_assert!(self.display_mode() == CalendarMode::Decade, "DisplayMode should be Decade");
 
-                let d = DateTimeHelper::add_years(DateTime::new(self.selected_year().year(), 1, 1), 10);
+                let d = self.system().add_years(self.system().first_of_year(self.selected_year()), 10);
 
                 match d {
                     Some(d) => {
-                        let decade = DateTimeHelper::decade_of_date(d).max(1);
-                        self.set_selected_year(DateTime::new(decade, 1, 1));
+                        let decade = self.system().decade_of_date(d).max(1);
+                        self.set_selected_year(self.system().year_start(decade));
                     }
-                    None => self.set_selected_year(DateTimeHelper::discard_day_time(self.display_date_range_end())),
+                    None => self.set_selected_year(self.system().discard_day_time(self.display_date_range_end())),
                 }
             }
             self.update_months();
@@ -1479,7 +1565,7 @@ impl Calendar {
     /// If the day is a trailing day, Update the DisplayDate.
     pub(crate) fn on_day_click(&self, selected_date: DateTime) {
         debug_assert!(self.display_mode() == CalendarMode::Month, "DisplayMode should be Month!");
-        let i = DateTimeHelper::compare_year_month(selected_date, self.display_date_internal());
+        let i = self.system().compare_year_month(selected_date, self.display_date_internal());
 
         if self.selection_mode() == CalendarSelectionMode::None {
             self.set_last_selected_date(Some(selected_date));
@@ -1502,7 +1588,7 @@ impl Calendar {
                 month_view.set_is_visible(true);
 
                 if !self.last_selected_date().is_some_and(|last_selected_date| {
-                    DateTimeHelper::compare_year_month(last_selected_date, self.display_date()) == 0
+                    self.system().compare_year_month(last_selected_date, self.display_date()) == 0
                 }) {
                     self.set_last_selected_date(Some(self.display_date()));
                 }
@@ -1703,7 +1789,7 @@ impl Calendar {
                             let hover_start = match self.last_selected_date() {
                                 Some(last_selected_date) => last_selected_date,
                                 None => {
-                                    if DateTimeHelper::compare_year_month(self.display_date_internal(), DateTime::today())
+                                    if self.system().compare_year_month(self.display_date_internal(), DateTime::today())
                                         == 0
                                     {
                                         DateTime::today()
@@ -1791,7 +1877,7 @@ impl Calendar {
                 // previous inactive day which is not a blackout day can get
                 // the focus.  In this case we should allow keyboard
                 // functions on that inactive day
-                if DateTimeHelper::compare_year_month(last_selected_date, self.display_date_internal()) != 0
+                if self.system().compare_year_month(last_selected_date, self.display_date_internal()) != 0
                     && self.focus_button().is_some_and(|focus_button| !focus_button.is_inactive())
                 {
                     return true;
@@ -1864,13 +1950,13 @@ impl Calendar {
                     self.set_selected_year(self.selected_month());
                     self.set_current_value(Self::display_mode_property(), CalendarMode::Decade);
                 } else {
-                    let selected_month = DateTimeHelper::add_months(self.selected_month.get(), -Self::COLUMNS_PER_YEAR);
+                    let selected_month = self.system().add_months(self.selected_month.get(), -Self::COLUMNS_PER_YEAR);
                     self.on_selected_month_changed(selected_month);
                 }
             }
             CalendarMode::Decade => {
                 if !ctrl {
-                    let selected_year = DateTimeHelper::add_years(self.selected_year(), -Self::COLUMNS_PER_YEAR);
+                    let selected_year = self.system().add_years(self.selected_year(), -Self::COLUMNS_PER_YEAR);
                     self.on_selected_year_changed(selected_year);
                 }
             }
@@ -1891,7 +1977,7 @@ impl Calendar {
                     self.set_current_value(Self::display_date_property(), self.selected_month());
                     self.set_current_value(Self::display_mode_property(), CalendarMode::Month);
                 } else {
-                    let selected_month = DateTimeHelper::add_months(self.selected_month.get(), Self::COLUMNS_PER_YEAR);
+                    let selected_month = self.system().add_months(self.selected_month.get(), Self::COLUMNS_PER_YEAR);
                     self.on_selected_month_changed(selected_month);
                 }
             }
@@ -1900,7 +1986,7 @@ impl Calendar {
                     self.set_selected_month(self.selected_year());
                     self.set_current_value(Self::display_mode_property(), CalendarMode::Year);
                 } else {
-                    let selected_year = DateTimeHelper::add_years(self.selected_year(), Self::COLUMNS_PER_YEAR);
+                    let selected_year = self.system().add_years(self.selected_year(), Self::COLUMNS_PER_YEAR);
                     self.on_selected_year_changed(selected_year);
                 }
             }
@@ -1914,11 +2000,11 @@ impl Calendar {
                 self.process_selection(shift, selected_date, Some(-1));
             }
             CalendarMode::Year => {
-                let selected_month = DateTimeHelper::add_months(self.selected_month.get(), -1);
+                let selected_month = self.system().add_months(self.selected_month.get(), -1);
                 self.on_selected_month_changed(selected_month);
             }
             CalendarMode::Decade => {
-                let selected_year = DateTimeHelper::add_years(self.selected_year(), -1);
+                let selected_year = self.system().add_years(self.selected_year(), -1);
                 self.on_selected_year_changed(selected_year);
             }
         }
@@ -1931,11 +2017,11 @@ impl Calendar {
                 self.process_selection(shift, selected_date, Some(1));
             }
             CalendarMode::Year => {
-                let selected_month = DateTimeHelper::add_months(self.selected_month.get(), 1);
+                let selected_month = self.system().add_months(self.selected_month.get(), 1);
                 self.on_selected_month_changed(selected_month);
             }
             CalendarMode::Decade => {
-                let selected_year = DateTimeHelper::add_years(self.selected_year(), 1);
+                let selected_year = self.system().add_years(self.selected_year(), 1);
                 self.on_selected_year_changed(selected_year);
             }
         }
@@ -1962,15 +2048,15 @@ impl Calendar {
             CalendarMode::Month => {
                 // REMOVE_RTM: Not all types of calendars start with Day1. If Non-Gregorian is supported check this:
                 let display_date_internal = self.display_date_internal();
-                let selected_date = DateTime::new(display_date_internal.year(), display_date_internal.month(), 1);
+                let selected_date = self.system().discard_day_time(display_date_internal);
                 self.process_selection(shift, Some(selected_date), None);
             }
             CalendarMode::Year => {
-                let selected_month = DateTime::new(self.selected_month.get().year(), 1, 1);
+                let selected_month = self.system().first_of_year(self.selected_month.get());
                 self.on_selected_month_changed(Some(selected_month));
             }
             CalendarMode::Decade => {
-                let selected_year = DateTime::new(DateTimeHelper::decade_of_date(self.selected_year()), 1, 1);
+                let selected_year = self.system().year_start(self.system().decade_of_date(self.selected_year()));
                 self.on_selected_year_changed(Some(selected_year));
             }
         }
@@ -1980,14 +2066,14 @@ impl Calendar {
         match self.display_mode() {
             CalendarMode::Month => {
                 let display_date_internal = self.display_date_internal();
-                let mut selected_date = DateTime::new(display_date_internal.year(), display_date_internal.month(), 1);
+                let mut selected_date = self.system().discard_day_time(display_date_internal);
 
-                if DateTimeHelper::compare_year_month(DateTime::MAX_VALUE, selected_date) > 0 {
+                if self.system().compare_year_month(DateTime::MAX_VALUE, selected_date) > 0 {
                     // since DisplayDate is not equal to
                     // DateTime.MaxValue we are sure selectedDate is
                     // not null
                     selected_date =
-                        DateTimeHelper::add_months(selected_date, 1).expect("the next month is a representable date");
+                        self.system().add_months(selected_date, 1).expect("the next month is a representable date");
                     selected_date =
                         DateTimeHelper::add_days(selected_date, -1).expect("the previous day is a representable date");
                 } else {
@@ -1996,11 +2082,11 @@ impl Calendar {
                 self.process_selection(shift, Some(selected_date), None);
             }
             CalendarMode::Year => {
-                let selected_month = DateTime::new(self.selected_month.get().year(), 12, 1);
+                let selected_month = self.system().last_month_of_year(self.selected_month.get());
                 self.on_selected_month_changed(Some(selected_month));
             }
             CalendarMode::Decade => {
-                let selected_year = DateTime::new(DateTimeHelper::end_of_decade(self.selected_year()), 1, 1);
+                let selected_year = self.system().year_start(self.system().end_of_decade(self.selected_year()));
                 self.on_selected_year_changed(Some(selected_year));
             }
         }
@@ -2013,15 +2099,15 @@ impl Calendar {
         }
         match self.display_mode() {
             CalendarMode::Month => {
-                let selected_date = DateTimeHelper::add_months(self.last_selected_date_or_today(), 1);
+                let selected_date = self.system().add_months(self.last_selected_date_or_today(), 1);
                 self.process_selection(shift, selected_date, None);
             }
             CalendarMode::Year => {
-                let selected_month = DateTimeHelper::add_years(self.selected_month.get(), 1);
+                let selected_month = self.system().add_years(self.selected_month.get(), 1);
                 self.on_selected_month_changed(selected_month);
             }
             CalendarMode::Decade => {
-                let selected_year = DateTimeHelper::add_years(self.selected_year(), 10);
+                let selected_year = self.system().add_years(self.selected_year(), 10);
                 self.on_selected_year_changed(selected_year);
             }
         }
@@ -2034,15 +2120,15 @@ impl Calendar {
         }
         match self.display_mode() {
             CalendarMode::Month => {
-                let selected_date = DateTimeHelper::add_months(self.last_selected_date_or_today(), -1);
+                let selected_date = self.system().add_months(self.last_selected_date_or_today(), -1);
                 self.process_selection(shift, selected_date, None);
             }
             CalendarMode::Year => {
-                let selected_month = DateTimeHelper::add_years(self.selected_month.get(), -1);
+                let selected_month = self.system().add_years(self.selected_month.get(), -1);
                 self.on_selected_month_changed(selected_month);
             }
             CalendarMode::Decade => {
-                let selected_year = DateTimeHelper::add_years(self.selected_year(), -10);
+                let selected_year = self.system().add_years(self.selected_year(), -10);
                 self.on_selected_year_changed(selected_year);
             }
         }

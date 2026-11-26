@@ -177,10 +177,13 @@
                   Grid.Row="1"
                   Grid.ColumnSpan="2" 
                   IsVisible="False">
+              <!-- The fourth row holds only the thirteenth month of a leap year of a lunisolar
+                   CalendarIdentifier (the Hebrew calendar); it is empty otherwise. -->
               <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />

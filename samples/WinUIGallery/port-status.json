@@ -295,9 +295,13 @@
         {
           "path": "samples/WinUIGallery/date_samples_tests.rs",
           "name": "calendar_view_selection_mode_option_sets_the_calendar_mode"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_view_identifier_language_and_out_of_scope_options_set_the_calendar"
         }
       ],
-      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). FerroUI's Calendar has no IsGroupLabelVisible, IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its names follow the current culture instead of a Language of the calendar, so those options and their x:Bind are left out and the page is partial.",
+      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). The CalendarIdentifier, Language and IsOutOfScopeEnabled options set the calendar's CalendarIdentifier (the ten identifiers of the source, with the feature calendar-systems of ferroui-controls), Language (the language list of the source) and IsOutOfScopeEnabled. FerroUI's Calendar has no IsGroupLabelVisible, so that option is left out and the page is partial.",
       "examples": []
     },
     "Canvas": {

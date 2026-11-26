@@ -39,7 +39,7 @@ ferroui-media-controls.workspace = true
 ferroui-media-video-controls.workspace = true
 ferroui-media-camera-controls.workspace = true
 ferroui-base = { workspace = true }
-ferroui-controls = { workspace = true }
+ferroui-controls = { workspace = true, features = ["calendar-systems"] }
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
 ferroui-controls-inking = { workspace = true, features = ["document-assets"] }
 ferroui-controls-charts = { workspace = true }

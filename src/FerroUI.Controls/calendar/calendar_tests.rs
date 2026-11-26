@@ -708,6 +708,7 @@ fn create_test_calendar() -> Ref<Calendar> {
 // ============================================================================
 mod additional {
     use super::super::calendar_item::date_of;
+    use super::super::{CalendarIdentifiers, CalendarSystem};
     use super::*;
     use crate::Button;
     use ferroui_base::input::{
@@ -918,7 +919,7 @@ mod additional {
             let (calendar, item) = create_calendar_in_mode(date(2024, 2, 15), mode);
             assert_eq!(mode, calendar.display_mode());
             assert_eq!(49, item.month_view().unwrap().children().count());
-            assert_eq!(12, item.year_view().unwrap().children().count());
+            assert_eq!(13, item.year_view().unwrap().children().count());
             assert!(item.year_view().unwrap().is_visible());
             assert!(!item.month_view().unwrap().is_visible());
             assert!(date_of(&year_button(&item, 0)).is_some());
@@ -936,19 +937,19 @@ mod additional {
         assert_eq!(0, year_view.children().count());
 
         calendar.set_display_mode(CalendarMode::Year);
-        assert_eq!(12, year_view.children().count());
+        assert_eq!(13, year_view.children().count());
         let first = year_view.children().get(0);
         assert_eq!("Jan", text_of(year_button(&item, 0).content()));
 
         calendar.set_display_mode(CalendarMode::Decade);
-        assert_eq!(12, year_view.children().count());
+        assert_eq!(13, year_view.children().count());
         assert!(first.ptr_eq(&year_view.children().get(0)));
         assert_eq!("2019", text_of(year_button(&item, 0).content()));
 
         calendar.set_display_mode(CalendarMode::Month);
         assert_eq!(49, item.month_view().unwrap().children().count());
         calendar.set_display_mode(CalendarMode::Year);
-        assert_eq!(12, year_view.children().count());
+        assert_eq!(13, year_view.children().count());
         assert!(first.ptr_eq(&year_view.children().get(0)));
         assert_eq!("Jan", text_of(year_button(&item, 0).content()));
     }
@@ -1916,5 +1917,171 @@ mod additional {
         calendar.set_display_date(date(2024, 3, 20));
         assert_eq!(vec![(Some(date(2024, 2, 15)), Some(date(2024, 3, 20)))], *changes.borrow());
         assert_eq!(date(2024, 3, 1), calendar.display_date_internal());
+    }
+
+    // CalendarIdentifier, Language and IsOutOfScopeEnabled (#1259).
+
+    #[test]
+    fn calendar_identifier_defaults_to_the_gregorian_calendar() {
+        let _scope = start();
+        let calendar = Calendar::new();
+        assert_eq!(CalendarIdentifiers::GREGORIAN, calendar.calendar_identifier());
+        assert!(calendar.is_out_of_scope_enabled());
+        assert!(calendar.system().is_default());
+        assert!(CalendarSystem::new(CalendarIdentifiers::GREGORIAN, None).is_default());
+        assert_eq!(10, CalendarIdentifiers::ALL.len());
+    }
+
+    #[test]
+    fn out_of_scope_days_are_active_when_is_out_of_scope_enabled_is_false() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 2, 15));
+        // 1 February 2024 is a Thursday: the four January days before it are out of scope.
+        assert_eq!(date(2024, 1, 28), day_date(&item, 7));
+        assert!(day(&item, 7).is_inactive());
+        assert!(!day(&item, 11).is_inactive());
+        calendar.set_is_out_of_scope_enabled(false);
+        assert!(!day(&item, 7).is_inactive());
+        calendar.set_is_out_of_scope_enabled(true);
+        assert!(day(&item, 7).is_inactive());
+    }
+
+    #[cfg(not(feature = "calendar-systems"))]
+    #[test]
+    fn without_the_feature_every_identifier_is_the_gregorian_calendar() {
+        let _scope = start();
+        for identifier in CalendarIdentifiers::ALL {
+            assert!(CalendarSystem::new(identifier, None).is_default(), "{identifier}");
+        }
+        let (calendar, item) = create_calendar(date(2024, 10, 3));
+        calendar.set_calendar_identifier(CalendarIdentifiers::HEBREW);
+        assert_eq!("October 2024", header(&item));
+    }
+
+    /// The (year, month, day) of reference dates in each calendar system.
+    #[cfg(feature = "calendar-systems")]
+    #[test]
+    fn calendar_systems_convert_reference_dates() {
+        let _scope = start();
+        let cases = [
+            // 1 Tishri 5785 (Rosh Hashanah); Adar I, Adar II and Nisan of the leap year 5784.
+            (CalendarIdentifiers::HEBREW, date(2024, 10, 3), (5785, 1, 1)),
+            (CalendarIdentifiers::HEBREW, date(2024, 2, 10), (5784, 6, 1)),
+            (CalendarIdentifiers::HEBREW, date(2024, 3, 11), (5784, 7, 1)),
+            (CalendarIdentifiers::HEBREW, date(2024, 4, 9), (5784, 8, 1)),
+            // 1 Muharram 1446: the tabular (civil) calendar one day after Umm al-Qura.
+            (CalendarIdentifiers::HIJRI, date(2024, 7, 8), (1446, 1, 1)),
+            (CalendarIdentifiers::UM_AL_QURA, date(2024, 7, 7), (1446, 1, 1)),
+            // Nowruz 1403.
+            (CalendarIdentifiers::PERSIAN, date(2024, 3, 20), (1403, 1, 1)),
+            // The Julian calendar is 13 days behind.
+            (CalendarIdentifiers::JULIAN, date(2024, 1, 14), (2024, 1, 1)),
+            (CalendarIdentifiers::JULIAN, date(2024, 3, 13), (2024, 2, 29)),
+        ];
+        for (identifier, gregorian, (year, month, day)) in cases {
+            let system = CalendarSystem::new(identifier, None);
+            assert!(!system.is_default());
+            let fields = (system.year(gregorian), system.month(gregorian), system.day(gregorian));
+            assert_eq!((year, month, day), fields, "{identifier} {gregorian:?}");
+            assert_eq!(system.discard_day_time(gregorian), DateTimeHelper::add_days(gregorian, 1 - day).unwrap());
+        }
+        let years = [
+            (CalendarIdentifiers::KOREAN, "4357"),
+            (CalendarIdentifiers::TAIWAN, "113"),
+            (CalendarIdentifiers::THAI, "2567"),
+            (CalendarIdentifiers::JAPANESE, "Reiwa"),
+        ];
+        for (identifier, text) in years {
+            let system = CalendarSystem::new(identifier, None);
+            let year = system.year_text(system.year(date(2024, 5, 1)));
+            assert!(year.contains(text), "{identifier}: {year}");
+            assert_eq!((5, 1), (system.month(date(2024, 5, 1)), system.day(date(2024, 5, 1))), "{identifier}");
+        }
+        let japanese = CalendarSystem::new(CalendarIdentifiers::JAPANESE, None);
+        let heisei = japanese.year_text(japanese.year(date(2019, 4, 30)));
+        assert!(heisei.contains("Heisei") || heisei.contains("Reiwa"), "{heisei}");
+    }
+
+    /// Month arithmetic stays on the first days of the months of each system, across years.
+    #[cfg(feature = "calendar-systems")]
+    #[test]
+    fn calendar_systems_navigate_months_and_years() {
+        let _scope = start();
+        for identifier in CalendarIdentifiers::ALL {
+            let system = CalendarSystem::new(identifier, Some(&locale!("en-US")));
+            let mut month = system.discard_day_time(date(2020, 1, 1));
+            for _ in 0..80 {
+                let next = system.add_months(month, 1).expect("a representable month");
+                assert_eq!(1, system.day(next), "{identifier} {next:?}");
+                assert_eq!(1, system.compare_year_month(next, month), "{identifier} {next:?}");
+                assert_eq!(Some(month), system.add_months(next, -1), "{identifier} {next:?}");
+                let year_later = system.add_years(month, 1).expect("a representable year");
+                assert_eq!(system.year(month) + 1, system.year(year_later), "{identifier}");
+                assert!(system.months_in_year(month) == 12 || system.months_in_year(month) == 13);
+                month = next;
+            }
+            let first = system.first_of_year(date(2024, 6, 1));
+            assert_eq!((1, 1), (system.month(first), system.day(first)), "{identifier}");
+            assert_eq!(system.year_start(system.year(first)), first, "{identifier}");
+            let last = system.last_month_of_year(date(2024, 6, 1));
+            assert_eq!(system.months_in_year(last), system.month(last), "{identifier}");
+        }
+        let hebrew = CalendarSystem::new(CalendarIdentifiers::HEBREW, None);
+        assert_eq!(13, hebrew.months_in_year(date(2024, 3, 11)));
+        assert_eq!(12, hebrew.months_in_year(date(2024, 10, 3)));
+        // A year after 1 Adar I of the leap year 5784 is 1 Adar of the common year 5785.
+        let adar = hebrew.add_years(date(2024, 2, 10), 1).unwrap();
+        assert_eq!((5785, 6, 1), (hebrew.year(adar), hebrew.month(adar), hebrew.day(adar)));
+    }
+
+    #[cfg(feature = "calendar-systems")]
+    #[test]
+    fn hebrew_calendar_views_show_its_months_and_the_thirteenth_month() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 10, 3));
+        assert_eq!("October 2024", header(&item));
+        calendar.set_calendar_identifier(CalendarIdentifiers::HEBREW);
+        let title = header(&item);
+        assert!(title.contains("Tishri") && title.contains("5785"), "{title}");
+        // 1 Tishri 5785 is a Thursday: four days of Elul before it.
+        assert_eq!(date(2024, 10, 3), day_date(&item, 11));
+        assert!(day(&item, 10).is_inactive());
+        assert!(!day(&item, 11).is_inactive());
+        calendar.on_next_click();
+        assert_eq!(date(2024, 11, 2), calendar.display_date_internal());
+
+        calendar.set_display_date(date(2024, 3, 11));
+        calendar.set_display_mode(CalendarMode::Year);
+        let visible = (0..13).filter(|index| year_button(&item, *index).is_visible()).count();
+        assert_eq!(13, visible);
+        assert_eq!(date(2024, 3, 11), date_of(&year_button(&item, 6)).unwrap());
+        calendar.set_display_mode(CalendarMode::Month);
+        calendar.set_display_date(date(2024, 10, 3));
+        calendar.set_display_mode(CalendarMode::Year);
+        let title = header(&item);
+        assert!(title.contains("5785"), "{title}");
+        assert!(!year_button(&item, 12).is_visible());
+        calendar.set_display_mode(CalendarMode::Decade);
+        assert!(text_of(year_button(&item, 0).content()).contains("5779"));
+        assert!(!year_button(&item, 12).is_visible());
+
+        calendar.set_calendar_identifier(CalendarIdentifiers::GREGORIAN);
+        calendar.set_display_mode(CalendarMode::Month);
+        assert_eq!("October 2024", header(&item));
+        assert!(calendar.system().is_default());
+    }
+
+    #[cfg(feature = "calendar-systems")]
+    #[test]
+    fn language_set_on_the_calendar_names_its_months() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 2, 15));
+        calendar.set_language(locale!("fr-FR"));
+        assert!(!calendar.system().is_default());
+        let title = header(&item);
+        assert!(title.contains("février") && title.contains("2024"), "{title}");
+        calendar.clear_value(Calendar::language_property());
+        assert!(calendar.system().is_default());
+        assert_eq!("February 2024", header(&item));
     }
 }

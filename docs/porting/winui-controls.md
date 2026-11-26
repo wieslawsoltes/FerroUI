@@ -481,7 +481,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | DatePicker | 2 of 2 | ported | `date_samples.rs` | `date_samples_tests.rs` |
 | TimePicker | 3 of 3 | ported | `date_samples.rs` (no code-behind upstream) | `date_samples_tests.rs` |
 | CalendarDatePicker | 1 of 1 | ported | `Pages/CalendarDatePicker.xaml` (no code-behind upstream) | `date_samples_tests.rs` |
-| CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
+| CalendarView | 1 partial: no IsGroupLabelVisible (CalendarIdentifier, Language and IsOutOfScopeEnabled: section 10.14) | partial | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
 | ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
 | TreeView | 4 of 4; the first tree's drag and drop is in the sample | ported | `tree_samples.rs` | `tree_samples_tests.rs` |
@@ -549,3 +549,24 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.14 CalendarView: calendar systems
+
+WinUI's `CalendarView.CalendarIdentifier` selects the calendar system of the views, and
+`FrameworkElement.Language` the language of their names. FerroUI's `Calendar` has
+`CalendarIdentifier` (a string, one of `CalendarIdentifiers`: the ten identifiers of
+`Windows.Globalization.CalendarIdentifiers` the gallery lists), `Language` (the inherited
+`TextElement.Language`; set on the calendar, it is the language of the names) and
+`IsOutOfScopeEnabled`. The month and year arithmetic of the views (the first day of a month,
+moving by months and years, the months of a year, the decades) goes through the calendar system
+of the calendar (`calendar/calendar_system.rs`); the dates stay `DateTime` values.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The calendars are those of `Windows.Globalization`. | With the feature `calendar-systems` of ferroui-controls, ICU's compiled calendar and date formatting data: Hebrew, tabular (civil) Hijri, Japanese, Julian, Persian, Republic of China (Taiwan), Buddhist (Thai) and Umm al-Qura. Without the feature every identifier is the Gregorian calendar. | ICU is the portable source of the calendar rules and names; the feature keeps its data out of applications that show no other calendar (hello world, every application without the feature). |
+| `KoreanCalendar` is the Gregorian calendar with the years of the Tangun era. | The Gregorian arithmetic and names, with the year plus 2333 written in Latin digits. | ICU's Korean calendar (`dangi`) is the lunisolar one, a different calendar. |
+| The Julian calendar has its own names. | The Gregorian names, written for a Gregorian date with the fields of the Julian one. | ICU formats no Julian dates; the month names are the same. |
+| The Gregorian calendar with the names of the current culture. | The same: the arithmetic and names of the calendar as before, with nothing allocated, unless `Language` is set on the calendar, which writes the names with ICU's data for that language. | No change for the default calendar. |
+| The year view of a lunisolar calendar shows the thirteenth month of a leap year. | The year view has one more button, in a fourth row of the year grid, shown only for the thirteenth month of a Hebrew leap year; the Fluent and Simple themes have that row (Auto, empty otherwise), the WinUI, macOS and Material themes already had four. Moving by years keeps the month by its code: a year after Adar I is Adar. | The month layout of WinUI's year view; the row does not change the twelve-month years. |
+| The week numbers (none in WinUI). | `IsWeekNumberVisible` counts the Gregorian weeks of the days. | A FerroUI addition, left as it is. |
+| `IsGroupLabelVisible` shows the month name on the first day of each month. | Not ported. | Left for a later change; the gallery page stays partial for it. |

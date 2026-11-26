@@ -19,6 +19,7 @@ use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::utilities::{DateTime, DayOfWeek, GregorianCalendar};
+use super::CalendarSystem;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, FerroObject,
     FerroObjectImpl, FerroProperty, Ref, StyledElementImpl, StyledProperty, StyledPropertyOptions, VisualImpl,
@@ -220,6 +221,11 @@ impl CalendarItem {
     }
 
     /// The calendar this item displays a month or year of.
+    /// The calendar system of the owner (the default one without an owner).
+    fn system(&self) -> CalendarSystem {
+        self.owner().map(|owner| owner.system()).unwrap_or_default()
+    }
+
     pub(crate) fn owner(&self) -> Option<Ref<Calendar>> {
         self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
     }
@@ -435,12 +441,20 @@ impl CalendarItem {
         let owner = self.owner();
 
         if let Some(year_view) = self.year_view() {
-            let child_count = Calendar::ROWS_PER_YEAR * Calendar::COLUMNS_PER_YEAR;
+            // One more button below the others: the thirteenth month of a leap year of a
+            // lunisolar calendar system (the Hebrew one), hidden otherwise.
+            let child_count = Calendar::ROWS_PER_YEAR * Calendar::COLUMNS_PER_YEAR + 1;
             let mut children: Vec<Ref<Control>> = Vec::with_capacity(child_count as usize);
 
-            for i in 0..Calendar::ROWS_PER_YEAR {
+            for i in 0..=Calendar::ROWS_PER_YEAR {
                 for j in 0..Calendar::COLUMNS_PER_YEAR {
+                    if i == Calendar::ROWS_PER_YEAR && j > 0 {
+                        break;
+                    }
                     let month = CalendarButton::new();
+                    if i == Calendar::ROWS_PER_YEAR {
+                        month.set_is_visible(false);
+                    }
 
                     if let Some(owner) = &owner {
                         month.set_owner(Some(owner));
@@ -478,6 +492,7 @@ impl CalendarItem {
     fn set_day_titles(&self) {
         let month_view = self.month_view().expect("the month view is present");
         let date_format = DateTimeHelper::get_current_date_format();
+        let system = self.system();
         let first_day_of_week = match self.owner() {
             Some(owner) => owner.first_day_of_week(),
             None => date_format.first_day_of_week(),
@@ -485,9 +500,11 @@ impl CalendarItem {
 
         for child_index in 0..Calendar::COLUMNS_PER_MONTH {
             let day_title = month_view.children().get(child_index as usize);
-            let name = &date_format.shortest_day_names()
-                [((child_index + first_day_of_week as i32) % NUMBER_OF_DAYS_PER_WEEK) as usize];
-            day_title.set_data_context(boxed_text(name.as_str()));
+            let index = ((child_index + first_day_of_week as i32) % NUMBER_OF_DAYS_PER_WEEK) as usize;
+            match DayOfWeek::from_i32(index as i32).and_then(|day| system.day_title(day)) {
+                Some(name) => day_title.set_data_context(boxed_text(name)),
+                None => day_title.set_data_context(boxed_text(date_format.shortest_day_names()[index].as_str())),
+            }
         }
     }
 
@@ -529,11 +546,13 @@ impl CalendarItem {
     fn set_month_mode_header_button(&self) {
         if let Some(header_button) = self.header_button() {
             let date_format = DateTimeHelper::get_current_date_format();
+            let system = self.system();
             if let Some(owner) = self.owner() {
-                header_button.set_content(boxed_text(owner.display_date_internal().to_string_format("Y", &date_format)));
+                let text = system.month_year_text(owner.display_date_internal(), &date_format);
+                header_button.set_content(boxed_text(text));
                 header_button.set_is_enabled(true);
             } else {
-                header_button.set_content(boxed_text(DateTime::today().to_string_format("Y", &date_format)));
+                header_button.set_content(boxed_text(system.month_year_text(DateTime::today(), &date_format)));
             }
         }
     }
@@ -541,12 +560,13 @@ impl CalendarItem {
     fn set_month_mode_next_button(&self, first_day_of_month: DateTime) {
         if let (Some(owner), Some(next_button)) = (self.owner(), self.next_button()) {
             // DisplayDate is equal to DateTime.MaxValue
-            if DateTimeHelper::compare_year_month(first_day_of_month, DateTime::MAX_VALUE) == 0 {
+            if self.system().compare_year_month(first_day_of_month, DateTime::MAX_VALUE) == 0 {
                 next_button.set_is_enabled(false);
             } else {
                 // Since we are sure DisplayDate is not equal to
                 // DateTime.MaxValue, it is safe to use AddMonths
-                let first_day_of_next_month = self.calendar.add_months(first_day_of_month, 1);
+                let first_day_of_next_month =
+                    self.system().add_months(first_day_of_month, 1).unwrap_or(DateTime::MAX_VALUE);
                 next_button.set_is_enabled(
                     DateTimeHelper::compare_days(owner.display_date_range_end(), first_day_of_next_month) > -1,
                 );
@@ -581,8 +601,10 @@ impl CalendarItem {
 
                 // SET IF THE DAY IS INACTIVE OR NOT: set if the day is a
                 // trailing day or not
+                // (none is with IsOutOfScopeEnabled false)
                 child_button.set_is_inactive(
-                    DateTimeHelper::compare_year_month(date_to_add, owner.display_date_internal()) != 0,
+                    owner.is_out_of_scope_enabled()
+                        && owner.system().compare_year_month(date_to_add, owner.display_date_internal()) != 0,
                 );
 
                 // SET IF THE DAY IS TODAY OR NOT
@@ -628,9 +650,10 @@ impl CalendarItem {
         let month_view = self.month_view().expect("the month view is present");
         let owner = self.owner();
         let last_month_to_display = self.previous_month_days(first_day_of_month);
+        let system = self.system();
         let mut date_to_add;
 
-        if DateTimeHelper::compare_year_month(first_day_of_month, DateTime::MIN_VALUE) > 0 {
+        if system.compare_year_month(first_day_of_month, DateTime::MIN_VALUE) > 0 {
             // DisplayDate is not equal to DateTime.MinValue we can subtract
             // days from the DisplayDate
             date_to_add = self.calendar.add_days(first_day_of_month, -last_month_to_display);
@@ -667,7 +690,7 @@ impl CalendarItem {
                 }
             }
 
-            child_button.set_content(boxed_text(DateTimeHelper::format_number(date_to_add.day())));
+            child_button.set_content(boxed_text(system.day_text(date_to_add)));
             child_button.set_data_context(boxed_date(date_to_add));
 
             if DateTime::compare(DateTimeHelper::discard_time(DateTime::MAX_VALUE), date_to_add) > 0 {
@@ -793,19 +816,24 @@ impl CalendarItem {
     fn set_year_mode_header_button(&self) {
         if let Some(header_button) = self.header_button() {
             header_button.set_is_enabled(true);
-            header_button.set_content(boxed_text(DateTimeHelper::format_number(self.current_month.get().year())));
+            let system = self.system();
+            header_button.set_content(boxed_text(system.year_text(system.year(self.current_month.get()))));
         }
     }
 
     fn set_year_mode_previous_button(&self) {
         if let (Some(owner), Some(previous_button)) = (self.owner(), self.previous_button()) {
-            previous_button.set_is_enabled(owner.display_date_range_start().year() != self.current_month.get().year());
+            let system = owner.system();
+            previous_button
+                .set_is_enabled(system.year(owner.display_date_range_start()) != system.year(self.current_month.get()));
         }
     }
 
     fn set_year_mode_next_button(&self) {
         if let (Some(owner), Some(next_button)) = (self.owner(), self.next_button()) {
-            next_button.set_is_enabled(owner.display_date_range_end().year() != self.current_month.get().year());
+            let system = owner.system();
+            next_button
+                .set_is_enabled(system.year(owner.display_date_range_end()) != system.year(self.current_month.get()));
         }
     }
 
@@ -818,21 +846,28 @@ impl CalendarItem {
         let owner = self.owner();
         let current_month = self.current_month.get();
         let date_format = DateTimeHelper::get_current_date_format();
+        let system = self.system();
+        let first_month = system.first_of_year(current_month);
+        let months = system.months_in_year(current_month) as usize;
 
         for (count, child) in year_view.children().snapshot().iter().enumerate() {
             let child_button = Self::calendar_button_of(child);
             // There should be no time component. Time is 12:00 AM
-            let day = DateTime::new(current_month.year(), count as i32 + 1, 1);
+            let day = match system.add_months(first_month, count as i32) {
+                Some(day) if count < months => day,
+                _ => {
+                    // The thirteenth button out of a leap year.
+                    child_button.set_is_visible(false);
+                    continue;
+                }
+            };
             child_button.set_data_context(boxed_date(day));
 
-            child_button.set_content(boxed_text(date_format.abbreviated_month_names()[count].as_str()));
+            child_button.set_content(boxed_text(system.month_abbreviation(day, &date_format)));
             child_button.set_is_visible(true);
 
             if let Some(owner) = &owner {
-                if day.year() == current_month.year()
-                    && day.month() == current_month.month()
-                    && day.day() == current_month.day()
-                {
+                if day == system.discard_day_time(current_month) {
                     owner.set_focus_calendar_button(Some(child_button.clone()));
                     child_button.set_is_calendar_button_focused(owner.has_focus_internal());
                 } else {
@@ -840,10 +875,10 @@ impl CalendarItem {
                 }
 
                 child_button
-                    .set_is_selected(DateTimeHelper::compare_year_month(day, owner.display_date_internal()) == 0);
+                    .set_is_selected(system.compare_year_month(day, owner.display_date_internal()) == 0);
 
-                if DateTimeHelper::compare_year_month(day, owner.display_date_range_start()) < 0
-                    || DateTimeHelper::compare_year_month(day, owner.display_date_range_end()) > 0
+                if system.compare_year_month(day, owner.display_date_range_start()) < 0
+                    || system.compare_year_month(day, owner.display_date_range_end()) > 0
                 {
                     child_button.set_is_enabled(false);
                     child_button.set_opacity(0.0);
@@ -872,8 +907,9 @@ impl CalendarItem {
             }
         }
 
-        let decade = DateTimeHelper::decade_of_date(selected_year);
-        let decade_end = DateTimeHelper::end_of_decade(selected_year);
+        let system = self.system();
+        let decade = system.decade_of_date(selected_year);
+        let decade_end = system.end_of_decade(selected_year);
 
         self.set_decade_mode_header_button(decade, decade_end);
         self.set_decade_mode_previous_button(decade);
@@ -910,28 +946,36 @@ impl CalendarItem {
     fn set_year_buttons(&self, decade: i32, decade_end: i32) {
         let year_view = self.year_view().expect("the year view is present");
         let owner = self.owner();
+        let system = self.system();
+        let (min_year, max_year) = (system.year(DateTime::MIN_VALUE), system.year(DateTime::MAX_VALUE));
+        let button_count = Calendar::ROWS_PER_YEAR * Calendar::COLUMNS_PER_YEAR;
 
         for (count, child) in (-1..).zip(year_view.children().snapshot().iter()) {
             let child_button = Self::calendar_button_of(child);
             let year = decade + count;
 
-            if year <= DateTime::MAX_VALUE.year() && year >= DateTime::MIN_VALUE.year() {
+            if count + 1 >= button_count {
+                // The button of a thirteenth month has no year.
+                child_button.set_is_visible(false);
+            } else if year <= max_year && year >= min_year {
                 // There should be no time component. Time is 12:00 AM
-                let day = DateTime::new(year, 1, 1);
+                let day = system.year_start(year);
                 child_button.set_data_context(boxed_date(day));
-                child_button.set_content(boxed_text(DateTimeHelper::format_number(year)));
+                child_button.set_content(boxed_text(system.year_text(year)));
                 child_button.set_is_visible(true);
 
                 if let Some(owner) = &owner {
-                    if year == owner.selected_year().year() {
+                    if year == system.year(owner.selected_year()) {
                         owner.set_focus_calendar_button(Some(child_button.clone()));
                         child_button.set_is_calendar_button_focused(owner.has_focus_internal());
                     } else {
                         child_button.set_is_calendar_button_focused(false);
                     }
-                    child_button.set_is_selected(owner.display_date().year() == year);
+                    child_button.set_is_selected(system.year(owner.display_date()) == year);
 
-                    if year < owner.display_date_range_start().year() || year > owner.display_date_range_end().year() {
+                    if year < system.year(owner.display_date_range_start())
+                        || year > system.year(owner.display_date_range_end())
+                    {
                         child_button.set_is_enabled(false);
                         child_button.set_opacity(0.0);
                     } else {
@@ -952,24 +996,22 @@ impl CalendarItem {
 
     fn set_decade_mode_header_button(&self, decade: i32, decade_end: i32) {
         if let Some(header_button) = self.header_button() {
-            header_button.set_content(boxed_text(format!(
-                "{}-{}",
-                DateTimeHelper::format_number(decade),
-                DateTimeHelper::format_number(decade_end)
-            )));
+            let system = self.system();
+            let text = format!("{}-{}", system.year_text(decade), system.year_text(decade_end));
+            header_button.set_content(boxed_text(text));
             header_button.set_is_enabled(false);
         }
     }
 
     fn set_decade_mode_next_button(&self, decade_end: i32) {
         if let (Some(owner), Some(next_button)) = (self.owner(), self.next_button()) {
-            next_button.set_is_enabled(owner.display_date_range_end().year() > decade_end);
+            next_button.set_is_enabled(owner.system().year(owner.display_date_range_end()) > decade_end);
         }
     }
 
     fn set_decade_mode_previous_button(&self, decade: i32) {
         if let (Some(owner), Some(previous_button)) = (self.owner(), self.previous_button()) {
-            previous_button.set_is_enabled(decade > owner.display_date_range_start().year());
+            previous_button.set_is_enabled(decade > owner.system().year(owner.display_date_range_start()));
         }
     }
 
@@ -983,16 +1025,14 @@ impl CalendarItem {
 
             if sender.is_enabled() {
                 if owner.display_mode() == CalendarMode::Month {
-                    let d = owner.display_date_internal();
-                    owner.set_selected_month(DateTime::new(d.year(), d.month(), 1));
+                    owner.set_selected_month(owner.system().discard_day_time(owner.display_date_internal()));
                     owner.set_display_mode(CalendarMode::Year);
                 } else {
                     debug_assert!(
                         owner.display_mode() == CalendarMode::Year,
                         "The Owner Calendar's DisplayMode should be Year!"
                     );
-                    let d = owner.selected_month();
-                    owner.set_selected_year(DateTime::new(d.year(), d.month(), 1));
+                    owner.set_selected_year(owner.system().discard_day_time(owner.selected_month()));
                     owner.set_display_mode(CalendarMode::Decade);
                 }
             }

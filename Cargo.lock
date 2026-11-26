@@ -1607,6 +1607,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-remote-protocol",
  "ferroui-system",
+ "icu_calendar",
+ "icu_datetime",
  "rustc-hash 2.1.3",
  "url",
 ]
