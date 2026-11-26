@@ -150,8 +150,8 @@ mod tests {
         assert_eq!(asked("DE-at-u-nu-latn"), (vec!["de-AT-u-nu-latn".to_owned(), "de-AT".to_owned(), "de".to_owned()], ",".to_owned()));
         assert_eq!(asked("zh-TW"), (vec!["zh-TW".to_owned(), "zh-Hant".to_owned(), "zh".to_owned()], ".".to_owned()));
         assert_eq!(asked(""), (Vec::new(), ".".to_owned()));
-        // A culture whose name is no BCP-47 tag is asked for by name (the deprecated methods,
-        // which this provider does not have), then the locale of its first parent that is one.
+        // A culture whose name is no BCP-47 tag is asked for the locale of its first parent that
+        // is one.
         assert_eq!(asked("de-DE_phoneb"), (vec!["de-DE".to_owned(), "de".to_owned()], ",".to_owned()));
         // The conventions are shared, and attached ones are not asked for.
         let culture = CultureInfo::from_locale(locale!("de-CH"));
@@ -160,37 +160,5 @@ mod tests {
         let attached = culture.with_number_format(NumberFormatInfo::new());
         assert_eq!(attached.number_format().number_decimal_separator(), ".");
         assert!(provider.asked.borrow().is_empty());
-    }
-
-    /// A provider written against the names: the deprecated methods.
-    struct ByName;
-
-    #[allow(deprecated)]
-    impl ICultureDataProvider for ByName {
-        fn get_number_format(&self, culture_name: &str) -> Option<Rc<NumberFormatInfo>> {
-            matches!(culture_name, "pl-PL" | "es-ES_tradnl")
-                .then(|| Rc::new(NumberFormatInfo::new().with_number_decimal_separator(culture_name)))
-        }
-
-        fn get_culture_names(&self, types: CultureTypes) -> Vec<String> {
-            let _ = types;
-            vec!["pl-PL".to_owned(), "es-ES_tradnl".to_owned()]
-        }
-    }
-
-    #[test]
-    fn a_provider_keyed_by_name_keeps_working() {
-        let _scope = FerroLocator::enter_scope();
-        FerroLocator::current_mutable().bind::<dyn ICultureDataProvider>().to_constant(Rc::new(ByName));
-
-        // The methods keyed by locale ask the ones keyed by name with the text of the locale.
-        assert_eq!(CultureInfo::get_culture_info("PL-pl").number_format().number_decimal_separator(), "pl-PL");
-        assert_eq!(CultureInfo::from_locale(locale!("pl-PL-u-nu-latn")).number_format().number_decimal_separator(), "pl-PL");
-        // A culture whose name is no BCP-47 tag is asked for by its name.
-        assert_eq!(CultureInfo::get_culture_info("es-ES_tradnl").number_format().number_decimal_separator(), "es-ES_tradnl");
-        assert_eq!(CultureInfo::get_culture_info("pl").number_format().number_decimal_separator(), ".");
-        // The listed names that are no BCP-47 tags name no locale.
-        let names: Vec<_> = CultureInfo::get_cultures(CultureTypes::SPECIFIC_CULTURES).iter().map(|c| c.name().to_owned()).collect();
-        assert_eq!(names, ["pl-PL"]);
     }
 }

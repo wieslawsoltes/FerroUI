@@ -151,22 +151,4 @@ mod tests {
         assert_eq!(current_locale(), Locale::UNKNOWN);
         assert_eq!(CultureInfo::current_formatting().name(), "es-ES_tradnl");
     }
-
-    #[test]
-    #[allow(deprecated)]
-    fn the_deprecated_current_cultures_are_the_ambient_locales() {
-        let _restore = restore();
-        CultureInfo::set_current_culture(CultureInfo::get_culture_info("de-DE"));
-        assert_eq!(current_locale(), locale!("de-DE"));
-        assert_eq!(CultureInfo::current_culture(), CultureInfo::get_culture_info("de-DE"));
-        set_current_locale(locale!("fr-FR"));
-        assert_eq!(CultureInfo::current_culture().name(), "fr-FR");
-
-        CultureInfo::set_current_ui_culture(CultureInfo::get_culture_info("ko-KR"));
-        assert_eq!(current_ui_locale(), locale!("ko-KR"));
-        assert_eq!(CultureInfo::current_ui_culture().name(), "ko-KR");
-        CultureInfo::set_current_ui_culture(CultureInfo::invariant_culture());
-        assert_eq!(current_ui_locale(), Locale::UNKNOWN);
-        assert!(CultureInfo::current_ui_culture().is_invariant());
-    }
 }
