@@ -397,6 +397,12 @@ pub enum Key {
     MediaTvGuide = 100026,
     /// Remote control Previous Channel
     MediaPreviousChannel = 100027,
+    /// The left shoulder button (bumper) of a gamepad (WinUI `VirtualKey.GamepadLeftShoulder`;
+    /// not in upstream).
+    GamepadLeftShoulder = 200000,
+    /// The right shoulder button (bumper) of a gamepad (WinUI `VirtualKey.GamepadRightShoulder`;
+    /// not in upstream).
+    GamepadRightShoulder = 200001,
 }
 
 /// The error returned when a string does not name a [`Key`].
@@ -636,6 +642,8 @@ static NAMES: &[(&str, Key)] = &[
     ("MediaSubtitle", Key::MediaSubtitle),
     ("MediaTvGuide", Key::MediaTvGuide),
     ("MediaPreviousChannel", Key::MediaPreviousChannel),
+    ("GamepadLeftShoulder", Key::GamepadLeftShoulder),
+    ("GamepadRightShoulder", Key::GamepadRightShoulder),
 ];
 
 #[allow(non_upper_case_globals)]
@@ -936,6 +944,8 @@ impl Key {
             Key::MediaSubtitle => "MediaSubtitle",
             Key::MediaTvGuide => "MediaTvGuide",
             Key::MediaPreviousChannel => "MediaPreviousChannel",
+            Key::GamepadLeftShoulder => "GamepadLeftShoulder",
+            Key::GamepadRightShoulder => "GamepadRightShoulder",
         }
     }
 

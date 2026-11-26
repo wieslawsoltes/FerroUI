@@ -409,6 +409,7 @@ pub use navigation_view_events::{
     NavigationViewDisplayModeChangedEventArgs, NavigationViewItemCollapsedEventArgs,
     NavigationViewItemExpandingEventArgs, NavigationViewItemInvokedEventArgs, NavigationViewPaneClosingEventArgs,
     NavigationViewPaneDisplayMode, NavigationViewSelectionChangedEventArgs, NavigationViewSelectionFollowsFocus,
+    NavigationViewShoulderNavigationEnabled,
 };
 pub use navigation_view_item::{
     NavigationViewItem, NavigationViewItemBase, NavigationViewItemHeader, NavigationViewItemSeparator,

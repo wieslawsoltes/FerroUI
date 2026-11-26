@@ -168,9 +168,9 @@ impl Parts {
 /// `SelectionModel` (follow-up F1). While the pane overlays the content, `ShadowCaster` casts its
 /// theme shadow and moves and fades with the pane by composition animations (`SetDropShadow`,
 /// `PaneOverlayGroup`); `TemplateSettings.TopPadding` keeps the panes clear of the title bar of a
-/// window extended into its decorations (`IsTitleBarAutoPaddingEnabled`). Missing
-/// (docs/porting/winui-controls.md, section 10.4): the shoulder navigation and the selectors of
-/// templates and styles.
+/// window extended into its decorations (`IsTitleBarAutoPaddingEnabled`); the shoulder keys of a
+/// gamepad move the selection in the top pane (`ShoulderNavigationEnabled`). Missing
+/// (docs/porting/winui-controls.md, section 10.4): the selectors of templates and styles.
 #[repr(C)]
 pub struct NavigationView {
     base: ContentControl,
@@ -402,6 +402,14 @@ ferro_properties! { impl NavigationView {
     /// Defines the `SelectionFollowsFocus` property. `Disabled` by default.
     pub fn selection_follows_focus_property() -> StyledProperty<NavigationViewSelectionFollowsFocus> {
         FerroProperty::register::<NavigationView, _>("SelectionFollowsFocus", NavigationViewSelectionFollowsFocus::Disabled)
+    }
+    /// Defines the `ShoulderNavigationEnabled` property: when the shoulder buttons of a gamepad move
+    /// the selection in the top pane. `WhenSelectionFollowsFocus` by default.
+    pub fn shoulder_navigation_enabled_property() -> StyledProperty<NavigationViewShoulderNavigationEnabled> {
+        FerroProperty::register::<NavigationView, _>(
+            "ShoulderNavigationEnabled",
+            NavigationViewShoulderNavigationEnabled::WhenSelectionFollowsFocus,
+        )
     }
     /// Defines the `IsTitleBarAutoPaddingEnabled` property: whether the panes keep clear of the
     /// title bar of a window extended into its decorations (`TemplateSettings.TopPadding`). `true`
@@ -660,6 +668,12 @@ impl NavigationView {
     }
     pub fn set_selection_follows_focus(&self, value: NavigationViewSelectionFollowsFocus) {
         self.set_value(Self::selection_follows_focus_property(), value);
+    }
+    pub fn shoulder_navigation_enabled(&self) -> NavigationViewShoulderNavigationEnabled {
+        self.get_value(Self::shoulder_navigation_enabled_property())
+    }
+    pub fn set_shoulder_navigation_enabled(&self, value: NavigationViewShoulderNavigationEnabled) {
+        self.set_value(Self::shoulder_navigation_enabled_property(), value);
     }
     pub fn is_title_bar_auto_padding_enabled(&self) -> bool {
         self.get_value(Self::is_title_bar_auto_padding_enabled_property())
@@ -987,6 +1001,19 @@ impl InputElementImpl for NavigationView {
     fn on_key_down(this: &Self, args: &KeyEventArgs) {
         Self::parent_on_key_down(this, args);
         if args.handled() {
+            return;
+        }
+        // OnKeyDown: the shoulder buttons of a gamepad move the selection in the top pane
+        // (BumperNavigation).
+        let offset = match args.key {
+            Key::GamepadLeftShoulder => -1,
+            Key::GamepadRightShoulder => 1,
+            _ => 0,
+        };
+        if offset != 0 {
+            if this.bumper_navigation(offset) {
+                args.set_handled(true);
+            }
             return;
         }
         // OnKeyDown: Escape closes a pane that is not inline.
@@ -2486,6 +2513,61 @@ impl VisualImpl for NavigationView {
 }
 
 impl NavigationView {
+    /// `BumperNavigation`: in the top pane, selects the next (`offset` 1) or the previous (-1) item
+    /// of the selected item's list that selects on invocation, skipping separators, headers and the
+    /// items of the overflow menu; past the end of the primary list it continues in the footer, and
+    /// before the start of the footer in the primary list. Whether it acts follows
+    /// `ShoulderNavigationEnabled` and `SelectionFollowsFocus`. Returns whether an item was selected.
+    fn bumper_navigation(&self, offset: i32) -> bool {
+        let enabled = match self.shoulder_navigation_enabled() {
+            NavigationViewShoulderNavigationEnabled::Always => true,
+            NavigationViewShoulderNavigationEnabled::Never => false,
+            NavigationViewShoulderNavigationEnabled::WhenSelectionFollowsFocus => {
+                self.selection_follows_focus() == NavigationViewSelectionFollowsFocus::Enabled
+            }
+        };
+        if !enabled || !self.is_top_navigation_view() {
+            return false;
+        }
+        let Some(selected) = self.container_from_menu_item(&self.selected_item()) else { return false };
+        let parts = self.parts.borrow().clone();
+        let list = |host: &Option<Ref<StackPanel>>| -> Vec<Ref<Control>> {
+            host.as_ref()
+                .map(|host| {
+                    host.children()
+                        .to_vec()
+                        .into_iter()
+                        .filter(|child| !child.ptr_eq(&self.settings_item) || self.is_settings_visible())
+                        .collect()
+                })
+                .unwrap_or_default()
+        };
+        let primary = list(&parts.top_menu);
+        let footer = list(&parts.top_footer);
+        let selected: Ref<Control> = selected.upcast();
+        let select = |items: &[Ref<Control>], start: i32| -> bool {
+            let mut index = start + offset;
+            while index >= 0 && (index as usize) < items.len() {
+                // SelectSelectableItemWithOffset: separators and headers are skipped.
+                if let Some(item) = items[index as usize].clone().cast::<NavigationViewItem>() {
+                    if item.selects_on_invoked() {
+                        item.set_is_selected(true);
+                        return true;
+                    }
+                }
+                index += offset;
+            }
+            false
+        };
+        if let Some(index) = primary.iter().position(|item| *item == selected) {
+            return select(&primary, index as i32) || offset > 0 && select(&footer, -1);
+        }
+        if let Some(index) = footer.iter().position(|item| *item == selected) {
+            return select(&footer, index as i32) || offset < 0 && select(&primary, primary.len() as i32);
+        }
+        false
+    }
+
     #[cfg(test)]
     pub(crate) fn pane_shadow_is_running(&self) -> bool {
         self.pane_shadow.is_running()

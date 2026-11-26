@@ -11853,7 +11853,9 @@
           "MediaSearch",
           "MediaSubtitle",
           "MediaTvGuide",
-          "MediaPreviousChannel"
+          "MediaPreviousChannel",
+          "GamepadLeftShoulder",
+          "GamepadRightShoulder"
         ]
       },
       "KeyModifiers": {
@@ -14346,6 +14348,17 @@
         "values": [
           "Disabled",
           "Enabled"
+        ],
+        "attached": false
+      },
+      "ShoulderNavigationEnabled": {
+        "name": "ShoulderNavigationEnabled",
+        "type_name": "NavigationViewShoulderNavigationEnabled",
+        "documentation": "NavigationView.ShoulderNavigationEnabled: NavigationViewShoulderNavigationEnabled",
+        "values": [
+          "WhenSelectionFollowsFocus",
+          "Always",
+          "Never"
         ],
         "attached": false
       },

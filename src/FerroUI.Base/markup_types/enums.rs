@@ -109,7 +109,7 @@ ferro_markup_enum!(
         DbeEnterDialogConversionMode, Pa1, OemClear, DeadCharProcessed, FnLeftArrow, FnRightArrow, FnUpArrow,
         FnDownArrow, MediaHome, MediaChannelList, MediaChannelRaise, MediaChannelLower, MediaRecord, MediaRed,
         MediaGreen, MediaYellow, MediaBlue, MediaMenu, MediaMore, MediaOption, MediaInfo, MediaSearch,
-        MediaSubtitle, MediaTvGuide, MediaPreviousChannel,
+        MediaSubtitle, MediaTvGuide, MediaPreviousChannel, GamepadLeftShoulder, GamepadRightShoulder,
     },
     { namespace: "FerroUI.Input" }
 );

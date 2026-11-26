@@ -5980,6 +5980,11 @@ pub trait NavigationViewProps: ElementBuilder {
         self.prop(<ferroui_controls::NavigationView>::selection_follows_focus_property(), value)
     }
 
+    /// Sets [`NavigationView::shoulder_navigation_enabled_property`](ferroui_controls::NavigationView::shoulder_navigation_enabled_property).
+    fn shoulder_navigation_enabled<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewShoulderNavigationEnabled, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::shoulder_navigation_enabled_property(), value)
+    }
+
     /// Sets [`NavigationView::is_title_bar_auto_padding_enabled_property`](ferroui_controls::NavigationView::is_title_bar_auto_padding_enabled_property).
     fn is_title_bar_auto_padding_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_title_bar_auto_padding_enabled_property(), value)

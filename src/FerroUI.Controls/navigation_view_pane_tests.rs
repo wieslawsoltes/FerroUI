@@ -1,7 +1,7 @@
 //! Tests of the pane of `NavigationView` that #1394 ports from WinUI (docs/porting/winui-controls.md,
 //! section 10.4): the shadow of the overlaying pane (`SetDropShadow`, `UnsetDropShadow`), its
 //! motion (the transitions of `PaneOverlayGroup` on the compositor) and the padding of the title
-//! bar (`UpdateTitleBarPadding`).
+//! bar (`UpdateTitleBarPadding`), and the shoulder navigation of the top pane (`BumperNavigation`).
 
 use crate::compositor_hit_testing_tests::CompositorTestServices;
 use crate::navigation_test_support::{part, show, start, start_with_window_impl};
@@ -9,7 +9,11 @@ use crate::navigation_view_pane_shadow::{PANE_SHADOW_CLOSE_DURATION, PANE_SHADOW
 use crate::platform::IWindowImpl;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::testing::MockWindowingPlatform;
-use crate::{Control, Grid, NavigationView, NavigationViewPaneDisplayMode, SplitView};
+use crate::{
+    Control, Grid, NavigationView, NavigationViewItem, NavigationViewItemSeparator, NavigationViewPaneDisplayMode,
+    NavigationViewSelectionFollowsFocus, NavigationViewShoulderNavigationEnabled, SplitView,
+};
+use ferroui_base::input::{InputElement, Key, KeyEventArgs};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::rendering::composition::server::ServerCompositionVisual;
 use ferroui_base::rendering::composition::{CompositionVisual, ElementComposition, ICompositionObjectAnimations};
@@ -250,4 +254,108 @@ fn title_bar_padding_follows_a_window_extended_into_its_decorations() {
     extend(false);
     scene.0.update_layout();
     assert_eq!(settings.top_padding(), 0.0);
+}
+
+fn shoulder(nav: &NavigationView, key: Key) -> bool {
+    let mut args = KeyEventArgs::new();
+    args.key = key;
+    args.set_routed_event(Some(InputElement::key_down_event()));
+    nav.raise_event(&args);
+    args.handled()
+}
+
+fn named_item(text: &str) -> Ref<NavigationViewItem> {
+    let item = NavigationViewItem::new();
+    item.set_content(Some(Rc::new(text.to_owned())));
+    item
+}
+
+fn is_selected(nav: &NavigationView, item: &NavigationViewItem) -> bool {
+    nav.container_from_menu_item(&nav.selected_item())
+        .is_some_and(|selected| selected.upcast::<Control>() == item.to_ref().upcast::<Control>())
+}
+
+#[test]
+fn the_shoulder_buttons_move_the_selection_between_the_items_of_the_top_pane() {
+    let _app = start();
+    let nav = NavigationView::new();
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Top);
+    nav.set_selection_follows_focus(NavigationViewSelectionFollowsFocus::Enabled);
+    let first = named_item("First");
+    let not_selectable = named_item("Not selectable");
+    not_selectable.set_selects_on_invoked(false);
+    let last = named_item("Last");
+    let footer = named_item("Footer");
+    nav.menu_items().add(Some(Control::boxed(&first)));
+    nav.menu_items()
+        .add(Some(Control::boxed(&NavigationViewItemSeparator::new())));
+    nav.menu_items().add(Some(Control::boxed(&not_selectable)));
+    nav.menu_items().add(Some(Control::boxed(&last)));
+    nav.footer_menu_items().add(Some(Control::boxed(&footer)));
+    let scene = show(&nav, 1200.0, 500.0);
+    nav.set_selected_item(Some(Control::boxed(&first)));
+    scene.0.update_layout();
+
+    // The separator and the item that does not select on invocation are skipped.
+    assert!(shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &last));
+    // Past the end of the primary list: the footer, then the settings item.
+    assert!(shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &footer));
+    assert!(shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &nav.settings_item()));
+    assert!(
+        !shoulder(&nav, Key::GamepadRightShoulder),
+        "nothing after the settings item"
+    );
+    // Back: before the start of the footer, the end of the primary list.
+    assert!(shoulder(&nav, Key::GamepadLeftShoulder));
+    assert!(shoulder(&nav, Key::GamepadLeftShoulder));
+    assert!(is_selected(&nav, &last));
+    assert!(shoulder(&nav, Key::GamepadLeftShoulder));
+    assert!(is_selected(&nav, &first));
+    assert!(
+        !shoulder(&nav, Key::GamepadLeftShoulder),
+        "nothing before the first item"
+    );
+
+    // A hidden settings item is not counted.
+    nav.set_is_settings_visible(false);
+    nav.set_selected_item(Some(Control::boxed(&footer)));
+    assert!(!shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &footer));
+}
+
+#[test]
+fn shoulder_navigation_follows_its_setting_and_the_pane() {
+    let _app = start();
+    let nav = NavigationView::new();
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Top);
+    let first = named_item("First");
+    let second = named_item("Second");
+    nav.menu_items().add(Some(Control::boxed(&first)));
+    nav.menu_items().add(Some(Control::boxed(&second)));
+    let scene = show(&nav, 1200.0, 500.0);
+    nav.set_selected_item(Some(Control::boxed(&first)));
+    scene.0.update_layout();
+    assert_eq!(
+        nav.shoulder_navigation_enabled(),
+        NavigationViewShoulderNavigationEnabled::WhenSelectionFollowsFocus
+    );
+    // WhenSelectionFollowsFocus without SelectionFollowsFocus.
+    assert!(!shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &first));
+    nav.set_shoulder_navigation_enabled(NavigationViewShoulderNavigationEnabled::Always);
+    assert!(shoulder(&nav, Key::GamepadRightShoulder));
+    assert!(is_selected(&nav, &second));
+    nav.set_selection_follows_focus(NavigationViewSelectionFollowsFocus::Enabled);
+    nav.set_shoulder_navigation_enabled(NavigationViewShoulderNavigationEnabled::Never);
+    assert!(!shoulder(&nav, Key::GamepadLeftShoulder));
+    assert!(is_selected(&nav, &second));
+    // Only the top pane.
+    nav.set_shoulder_navigation_enabled(NavigationViewShoulderNavigationEnabled::Always);
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    scene.0.update_layout();
+    assert!(!shoulder(&nav, Key::GamepadLeftShoulder));
+    assert!(is_selected(&nav, &second));
 }
