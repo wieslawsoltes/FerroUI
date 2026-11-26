@@ -243,6 +243,11 @@ impl Migration<'_, '_> {
                             | "ProgressRingTemplateSettings"
                             | "PersonPictureTemplateSettings"
                             | "PagerControlTemplateSettings"
+                            | "ScrollPresenter"
+                            | "IScrollController"
+                            | "ScrollControllerScrollToRequestedEventArgs"
+                            | "ScrollControllerScrollByRequestedEventArgs"
+                            | "ScrollControllerAddScrollVelocityRequestedEventArgs"
                     ))
                 .then(|| (PRIMITIVES_NAMESPACE.to_string(), name.to_string()))
             })
@@ -301,6 +306,25 @@ impl Migration<'_, '_> {
                             | "AutoSuggestBoxTextChangedEventArgs"
                             | "AutoSuggestBoxSuggestionChosenEventArgs"
                             | "AutoSuggestBoxQuerySubmittedEventArgs"
+                            | "ScrollView"
+                            | "ScrollingScrollBarVisibility"
+                            | "ScrollingContentOrientation"
+                            | "ScrollingInteractionState"
+                            | "ScrollingScrollMode"
+                            | "ScrollingZoomMode"
+                            | "ScrollingChainMode"
+                            | "ScrollingRailMode"
+                            | "ScrollingInputKinds"
+                            | "ScrollingAnimationMode"
+                            | "ScrollingSnapPointsMode"
+                            | "ScrollingScrollOptions"
+                            | "ScrollingZoomOptions"
+                            | "ScrollingScrollAnimationStartingEventArgs"
+                            | "ScrollingZoomAnimationStartingEventArgs"
+                            | "ScrollingScrollCompletedEventArgs"
+                            | "ScrollingZoomCompletedEventArgs"
+                            | "ScrollingScrollStartingEventArgs"
+                            | "ScrollingZoomStartingEventArgs"
                     ))
                 .then(|| (CONTROLS_NAMESPACE.to_string(), name.to_string()))
             })
