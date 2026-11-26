@@ -25,6 +25,7 @@ mod custom_controls;
 mod date_samples;
 pub mod examples;
 mod feedback_samples;
+mod tab_view_samples;
 mod frame_sample;
 pub mod gallery;
 mod ink_samples;
@@ -72,6 +73,9 @@ mod custom_controls_tests;
 
 #[cfg(test)]
 mod feedback_samples_tests;
+
+#[cfg(test)]
+mod tab_view_samples_tests;
 
 #[cfg(test)]
 mod navigation_view_samples_tests;
