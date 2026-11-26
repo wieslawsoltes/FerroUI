@@ -241,3 +241,42 @@ fn a_list_without_groups_has_no_headers_and_no_insets() {
     assert_eq!(panel.container_from_index(1).unwrap().bounds().y, ITEM);
     assert!(!list.is_grouping());
 }
+
+/// `CollectionViewSource.ItemsPath` (#1424): the items of each group are the value of the path of
+/// the group, which is the header; the view follows the lists at the path.
+#[test]
+fn the_items_path_reads_the_items_of_each_group() {
+    let _scope = test_scope();
+    let group = |name: &str, items: &[&str]| {
+        let list = Rc::new(FerroList::from_items(items.iter().map(|item| item.to_string())));
+        let control = crate::ItemsControl::new();
+        control.set_name(Some(name.to_string()));
+        control.set_items_source(Some(ItemsSource::new(list.clone())));
+        (crate::Control::boxed(control), list)
+    };
+    let (first, first_items) = group("First", &["a", "b"]);
+    let (second, _) = group("Second", &["c"]);
+    let source = CollectionViewSource::new();
+    source.set_is_source_grouped(true);
+    source.set_items_path("ItemsSource");
+    source.set_source(Some(ItemsSource::from_items([Some(first.clone()), Some(second)])));
+    let view = source.view().expect("a view");
+    let texts = |view: &ItemsSource| -> Vec<String> { view.iter().filter_map(|item| string_of(&item?)).collect() };
+    assert_eq!(texts(&view), ["a", "b", "c"]);
+    let groups = source.collection_groups();
+    assert_eq!(groups.len(), 2);
+    assert!(Rc::ptr_eq(groups[0].group().as_ref().expect("the header"), &first), "the group is its header");
+    // The view follows the list at the path.
+    let changes = Rc::new(RefCell::new(0));
+    let counted = changes.clone();
+    let token = view.list().add_collection_changed(Rc::new(move |_| *counted.borrow_mut() += 1));
+    first_items.add("a2".to_string());
+    assert_eq!(texts(&view), ["a", "b", "a2", "c"]);
+    assert_eq!(*changes.borrow(), 1);
+    if let Some(token) = token {
+        view.list().remove_collection_changed(token);
+    }
+    // Without the path, each group is its own list: these groups are not lists.
+    source.set_items_path("");
+    assert!(texts(&source.view().expect("a view")).is_empty());
+}

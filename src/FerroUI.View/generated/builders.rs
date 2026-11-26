@@ -3043,6 +3043,11 @@ pub trait CollectionViewSourceProps: ElementBuilder {
     fn is_source_grouped<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CollectionViewSource>::is_source_grouped_property(), value)
     }
+
+    /// Sets [`CollectionViewSource::items_path_property`](ferroui_controls::CollectionViewSource::items_path_property).
+    fn items_path<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::CollectionViewSource>::items_path_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::CollectionViewSource>> CollectionViewSourceProps for El<T> {}
 

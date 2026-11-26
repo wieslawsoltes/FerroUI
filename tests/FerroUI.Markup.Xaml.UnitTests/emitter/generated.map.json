@@ -810,6 +810,11 @@
     {"file_lines": [5692, 5693], "document": "scoped_namespace_bindings.xaml", "line": 1, "position": 524},
     {"file_lines": [5694, 5696], "document": "scoped_namespace_bindings.xaml", "line": 1, "position": 514},
     {"file_lines": [5697, 5699], "document": "scoped_namespace_bindings.xaml", "line": 1, "position": 556},
-    {"file_lines": [5700, 5708], "document": "scoped_namespace_bindings.xaml", "line": 1, "position": 556}
+    {"file_lines": [5700, 5708], "document": "scoped_namespace_bindings.xaml", "line": 1, "position": 556},
+    {"file_lines": [5725, 5729], "document": "list_view_items_updating_scroll_mode.xaml", "line": 1, "position": 2},
+    {"file_lines": [5730, 5734], "document": "list_view_items_updating_scroll_mode.xaml", "line": 1, "position": 2},
+    {"file_lines": [5751, 5754], "document": "collection_view_source_items_path.xaml", "line": 1, "position": 2},
+    {"file_lines": [5755, 5756], "document": "collection_view_source_items_path.xaml", "line": 1, "position": 2},
+    {"file_lines": [5757, 5760], "document": "collection_view_source_items_path.xaml", "line": 1, "position": 136}
   ]
 }

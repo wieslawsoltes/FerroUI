@@ -776,3 +776,46 @@ fn navigation_view_hover_stays_on_the_row_under_the_pointer() {
     }
     window.close();
 }
+
+/// The check boxes of a list view in `Multiple` (#1424): the items of the `:multiselect`
+/// pseudo-class get the template with the check box, whose check shows the selection; the other
+/// modes keep the template of `DefaultListViewItemStyle`.
+#[test]
+fn the_items_of_a_list_in_multiple_show_check_boxes() {
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::{ListView, ListViewSelectionMode};
+
+    let _app = start_themed_application();
+    let list = ListView::new();
+    for text in ["One", "Two", "Three"] {
+        list.items().add(Some(Rc::new(text.to_string()) as ferroui_base::BoxedValue));
+    }
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&list)));
+    window.show();
+    window.update_layout();
+
+    let part = |index: i32, name: &str| {
+        let item = list.container_from_index(index).expect("a realized item");
+        let item = item.cast::<TemplatedControl>().expect("a templated item");
+        item.get_template_descendants().into_iter().find(|element| element.name().as_deref() == Some(name))
+    };
+    assert!(part(0, "MultiSelectSquare").is_none(), "Single has no check boxes");
+
+    list.set_selection_mode(ListViewSelectionMode::Multiple);
+    list.selection().select(1);
+    window.update_layout();
+    let check_opacity = |index: i32| part(index, "MultiSelectCheck").expect("the check").opacity();
+    assert!(part(0, "MultiSelectSquare").is_some());
+    assert_eq!(check_opacity(0), 0.0);
+    assert_eq!(check_opacity(1), 1.0);
+    let presenter = part(0, "PART_ContentPresenter").and_then(|element| element.cast::<ContentPresenter>());
+    assert_eq!(presenter.expect("the content").margin().left, 28.0);
+    let square = part(1, "MultiSelectSquare").and_then(|element| element.cast::<Border>()).expect("a square");
+    assert_eq!(square.border_thickness(), Thickness::uniform(0.0), "a selected square has no border");
+
+    list.set_is_multi_select_check_box_enabled(false);
+    window.update_layout();
+    assert!(part(0, "MultiSelectSquare").is_none());
+    window.close();
+}

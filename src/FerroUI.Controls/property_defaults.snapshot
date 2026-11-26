@@ -166,6 +166,7 @@ FerroUI.Controls.Chrome.WindowDrawnDecorations.Template: Option<Rc<dyn IWindowDr
 FerroUI.Controls.Chrome.WindowDrawnDecorations.Title: Option<String> = (null); OneWay
 FerroUI.Controls.Chrome.WindowDrawnDecorations.TitleBarDecorations: TitleBarDecorations = All; OneWay; attached
 FerroUI.Controls.CollectionViewSource.IsSourceGrouped: bool = False; OneWay
+FerroUI.Controls.CollectionViewSource.ItemsPath: String = ""; OneWay
 FerroUI.Controls.CollectionViewSource.Source: Option<ItemsSource> = (null); OneWay
 FerroUI.Controls.ColumnDefinition.MaxWidth: f64 = inf; OneWay
 FerroUI.Controls.ColumnDefinition.MinWidth: f64 = 0; OneWay

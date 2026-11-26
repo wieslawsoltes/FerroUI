@@ -21,6 +21,10 @@
     not port (G-22).
   - The items are ListViewItems drawn with DefaultListViewItemStyle (decision D6: the chrome of
     ListViewItemPresenter drawn with elements, LBI-6 to LBI-9).
+  - The check box of an item of a list in Multiple (MultiSelectStates of the presenter,
+    dxaml/xcp/core/core/elements/ListViewBaseItemChrome.cpp) is the template of the :multiselect
+    pseudo-class of ListViewItem, with the values of the chrome (#1424); the other lists keep the
+    template of DefaultListViewItemStyle.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -77,7 +81,107 @@
 
   <ControlTheme x:Key="{x:Type ListView}" TargetType="ListView" BasedOn="{StaticResource DefaultListViewStyle}" />
 
-  <ControlTheme x:Key="{x:Type ListViewItem}" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}" />
+  <!-- ListViewItem: DefaultListViewItemStyle, and the chrome of the multiple selection mode. -->
+  <ControlTheme x:Key="{x:Type ListViewItem}" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+    <!-- MultiSelectEnabled (the `:multiselect` pseudo-class the list sets in Multiple): the check
+         box of the presenter (CheckMode Inline, the rounded chrome): a square of 20 px
+         (s_multiSelectSquareSize) at 14 px from the left edge (s_multiSelectRoundedSquareInlineMargin)
+         with the corner radius ListViewItemCheckBoxCornerRadius and a border of 1 px
+         (s_multiSelectRoundedSquareThickness) while unselected, the check glyph E73E of 16 px
+         (s_checkMarkGlyphFontSize), and the content moved by 28 px
+         (s_multiSelectRoundedContentOffset). The selection indicator is not shown in Multiple
+         (IsInSelectionIndicatorMode). Only lists in this mode use this template. -->
+    <Style Selector="^:multiselect">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel x:Name="Root">
+            <Border x:Name="Backplate"
+                    Margin="4,2,4,2"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{DynamicResource ListViewItemCornerRadius}"
+                    IsHitTestVisible="False"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+            <Border x:Name="MultiSelectSquare"
+                    Margin="14,0,0,0"
+                    MinWidth="20"
+                    Height="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    ClipToBounds="True"
+                    CornerRadius="{DynamicResource ListViewItemCheckBoxCornerRadius}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ListViewItemCheckBoxBorderBrush}"
+                    Background="{DynamicResource ListViewItemCheckBoxBrush}"
+                    IsHitTestVisible="False">
+              <!-- E73E at 16 px: the ink of the glyph in the symbol font. -->
+              <Path x:Name="MultiSelectCheck"
+                    Data="{StaticResource GlyphGeometryE73E}"
+                    Fill="{DynamicResource ListViewItemCheckBrush}"
+                    Stretch="Uniform"
+                    Width="13"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FlowDirection="LeftToRight"
+                    Opacity="0" />
+            </Border>
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Margin="28,0,0,0"
+                              Padding="{TemplateBinding Padding}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <!-- The brushes of the check box (SetMultiSelectCheckBoxBackground, SetMultiSelectCheckBoxBorder,
+         SetMultiSelectCheckBoxForeground), in the order of their precedence. -->
+    <Style Selector="^:multiselect:selected">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxSelectedBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:pointerover /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxPointerOverBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ListViewItemCheckBoxPointerOverBorderBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:selected:pointerover /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxSelectedPointerOverBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:pressed /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxPressedBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ListViewItemCheckBoxPressedBorderBrush}" />
+    </Style>
+    <Style Selector="^:multiselect:selected:pressed">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxSelectedPressedBrush}" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Fill" Value="{DynamicResource ListViewItemCheckPressedBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:disabled">
+      <Style Selector="^ /template/ Border#MultiSelectSquare">
+        <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxDisabledBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ListViewItemCheckBoxDisabledBorderBrush}" />
+      </Style>
+      <Style Selector="^ /template/ Path#MultiSelectCheck">
+        <Setter Property="Fill" Value="{DynamicResource ListViewItemCheckDisabledBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:multiselect:selected:disabled /template/ Border#MultiSelectSquare">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemCheckBoxSelectedDisabledBrush}" />
+    </Style>
+  </ControlTheme>
 
   <!-- The header of a group: the implicit style of ListViewHeaderItem of generic.xaml. -->
   <ControlTheme x:Key="{x:Type ListViewHeaderItem}" TargetType="ListViewHeaderItem">

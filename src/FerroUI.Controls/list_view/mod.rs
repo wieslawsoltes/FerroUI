@@ -11,6 +11,8 @@ mod list_view_base;
 #[cfg(test)]
 mod grouping_tests;
 #[cfg(test)]
+mod items_updating_scroll_mode_tests;
+#[cfg(test)]
 mod list_view_tests;
 
 pub use grid_view::{GridView, GridViewItem, GridViewItemTemplateSettings};

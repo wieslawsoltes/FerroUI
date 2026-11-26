@@ -210,3 +210,27 @@ fn the_wrap_grid_lays_out_cells_of_one_size() {
     panel.measure(ferroui_base::Size::new(350.0, f64::INFINITY));
     assert_eq!(panel.desired_size(), ferroui_base::Size::new(200.0, 150.0));
 }
+
+/// WinUI's `MultiSelectStates`: the items of a list in `Multiple` show check boxes, unless
+/// `IsMultiSelectCheckBoxEnabled` is off; the `:multiselect` pseudo-class follows both (#1424).
+#[test]
+fn the_items_of_multiple_get_the_check_box_state() {
+    let _scope = test_scope();
+    let (list, root) = list_view(5);
+    let states = |list: &ListView| -> Vec<bool> {
+        list.get_realized_containers().iter().map(|item| item.classes().contains(":multiselect")).collect()
+    };
+    assert_eq!(states(&list), [false; 5]);
+    list.set_selection_mode(ListViewSelectionMode::Multiple);
+    assert_eq!(states(&list), [true; 5]);
+    list.set_is_multi_select_check_box_enabled(false);
+    assert_eq!(states(&list), [false; 5]);
+    list.set_is_multi_select_check_box_enabled(true);
+    list.set_selection_mode(ListViewSelectionMode::Extended);
+    assert_eq!(states(&list), [false; 5], "Extended has no check boxes");
+    list.set_selection_mode(ListViewSelectionMode::Multiple);
+    // The containers prepared later get the state too.
+    list.set_items_source(Some(ItemsSource::from_items((0..3).map(|index| boxed_str(&format!("New {index}"))))));
+    root.layout_manager().execute_layout_pass();
+    assert_eq!(states(&list), [true; 3]);
+}
