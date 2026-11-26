@@ -130,3 +130,69 @@ fn logical_metrics_transactions_only_write_genuine_final_offset_corrections() {
     assert_eq!(scrollable.offset(), target.offset());
     assert!(scrollable.take_offset_writes().is_empty());
 }
+
+#[test]
+fn child_owned_overscroll_survives_unchanged_scroll_metrics() {
+    let _scope = test_scope();
+    let extent = Size::new(100.0, 100.0);
+    let viewport = Size::new(25.0, 25.0);
+    let scrollable = TestScrollable::with_state(extent, Vector::default(), viewport);
+    let (target, _root) = create_target(&scrollable);
+    scrollable.take_offset_writes();
+
+    // A wrapping carousel retains negative fractional progress while its
+    // owning ScrollViewer stays at zero. Repeated notifications with unchanged
+    // metrics must not turn that observation into an unsolicited scroll.
+    for position in [-0.375, -0.75] {
+        let progress = Vector::new(position, position);
+        scrollable.publish_scroll_state(extent, progress, viewport);
+        assert_eq!(Vector::default(), target.offset());
+        assert_eq!(progress, scrollable.offset());
+        assert!(scrollable.take_offset_writes().is_empty());
+    }
+
+    // A metric change alone is still not an owner scroll request when the
+    // effective boundary offset remains zero.
+    let progress = Vector::new(-0.75, -0.75);
+    let enlarged_extent = Size::new(200.0, 200.0);
+    let enlarged_viewport = Size::new(50.0, 50.0);
+    scrollable.publish_scroll_state(enlarged_extent, progress, enlarged_viewport);
+    assert_eq!(enlarged_extent, target.extent());
+    assert_eq!(enlarged_viewport, target.viewport());
+    assert_eq!(Vector::default(), target.offset());
+    assert_eq!(progress, scrollable.offset());
+    assert!(scrollable.take_offset_writes().is_empty());
+    scrollable.publish_scroll_state(extent, progress, viewport);
+    assert_eq!(progress, scrollable.offset());
+    assert!(scrollable.take_offset_writes().is_empty());
+
+    // An actual owner request still overrides the child-owned position.
+    let requested = Vector::new(25.0, 25.0);
+    target.set_offset(requested);
+    assert_eq!(requested, scrollable.offset());
+    assert_eq!(vec![requested], scrollable.take_offset_writes());
+
+    // Unlike an unchanged boundary notification, this invalid child offset
+    // changes the presenter's effective offset and must be written back once.
+    scrollable.publish_scroll_state(extent, Vector::new(-0.375, -0.375), viewport);
+    assert_eq!(Vector::default(), target.offset());
+    assert_eq!(Vector::default(), scrollable.offset());
+    assert_eq!(vec![Vector::default()], scrollable.take_offset_writes());
+
+    // The same ownership rule applies beyond the other end of the range.
+    let end = Vector::new(75.0, 75.0);
+    target.set_offset(end);
+    assert_eq!(vec![end], scrollable.take_offset_writes());
+    let progress = Vector::new(75.375, 75.375);
+    scrollable.publish_scroll_state(extent, progress, viewport);
+    assert_eq!(end, target.offset());
+    assert_eq!(progress, scrollable.offset());
+    assert!(scrollable.take_offset_writes().is_empty());
+
+    // A genuine range change still reconciles an invalid final position.
+    let clamped = Vector::new(70.0, 70.0);
+    scrollable.publish_scroll_state(Size::new(95.0, 95.0), progress, viewport);
+    assert_eq!(clamped, target.offset());
+    assert_eq!(clamped, scrollable.offset());
+    assert_eq!(vec![clamped], scrollable.take_offset_writes());
+}

@@ -1325,6 +1325,7 @@ impl ScrollContentPresenter {
                     offset.y.to_bits(),
                 ]
             };
+            let original_offset = self.offset();
             let was_updating = self.updating_logical_scroll.replace(true);
             let offset = loop {
                 let viewport = scrollable.viewport();
@@ -1364,13 +1365,16 @@ impl ScrollContentPresenter {
                 }
                 return;
             };
-            // Coercion may already have reached the final value while feedback
-            // was suppressed, so its assignment need not raise a change.
-            // Preserve genuine final clamping as well as unchanged selections.
+            // A changed range can already have coerced Offset while feedback
+            // was suppressed, so its final assignment need not raise a change.
+            // If the effective offset is unchanged, preserve the child's
+            // transient wrap/overscroll position: no property change would
+            // normally have sent a scroll request back to the child.
             if self
                 .child()
                 .as_ref()
                 .is_some_and(|current| current.ptr_eq(child))
+                && original_offset != offset
                 && offset != scrollable.offset()
             {
                 scrollable.set_offset(offset);
