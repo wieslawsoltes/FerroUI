@@ -76,6 +76,7 @@ members = [
     "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",
     "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI",
     "src/Dock/FerroDock.Settings",
+    "tests/FerroUI.Controls.DefaultNamespace.Tests",
     "tests/FerroUI.Controls.ItemsView.DefaultNamespace.Tests",
     "tests/Dock/FerroDock.Markup.Tests",
     "tests/Dock/FerroDock.Serializer.Generated.Tests",
@@ -117,6 +118,11 @@ members = [
     "src/FerroUI.Controls.LiveCharts",
     "src/FerroUI.Controls.Repeater",
     "src/FerroUI.Controls.Inking",
+    "src/FerroUI.Controls.SplitMenu",
+    "src/FerroUI.Controls.PasswordBox",
+    "src/FerroUI.Controls.TeachingTip",
+    "src/FerroUI.Controls.FlipView",
+    "src/FerroUI.Controls.Icons",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
@@ -373,6 +379,11 @@ ferroui-controls-livecharts = { version = "=0.6.0-preview.1", path = "src/FerroU
 ferroui-controls-repeater = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Repeater" }
 ferroui-controls-items-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.ItemsView" }
 ferroui-controls-inking = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Inking" }
+ferroui-controls-split-menu = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.SplitMenu" }
+ferroui-controls-password-box = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.PasswordBox" }
+ferroui-controls-teaching-tip = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.TeachingTip" }
+ferroui-controls-flip-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.FlipView" }
+ferroui-controls-icons = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Icons" }
 ferroui-treedatagrid-core = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
 ferroui-static-view-locator = { version = "=0.6.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
