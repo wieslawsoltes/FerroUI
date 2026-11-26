@@ -3,8 +3,8 @@
      see ../NOTICE.md. The control theme below is the default style of
      CounterControl.xaml (DefaultStyleKey); the template of ValidatedPasswordBox.xaml is built in
      Rust, because a TextBox in a ControlTemplate of run-time loaded markup does not get its
-     template part. FerroUI has no PasswordBox, so the template's password box is a TextBox with a
-     PasswordChar, and its Header is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
+     template part. The template's password box is the PasswordBox of
+     ferroui-controls-password-box, and its Header is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
      theme's SubtitleTextBlockStyle with heading level 2. The Submit button's x:Bind of IsValid is
      the code behind in Rust. -->
 <StackPanel xmlns="https://github.com/ferroui"

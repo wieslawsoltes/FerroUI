@@ -261,6 +261,7 @@ document_tests! {
     controls_split_button => "/Controls/SplitButton.xaml";
     controls_toggle_switch => "/Controls/ToggleSwitch.xaml";
     controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_content_dialog => "/Controls/ContentDialog.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_number_box => "/Controls/NumberBox.xaml";

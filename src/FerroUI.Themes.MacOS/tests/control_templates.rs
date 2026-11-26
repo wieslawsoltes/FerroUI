@@ -259,6 +259,7 @@ control_tests! {
     progress_ring => "ProgressRing";
     info_badge => "InfoBadge";
     info_bar => "InfoBar";
+    content_dialog => "ContentDialog";
     font_icon => "FontIcon";
     symbol_icon => "SymbolIcon";
     progress_bar => "ProgressBar";
