@@ -9,7 +9,7 @@
                TextWrapping="Wrap" />
 
     <controls:SampleSection Header="Rich editing"
-                            Description="Select a range and use the toolbar or context menu. Undo and redo include both text and formatting changes.">
+                            Description="Select a range and use the toolbar or context menu. Undo and redo include both text and formatting changes. The list buttons set the list type of the selected paragraphs (ParagraphFormat.ListType) and change their level.">
       <StackPanel Spacing="12">
         <WrapPanel>
           <ToggleButton Content="Bold" FontWeight="Bold" Margin="0,0,6,6" Focusable="False"
@@ -33,6 +33,20 @@
           <CheckBox Content="Read only" Margin="0,0,0,6"
                     IsChecked="{Binding #Editor.IsReadOnly, Mode=TwoWay}" />
         </WrapPanel>
+        <WrapPanel>
+          <Button Name="BulletsButton" Content="Bullets" Margin="0,0,6,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+          <Button Name="NumbersButton" Content="Numbers" Margin="0,0,6,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+          <Button Name="RomanButton" Content="Roman numerals" Margin="0,0,6,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+          <Button Name="NoListButton" Content="No list" Margin="0,0,18,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+          <Button Name="IndentButton" Content="Indent" Margin="0,0,6,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+          <Button Name="OutdentButton" Content="Outdent" Margin="0,0,0,6" Focusable="False"
+                  IsEnabled="{Binding #Editor.CanFormat}" />
+        </WrapPanel>
         <RichEditBox Name="Editor" Height="240" Header="Project notes"
                      Description="Try typing, formatting a mixed selection, or pasting rich content."
                      PlaceholderText="Write your notes here" AcceptsTab="True">
@@ -44,6 +58,12 @@
           <Paragraph>
             <Run Text="Text can include café, 日本語, العربية and emoji 😀." />
           </Paragraph>
+          <Paragraph ListType="Bullet">
+            <Run Text="Lists: Enter continues a list and ends it in an empty item" />
+          </Paragraph>
+          <Paragraph ListType="Bullet">
+            <Run Text="Tab and Shift+Tab at the start of an item change its level" />
+          </Paragraph>
         </RichEditBox>
       </StackPanel>
       <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichEditBox Name="Editor" Header="Project notes"
@@ -51,7 +71,14 @@
   <Paragraph><Bold><Run Text="A shared document" /></Bold></Paragraph>
 </RichEditBox>
 <Button Content="Bold" Command="{Binding #Editor.ToggleBold}"
-        IsEnabled="{Binding #Editor.CanFormat}" />]]></x:String></controls:SampleSection.Code>
+        IsEnabled="{Binding #Editor.CanFormat}" />
+
+// Code-behind: a list is the list type of the selected paragraphs.
+editor.apply_paragraph_format(&ParagraphFormat {
+    list_type: Some(MarkerType::Bullet),
+    ..Default::default()
+})?;
+editor.change_list_level(1)?;]]></x:String></controls:SampleSection.Code>
     </controls:SampleSection>
 
     <controls:SampleSection Header="Read-only preview"

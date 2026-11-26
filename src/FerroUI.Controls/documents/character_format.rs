@@ -1,6 +1,6 @@
 use super::{
-    Block, Inline, LineSpacingRule, LineStackingStrategy, Paragraph, TabAlignment, TabLeader,
-    TextElement, TextTabStop, TextTabStops, TypographyFormat,
+    Block, Inline, LineSpacingRule, LineStackingStrategy, MarkerAlignment, MarkerStyle, MarkerType,
+    Paragraph, TabAlignment, TabLeader, TextElement, TextTabStop, TextTabStops, TypographyFormat,
 };
 use ferroui_base::media::{
     BaselineAlignment, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
@@ -325,6 +325,15 @@ pub struct ParagraphFormat {
     pub right_indent: Option<f64>,
     pub tab_stops: Option<TextTabStops>,
     pub default_tab_stop: Option<f64>,
+    /// `ITextParagraphFormat.ListType`: `MarkerType::None` removes the paragraph from a list.
+    pub list_type: Option<MarkerType>,
+    pub list_style: Option<MarkerStyle>,
+    pub list_start: Option<i32>,
+    /// The marker space and the indent of a nested level, in layout units (0: two ems).
+    pub list_tab: Option<f64>,
+    /// 1-based list level, up to 9 (0: level 1).
+    pub list_level_index: Option<i32>,
+    pub list_alignment: Option<MarkerAlignment>,
 }
 
 impl PartialEq for ParagraphFormat {
@@ -342,6 +351,12 @@ impl PartialEq for ParagraphFormat {
             && self.right_indent == other.right_indent
             && self.tab_stops == other.tab_stops
             && self.default_tab_stop == other.default_tab_stop
+            && self.list_type == other.list_type
+            && self.list_style == other.list_style
+            && self.list_start == other.list_start
+            && self.list_tab == other.list_tab
+            && self.list_level_index == other.list_level_index
+            && self.list_alignment == other.list_alignment
     }
 }
 
@@ -362,6 +377,12 @@ impl ParagraphFormat {
             right_indent: paragraph.get_base_value(Paragraph::right_indent_property()),
             tab_stops: paragraph.get_base_value(Paragraph::tab_stops_property()),
             default_tab_stop: paragraph.get_base_value(Paragraph::default_tab_stop_property()),
+            list_type: paragraph.get_base_value(Paragraph::list_type_property()),
+            list_style: paragraph.get_base_value(Paragraph::list_style_property()),
+            list_start: paragraph.get_base_value(Paragraph::list_start_property()),
+            list_tab: paragraph.get_base_value(Paragraph::list_tab_property()),
+            list_level_index: paragraph.get_base_value(Paragraph::list_level_index_property()),
+            list_alignment: paragraph.get_base_value(Paragraph::list_alignment_property()),
         }
     }
 
@@ -381,6 +402,12 @@ impl ParagraphFormat {
             right_indent: Some(paragraph.right_indent()),
             tab_stops: Some(paragraph.tab_stops()),
             default_tab_stop: Some(paragraph.default_tab_stop()),
+            list_type: Some(paragraph.list_type()),
+            list_style: Some(paragraph.list_style()),
+            list_start: Some(paragraph.list_start()),
+            list_tab: Some(paragraph.list_tab()),
+            list_level_index: Some(paragraph.list_level_index()),
+            list_alignment: Some(paragraph.list_alignment()),
         }
     }
 
@@ -523,6 +550,19 @@ impl ParagraphFormat {
                 "Paragraph indents must be finite",
             ));
         }
+        if self.list_tab.is_some_and(|value| !value.is_finite() || value < 0.0) {
+            return Err(super::DocumentError::InvalidFormat(
+                "ListTab must be finite and nonnegative",
+            ));
+        }
+        if self
+            .list_level_index
+            .is_some_and(|value| !(0..=super::MAX_LIST_LEVEL).contains(&value))
+        {
+            return Err(super::DocumentError::InvalidFormat(
+                "ListLevelIndex must be between 0 and 9",
+            ));
+        }
         if self
             .line_height
             .is_some_and(|v| (!v.is_finite() && !v.is_nan()) || v < 0.0)
@@ -565,7 +605,13 @@ impl ParagraphFormat {
             line_spacing,
             left_indent,
             right_indent,
-            default_tab_stop
+            default_tab_stop,
+            list_type,
+            list_style,
+            list_start,
+            list_tab,
+            list_level_index,
+            list_alignment
         );
         if let Some(tabs) = &patch.tab_stops {
             result.tab_stops = Some(tabs.clone());
@@ -618,6 +664,24 @@ impl ParagraphFormat {
         if let Some(value) = self.default_tab_stop {
             paragraph.set_default_tab_stop(value);
         }
+        if let Some(value) = self.list_type {
+            paragraph.set_list_type(value);
+        }
+        if let Some(value) = self.list_style {
+            paragraph.set_list_style(value);
+        }
+        if let Some(value) = self.list_start {
+            paragraph.set_list_start(value);
+        }
+        if let Some(value) = self.list_tab {
+            paragraph.set_list_tab(value);
+        }
+        if let Some(value) = self.list_level_index {
+            paragraph.set_list_level_index(value);
+        }
+        if let Some(value) = self.list_alignment {
+            paragraph.set_list_alignment(value);
+        }
     }
 
     pub(crate) fn replace_on(&self, paragraph: &Paragraph) {
@@ -634,6 +698,12 @@ impl ParagraphFormat {
         paragraph.clear_value(Paragraph::right_indent_property());
         paragraph.clear_value(Paragraph::tab_stops_property());
         paragraph.clear_value(Paragraph::default_tab_stop_property());
+        paragraph.clear_value(Paragraph::list_type_property());
+        paragraph.clear_value(Paragraph::list_style_property());
+        paragraph.clear_value(Paragraph::list_start_property());
+        paragraph.clear_value(Paragraph::list_tab_property());
+        paragraph.clear_value(Paragraph::list_level_index_property());
+        paragraph.clear_value(Paragraph::list_alignment_property());
         self.apply_to(paragraph);
     }
 }

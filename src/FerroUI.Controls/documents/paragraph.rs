@@ -1,6 +1,6 @@
 use super::{
-    Block, BlockImpl, IInlineHost, Inline, InlineCollection, LineSpacingRule, TextElementImpl,
-    TextElementImplExt, TextTabStops,
+    Block, BlockImpl, IInlineHost, Inline, InlineCollection, LineSpacingRule, MarkerAlignment,
+    MarkerStyle, MarkerType, TextElementImpl, TextElementImplExt, TextTabStops, MAX_LIST_LEVEL,
 };
 use crate::Control;
 use ferroui_base::media::text_formatting::TextRun;
@@ -50,6 +50,12 @@ impl FerroObjectImpl for Paragraph {
             || change.property() == Self::right_indent_property().as_property()
             || change.property() == Self::tab_stops_property().as_property()
             || change.property() == Self::default_tab_stop_property().as_property()
+            || change.property() == Self::list_type_property().as_property()
+            || change.property() == Self::list_style_property().as_property()
+            || change.property() == Self::list_start_property().as_property()
+            || change.property() == Self::list_tab_property().as_property()
+            || change.property() == Self::list_level_index_property().as_property()
+            || change.property() == Self::list_alignment_property().as_property()
         {
             this.invalidate_format_change(change);
         }
@@ -124,6 +130,32 @@ ferroui_base::ferro_properties! {
         pub fn right_indent_property() -> StyledProperty<f64> {
             FerroProperty::register_with::<Paragraph, _>("RightIndent",
                 StyledPropertyOptions::new(0.0).validate(|value: &f64| value.is_finite()))
+        }
+
+        pub fn list_type_property() -> StyledProperty<MarkerType> {
+            FerroProperty::register::<Paragraph, _>("ListType", MarkerType::None)
+        }
+
+        pub fn list_style_property() -> StyledProperty<MarkerStyle> {
+            FerroProperty::register::<Paragraph, _>("ListStyle", MarkerStyle::Parenthesis)
+        }
+
+        pub fn list_start_property() -> StyledProperty<i32> {
+            FerroProperty::register::<Paragraph, _>("ListStart", 1)
+        }
+
+        pub fn list_tab_property() -> StyledProperty<f64> {
+            FerroProperty::register_with::<Paragraph, _>("ListTab",
+                StyledPropertyOptions::new(0.0).validate(|value: &f64| value.is_finite() && *value >= 0.0))
+        }
+
+        pub fn list_level_index_property() -> StyledProperty<i32> {
+            FerroProperty::register_with::<Paragraph, _>("ListLevelIndex",
+                StyledPropertyOptions::new(0).validate(|value: &i32| (0..=MAX_LIST_LEVEL).contains(value)))
+        }
+
+        pub fn list_alignment_property() -> StyledProperty<MarkerAlignment> {
+            FerroProperty::register::<Paragraph, _>("ListAlignment", MarkerAlignment::Left)
         }
     }
 }
@@ -219,6 +251,63 @@ impl Paragraph {
 
     pub fn set_right_indent(&self, value: f64) {
         self.set_value(Self::right_indent_property(), value);
+    }
+
+    /// The kind of the paragraph's list marker; `MarkerType::None` is no list.
+    pub fn list_type(&self) -> MarkerType {
+        self.get_value(Self::list_type_property())
+    }
+
+    pub fn set_list_type(&self, value: MarkerType) {
+        self.set_value(Self::list_type_property(), value);
+    }
+
+    /// The punctuation around the paragraph's list number.
+    pub fn list_style(&self) -> MarkerStyle {
+        self.get_value(Self::list_style_property())
+    }
+
+    pub fn set_list_style(&self, value: MarkerStyle) {
+        self.set_value(Self::list_style_property(), value);
+    }
+
+    /// The number of the first paragraph of a numbered sequence (for `UnicodeSequence`, the
+    /// first code point).
+    pub fn list_start(&self) -> i32 {
+        self.get_value(Self::list_start_property())
+    }
+
+    pub fn set_list_start(&self, value: i32) {
+        self.set_value(Self::list_start_property(), value);
+    }
+
+    /// The space for the marker before the text and the indent of each nested level, in
+    /// layout units; 0 is two ems of the paragraph's font. A marker wider than the space
+    /// widens it for its paragraph.
+    pub fn list_tab(&self) -> f64 {
+        self.get_value(Self::list_tab_property())
+    }
+
+    pub fn set_list_tab(&self, value: f64) {
+        self.set_value(Self::list_tab_property(), value);
+    }
+
+    /// The 1-based list level, up to 9; 0 lays out and numbers a list paragraph at level 1.
+    pub fn list_level_index(&self) -> i32 {
+        self.get_value(Self::list_level_index_property())
+    }
+
+    pub fn set_list_level_index(&self, value: i32) {
+        self.set_value(Self::list_level_index_property(), value);
+    }
+
+    /// Where the marker sits in its space.
+    pub fn list_alignment(&self) -> MarkerAlignment {
+        self.get_value(Self::list_alignment_property())
+    }
+
+    pub fn set_list_alignment(&self, value: MarkerAlignment) {
+        self.set_value(Self::list_alignment_property(), value);
     }
 
     pub fn as_add_child_of_inline(this: Ref<Self>) -> Rc<dyn IAddChild<Ref<Inline>>> {

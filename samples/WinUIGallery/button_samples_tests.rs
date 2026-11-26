@@ -303,13 +303,25 @@ fn split_button_swatches_close_their_flyouts() {
 }
 
 #[test]
-fn toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state() {
+fn toggle_split_button_bullets_set_the_symbol_the_name_the_checked_state_and_the_list() {
     use ferroui_controls::automation::AutomationProperties;
-    use ferroui_controls::{Symbol, SymbolIcon, ToggleSplitButton};
+    use ferroui_controls::documents::MarkerType;
+    use ferroui_controls::{RichEditBox, Symbol, SymbolIcon, ToggleSplitButton};
     let _application = start();
     let root = page("ToggleSplitButton");
     let list_button = root.get_control::<ToggleSplitButton>("myListButton");
     let icon = root.get_control::<SymbolIcon>("mySymbolIcon");
+    let editor = root.get_control::<RichEditBox>("myRichEditBox");
+    editor.set_text("one\ntwo").unwrap();
+    editor.select(0, 7);
+    let list_types = || {
+        editor
+            .rich_document()
+            .paragraphs()
+            .iter()
+            .map(|paragraph| paragraph.list_type())
+            .collect::<Vec<_>>()
+    };
     assert!(!list_button.is_checked());
     click(&root.get_control::<Button>("RomanNumeralsListButton"));
     assert_eq!(icon.symbol(), Symbol::Bullets);
@@ -318,7 +330,12 @@ fn toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state() {
         Some("Roman Numerals")
     );
     assert!(list_button.is_checked());
+    assert_eq!(list_types(), [MarkerType::UppercaseRoman; 2]);
+    // MyListButton_IsCheckedChanged: unchecking removes the list, checking applies the type.
     list_button.set_is_checked(false);
+    assert_eq!(list_types(), [MarkerType::None; 2]);
+    list_button.set_is_checked(true);
+    assert_eq!(list_types(), [MarkerType::UppercaseRoman; 2]);
     click(&root.get_control::<Button>("BulletedListButton"));
     assert_eq!(icon.symbol(), Symbol::List);
     assert_eq!(
@@ -326,6 +343,10 @@ fn toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state() {
         Some("Bullets")
     );
     assert!(list_button.is_checked());
+    assert_eq!(list_types(), [MarkerType::Bullet; 2]);
+    // Each change is an undo unit of the editor.
+    editor.undo().unwrap();
+    assert_eq!(list_types(), [MarkerType::UppercaseRoman; 2]);
 }
 
 #[test]

@@ -3,7 +3,8 @@
 
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{ContentPage, RichEditBox, RichTextBlock};
+use ferroui_controls::documents::{MarkerStyle, MarkerType, ParagraphFormat};
+use ferroui_controls::{Button, ContentPage, RichEditBox, RichTextBlock};
 
 #[repr(C)]
 pub struct RichEditBoxPage {
@@ -23,7 +24,40 @@ impl RichEditBoxPage {
         let this = instantiate(Self::construct());
         this.initialize_component();
         this.follow_the_editor();
+        this.wire_list_buttons();
         this
+    }
+
+    /// The list buttons: a list is the list type of the selected paragraphs, and its level is
+    /// changed by `change_list_level` (Tab and Shift+Tab do the same at the start of an item).
+    fn wire_list_buttons(&self) {
+        let editor = self.get_control::<RichEditBox>("Editor");
+        let lists = [
+            ("BulletsButton", MarkerType::Bullet, MarkerStyle::Parenthesis),
+            ("NumbersButton", MarkerType::Arabic, MarkerStyle::Period),
+            ("RomanButton", MarkerType::UppercaseRoman, MarkerStyle::Period),
+            ("NoListButton", MarkerType::None, MarkerStyle::Parenthesis),
+        ];
+        for (name, list_type, list_style) in lists {
+            let weak_editor = editor.downgrade();
+            self.get_control::<Button>(name).click(move |_, _| {
+                if let Some(editor) = weak_editor.upgrade() {
+                    let _ = editor.apply_paragraph_format(&ParagraphFormat {
+                        list_type: Some(list_type),
+                        list_style: Some(list_style),
+                        ..Default::default()
+                    });
+                }
+            });
+        }
+        for (name, delta) in [("IndentButton", 1), ("OutdentButton", -1)] {
+            let weak_editor = editor.downgrade();
+            self.get_control::<Button>(name).click(move |_, _| {
+                if let Some(editor) = weak_editor.upgrade() {
+                    let _ = editor.change_list_level(delta);
+                }
+            });
+        }
     }
 
     /// The preview shows a copy of the editor's document: a document belongs to one

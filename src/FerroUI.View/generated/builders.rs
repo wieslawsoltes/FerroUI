@@ -6554,6 +6554,36 @@ pub trait ParagraphProps: ElementBuilder {
     fn right_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::right_indent_property(), value)
     }
+
+    /// Sets [`Paragraph::list_type_property`](ferroui_controls::documents::Paragraph::list_type_property).
+    fn list_type<M>(self, value: impl IntoProp<ferroui_controls::documents::MarkerType, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_type_property(), value)
+    }
+
+    /// Sets [`Paragraph::list_style_property`](ferroui_controls::documents::Paragraph::list_style_property).
+    fn list_style<M>(self, value: impl IntoProp<ferroui_controls::documents::MarkerStyle, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_style_property(), value)
+    }
+
+    /// Sets [`Paragraph::list_start_property`](ferroui_controls::documents::Paragraph::list_start_property).
+    fn list_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_start_property(), value)
+    }
+
+    /// Sets [`Paragraph::list_tab_property`](ferroui_controls::documents::Paragraph::list_tab_property).
+    fn list_tab<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_tab_property(), value)
+    }
+
+    /// Sets [`Paragraph::list_level_index_property`](ferroui_controls::documents::Paragraph::list_level_index_property).
+    fn list_level_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_level_index_property(), value)
+    }
+
+    /// Sets [`Paragraph::list_alignment_property`](ferroui_controls::documents::Paragraph::list_alignment_property).
+    fn list_alignment<M>(self, value: impl IntoProp<ferroui_controls::documents::MarkerAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::list_alignment_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::documents::Paragraph>> ParagraphProps for El<T> {}
 

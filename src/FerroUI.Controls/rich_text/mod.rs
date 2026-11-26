@@ -5,6 +5,7 @@ mod rich_edit_text_field_story;
 mod rich_text_editor;
 mod rich_text_field_story;
 mod rich_text_link;
+mod rich_text_lists;
 mod rich_text_transfer;
 mod rtf;
 
