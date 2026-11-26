@@ -481,7 +481,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | DatePicker | 2 of 2 | ported | `date_samples.rs` | `date_samples_tests.rs` |
 | TimePicker | 3 of 3 | ported | `date_samples.rs` (no code-behind upstream) | `date_samples_tests.rs` |
 | CalendarDatePicker | 1 of 1 | ported | `Pages/CalendarDatePicker.xaml` (no code-behind upstream) | `date_samples_tests.rs` |
-| CalendarView | 1 partial: no IsGroupLabelVisible (CalendarIdentifier, Language and IsOutOfScopeEnabled: section 10.14) | partial | `date_samples.rs` | `date_samples_tests.rs` |
+| CalendarView | 1 ported (CalendarIdentifier, Language, IsOutOfScopeEnabled and IsGroupLabelVisible: section 10.14) | ported | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
 | ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
 | TreeView | 4 of 4; the first tree's drag and drop is in the sample | ported | `tree_samples.rs` | `tree_samples_tests.rs` |
@@ -550,14 +550,14 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
 
-### 10.14 CalendarView: calendar systems
+### 10.14 CalendarView: calendar systems and group labels
 
 WinUI's `CalendarView.CalendarIdentifier` selects the calendar system of the views, and
 `FrameworkElement.Language` the language of their names. FerroUI's `Calendar` has
 `CalendarIdentifier` (a string, one of `CalendarIdentifiers`: the ten identifiers of
 `Windows.Globalization.CalendarIdentifiers` the gallery lists), `Language` (the inherited
 `TextElement.Language`; set on the calendar, it is the language of the names) and
-`IsOutOfScopeEnabled`. The month and year arithmetic of the views (the first day of a month,
+`IsOutOfScopeEnabled` and `IsGroupLabelVisible`. The month and year arithmetic of the views (the first day of a month,
 moving by months and years, the months of a year, the decades) goes through the calendar system
 of the calendar (`calendar/calendar_system.rs`); the dates stay `DateTime` values.
 
@@ -569,4 +569,5 @@ of the calendar (`calendar/calendar_system.rs`); the dates stay `DateTime` value
 | The Gregorian calendar with the names of the current culture. | The same: the arithmetic and names of the calendar as before, with nothing allocated, unless `Language` is set on the calendar, which writes the names with ICU's data for that language. | No change for the default calendar. |
 | The year view of a lunisolar calendar shows the thirteenth month of a leap year. | The year view has one more button, in a fourth row of the year grid, shown only for the thirteenth month of a Hebrew leap year; the Fluent and Simple themes have that row (Auto, empty otherwise), the WinUI, macOS and Material themes already had four. Moving by years keeps the month by its code: a year after Adar I is Adar. | The month layout of WinUI's year view; the row does not change the twelve-month years. |
 | The week numbers (none in WinUI). | `IsWeekNumberVisible` counts the Gregorian weeks of the days. | A FerroUI addition, left as it is. |
-| `IsGroupLabelVisible` shows the month name on the first day of each month. | Not ported. | Left for a later change; the gallery page stays partial for it. |
+| `IsGroupLabelVisible` (false by default) shows the abbreviated month name on the first day of each month (`CalendarViewGeneratorMonthViewHost::UpdateLabel`); the chrome creates the label text block the first time it is needed (`CalendarViewBaseItemChrome::UpdateLabelText`). | `Calendar.IsGroupLabelVisible`: the calendar gives the first day of each month of the month view the name of its calendar system (`month_abbreviation`, the name of the year view) and the `:grouplabel` pseudo-class. The theme style of that pseudo-class sets a template with the text block `PART_GroupLabel` (in the WinUI, macOS and Material themes 8 px with the margin 0,2,0,0 from `CalendarViewFirstOfMonthLabelFontSize` and `CalendarViewFirstOfMonthLabelMargin`, centred at the top, in the foreground of the day; the same in Fluent; above the day in Simple, whose cells are too small to draw over the day). | A style cannot add an element on demand; only the labelled days swap their template, so a calendar without labels formats no name and creates no element. |
+| `IsGroupLabelVisible` also labels the first month of each year in the scrolling year view with the year (`CalendarViewGeneratorYearViewHost::UpdateLabel`, `FirstOfYearDecadeLabel*`); the decade view has no label. | Not shown. | FerroUI's year view shows the months of one year under a header with that year, so the label would repeat the header (CLB-5 of the theme deviations). |

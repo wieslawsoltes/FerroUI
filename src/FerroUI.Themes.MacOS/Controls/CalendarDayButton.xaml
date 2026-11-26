@@ -28,8 +28,9 @@
     matching one gives the value the chrome chooses.
   - The text: DayItemFontSize (CalendarViewDayItemFontSize), DayItemFontFamily (XamlAutoFontFamily),
     TodayFontWeight (CalendarViewTodayFontWeight) for today, the text margin DayItemMargin
-    (CalendarViewDayItemMargin) inside the item; the labels of the first day of a month
-    (IsGroupLabelVisible, False by default) are not ported: FerroUI's Calendar has no such labels.
+    (CalendarViewDayItemMargin) inside the item. The label of the first day of a month
+    (IsGroupLabelVisible, False by default) is the TextBlock PART_GroupLabel of the template of the
+    :grouplabel pseudo-class, which the calendar sets on those days only.
   - The Padding 0,0,0,4 of the implicit style of CalendarViewDayItem is 0,0,0,2: measured at 200 %
     against WinUI, 0 put the text of the days 2 px below WinUI's and 4 put it 2 px above (CDB-10).
   - The focus visual (UseSystemFocusVisuals, FocusVisualMargin -3, CalendarViewFocusVisualPrimaryBrush
@@ -116,6 +117,72 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+
+    <!-- First of month (Calendar.IsGroupLabelVisible, CalendarViewGeneratorMonthViewHost::UpdateLabel):
+         the label text block of the chrome with the abbreviated name of the month,
+         FirstOfMonthLabelFontSize (CalendarViewFirstOfMonthLabelFontSize), the Normal
+         FirstOfMonthLabelFontWeight, FirstOfMonthLabelMargin (CalendarViewFirstOfMonthLabelMargin),
+         centred at the top (HorizontalFirstOfMonthLabelAlignment, VerticalFirstOfMonthLabelAlignment)
+         and the foreground of the text of the day (UpdateTextBlockForeground). Only the first days
+         of the months use this template while the labels are shown, so a calendar without labels
+         creates nothing more. -->
+    <Style Selector="^:grouplabel">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel>
+            <Border x:Name="OuterBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    IsHitTestVisible="False" />
+            <Border x:Name="InnerBorder"
+                    Margin="{TemplateBinding BorderThickness}"
+                    BorderThickness="1"
+                    CornerRadius="19"
+                    IsHitTestVisible="False" />
+            <Panel Margin="{TemplateBinding BorderThickness}">
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                Margin="{TemplateBinding Padding}"
+                                Padding="{DynamicResource CalendarViewDayItemMargin}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+              <TextBlock x:Name="PART_GroupLabel"
+                         FontSize="{DynamicResource CalendarViewFirstOfMonthLabelFontSize}"
+                         FontWeight="Normal"
+                         Margin="{DynamicResource CalendarViewFirstOfMonthLabelMargin}"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Top"
+                         Foreground="{Binding #PART_ContentPresenter.Foreground}" />
+            </Panel>
+            <!-- 1.25 x 14 px wide and high, centred (CalendarViewBaseItemChrome::SetBlackoutStrikethroughSize). -->
+            <Path x:Name="BlackoutStrikethrough"
+                  Data="M 0,0 L 18,18"
+                  Stroke="{DynamicResource CalendarViewBlackoutStrikethroughBrush}"
+                  StrokeThickness="1"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  IsHitTestVisible="False"
+                  IsVisible="False" />
+            <Border x:Name="FocusVisual"
+                    Margin="-3"
+                    BorderThickness="2"
+                    BorderBrush="{DynamicResource CalendarViewFocusVisualPrimaryBrush}"
+                    CornerRadius="23"
+                    IsHitTestVisible="False"
+                    IsVisible="False">
+              <Border BorderThickness="1"
+                      BorderBrush="{DynamicResource CalendarViewFocusVisualSecondaryBrush}"
+                      CornerRadius="21" />
+            </Border>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
 
     <!-- Hovered -->
     <Style Selector="^:pointerover">

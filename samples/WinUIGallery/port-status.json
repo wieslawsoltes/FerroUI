@@ -281,7 +281,7 @@
       "examples": []
     },
     "CalendarView": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/CalendarView.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -299,9 +299,13 @@
         {
           "path": "samples/WinUIGallery/date_samples_tests.rs",
           "name": "calendar_view_identifier_language_and_out_of_scope_options_set_the_calendar"
+        },
+        {
+          "path": "samples/WinUIGallery/date_samples_tests.rs",
+          "name": "calendar_view_group_label_option_sets_the_calendar"
         }
       ],
-      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). The CalendarIdentifier, Language and IsOutOfScopeEnabled options set the calendar's CalendarIdentifier (the ten identifiers of the source, with the feature calendar-systems of ferroui-controls), Language (the language list of the source) and IsOutOfScopeEnabled. FerroUI's Calendar has no IsGroupLabelVisible, so that option is left out and the page is partial.",
+      "notes": "The source example uses native Calendar (WinUI's CalendarView) with SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs in Rust (None, Single as SingleDate, Multiple as MultipleRange). The CalendarIdentifier, Language and IsOutOfScopeEnabled options set the calendar's CalendarIdentifier (the ten identifiers of the source, with the feature calendar-systems of ferroui-controls), Language (the language list of the source) and IsOutOfScopeEnabled. The IsGroupLabelVisible option sets the calendar's IsGroupLabelVisible (the abbreviated month name on the first day of each month).",
       "examples": []
     },
     "Canvas": {

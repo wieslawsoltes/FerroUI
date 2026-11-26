@@ -2084,4 +2084,68 @@ mod additional {
         assert!(calendar.system().is_default());
         assert_eq!("February 2024", header(&item));
     }
+
+    // IsGroupLabelVisible (#1259).
+
+    fn labelled_days(item: &CalendarItem) -> Vec<(usize, String)> {
+        (7..49).filter_map(|index| day(item, index).group_label().map(|label| (index, label))).collect()
+    }
+
+    #[test]
+    fn group_labels_name_the_month_on_its_first_day() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 2, 15));
+        assert!(!calendar.is_group_label_visible());
+        assert!(labelled_days(&item).is_empty());
+        assert!(!(7..49).any(|index| day(&item, index).classes().contains(":grouplabel")));
+
+        calendar.set_is_group_label_visible(true);
+        // 1 February 2024 is a Thursday (index 11); 1 March is 29 days later.
+        assert_eq!(vec![(11, "Feb".to_string()), (40, "Mar".to_string())], labelled_days(&item));
+        assert!(day(&item, 11).classes().contains(":grouplabel"));
+        assert!(!day(&item, 12).classes().contains(":grouplabel"));
+
+        // 1 March 2024 is a Friday; 1 April is 31 days later.
+        calendar.on_next_click();
+        assert_eq!(vec![(12, "Mar".to_string()), (43, "Apr".to_string())], labelled_days(&item));
+        assert!(!day(&item, 11).classes().contains(":grouplabel"));
+
+        calendar.set_is_group_label_visible(false);
+        assert!(labelled_days(&item).is_empty());
+        assert!(!(7..49).any(|index| day(&item, index).classes().contains(":grouplabel")));
+    }
+
+    #[test]
+    fn group_label_sets_the_text_of_the_label_part_of_the_template() {
+        let _scope = start();
+        let button = CalendarDayButton::new();
+        button.set_template(Some(FuncControlTemplate::for_type::<CalendarDayButton>(|_, scope| {
+            let label = TextBlock::new();
+            label.set_name(Some("PART_GroupLabel".to_string()));
+            label.register_in_name_scope(&**scope).upcast()
+        })));
+        button.set_group_label(Some("Jan".to_string()));
+        assert!(button.classes().contains(":grouplabel"));
+        button.apply_template();
+        let label = button.visual_children().get(0).cast::<TextBlock>().expect("the label part");
+        assert_eq!(Some("Jan".to_string()), label.text());
+        button.set_group_label(Some("Feb".to_string()));
+        assert_eq!(Some("Feb".to_string()), label.text());
+        button.set_group_label(None);
+        assert_eq!(None, label.text());
+        assert!(!button.classes().contains(":grouplabel"));
+    }
+
+    #[cfg(feature = "calendar-systems")]
+    #[test]
+    fn group_labels_follow_the_calendar_system() {
+        let _scope = start();
+        let (calendar, item) = create_calendar(date(2024, 10, 3));
+        calendar.set_is_group_label_visible(true);
+        calendar.set_calendar_identifier(CalendarIdentifiers::HEBREW);
+        // 1 Tishri 5785 is 3 October 2024 (index 11); 1 Heshvan is 30 days later.
+        let labels = labelled_days(&item);
+        assert_eq!(vec![11, 41], labels.iter().map(|(index, _)| *index).collect::<Vec<_>>(), "{labels:?}");
+        assert!(labels[0].1.starts_with("Tishri") || labels[0].1.starts_with("Tis"), "{labels:?}");
+    }
 }

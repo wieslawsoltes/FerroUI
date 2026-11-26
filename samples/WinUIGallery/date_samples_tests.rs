@@ -115,3 +115,18 @@ fn calendar_view_identifier_language_and_out_of_scope_options_set_the_calendar()
     out_of_scope.set_is_checked(Some(true));
     assert!(calendar.is_out_of_scope_enabled());
 }
+
+#[test]
+fn calendar_view_group_label_option_sets_the_calendar() {
+    let _application = start();
+    let root = page("CalendarView");
+    let calendar = root.get_control::<Calendar>("Control1");
+    // The check box of the source is checked at first, and so are the labels.
+    assert!(calendar.is_group_label_visible());
+    let group_label = root.get_control::<CheckBox>("isGroupLabelVisible");
+    assert_eq!(group_label.is_checked(), Some(true));
+    group_label.set_is_checked(Some(false));
+    assert!(!calendar.is_group_label_visible());
+    group_label.set_is_checked(Some(true));
+    assert!(calendar.is_group_label_visible());
+}
