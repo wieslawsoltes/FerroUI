@@ -1,0 +1,20 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="AnnotatedScrollBar"
+             x:Class="ControlCatalog.Pages.AnnotatedScrollBarPage">
+  <!-- Not from upstream: WinUI's AnnotatedScrollBar (docs/porting/winui-controls.md, section 10.13).
+       Its template is in the WinUI theme and the macOS and Material themes derived from it. The
+       labels, the detail label and the link to the view are set by the class of the page. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">An AnnotatedScrollBar scrolls a ScrollView through its scroll controller: its labels mark offsets of the content, a press or a drag on the rail scrolls there, and the detail label under the pointer names the section.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A list of 26 sections, one label per section</TextBlock>
+    <Grid Margin="2" Height="320" ColumnDefinitions="300,Auto" HorizontalAlignment="Left">
+      <ScrollView x:Name="View" VerticalScrollBarVisibility="Hidden">
+        <StackPanel x:Name="Lines" />
+      </ScrollView>
+      <AnnotatedScrollBar x:Name="Bar" Grid.Column="1" Margin="4,0,0,0" />
+    </Grid>
+    <TextBlock x:Name="Scrolling" Margin="2" />
+  </StackPanel>
+</ContentPage>

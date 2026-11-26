@@ -135,6 +135,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Pivot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SwipeControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ScrollView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AnnotatedScrollBar.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

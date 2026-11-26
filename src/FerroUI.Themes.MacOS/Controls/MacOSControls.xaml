@@ -123,6 +123,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Pivot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SwipeControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ScrollView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AnnotatedScrollBar.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

@@ -90,6 +90,7 @@
         <MergeResourceInclude Source="/Resources/PagerControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PipsPager_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AnnotatedScrollBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SelectorBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TitleBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TabularSurfaces_themeresources.xaml" />

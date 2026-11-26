@@ -7,6 +7,7 @@
 ferroui_base::ferro_rust_paths! {
     classes: [
         crate::AdaptiveTrigger,
+        crate::AnnotatedScrollBar,
         crate::Application,
         crate::AutoCompleteBox,
         crate::AutoSuggestBox,
@@ -388,6 +389,10 @@ ferroui_base::ferro_rust_paths! {
     ],
     types: [
         crate::AcrylicPlatformCompensationLevels,
+        crate::AnnotatedScrollBarDetailLabelRequestedEventArgs,
+        crate::AnnotatedScrollBarLabel,
+        crate::AnnotatedScrollBarScrollingEventArgs,
+        crate::AnnotatedScrollBarScrollingEventKind,
         crate::AutoCompleteFilterMode,
         crate::AutoSuggestBoxQuerySubmittedEventArgs,
         crate::AutoSuggestBoxSuggestionChosenEventArgs,

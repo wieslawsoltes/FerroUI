@@ -426,6 +426,136 @@
     ]
   },
   {
+    "name": "AnnotatedScrollBar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AnnotatedScrollBar",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "Labels": {
+        "name": "Labels",
+        "type_name": "Option<FerroList<AnnotatedScrollBarLabel>>",
+        "documentation": "AnnotatedScrollBar.Labels: Option<FerroList<AnnotatedScrollBarLabel>>",
+        "values": [],
+        "attached": false
+      },
+      "LabelTemplate": {
+        "name": "LabelTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "AnnotatedScrollBar.LabelTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "DetailLabelTemplate": {
+        "name": "DetailLabelTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "AnnotatedScrollBar.DetailLabelTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "SmallChange": {
+        "name": "SmallChange",
+        "type_name": "f64",
+        "documentation": "AnnotatedScrollBar.SmallChange: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AnnotatedScrollBarDetailLabelRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AnnotatedScrollBarDetailLabelRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ScrollOffset": {
+        "name": "ScrollOffset",
+        "type_name": "f64",
+        "documentation": "AnnotatedScrollBarDetailLabelRequestedEventArgs.ScrollOffset: f64",
+        "values": []
+      },
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "AnnotatedScrollBarDetailLabelRequestedEventArgs.Content: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AnnotatedScrollBarLabel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AnnotatedScrollBarLabel",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "AnnotatedScrollBarLabel.Content: Option<BoxedValue>",
+        "values": []
+      },
+      "ScrollOffset": {
+        "name": "ScrollOffset",
+        "type_name": "f64",
+        "documentation": "AnnotatedScrollBarLabel.ScrollOffset: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AnnotatedScrollBarScrollingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AnnotatedScrollBarScrollingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ScrollOffset": {
+        "name": "ScrollOffset",
+        "type_name": "f64",
+        "documentation": "AnnotatedScrollBarScrollingEventArgs.ScrollOffset: f64",
+        "values": []
+      },
+      "ScrollingEventKind": {
+        "name": "ScrollingEventKind",
+        "type_name": "AnnotatedScrollBarScrollingEventKind",
+        "documentation": "AnnotatedScrollBarScrollingEventArgs.ScrollingEventKind: AnnotatedScrollBarScrollingEventKind",
+        "values": [
+          "Click",
+          "Drag",
+          "IncrementButton",
+          "DecrementButton"
+        ]
+      },
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "AnnotatedScrollBarScrollingEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Application",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Application",

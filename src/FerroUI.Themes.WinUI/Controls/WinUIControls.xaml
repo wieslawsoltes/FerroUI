@@ -67,6 +67,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Pivot.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/SwipeControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ScrollView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AnnotatedScrollBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TitleBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressRing.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowNotificationManager.xaml" />

@@ -134,8 +134,8 @@
    "key": "{AnnotatedScrollBar}",
    "kind": "Style",
    "target_type": "AnnotatedScrollBar",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -144,8 +144,8 @@
    "key": "AnnotatedScrollBarTooltipMaxWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -154,8 +154,8 @@
    "key": "AnnotatedScrollBarTooltipMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -164,8 +164,8 @@
    "key": "LabelsGridMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -174,8 +174,8 @@
    "key": "ScrollButtonFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -184,8 +184,8 @@
    "key": "ScrollButtonStyle",
    "kind": "Style",
    "target_type": "RepeatButton",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -194,8 +194,8 @@
    "key": "ThumbCornerRadius",
    "kind": "CornerRadius",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -204,8 +204,8 @@
    "key": "ThumbHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -214,8 +214,8 @@
    "key": "ThumbWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -224,8 +224,8 @@
    "key": "ScrollButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -234,8 +234,8 @@
    "key": "ScrollButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -244,8 +244,8 @@
    "key": "ScrollButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -254,8 +254,8 @@
    "key": "ScrollButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -264,8 +264,8 @@
    "key": "ScrollButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -274,8 +274,8 @@
    "key": "ScrollButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -284,8 +284,8 @@
    "key": "ScrollButtonStyleBorderThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -294,8 +294,8 @@
    "key": "VerticalThumbBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -304,8 +304,8 @@
    "key": "ScrollButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -314,8 +314,8 @@
    "key": "ScrollButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -324,8 +324,8 @@
    "key": "ScrollButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -334,8 +334,8 @@
    "key": "ScrollButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -344,8 +344,8 @@
    "key": "ScrollButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -354,8 +354,8 @@
    "key": "ScrollButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -364,8 +364,8 @@
    "key": "ScrollButtonStyleBorderThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -374,8 +374,8 @@
    "key": "VerticalThumbBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -384,8 +384,8 @@
    "key": "ScrollButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -394,8 +394,8 @@
    "key": "ScrollButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -404,8 +404,8 @@
    "key": "ScrollButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -414,8 +414,8 @@
    "key": "ScrollButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -424,8 +424,8 @@
    "key": "ScrollButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -434,8 +434,8 @@
    "key": "ScrollButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -444,8 +444,8 @@
    "key": "ScrollButtonStyleBorderThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -454,8 +454,8 @@
    "key": "VerticalThumbBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90058,6 +90058,7 @@
  "port_documents": [
   "WinUITheme.xaml",
   "Controls/AdornerLayer.xaml",
+  "Controls/AnnotatedScrollBar.xaml",
   "Controls/AutoCompleteBox.xaml",
   "Controls/AutoSuggestBox.xaml",
   "Controls/Button.xaml",
@@ -90164,6 +90165,7 @@
   "Controls/WindowNotificationManager.xaml",
   "DensityStyles/Compact.xaml",
   "Resources/AcrylicBrush_themeresources.xaml",
+  "Resources/AnnotatedScrollBar_themeresources.xaml",
   "Resources/AppBarButton_themeresources.xaml",
   "Resources/AppBarSeparator_themeresources.xaml",
   "Resources/AppBarToggleButton_themeresources.xaml",
@@ -90849,6 +90851,17 @@
    "date": "2026-11-26"
   },
   {
+   "document": "AnnotatedScrollBar.xaml",
+   "themes": [
+    "{AnnotatedScrollBar}"
+   ],
+   "batch": "B6",
+   "winui": "AnnotatedScrollBar: {AnnotatedScrollBar} (AnnotatedScrollBar.xaml; AnnotatedScrollBar_themeresources.xaml with ScrollButtonStyle). A WinUI control in ferroui-controls (docs/porting/winui-controls.md, section 10.13); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 0,
+   "date": "2026-11-26"
+  },
+  {
    "document": "NumericUpDown.xaml",
    "themes": [
     "{NumericUpDown}"
@@ -91515,20 +91528,6 @@
    "items": 2
   },
   {
-   "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "AnnotatedScrollBar: no FerroUI control.",
-   "items": 32
-  },
-  {
    "document": "controls/dev/ItemsView/ItemsView.xaml",
    "key": "*",
    "variant": null,
@@ -91896,6 +91895,10 @@
   },
   "ScrollView": {
    "ferroui": "ScrollView",
+   "batch": "B6"
+  },
+  "AnnotatedScrollBar": {
+   "ferroui": "AnnotatedScrollBar",
    "batch": "B6"
   },
   "InfoBar": {

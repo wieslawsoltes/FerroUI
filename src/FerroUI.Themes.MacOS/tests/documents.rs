@@ -248,6 +248,7 @@ document_tests! {
     resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
     resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
     resources_scroll_view_themeresources => "/Resources/ScrollView_themeresources.xaml";
+    resources_annotated_scroll_bar_themeresources => "/Resources/AnnotatedScrollBar_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -282,6 +283,7 @@ document_tests! {
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
     controls_scroll_view => "/Controls/ScrollView.xaml";
+    controls_annotated_scroll_bar => "/Controls/AnnotatedScrollBar.xaml";
 }
 
 #[test]

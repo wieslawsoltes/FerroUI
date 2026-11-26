@@ -161,6 +161,11 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::ScrollingScrollCompletedEventArgs as MarkupTyped>::MARKUP,
     <crate::ScrollingZoomCompletedEventArgs as MarkupTyped>::MARKUP,
     <crate::ScrollingScrollStartingEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's AnnotatedScrollBar (docs/porting/winui-controls.md, section 10.13).
+    <crate::AnnotatedScrollBarScrollingEventKind as MarkupTyped>::MARKUP,
+    <crate::AnnotatedScrollBarLabel as MarkupTyped>::MARKUP,
+    <crate::AnnotatedScrollBarScrollingEventArgs as MarkupTyped>::MARKUP,
+    <crate::AnnotatedScrollBarDetailLabelRequestedEventArgs as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -212,6 +217,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<crate::ScrollingInputKinds>();
     ValueTypes::register_used::<crate::ScrollingAnimationMode>();
     ValueTypes::register_used::<crate::ScrollingSnapPointsMode>();
+    ValueTypes::register_used::<crate::AnnotatedScrollBarScrollingEventKind>();
     ValueTypes::register_used::<crate::PagerControlButtonVisibility>();
     ValueTypes::register_used::<crate::media::ApplicationTheme>();
     ValueTypes::register_used::<crate::media::RevealBrushState>();
@@ -452,5 +458,11 @@ impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingAnimati
 impl ferroui_base::data::core::ValueTypeRegistration for crate::ScrollingSnapPointsMode {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<crate::ScrollingSnapPointsMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::AnnotatedScrollBarScrollingEventKind {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::AnnotatedScrollBarScrollingEventKind>();
     }
 }

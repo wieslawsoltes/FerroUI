@@ -153,6 +153,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ScrollViewerPage.xaml", "ScrollViewer", Icons::SCROLL, "Scrollable viewport over large content");
             // Not from upstream: ScrollView of WinUI (docs/porting/winui-controls.md, section 10.12).
             s.add("/Pages/ScrollViewPage.xaml", "ScrollView", Icons::SCROLL, "WinUI's scroller with a presenter, scroll bars and animated view changes");
+            // Not from upstream: AnnotatedScrollBar of WinUI (docs/porting/winui-controls.md, section 10.13).
+            s.add("/Pages/AnnotatedScrollBarPage.xaml", "AnnotatedScrollBar", Icons::SCROLL, "WinUI's scroll bar with labels and a detail label for a ScrollView");
             s.add("/Pages/ViewboxPage.xaml", "Viewbox", Icons::VIEWBOX, "Scale content to fit available space");
             // Not from upstream: WinUI's visual state manager.
             s.add("/Pages/VisualStatesPage.xaml", "Visual States", Icons::LAYOUT, "WinUI visual state groups, states and setters");

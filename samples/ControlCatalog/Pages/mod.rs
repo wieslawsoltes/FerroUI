@@ -64,6 +64,7 @@ mod auto_suggest_box_page;
 mod rich_edit_box_page;
 mod rich_text_block_page;
 mod number_box_page;
+mod annotated_scroll_bar_page;
 mod scroll_view_page;
 mod radio_buttons_page;
 mod person_picture_page;
@@ -274,6 +275,7 @@ pub use winui_composition_page::{
 };
 pub use winui_composition_pages::{smoke_run_section, smoke_section_count, smoke_section_header, smoke_show_section};
 pub use winui_materials_page::smoke_set_materials_backdrop;
+pub use annotated_scroll_bar_page::AnnotatedScrollBarPage;
 pub use scroll_view_page::ScrollViewPage;
 pub use scroll_viewer_page::{ScrollViewerPage, ScrollViewerPageViewModel};
 pub use section_page::SectionPage;
@@ -363,6 +365,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     RatingControlPage::TYPE,
     ItemsRepeaterPage::TYPE,
     ScrollViewPage::TYPE,
+    AnnotatedScrollBarPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -480,6 +483,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &RatingControlPage::XAML_CLASS,
     &ItemsRepeaterPage::XAML_CLASS,
     &ScrollViewPage::XAML_CLASS,
+    &AnnotatedScrollBarPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,

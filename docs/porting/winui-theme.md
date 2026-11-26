@@ -551,6 +551,7 @@ ports a control updates its state by porting it, not by editing the table.
 | `InfoBadge.xaml` | `{InfoBadge}` | InfoBadge: {InfoBadge} (InfoBadge.xaml), DefaultInfoBadgeStyle and the Attention, Informational, Success, Caution and Critical styles (InfoBadge_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B1 | ported |
 | `SwipeControl.xaml` | `{SwipeControl}`, `SwipeItemStyle` | SwipeControl: {SwipeControl} (SwipeControl.xaml, DefaultSwipeControlStyle) and SwipeItemStyle (SwipeControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, SW-1); the Fluent theme has no document for it. | B6 | ported |
 | `ScrollView.xaml` | `{ScrollView}` | ScrollView: {ScrollView} (ScrollView.xaml, DefaultScrollViewStyle; ScrollView_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md, section 10.12); the Fluent theme has no document for it. | B6 | ported |
+| `AnnotatedScrollBar.xaml` | `{AnnotatedScrollBar}` | AnnotatedScrollBar: {AnnotatedScrollBar} (AnnotatedScrollBar.xaml; AnnotatedScrollBar_themeresources.xaml with ScrollButtonStyle). A WinUI control in ferroui-controls (docs/porting/winui-controls.md, section 10.13); the Fluent theme has no document for it. | B6 | ported |
 | `NumericUpDown.xaml` | `{NumericUpDown}` | NumberBox: {NumberBox}, NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle (NumberBox.xaml, NumberBox_themeresources.xaml). | B2 | ported |
 | `OverlayPopupHost.xaml` | `{OverlayPopupHost}` | No WinUI style: the text of the window (TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize). | F | ported |
 | `PathIcon.xaml` | `{PathIcon}` | No WinUI style (IconElement has no template): the Path that WinUI's PathIcon builds in code (CPathIcon::ApplyTemplate, icon.cpp), unscaled and filled with the Foreground. | B1 | ported |
@@ -609,6 +610,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 
 | WinUI target type | FerroUI control | Batch | Note |
 |---|---|---|---|
+| `AnnotatedScrollBar` | `AnnotatedScrollBar` | B6 |  |
 | `AppBarButton` | `CommandBarButton` | B5 |  |
 | `AppBarSeparator` | `CommandBarSeparator` | B5 |  |
 | `AppBarToggleButton` | `CommandBarToggleButton` | B5 |  |
@@ -704,7 +706,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridViewHeaderItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridViewHeaderItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 
