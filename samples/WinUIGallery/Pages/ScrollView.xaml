@@ -1,0 +1,117 @@
+<!-- Ported from the three pinned ScrollView examples of WinUI Gallery (14061eea) and the code behind
+     of ScrollViewPage.xaml.cs (scroll_view_samples.rs); see ../NOTICE.md. The images are the
+     source's SampleMedia pictures, set by scroll_view_samples.rs. The NumberBox of the zoom factor
+     has no DecimalFormatter (FerroUI's NumberBox formats the value itself); the code snippets of
+     the third example (Example3.CSharp) are not shown. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Content inside of a ScrollView" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="16">
+        <TextBlock TextWrapping="Wrap"
+                   Text="This ScrollView allows horizontal and vertical scrolling, as well as zooming. Change the settings on the right to alter those capabilities or the built-in scrollbars' visibility." />
+        <ScrollView x:Name="scrollView1" Width="400" Height="266" HorizontalAlignment="Left"
+                    VerticalAlignment="Top" ContentOrientation="None" IsTabStop="True" ZoomMode="Enabled">
+          <Image x:Name="cliffImage" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 AutomationProperties.Name="cliff" Stretch="Uniform" />
+        </ScrollView>
+      </StackPanel>
+      <Grid Grid.Column="1" MinWidth="200" ColumnDefinitions="Auto,*" ColumnSpacing="12"
+            RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="16">
+        <TextBlock VerticalAlignment="Center" Text="ZoomMode" />
+        <ComboBox x:Name="cmbZoomMode" Grid.Column="1" HorizontalAlignment="Stretch"
+                  AutomationProperties.Name="zoom mode" SelectedIndex="0">
+          <ComboBoxItem>Enabled</ComboBoxItem>
+          <ComboBoxItem>Disabled</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="ZoomFactor" />
+        <NumberBox x:Name="nbZoomFactor" Grid.Row="1" Grid.Column="1" AutomationProperties.Name="zoom factor"
+                   LargeChange="10" Maximum="10" Minimum="0.1" SmallChange="1"
+                   SpinButtonPlacementMode="Inline" Value="4" />
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Center" Text="ScrollMode" />
+        <TextBlock Grid.Row="3" VerticalAlignment="Center" Text="Horizontal" />
+        <ComboBox x:Name="cmbHorizontalScrollMode" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch"
+                  AutomationProperties.Name="horizontal scroll mode" SelectedIndex="2">
+          <ComboBoxItem>Enabled</ComboBoxItem>
+          <ComboBoxItem>Disabled</ComboBoxItem>
+          <ComboBoxItem>Auto</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="Vertical" />
+        <ComboBox x:Name="cmbVerticalScrollMode" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Stretch"
+                  AutomationProperties.Name="vertical scroll mode" SelectedIndex="2">
+          <ComboBoxItem>Enabled</ComboBoxItem>
+          <ComboBoxItem>Disabled</ComboBoxItem>
+          <ComboBoxItem>Auto</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Center" Text="ScrollbarVisibility" />
+        <TextBlock Grid.Row="6" VerticalAlignment="Center" Text="Horizontal" />
+        <ComboBox x:Name="cmbHorizontalScrollBarVisibility" Grid.Row="6" Grid.Column="1"
+                  HorizontalAlignment="Stretch" AutomationProperties.Name="horizontal scroll bar visibility"
+                  SelectedIndex="0">
+          <ComboBoxItem>Auto</ComboBoxItem>
+          <ComboBoxItem>Visible</ComboBoxItem>
+          <ComboBoxItem>Hidden</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Grid.Row="7" VerticalAlignment="Center" Text="Vertical" />
+        <ComboBox x:Name="cmbVerticalScrollBarVisibility" Grid.Row="7" Grid.Column="1"
+                  HorizontalAlignment="Stretch" AutomationProperties.Name="vertical scroll bar visibility"
+                  SelectedIndex="0">
+          <ComboBoxItem>Auto</ComboBoxItem>
+          <ComboBoxItem>Visible</ComboBoxItem>
+          <ComboBoxItem>Hidden</ComboBoxItem>
+        </ComboBox>
+      </Grid>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Constant velocity scrolling" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="16">
+        <TextBlock TextWrapping="Wrap"
+                   Text="Set the vertical velocity to a value greater than 30 to scroll down, or a value smaller than -30 to scroll up at a constant speed." />
+        <ScrollView x:Name="scrollView2" Width="400" Height="300" HorizontalAlignment="Left"
+                    VerticalAlignment="Top" IsTabStop="True">
+          <StackPanel x:Name="scrollView2Images" />
+        </ScrollView>
+      </StackPanel>
+      <Grid Grid.Column="1" MinWidth="200" ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto">
+        <TextBlock VerticalAlignment="Center" Text="Vertical velocity" />
+        <NumberBox x:Name="nbVerticalVelocity" Grid.Column="1" AutomationProperties.Name="vertical velocity"
+                   LargeChange="30" Maximum="200" Minimum="-200" SmallChange="10"
+                   SpinButtonPlacementMode="Inline" Value="30" />
+      </Grid>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Programmatic scroll with custom animation" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="16">
+        <TextBlock TextWrapping="Wrap"
+                   Text="Pick an animation type and its duration and then click the button on the right to launch a programmatic scroll." />
+        <ScrollView x:Name="scrollView3" Width="400" Height="300" HorizontalAlignment="Left"
+                    VerticalAlignment="Top" IsTabStop="True">
+          <StackPanel x:Name="scrollView3Images" />
+        </ScrollView>
+      </StackPanel>
+      <Grid Grid.Column="1" MinWidth="320" ColumnDefinitions="Auto,*" ColumnSpacing="12"
+            RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
+        <TextBlock VerticalAlignment="Center" Text="Scroll with animation" />
+        <ComboBox x:Name="cmbVerticalAnimation" Grid.Column="1" HorizontalAlignment="Stretch"
+                  AutomationProperties.Name="vertical animation options" SelectedIndex="0">
+          <ComboBoxItem>Default</ComboBoxItem>
+          <ComboBoxItem>Accordion</ComboBoxItem>
+          <ComboBoxItem>Teleportation</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Animation duration (msec)" />
+        <NumberBox x:Name="nbAnimationDuration" Grid.Row="1" Grid.Column="1"
+                   AutomationProperties.Name="animation duration" LargeChange="1000" Maximum="5000"
+                   Minimum="1000" SmallChange="500" SpinButtonPlacementMode="Inline" Value="1500" />
+        <Button x:Name="btnScrollWithAnimation" Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="scroll with animation" Content="Scroll with animation" />
+      </Grid>
+    </Grid>
+  </StackPanel>
+</StackPanel>

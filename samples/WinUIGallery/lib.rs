@@ -43,6 +43,7 @@ mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
 mod scroll_samples;
+mod scroll_view_samples;
 mod shape_samples;
 mod sizing_sample;
 mod split_view_samples;
@@ -141,6 +142,8 @@ mod shape_samples_tests;
 
 #[cfg(test)]
 mod scroll_samples_tests;
+#[cfg(test)]
+mod scroll_view_samples_tests;
 
 #[cfg(test)]
 mod brush_samples_tests;

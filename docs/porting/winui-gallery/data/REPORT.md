@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 35 |
+| pending | 34 |
 | partial | 37 |
-| ported | 54 |
+| ported | 55 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -147,7 +147,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | RichEditBox | Text | partial | 5 |
 | RichTextBlock | Text | ported | 4 |
 | ScratchPad | Fundamentals | partial | 0 |
-| ScrollView | Scrolling | pending | 3 |
+| ScrollView | Scrolling | ported | 3 |
 | ScrollViewer | Scrolling | ported | 1 |
 | SelectorBar | Navigation | pending | 3 |
 | SemanticZoom | Scrolling | pending | 1 |
