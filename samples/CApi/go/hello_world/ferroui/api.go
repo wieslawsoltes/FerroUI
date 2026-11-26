@@ -2,8 +2,8 @@
 
 package ferroui
 
-const apiFingerprint int64 = -2034746434256777622
-const selectionFingerprint int64 = -6457349082854047077
+const apiFingerprint int64 = -5451091071318546145
+const selectionFingerprint int64 = -1321240882640037536
 
 // BackgroundSizing: Defines how a background is drawn relative to its border.
 type BackgroundSizing int64
@@ -172,9 +172,9 @@ func NewAnimatable() (Animatable, error) {
 }
 
 // Transitions reads Transitions. Defines the `Transitions` property.
-func (o Animatable) Transitions() string { return getString(o.h, 937) }
+func (o Animatable) Transitions() string { return getString(o.h, 953) }
 // SetTransitions writes Transitions.
-func (o Animatable) SetTransitions(value string) error { return setString(o.h, 937, value) }
+func (o Animatable) SetTransitions(value string) error { return setString(o.h, 953, value) }
 
 // StyledElement: Extends an [`Animatable`] with the following features: - An inherited
 // `DataContext`. - Implements the logical tree. - A collection of class strings for custom
@@ -183,7 +183,7 @@ type StyledElement struct{ Animatable }
 
 // NewStyledElement creates a StyledElement, with one reference counted.
 func NewStyledElement() (StyledElement, error) {
-	object, err := create(395)
+	object, err := create(398)
 	return As[StyledElement](object), err
 }
 
@@ -195,38 +195,38 @@ func (o StyledElement) ActualThemeVariant() string { return getString(o.h, 9) }
 func (o StyledElement) SetActualThemeVariant(value string) error { return setString(o.h, 9, value) }
 
 // DataContext reads DataContext. Defines the `DataContext` property.
-func (o StyledElement) DataContext() string { return getString(o.h, 184) }
+func (o StyledElement) DataContext() string { return getString(o.h, 185) }
 // DataContextObject is the object the property holds, with one reference counted: release it.
-func (o StyledElement) DataContextObject() Object { return getObject(o.h, 184) }
+func (o StyledElement) DataContextObject() Object { return getObject(o.h, 185) }
 // SetDataContext writes DataContext.
-func (o StyledElement) SetDataContext(value string) error { return setString(o.h, 184, value) }
+func (o StyledElement) SetDataContext(value string) error { return setString(o.h, 185, value) }
 // SetDataContextObject writes DataContext to an object; nil is null.
-func (o StyledElement) SetDataContextObject(value Wrapper) error { return setObject(o.h, 184, value) }
+func (o StyledElement) SetDataContextObject(value Wrapper) error { return setObject(o.h, 185, value) }
 
 // Name reads Name. Defines the `Name` property.
-func (o StyledElement) Name() string { return getString(o.h, 558) }
+func (o StyledElement) Name() string { return getString(o.h, 564) }
 // SetName writes Name.
-func (o StyledElement) SetName(value string) error { return setString(o.h, 558, value) }
+func (o StyledElement) SetName(value string) error { return setString(o.h, 564, value) }
 
 // Parent reads Parent. Defines the `Parent` property.
 // Parent is the object the property holds, with one reference counted: release it.
-func (o StyledElement) Parent() Object { return getObject(o.h, 626) }
+func (o StyledElement) Parent() Object { return getObject(o.h, 632) }
 
 // RequestedThemeVariant reads RequestedThemeVariant. Defines the RequestedThemeVariant
 // property: the theme variant requested for an element and its descendants.
-func (o StyledElement) RequestedThemeVariant() string { return getString(o.h, 704) }
+func (o StyledElement) RequestedThemeVariant() string { return getString(o.h, 713) }
 // SetRequestedThemeVariant writes RequestedThemeVariant.
-func (o StyledElement) SetRequestedThemeVariant(value string) error { return setString(o.h, 704, value) }
+func (o StyledElement) SetRequestedThemeVariant(value string) error { return setString(o.h, 713, value) }
 
 // TemplatedParent reads TemplatedParent. Defines the `TemplatedParent` property.
 // TemplatedParent is the object the property holds, with one reference counted: release it.
-func (o StyledElement) TemplatedParent() Object { return getObject(o.h, 843) }
+func (o StyledElement) TemplatedParent() Object { return getObject(o.h, 859) }
 
 // Theme reads Theme. Defines the `Theme` property.
 // Theme is the object the property holds, with one reference counted: release it.
-func (o StyledElement) Theme() Object { return getObject(o.h, 894) }
+func (o StyledElement) Theme() Object { return getObject(o.h, 910) }
 // SetTheme writes Theme to an object; nil is null.
-func (o StyledElement) SetTheme(value Wrapper) error { return setObject(o.h, 894, value) }
+func (o StyledElement) SetTheme(value Wrapper) error { return setObject(o.h, 910, value) }
 
 // Visual: Base class for controls that provides rendering and related visual properties. The
 // visual class represents elements that have a visual on-screen representation and stores all
@@ -236,7 +236,7 @@ type Visual struct{ StyledElement }
 
 // NewVisual creates a Visual, with one reference counted.
 func NewVisual() (Visual, error) {
-	object, err := create(490)
+	object, err := create(494)
 	return As[Visual](object), err
 }
 
@@ -261,122 +261,122 @@ func (o Visual) ClipToBounds() bool { return getBool(o.h, 138) }
 func (o Visual) SetClipToBounds(value bool) error { return setBool(o.h, 138, value) }
 
 // Effect reads Effect. Defines the `Effect` property.
-func (o Visual) Effect() string { return getString(o.h, 252) }
+func (o Visual) Effect() string { return getString(o.h, 254) }
 // SetEffect writes Effect.
-func (o Visual) SetEffect(value string) error { return setString(o.h, 252, value) }
+func (o Visual) SetEffect(value string) error { return setString(o.h, 254, value) }
 
 // HasMirrorTransform reads HasMirrorTransform. Defines the `HasMirrorTransform` property.
-func (o Visual) HasMirrorTransform() bool { return getBool(o.h, 325) }
+func (o Visual) HasMirrorTransform() bool { return getBool(o.h, 328) }
 
 // IsVisible reads IsVisible. Defines the `IsVisible` property.
-func (o Visual) IsVisible() bool { return getBool(o.h, 455) }
+func (o Visual) IsVisible() bool { return getBool(o.h, 460) }
 // SetIsVisible writes IsVisible.
-func (o Visual) SetIsVisible(value bool) error { return setBool(o.h, 455, value) }
+func (o Visual) SetIsVisible(value bool) error { return setBool(o.h, 460, value) }
 
 // Opacity reads Opacity. Defines the `Opacity` property.
-func (o Visual) Opacity() float64 { return getF64(o.h, 595) }
+func (o Visual) Opacity() float64 { return getF64(o.h, 601) }
 // SetOpacity writes Opacity.
-func (o Visual) SetOpacity(value float64) error { return setF64(o.h, 595, value) }
+func (o Visual) SetOpacity(value float64) error { return setF64(o.h, 601, value) }
 
 // OpacityMask reads OpacityMask. Defines the `OpacityMask` property.
-func (o Visual) OpacityMask() string { return getString(o.h, 596) }
+func (o Visual) OpacityMask() string { return getString(o.h, 602) }
 // SetOpacityMask writes OpacityMask.
-func (o Visual) SetOpacityMask(value string) error { return setString(o.h, 596, value) }
+func (o Visual) SetOpacityMask(value string) error { return setString(o.h, 602, value) }
 
 // RenderTransform reads RenderTransform. Defines the `RenderTransform` property.
-func (o Visual) RenderTransform() string { return getString(o.h, 700) }
+func (o Visual) RenderTransform() string { return getString(o.h, 709) }
 // SetRenderTransform writes RenderTransform.
-func (o Visual) SetRenderTransform(value string) error { return setString(o.h, 700, value) }
+func (o Visual) SetRenderTransform(value string) error { return setString(o.h, 709, value) }
 
 // RenderTransformOrigin reads RenderTransformOrigin. Defines the `RenderTransformOrigin`
 // property.
-func (o Visual) RenderTransformOrigin() string { return getString(o.h, 701) }
+func (o Visual) RenderTransformOrigin() string { return getString(o.h, 710) }
 // SetRenderTransformOrigin writes RenderTransformOrigin.
-func (o Visual) SetRenderTransformOrigin(value string) error { return setString(o.h, 701, value) }
+func (o Visual) SetRenderTransformOrigin(value string) error { return setString(o.h, 710, value) }
 
 // VisualFlowDirection reads the attached property Visual.FlowDirection. Defines the
 // `FlowDirection` attached property.
-func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1011)) }
+func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1027)) }
 // VisualSetFlowDirection writes the attached property Visual.FlowDirection.
-func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1011, int64(value)) }
+func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1027, int64(value)) }
 
 // VisualParent reads VisualParent. Defines the `VisualParent` property.
 // VisualParent is the object the property holds, with one reference counted: release it.
-func (o Visual) VisualParent() Object { return getObject(o.h, 1012) }
+func (o Visual) VisualParent() Object { return getObject(o.h, 1028) }
 
 // ZIndex reads ZIndex. Defines the `ZIndex` property.
-func (o Visual) ZIndex() int64 { return getI64(o.h, 1040) }
+func (o Visual) ZIndex() int64 { return getI64(o.h, 1057) }
 // SetZIndex writes ZIndex.
-func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1040, value) }
+func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1057, value) }
 
 // Layoutable: Implements layout-related functionality for a control.
 type Layoutable struct{ Visual }
 
 // NewLayoutable creates a Layoutable, with one reference counted.
 func NewLayoutable() (Layoutable, error) {
-	object, err := create(189)
+	object, err := create(190)
 	return As[Layoutable](object), err
 }
 
 // DesiredSize reads DesiredSize. Defines the `DesiredSize` property.
-func (o Layoutable) DesiredSize() string { return getString(o.h, 210) }
+func (o Layoutable) DesiredSize() string { return getString(o.h, 212) }
 
 // Height reads Height. Defines the `Height` property.
-func (o Layoutable) Height() float64 { return getF64(o.h, 336) }
+func (o Layoutable) Height() float64 { return getF64(o.h, 339) }
 // SetHeight writes Height.
-func (o Layoutable) SetHeight(value float64) error { return setF64(o.h, 336, value) }
+func (o Layoutable) SetHeight(value float64) error { return setF64(o.h, 339, value) }
 
 // HorizontalAlignment reads HorizontalAlignment. Defines the `HorizontalAlignment` property.
-func (o Layoutable) HorizontalAlignment() HorizontalAlignment { return HorizontalAlignment(getI64(o.h, 339)) }
+func (o Layoutable) HorizontalAlignment() HorizontalAlignment { return HorizontalAlignment(getI64(o.h, 342)) }
 // SetHorizontalAlignment writes HorizontalAlignment.
-func (o Layoutable) SetHorizontalAlignment(value HorizontalAlignment) error { return setI64(o.h, 339, int64(value)) }
+func (o Layoutable) SetHorizontalAlignment(value HorizontalAlignment) error { return setI64(o.h, 342, int64(value)) }
 
 // Margin reads Margin. Defines the `Margin` property.
-func (o Layoutable) Margin() string { return getString(o.h, 513) }
+func (o Layoutable) Margin() string { return getString(o.h, 519) }
 // SetMargin writes Margin.
-func (o Layoutable) SetMargin(value string) error { return setString(o.h, 513, value) }
+func (o Layoutable) SetMargin(value string) error { return setString(o.h, 519, value) }
 
 // MaxHeight reads MaxHeight. Defines the `MaxHeight` property.
-func (o Layoutable) MaxHeight() float64 { return getF64(o.h, 522) }
+func (o Layoutable) MaxHeight() float64 { return getF64(o.h, 528) }
 // SetMaxHeight writes MaxHeight.
-func (o Layoutable) SetMaxHeight(value float64) error { return setF64(o.h, 522, value) }
+func (o Layoutable) SetMaxHeight(value float64) error { return setF64(o.h, 528, value) }
 
 // MaxWidth reads MaxWidth. Defines the `MaxWidth` property.
-func (o Layoutable) MaxWidth() float64 { return getF64(o.h, 530) }
+func (o Layoutable) MaxWidth() float64 { return getF64(o.h, 536) }
 // SetMaxWidth writes MaxWidth.
-func (o Layoutable) SetMaxWidth(value float64) error { return setF64(o.h, 530, value) }
+func (o Layoutable) SetMaxWidth(value float64) error { return setF64(o.h, 536, value) }
 
 // MinHeight reads MinHeight. Defines the `MinHeight` property.
-func (o Layoutable) MinHeight() float64 { return getF64(o.h, 541) }
+func (o Layoutable) MinHeight() float64 { return getF64(o.h, 547) }
 // SetMinHeight writes MinHeight.
-func (o Layoutable) SetMinHeight(value float64) error { return setF64(o.h, 541, value) }
+func (o Layoutable) SetMinHeight(value float64) error { return setF64(o.h, 547, value) }
 
 // MinWidth reads MinWidth. Defines the `MinWidth` property.
-func (o Layoutable) MinWidth() float64 { return getF64(o.h, 543) }
+func (o Layoutable) MinWidth() float64 { return getF64(o.h, 549) }
 // SetMinWidth writes MinWidth.
-func (o Layoutable) SetMinWidth(value float64) error { return setF64(o.h, 543, value) }
+func (o Layoutable) SetMinWidth(value float64) error { return setF64(o.h, 549, value) }
 
 // UseLayoutRounding reads UseLayoutRounding. Defines the `UseLayoutRounding` property.
-func (o Layoutable) UseLayoutRounding() bool { return getBool(o.h, 992) }
+func (o Layoutable) UseLayoutRounding() bool { return getBool(o.h, 1008) }
 // SetUseLayoutRounding writes UseLayoutRounding.
-func (o Layoutable) SetUseLayoutRounding(value bool) error { return setBool(o.h, 992, value) }
+func (o Layoutable) SetUseLayoutRounding(value bool) error { return setBool(o.h, 1008, value) }
 
 // VerticalAlignment reads VerticalAlignment. Defines the `VerticalAlignment` property.
-func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1000)) }
+func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1016)) }
 // SetVerticalAlignment writes VerticalAlignment.
-func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1000, int64(value)) }
+func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1016, int64(value)) }
 
 // Width reads Width. Defines the `Width` property.
-func (o Layoutable) Width() float64 { return getF64(o.h, 1018) }
+func (o Layoutable) Width() float64 { return getF64(o.h, 1034) }
 // SetWidth writes Width.
-func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1018, value) }
+func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1034, value) }
 
 // Interactive: Base class for objects that raise routed events.
 type Interactive struct{ Layoutable }
 
 // NewInteractive creates a Interactive, with one reference counted.
 func NewInteractive() (Interactive, error) {
-	object, err := create(168)
+	object, err := create(169)
 	return As[Interactive](object), err
 }
 
@@ -387,7 +387,7 @@ type InputElement struct{ Interactive }
 
 // NewInputElement creates a InputElement, with one reference counted.
 func NewInputElement() (InputElement, error) {
-	object, err := create(164)
+	object, err := create(165)
 	return As[InputElement](object), err
 }
 
@@ -399,43 +399,43 @@ func (o InputElement) AllowFocusOnInteraction() bool { return getBool(o.h, 20) }
 func (o InputElement) SetAllowFocusOnInteraction(value bool) error { return setBool(o.h, 20, value) }
 
 // Focusable reads Focusable. Defines the `Focusable` property.
-func (o InputElement) Focusable() bool { return getBool(o.h, 289) }
+func (o InputElement) Focusable() bool { return getBool(o.h, 291) }
 // SetFocusable writes Focusable.
-func (o InputElement) SetFocusable(value bool) error { return setBool(o.h, 289, value) }
+func (o InputElement) SetFocusable(value bool) error { return setBool(o.h, 291, value) }
 
 // IsEffectivelyEnabled reads IsEffectivelyEnabled. Defines the `IsEffectivelyEnabled`
 // property.
-func (o InputElement) IsEffectivelyEnabled() bool { return getBool(o.h, 396) }
+func (o InputElement) IsEffectivelyEnabled() bool { return getBool(o.h, 399) }
 
 // IsEnabled reads IsEnabled. Defines the `IsEnabled` property.
-func (o InputElement) IsEnabled() bool { return getBool(o.h, 397) }
+func (o InputElement) IsEnabled() bool { return getBool(o.h, 400) }
 // SetIsEnabled writes IsEnabled.
-func (o InputElement) SetIsEnabled(value bool) error { return setBool(o.h, 397, value) }
+func (o InputElement) SetIsEnabled(value bool) error { return setBool(o.h, 400, value) }
 
 // IsFocused reads IsFocused. Defines the `IsFocused` property.
-func (o InputElement) IsFocused() bool { return getBool(o.h, 401) }
+func (o InputElement) IsFocused() bool { return getBool(o.h, 404) }
 
 // IsHitTestVisible reads IsHitTestVisible. Defines the `IsHitTestVisible` property.
-func (o InputElement) IsHitTestVisible() bool { return getBool(o.h, 405) }
+func (o InputElement) IsHitTestVisible() bool { return getBool(o.h, 408) }
 // SetIsHitTestVisible writes IsHitTestVisible.
-func (o InputElement) SetIsHitTestVisible(value bool) error { return setBool(o.h, 405, value) }
+func (o InputElement) SetIsHitTestVisible(value bool) error { return setBool(o.h, 408, value) }
 
 // IsKeyboardFocusWithin reads IsKeyboardFocusWithin. Defines the `IsKeyboardFocusWithin`
 // property.
-func (o InputElement) IsKeyboardFocusWithin() bool { return getBool(o.h, 414) }
+func (o InputElement) IsKeyboardFocusWithin() bool { return getBool(o.h, 417) }
 
 // IsPointerOver reads IsPointerOver. Defines the `IsPointerOver` property.
-func (o InputElement) IsPointerOver() bool { return getBool(o.h, 429) }
+func (o InputElement) IsPointerOver() bool { return getBool(o.h, 432) }
 
 // IsTabStop reads IsTabStop. Defines the `IsTabStop` property.
-func (o InputElement) IsTabStop() bool { return getBool(o.h, 443) }
+func (o InputElement) IsTabStop() bool { return getBool(o.h, 448) }
 // SetIsTabStop writes IsTabStop.
-func (o InputElement) SetIsTabStop(value bool) error { return setBool(o.h, 443, value) }
+func (o InputElement) SetIsTabStop(value bool) error { return setBool(o.h, 448, value) }
 
 // TabIndex reads TabIndex. Defines the `TabIndex` property.
-func (o InputElement) TabIndex() int64 { return getI64(o.h, 830) }
+func (o InputElement) TabIndex() int64 { return getI64(o.h, 846) }
 // SetTabIndex writes TabIndex.
-func (o InputElement) SetTabIndex(value int64) error { return setI64(o.h, 830, value) }
+func (o InputElement) SetTabIndex(value int64) error { return setI64(o.h, 846, value) }
 
 // OnContextCanceled subscribes to ContextCanceled; the sender is valid for the call. Provides
 // event data for the `ContextCanceled` event.
@@ -645,30 +645,30 @@ type Control struct{ InputElement }
 
 // NewControl creates a Control, with one reference counted.
 func NewControl() (Control, error) {
-	object, err := create(72)
+	object, err := create(73)
 	return As[Control](object), err
 }
 
 // ContextFlyout reads ContextFlyout. Defines the `ContextFlyout` property.
 // ContextFlyout is the object the property holds, with one reference counted: release it.
-func (o Control) ContextFlyout() Object { return getObject(o.h, 172) }
+func (o Control) ContextFlyout() Object { return getObject(o.h, 173) }
 // SetContextFlyout writes ContextFlyout to an object; nil is null.
-func (o Control) SetContextFlyout(value Wrapper) error { return setObject(o.h, 172, value) }
+func (o Control) SetContextFlyout(value Wrapper) error { return setObject(o.h, 173, value) }
 
 // ContextMenu reads ContextMenu. Defines the `ContextMenu` property.
 // ContextMenu is the object the property holds, with one reference counted: release it.
-func (o Control) ContextMenu() Object { return getObject(o.h, 173) }
+func (o Control) ContextMenu() Object { return getObject(o.h, 174) }
 // SetContextMenu writes ContextMenu to an object; nil is null.
-func (o Control) SetContextMenu(value Wrapper) error { return setObject(o.h, 173, value) }
+func (o Control) SetContextMenu(value Wrapper) error { return setObject(o.h, 174, value) }
 
 // Tag reads Tag. Defines the `Tag` property.
-func (o Control) Tag() string { return getString(o.h, 836) }
+func (o Control) Tag() string { return getString(o.h, 852) }
 // TagObject is the object the property holds, with one reference counted: release it.
-func (o Control) TagObject() Object { return getObject(o.h, 836) }
+func (o Control) TagObject() Object { return getObject(o.h, 852) }
 // SetTag writes Tag.
-func (o Control) SetTag(value string) error { return setString(o.h, 836, value) }
+func (o Control) SetTag(value string) error { return setString(o.h, 852, value) }
 // SetTagObject writes Tag to an object; nil is null.
-func (o Control) SetTagObject(value Wrapper) error { return setObject(o.h, 836, value) }
+func (o Control) SetTagObject(value Wrapper) error { return setObject(o.h, 852, value) }
 
 // OnLoaded subscribes to Loaded; the sender is valid for the call. Defines the `Loaded` event.
 func (o Control) OnLoaded(handler func(Control)) (Subscription, error) {
@@ -698,7 +698,7 @@ type TemplatedControl struct{ Control }
 
 // NewTemplatedControl creates a TemplatedControl, with one reference counted.
 func NewTemplatedControl() (TemplatedControl, error) {
-	object, err := create(418)
+	object, err := create(422)
 	return As[TemplatedControl](object), err
 }
 
@@ -723,61 +723,61 @@ func (o TemplatedControl) BorderThickness() string { return getString(o.h, 82) }
 func (o TemplatedControl) SetBorderThickness(value string) error { return setString(o.h, 82, value) }
 
 // CornerRadius reads CornerRadius. Defines the `CornerRadius` property.
-func (o TemplatedControl) CornerRadius() string { return getString(o.h, 174) }
+func (o TemplatedControl) CornerRadius() string { return getString(o.h, 175) }
 // SetCornerRadius writes CornerRadius.
-func (o TemplatedControl) SetCornerRadius(value string) error { return setString(o.h, 174, value) }
+func (o TemplatedControl) SetCornerRadius(value string) error { return setString(o.h, 175, value) }
 
 // FontFamily reads FontFamily. Defines the `FontFamily` property.
-func (o TemplatedControl) FontFamily() string { return getString(o.h, 290) }
+func (o TemplatedControl) FontFamily() string { return getString(o.h, 292) }
 // SetFontFamily writes FontFamily.
-func (o TemplatedControl) SetFontFamily(value string) error { return setString(o.h, 290, value) }
+func (o TemplatedControl) SetFontFamily(value string) error { return setString(o.h, 292, value) }
 
 // FontFeatures reads FontFeatures. Defines the `FontFeatures` property.
-func (o TemplatedControl) FontFeatures() string { return getString(o.h, 291) }
+func (o TemplatedControl) FontFeatures() string { return getString(o.h, 293) }
 // SetFontFeatures writes FontFeatures.
-func (o TemplatedControl) SetFontFeatures(value string) error { return setString(o.h, 291, value) }
+func (o TemplatedControl) SetFontFeatures(value string) error { return setString(o.h, 293, value) }
 
 // FontSize reads FontSize. Defines the `FontSize` property.
-func (o TemplatedControl) FontSize() float64 { return getF64(o.h, 292) }
+func (o TemplatedControl) FontSize() float64 { return getF64(o.h, 294) }
 // SetFontSize writes FontSize.
-func (o TemplatedControl) SetFontSize(value float64) error { return setF64(o.h, 292, value) }
+func (o TemplatedControl) SetFontSize(value float64) error { return setF64(o.h, 294, value) }
 
 // FontStretch reads FontStretch. Defines the `FontStretch` property.
-func (o TemplatedControl) FontStretch() FontStretch { return FontStretch(getI64(o.h, 293)) }
+func (o TemplatedControl) FontStretch() FontStretch { return FontStretch(getI64(o.h, 295)) }
 // SetFontStretch writes FontStretch.
-func (o TemplatedControl) SetFontStretch(value FontStretch) error { return setI64(o.h, 293, int64(value)) }
+func (o TemplatedControl) SetFontStretch(value FontStretch) error { return setI64(o.h, 295, int64(value)) }
 
 // FontStyle reads FontStyle. Defines the `FontStyle` property.
-func (o TemplatedControl) FontStyle() FontStyle { return FontStyle(getI64(o.h, 294)) }
+func (o TemplatedControl) FontStyle() FontStyle { return FontStyle(getI64(o.h, 296)) }
 // SetFontStyle writes FontStyle.
-func (o TemplatedControl) SetFontStyle(value FontStyle) error { return setI64(o.h, 294, int64(value)) }
+func (o TemplatedControl) SetFontStyle(value FontStyle) error { return setI64(o.h, 296, int64(value)) }
 
 // FontWeight reads FontWeight. Defines the `FontWeight` property.
-func (o TemplatedControl) FontWeight() string { return getString(o.h, 295) }
+func (o TemplatedControl) FontWeight() string { return getString(o.h, 297) }
 // SetFontWeight writes FontWeight.
-func (o TemplatedControl) SetFontWeight(value string) error { return setString(o.h, 295, value) }
+func (o TemplatedControl) SetFontWeight(value string) error { return setString(o.h, 297, value) }
 
 // Foreground reads Foreground. Defines the `Foreground` property.
-func (o TemplatedControl) Foreground() string { return getString(o.h, 301) }
+func (o TemplatedControl) Foreground() string { return getString(o.h, 303) }
 // SetForeground writes Foreground.
-func (o TemplatedControl) SetForeground(value string) error { return setString(o.h, 301, value) }
+func (o TemplatedControl) SetForeground(value string) error { return setString(o.h, 303, value) }
 
 // LetterSpacing reads LetterSpacing. Defines the `LetterSpacing` property.
-func (o TemplatedControl) LetterSpacing() float64 { return getF64(o.h, 503) }
+func (o TemplatedControl) LetterSpacing() float64 { return getF64(o.h, 509) }
 // SetLetterSpacing writes LetterSpacing.
-func (o TemplatedControl) SetLetterSpacing(value float64) error { return setF64(o.h, 503, value) }
+func (o TemplatedControl) SetLetterSpacing(value float64) error { return setF64(o.h, 509, value) }
 
 // Padding reads Padding. Defines the `Padding` property.
-func (o TemplatedControl) Padding() string { return getString(o.h, 605) }
+func (o TemplatedControl) Padding() string { return getString(o.h, 611) }
 // SetPadding writes Padding.
-func (o TemplatedControl) SetPadding(value string) error { return setString(o.h, 605, value) }
+func (o TemplatedControl) SetPadding(value string) error { return setString(o.h, 611, value) }
 
 // TemplatedControlIsTemplateFocusTarget reads the attached property
 // TemplatedControl.IsTemplateFocusTarget. Defines the `IsTemplateFocusTarget` attached
 // property.
-func TemplatedControlIsTemplateFocusTarget(target Wrapper) bool { return getBool(target.Handle(), 842) }
+func TemplatedControlIsTemplateFocusTarget(target Wrapper) bool { return getBool(target.Handle(), 858) }
 // TemplatedControlSetIsTemplateFocusTarget writes the attached property TemplatedControl.IsTemplateFocusTarget.
-func TemplatedControlSetIsTemplateFocusTarget(target Wrapper, value bool) error { return setBool(target.Handle(), 842, value) }
+func TemplatedControlSetIsTemplateFocusTarget(target Wrapper, value bool) error { return setBool(target.Handle(), 858, value) }
 
 // OnTemplateApplied subscribes to TemplateApplied; the sender is valid for the call. Defines
 // the `TemplateApplied` routed event.
@@ -795,25 +795,25 @@ func NewContentControl() (ContentControl, error) {
 }
 
 // Content reads Content. Defines the `Content` property.
-func (o ContentControl) Content() string { return getString(o.h, 167) }
+func (o ContentControl) Content() string { return getString(o.h, 168) }
 // ContentObject is the object the property holds, with one reference counted: release it.
-func (o ContentControl) ContentObject() Object { return getObject(o.h, 167) }
+func (o ContentControl) ContentObject() Object { return getObject(o.h, 168) }
 // SetContent writes Content.
-func (o ContentControl) SetContent(value string) error { return setString(o.h, 167, value) }
+func (o ContentControl) SetContent(value string) error { return setString(o.h, 168, value) }
 // SetContentObject writes Content to an object; nil is null.
-func (o ContentControl) SetContentObject(value Wrapper) error { return setObject(o.h, 167, value) }
+func (o ContentControl) SetContentObject(value Wrapper) error { return setObject(o.h, 168, value) }
 
 // HorizontalContentAlignment reads HorizontalContentAlignment. Defines the
 // `HorizontalContentAlignment` property.
-func (o ContentControl) HorizontalContentAlignment() HorizontalAlignment { return HorizontalAlignment(getI64(o.h, 340)) }
+func (o ContentControl) HorizontalContentAlignment() HorizontalAlignment { return HorizontalAlignment(getI64(o.h, 343)) }
 // SetHorizontalContentAlignment writes HorizontalContentAlignment.
-func (o ContentControl) SetHorizontalContentAlignment(value HorizontalAlignment) error { return setI64(o.h, 340, int64(value)) }
+func (o ContentControl) SetHorizontalContentAlignment(value HorizontalAlignment) error { return setI64(o.h, 343, int64(value)) }
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1001)) }
+func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1017)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1001, int64(value)) }
+func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1017, int64(value)) }
 
 // Button: A standard button control.
 type Button struct{ ContentControl }
@@ -830,37 +830,37 @@ func (o Button) ClickMode() ClickMode { return ClickMode(getI64(o.h, 134)) }
 func (o Button) SetClickMode(value ClickMode) error { return setI64(o.h, 134, int64(value)) }
 
 // CommandParameter reads CommandParameter. Defines the `CommandParameter` property.
-func (o Button) CommandParameter() string { return getString(o.h, 154) }
+func (o Button) CommandParameter() string { return getString(o.h, 155) }
 // CommandParameterObject is the object the property holds, with one reference counted: release it.
-func (o Button) CommandParameterObject() Object { return getObject(o.h, 154) }
+func (o Button) CommandParameterObject() Object { return getObject(o.h, 155) }
 // SetCommandParameter writes CommandParameter.
-func (o Button) SetCommandParameter(value string) error { return setString(o.h, 154, value) }
+func (o Button) SetCommandParameter(value string) error { return setString(o.h, 155, value) }
 // SetCommandParameterObject writes CommandParameter to an object; nil is null.
-func (o Button) SetCommandParameterObject(value Wrapper) error { return setObject(o.h, 154, value) }
+func (o Button) SetCommandParameterObject(value Wrapper) error { return setObject(o.h, 155, value) }
 
 // Flyout reads Flyout. Defines the `Flyout` property.
 // Flyout is the object the property holds, with one reference counted: release it.
-func (o Button) Flyout() Object { return getObject(o.h, 285) }
+func (o Button) Flyout() Object { return getObject(o.h, 287) }
 // SetFlyout writes Flyout to an object; nil is null.
-func (o Button) SetFlyout(value Wrapper) error { return setObject(o.h, 285, value) }
+func (o Button) SetFlyout(value Wrapper) error { return setObject(o.h, 287, value) }
 
 // HotKey reads HotKey. Defines the `HotKey` property.
-func (o Button) HotKey() string { return getString(o.h, 344) }
+func (o Button) HotKey() string { return getString(o.h, 347) }
 // SetHotKey writes HotKey.
-func (o Button) SetHotKey(value string) error { return setString(o.h, 344, value) }
+func (o Button) SetHotKey(value string) error { return setString(o.h, 347, value) }
 
 // IsCancel reads IsCancel. Defines the `IsCancel` property.
-func (o Button) IsCancel() bool { return getBool(o.h, 383) }
+func (o Button) IsCancel() bool { return getBool(o.h, 386) }
 // SetIsCancel writes IsCancel.
-func (o Button) SetIsCancel(value bool) error { return setBool(o.h, 383, value) }
+func (o Button) SetIsCancel(value bool) error { return setBool(o.h, 386, value) }
 
 // IsDefault reads IsDefault. Defines the `IsDefault` property.
-func (o Button) IsDefault() bool { return getBool(o.h, 391) }
+func (o Button) IsDefault() bool { return getBool(o.h, 394) }
 // SetIsDefault writes IsDefault.
-func (o Button) SetIsDefault(value bool) error { return setBool(o.h, 391, value) }
+func (o Button) SetIsDefault(value bool) error { return setBool(o.h, 394, value) }
 
 // IsPressed reads IsPressed. Defines the `IsPressed` property.
-func (o Button) IsPressed() bool { return getBool(o.h, 430) }
+func (o Button) IsPressed() bool { return getBool(o.h, 433) }
 
 // OnClick subscribes to Click; the sender is valid for the call. Defines the `Click` event.
 func (o Button) OnClick(handler func(Button)) (Subscription, error) {
@@ -874,7 +874,7 @@ type Panel struct{ Control }
 
 // NewPanel creates a Panel, with one reference counted.
 func NewPanel() (Panel, error) {
-	object, err := create(261)
+	object, err := create(262)
 	return As[Panel](object), err
 }
 
@@ -888,7 +888,7 @@ type StackPanel struct{ Panel }
 
 // NewStackPanel creates a StackPanel, with one reference counted.
 func NewStackPanel() (StackPanel, error) {
-	object, err := create(387)
+	object, err := create(390)
 	return As[StackPanel](object), err
 }
 
@@ -905,14 +905,14 @@ func (o StackPanel) AreVerticalSnapPointsRegular() bool { return getBool(o.h, 32
 func (o StackPanel) SetAreVerticalSnapPointsRegular(value bool) error { return setBool(o.h, 32, value) }
 
 // Orientation reads Orientation. Defines the `Orientation` property.
-func (o StackPanel) Orientation() Orientation { return Orientation(getI64(o.h, 598)) }
+func (o StackPanel) Orientation() Orientation { return Orientation(getI64(o.h, 604)) }
 // SetOrientation writes Orientation.
-func (o StackPanel) SetOrientation(value Orientation) error { return setI64(o.h, 598, int64(value)) }
+func (o StackPanel) SetOrientation(value Orientation) error { return setI64(o.h, 604, int64(value)) }
 
 // Spacing reads Spacing. Defines the `Spacing` property.
-func (o StackPanel) Spacing() float64 { return getF64(o.h, 802) }
+func (o StackPanel) Spacing() float64 { return getF64(o.h, 817) }
 // SetSpacing writes Spacing.
-func (o StackPanel) SetSpacing(value float64) error { return setF64(o.h, 802, value) }
+func (o StackPanel) SetSpacing(value float64) error { return setF64(o.h, 817, value) }
 
 // OnHorizontalSnapPointsChanged subscribes to HorizontalSnapPointsChanged; the sender is valid
 // for the call. Defines the `HorizontalSnapPointsChanged` event.
@@ -931,7 +931,7 @@ type TextBlock struct{ Control }
 
 // NewTextBlock creates a TextBlock, with one reference counted.
 func NewTextBlock() (TextBlock, error) {
-	object, err := create(429)
+	object, err := create(433)
 	return As[TextBlock](object), err
 }
 
@@ -941,117 +941,117 @@ func (o TextBlock) Background() string { return getString(o.h, 64) }
 func (o TextBlock) SetBackground(value string) error { return setString(o.h, 64, value) }
 
 // FontFamily reads FontFamily. Defines the `FontFamily` property.
-func (o TextBlock) FontFamily() string { return getString(o.h, 290) }
+func (o TextBlock) FontFamily() string { return getString(o.h, 292) }
 // SetFontFamily writes FontFamily.
-func (o TextBlock) SetFontFamily(value string) error { return setString(o.h, 290, value) }
+func (o TextBlock) SetFontFamily(value string) error { return setString(o.h, 292, value) }
 
 // FontFeatures reads FontFeatures. Defines the `FontFeatures` property.
-func (o TextBlock) FontFeatures() string { return getString(o.h, 291) }
+func (o TextBlock) FontFeatures() string { return getString(o.h, 293) }
 // SetFontFeatures writes FontFeatures.
-func (o TextBlock) SetFontFeatures(value string) error { return setString(o.h, 291, value) }
+func (o TextBlock) SetFontFeatures(value string) error { return setString(o.h, 293, value) }
 
 // FontSize reads FontSize. Defines the `FontSize` property.
-func (o TextBlock) FontSize() float64 { return getF64(o.h, 292) }
+func (o TextBlock) FontSize() float64 { return getF64(o.h, 294) }
 // SetFontSize writes FontSize.
-func (o TextBlock) SetFontSize(value float64) error { return setF64(o.h, 292, value) }
+func (o TextBlock) SetFontSize(value float64) error { return setF64(o.h, 294, value) }
 
 // FontStretch reads FontStretch. Defines the `FontStretch` property.
-func (o TextBlock) FontStretch() FontStretch { return FontStretch(getI64(o.h, 293)) }
+func (o TextBlock) FontStretch() FontStretch { return FontStretch(getI64(o.h, 295)) }
 // SetFontStretch writes FontStretch.
-func (o TextBlock) SetFontStretch(value FontStretch) error { return setI64(o.h, 293, int64(value)) }
+func (o TextBlock) SetFontStretch(value FontStretch) error { return setI64(o.h, 295, int64(value)) }
 
 // FontStyle reads FontStyle. Defines the `FontStyle` property.
-func (o TextBlock) FontStyle() FontStyle { return FontStyle(getI64(o.h, 294)) }
+func (o TextBlock) FontStyle() FontStyle { return FontStyle(getI64(o.h, 296)) }
 // SetFontStyle writes FontStyle.
-func (o TextBlock) SetFontStyle(value FontStyle) error { return setI64(o.h, 294, int64(value)) }
+func (o TextBlock) SetFontStyle(value FontStyle) error { return setI64(o.h, 296, int64(value)) }
 
 // FontWeight reads FontWeight. Defines the `FontWeight` property.
-func (o TextBlock) FontWeight() string { return getString(o.h, 295) }
+func (o TextBlock) FontWeight() string { return getString(o.h, 297) }
 // SetFontWeight writes FontWeight.
-func (o TextBlock) SetFontWeight(value string) error { return setString(o.h, 295, value) }
+func (o TextBlock) SetFontWeight(value string) error { return setString(o.h, 297, value) }
 
 // Foreground reads Foreground. Defines the `Foreground` property.
-func (o TextBlock) Foreground() string { return getString(o.h, 301) }
+func (o TextBlock) Foreground() string { return getString(o.h, 303) }
 // SetForeground writes Foreground.
-func (o TextBlock) SetForeground(value string) error { return setString(o.h, 301, value) }
+func (o TextBlock) SetForeground(value string) error { return setString(o.h, 303, value) }
 
 // Inlines reads Inlines. Defines the `Inlines` property.
-func (o TextBlock) Inlines() string { return getString(o.h, 369) }
+func (o TextBlock) Inlines() string { return getString(o.h, 372) }
 // SetInlines writes Inlines.
-func (o TextBlock) SetInlines(value string) error { return setString(o.h, 369, value) }
+func (o TextBlock) SetInlines(value string) error { return setString(o.h, 372, value) }
 
 // LetterSpacing reads LetterSpacing. Defines the `LetterSpacing` property.
-func (o TextBlock) LetterSpacing() float64 { return getF64(o.h, 503) }
+func (o TextBlock) LetterSpacing() float64 { return getF64(o.h, 509) }
 // SetLetterSpacing writes LetterSpacing.
-func (o TextBlock) SetLetterSpacing(value float64) error { return setF64(o.h, 503, value) }
+func (o TextBlock) SetLetterSpacing(value float64) error { return setF64(o.h, 509, value) }
 
 // Padding reads Padding. Defines the `Padding` property.
-func (o TextBlock) Padding() string { return getString(o.h, 605) }
+func (o TextBlock) Padding() string { return getString(o.h, 611) }
 // SetPadding writes Padding.
-func (o TextBlock) SetPadding(value string) error { return setString(o.h, 605, value) }
+func (o TextBlock) SetPadding(value string) error { return setString(o.h, 611, value) }
 
 // Text reads Text. Defines the `Text` property.
-func (o TextBlock) Text() string { return getString(o.h, 844) }
+func (o TextBlock) Text() string { return getString(o.h, 860) }
 // SetText writes Text.
-func (o TextBlock) SetText(value string) error { return setString(o.h, 844, value) }
+func (o TextBlock) SetText(value string) error { return setString(o.h, 860, value) }
 
 // TextBlockBaselineOffset reads the attached property TextBlock.BaselineOffset. Defines the
 // `BaselineOffset` attached property.
-func TextBlockBaselineOffset(target Wrapper) float64 { return getF64(target.Handle(), 846) }
+func TextBlockBaselineOffset(target Wrapper) float64 { return getF64(target.Handle(), 862) }
 // TextBlockSetBaselineOffset writes the attached property TextBlock.BaselineOffset.
-func TextBlockSetBaselineOffset(target Wrapper, value float64) error { return setF64(target.Handle(), 846, value) }
+func TextBlockSetBaselineOffset(target Wrapper, value float64) error { return setF64(target.Handle(), 862, value) }
 
 // TextBlockLayoutRoundingPlacement reads the attached property
 // TextBlock.LayoutRoundingPlacement. Defines the `LayoutRoundingPlacement` attached property:
 // where a text block puts the height layout rounding adds to it (a FerroUI addition).
 // Inherited, so that a theme sets it once on the top-level.
-func TextBlockLayoutRoundingPlacement(target Wrapper) TextLayoutRoundingPlacement { return TextLayoutRoundingPlacement(getI64(target.Handle(), 847)) }
+func TextBlockLayoutRoundingPlacement(target Wrapper) TextLayoutRoundingPlacement { return TextLayoutRoundingPlacement(getI64(target.Handle(), 863)) }
 // TextBlockSetLayoutRoundingPlacement writes the attached property TextBlock.LayoutRoundingPlacement.
-func TextBlockSetLayoutRoundingPlacement(target Wrapper, value TextLayoutRoundingPlacement) error { return setI64(target.Handle(), 847, int64(value)) }
+func TextBlockSetLayoutRoundingPlacement(target Wrapper, value TextLayoutRoundingPlacement) error { return setI64(target.Handle(), 863, int64(value)) }
 
 // TextBlockLineHeight reads the attached property TextBlock.LineHeight. Defines the
 // `LineHeight` property.
-func TextBlockLineHeight(target Wrapper) float64 { return getF64(target.Handle(), 848) }
+func TextBlockLineHeight(target Wrapper) float64 { return getF64(target.Handle(), 864) }
 // TextBlockSetLineHeight writes the attached property TextBlock.LineHeight.
-func TextBlockSetLineHeight(target Wrapper, value float64) error { return setF64(target.Handle(), 848, value) }
+func TextBlockSetLineHeight(target Wrapper, value float64) error { return setF64(target.Handle(), 864, value) }
 
 // TextBlockLineSpacing reads the attached property TextBlock.LineSpacing. Defines the
 // `LineSpacing` property.
-func TextBlockLineSpacing(target Wrapper) float64 { return getF64(target.Handle(), 849) }
+func TextBlockLineSpacing(target Wrapper) float64 { return getF64(target.Handle(), 865) }
 // TextBlockSetLineSpacing writes the attached property TextBlock.LineSpacing.
-func TextBlockSetLineSpacing(target Wrapper, value float64) error { return setF64(target.Handle(), 849, value) }
+func TextBlockSetLineSpacing(target Wrapper, value float64) error { return setF64(target.Handle(), 865, value) }
 
 // TextBlockMaxLines reads the attached property TextBlock.MaxLines. Defines the `MaxLines`
 // property.
-func TextBlockMaxLines(target Wrapper) int64 { return getI64(target.Handle(), 850) }
+func TextBlockMaxLines(target Wrapper) int64 { return getI64(target.Handle(), 866) }
 // TextBlockSetMaxLines writes the attached property TextBlock.MaxLines.
-func TextBlockSetMaxLines(target Wrapper, value int64) error { return setI64(target.Handle(), 850, value) }
+func TextBlockSetMaxLines(target Wrapper, value int64) error { return setI64(target.Handle(), 866, value) }
 
 // TextBlockTextAlignment reads the attached property TextBlock.TextAlignment. Defines the
 // `TextAlignment` property.
-func TextBlockTextAlignment(target Wrapper) TextAlignment { return TextAlignment(getI64(target.Handle(), 851)) }
+func TextBlockTextAlignment(target Wrapper) TextAlignment { return TextAlignment(getI64(target.Handle(), 867)) }
 // TextBlockSetTextAlignment writes the attached property TextBlock.TextAlignment.
-func TextBlockSetTextAlignment(target Wrapper, value TextAlignment) error { return setI64(target.Handle(), 851, int64(value)) }
+func TextBlockSetTextAlignment(target Wrapper, value TextAlignment) error { return setI64(target.Handle(), 867, int64(value)) }
 
 // TextBlockTextLineBounds reads the attached property TextBlock.TextLineBounds. Defines the
 // `TextLineBounds` attached property: how the box of each line is bounded above and below (a
 // FerroUI addition after WinUI's `TextBlock.TextLineBounds`, DEVIATIONS.md, Text block).
 // Inherited, as the other attached text properties, so that a content presenter sets it for
 // the text of its content.
-func TextBlockTextLineBounds(target Wrapper) TextLineBounds { return TextLineBounds(getI64(target.Handle(), 852)) }
+func TextBlockTextLineBounds(target Wrapper) TextLineBounds { return TextLineBounds(getI64(target.Handle(), 868)) }
 // TextBlockSetTextLineBounds writes the attached property TextBlock.TextLineBounds.
-func TextBlockSetTextLineBounds(target Wrapper, value TextLineBounds) error { return setI64(target.Handle(), 852, int64(value)) }
+func TextBlockSetTextLineBounds(target Wrapper, value TextLineBounds) error { return setI64(target.Handle(), 868, int64(value)) }
 
 // TextBlockTextWrapping reads the attached property TextBlock.TextWrapping. Defines the
 // `TextWrapping` property.
-func TextBlockTextWrapping(target Wrapper) TextWrapping { return TextWrapping(getI64(target.Handle(), 854)) }
+func TextBlockTextWrapping(target Wrapper) TextWrapping { return TextWrapping(getI64(target.Handle(), 870)) }
 // TextBlockSetTextWrapping writes the attached property TextBlock.TextWrapping.
-func TextBlockSetTextWrapping(target Wrapper, value TextWrapping) error { return setI64(target.Handle(), 854, int64(value)) }
+func TextBlockSetTextWrapping(target Wrapper, value TextWrapping) error { return setI64(target.Handle(), 870, int64(value)) }
 
 // TextDecorations reads TextDecorations. Defines the `TextDecorations` property.
-func (o TextBlock) TextDecorations() string { return getString(o.h, 859) }
+func (o TextBlock) TextDecorations() string { return getString(o.h, 875) }
 // SetTextDecorations writes TextDecorations.
-func (o TextBlock) SetTextDecorations(value string) error { return setString(o.h, 859, value) }
+func (o TextBlock) SetTextDecorations(value string) error { return setString(o.h, 875, value) }
 
 // TopLevel: Base class for top-level widgets. This class acts as a base for top level widget.
 // It handles scheduling layout, styling and rendering as well as tracking the widget's
@@ -1066,31 +1066,31 @@ func (o TopLevel) ActualTransparencyLevel() string { return getString(o.h, 10) }
 func (o TopLevel) ClientSize() string { return getString(o.h, 135) }
 
 // FrameSize reads FrameSize. Defines the `FrameSize` property.
-func (o TopLevel) FrameSize() string { return getString(o.h, 304) }
+func (o TopLevel) FrameSize() string { return getString(o.h, 306) }
 
 // TopLevelAutoSafeAreaPadding reads the attached property TopLevel.AutoSafeAreaPadding.
 // Defines the AutoSafeAreaPadding attached property.
-func TopLevelAutoSafeAreaPadding(target Wrapper) bool { return getBool(target.Handle(), 930) }
+func TopLevelAutoSafeAreaPadding(target Wrapper) bool { return getBool(target.Handle(), 946) }
 // TopLevelSetAutoSafeAreaPadding writes the attached property TopLevel.AutoSafeAreaPadding.
-func TopLevelSetAutoSafeAreaPadding(target Wrapper, value bool) error { return setBool(target.Handle(), 930, value) }
+func TopLevelSetAutoSafeAreaPadding(target Wrapper, value bool) error { return setBool(target.Handle(), 946, value) }
 
 // TopLevelSystemBarColor reads the attached property TopLevel.SystemBarColor. Defines the
 // SystemBarColor attached property.
-func TopLevelSystemBarColor(target Wrapper) Object { return getObject(target.Handle(), 931) }
+func TopLevelSystemBarColor(target Wrapper) Object { return getObject(target.Handle(), 947) }
 // TopLevelSetSystemBarColor writes the attached property TopLevel.SystemBarColor to an object.
-func TopLevelSetSystemBarColor(target Wrapper, value Wrapper) error { return setObject(target.Handle(), 931, value) }
+func TopLevelSetSystemBarColor(target Wrapper, value Wrapper) error { return setObject(target.Handle(), 947, value) }
 
 // TransparencyBackgroundFallback reads TransparencyBackgroundFallback. Defines the
 // `TransparencyBackgroundFallback` property.
-func (o TopLevel) TransparencyBackgroundFallback() string { return getString(o.h, 939) }
+func (o TopLevel) TransparencyBackgroundFallback() string { return getString(o.h, 955) }
 // SetTransparencyBackgroundFallback writes TransparencyBackgroundFallback.
-func (o TopLevel) SetTransparencyBackgroundFallback(value string) error { return setString(o.h, 939, value) }
+func (o TopLevel) SetTransparencyBackgroundFallback(value string) error { return setString(o.h, 955, value) }
 
 // TransparencyLevelHint reads TransparencyLevelHint. Defines the `TransparencyLevelHint`
 // property.
-func (o TopLevel) TransparencyLevelHint() string { return getString(o.h, 940) }
+func (o TopLevel) TransparencyLevelHint() string { return getString(o.h, 956) }
 // SetTransparencyLevelHint writes TransparencyLevelHint.
-func (o TopLevel) SetTransparencyLevelHint(value string) error { return setString(o.h, 940, value) }
+func (o TopLevel) SetTransparencyLevelHint(value string) error { return setString(o.h, 956, value) }
 
 // OnBackRequested subscribes to BackRequested; the sender is valid for the call. Defines the
 // `BackRequested` event.
@@ -1104,23 +1104,23 @@ func (o TopLevel) OnBackRequested(handler func(TopLevel)) (Subscription, error) 
 type WindowBase struct{ TopLevel }
 
 // IsActive reads IsActive. Defines the `IsActive` property.
-func (o WindowBase) IsActive() bool { return getBool(o.h, 377) }
+func (o WindowBase) IsActive() bool { return getBool(o.h, 380) }
 
 // Owner reads Owner. Defines the `Owner` property.
 // Owner is the object the property holds, with one reference counted: release it.
-func (o WindowBase) Owner() Object { return getObject(o.h, 604) }
+func (o WindowBase) Owner() Object { return getObject(o.h, 610) }
 
 // Topmost reads Topmost. Defines the `Topmost` property.
-func (o WindowBase) Topmost() bool { return getBool(o.h, 934) }
+func (o WindowBase) Topmost() bool { return getBool(o.h, 950) }
 // SetTopmost writes Topmost.
-func (o WindowBase) SetTopmost(value bool) error { return setBool(o.h, 934, value) }
+func (o WindowBase) SetTopmost(value bool) error { return setBool(o.h, 950, value) }
 
 // Window: A top-level window.
 type Window struct{ WindowBase }
 
 // NewWindow creates a Window, with one reference counted.
 func NewWindow() (Window, error) {
-	object, err := create(497)
+	object, err := create(501)
 	return As[Window](object), err
 }
 
@@ -1140,76 +1140,76 @@ func (o Window) CanResize() bool { return getBool(o.h, 109) }
 func (o Window) SetCanResize(value bool) error { return setBool(o.h, 109, value) }
 
 // ClosingBehavior reads ClosingBehavior. Defines the `ClosingBehavior` property.
-func (o Window) ClosingBehavior() WindowClosingBehavior { return WindowClosingBehavior(getI64(o.h, 148)) }
+func (o Window) ClosingBehavior() WindowClosingBehavior { return WindowClosingBehavior(getI64(o.h, 149)) }
 // SetClosingBehavior writes ClosingBehavior.
-func (o Window) SetClosingBehavior(value WindowClosingBehavior) error { return setI64(o.h, 148, int64(value)) }
+func (o Window) SetClosingBehavior(value WindowClosingBehavior) error { return setI64(o.h, 149, int64(value)) }
 
 // ExtendClientAreaTitleBarHeightHint reads ExtendClientAreaTitleBarHeightHint. Defines the
 // `ExtendClientAreaTitleBarHeightHint` property.
-func (o Window) ExtendClientAreaTitleBarHeightHint() float64 { return getF64(o.h, 264) }
+func (o Window) ExtendClientAreaTitleBarHeightHint() float64 { return getF64(o.h, 266) }
 // SetExtendClientAreaTitleBarHeightHint writes ExtendClientAreaTitleBarHeightHint.
-func (o Window) SetExtendClientAreaTitleBarHeightHint(value float64) error { return setF64(o.h, 264, value) }
+func (o Window) SetExtendClientAreaTitleBarHeightHint(value float64) error { return setF64(o.h, 266, value) }
 
 // ExtendClientAreaToDecorationsHint reads ExtendClientAreaToDecorationsHint. Defines the
 // `ExtendClientAreaToDecorationsHint` property.
-func (o Window) ExtendClientAreaToDecorationsHint() bool { return getBool(o.h, 265) }
+func (o Window) ExtendClientAreaToDecorationsHint() bool { return getBool(o.h, 267) }
 // SetExtendClientAreaToDecorationsHint writes ExtendClientAreaToDecorationsHint.
-func (o Window) SetExtendClientAreaToDecorationsHint(value bool) error { return setBool(o.h, 265, value) }
+func (o Window) SetExtendClientAreaToDecorationsHint(value bool) error { return setBool(o.h, 267, value) }
 
 // IsExtendedIntoWindowDecorations reads IsExtendedIntoWindowDecorations. Defines the
 // `IsExtendedIntoWindowDecorations` property.
-func (o Window) IsExtendedIntoWindowDecorations() bool { return getBool(o.h, 399) }
+func (o Window) IsExtendedIntoWindowDecorations() bool { return getBool(o.h, 402) }
 
 // OffScreenMargin reads OffScreenMargin. Defines the `OffScreenMargin` property.
-func (o Window) OffScreenMargin() string { return getString(o.h, 589) }
+func (o Window) OffScreenMargin() string { return getString(o.h, 595) }
 
 // ShowActivated reads ShowActivated. Defines the `ShowActivated` property.
-func (o Window) ShowActivated() bool { return getBool(o.h, 781) }
+func (o Window) ShowActivated() bool { return getBool(o.h, 793) }
 // SetShowActivated writes ShowActivated.
-func (o Window) SetShowActivated(value bool) error { return setBool(o.h, 781, value) }
+func (o Window) SetShowActivated(value bool) error { return setBool(o.h, 793, value) }
 
 // ShowInTaskbar reads ShowInTaskbar. Enables or disables the taskbar icon.
-func (o Window) ShowInTaskbar() bool { return getBool(o.h, 785) }
+func (o Window) ShowInTaskbar() bool { return getBool(o.h, 798) }
 // SetShowInTaskbar writes ShowInTaskbar.
-func (o Window) SetShowInTaskbar(value bool) error { return setBool(o.h, 785, value) }
+func (o Window) SetShowInTaskbar(value bool) error { return setBool(o.h, 798, value) }
 
 // SizeToContent reads SizeToContent. Defines the `SizeToContent` property.
-func (o Window) SizeToContent() string { return getString(o.h, 793) }
+func (o Window) SizeToContent() string { return getString(o.h, 807) }
 // SetSizeToContent writes SizeToContent.
-func (o Window) SetSizeToContent(value string) error { return setString(o.h, 793, value) }
+func (o Window) SetSizeToContent(value string) error { return setString(o.h, 807, value) }
 
 // Title reads Title. Defines the `Title` property.
-func (o Window) Title() string { return getString(o.h, 908) }
+func (o Window) Title() string { return getString(o.h, 924) }
 // SetTitle writes Title.
-func (o Window) SetTitle(value string) error { return setString(o.h, 908, value) }
+func (o Window) SetTitle(value string) error { return setString(o.h, 924, value) }
 
 // WindowDecorationMargin reads WindowDecorationMargin. Defines the `WindowDecorationMargin`
 // property.
-func (o Window) WindowDecorationMargin() string { return getString(o.h, 1021) }
+func (o Window) WindowDecorationMargin() string { return getString(o.h, 1037) }
 
 // WindowDecorations reads WindowDecorations. Defines the `WindowDecorations` property.
-func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1023)) }
+func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1039)) }
 // SetWindowDecorations writes WindowDecorations.
-func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1023, int64(value)) }
+func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1039, int64(value)) }
 
 // WindowDecorationsTheme reads WindowDecorationsTheme. Defines the `WindowDecorationsTheme`
 // property.
 // WindowDecorationsTheme is the object the property holds, with one reference counted: release it.
-func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1024) }
+func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1040) }
 // SetWindowDecorationsTheme writes WindowDecorationsTheme to an object; nil is null.
-func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1024, value) }
+func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1040, value) }
 
 // WindowStartupLocation reads WindowStartupLocation. Defines the `WindowStartupLocation`
 // property.
-func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1027)) }
+func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1043)) }
 // SetWindowStartupLocation writes WindowStartupLocation.
-func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1027, int64(value)) }
+func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1043, int64(value)) }
 
 // WindowState reads WindowState. Represents the currently effective window state (normal,
 // minimized, maximized).
-func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1028)) }
+func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1044)) }
 // SetWindowState writes WindowState.
-func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1028, int64(value)) }
+func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1044, int64(value)) }
 
 // OnWindowClosed subscribes to WindowClosed; the sender is valid for the call. Routed event
 // that can be used for global tracking of window destruction.
