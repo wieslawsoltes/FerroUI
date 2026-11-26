@@ -34,8 +34,9 @@
     ScaleTransform after its transform.
   - The visual states of the pager: PreviousPageButtonHidden and NextPageButtonHidden (the page at
     the edge, Opacity 0) are :first-page and :last-page; PreviousPageButtonCollapsed and
-    NextPageButtonCollapsed are IsPreviousButtonVisible and IsNextButtonVisible (FerroUI has no
-    VisibleOnPointerHover); the Enabled states are the IsEnabled the control sets on the buttons;
+    NextPageButtonCollapsed are IsPreviousButtonVisible and IsNextButtonVisible, which the control
+    makes false for a Collapsed PreviousButtonVisibility or NextButtonVisibility; the control sets
+    the opacity of a VisibleOnPointerOver button that is hidden; the Enabled states are the IsEnabled the control sets on the buttons;
     HorizontalOrientationView is :horizontal (the navigation buttons turned by -90 degrees, the
     pips side by side); the OrientationStates of the pips (VerticalOrientation, 24 x 12) are the
     size of the items in :vertical. The tooltips of the navigation buttons (the automation name,
