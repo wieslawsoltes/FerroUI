@@ -6,7 +6,6 @@ mod composition_property;
 mod composition_target_overlays;
 mod compositor_lock;
 mod compositor_pools;
-mod drawing_context_proxy;
 
 pub use compositor_lock::{CompositorLock, CompositorLockGuard, LockBound, LockedServerCompositor};
 mod server_composition_bitmap_cache;
@@ -90,7 +89,6 @@ pub use server_compositor::{BatchQueue, CompositorClock, ServerCompositor};
 pub use server_list::ServerList;
 pub use composition_target_overlays::CompositionTargetOverlays;
 pub use compositor_pools::{CompositorPools, StackPool};
-pub use drawing_context_proxy::CompositorDrawingContextProxy;
 pub use server_composition_bitmap_cache::ServerCompositionBitmapCache;
 pub use server_composition_cache_mode::ServerCompositionCacheMode;
 pub use server_composition_container_visual::ServerCompositionContainerVisual;

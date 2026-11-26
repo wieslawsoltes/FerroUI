@@ -4,7 +4,8 @@ use crate::rendering::composition::generated::{
     ServerCompositionExperimentalAcrylicVisualHooks, ServerCompositionExperimentalAcrylicVisualProps,
 };
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::{Rect, RoundedRect};
+use crate::platform::IDrawingContextImpl;
+use crate::{CornerRadius, Rect, RoundedRect};
 use std::any::{Any, TypeId};
 use std::time::Duration;
 
@@ -43,6 +44,17 @@ impl IServerVisualContent for ServerCompositionExperimentalAcrylicVisual {
         committed_at: Duration,
     ) {
         self.props.deserialize_changes_core(visual, reader, committed_at);
+    }
+
+    fn push_clip_to_bounds(&self, visual: &ServerCompositionVisual, canvas: &mut dyn IDrawingContextImpl) {
+        let size = visual.size();
+        let clip_rect = Rect::new(0.0, 0.0, size.x, size.y);
+        let corner_radius = self.props.corner_radius();
+        if corner_radius == CornerRadius::default() {
+            canvas.push_clip(clip_rect);
+        } else {
+            canvas.push_clip_rounded(RoundedRect::from_corner_radius(clip_rect, corner_radius));
+        }
     }
 
     fn render_core(

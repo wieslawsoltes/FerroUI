@@ -26,6 +26,10 @@ impl ICompositionDrawListVisualExtension for BorderVisualState {
         }
     }
 
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     // The border writes its corner radius whenever the property changes, in a tree or not
     // (`Border::on_property_changed`).
     fn follows_control_out_of_tree(&self) -> bool {
@@ -56,6 +60,19 @@ impl CompositionBorderVisual {
             state.clone(),
         );
         Self { visual, state }
+    }
+
+    /// Sets the corner radius of `visual`, when it is a border visual. For a control that makes
+    /// one only when it needs it, and keeps no field for it.
+    pub(crate) fn set_corner_radius_of(visual: &CompositionDrawListVisual, value: CornerRadius) {
+        let state = visual.extension().and_then(|extension| extension.as_any());
+        if let Some(state) = state.and_then(|state| state.downcast_ref::<BorderVisualState>()) {
+            if state.corner_radius.get() != value {
+                state.corner_radius_changed.set(true);
+                state.corner_radius.set(value);
+                visual.register_for_serialization();
+            }
+        }
     }
 
     /// The visual as the draw list visual it is.

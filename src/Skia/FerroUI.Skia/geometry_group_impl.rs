@@ -1,4 +1,5 @@
 use crate::geometry_impl::{
+    cache_path_bounds,
     impl_geometry_impl, register, try_get_geometry_impl, FillPath, GeometryImpl, GeometryImplBase, Shared,
 };
 use crate::skia_sharp_extensions::to_rect;
@@ -37,7 +38,7 @@ impl GeometryGroupImpl {
             }
         }
 
-        let stroke_path = stroke.detach();
+        let stroke_path = cache_path_bounds(stroke.detach());
 
         let fill = if requires_fill_pass {
             let mut fill = PathBuilder::new_with_fill_type(fill_type);
@@ -48,7 +49,7 @@ impl GeometryGroupImpl {
                 }
             }
 
-            FillPath::Separate(fill.detach())
+            FillPath::Separate(cache_path_bounds(fill.detach()))
         } else {
             FillPath::SameAsStroke
         };

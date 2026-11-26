@@ -100,6 +100,10 @@ impl VisualImpl for ExperimentalAcrylicBorder {
         true
     }
 
+    fn clip_to_bounds_radius(this: &Self) -> Option<CornerRadius> {
+        Some(this.corner_radius())
+    }
+
     fn create_composition_visual(this: &Self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
         let v = CompositionExperimentalAcrylicVisual::new(compositor, this);
         this.sync_material(Some(v.as_draw_list_visual().clone()));
