@@ -1,0 +1,34 @@
+[package]
+name = "ferroui-controls-default-namespace-tests"
+description = "Compiled and run-time loading of the component controls from the default XML namespace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-controls-flip-view.workspace = true
+ferroui-controls-icons.workspace = true
+ferroui-controls-password-box.workspace = true
+ferroui-controls-split-menu.workspace = true
+ferroui-controls-teaching-tip.workspace = true
+ferroui-markup-xaml.workspace = true
+
+[build-dependencies]
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
