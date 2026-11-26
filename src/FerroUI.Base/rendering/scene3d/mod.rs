@@ -31,8 +31,10 @@
 //! (Direct3D, Metal and WebGPU; a GL executor remaps it), as WPF's matrices are.
 
 mod brush_content;
+mod video_frame;
 
 pub use brush_content::Scene3DBrushContent;
+pub use video_frame::{find_frame_provider, register_frame_provider, IScene3DFrameProvider, Scene3DFrameSlot};
 
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::{Color, SharedBrush};
