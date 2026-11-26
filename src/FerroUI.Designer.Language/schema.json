@@ -16197,6 +16197,84 @@
         "values": [],
         "attached": false
       },
+      "ListType": {
+        "name": "ListType",
+        "type_name": "MarkerType",
+        "documentation": "Paragraph.ListType: MarkerType",
+        "values": [
+          "None",
+          "Bullet",
+          "Arabic",
+          "LowercaseEnglishLetter",
+          "UppercaseEnglishLetter",
+          "LowercaseRoman",
+          "UppercaseRoman",
+          "UnicodeSequence",
+          "CircledNumber",
+          "BlackCircleWingding",
+          "WhiteCircleWingding",
+          "ArabicWide",
+          "SimplifiedChinese",
+          "TraditionalChinese",
+          "JapanSimplifiedChinese",
+          "JapanKorean",
+          "ArabicDictionary",
+          "ArabicAbjad",
+          "Hebrew",
+          "ThaiAlphabetic",
+          "ThaiNumeric",
+          "DevanagariVowel",
+          "DevanagariConsonant",
+          "DevanagariNumeric"
+        ],
+        "attached": false
+      },
+      "ListStyle": {
+        "name": "ListStyle",
+        "type_name": "MarkerStyle",
+        "documentation": "Paragraph.ListStyle: MarkerStyle",
+        "values": [
+          "Parenthesis",
+          "Parentheses",
+          "Period",
+          "Plain",
+          "NoNumber",
+          "Minus"
+        ],
+        "attached": false
+      },
+      "ListStart": {
+        "name": "ListStart",
+        "type_name": "i32",
+        "documentation": "Paragraph.ListStart: i32",
+        "values": [],
+        "attached": false
+      },
+      "ListTab": {
+        "name": "ListTab",
+        "type_name": "f64",
+        "documentation": "Paragraph.ListTab: f64",
+        "values": [],
+        "attached": false
+      },
+      "ListLevelIndex": {
+        "name": "ListLevelIndex",
+        "type_name": "i32",
+        "documentation": "Paragraph.ListLevelIndex: i32",
+        "values": [],
+        "attached": false
+      },
+      "ListAlignment": {
+        "name": "ListAlignment",
+        "type_name": "MarkerAlignment",
+        "documentation": "Paragraph.ListAlignment: MarkerAlignment",
+        "values": [
+          "Left",
+          "Center",
+          "Right"
+        ],
+        "attached": false
+      },
       "Inlines": {
         "name": "Inlines",
         "type_name": "InlineCollection",
