@@ -291,7 +291,13 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 1. Use `ferroui_reload_targets` to find a target. Start it with `ferroui_reload_control` and `action: "start"`, or use `start_debug` with a Rust attach configuration. For an independent app or Studio, call `ferroui_runtime_attach` with its loopback `url`, bearer `token`, and optional `label`. Only share the token with an agent authorized to inspect that app.
 2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
 3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
-4. Read `debuggerAttached` and `debuggerPaused` on the exact entry in `runtimes` to check its editor-owned debugger. Use `debuggerPaused` to distinguish a breakpoint from an app that can answer inspector requests. Continue in VS Code before sending a new inspector request to that session. Reading these fields works with editor writes disabled.
+4. Read `debuggerAttached` and `debuggerPaused` on the exact entry in `runtimes` to check its editor-owned debugger. Use `debuggerPaused` to identify a breakpoint before sending a new inspector request to that session. Reading these fields works with editor writes disabled.
+
+### Continue a paused debugger with MCP
+
+1. Read `ferroui_app_sessions`. Find the `runtime` with `debuggerPaused: true` and copy its `debuggerGeneration`.
+2. Call `ferroui_continue_debugger` with that `runtime` and its `debuggerGeneration` as `expected_debugger_generation`. The action requires `ferroui.mcp.allowWrites` on the trusted workspace host. It also works with managed apps and registered supervisors that run without a Live App inspector.
+3. Use the returned summary to check `debuggerPaused` before sending another inspector request. If a subsequent breakpoint stops the app or a rebuild changes the generation, read the current session before continuing again. [App Sessions](runtime.md#inspect-a-paused-app)
 
 ### Detach a debugger with MCP
 

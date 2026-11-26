@@ -15,6 +15,8 @@ export class AndroidSessionDebugger {
 
     statusFor(receipt: AndroidReceipt) { return this.attachment?.statusFor(receipt); }
 
+    continueStopped(signal?: AbortSignal): Promise<void> | undefined { return this.attachment?.continueStopped(signal); }
+
     async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, receipt: AndroidReceipt,
         symbols: readonly string[], signal: AbortSignal): Promise<void> {
         signal.throwIfAborted();

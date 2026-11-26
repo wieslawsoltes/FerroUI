@@ -9,7 +9,7 @@ import { detachedDebugger } from './debuggerPause';
 import { selectDebugConfiguration, type MobileLaunchDebug } from './reloadDebugConfiguration';
 import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
-import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
+import type { RuntimeConnections, RuntimeDebugger, RuntimeSummary } from './runtimeConnections';
 import type { AndroidRuntimeTarget, AppRuntime } from './runtimeTargets';
 import { workspaceFolders } from './workspacePaths';
 
@@ -95,7 +95,7 @@ export class AndroidSessions implements vscode.Disposable {
             if (configuration) this.debugger(session).prepare(folder, configuration);
             if (mode === 'run' && app.build) {
                 const runtime = this.connections.beginAndroid({ ...this.target(session), development: true }, this.label(session),
-                    () => this.debuggerStatus(session));
+                    this.debuggerControl(session));
                 session.runtime = runtime.runtime;
                 session.development = new AndroidDevelopment(app, session.bridge, this.connections, runtime.runtime,
                     this.history, this.output(session).log, session.stop.signal, this.debugger(session));
@@ -195,6 +195,13 @@ export class AndroidSessions implements vscode.Disposable {
         if (receipt?.debuggerPath) return session.debugger?.statusFor(receipt) ?? detachedDebugger;
     }
 
+    private debuggerControl(session: Session): RuntimeDebugger {
+        return {
+            statusFor: () => this.debuggerStatus(session),
+            continueStopped: signal => session.debugger?.continueStopped(signal),
+        };
+    }
+
     private label(session: Session): string { return `${session.app.label} · ${session.bridge.device.name}`; }
 
     private target(session: Session): AndroidRuntimeTarget {
@@ -209,7 +216,7 @@ export class AndroidSessions implements vscode.Disposable {
         workspaceFolders(session.app.folder);
         signal.throwIfAborted();
         const runtime = this.connections.addPlatform({ kind: 'android', android: this.target(session) },
-            this.label(session), process.forward.endpoint, () => this.debuggerStatus(session));
+            this.label(session), process.forward.endpoint, this.debuggerControl(session));
         session.runtime = runtime.runtime;
         return runtime;
     }

@@ -169,9 +169,9 @@ A save can affect one app or several. The extension tracks each app’s Cargo pa
 
 ### Inspect a paused app
 
-When a debugger opened by FerroUI stops at a breakpoint, Live App keeps its last frame and ends keyboard capture. Use the VS Code debug toolbar to inspect the callback and choose **Continue**. Live App resumes polling the same session. Other app sessions stay available throughout the pause.
+When a debugger opened by FerroUI stops at a breakpoint, Live App keeps its last frame and ends keyboard capture. Use VS Code's Run and Debug view to inspect the callback. In **App Sessions**, choose the Continue icon on the paused app's row. From the Command Palette, run **FerroUI: Continue Paused App** and pick a session if several apps are paused. This resumes the chosen app even when a separate debugger is active in VS Code. Live App resumes polling the same session.
 
-Continue before sending another inspector request through Live App or the editor MCP bridge. An input action that triggered the breakpoint can finish after Continue. If its request expires during a longer pause, check the app before repeating it. [Read debugger state through MCP](reference.md#target-app-sessions-with-mcp)
+Continue before sending another inspector request through Live App or the editor MCP bridge. An input action that triggered the breakpoint can finish after Continue. If its request expires during a longer pause, check the app before repeating it. [Continue a paused debugger with MCP](reference.md#continue-a-paused-debugger-with-mcp)
 
 ![VS Code stopped in the Rust approval callback. Live App retains the native window, and App Sessions marks only Release Review as paused.](../images/vscode-native-debugger-pause.png)
 

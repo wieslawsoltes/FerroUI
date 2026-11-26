@@ -107,7 +107,7 @@ export class BrowserSessions implements vscode.Disposable {
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
                 folder: app.folder, profile: app.id, url: app.url, launched: mode !== 'attach',
                 ...(appDebugger ? { debuggable: true } : {}),
-            } }, app.label, { channel }, appDebugger && (generation => appDebugger.statusFor(generation)));
+            } }, app.label, { channel }, appDebugger);
             session.runtime = runtime.runtime;
             const generation = runtime.generation;
             if (browser.debugPort && pause && generation !== null) appDebugger?.accepted({

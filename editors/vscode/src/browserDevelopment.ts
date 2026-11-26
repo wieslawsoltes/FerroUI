@@ -54,7 +54,7 @@ export class BrowserDevelopment {
         this.runtime = connections.beginBrowser({
             folder: app.folder, profile: app.id, launched: true, development: true,
             ...(appDebugger ? { debuggable: true } : {}),
-        }, app.label, appDebugger && (generation => appDebugger.statusFor(generation))).runtime;
+        }, app.label, appDebugger).runtime;
     }
 
     rebuild(delay = 0): void {

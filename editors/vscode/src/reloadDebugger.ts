@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import * as vscode from 'vscode';
-import { DebuggerPause, detachedDebugger, type DebuggerStatus } from './debuggerPause';
+import { DebuggerPause, detachedDebugger, noStoppedDebugger, type DebuggerStatus } from './debuggerPause';
 import { trackDebuggerPause } from './debuggerPauseTracker';
 
 export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
@@ -31,7 +31,7 @@ export class ReloadDebugger implements vscode.Disposable {
             vscode.debug.registerDebugAdapterTrackerFactory('*', { createDebugAdapterTracker: session => {
                 const generation = this.attachment?.generation;
                 if (generation === undefined || !this.owns(session, generation)) return;
-                return trackDebuggerPause(this.pause, () => this.owns(session, generation));
+                return trackDebuggerPause(this.pause, () => this.owns(session, generation), session);
             } }),
             vscode.debug.onDidStartDebugSession(session => {
                 if (session.configuration.ferrouiManagedInstance !== this.instance) return;
@@ -77,6 +77,11 @@ export class ReloadDebugger implements vscode.Disposable {
 
     statusFor(generation: number | undefined): DebuggerStatus {
         return generation !== undefined && this.follows(generation) ? this.status : detachedDebugger;
+    }
+
+    continueStopped(signal?: AbortSignal): Promise<void> {
+        if (!this.status.paused) return Promise.reject(new Error(noStoppedDebugger));
+        return this.pause.continueStopped(signal);
     }
 
     private owns(session: vscode.DebugSession, generation: number): boolean {

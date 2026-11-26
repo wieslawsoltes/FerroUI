@@ -38,6 +38,8 @@ export class BrowserDebugger {
 
     statusFor(generation: number | undefined) { return this.debug.statusFor(generation); }
 
+    continueStopped(signal?: AbortSignal): Promise<void> { return this.debug.continueStopped(signal); }
+
     accepted(frame: BrowserDebugFrame): void {
         this.stopWatching?.();
         this.frame?.pause.clear();

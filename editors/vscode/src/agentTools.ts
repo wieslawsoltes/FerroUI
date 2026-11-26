@@ -75,6 +75,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     change?: CommandBindingEdit;
     expected_rust_version: number;
     expected_generation: number;
+    expected_debugger_generation: number;
     expected_process_generation?: number;
     expected_sequence: number;
     runtime?: RuntimeTarget;
@@ -249,6 +250,7 @@ export class AgentTools {
             return describe(panel);
         }
         if (tool === 'ferroui_app_sessions') return this.appSessions.list();
+        if (tool === 'ferroui_continue_debugger') return this.appSessions.continueDebugger(args.runtime as AppRuntime, args.expected_debugger_generation, signal);
         if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal,
             args.debug ? { name: args.debug_configuration } : undefined);

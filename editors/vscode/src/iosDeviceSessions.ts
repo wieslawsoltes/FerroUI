@@ -13,7 +13,7 @@ import { iosDeviceAttachCommands, iosDeviceVariable, selectDebugConfiguration, t
 import { ReloadDebugger } from './reloadDebugger';
 import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
-import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
+import type { RuntimeConnections, RuntimeDebugger, RuntimeSummary } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 import { workspaceFolders } from './workspacePaths';
 
@@ -30,6 +30,13 @@ interface Launch {
     attaching?: boolean;
     starting?: Promise<RuntimeSummary>;
     closing?: Promise<void>;
+}
+
+function debuggerControl(launch: Launch): RuntimeDebugger {
+    return {
+        statusFor: generation => launch.debugger?.statusFor(generation) ?? detachedDebugger,
+        continueStopped: signal => launch.debugger?.continueStopped(signal),
+    };
 }
 
 export class IosDeviceSessions implements vscode.Disposable {
@@ -161,14 +168,14 @@ export class IosDeviceSessions implements vscode.Disposable {
 
     private publish(launch: Launch, pid: number, endpoint: IosDeviceProcess['endpoint'], attached?: true): RuntimeSummary {
         const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: { ...this.target(launch), pid, attached } },
-            this.label(launch), endpoint, generation => launch.debugger?.statusFor(generation) ?? detachedDebugger);
+            this.label(launch), endpoint, debuggerControl(launch));
         launch.runtime = runtime.runtime;
         return runtime;
     }
 
     private startDevelopment(launch: Launch, label: string): RuntimeSummary {
         const pending = this.connections.beginIosDevice({ ...this.target(launch), development: true }, label,
-            generation => launch.debugger?.statusFor(generation) ?? detachedDebugger);
+            debuggerControl(launch));
         const runtime = launch.runtime = pending.runtime;
         launch.development = iosDeviceDevelopment({
             app: launch.app, device: launch.device, bridge: this.bridge, connections: this.connections, runtime,

@@ -11,7 +11,7 @@ import { selectDebugConfiguration, type MobileLaunchDebug } from './reloadDebugC
 import { ReloadDebugger } from './reloadDebugger';
 import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
-import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
+import type { RuntimeConnections, RuntimeDebugger, RuntimeSummary } from './runtimeConnections';
 import { verifyRuntime } from './runtimeReady';
 import type { AppRuntime, IosRuntimeTarget } from './runtimeTargets';
 import { workspaceFolders } from './workspacePaths';
@@ -30,6 +30,14 @@ interface Launch {
 }
 
 interface DebugOptions { configuration?: string; interactive?: boolean; detach?: boolean; signal?: AbortSignal }
+
+function debuggerControl(launch: Launch): RuntimeDebugger {
+    return {
+        statusFor: () => (launch.development ? launch.debugger?.statusFor(launch.development.current?.pid)
+            : launch.debugger?.status) ?? detachedDebugger,
+        continueStopped: signal => launch.debugger?.continueStopped(signal),
+    };
+}
 
 export class IosSimulatorSessions implements vscode.Disposable {
     readonly supported = process.platform === 'darwin';
@@ -110,7 +118,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             workspaceFolders(app.folder);
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
             const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint,
-                () => launch.debugger?.status ?? detachedDebugger);
+                debuggerControl(launch));
             launch.runtime = runtime.runtime;
             this.resumeDebugger(launch);
             return runtime;
@@ -192,10 +200,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
         const build = app.build;
         if (!build) throw new Error('Choose an iOS simulator source-build profile.');
         const target = build.target ?? (process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios');
-        const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch), () => {
-            const pid = launch.development?.current?.pid;
-            return launch.debugger?.statusFor(pid) ?? detachedDebugger;
-        });
+        const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch), debuggerControl(launch));
         const { runtime } = pending;
         launch.runtime = runtime;
         const output = this.output(launch).log;

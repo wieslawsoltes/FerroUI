@@ -46,4 +46,48 @@ export async function verifyDebuggerPause(): Promise<void> {
     cancel.abort(new Error('The accepted generation retired.'));
     await assert.rejects(cancelled, { name: 'AbortError' });
     pause.clear();
+
+    await verifyContinueStopped();
+}
+
+async function verifyContinueStopped(): Promise<void> {
+    const pause = new DebuggerPause();
+    const actions: number[] = [];
+    const adapterFor = (owner: DebuggerPause) => {
+        const tracker = trackDebuggerPause(owner, () => true, {
+            async customRequest(command, args) {
+                assert.equal(command, 'continue');
+                actions.push(args.threadId);
+                tracker.onDidSendMessage?.({ type: 'event', event: 'continued', body: { threadId: args.threadId } });
+            },
+        });
+        return tracker;
+    };
+    const stop = (threadId?: number) => ({ type: 'event', event: 'stopped', body: { threadId } });
+    adapterFor(pause).onDidSendMessage?.(stop(7));
+    adapterFor(pause).onDidSendMessage?.(stop(42));
+    const otherApp = new DebuggerPause();
+    adapterFor(otherApp).onDidSendMessage?.(stop(101));
+    await pause.continueStopped();
+    assert.deepEqual(actions, [7, 42]);
+    assert.equal(pause.paused, false);
+    assert.equal(otherApp.paused, true);
+    await assert.rejects(pause.continueStopped(), /not paused/);
+
+    let acceptThreads!: (threads: { threads: { id: number }[] }) => void;
+    const threads = new Promise<{ threads: { id: number }[] }>(resolve => { acceptThreads = resolve; });
+    const replaced = trackDebuggerPause(pause, () => true, {
+        async customRequest(command) {
+            assert.equal(command, 'threads');
+            return threads;
+        },
+    });
+    replaced.onDidSendMessage?.(stop());
+    const request = pause.continueStopped();
+    await assert.rejects(pause.continueStopped(), /already continuing/);
+    replaced.onDidSendMessage?.(stop());
+    acceptThreads({ threads: [{ id: 8 }] });
+    await assert.rejects(request, /debugger stop changed/);
+    assert.equal(pause.paused, true);
+    assert.deepEqual(actions, [7, 42]);
 }

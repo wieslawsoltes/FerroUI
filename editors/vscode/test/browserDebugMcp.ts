@@ -18,7 +18,11 @@ export async function verifyBrowserDebug(): Promise<void> {
     const tracker = vscode.debug.registerDebugAdapterTrackerFactory('*', {
         createDebugAdapterTracker(session) {
             return { onDidSendMessage(message) {
-                if (message.event === 'stopped' && message.body?.reason === 'breakpoint') hits.push({ session, thread: message.body.threadId });
+                if (message.event !== 'stopped' || message.body?.reason !== 'breakpoint') return;
+                const owner = session.parentSession ?? session;
+                // The running page can hit its interval breakpoint again before its replacement is accepted.
+                if (!owner.configuration.ferrouiManagedInstance || hits.some(hit => (hit.session.parentSession ?? hit.session).id === owner.id)) return;
+                hits.push({ session, thread: message.body.threadId });
             } };
         },
     });
@@ -106,6 +110,20 @@ export async function verifyBrowserDebug(): Promise<void> {
         await vscode.commands.executeCommand('ferroui.appSessions.showOutput', runtime);
         await vscode.commands.executeCommand('ferroui.appSessions.showOutput', served.runtime);
         await vscode.workspace.fs.delete(failMarker);
+
+        const debuggerGeneration = stopped?.debuggerGeneration;
+        assert.ok(debuggerGeneration);
+        const continueDebugger = (expected_debugger_generation: number) => invoke('ferroui_continue_debugger', { runtime, expected_debugger_generation });
+        assert.match((await continueDebugger(debuggerGeneration - 1)).content[0]?.text ?? '', /current debugger generation/);
+        await config.update('allowWrites', false, vscode.ConfigurationTarget.Global);
+        try { assert.ok((await continueDebugger(debuggerGeneration)).isError); }
+        finally { await config.update('allowWrites', true, vscode.ConfigurationTarget.Global); }
+        assert.equal((await current())?.debuggerPaused, true);
+        const continued = content<RuntimeSummary>(await continueDebugger(debuggerGeneration));
+        assert.equal(continued.runtime, initial.runtime);
+        assert.equal(continued.generation, initial.generation);
+        assert.equal(continued.debuggerPaused, false);
+        assert.equal(continued.debuggerAttached, true);
 
         const line = editor.document.lineAt(2);
         assert.ok(await editor.edit(edit => edit.replace(line.range, line.text.replace('+= 1', '+= 2'))));

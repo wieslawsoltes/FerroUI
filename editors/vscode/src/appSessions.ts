@@ -61,6 +61,7 @@ export class AppSessions implements vscode.Disposable {
             managed('select'),
             command('debug', session => this.debug(session)),
             command('detachDebug', session => this.debug(session, true)),
+            vscode.commands.registerCommand('ferroui.appSessions.continueDebug', (item?: AppItem) => this.continueFromWorkbench(item?.session)),
             command('rebuild', session => {
                 if (session.simulator?.development) return this.simulators.rebuild(session.runtime);
                 if (session.iosDevice?.development) return this.iosDevices.rebuild(session.runtime);
@@ -80,6 +81,10 @@ export class AppSessions implements vscode.Disposable {
     }
 
     list() { return { active: this.reload.active ?? null, managed: this.reload.runs().map(run => run.state), runtimes: this.connections.targets() }; }
+
+    continueDebugger(runtime: AppRuntime, generation: number, signal?: AbortSignal) {
+        return this.connections.continueDebugger(runtime, generation, signal);
+    }
 
     attach(url: string, token: string, name?: string, signal?: AbortSignal) { return this.connections.attach(url, token, name, signal); }
     detach(runtime: AppRuntime): void { this.connections.detach(runtime); }
@@ -102,6 +107,23 @@ export class AppSessions implements vscode.Disposable {
                 else if (session.android) await this.android.debug(session.runtime, session.generation, options);
             }
         } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+    }
+
+    private async continueFromWorkbench(item?: RuntimeSummary): Promise<RuntimeSummary | undefined> {
+        let selected = item;
+        if (!selected) {
+            const paused = this.connections.targets().filter(session => session.debuggerPaused && session.debuggerGeneration !== undefined);
+            if (!paused.length) {
+                void vscode.window.showInformationMessage('No FerroUI app is paused in its debugger.');
+                return;
+            }
+            selected = paused.length === 1 ? paused[0] : (await vscode.window.showQuickPick(paused.map(session => ({
+                label: session.label, description: session.pid ? `PID ${session.pid}` : session.kind, session,
+            })), { title: 'Continue Paused FerroUI App' }))?.session;
+        }
+        if (selected?.debuggerGeneration === undefined) return;
+        try { return await this.continueDebugger(selected.runtime, selected.debuggerGeneration); }
+        catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
     }
 
     private stop(session: RuntimeSummary) {
@@ -145,6 +167,7 @@ export class AppSessions implements vscode.Disposable {
         } else {
             item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         }
+        if (session.debuggerPaused && session.debuggerGeneration !== undefined) item.contextValue += '-paused';
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;
     }

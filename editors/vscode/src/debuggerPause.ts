@@ -8,19 +8,29 @@ export interface PauseState {
 
 export interface DebuggerStatus { attached: boolean; paused: boolean }
 export const detachedDebugger: Readonly<DebuggerStatus> = { attached: false, paused: false };
+export const noStoppedDebugger = 'This FerroUI app is not paused in its debugger.';
+
+type ContinueStopped = (signal?: AbortSignal) => Promise<void>;
 
 /** Aggregates stops from the adapters that belong to one debugger attachment. */
 export class DebuggerPause implements PauseState {
-    private readonly stopped = new Set<symbol>();
+    private readonly stopped = new Map<symbol, ContinueStopped | undefined>();
     private readonly listeners = new Set<(paused: boolean) => void>();
 
     get paused(): boolean { return this.stopped.size > 0; }
 
-    set(adapter: symbol, paused: boolean): void {
+    set(adapter: symbol, paused: boolean, continueStopped?: ContinueStopped): void {
         const before = this.paused;
-        if (paused) this.stopped.add(adapter);
+        if (paused) this.stopped.set(adapter, continueStopped);
         else this.stopped.delete(adapter);
         if (before !== this.paused) this.notify();
+    }
+
+    async continueStopped(signal?: AbortSignal): Promise<void> {
+        signal?.throwIfAborted();
+        const actions = [...this.stopped.values()].filter(action => action !== undefined);
+        if (!actions.length) throw new Error(noStoppedDebugger);
+        await Promise.all(actions.map(action => action(signal)));
     }
 
     clear(): void {

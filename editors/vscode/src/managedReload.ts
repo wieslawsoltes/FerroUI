@@ -88,6 +88,11 @@ export class ManagedReload {
         await this.debugger.detach();
     }
 
+    continueDebugger(generation: number, signal?: AbortSignal): Promise<void> {
+        this.requireProcess(generation);
+        return this.debugger.continueStopped(signal);
+    }
+
     private requireProcess(generation: number | undefined): void {
         if (this.stopping || generation === undefined || generation !== this.processGeneration) {
             throw new Error('Read the current accepted process generation with ferroui_reload_status.');

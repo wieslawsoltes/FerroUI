@@ -1,5 +1,5 @@
-import type { DebugAdapterTracker } from 'vscode';
-import type { DebuggerPause } from './debuggerPause';
+import type { DebugAdapterTracker, DebugSession } from 'vscode';
+import { noStoppedDebugger, type DebuggerPause } from './debuggerPause';
 
 const resumeCommands = new Set(['continue', 'next', 'stepIn', 'stepOut', 'stepBack', 'reverseContinue', 'goto', 'restartFrame']);
 
@@ -17,11 +17,34 @@ interface AdapterMessage {
     body?: { threadId?: number; allThreadsContinued?: boolean; reason?: string };
 }
 
-export function trackDebuggerPause(pause: DebuggerPause, current: () => boolean): DebugAdapterTracker {
+export function trackDebuggerPause(pause: DebuggerPause, current: () => boolean,
+    session?: Pick<DebugSession, 'customRequest'>): DebugAdapterTracker {
     const adapter = Symbol();
     const stopped: Stops = new Map();
     const resumes = new Map<number, Resume>();
-    const update = () => pause.set(adapter, stopped.size > 0 && current());
+    let continuing = false;
+    const continueStopped = session && (async (signal?: AbortSignal) => {
+        const stop = stopped.entries().next().value;
+        if (!stop || !current()) throw new Error(noStoppedDebugger);
+        const [thread, marker] = stop;
+        const resuming = () => [...resumes.values()].some(operation => operation.before.get(thread) === marker);
+        if (continuing || resuming()) throw new Error('This debugger is already continuing.');
+        continuing = true;
+        try {
+            let threadId = thread;
+            if (threadId === undefined) {
+                const result: { threads?: { id: number }[] } | undefined = await session.customRequest('threads');
+                threadId = result?.threads?.[0]?.id;
+            }
+            signal?.throwIfAborted();
+            if (!current() || stopped.get(thread) !== marker || resuming()) {
+                throw new Error('The debugger stop changed. Read the current FerroUI app session.');
+            }
+            if (threadId === undefined) throw new Error('The debug adapter did not report a thread to continue.');
+            await session.customRequest('continue', { threadId });
+        } finally { continuing = false; }
+    });
+    const update = () => pause.set(adapter, stopped.size > 0 && current(), continueStopped);
     const clear = () => { stopped.clear(); resumes.clear(); update(); };
     const resume = (thread: number | undefined, all: boolean, before: Stops) => {
         for (const [id, marker] of before) {

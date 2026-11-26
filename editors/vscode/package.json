@@ -129,6 +129,13 @@
         "icon": "$(debug-disconnect)"
       },
       {
+        "command": "ferroui.appSessions.continueDebug",
+        "title": "Continue Paused App",
+        "category": "FerroUI",
+        "icon": "$(debug-continue)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
         "command": "ferroui.appSessions.showOutput",
         "title": "Show App Output",
         "category": "FerroUI",
@@ -1450,22 +1457,27 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-paused)?$/",
           "group": "inline@1"
         },
         {
-          "command": "ferroui.appSessions.rebuild",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(simulator|ios-device|android|browser)-development(-debug)?)$/",
+          "command": "ferroui.appSessions.continueDebug",
+          "when": "view == ferroui.appSessions && viewItem =~ /-paused$/",
           "group": "inline@2"
         },
         {
-          "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)$/",
+          "command": "ferroui.appSessions.rebuild",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(simulator|ios-device|android|browser)-development(-debug)?)(-paused)?$/",
           "group": "inline@3"
         },
         {
+          "command": "ferroui.appSessions.stop",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-paused)?$/",
+          "group": "inline@4"
+        },
+        {
           "command": "ferroui.appSessions.select",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)(-paused)?$/",
           "group": "1_apps@1"
         },
         {
@@ -1475,12 +1487,12 @@
         },
         {
           "command": "ferroui.appSessions.detachDebug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|ios-device|(simulator|ios-device|android|browser)(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|ios-device|(simulator|ios-device|android|browser)(-development)?-debug)(-paused)?$/",
           "group": "1_apps@3"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|ios-device|android|browser)(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|ios-device|android|browser)(-development)?(-debug)?)(-paused)?$/",
           "group": "1_apps@4"
         },
         {

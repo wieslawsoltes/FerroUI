@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
+import type { RuntimeSummary } from '../src/runtimeConnections';
 import { fileKey } from '../src/workspacePaths';
 import { trackNativeDebugger } from './nativeDebugFixture';
 import { until } from './wait';
@@ -35,7 +36,14 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
                 assert.match(frame.name, /\bsave_review\b/);
                 assert.equal(fileKey(await realpath(frame.source.path)), fileKey(await realpath(source.uri.fsPath)));
                 assert.equal(frame.line, line + 1);
-            } finally { await current.customRequest('continue', { threadId }); }
+                const resumed = await vscode.commands.executeCommand<RuntimeSummary>('ferroui.appSessions.continueDebug');
+                assert.ok(resumed, 'The FerroUI command continued the paused application');
+                assert.equal(resumed.pid, current.configuration.pid);
+                assert.equal(resumed.debuggerPaused, false);
+            } catch (error) {
+                await current.customRequest('continue', { threadId }).then(undefined, () => {});
+                throw error;
+            }
             const error = await input;
             if (error !== undefined) throw error;
         },

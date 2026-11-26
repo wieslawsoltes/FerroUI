@@ -28,6 +28,8 @@ export class AndroidDebugger {
         return this.receipt === receipt ? this.debugger.statusFor(receipt.pid) : detachedDebugger;
     }
 
+    continueStopped(signal?: AbortSignal): Promise<void> { return this.debugger.continueStopped(signal); }
+
     attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, signal: AbortSignal): Promise<void> {
         return this.starting = this.start(folder, configuration, AbortSignal.any([signal, this.stop.signal, AbortSignal.timeout(35_000)]));
     }
