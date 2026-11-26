@@ -2,15 +2,24 @@
 //! the handlers of `AppBarButtonPage.xaml.cs`, `AppBarToggleButtonPage.xaml.cs` and
 //! `CommandBarPage.xaml.cs`. WinUI's AppBarButton, AppBarToggleButton and AppBarSeparator are
 //! FerroUI's CommandBarButton, CommandBarToggleButton and CommandBarSeparator, and a
-//! KeyboardAccelerator is the button's HotKey. The AppBarSeparator page has no code-behind
+//! KeyboardAccelerator is the button's HotKey. The XamlUICommand and StandardUICommand pages
+//! (`XamlUICommandPage.xaml.cs`, `StandardUICommandPage.xaml.cs`) use the commands of
+//! ferroui-controls. The AppBarSeparator page has no code-behind
 //! upstream. The command bar owns its layout and overflow; the sample owns only its commands.
 
-use ferroui_base::input::{Key, KeyGesture, KeyModifiers};
-use ferroui_base::{BoxedValue, Ref};
+use ferroui_base::collections::FerroList;
+use ferroui_base::input::{ICommand, InputElement, Key, KeyGesture, KeyModifiers, PointerEventArgs, PointerType};
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Colors, IBrush};
+use ferroui_base::{BoxedValue, Ref, Thickness, WeakRef};
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls_icons::BitmapIcon;
 use ferroui_controls::{
-    Button, CommandBar, CommandBarButton, CommandBarSeparator, CommandBarToggleButton, Control,
-    Image, Symbol, SymbolIcon, TextBlock,
+    Button, CommandBar, CommandBarButton, CommandBarSeparator, CommandBarToggleButton, Control, Grid, ListBox,
+    MenuFlyout, MenuItem, StandardUICommand, StandardUICommandKind, SwipeControl, SwipeItem, SwipeItems, SwipeMode,
+    Symbol, SymbolIcon, TextBlock, XamlUICommand,
 };
 use std::rc::Rc;
 
@@ -22,6 +31,8 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "AppBarButton" => wire_app_bar_button(root),
         "AppBarToggleButton" => wire_app_bar_toggle_button(root),
         "CommandBar" => wire_command_bar(root),
+        "XamlUICommand" => wire_xaml_ui_command(root),
+        "StandardUICommand" => wire_standard_ui_command(root),
         _ => {}
     }
 }
@@ -200,4 +211,142 @@ fn wire_command_bar(root: &Ref<Control>) {
     });
     on_click("AddSecondaryCommandsButton", add_secondary_commands);
     on_click("RemoveSecondaryCommandsButton", remove_secondary_commands);
+}
+
+/// `CustomXamlUICommand_ExecuteRequested` of `XamlUICommandPage.xaml.cs`: the command of the
+/// AppBarButton writes its output, which a polite live region announces (the source's
+/// `AnnounceActionForAccessibility`).
+fn wire_xaml_ui_command(root: &Ref<Control>) {
+    let button = root.get_control::<CommandBarButton>("CustomButton");
+    let Some(command) = button.command().as_ref().and_then(XamlUICommand::from_command) else {
+        return;
+    };
+    let output = root.get_control::<TextBlock>("XamlUICommandOutput").downgrade();
+    command
+        .execute_requested(move |_, _| {
+            if let Some(output) = output.upgrade() {
+                output.set_text(Some("You fired the custom command"));
+            }
+        })
+        .detach();
+}
+
+/// The list of `StandardUICommandPage.xaml.cs`: the texts of its `ListItemData`.
+pub(crate) struct StandardUICommandPage {
+    collection: Rc<FerroList<BoxedValue>>,
+    list: WeakRef<ListBox>,
+}
+
+impl StandardUICommandPage {
+    /// `DeleteCommand_ExecuteRequested`: the item of the parameter goes, or else the selected one.
+    fn delete(&self, parameter: Option<&BoxedValue>) {
+        if let Some(text) = parameter.and_then(|parameter| parameter.downcast_ref::<String>()) {
+            let items = self.collection.snapshot();
+            if let Some(index) = items.iter().position(|item| item.downcast_ref::<String>() == Some(text)) {
+                self.collection.remove_at(index);
+                return;
+            }
+        }
+        let selected = self.list.upgrade().map_or(-1, |list| list.selected_index());
+        if let Ok(index) = usize::try_from(selected) {
+            self.collection.remove_at(index);
+        }
+    }
+}
+
+/// The item template of the list (the source's `UserControl` with its `SwipeControl`): the text,
+/// the execute SwipeItem of the right side and the AppBarButton shown while a mouse or a pen is
+/// over the item, all with the command of the item and its text as the parameter; the context
+/// menu of `ListViewRight_ContainerContentChanging` has a MenuFlyoutItem of the command and
+/// selects the item when it opens.
+fn standard_ui_command_item(list: &WeakRef<ListBox>, data: &BoxedValue, command: &Rc<dyn ICommand>) -> Ref<Control> {
+    let text = data.downcast_ref::<String>().cloned().unwrap_or_default();
+    let parameter: BoxedValue = Rc::new(text.clone());
+    let swipe_item = SwipeItem::new();
+    swipe_item.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(Colors::RED)) as Rc<dyn IBrush>));
+    swipe_item.set_command(Some(command.clone()));
+    swipe_item.set_command_parameter(Some(parameter.clone()));
+    let right_items = SwipeItems::with_mode(SwipeMode::Execute);
+    right_items.add(swipe_item);
+
+    let label = TextBlock::new();
+    label.set_margin(Thickness::uniform(10.0));
+    label.set_horizontal_alignment(HorizontalAlignment::Left);
+    label.set_vertical_alignment(VerticalAlignment::Center);
+    label.set_font_size(18.0);
+    label.set_text(Some(&text));
+    let hover_button = CommandBarButton::new();
+    hover_button.set_name(Some("HoverButton".to_string()));
+    hover_button.set_horizontal_alignment(HorizontalAlignment::Right);
+    hover_button.set_command(Some(command.clone()));
+    hover_button.set_command_parameter(Some(parameter));
+    hover_button.set_is_tab_stop(false);
+    hover_button.set_is_visible(false);
+    let content = Grid::new();
+    content.set_vertical_alignment(VerticalAlignment::Center);
+    content.children().add(label.upcast::<Control>());
+    content.children().add(hover_button.clone().upcast::<Control>());
+
+    let swipe = SwipeControl::new();
+    swipe.set_name(Some("ListViewSwipeContainer".to_string()));
+    swipe.set_right_items(Some(right_items));
+    swipe.set_content(Some(Control::boxed(content)));
+    let root = Grid::new();
+    AutomationProperties::set_name(&root, Some(&text));
+    root.children().add(swipe.upcast::<Control>());
+    // ListViewSwipeContainer_PointerEntered and _PointerExited: HoverButtonsShown for a mouse or a
+    // pen, HoverButtonsHidden when the pointer leaves.
+    let shown = hover_button.downgrade();
+    root.add_handler(InputElement::pointer_entered_event(), move |_, e: &PointerEventArgs| {
+        if matches!(e.pointer().type_(), PointerType::Mouse | PointerType::Pen) {
+            if let Some(button) = shown.upgrade() {
+                button.set_is_visible(true);
+            }
+        }
+    });
+    let hidden = hover_button.downgrade();
+    root.add_handler(InputElement::pointer_exited_event(), move |_, _: &PointerEventArgs| {
+        if let Some(button) = hidden.upgrade() {
+            button.set_is_visible(false);
+        }
+    });
+
+    let item = MenuItem::new();
+    item.set_command(Some(command.clone()));
+    let flyout = MenuFlyout::new();
+    flyout.items().add(Some(Control::boxed(item)));
+    let list = list.clone();
+    let selected = data.clone();
+    flyout
+        .opened(move || {
+            if let Some(list) = list.upgrade() {
+                list.set_selected_item(Some(selected.clone()));
+            }
+        })
+        .detach();
+    root.set_context_flyout(flyout);
+    root.upcast()
+}
+
+/// `ControlExample_Loaded` and `ListView_Loaded` of `StandardUICommandPage.xaml.cs`: the Delete
+/// command (`StandardUICommand(StandardUICommandKind.Delete)`) with its `ExecuteRequested`
+/// handler, set on the Edit menu's item and on the 15 items of the list.
+fn wire_standard_ui_command(root: &Ref<Control>) {
+    let list = root.get_control::<ListBox>("ListViewRight");
+    let page = Rc::new(StandardUICommandPage { collection: Rc::new(FerroList::new()), list: list.downgrade() });
+    let delete_command = StandardUICommand::with_kind(StandardUICommandKind::Delete);
+    let handler_page = page.clone();
+    delete_command.execute_requested(move |_, args| handler_page.delete(args.parameter().as_ref())).detach();
+    let command = delete_command.as_command();
+    root.get_control::<MenuItem>("DeleteFlyoutItem").set_command(Some(command.clone()));
+    for index in 0..15 {
+        page.collection.add(Rc::new(format!("List item {index}")) as BoxedValue);
+    }
+    let weak_list = list.downgrade();
+    list.set_item_template(Some(FuncDataTemplate::new(
+        |_| true,
+        move |data, _| data.as_ref().map(|data| standard_ui_command_item(&weak_list, data, &command)),
+        false,
+    )));
+    list.set_items_source(Some(page.collection.clone().into()));
 }

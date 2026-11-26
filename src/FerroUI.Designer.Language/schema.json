@@ -2203,6 +2203,34 @@
     ]
   },
   {
+    "name": "CanExecuteRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::CanExecuteRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Parameter": {
+        "name": "Parameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CanExecuteRequestedEventArgs.Parameter: Option<BoxedValue>",
+        "values": []
+      },
+      "CanExecute": {
+        "name": "CanExecute",
+        "type_name": "bool",
+        "documentation": "CanExecuteRequestedEventArgs.CanExecute: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "CancelEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::utilities::CancelEventArgs",
@@ -7044,6 +7072,25 @@
     "namespace_aliases": [
       "using:System",
       "clr-namespace:System;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ExecuteRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ExecuteRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Parameter": {
+        "name": "Parameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ExecuteRequestedEventArgs.Parameter: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -11903,6 +11950,238 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "KeyboardAccelerator",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::KeyboardAccelerator",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Key": {
+        "name": "Key",
+        "type_name": "Key",
+        "documentation": "KeyboardAccelerator.Key: Key",
+        "values": [
+          "None",
+          "Cancel",
+          "Back",
+          "Tab",
+          "LineFeed",
+          "Clear",
+          "Return",
+          "Pause",
+          "CapsLock",
+          "HangulMode",
+          "JunjaMode",
+          "FinalMode",
+          "KanjiMode",
+          "Escape",
+          "ImeConvert",
+          "ImeNonConvert",
+          "ImeAccept",
+          "ImeModeChange",
+          "Space",
+          "PageUp",
+          "PageDown",
+          "End",
+          "Home",
+          "Left",
+          "Up",
+          "Right",
+          "Down",
+          "Select",
+          "Print",
+          "Execute",
+          "Snapshot",
+          "Insert",
+          "Delete",
+          "Help",
+          "D0",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "LWin",
+          "RWin",
+          "Apps",
+          "Sleep",
+          "NumPad0",
+          "NumPad1",
+          "NumPad2",
+          "NumPad3",
+          "NumPad4",
+          "NumPad5",
+          "NumPad6",
+          "NumPad7",
+          "NumPad8",
+          "NumPad9",
+          "Multiply",
+          "Add",
+          "Separator",
+          "Subtract",
+          "Decimal",
+          "Divide",
+          "F1",
+          "F2",
+          "F3",
+          "F4",
+          "F5",
+          "F6",
+          "F7",
+          "F8",
+          "F9",
+          "F10",
+          "F11",
+          "F12",
+          "F13",
+          "F14",
+          "F15",
+          "F16",
+          "F17",
+          "F18",
+          "F19",
+          "F20",
+          "F21",
+          "F22",
+          "F23",
+          "F24",
+          "NumLock",
+          "Scroll",
+          "LeftShift",
+          "RightShift",
+          "LeftCtrl",
+          "RightCtrl",
+          "LeftAlt",
+          "RightAlt",
+          "BrowserBack",
+          "BrowserForward",
+          "BrowserRefresh",
+          "BrowserStop",
+          "BrowserSearch",
+          "BrowserFavorites",
+          "BrowserHome",
+          "VolumeMute",
+          "VolumeDown",
+          "VolumeUp",
+          "MediaNextTrack",
+          "MediaPreviousTrack",
+          "MediaStop",
+          "MediaPlayPause",
+          "LaunchMail",
+          "SelectMedia",
+          "LaunchApplication1",
+          "LaunchApplication2",
+          "OemSemicolon",
+          "OemPlus",
+          "OemComma",
+          "OemMinus",
+          "OemPeriod",
+          "OemQuestion",
+          "OemTilde",
+          "AbntC1",
+          "AbntC2",
+          "OemOpenBrackets",
+          "OemPipe",
+          "OemCloseBrackets",
+          "OemQuotes",
+          "Oem8",
+          "OemBackslash",
+          "ImeProcessed",
+          "System",
+          "OemAttn",
+          "OemFinish",
+          "DbeHiragana",
+          "DbeSbcsChar",
+          "DbeDbcsChar",
+          "OemBackTab",
+          "DbeNoRoman",
+          "CrSel",
+          "ExSel",
+          "EraseEof",
+          "Play",
+          "DbeNoCodeInput",
+          "NoName",
+          "DbeEnterDialogConversionMode",
+          "OemClear",
+          "DeadCharProcessed",
+          "FnLeftArrow",
+          "FnRightArrow",
+          "FnUpArrow",
+          "FnDownArrow",
+          "MediaHome",
+          "MediaChannelList",
+          "MediaChannelRaise",
+          "MediaChannelLower",
+          "MediaRecord",
+          "MediaRed",
+          "MediaGreen",
+          "MediaYellow",
+          "MediaBlue",
+          "MediaMenu",
+          "MediaMore",
+          "MediaOption",
+          "MediaInfo",
+          "MediaSearch",
+          "MediaSubtitle",
+          "MediaTvGuide",
+          "MediaPreviousChannel"
+        ],
+        "attached": false
+      },
+      "Modifiers": {
+        "name": "Modifiers",
+        "type_name": "KeyModifiers",
+        "documentation": "KeyboardAccelerator.Modifiers: KeyModifiers",
+        "values": [],
+        "attached": false
+      },
+      "IsEnabled": {
+        "name": "IsEnabled",
+        "type_name": "bool",
+        "documentation": "KeyboardAccelerator.IsEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -23005,6 +23284,44 @@
     ]
   },
   {
+    "name": "StandardUICommand",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::StandardUICommand",
+    "base": "XamlUICommand",
+    "constructible": true,
+    "properties": {
+      "Kind": {
+        "name": "Kind",
+        "type_name": "StandardUICommandKind",
+        "documentation": "StandardUICommand.Kind: StandardUICommandKind",
+        "values": [
+          "None",
+          "Cut",
+          "Copy",
+          "Paste",
+          "SelectAll",
+          "Delete",
+          "Share",
+          "Save",
+          "Open",
+          "Close",
+          "Pause",
+          "Play",
+          "Stop",
+          "Forward",
+          "Backward",
+          "Undo",
+          "Redo"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "StateTrigger",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::StateTrigger",
@@ -31293,6 +31610,60 @@
     "namespace_aliases": [
       "using:FerroUI.Markup.Xaml.Diagnostics",
       "clr-namespace:FerroUI.Markup.Xaml.Diagnostics;assembly=FerroUI.Markup.Xaml"
+    ]
+  },
+  {
+    "name": "XamlUICommand",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::XamlUICommand",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Label": {
+        "name": "Label",
+        "type_name": "String",
+        "documentation": "XamlUICommand.Label: String",
+        "values": [],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "XamlUICommand.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      },
+      "AccessKey": {
+        "name": "AccessKey",
+        "type_name": "String",
+        "documentation": "XamlUICommand.AccessKey: String",
+        "values": [],
+        "attached": false
+      },
+      "Description": {
+        "name": "Description",
+        "type_name": "String",
+        "documentation": "XamlUICommand.Description: String",
+        "values": [],
+        "attached": false
+      },
+      "Command": {
+        "name": "Command",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "XamlUICommand.Command: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "KeyboardAccelerators": {
+        "name": "KeyboardAccelerators",
+        "type_name": "FerroList<Ref<KeyboardAccelerator>>",
+        "documentation": "XamlUICommand.KeyboardAccelerators: FerroList<Ref<KeyboardAccelerator>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

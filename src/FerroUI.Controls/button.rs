@@ -102,6 +102,7 @@ impl FerroObjectImpl for Button {
                 }
             }
             this.can_execute_changed(new_value.as_ref(), this.command_parameter().as_ref());
+            crate::ui_command::command_changed(this, crate::ui_command::UICommandSource::Button, new_value.as_ref());
         } else if property == Self::command_parameter_property().as_property() {
             let new_value = change.get_new_value::<Option<BoxedValue>>();
             this.can_execute_changed(this.command().as_ref(), new_value.as_ref());

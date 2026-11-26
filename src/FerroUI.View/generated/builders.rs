@@ -5380,6 +5380,20 @@ pub trait KeyBindingProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::KeyBinding>> KeyBindingProps for El<T> {}
 
+/// The properties and routed events of [`KeyboardAccelerator`](ferroui_controls::KeyboardAccelerator).
+pub trait KeyboardAcceleratorProps: ElementBuilder {
+    /// Sets [`KeyboardAccelerator::modifiers_property`](ferroui_controls::KeyboardAccelerator::modifiers_property).
+    fn modifiers<M>(self, value: impl IntoProp<ferroui_base::input::KeyModifiers, M>) -> Self {
+        self.prop(<ferroui_controls::KeyboardAccelerator>::modifiers_property(), value)
+    }
+
+    /// Sets [`KeyboardAccelerator::is_enabled_property`](ferroui_controls::KeyboardAccelerator::is_enabled_property).
+    fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::KeyboardAccelerator>::is_enabled_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::KeyboardAccelerator>> KeyboardAcceleratorProps for El<T> {}
+
 /// The properties and routed events of [`LayoutTransformControl`](ferroui_controls::LayoutTransformControl).
 pub trait LayoutTransformControlProps: ElementBuilder {
     /// Sets [`LayoutTransformControl::layout_transform_property`](ferroui_controls::LayoutTransformControl::layout_transform_property).
@@ -8879,6 +8893,15 @@ pub trait StackPanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::StackPanel>> StackPanelProps for El<T> {}
 
+/// The properties and routed events of [`StandardUICommand`](ferroui_controls::StandardUICommand).
+pub trait StandardUICommandProps: ElementBuilder {
+    /// Sets [`StandardUICommand::kind_property`](ferroui_controls::StandardUICommand::kind_property).
+    fn kind<M>(self, value: impl IntoProp<ferroui_controls::StandardUICommandKind, M>) -> Self {
+        self.prop(<ferroui_controls::StandardUICommand>::kind_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::StandardUICommand>> StandardUICommandProps for El<T> {}
+
 /// The properties and routed events of [`StateTrigger`](ferroui_controls::StateTrigger).
 pub trait StateTriggerProps: ElementBuilder {
     /// Sets [`StateTrigger::is_active_property`](ferroui_controls::StateTrigger::is_active_property).
@@ -10901,6 +10924,35 @@ pub trait XamlCompositionBrushBaseProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::XamlCompositionBrushBase>> XamlCompositionBrushBaseProps for El<T> {}
+
+/// The properties and routed events of [`XamlUICommand`](ferroui_controls::XamlUICommand).
+pub trait XamlUICommandProps: ElementBuilder {
+    /// Sets [`XamlUICommand::label_property`](ferroui_controls::XamlUICommand::label_property).
+    fn label<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::XamlUICommand>::label_property(), value)
+    }
+
+    /// Sets [`XamlUICommand::icon_source_property`](ferroui_controls::XamlUICommand::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::XamlUICommand>::icon_source_property(), value)
+    }
+
+    /// Sets [`XamlUICommand::access_key_property`](ferroui_controls::XamlUICommand::access_key_property).
+    fn access_key<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::XamlUICommand>::access_key_property(), value)
+    }
+
+    /// Sets [`XamlUICommand::description_property`](ferroui_controls::XamlUICommand::description_property).
+    fn description<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::XamlUICommand>::description_property(), value)
+    }
+
+    /// Sets [`XamlUICommand::command_property`](ferroui_controls::XamlUICommand::command_property).
+    fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::XamlUICommand>::command_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::XamlUICommand>> XamlUICommandProps for El<T> {}
 
 /// The attached properties of FerroUI.Base and FerroUI.Controls, named after their owner.
 pub trait AttachedProps: ElementBuilder {

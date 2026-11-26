@@ -11,8 +11,8 @@ use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
 use crate::animation::{ColorKeyFrame, DoubleKeyFrame, ObjectKeyFrame, PointKeyFrame, Timeline};
 use crate::{
-    ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, SwipeItem, TableViewColumn, VisualState, VisualStateGroup,
-    VisualTransition,
+    ItemsSourceView, KeyboardAccelerator, NativeMenuItemBase, Page, StateTriggerBase, SwipeItem, TableViewColumn,
+    VisualState, VisualStateGroup, VisualTransition,
 };
 use ferroui_base::collections::FerroList;
 use crate::{
@@ -504,6 +504,24 @@ ferro_markup_type!(class FerroListOf<Ref<SwipeItem>> as "FerroList`1" {
     methods: [fn Add(Ref<SwipeItem>) => |list: &FerroList<Ref<SwipeItem>>, item: Ref<SwipeItem>| list.add(item)],
 });
 
+// The keyboard accelerators of a command (`XamlUICommand.KeyboardAccelerators`).
+ferro_markup_type!(class FerroListOf<Ref<KeyboardAccelerator>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<KeyboardAccelerator>>, Option<FerroList<Ref<KeyboardAccelerator>>>],
+    this: FerroList<Ref<KeyboardAccelerator>>,
+    generic: "FerroList`1" [Ref<KeyboardAccelerator>],
+    constructors: [() => FerroList::<Ref<KeyboardAccelerator>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<KeyboardAccelerator>>| list.count() as i32 },
+    ],
+    methods: [
+        fn Add(Ref<KeyboardAccelerator>) => |list: &FerroList<Ref<KeyboardAccelerator>>, item: Ref<KeyboardAccelerator>| {
+            list.add(item)
+        },
+    ],
+});
+
 // The triggers of a visual state (`VisualState.StateTriggers`).
 ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -677,6 +695,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<SwipeItem>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<KeyboardAccelerator>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualTransition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Timeline>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<DoubleKeyFrame>> as MarkupTyped>::MARKUP,
@@ -705,6 +724,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
     ValueTypes::register_nullable::<FerroList<Ref<SwipeItem>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<KeyboardAccelerator>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualTransition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Timeline>>>();
     ValueTypes::register_nullable::<FerroList<Ref<DoubleKeyFrame>>>();

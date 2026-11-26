@@ -195,6 +195,13 @@ with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
 directly (`controls/dev/NavigationView` with the English texts of its
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
 
+The files under `ui_command/` (WinUI's `XamlUICommand`, `StandardUICommand`, its kinds,
+`KeyboardAccelerator` as the description of a gesture, the arguments of `ExecuteRequested` and
+`CanExecuteRequested`, and `CommandingHelpers`) are ported from the WinUI project directly
+(`dxaml/xcp/dxaml/lib/XamlUICommand_Partial.cpp`, `StandardUICommand_Partial.cpp`,
+`CommandingHelpers.cpp` and the English texts of `dxaml/xcp/dxaml/dllsrv/winrt/Microsoft.UI.Xaml.Common.rc`,
+at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

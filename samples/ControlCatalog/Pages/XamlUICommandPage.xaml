@@ -1,0 +1,27 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="XamlUICommand"
+             x:Class="ControlCatalog.Pages.XamlUICommandPage">
+  <!-- Not from upstream: WinUI's XamlUICommand (docs/porting/winui-controls.md, section 10.16).
+       The class of the page creates the command and sets it on the button, the command bar
+       button and the menu item, which take its label, icon, hot key and description. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">An XamlUICommand carries the label, icon, keyboard accelerator and description of a command: every control it is set on shows them without setting them itself.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">One command, three sources</TextBlock>
+    <StackPanel Orientation="Horizontal" Spacing="8" Margin="2">
+      <Button x:Name="CommandButton" />
+      <CommandBarButton x:Name="CommandBarCommandButton" />
+      <Menu>
+        <MenuItem Header="Edit">
+          <MenuItem x:Name="CommandMenuItem" />
+        </MenuItem>
+      </Menu>
+    </StackPanel>
+    <TextBlock x:Name="Output" Margin="2" Text="Run the command with a click or with Ctrl+D." />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">CanExecuteRequested</TextBlock>
+    <CheckBox x:Name="CanExecute" Margin="2" IsChecked="True" Content="The command can run" />
+    <Button x:Name="Rename" Margin="2" Content="Rename the command" />
+  </StackPanel>
+</ContentPage>

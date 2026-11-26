@@ -12,7 +12,7 @@ use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, instantiate, BoxedValue,
-    FerroObject, FerroObjectImpl, FerroProperty, Ref, StyledProperty,
+    FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty,
 };
 use std::rc::Rc;
 
@@ -94,7 +94,17 @@ pub struct SwipeItem {
 
 ferro_class!(SwipeItem: FerroObject);
 ferro_class_info!(SwipeItem { new: SwipeItem::new, markup: { namespace: "FerroUI.Controls" } });
-ferro_impl_classes!(SwipeItem: FerroObjectImpl);
+
+impl FerroObjectImpl for SwipeItem {
+    // SwipeItem::OnPropertyChanged: the text and the icon source of an `XamlUICommand`.
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+        Self::parent_on_property_changed(this, change);
+        if change.property() == Self::command_property().as_property() {
+            let command = change.get_new_value::<Option<Rc<dyn ICommand>>>();
+            crate::ui_command::command_changed(this, crate::ui_command::UICommandSource::SwipeItem, command.as_ref());
+        }
+    }
+}
 
 ferro_properties! { impl SwipeItem {
     /// Defines the `Text` property: the label of the item. Default empty.

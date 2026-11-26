@@ -522,6 +522,10 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- commands (WinUI, docs/porting/winui-controls.md, section 10.16) ---
+    crate::ui_command::XamlUICommand,
+    crate::ui_command::StandardUICommand,
+    crate::ui_command::KeyboardAccelerator,
     // --- swipe (WinUI, docs/porting/winui-calculator-gaps.md, SW-1) ---
     crate::swipe_control::SwipeControl,
     crate::swipe_control::SwipeItems,

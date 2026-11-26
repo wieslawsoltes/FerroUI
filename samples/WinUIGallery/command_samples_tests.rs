@@ -135,3 +135,54 @@ fn command_bar_options_open_close_and_change_the_secondary_commands() {
     click(&root.get_control::<Button>("RemoveSecondaryCommandsButton"));
     assert_eq!(bar.secondary_commands().count(), 1);
 }
+
+/// The XamlUICommand page: the AppBarButton takes the label, icon, accelerator and description of
+/// the page's command, and running it writes the output of `CustomXamlUICommand_ExecuteRequested`.
+#[test]
+fn xaml_ui_command_gives_the_button_its_ui_and_writes_the_output() {
+    use ferroui_controls::{SymbolIcon, ToolTip, XamlUICommand};
+    let _application = start();
+    let root = page("XamlUICommand");
+    let button = root.get_control::<CommandBarButton>("CustomButton");
+    assert_eq!(button.label().as_deref(), Some("Custom XamlUICommand"));
+    assert_eq!(button.hot_key(), Some(KeyGesture::new(Key::D, KeyModifiers::CONTROL)));
+    let icon = button.icon().as_ref().and_then(Control::from_boxed).and_then(|icon| icon.cast::<SymbolIcon>());
+    assert_eq!(icon.map(|icon| icon.symbol()), Some(ferroui_controls::Symbol::Favorite));
+    let tip = ToolTip::get_tip(&button).and_then(|tip| tip.downcast_ref::<String>().cloned());
+    assert_eq!(tip.as_deref(), Some("This is a custom command"));
+    assert!(button.command().as_ref().and_then(XamlUICommand::from_command).is_some());
+    assert_eq!(text(&root, "XamlUICommandOutput"), None);
+    // A click runs the command of the button (Button.OnClick).
+    button.on_click();
+    assert_eq!(text(&root, "XamlUICommandOutput").as_deref(), Some("You fired the custom command"));
+}
+
+/// The StandardUICommand page: the Delete command gives the Edit menu's item its label and
+/// accelerator, and deletes the item of its parameter (the swipe item and the hover button), or
+/// else the selected item (the menu item).
+#[test]
+fn standard_ui_command_deletes_the_item_of_the_parameter_or_the_selection() {
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::{ListBox, MenuItem};
+    use std::rc::Rc;
+    let _application = start();
+    let root = page("StandardUICommand");
+    let menu_item = root.get_control::<MenuItem>("DeleteFlyoutItem");
+    let header = menu_item.header().and_then(|header| header.downcast_ref::<String>().cloned());
+    assert_eq!(header.as_deref(), Some("Delete"));
+    assert_eq!(menu_item.input_gesture(), Some(KeyGesture::from_key(Key::Delete)));
+    let list = root.get_control::<ListBox>("ListViewRight");
+    let items = || -> Vec<String> {
+        let view = list.items().view().clone();
+        (0..view.count()).filter_map(|index| view.get_at(index)?.downcast_ref::<String>().cloned()).collect()
+    };
+    assert_eq!(items().len(), 15);
+    let command = menu_item.command().expect("the delete command");
+    let parameter: BoxedValue = Rc::new("List item 3".to_string());
+    command.execute(Some(&parameter));
+    assert_eq!(items().len(), 14);
+    assert!(!items().contains(&"List item 3".to_string()));
+    list.set_selected_index(0);
+    command.execute(None);
+    assert_eq!(items().first().map(String::as_str), Some("List item 1"));
+}

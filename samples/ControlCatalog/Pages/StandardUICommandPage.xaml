@@ -1,0 +1,14 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="StandardUICommand"
+             x:Class="ControlCatalog.Pages.StandardUICommandPage">
+  <!-- Not from upstream: WinUI's StandardUICommand (docs/porting/winui-controls.md, section
+       10.16). The class of the page fills the command bar with a button of each kind. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A StandardUICommand describes a platform command by its kind: the label, the symbol, the keyboard accelerator and the description come with the kind.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A command bar of standard commands</TextBlock>
+    <CommandBar x:Name="Commands" Margin="2" DefaultLabelPosition="Right" />
+    <TextBlock x:Name="Output" Margin="2" Text="Run a command with a click or with its keyboard accelerator." />
+  </StackPanel>
+</ContentPage>

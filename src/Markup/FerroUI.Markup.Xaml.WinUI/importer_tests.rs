@@ -270,6 +270,20 @@ fn implemented_controls_use_the_native_controls_namespace() {
     }
 }
 
+/// WinUI's XamlUICommand and StandardUICommand (docs/porting/winui-controls.md, section 10.16)
+/// with their keyboard accelerators are the commands of ferroui-controls.
+#[test]
+fn ui_commands_use_the_native_controls_namespace() {
+    let result = migrate(
+        "<XamlUICommand Label='Run'><XamlUICommand.KeyboardAccelerators><KeyboardAccelerator Key='R' Modifiers='Control'/></XamlUICommand.KeyboardAccelerators></XamlUICommand><StandardUICommand Kind='Delete'/>",
+    );
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let doc = Document::parse(&result.xaml).unwrap();
+    for element in doc.descendants().filter(Node::is_element).skip(1) {
+        assert_eq!(element.tag_name().namespace(), Some(CONTROLS_NAMESPACE), "{}", element.tag_name().name());
+    }
+}
+
 #[test]
 fn feedback_controls_and_item_descriptions_migrate_without_global_type_replacement() {
     let result = migrate("<InfoBadge Value='7'><InfoBadge.IconSource><FontIconSource Glyph='A'/></InfoBadge.IconSource></InfoBadge><ProgressRing IsIndeterminate='False' Value='42'/><RatingControl PlaceholderValue='2.5'><RatingControl.ItemInfo><RatingItemFontInfo Glyph='B' UnsetGlyph='C'/></RatingControl.ItemInfo></RatingControl><RatingItemImageInfo/><RatingItemInfo/><InfoBadgeTemplateSettings/><ProgressRingTemplateSettings/>");
