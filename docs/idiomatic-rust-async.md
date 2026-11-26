@@ -428,6 +428,10 @@ As [idiomatic-rust.md](idiomatic-rust.md), section 3, has it: the old types rema
 - Each step adds its rows to `docs/porting/data/upstream-names.toml`
   (`System.Threading.Tasks.Task` to `ferroui_system::task::JoinHandle`, ...) and its migration
   notes to `CHANGELOG.md`.
+- Removed in 0.7.0 (#625): the wrappers above, the `..._task` variants of the controls and the
+  local forms of the platforms, after their callers moved to the new types. The rows of
+  `upstream-names.toml` keep the replacement and drop the old path; the Migration section of
+  `CHANGELOG.md` lists what replaces each.
 
 ## 5. Steps
 
