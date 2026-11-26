@@ -3673,6 +3673,53 @@
     ]
   },
   {
+    "name": "CommandBarFlyout",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::CommandBarFlyout",
+    "base": "PopupFlyoutBase",
+    "constructible": true,
+    "properties": {
+      "AlwaysExpanded": {
+        "name": "AlwaysExpanded",
+        "type_name": "bool",
+        "documentation": "CommandBarFlyout.AlwaysExpanded: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "PrimaryCommands": {
+        "name": "PrimaryCommands",
+        "type_name": "CommandBarElementList",
+        "documentation": "CommandBarFlyout.PrimaryCommands: CommandBarElementList",
+        "values": []
+      },
+      "SecondaryCommands": {
+        "name": "SecondaryCommands",
+        "type_name": "CommandBarElementList",
+        "documentation": "CommandBarFlyout.SecondaryCommands: CommandBarElementList",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "CommandBarFlyoutCommandBar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::CommandBarFlyoutCommandBar",
+    "base": "CommandBar",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "CommandBarSeparator",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::CommandBarSeparator",
