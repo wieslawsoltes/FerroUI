@@ -16,6 +16,8 @@
 //! two stay comparable. The design, the facts about the renderers it rests
 //! on and what is built are in `docs/porting/vello-backend.md`.
 
+#[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl", test))]
+mod effect_uniforms;
 #[cfg(any(feature = "hybrid", feature = "gpu"))]
 pub mod gpu;
 #[cfg(not(target_family = "wasm"))]
