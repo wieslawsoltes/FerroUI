@@ -1,0 +1,104 @@
+<!-- macOS 26 theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/ScrollView.xaml),
+     as docs/porting/macos26-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/ScrollView/ScrollView.xaml (DefaultScrollViewStyle; its resources are
+    Resources/ScrollView_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4; docs/porting/winui-controls.md,
+  section 10.12):
+  - The parts are WinUI's: PART_Root, PART_ScrollPresenter (FerroUI's ScrollPresenter, which
+    hosts a scroll viewer without bars), PART_HorizontalScrollBar, PART_VerticalScrollBar and
+    PART_ScrollBarsSeparator. The view drives each bar through a scroll controller, which sets its
+    range, value and viewport, as WinUI's ScrollBarController does.
+  - The Grid around each bar binds IsVisible to ComputedHorizontalScrollBarVisibility and
+    ComputedVerticalScrollBarVisibility (a bool here, WinUI's Visibility); its Padding,
+    ScrollViewScrollBarsMargin, is the margin of the bar.
+  - PART_Root is a Border with the border and the corner radius of the view, which clips the
+    content to its rounded corners (ContentClipped, the default state of ContentClippingStates).
+  - ScrollingIndicatorStates (the IndicatorMode of the bars) and the delays of
+    ScrollBarsSeparatorStates are left out: the bars of FerroUI show their collapsed indicator and
+    expand under the pointer, as in the scroll viewer of this theme; the separator keeps its
+    opacity 0 (its brush is transparent in every variant) and shows only when both bars do.
+  - UseSystemFocusVisuals is left out (the focus visual of the view is the theme's).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <ScrollView Width="200" Height="200" ContentOrientation="None">
+      <Border Width="400" Height="400" Background="Gray" />
+    </ScrollView>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultScrollViewStyle" TargetType="ScrollView">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="ContentOrientation" Value="Vertical" />
+    <Setter Property="HorizontalScrollChainMode" Value="Auto" />
+    <Setter Property="HorizontalScrollMode" Value="Auto" />
+    <Setter Property="HorizontalScrollRailMode" Value="Enabled" />
+    <Setter Property="VerticalScrollChainMode" Value="Auto" />
+    <Setter Property="VerticalScrollMode" Value="Auto" />
+    <Setter Property="VerticalScrollRailMode" Value="Enabled" />
+    <Setter Property="ZoomChainMode" Value="Auto" />
+    <Setter Property="ZoomMode" Value="Disabled" />
+    <Setter Property="IgnoredInputKinds" Value="None" />
+    <Setter Property="MinZoomFactor" Value="0.1" />
+    <Setter Property="MaxZoomFactor" Value="10.0" />
+    <Setter Property="HorizontalAnchorRatio" Value="0.0" />
+    <Setter Property="VerticalAnchorRatio" Value="0.0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Root"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                ClipToBounds="True">
+          <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+            <ScrollPresenter x:Name="PART_ScrollPresenter"
+                             Grid.ColumnSpan="2"
+                             Grid.RowSpan="2"
+                             Background="{TemplateBinding Background}"
+                             Content="{TemplateBinding Content}"
+                             Margin="{TemplateBinding Padding}"
+                             ContentOrientation="{TemplateBinding ContentOrientation}"
+                             HorizontalScrollChainMode="{TemplateBinding HorizontalScrollChainMode}"
+                             HorizontalScrollMode="{TemplateBinding HorizontalScrollMode}"
+                             HorizontalScrollRailMode="{TemplateBinding HorizontalScrollRailMode}"
+                             VerticalScrollChainMode="{TemplateBinding VerticalScrollChainMode}"
+                             VerticalScrollMode="{TemplateBinding VerticalScrollMode}"
+                             VerticalScrollRailMode="{TemplateBinding VerticalScrollRailMode}"
+                             ZoomChainMode="{TemplateBinding ZoomChainMode}"
+                             ZoomMode="{TemplateBinding ZoomMode}"
+                             IgnoredInputKinds="{TemplateBinding IgnoredInputKinds}"
+                             MinZoomFactor="{TemplateBinding MinZoomFactor}"
+                             MaxZoomFactor="{TemplateBinding MaxZoomFactor}"
+                             HorizontalAnchorRatio="{TemplateBinding HorizontalAnchorRatio}"
+                             VerticalAnchorRatio="{TemplateBinding VerticalAnchorRatio}" />
+            <Grid Grid.Row="1" IsVisible="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
+              <ScrollBar x:Name="PART_HorizontalScrollBar"
+                         Margin="{DynamicResource ScrollViewScrollBarsMargin}"
+                         Orientation="Horizontal" />
+            </Grid>
+            <Grid Grid.Column="1" IsVisible="{TemplateBinding ComputedVerticalScrollBarVisibility}">
+              <ScrollBar x:Name="PART_VerticalScrollBar"
+                         Margin="{DynamicResource ScrollViewScrollBarsMargin}"
+                         Orientation="Vertical" />
+            </Grid>
+            <Border x:Name="PART_ScrollBarsSeparator"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Opacity="0"
+                    Background="{DynamicResource ScrollViewScrollBarsSeparatorBackground}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ScrollView}" TargetType="ScrollView" BasedOn="{StaticResource DefaultScrollViewStyle}" />
+</ResourceDictionary>

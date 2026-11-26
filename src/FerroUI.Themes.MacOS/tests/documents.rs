@@ -247,6 +247,7 @@ document_tests! {
     resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
     resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
     resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
+    resources_scroll_view_themeresources => "/Resources/ScrollView_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -280,6 +281,7 @@ document_tests! {
     controls_grid_view => "/Controls/GridView.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
+    controls_scroll_view => "/Controls/ScrollView.xaml";
 }
 
 #[test]
