@@ -13,29 +13,26 @@ export class PreviewKeyboard {
     readonly button = iconButton('keyboard', 'Preview keyboard input', () => this.active ? this.leave(true) : this.enter());
     private readonly capture = create('textarea');
     private readonly status = create('p');
-    private readonly announcement = create('p');
+    private readonly navigationHelp: string;
     private active = false;
     private composing = false;
 
     constructor(private readonly surface: HTMLElement, artboard: HTMLElement, id: number, private readonly returnTo: HTMLElement,
         private readonly send: (input: KeyboardInput) => void, private readonly options: CaptureOptions = {}) {
-        const instructions = create('span', options.nativeEscape
+        this.navigationHelp = options.nativeEscape
             ? 'Tab and Shift+Tab move within the active view. Escape closes an overlay or exits the prototype.'
-            : 'Tab and Shift+Tab move within the preview. Press Escape to return to the preview toolbar.');
+            : 'Tab and Shift+Tab move within the preview. Press Escape to return to the preview toolbar.';
+        const instructions = create('span', this.navigationHelp);
         instructions.id = `preview-keyboard-help-${id}`;
         instructions.hidden = true;
         this.capture.className = 'preview-keyboard-capture';
         this.capture.tabIndex = -1;
         this.button.setAttribute('aria-describedby', instructions.id);
-        this.capture.setAttribute('aria-describedby', instructions.id);
         this.capture.spellcheck = false;
         this.capture.hidden = this.button.hidden = this.status.hidden = true;
         this.button.setAttribute('aria-pressed', 'false');
         this.status.className = 'preview-keyboard-status';
         this.status.setAttribute('aria-hidden', 'true');
-        this.announcement.className = 'preview-keyboard-announcement';
-        this.announcement.setAttribute('role', 'status');
-        this.announcement.setAttribute('aria-atomic', 'true');
         this.button.onpointerdown = event => { if (this.active) event.preventDefault(); };
         this.capture.onblur = () => this.leave(false);
         this.capture.onkeydown = event => this.keydown(event);
@@ -45,7 +42,7 @@ export class PreviewKeyboard {
             this.composing = false;
             queueMicrotask(() => this.flushText());
         });
-        artboard.append(instructions, this.capture, this.status, this.announcement);
+        artboard.append(instructions, this.capture, this.status);
     }
 
     update(name: string, offered: boolean, enabled: boolean): void {
@@ -61,6 +58,7 @@ export class PreviewKeyboard {
     enter(): void {
         if (this.active || this.button.hidden || this.button.disabled) return;
         this.active = true;
+        this.capture.setAttribute('aria-description', this.navigationHelp);
         this.capture.hidden = this.status.hidden = false;
         this.surface.dataset.keyboard = 'true';
         this.button.setAttribute('aria-pressed', 'true');
@@ -75,8 +73,9 @@ export class PreviewKeyboard {
             : ['No focusable control'];
         const label = [...parts, this.shortcut].join(' · ');
         if (this.status.textContent !== label) this.status.textContent = label;
-        const spoken = parts.join(', ');
-        if (this.announcement.textContent !== spoken) this.announcement.textContent = spoken;
+        const description = parts.join(', ');
+        // Announce native focus through the focused entry even when other editor panes are open.
+        if (this.capture.getAttribute('aria-description') !== description) this.capture.setAttribute('aria-description', description);
     }
 
     private get shortcut(): string { return this.options.nativeEscape ? 'Esc to go back' : 'Esc to exit'; }
@@ -86,7 +85,6 @@ export class PreviewKeyboard {
         this.active = this.composing = false;
         this.capture.value = '';
         this.capture.hidden = this.status.hidden = true;
-        this.announcement.textContent = '';
         this.button.setAttribute('aria-pressed', 'false');
         delete this.surface.dataset.keyboard;
         this.options.onExit?.();

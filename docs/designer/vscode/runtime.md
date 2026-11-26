@@ -606,7 +606,7 @@ Filter by control type, name, text, or role. Matches keep their parent path. Esc
 ### Use the keyboard in Live App
 
 1. Open a window whose app enabled inspector input. Switch to **Interact**, then choose the keyboard icon labeled **Keyboard input for** that window. The app’s current focus or first tab stop appears below the native frame.
-2. Use Tab and Shift+Tab to follow the app’s focus order. Type or paste into the focused field. Use Enter or Space to activate the focused control. You can click a control in the frame while keyboard input is active.
+2. Use Tab and Shift+Tab to follow the app’s focus order. Type or paste into the focused field. Use Enter or Space to activate the focused control. The keyboard input’s accessible description gives the current control’s name and role as focus moves. You can click a control in the frame while keyboard input is active.
 3. Press Escape to return to the Live App toolbar. Leaving the editor, selecting another window, reconnecting, or replacing the app process also ends keyboard input. VoiceOver’s Control–Option shortcuts remain available during capture.
 
 The keyboard icon uses the running app’s `window_keyboard` inspector tool. To send text or an exact key gesture to one selected control, use the **Send input** form below the frame. [Drive the same window with MCP](reference.md#send-keyboard-input-to-a-running-window)

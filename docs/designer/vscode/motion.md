@@ -859,7 +859,7 @@ Type a name or role to filter the picker. Choose a mapped row to reveal its XAML
 ### Use the keyboard in a stage
 
 1. Switch a ready stage to **Interact**. Choose the key icon labeled **Keyboard input for** the stage, or click a control directly on the artboard.
-2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the focused control’s name and role, and exposes them to screen readers.
+2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the native control’s name and role. With a screen reader, read the focused keyboard input’s description for the same information.
 3. Press Escape to return to the card toolbar. VoiceOver’s Control–Option shortcuts remain available during keyboard input. Each card has its own temporary control values. Pausing the card or editing its source ends keyboard input.
 
 ![The Desktop stage accepts Release review while the Compact stage shows its own text. The artboard shows SearchInput and the Escape shortcut.](../images/vscode-stage-keyboard.jpg)
@@ -900,6 +900,6 @@ The sheet moves into the clipped artboard while the Accounts screen stays in pla
 2. Open an overlay. Its native controls receive focus, and Tab cycles within the overlay. Open a second overlay to test a stacked dialog. Use Escape or **Close overlay** to return to the previous layer. Its opener regains focus when it is still available.
 3. **Back** closes the top overlay first and then returns through the flow’s screen history. **Restart prototype** returns to the flow’s start while retaining your playback values. **Exit Prototype** followed by Play starts a fresh run.
 
-The native artboard includes the base view, clipped overlays, and dimming. The playback toolbar and named interactions stay available for design review. While typing in a modal, the status on the artboard announces the focused control’s accessible name and role. [Prototype automation](reference.md#drive-the-native-prototype-player)
+The native artboard includes the base view, clipped overlays, and dimming. The playback toolbar and named interactions stay available for design review. The keyboard input’s description follows the focused native control, including within modal overlays. [Prototype automation](reference.md#drive-the-native-prototype-player)
 
 ![The Accounts view stays visible behind the native Account settings modal, where the Company edit control has focus](../images/vscode-prototype-modal.png)
