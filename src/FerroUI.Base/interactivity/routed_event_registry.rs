@@ -34,8 +34,6 @@ impl RoutedEventRegistry {
     ///
     /// You won't usually want to call this method directly: use
     /// [`RoutedEvent::register`], which calls it.
-    // Out of line for the same reason as `create_inner_core`: it is called by every event.
-    #[inline(never)]
     pub fn register<T: ?Sized>(&self, type_: &'static TypeInfo, event: RoutedEvent<T>) {
         self.registered_routed_events.borrow_mut().entry(type_).or_default().push(event.as_routed_event());
     }

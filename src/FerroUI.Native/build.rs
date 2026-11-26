@@ -131,6 +131,10 @@ fn main() {
         if arc {
             b.flag("-fobjc-weak");
         }
+        // The text range accessibility of the `text-editor` feature (automation.mm).
+        if env::var_os("CARGO_FEATURE_TEXT_EDITOR").is_some() {
+            b.define("FRN_TEXT_EDITOR", "1");
+        }
         if debug {
             b.define("DEBUG", "1");
         } else {
