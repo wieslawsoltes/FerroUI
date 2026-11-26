@@ -1,0 +1,32 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.SelectorBarPage"
+             xmlns="https://github.com/ferroui"
+             Header="SelectorBar">
+    <StackPanel Orientation="Vertical" Spacing="4">
+        <TextBlock Classes="h2">A strip of items of which one can be selected</TextBlock>
+
+        <Separator Margin="0 16"/>
+
+        <TextBlock Classes="h1">Text and icons</TextBlock>
+        <SelectorBar>
+            <SelectorBarItem Text="Recent">
+                <SelectorBarItem.Icon><SymbolIcon Symbol="Clock"/></SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Text="Shared">
+                <SelectorBarItem.Icon><SymbolIcon Symbol="Share"/></SelectorBarItem.Icon>
+            </SelectorBarItem>
+            <SelectorBarItem Text="Favorites">
+                <SelectorBarItem.Icon><SymbolIcon Symbol="Favorite"/></SelectorBarItem.Icon>
+            </SelectorBarItem>
+        </SelectorBar>
+
+        <Separator Margin="0 16"/>
+
+        <TextBlock Classes="h1">Text only, with a disabled item</TextBlock>
+        <SelectorBar SelectedIndex="0">
+            <SelectorBarItem Text="First"/>
+            <SelectorBarItem Text="Second"/>
+            <SelectorBarItem Text="Disabled" IsEnabled="False"/>
+        </SelectorBar>
+    </StackPanel>
+</ContentPage>

@@ -99,3 +99,30 @@ fn regenerate_compiled_xaml() {
     std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
 }
+
+/// #1290: an application that does not use the icons does not keep their control themes.
+#[test]
+fn a_theme_with_parts_leaves_out_the_icon_units() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::StaticType;
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeUnit;
+    let _app = start_application();
+    let units = crate::compiled_xaml::THEME_UNITS;
+    let is_icon = |unit: &ThemeUnit| {
+        ["Controls/FontIcon.xaml", "Controls/SymbolIcon.xaml", "Controls/IconResources.xaml"].contains(&unit.name)
+    };
+    assert_eq!(units.iter().filter(|unit| is_icon(unit)).count(), 3, "each icon document is a unit");
+    let parts: Vec<&'static ThemeUnit> = units.iter().copied().filter(|unit| !is_icon(unit)).collect();
+    let parts: &'static [&'static ThemeUnit] = Box::leak(parts.into_boxed_slice());
+    let font = ResourceKey::Type(<ferroui_controls::FontIcon as StaticType>::TYPE);
+    let symbol = ResourceKey::Type(<ferroui_controls::SymbolIcon as StaticType>::TYPE);
+
+    let trimmed = SimpleTheme::with_parts(None, parts);
+    assert!(trimmed.try_get_resource(&font, None).is_none());
+    assert!(trimmed.try_get_resource(&symbol, None).is_none());
+    assert!(trimmed.try_get_resource(&"SymbolThemeFontFamily".into(), None).is_none());
+    let full = SimpleTheme::with_parts(None, units);
+    assert!(full.try_get_resource(&font, None).is_some());
+    assert!(full.try_get_resource(&symbol, None).is_some());
+    assert!(full.try_get_resource(&"SymbolThemeFontFamily".into(), None).is_some());
+}
