@@ -15,7 +15,8 @@ use crate::{
     Button, ColumnDefinition, Control, ControlImpl, Grid, GridLength, GridUnitType, ItemsChangedEventArgs,
     ItemsSource, ListViewItem, RepeatButton, ScrollViewer, SelectionChangedEventArgs, ToolTip,
 };
-use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
+use crate::item_collection::{ItemCollection, ItemCollectionList};
+use ferroui_base::collections::NotifyCollectionChangedAction;
 use ferroui_base::input::{
     FocusManager, ICommand, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     NavigationMethod,
@@ -163,7 +164,9 @@ struct TabViewParts {
 #[repr(C)]
 pub struct TabView {
     base: TemplatedControl,
-    tab_items: FerroList<Option<BoxedValue>>,
+    tab_items: ItemCollection,
+    /// `tab_items` as the items source of the list, made once so the list keeps it.
+    tab_items_as_source: ItemsSource,
     parts: RefCell<TabViewParts>,
     previous_available_width: Cell<f64>,
     /// The width `update_tab_widths` gave the tabs last, for a container prepared after it ran.
@@ -185,9 +188,6 @@ ferro_class_info!(TabView {
     markup: {
         namespace: "FerroUI.Controls",
         content: TabItems,
-        properties: [
-            TabItems: FerroList<Option<BoxedValue>> { get: TabView::tab_items },
-        ],
         events: [
             TabCloseRequested(Option<BoxedValue>, TabViewTabCloseRequestedEventArgs) =>
                 |this: &Ref<TabView>, handler: MarkupDelegate| {
@@ -335,8 +335,8 @@ ferro_properties! { impl TabView {
 
     ferro_property!(
         /// Defines the `TabItems` property: the items of the tabs, when `TabItemsSource` is not set.
-        pub fn tab_items_property() -> DirectProperty<TabView, FerroList<Option<BoxedValue>>> {
-            FerroProperty::register_direct::<TabView, _>("TabItems", |o| o.tab_items(), None, FerroList::new())
+        pub fn tab_items_property() -> DirectProperty<TabView, ItemCollection> {
+            FerroProperty::register_direct::<TabView, _>("TabItems", |o| o.tab_items(), None, ItemCollection::new())
         }
     );
 } }
@@ -499,9 +499,12 @@ impl InputElementImpl for TabView {
 impl TabView {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
+        let tab_items = ItemCollection::new();
+        let tab_items_as_source = ItemsSource::new(Rc::new(ItemCollectionList(tab_items.view().clone())));
         Self {
             base: TemplatedControl::construct(),
-            tab_items: FerroList::new(),
+            tab_items,
+            tab_items_as_source,
             parts: RefCell::new(TabViewParts::default()),
             previous_available_width: Cell::new(f64::NAN),
             tab_width: Cell::new(f64::NAN),
@@ -530,7 +533,7 @@ impl TabView {
 
     /// The items of the tabs (WinUI's `TabItems`): `TabViewItem`s, or other items when
     /// [`tab_item_template`](Self::tab_item_template) makes their tabs.
-    pub fn tab_items(&self) -> FerroList<Option<BoxedValue>> {
+    pub fn tab_items(&self) -> ItemCollection {
         self.tab_items.clone()
     }
 
@@ -743,7 +746,7 @@ impl TabView {
     /// items of the list when it loads; the port gives the list the collection itself).
     fn update_list_view_items(&self) {
         let Some(list_view) = self.list_view() else { return };
-        let source = self.tab_items_source().unwrap_or_else(|| ItemsSource::new(Rc::new(self.tab_items.clone())));
+        let source = self.tab_items_source().unwrap_or_else(|| self.tab_items_as_source.clone());
         if list_view.items_source().as_ref() != Some(&source) {
             list_view.set_items_source(Some(source));
         }
@@ -1217,7 +1220,7 @@ impl TabView {
     fn item_at(&self, index: i32) -> Option<BoxedValue> {
         match self.tab_items_source() {
             Some(source) => usize::try_from(index).ok().filter(|&i| i < source.count()).and_then(|i| source.get_at(i)),
-            None => usize::try_from(index).ok().filter(|&i| i < self.tab_items.count()).and_then(|i| self.tab_items.get(i)),
+            None => usize::try_from(index).ok().filter(|&i| i < self.tab_items.count()).and_then(|i| self.tab_items.get_at(i)),
         }
     }
 
