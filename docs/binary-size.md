@@ -1780,8 +1780,9 @@ Against main `8af335b50` (macOS arm64, 2026-11-27), after the review of the stac
 
 Of the +804 bytes, 288 are the minimum line height of the text formatter
 (`TextParagraphProperties::minimum_line_height`, its key in the layout cache and the padding of a
-line) and 292 the rounded rectangle of `ITextDrawingSink`; the clipboard (-1,744 before the
-feature), the input method tag (-964), the automation resolver and the popup opt-in add nothing.
+line) and 292 the rounded rectangle of `ITextDrawingSink`. The clipboard (1,744 bytes before it
+became a feature), the input method tag (964 bytes before), the automation resolver and the popup
+opt-in add nothing.
 
 In `dist` the rest is code PR 1057 adds to paths every application runs: the value of a value
 provider as bytes and a length, the bounds checks of the pasteboard, the tag of input method
