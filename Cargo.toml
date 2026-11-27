@@ -110,6 +110,7 @@ members = [
     # An Osprey Native host on FerroUI (docs/osprey-native-host.md).
     "src/FerroUI.OspreyNative",
     "src/FerroUI.Controls.ColorPicker",
+    "src/FerroUI.Controls.ItemsView",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",
     "src/FerroUI.Controls.LiveCharts",
@@ -369,6 +370,7 @@ ferroui-controls-charts = { version = "=0.6.0-preview.1", path = "src/FerroUI.Co
 ferroui-livecharts = { version = "=0.6.0-preview.1", path = "src/FerroUI.LiveCharts" }
 ferroui-controls-livecharts = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.LiveCharts" }
 ferroui-controls-repeater = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Repeater" }
+ferroui-controls-items-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.ItemsView" }
 ferroui-controls-inking = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Inking" }
 ferroui-treedatagrid-core = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
