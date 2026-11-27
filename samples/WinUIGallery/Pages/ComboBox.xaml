@@ -2,9 +2,8 @@
      ComboBoxPage.xaml.cs (button_samples.rs); see ../NOTICE.md. FerroUI's ComboBox has no Header,
      which is composed. The FontHelper.Fonts items are their names, and the output's font follows
      the selected name (the source's x:Bind of FontItem.Font). The font sizes are the source's
-     FontSizes; Combo3_Loaded selects the third. FerroUI's ComboBox has no TextSubmitted event and
-     there is no ContentDialog, so Combo3_TextSubmitted (the check of a typed size and its dialog)
-     is not ported: the page is partial. OutputTextBlockStyle is its margin. -->
+     FontSizes; Combo3_Loaded selects the third. Combo3_TextSubmitted is button_samples.rs, with the source's dialog for an invalid size.
+     OutputTextBlockStyle is its margin. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="ComboBoxExample1" Spacing="8">
