@@ -1343,3 +1343,21 @@ fn text_layout_build_geometry_of_empty_text_has_no_ink() {
     assert!(!geometry.fill_contains(Point::new(91.0, 73.0)));
     scope.dispose();
 }
+
+#[test]
+fn a_variable_font_reports_its_axes_and_named_instances() {
+    let _scope = start();
+    let typeface = VelloTypeface::from_bytes(INTER_VARIABLE.to_vec(), FontSimulations::None).unwrap();
+    let design = IPlatformTypeface::variation_design(&*typeface);
+    let weight = design.axis(OpenTypeTag::from_chars('w', 'g', 'h', 't')).expect("the weight axis");
+    assert_eq!((100.0, 400.0, 900.0), (weight.min_value, weight.default_value, weight.max_value));
+    assert!(weight.name.as_deref().is_some_and(|name| !name.is_empty()), "{weight:?}");
+    assert!(!design.named_instances.is_empty());
+    let bold = design.named_instances.iter().find(|instance| instance.name.as_deref() == Some("Bold"));
+    if let Some(bold) = bold {
+        assert_eq!(Some(700.0), bold.coordinates.try_get_value(weight.tag));
+    }
+
+    let plain = VelloTypeface::from_bytes(INTER.to_vec(), FontSimulations::None).unwrap();
+    assert!(IPlatformTypeface::variation_design(&*plain).is_empty());
+}
