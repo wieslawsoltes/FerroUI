@@ -1,0 +1,68 @@
+[package]
+name = "ferroui-capi"
+description = "The universal C ABI of FerroUI: opaque integer handles, interned type, property and event IDs, scalar setters and getters, callbacks with integer tokens and the UI thread rule, with a generated C header that every language binds to"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# Phase 1 of #636: the ABI is versioned (`ferro_abi_version`) but not yet published; the C library
+# is built from the workspace (docs/c-abi.md).
+publish = false
+# Unit tests live in `tests/` as a module tree of the library (`mod tests;`), not as integration test
+# targets: an integration test would build the static and the dynamic library as well.
+autotests = false
+autobenches = false
+
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+# The dynamic library for bindings that load it, the static library for a C or C++ application that
+# links it (with link-time optimisation the exports it does not call drop at its link), and the Rust
+# library for the benchmark and for a Rust launcher that hosts another language.
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[features]
+default = ["desktop", "type-tables"]
+# The tables of every type (`ferroui-base/type-tables`): every class, property and event is found
+# by name from the start (`ferro_type_id`), and markup can name any type. Without it (the by-use
+# mode, docs/c-abi.md, section 16) a class is known once it is registered by its entry
+# (`ferro_type_<class>()`, which the generated bindings of a selection call) or used, and the
+# linker of an application removes every class the application does not reach.
+type-tables = ["ferroui-base/type-tables"]
+# `ferro_app_run`: an application on the platform of the operating system (`ferroui-desktop`, which
+# renders with Skia) with the Fluent theme. Without it `ferro_app_run` returns
+# `FERRO_NOT_SUPPORTED`, and everything else works on a thread the host drives
+# (`ferro_run_jobs`): the C tests of the ABI and the benchmark build without a renderer.
+desktop = ["dep:ferroui-desktop", "dep:ferroui-themes-fluent", "dep:ferroui-markup-xaml"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-themes-fluent = { workspace = true, optional = true }
+# The units of the Fluent theme the class entries name (`api_types.rs`), and the parts table the
+# theme is constructed with in the by-use mode.
+ferroui-markup-xaml = { workspace = true, optional = true }
+
+[dev-dependencies]
+# The C header is generated from the sources of this crate (`include/ferroui.h`); a unit test
+# compares it with what cbindgen writes now (`tests/header_tests.rs`).
+cbindgen = { version = "0.28", default-features = false }
+# The class entries (`api_types.rs`) are generated from the API model and the theme units each class
+# roots (`tests/types_tests.rs`), with the unit closure of the build tool.
+ferroui-build = { workspace = true }
+serde_json = { workspace = true }
+# The unit tests look types up by name, as the full mode does.
+ferroui-base = { workspace = true, features = ["type-tables"] }
+
+# The cost of a call through the ABI against the same operation in Rust (docs/c-abi.md, section 8).
+[[bench]]
+name = "call_overhead"
+path = "benches/call_overhead.rs"
+harness = false

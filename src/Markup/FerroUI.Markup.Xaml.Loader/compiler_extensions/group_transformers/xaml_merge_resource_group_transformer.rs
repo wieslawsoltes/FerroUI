@@ -114,6 +114,20 @@ fn theme_dictionary_value_group(
         .cast::<XamlManipulationGroupNode>()
 }
 
+/// The value of an assignment of `Key` (the key of a theme dictionary), or `None` for another
+/// node.
+fn key_assignment_value(node: &Rc<dyn IXamlAstManipulationNode>) -> Option<Rc<dyn IXamlAstValueNode>> {
+    let assignment = node.cast::<XamlPropertyAssignmentNode>()?;
+    if assignment.property.name() != "Key" {
+        return None;
+    }
+    let values = assignment.values.borrow();
+    if values.len() != 1 {
+        return None;
+    }
+    Some(values[0].clone())
+}
+
 /// A `MergeResourceInclude` taken out of the merged dictionaries of a dictionary.
 struct MergeSource {
     /// The assignment of its `Source`.
@@ -503,7 +517,22 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                 };
                 if Self::theme_variant_node_equals(context, &key, &prev_values[0])? {
                     let added = value_group.children.borrow().clone();
-                    same_key_prev_value_group.children.borrow_mut().extend(added);
+                    // Not from upstream: the `Key` the merged dictionary assigns is left out when
+                    // the dictionary it is merged into already assigns an equal one. The merge
+                    // joins only dictionaries of equal keys, and the assignment stores the key
+                    // again, so it changes nothing; a theme of many documents (the WinUI theme)
+                    // repeated it, with its casts, once for every merged document.
+                    let kept_key = same_key_prev_value_group.children.borrow().iter().find_map(key_assignment_value);
+                    let mut kept = Vec::with_capacity(added.len());
+                    for child in added {
+                        if let (Some(kept_key), Some(added_key)) = (&kept_key, key_assignment_value(&child)) {
+                            if Self::theme_variant_node_equals(context, kept_key, &added_key)? {
+                                continue;
+                            }
+                        }
+                        kept.push(child);
+                    }
+                    same_key_prev_value_group.children.borrow_mut().extend(kept);
                     Self::fix_ensure_capacity_nodes(context, &same_key_prev_value_group)?;
                     children.remove(i);
                     break;

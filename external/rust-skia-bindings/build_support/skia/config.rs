@@ -314,6 +314,9 @@ pub fn build(
         crate::build_support::graphite_metal_lifetime::apply(&build.skia_source_dir)
             .expect("apply pinned Graphite Metal ownership fix");
         println!("cargo:warning=FerroUI Graphite Metal ownership fix applied (manual reference counting)");
+        // For the crates that depend on the binding (`links = "skia"`): ferroui-skia reads it as
+        // DEP_SKIA_GRAPHITE_METAL_OWNERSHIP and knows the Skia it links carries the fix (#622).
+        println!("cargo:graphite_metal_ownership=fixed");
     }
     configure_skia(build, config, python, gn_command.as_deref());
     build_skia(config, &ninja);

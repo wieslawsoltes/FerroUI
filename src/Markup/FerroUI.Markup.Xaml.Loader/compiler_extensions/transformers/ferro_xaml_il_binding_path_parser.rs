@@ -19,7 +19,7 @@ use xamlx::{xaml_ast_node_members, xaml_line_info_impl};
 use super::{
     FerroSyntheticCompiledBindingProperty, FerroXamlIlTargetTypeMetadataNode,
     FerroXamlIlWellKnownTypesExtensions, ScopeTypes, SyntheticCompiledBindingPropertyName,
-    XamlBindingsTransformException,
+    FerroTransformErrors,
 };
 
 /// `BindingExpressionGrammar.INode`: a node of a parsed binding path.
@@ -263,7 +263,7 @@ impl FerroXamlIlBindingPathParser {
                         Some(value) => &**value,
                         None => &**element_name_property,
                     };
-                    return Err(XamlBindingsTransformException::new(
+                    return Err(XamlError::bindings_transform(
                         format!("Invalid ElementName '{description}'."),
                         line_info,
                         None,
@@ -273,7 +273,7 @@ impl FerroXamlIlBindingPathParser {
         }
 
         if source_property.is_some() && converted_node.is_some() {
-            return Err(XamlBindingsTransformException::new(
+            return Err(XamlError::bindings_transform(
                 "Only one of ElementName, Source, or RelativeSource specified as a binding source. Only one property is allowed.",
                 &**binding,
                 None,
@@ -285,7 +285,7 @@ impl FerroXamlIlBindingPathParser {
             relative_source_property.as_ref(),
         )? {
             if converted_node.is_some() {
-                return Err(XamlBindingsTransformException::new(
+                return Err(XamlError::bindings_transform(
                     "Only one of ElementName, Source, or RelativeSource specified as a binding source. Only one property is allowed.",
                     &**binding,
                     None,
@@ -354,7 +354,7 @@ impl FerroXamlIlBindingPathParser {
                             {
                                 Some(type_extension_node.value().get_clr_type()?)
                             } else {
-                                return Err(XamlBindingsTransformException::new(
+                                return Err(XamlError::bindings_transform(
                                     "Unsupported node for AncestorType property",
                                     &*relative_source_object,
                                     None,
@@ -365,7 +365,7 @@ impl FerroXamlIlBindingPathParser {
 
                     if ancestor_type.is_none() {
                         if tree_type == "Visual" {
-                            return Err(XamlBindingsTransformException::new(
+                            return Err(XamlError::bindings_transform(
                                 "AncestorType must be set for RelativeSourceMode.FindAncestor when searching the visual tree.",
                                 &*relative_source_object,
                                 None,
@@ -389,7 +389,7 @@ impl FerroXamlIlBindingPathParser {
                                 .and_then(|level| styled_parents.get(level).cloned());
 
                             if ancestor_type.is_none() {
-                                return Err(XamlBindingsTransformException::new(
+                                return Err(XamlError::bindings_transform(
                                     "Unable to resolve implicit ancestor type based on XAML tree.",
                                     &*relative_source_object,
                                     None,
@@ -416,7 +416,7 @@ impl FerroXamlIlBindingPathParser {
                             ));
                         }
                         _ => {
-                            return Err(XamlBindingsTransformException::new(
+                            return Err(XamlError::bindings_transform(
                                 format!("Unknown tree type '{tree_type}'."),
                                 &**binding,
                                 None,
@@ -437,7 +437,7 @@ impl FerroXamlIlBindingPathParser {
                         .filter_map(|n| n.cast::<FerroXamlIlTargetTypeMetadataNode>())
                         .find(|x| x.scope_type == ScopeTypes::ControlTemplate);
                     let Some(content_template_node) = content_template_node else {
-                        return Err(XamlBindingsTransformException::new(
+                        return Err(XamlError::bindings_transform(
                             "A binding with a TemplatedParent RelativeSource has to be in a ControlTemplate.",
                             &**binding,
                             None,
@@ -454,7 +454,7 @@ impl FerroXamlIlBindingPathParser {
                     ));
                 }
                 _ => {
-                    return Err(XamlBindingsTransformException::new(
+                    return Err(XamlError::bindings_transform(
                         format!(
                             "Unknown RelativeSource mode '{}'.",
                             mode.as_deref().unwrap_or_default()
@@ -494,7 +494,7 @@ impl FerroXamlIlBindingPathParser {
         if let Some(me) = value.cast::<XamlMarkupExtensionNode>() {
             let me_type = me.type_().get_clr_type()?;
             if !me_type.equals(&**relative_source) {
-                return Err(XamlBindingsTransformException::new(
+                return Err(XamlError::bindings_transform(
                     format!(
                         "Expected an object of type 'FerroUI.Data.RelativeSource'. Found a object of type '{}'",
                         me_type.get_fqn()
@@ -518,7 +518,7 @@ impl FerroXamlIlBindingPathParser {
         if let Some(on) = value.cast::<XamlAstObjectNode>() {
             let on_type = on.type_().get_clr_type()?;
             if !on_type.equals(&**relative_source) {
-                return Err(XamlBindingsTransformException::new(
+                return Err(XamlError::bindings_transform(
                     format!(
                         "Expected an object of type 'FerroUI.Data.RelativeSource'. Found a object of type '{}'",
                         on_type.get_fqn()

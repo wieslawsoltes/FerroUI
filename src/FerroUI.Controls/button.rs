@@ -528,6 +528,7 @@ impl Button {
     );
 
     fn static_constructor() {
+        crate::visual_state::state_mappers::register::<Button>(crate::visual_state::state_mappers::button);
         register_command_source::<Button>(|button| Rc::new(ButtonHandle(button)));
         register_clickable_control::<Button>(|button| Rc::new(ButtonHandle(button)));
 

@@ -14,6 +14,8 @@ fn main() {
         .file("native/camera.mm")
         .flag("-fobjc-arc")
         .flag("-fblocks")
+        .flag("-fvisibility=hidden")
+        .flag("-fvisibility-inlines-hidden")
         .compile("ferroui_media_camera_apple");
     for framework in [
         "Foundation",
@@ -24,5 +26,8 @@ fn main() {
         "ImageIO",
     ] {
         println!("cargo:rustc-link-lib=framework={framework}");
+    }
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("ios") {
+        println!("cargo:rustc-link-lib=framework=UIKit");
     }
 }

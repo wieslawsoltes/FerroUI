@@ -16,6 +16,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct AnimationBuilderRef(pub Rc<dyn IAnimationBuilder>);
 
+ferroui_base::styled_value!(AnimationBuilderRef);
+
 impl AnimationBuilderRef {
     /// The handle of `builder`.
     pub fn new(builder: Rc<dyn IAnimationBuilder>) -> Self {

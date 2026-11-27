@@ -90,6 +90,9 @@ pub struct ServerDrawItem {
     /// Where the item is among the items of its holder: the range it belongs to is told when
     /// its drawing changes.
     index: Cell<u32>,
+    /// The frame of its last change, for the count of unchanged drawings (0 when the count is
+    /// off; `unchanged_drawings`, #821).
+    changed: super::unchanged_drawings::ChangedFrame,
 }
 
 impl ServerDrawItem {
@@ -107,6 +110,7 @@ impl ServerDrawItem {
             announced: Cell::new(None),
             dirty: Cell::new(true),
             index: Cell::new(0),
+            changed: super::unchanged_drawings::ChangedFrame::now(),
         });
         item.read_data(compositor, reader);
         item.read_offset(reader);
@@ -176,6 +180,7 @@ impl IServerRenderResourceObserver for ServerDrawItem {
     fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
         self.fragment.set(None);
         self.dirty.set(true);
+        self.changed.note();
         if let Some(holder) = self.holder.upgrade() {
             // The bounds of the drawing may be other ones.
             if let Some(items) = holder.draw_items() {
@@ -282,6 +287,7 @@ impl ServerDrawItems {
                 item.read_clip(reader);
             }
             item.dirty.set(true);
+            item.changed.note();
             self.item_changed(index);
         }
 
@@ -418,7 +424,11 @@ impl ServerDrawItems {
                 if let Some((width, height)) = clip {
                     canvas.push_clip(Rect::new(0.0, 0.0, width, height));
                 }
-                draw_with_fragment(&data, &item.fragment, canvas);
+                super::unchanged_drawings::replay(
+                    item.changed.get(),
+                    || data.recorded_bytes(),
+                    || draw_with_fragment(&data, &item.fragment, canvas),
+                );
                 if clip.is_some() {
                     canvas.pop_clip();
                 }

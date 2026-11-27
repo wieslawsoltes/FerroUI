@@ -11,6 +11,8 @@ use std::ops::Deref;
 #[derive(Clone, PartialEq)]
 pub struct ConditionCollection(FerroList<Ref<Condition>>);
 
+ferroui_base::styled_value!(ConditionCollection);
+
 impl ConditionCollection {
     /// Creates an empty collection.
     pub fn new() -> Self {

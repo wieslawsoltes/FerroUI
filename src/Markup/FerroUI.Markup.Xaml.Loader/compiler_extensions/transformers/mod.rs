@@ -4,11 +4,13 @@ mod add_name_scope_registration;
 mod ferro_xaml_il_control_template_target_type_metadata_transformer;
 mod ferro_xaml_il_well_known_types;
 mod xaml_property_path_exception;
+mod transform_errors;
 
 pub use add_name_scope_registration::*;
 pub use ferro_xaml_il_control_template_target_type_metadata_transformer::*;
 pub use ferro_xaml_il_well_known_types::*;
 pub use xaml_property_path_exception::*;
+pub use transform_errors::{FerroTransformErrorKind, FerroTransformErrors};
 
 // Objects, properties, resources.
 mod ferro_x_aml_il_classes_transformer;

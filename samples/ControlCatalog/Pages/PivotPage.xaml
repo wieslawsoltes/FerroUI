@@ -1,0 +1,66 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="Pivot"
+             x:Class="ControlCatalog.Pages.PivotPage">
+  <!-- Not from upstream: WinUI's Pivot (docs/porting/winui-calculator-gaps.md, PV-1 to PV-3). Its
+       templates are in the WinUI theme. As in WinUI, the content pans with touch; a mouse or a pen
+       over the headers shows the previous and next buttons. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A Pivot shows one item at a time under a row of headers: tap a header, pan the content or use the navigation buttons to move between the items. The headers wrap around while they do not fit.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A pivot with a title</TextBlock>
+    <Pivot Title="EMAIL" Height="260" Margin="2">
+      <PivotItem Header="All">
+        <TextBlock Text="All emails go here." Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Unread">
+        <TextBlock Text="Unread emails go here." Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Flagged">
+        <TextBlock Text="Flagged emails go here." Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Urgent">
+        <TextBlock Text="Urgent emails go here." Margin="0,12,0,0" />
+      </PivotItem>
+    </Pivot>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Headers that do not fit wrap around, with slide-in groups</TextBlock>
+    <Pivot Height="260" Width="420" HorizontalAlignment="Left" Margin="2">
+      <PivotItem Header="Recent">
+        <StackPanel Margin="0,12,0,0" Spacing="4">
+          <TextBlock Text="Slides in first" Pivot.SlideInAnimationGroup="GroupOne" />
+          <TextBlock Text="Slides in second" Pivot.SlideInAnimationGroup="GroupTwo" />
+          <TextBlock Text="Slides in third" Pivot.SlideInAnimationGroup="GroupThree" />
+        </StackPanel>
+      </PivotItem>
+      <PivotItem Header="Favorites">
+        <TextBlock Text="Favorite documents" Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Shared with me">
+        <TextBlock Text="Documents shared with you" Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Archived">
+        <TextBlock Text="Archived documents" Margin="0,12,0,0" />
+      </PivotItem>
+    </Pivot>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A locked pivot and static headers</TextBlock>
+    <StackPanel Orientation="Horizontal" Spacing="12" Margin="2">
+      <CheckBox x:Name="LockCheckBox" Content="IsLocked" />
+      <CheckBox x:Name="CarouselCheckBox" Content="IsHeaderItemsCarouselEnabled" IsChecked="True" />
+    </StackPanel>
+    <Pivot Height="200" Margin="2"
+           IsLocked="{Binding #LockCheckBox.IsChecked}"
+           IsHeaderItemsCarouselEnabled="{Binding #CarouselCheckBox.IsChecked}">
+      <PivotItem Header="Step one">
+        <TextBlock Text="The first step." Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Step two">
+        <TextBlock Text="The second step." Margin="0,12,0,0" />
+      </PivotItem>
+      <PivotItem Header="Step three">
+        <TextBlock Text="The third step." Margin="0,12,0,0" />
+      </PivotItem>
+    </Pivot>
+  </StackPanel>
+</ContentPage>

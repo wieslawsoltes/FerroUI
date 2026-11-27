@@ -62,6 +62,8 @@ use std::time::Duration;
 /// from, two filters made from the same function do not.
 pub struct AutoCompleteFilterPredicate<T: 'static>(Rc<dyn Fn(Option<&str>, &T) -> bool>);
 
+ferroui_base::styled_value!(impl<T> for AutoCompleteFilterPredicate<T>);
+
 impl<T: 'static> AutoCompleteFilterPredicate<T> {
     /// Wraps a filter function.
     pub fn new(filter: impl Fn(Option<&str>, &T) -> bool + 'static) -> Self {
@@ -99,6 +101,8 @@ impl<T: 'static> PartialEq for AutoCompleteFilterPredicate<T> {
 /// from, two selectors made from the same function do not.
 pub struct AutoCompleteSelector<T: 'static>(Rc<dyn Fn(Option<&str>, &T) -> String>);
 
+ferroui_base::styled_value!(impl<T> for AutoCompleteSelector<T>);
+
 impl<T: 'static> AutoCompleteSelector<T> {
     /// Wraps a selector function.
     pub fn new(selector: impl Fn(Option<&str>, &T) -> String + 'static) -> Self {
@@ -135,6 +139,8 @@ pub type AutoCompletePopulation = Pin<Box<dyn Future<Output = Result<Vec<Option<
 /// copied from.
 #[derive(Clone)]
 pub struct AutoCompleteAsyncPopulator(Rc<dyn Fn(Option<String>, CancellationToken) -> AutoCompletePopulation>);
+
+ferroui_base::styled_value!(AutoCompleteAsyncPopulator);
 
 impl AutoCompleteAsyncPopulator {
     /// Wraps a populator function.

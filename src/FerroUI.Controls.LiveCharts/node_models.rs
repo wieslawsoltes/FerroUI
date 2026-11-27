@@ -238,6 +238,81 @@ ferro_properties! { impl TreemapNode {
 
 /// The engine series of a series of a Sankey chart, from the snapshot of its shared properties.
 /// The source chart casts its series to `ISankeySeries`; another kind of series is an error.
+impl SankeySeries {
+    /// The nodes of custom models (the source's `Values` of `TModel`, with its `LabelMapper` and
+    /// `NodeColorMapper`): a node for each model in order, named by `label` and coloured by
+    /// `color` (`None` takes the colour of the series). They replace the nodes of the series and
+    /// are returned so that links can refer to them ([`Self::set_mapped_links`]).
+    pub fn set_mapped_nodes<T>(
+        &self,
+        models: &[T],
+        label: impl Fn(&T) -> String,
+        color: impl Fn(&T) -> Option<Color>,
+    ) -> Vec<Ref<SankeyNode>> {
+        let nodes: Vec<_> = models
+            .iter()
+            .map(|model| {
+                let node = SankeyNode::with_name(label(model));
+                node.set_color(color(model));
+                node
+            })
+            .collect();
+        self.set_nodes(SankeyNodes::from_items(nodes.iter().cloned()));
+        nodes
+    }
+
+    /// The links of custom models (the source's links of `TModel`, with its `LinkColorMapper`):
+    /// `ends` gives the indexes of the source and target nodes among the nodes of the series and
+    /// the weight, `color` the colour of the ribbon (`None` takes the source node's or the
+    /// series'). A link whose ends are not nodes of the series is left out.
+    pub fn set_mapped_links<T>(
+        &self,
+        models: &[T],
+        ends: impl Fn(&T) -> (usize, usize, f64),
+        color: impl Fn(&T) -> Option<Color>,
+    ) {
+        let nodes = self.nodes().to_vec();
+        let links = models.iter().filter_map(|model| {
+            let (source, target, weight) = ends(model);
+            let link = SankeyLink::with_nodes(nodes.get(source)?, nodes.get(target)?, weight);
+            link.set_color(color(model));
+            Some(link)
+        });
+        self.set_links(SankeyLinks::from_items(links.collect::<Vec<_>>()));
+    }
+}
+
+impl TreemapSeries {
+    /// The nodes of custom models (the source's `Values` of `TModel`, with its `ValueMapper`,
+    /// `ChildrenMapper` and `LabelMapper`): a node for each root and, below it, for each child
+    /// `children` gives (`None` for a leaf), with the weight of `value` (an internal node with
+    /// a weight of 0 sums its children) and the name of `label`. They replace the nodes of the
+    /// series.
+    pub fn set_mapped_nodes<T>(
+        &self,
+        roots: &[T],
+        value: impl Fn(&T) -> f64,
+        children: impl Fn(&T) -> Option<&[T]>,
+        label: impl Fn(&T) -> String,
+    ) {
+        fn map<T>(
+            models: &[T],
+            value: &dyn Fn(&T) -> f64,
+            children: &dyn Fn(&T) -> Option<&[T]>,
+            label: &dyn Fn(&T) -> String,
+        ) -> TreemapNodes {
+            TreemapNodes::from_items(models.iter().map(|model| {
+                let node = TreemapNode::with_value(value(model), label(model));
+                if let Some(nested) = children(model) {
+                    node.set_children(Some(map(nested, value, children, label)));
+                }
+                node
+            }))
+        }
+        self.set_nodes(map(roots, &value, &children, &label));
+    }
+}
+
 pub(crate) fn sankey_series(
     model: &Ref<ChartSeries>,
     series: Series,
@@ -501,5 +576,89 @@ mod tests {
         leaf.set_numeric_value(30.0);
         series.nodes().clear();
         assert_eq!((changes.get(), rebinds.get()), (1, 2));
+    }
+
+    /// `LabelMapper`, `NodeColorMapper` and `LinkColorMapper` of a Sankey series of custom
+    /// models: the nodes take the names and colours of their models, the links refer to the
+    /// mapped node objects, and a link to a node that is not there is left out.
+    #[test]
+    fn sankey_nodes_and_links_map_custom_models() {
+        let _scope = Dispatcher::unit_test_scope();
+        struct Country {
+            code: &'static str,
+            red: bool,
+        }
+        let series = SankeySeries::new();
+        let models = [
+            Country {
+                code: "fra",
+                red: false,
+            },
+            Country {
+                code: "deu",
+                red: true,
+            },
+        ];
+        let nodes = series.set_mapped_nodes(
+            &models,
+            |c| c.code.to_uppercase(),
+            |c| c.red.then(|| Color::from_rgb(255, 0, 0)),
+        );
+        assert_eq!(series.nodes().count(), 2);
+        assert_eq!(nodes[0].name(), "FRA");
+        assert_eq!(nodes[0].color(), None);
+        assert_eq!(nodes[1].color(), Some(Color::from_rgb(255, 0, 0)));
+        series.set_mapped_links(
+            &[(0_usize, 1_usize, 5.0_f64), (0, 7, 1.0)],
+            |&(s, t, w)| (s, t, w),
+            |_| Some(Color::from_rgb(0, 0, 255)),
+        );
+        let links = series.links().to_vec();
+        assert_eq!(links.len(), 1, "a link to a missing node is left out");
+        assert_eq!(links[0].source().unwrap().entity_id(), nodes[0].entity_id());
+        assert_eq!(links[0].target().unwrap().entity_id(), nodes[1].entity_id());
+        assert_eq!(links[0].weight(), 5.0);
+        assert_eq!(links[0].color(), Some(Color::from_rgb(0, 0, 255)));
+    }
+
+    /// `ValueMapper`, `ChildrenMapper` and `LabelMapper` of a treemap series of custom models:
+    /// the tree of the models becomes the tree of the nodes.
+    #[test]
+    fn treemap_nodes_map_a_tree_of_custom_models() {
+        let _scope = Dispatcher::unit_test_scope();
+        struct Region {
+            name: &'static str,
+            people: f64,
+            parts: Vec<Region>,
+        }
+        let leaf = |name, people| Region {
+            name,
+            people,
+            parts: Vec::new(),
+        };
+        let roots = [Region {
+            name: "Asia",
+            people: 0.0,
+            parts: vec![leaf("China", 1400.0), leaf("India", 1300.0)],
+        }];
+        let series = TreemapSeries::new();
+        series.set_mapped_nodes(
+            &roots,
+            |r| r.people,
+            |r| (!r.parts.is_empty()).then_some(r.parts.as_slice()),
+            |r| r.name.to_owned(),
+        );
+        let asia = series.nodes().get(0);
+        assert_eq!(asia.name(), "Asia");
+        let children = asia.children().unwrap().to_vec();
+        assert_eq!(children.len(), 2);
+        assert_eq!(
+            (children[1].name(), children[1].value()),
+            ("India".to_owned(), 1300.0)
+        );
+        assert!(children[0].children().is_none());
+        let mut ids = Vec::new();
+        let snapshot = treemap_snapshot(&series.nodes(), &mut ids).unwrap();
+        assert_eq!(snapshot[0].children.as_ref().map(Vec::len), Some(2));
     }
 }

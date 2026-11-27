@@ -14,7 +14,7 @@ use ferroui_controls::automation::provider::{
 };
 use ferroui_controls::automation::ExpandCollapseState;
 use std::rc::Weak;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ActionEntry {
@@ -199,10 +199,10 @@ impl DBusInterface for AtSpiActionHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         Some(match name {
-            "version" => Value::from(self.version()),
-            "NActions" => Value::from(self.n_actions()),
+            "version" => Variant::from(self.version()),
+            "NActions" => Variant::from(self.n_actions()),
             _ => return None,
         })
     }

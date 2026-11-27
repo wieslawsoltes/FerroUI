@@ -127,6 +127,14 @@ The element also has its own methods:
 | `node_ref(r)` | Keeps the control in a `NodeRef` |
 | `row_definitions("Auto,*")`, `column_definitions(..)` | The rows and columns of a grid, as XAML writes them |
 
+The rows and columns are values of the grid in their text form (`GridDefinitionsText::rows_property()`,
+`columns_property()`): a component that runs again with another text, or a text that follows state
+(`.set(GridDefinitionsText::columns_property(), move || format!("{filled}*,{rest}*"))`), gives the grid
+the new sizes. Where the grid has as many definitions as the text names, each of the same kind (pixels,
+`Auto`, stars), the definitions it has take the new sizes and stay in the grid; otherwise the grid gets
+a new collection. A collection given to the grid directly (`Grid::set_column_definitions`) is always
+the one the grid then has.
+
 ### 4.1 What a setter takes
 
 A setter of a property whose value is `T` takes what converts to it (`IntoProp<T, _>`, the second parameter inferred):

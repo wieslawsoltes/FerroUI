@@ -67,7 +67,11 @@ Settings invalidate hosted resources, so existing controls update. Clearing
 property does not override a system preference that requires it: the effective
 value combines the explicit theme preference with platform settings.
 
-On macOS, `NSWorkspace` supplies Reduce Motion and Reduce Transparency. A separate
+On macOS, `NSWorkspace` supplies Reduce Motion and Reduce Transparency. "Increase
+contrast" (`accessibilityDisplayShouldIncreaseContrast`, read through the optional native
+interface `IFrnContrastSettings`) is reported as the `High` contrast preference of the colour
+values, with the system colours under the effective appearance, so the effective
+`IncreaseContrast` of this theme follows it (#560). A separate
 accessibility-change event updates controls even if the system's color values did
 not change. The optional `IFrnAccessibilitySettings` native interface preserves the
 original `IFrnPlatformSettings` ABI. Older native libraries fall back to the

@@ -6,6 +6,9 @@ macro_rules! println {
 }
 #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
 mod desktop;
+// `compiled_markup`: the table of the units of the WinUI theme the build wrote (`build.rs`).
+#[cfg(any(target_os = "macos", windows, target_os = "linux"))]
+ferroui_markup_xaml::include_compiled_xaml!();
 fn main() -> std::process::ExitCode {
     QUIET.store(
         std::env::args().any(|a| a == "--quiet-diagnostics"),

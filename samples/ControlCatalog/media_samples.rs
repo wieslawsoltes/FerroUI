@@ -799,10 +799,24 @@ pub fn smoke_transport_item(path: &[&str]) -> bool {
             .find(|item| item.header().and_then(|header| header.downcast_ref::<String>().cloned()).as_deref() == Some(label))
     }
     let Some(view) = smoke_video_element() else { return false };
-    let Some(button) = view.transport_controls().get_visual_descendants()
-        .find_map(|visual| visual.cast::<Button>().filter(|button| button.name().as_deref() == Some("MediaMore"))) else {
-        return false;
+    let transport = view.transport_controls();
+    let part = |name: &str| transport.get_visual_descendants()
+        .find_map(|visual| visual.cast::<Button>().filter(|button| button.name().as_deref() == Some(name)));
+    // WinUI's template has a button for each action (and a menu for the rate and the tracks);
+    // the 0.5.0 template has them in its MediaMore menu.
+    let (button, path) = match path.split_first() {
+        Some((&"Skip back 10 seconds", [])) if part("SkipBackwardButton").is_some() => (part("SkipBackwardButton"), &[][..]),
+        Some((&"Skip forward 30 seconds", [])) if part("SkipForwardButton").is_some() => (part("SkipForwardButton"), &[][..]),
+        Some((&("Zoom to fill" | "Fit video"), [])) if part("ZoomButton").is_some() => (part("ZoomButton"), &[][..]),
+        Some((&"Playback speed", rest)) if part("PlaybackRateButton").is_some() => (part("PlaybackRateButton"), rest),
+        Some((&"Closed captions", rest)) if part("CCSelectionButton").is_some() => (part("CCSelectionButton"), rest),
+        Some((&"Audio tracks", rest)) if part("AudioTracksSelectionButton").is_some() => (part("AudioTracksSelectionButton"), rest),
+        _ => (part("MediaMore"), path),
     };
+    let Some(button) = button else { return false };
+    if path.is_empty() {
+        return ButtonAutomationPeer::new(&button).invoke().is_ok();
+    }
     let Some(menu) = button.flyout().and_then(|flyout| flyout.cast::<MenuFlyout>()) else { return false };
     let result = (|| {
         ButtonAutomationPeer::new(&button).invoke().ok()?;

@@ -1,4 +1,38 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Border Padding="20" BorderThickness="2" BorderBrush="DodgerBlue" CornerRadius="8" HorizontalAlignment="Left"><TextBlock Text="Text inside a border" FontSize="18"/></Border>
+<!-- Ported from the pinned Border example of WinUI Gallery (14061eea) and the handlers of
+     BorderPage.xaml.cs (layout_samples.rs); see ../NOTICE.md. FerroUI's Slider has no Header
+     (composed) and no StepFrequency: the steps of 1 are TickFrequency with IsSnapToTickEnabled.
+     IsFocusEngagementEnabled is the gamepad focus engagement of Xbox, which FerroUI does not
+     have. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="BorderExample1" Spacing="8">
+    <TextBlock Text="A Border around a TextBlock." FontSize="18" />
+    <Border x:Name="Control1"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="#FFFFFFFF"
+            BorderBrush="#FFFFD700"
+            BorderThickness="2">
+      <TextBlock Margin="8,5" FontSize="18" Foreground="Black" Text="Text inside a border" />
+    </Border>
+    <StackPanel>
+      <TextBlock Text="BorderThickness" />
+      <Slider x:Name="ThicknessSlider" Width="200" HorizontalAlignment="Left" AutomationProperties.Name="BorderThickness"
+              Maximum="10" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" Value="2" />
+      <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+        <RadioButtons x:Name="BackgroundRadioButtons" Header="Background">
+          <RadioButton x:Name="BackgroundGreen" Content="Green" GroupName="BGColor" />
+          <RadioButton x:Name="BackgroundYellow" Content="Yellow" GroupName="BGColor" />
+          <RadioButton x:Name="BackgroundBlue" Content="Blue" GroupName="BGColor" />
+          <RadioButton x:Name="BackgroundWhite" Content="White" GroupName="BGColor" IsChecked="True" />
+        </RadioButtons>
+        <RadioButtons x:Name="BorderBrushRadioButtons" Grid.Column="1" Header="BorderBrush">
+          <RadioButton x:Name="BorderBrushGreen" Content="Green" GroupName="BorderBrush" />
+          <RadioButton x:Name="BorderBrushYellow" Content="Yellow" GroupName="BorderBrush" IsChecked="True" />
+          <RadioButton x:Name="BorderBrushBlue" Content="Blue" GroupName="BorderBrush" />
+          <RadioButton x:Name="BorderBrushWhite" Content="White" GroupName="BorderBrush" />
+        </RadioButtons>
+      </Grid>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

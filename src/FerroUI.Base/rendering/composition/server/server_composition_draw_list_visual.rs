@@ -23,6 +23,9 @@ pub struct ServerCompositionDrawListVisual {
     /// The drawings of the visuals below that have no composition visual (section 9.42):
     /// made when the first one arrives.
     items: OnceCell<Box<ServerDrawItems>>,
+    /// The frame of the last change of its own drawing, for the count of unchanged drawings (0
+    /// when the count is off; `unchanged_drawings`, #821).
+    changed: super::unchanged_drawings::ChangedFrame,
 }
 
 /// The bits of the byte the changes of a draw list visual start with: what changed of its own
@@ -72,6 +75,7 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         if change == DRAW_LIST_REDRAWN {
             // The same drawing, drawn again (section 9.14).
             self.fragment.set(None);
+            self.changed.note();
             visual.invalidate_content();
         }
         if change == DRAW_LIST_NEW {
@@ -90,6 +94,7 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
             }
             *self.render_commands.borrow_mut() = commands;
             self.fragment.set(None);
+            self.changed.note();
             visual.invalidate_content();
         }
         if changes & DRAW_LIST_ITEMS != 0 {
@@ -110,11 +115,16 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         // replays the commands every time (`RenderCore`). A backend that
         // keeps fragments draws them from the one it kept when it can, and
         // keeps a new one when it cannot.
-        draw_with_fragment(&commands, &self.fragment, context.canvas());
+        super::unchanged_drawings::replay(
+            self.changed.get(),
+            || commands.recorded_bytes(),
+            || draw_with_fragment(&commands, &self.fragment, context.canvas()),
+        );
     }
 
     fn dependency_queued_invalidate(&self, visual: &ServerCompositionVisual) {
         self.fragment.set(None);
+        self.changed.note();
         visual.invalidate_content();
     }
 

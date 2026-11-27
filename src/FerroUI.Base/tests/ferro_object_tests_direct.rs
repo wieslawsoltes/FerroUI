@@ -731,3 +731,22 @@ fn set_value_untyped_refuses_a_value_without_an_implicit_conversion() {
         target.set_value_untyped(Class1::baz_property(), &4.5, BindingPriority::LocalValue);
     });
 }
+
+// Not from upstream: a value of the type of a direct property is set without an untyped value,
+// and a value of another type is given back (the untyped route converts it).
+#[test]
+fn try_set_value_typed_sets_a_direct_property_and_gives_back_a_value_of_another_type() {
+    let target = Class1::new();
+
+    assert_eq!(Ok(()), target.try_set_value_typed(Class1::foo_property(), s("typed")));
+    assert_eq!("typed", target.get_direct_value(Class1::foo_property()));
+    assert_eq!(Ok(()), target.try_set_value_typed(Class1::double_value_property(), 2.5));
+    assert_eq!(2.5, target.get_direct_value(Class1::double_value_property()));
+    assert_eq!(Err(4), target.try_set_value_typed(Class1::double_value_property(), 4));
+    assert_eq!(2.5, target.get_direct_value(Class1::double_value_property()));
+
+    // A property added to another owner.
+    let other = Class2::new();
+    assert_eq!(Ok(()), other.try_set_value_typed(Class2::foo_property(), s("owner")));
+    assert_eq!("owner", other.foo());
+}

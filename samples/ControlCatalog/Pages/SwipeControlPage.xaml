@@ -1,0 +1,50 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="SwipeControl"
+             x:Class="ControlCatalog.Pages.SwipeControlPage">
+  <!-- Not from upstream: WinUI's SwipeControl (docs/porting/winui-calculator-gaps.md, SW-1). Its
+       template and SwipeItemStyle are in the WinUI theme. As in WinUI, touch and pen swipe; the
+       mouse does not drag. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A SwipeControl reveals commands when its content is swiped with touch or a pen: reveal items stay open to be invoked, an execute item runs when the swipe passes its threshold.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Reveal items on the left, an execute item on the right</TextBlock>
+    <StackPanel Margin="2" Spacing="2" Width="360" HorizontalAlignment="Left">
+      <SwipeControl>
+        <SwipeControl.LeftItems>
+          <SwipeItems Mode="Reveal">
+            <SwipeItem Text="Archive">
+              <SwipeItem.IconSource>
+                <SymbolIconSource Symbol="Save" />
+              </SwipeItem.IconSource>
+            </SwipeItem>
+            <SwipeItem Text="Flag">
+              <SwipeItem.IconSource>
+                <SymbolIconSource Symbol="Flag" />
+              </SwipeItem.IconSource>
+            </SwipeItem>
+          </SwipeItems>
+        </SwipeControl.LeftItems>
+        <SwipeControl.RightItems>
+          <SwipeItems Mode="Execute">
+            <SwipeItem Text="Delete" Background="#FFC42B1C" Foreground="White">
+              <SwipeItem.IconSource>
+                <SymbolIconSource Symbol="Delete" />
+              </SwipeItem.IconSource>
+            </SwipeItem>
+          </SwipeItems>
+        </SwipeControl.RightItems>
+        <TextBlock Margin="12" Text="Swipe me left or right" VerticalAlignment="Center" />
+      </SwipeControl>
+      <SwipeControl>
+        <SwipeControl.RightItems>
+          <SwipeItems Mode="Reveal">
+            <SwipeItem Text="Accept" BehaviorOnInvoked="RemainOpen" />
+            <SwipeItem Text="Decline" />
+          </SwipeItems>
+        </SwipeControl.RightItems>
+        <TextBlock Margin="12" Text="Swipe me left: Accept keeps it open" VerticalAlignment="Center" />
+      </SwipeControl>
+    </StackPanel>
+  </StackPanel>
+</ContentPage>

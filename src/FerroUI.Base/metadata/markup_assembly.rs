@@ -97,14 +97,14 @@ impl MarkupAssembly {
     /// the table reaches is left out of the binary. An application registers
     /// its own assembly with [`register`](Self::register), which always
     /// registers.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_table(assembly: &'static MarkupAssembly) {
         Self::register_tables(assembly);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline(always)]
     pub fn register_table(assembly: &'static MarkupAssembly) {
         let _ = assembly;

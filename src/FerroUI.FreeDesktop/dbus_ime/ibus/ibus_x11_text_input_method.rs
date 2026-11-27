@@ -20,7 +20,7 @@ use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use zbus::message::Sequence;
 use zbus::proxy::CacheProperties;
-use zbus::zvariant::Value;
+use zbus::Variant;
 use zbus::Connection;
 
 /// The `ContentType` of an input context until it is set: a free-form purpose and no hints.
@@ -50,15 +50,15 @@ pub struct IBusX11TextInputMethod {
 
 /// The text of an `IBusText` as it travels in a variant: a structure
 /// whose third member is the string.
-pub(crate) fn ibus_text(value: &Value<'_>) -> Option<String> {
-    fn unwrap<'a, 'v>(mut value: &'a Value<'v>) -> &'a Value<'v> {
-        while let Value::Value(inner) = value {
+pub(crate) fn ibus_text(value: &Variant<'_>) -> Option<String> {
+    fn unwrap<'a, 'v>(mut value: &'a Variant<'v>) -> &'a Variant<'v> {
+        while let Variant::Variant(inner) = value {
             value = inner;
         }
         value
     }
 
-    let Value::Structure(structure) = unwrap(value) else {
+    let Variant::Structure(structure) = unwrap(value) else {
         return None;
     };
     let fields = structure.fields();
@@ -66,7 +66,7 @@ pub(crate) fn ibus_text(value: &Value<'_>) -> Option<String> {
         return None;
     }
     match unwrap(&fields[2]) {
-        Value::Str(text) => Some(text.as_str().to_string()),
+        Variant::Str(text) => Some(text.as_str().to_string()),
         _ => None,
     }
 }
@@ -234,7 +234,7 @@ impl IBusX11TextInputMethod {
 
     fn on_show_preedit(&self) {}
 
-    fn on_update_preedit(&self, text: &Value<'_>, cursor_pos: u32, _visible: bool) {
+    fn on_update_preedit(&self, text: &Variant<'_>, cursor_pos: u32, _visible: bool) {
         let preedit_text = ibus_text(text).unwrap_or_default();
 
         if !self.supports_preedit() || preedit_text == *self.preedit_text.borrow() {
@@ -259,7 +259,7 @@ impl IBusX11TextInputMethod {
         }
     }
 
-    fn on_commit_text(&self, variant_item: &Value<'_>, position: Sequence) {
+    fn on_commit_text(&self, variant_item: &Variant<'_>, position: Sequence) {
         if self.inside_reset.get() > 0 {
             // For some reason iBus can trigger a CommitText while being reset.
             // Thankfully the signal is sent _during_ Reset call processing,
@@ -300,22 +300,22 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let owner = dbus.get_name_owner(bus_name).await?.to_string();
 
             let portal = PortalProxy::builder(&connection)
-                .destination(owner.clone())?
-                .path("/org/freedesktop/IBus")?
+                .destination(owner.clone())
+                .path("/org/freedesktop/IBus")
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             let path = portal.create_input_context(&base.get_app_name()).await?;
 
             let service = ServiceProxy::builder(&connection)
-                .destination(owner.clone())?
-                .path(path.clone().into_inner())?
+                .destination(owner.clone())
+                .path(path.clone().into_inner())
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             let context = InputContextProxy::builder(&connection)
-                .destination(owner)?
-                .path(path.into_inner())?
+                .destination(owner)
+                .path(path.into_inner())
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
@@ -511,17 +511,17 @@ mod tests {
     // Not from the reference, which has no tests of this class. The
     // input method against a service is tested in `dbus_ime/tests.rs`.
     use super::*;
-    use zbus::zvariant::{Array, Structure};
+    use zbus::{Array, Structure};
 
-    fn ibus_text_value(text: &str) -> Value<'static> {
+    fn ibus_text_value(text: &str) -> Variant<'static> {
         // IBusText: (sa{sv}sv): the type name, attachments, the text, the
         // attribute list.
-        let attachments: std::collections::HashMap<String, Value<'static>> = std::collections::HashMap::new();
-        Value::Structure(Structure::from((
+        let attachments: std::collections::HashMap<String, Variant<'static>> = std::collections::HashMap::new();
+        Variant::Structure(Structure::from((
             "IBusText".to_string(),
             attachments,
             text.to_string(),
-            Value::from(Array::from(Vec::<u32>::new())),
+            Variant::from(Array::from(Vec::<u32>::new())),
         )))
     }
 
@@ -529,11 +529,11 @@ mod tests {
     fn the_text_of_an_ibus_text_is_its_third_member() {
         assert_eq!(ibus_text(&ibus_text_value("にほん")).as_deref(), Some("にほん"));
         // Wrapped once more, as a variant in a variant.
-        assert_eq!(ibus_text(&Value::Value(Box::new(ibus_text_value("a")))).as_deref(), Some("a"));
+        assert_eq!(ibus_text(&Variant::Variant(Box::new(ibus_text_value("a")))).as_deref(), Some("a"));
         // Not a structure, too short, or a third member of another type.
-        assert_eq!(ibus_text(&Value::from("text")), None);
-        assert_eq!(ibus_text(&Value::Structure(Structure::from(("a".to_string(), "b".to_string())))), None);
-        assert_eq!(ibus_text(&Value::Structure(Structure::from(("a".to_string(), 1u32, 2u32)))), None);
+        assert_eq!(ibus_text(&Variant::from("text")), None);
+        assert_eq!(ibus_text(&Variant::Structure(Structure::from(("a".to_string(), "b".to_string())))), None);
+        assert_eq!(ibus_text(&Variant::Structure(Structure::from(("a".to_string(), 1u32, 2u32)))), None);
     }
 
     #[test]

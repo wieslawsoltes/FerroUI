@@ -1,5 +1,6 @@
-//! The PageTransition page's native Frame navigation and source sample-page layouts.
-//! Original transition effects are not substituted with unrelated animations.
+//! The PageTransition page's native Frame navigation and source sample-page layouts, with the code
+//! behind of `PageTransitionPage.xaml.cs`. The transition modes are the
+//! `NavigationTransitionInfo` of the navigations.
 
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -8,14 +9,15 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref,
     StyledElementImpl, VisualImpl,
 };
-use ferroui_controls::navigation::NavigationError;
-use ferroui_controls::primitives::TemplatedControlImpl;
+use ferroui_controls::navigation::{NavigationError, NavigationTransitionInfo};
+use ferroui_controls::primitives::{SelectingItemsControl, TemplatedControlImpl};
 use ferroui_controls::{
-    Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
+    Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl, RadioButtons,
     TextBlock,
 };
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+use std::cell::Cell;
 use std::rc::Rc;
 
 macro_rules! sample_page {
@@ -75,14 +77,17 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
             )));
         }
     }).detach();
-    for name in ["NavigationNext", "NavigationBack", "NavigationForward"] {
+    let transition = Rc::new(Cell::new(None));
+    for name in ["NavigationNext", "NavigationBack"] {
+        let transition = transition.clone();
         let weak_frame = frame.downgrade();
         let weak_status = status.downgrade();
         root.get_control::<Button>(name).click(move |_, _| {
             if let (Some(frame), Some(status)) = (weak_frame.upgrade(), weak_status.upgrade()) {
                 let result = match name {
+                    // BackwardButton1_Click goes back while the back stack has a page.
+                    "NavigationBack" if frame.back_stack_depth() == 0 => Ok(()),
                     "NavigationBack" => frame.go_back(),
-                    "NavigationForward" => frame.go_forward(),
                     _ => {
                         // The source sample alternates page types using its BackStackDepth.
                         let next = if frame.back_stack_depth() % 2 == 1 {
@@ -90,7 +95,11 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
                         } else {
                             SecondSamplePage::PAGE_TYPE
                         };
-                        frame.navigate(next, None).map(|_| ())
+                        // ForwardButton1_Click: the kept transition, or the default navigation.
+                        match transition.get() {
+                            Some(info) => frame.navigate_with_transition(next, None, info).map(|_| ()),
+                            None => frame.navigate(next, None).map(|_| ()),
+                        }
                     }
                 };
                 if let Err(error) = result {
@@ -99,10 +108,63 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
             }
         });
     }
+    wire_transition_modes(root, transition);
     frame
         .navigate(FirstSamplePage::PAGE_TYPE, None)
         .map_err(load_error)?;
     Ok(())
+}
+
+/// The code of the NavigationTransitionInfo that `TransitionRadioButton_Checked` keeps for the
+/// mode of `content` (the source's TransitionParameter substitution; empty for Default).
+pub(crate) fn transition_parameter(content: &str) -> String {
+    match content {
+        "Default" => String::new(),
+        "Slide from Right" => {
+            ", new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight }".to_string()
+        }
+        "Slide from Left" => {
+            ", new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromLeft }".to_string()
+        }
+        other => format!(", new {other}NavigationTransitionInfo()"),
+    }
+}
+
+/// The NavigationTransitionInfo of the mode of `content`; `None` for Default.
+pub(crate) fn transition_info(content: &str) -> Option<NavigationTransitionInfo> {
+    match content {
+        "Entrance" => Some(NavigationTransitionInfo::Entrance),
+        "DrillIn" => Some(NavigationTransitionInfo::DrillIn),
+        "Suppress" => Some(NavigationTransitionInfo::Suppress),
+        "Slide from Right" => Some(NavigationTransitionInfo::SlideFromRight),
+        "Slide from Left" => Some(NavigationTransitionInfo::SlideFromLeft),
+        _ => None,
+    }
+}
+
+/// `TransitionRadioButton_Checked`: the checked mode's NavigationTransitionInfo, which the next
+/// navigation plays.
+fn wire_transition_modes(root: &Ref<Control>, transition: Rc<Cell<Option<NavigationTransitionInfo>>>) {
+    let modes = root.get_control::<RadioButtons>("TransitionModes");
+    let weak_modes = modes.downgrade();
+    let weak_value = root.get_control::<TextBlock>("TransitionValue").downgrade();
+    modes.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_index_property().as_property() {
+            return;
+        }
+        let (Some(modes), Some(value)) = (weak_modes.upgrade(), weak_value.upgrade()) else {
+            return;
+        };
+        let content = modes
+            .selected_item()
+            .and_then(|item| Control::from_boxed(&item))
+            .and_then(|item| item.cast::<ferroui_controls::ContentControl>())
+            .and_then(|item| item.content())
+            .and_then(|content| content.downcast_ref::<String>().cloned())
+            .unwrap_or_default();
+        value.set_text(Some(&transition_parameter(&content)));
+        transition.set(transition_info(&content));
+    });
 }
 
 fn load_error(error: NavigationError) -> XamlLoadError {

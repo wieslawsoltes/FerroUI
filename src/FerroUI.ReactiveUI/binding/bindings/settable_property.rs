@@ -96,7 +96,7 @@ impl<S: 'static, V: 'static> fmt::Debug for SettableProperty<S, V> {
 #[macro_export]
 macro_rules! settable_prop {
     (@set $source:expr, $value:expr; $last:ident) => {
-        $crate::__private::paste! { $source.[<set_ $last>]($value) }
+        $crate::__private::ferro_idents! { $source.[<set_ $last>]($value) }
     };
     (@set $source:expr, $value:expr; $head:ident $(. $tail:ident)+) => {
         $crate::settable_prop!(@set $source.$head(), $value; $($tail).+)

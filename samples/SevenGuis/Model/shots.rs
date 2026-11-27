@@ -8,16 +8,36 @@ use ferroui_base::media::imaging::{IBitmap, PngBitmapEncoderOptions, RenderTarge
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::{PixelSize, Ref, Vector, Visual};
 use ferroui_controls::Window;
+use ferroui_markup_xaml::xaml_il::runtime::compiled::ThemeParts;
 use ferroui_view::prelude::*;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 /// Runs the element of a task as the content of the main window, titled
-/// `title`, of `width` by `height`, in the WinUI 3 theme. `name` names its
-/// picture.
+/// `title`, of `width` by `height`, in the WinUI 3 theme with every unit.
+/// `name` names its picture.
 pub fn run(name: &'static str, title: &'static str, width: f64, height: f64, view: impl FnOnce() -> Element + 'static) {
     launch_themed(
         || ferroui_themes_winui::WinUITheme::new().as_style(),
+        move || window().title(title).width(width).height(height).child(view()).into(),
+        move |window| capture_if_asked(window, name),
+    );
+}
+
+/// [`run`] in the WinUI 3 theme constructed from `parts`, the table of the units
+/// the build of the task wrote (`build.rs` with `Build::theme`,
+/// docs/xaml-themes.md, section 3): the theme of a task keeps the units of the
+/// controls its sources make.
+pub fn run_with_parts(
+    name: &'static str,
+    title: &'static str,
+    width: f64,
+    height: f64,
+    parts: ThemeParts,
+    view: impl FnOnce() -> Element + 'static,
+) {
+    launch_themed(
+        move || ferroui_themes_winui::WinUITheme::with_parts(None, parts).as_style(),
         move || window().title(title).width(width).height(height).child(view()).into(),
         move |window| capture_if_asked(window, name),
     );

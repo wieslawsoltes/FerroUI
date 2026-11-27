@@ -4,7 +4,7 @@ use crate::media_samples::{self, FlipItem};
 use crate::{examples, tests::start};
 use ferroui_base::animation::SlideAxis;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs};
-use ferroui_base::layout::{Orientation, VerticalAlignment};
+use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::media::imaging::{Bitmap, CroppedBitmap};
 use ferroui_base::media::{DrawingGroup, DrawingImage, ImageDrawing, Stretch};
 use ferroui_base::platform::{AlphaFormat, PixelFormat};
@@ -12,8 +12,9 @@ use ferroui_base::{PixelRect, PixelSize, Rect, Ref, Size, Vector};
 use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Border, Button, Carousel, Control, Grid, Image, PipsPager, RadioButtons, StackPanel, TextBlock,
+    Border, Button, Carousel, Control, Grid, Image, RadioButtons, StackPanel, TextBlock,
 };
+use ferroui_controls_flip_view::FlipView;
 use std::rc::Rc;
 
 fn page(id: &str) -> Ref<Control> {
@@ -146,28 +147,13 @@ fn image_decode_reports_missing_asset_errors() {
 fn flip_view_page_preserves_declared_images_data_order_and_orientation() {
     let _application = start();
     let root = page("FlipView");
-    for (name, count, axis, orientation) in [
-        (
-            "DeclaredFlipView",
-            5,
-            SlideAxis::Horizontal,
-            Orientation::Horizontal,
-        ),
-        (
-            "BoundFlipView",
-            15,
-            SlideAxis::Horizontal,
-            Orientation::Horizontal,
-        ),
-        (
-            "VerticalFlipView",
-            5,
-            SlideAxis::Vertical,
-            Orientation::Vertical,
-        ),
+    for (name, count, axis) in [
+        ("DeclaredFlipView", 5, SlideAxis::Horizontal),
+        ("BoundFlipView", 15, SlideAxis::Horizontal),
+        ("VerticalFlipView", 5, SlideAxis::Vertical),
     ] {
+        assert!(root.get_control::<Control>(name).cast::<FlipView>().is_some());
         let carousel = root.get_control::<Carousel>(name);
-        let pager = root.get_control::<PipsPager>(&format!("{name}Pager"));
         assert_eq!(carousel.item_count(), count);
         assert_eq!(carousel.selected_index(), 0);
         assert!(!carousel.wrap_selection());
@@ -186,9 +172,6 @@ fn flip_view_page_preserves_declared_images_data_order_and_orientation() {
             AutomationProperties::get_control_type_override(&carousel),
             Some(AutomationControlType::List)
         );
-        assert_eq!(pager.number_of_pages(), count);
-        assert_eq!(pager.selected_page_index(), 0);
-        assert_eq!(pager.orientation(), orientation);
     }
     for name in ["DeclaredFlipView", "VerticalFlipView"] {
         let carousel = root.get_control::<Carousel>(name);
@@ -215,26 +198,20 @@ fn flip_view_page_preserves_declared_images_data_order_and_orientation() {
 }
 
 #[test]
-fn flip_view_pager_and_carousel_selection_synchronize_both_directions_without_wrapping() {
+fn flip_view_selection_stops_at_both_ends() {
     let _application = start();
     let root = page("FlipView");
     for name in ["DeclaredFlipView", "BoundFlipView", "VerticalFlipView"] {
         let carousel = root.get_control::<Carousel>(name);
-        let pager = root.get_control::<PipsPager>(&format!("{name}Pager"));
-        let output = root.get_control::<TextBlock>(&format!("{name}Selection"));
         let last = carousel.item_count() - 1;
-        pager.set_selected_page_index(last);
-        assert_eq!(carousel.selected_index(), last);
-        assert_eq!(output.text(), Some(format!("{} of {}", last + 1, last + 1)));
+        carousel.set_selected_index(last);
         carousel.next();
         assert_eq!(carousel.selected_index(), last);
         carousel.previous();
-        assert_eq!(pager.selected_page_index(), last - 1);
-        assert_eq!(output.text(), Some(format!("{} of {}", last, last + 1)));
+        assert_eq!(carousel.selected_index(), last - 1);
         carousel.set_selected_index(0);
         carousel.previous();
         assert_eq!(carousel.selected_index(), 0);
-        assert_eq!(pager.selected_page_index(), 0);
     }
 }
 
@@ -247,10 +224,8 @@ fn flip_view_keyboard_navigation_follows_each_native_carousel_axis() {
         ("VerticalFlipView", Key::Down, Key::Up, Key::Right),
     ] {
         let carousel = root.get_control::<Carousel>(name);
-        let pager = root.get_control::<PipsPager>(&format!("{name}Pager"));
         assert!(key(&carousel, forward));
         assert_eq!(carousel.selected_index(), 1);
-        assert_eq!(pager.selected_page_index(), 1);
         assert!(!key(&carousel, other_axis));
         assert_eq!(carousel.selected_index(), 1);
         assert!(key(&carousel, Key::End));
@@ -258,7 +233,7 @@ fn flip_view_keyboard_navigation_follows_each_native_carousel_axis() {
         assert!(key(&carousel, backward));
         assert_eq!(carousel.selected_index(), 3);
         assert!(key(&carousel, Key::Home));
-        assert_eq!(pager.selected_page_index(), 0);
+        assert_eq!(carousel.selected_index(), 0);
     }
 }
 
@@ -332,13 +307,9 @@ fn media_page_callbacks_do_not_keep_the_page_and_controls_alive() {
     let root = page("FlipView");
     let weak_root = root.downgrade();
     let weak_carousel = root.get_control::<Carousel>("DeclaredFlipView").downgrade();
-    let weak_pager = root
-        .get_control::<PipsPager>("DeclaredFlipViewPager")
-        .downgrade();
     drop(root);
     assert!(weak_root.upgrade().is_none());
     assert!(weak_carousel.upgrade().is_none());
-    assert!(weak_pager.upgrade().is_none());
     let root = page("Image");
     let weak_root = root.downgrade();
     let weak_image = root.get_control::<Image>("StretchImage").downgrade();

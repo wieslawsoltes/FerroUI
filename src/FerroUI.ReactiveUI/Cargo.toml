@@ -25,7 +25,7 @@ ferroui-splat = { workspace = true }
 uuid = { workspace = true }
 # The names of the accessors that `reactive_properties!` writes (`set_<field>`, the PascalCase
 # property name).
-paste = { workspace = true }
+ferroui-ident-macros = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

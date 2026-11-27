@@ -26,6 +26,14 @@ pub trait IVelloGpu {
     /// The graphics context of the platform this GPU draws with.
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext>;
 
+    /// Advances the work of the platform's context that the producers of shared frames wait
+    /// for, without waiting: the fences of their frames and the textures they retire, where the
+    /// device is made over that context (`gl_context_gpu.rs`), as the Skia backend polls it.
+    /// Whether some of it is still pending; nothing for a device of its own (the default).
+    fn poll_pending_platform_gpu_work(&self) -> bool {
+        false
+    }
+
     /// The render target of the first of the surfaces this GPU draws to,
     /// with scenes in the first of `rendering_modes` that the device runs.
     fn try_create_render_target(

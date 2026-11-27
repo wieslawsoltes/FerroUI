@@ -478,9 +478,17 @@ fn method_binds_as_a_delegate() {
 
     delegate.invoke(&[Some(boxed(3))]);
     assert_eq!(vm.log(), ["Count 3"]);
-    // A failure is reported by the fallible form only.
+    // The fallible form returns a failure; `invoke` raises it on the dispatcher (#567).
     assert!(delegate.try_invoke(&[Some(boxed("x".to_string()))]).is_err());
+    let _scope = Dispatcher::unit_test_scope();
+    let raised = Rc::new(Cell::new(false));
+    let seen = raised.clone();
+    let _handler = Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        seen.set(args.error().is_some());
+        args.set_handled(true);
+    });
     assert_eq!(delegate.invoke(&[Some(boxed("x".to_string()))]), None);
+    assert!(raised.get());
 
     // The text of a delegate is the name of its type.
     target.bind_binding(MemberTarget::text_property(), &ReflectionBinding::new("Save"));

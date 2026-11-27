@@ -6,6 +6,8 @@
 #[repr(transparent)]
 pub struct PinnedDockDisplayMode(i32);
 
+ferroui_system::styled_value!(PinnedDockDisplayMode);
+
 // Source enum member names are part of the public API.
 #[allow(non_upper_case_globals)]
 impl PinnedDockDisplayMode {

@@ -1,0 +1,10 @@
+01-home.png 1900 x 1360 pixels, 19549 differ (x 138-1893, y 130-577)
+02-buttons.png 1900 x 1360 pixels, 0 differ
+03-textblock.png 1900 x 1360 pixels, 0 differ
+04-listbox.png 1900 x 1360 pixels, 0 differ
+05-image.png 1900 x 1360 pixels, 0 differ
+06-calendar.png 1900 x 1360 pixels, 0 differ
+07-slider.png 1900 x 1360 pixels, 6537 differ (x 603-1188, y 563-589)
+08-textbox.png 1900 x 1360 pixels, 0 differ
+09-dialogs.png 1900 x 1360 pixels, 0 differ
+10-treedatagrid.png 1900 x 1360 pixels, 0 differ

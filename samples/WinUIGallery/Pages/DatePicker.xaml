@@ -1,4 +1,23 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Pick a date"/><DatePicker HorizontalAlignment="Left"/><TextBlock Text="Year hidden"/><DatePicker HorizontalAlignment="Left" YearVisible="False"/>
+<!-- Ported from the two pinned DatePicker examples of WinUI Gallery (14061eea) and OnNavigatedTo of
+     DatePickerPage.xaml.cs (date_samples.rs); see ../NOTICE.md. FerroUI's DatePicker has no
+     Header (composed above it, whose automation name it is). Its DayFormat is a .NET date format:
+     WinUI's "{day.integer} ({dayofweek.abbreviated})" is "d (ddd)". WinUI's Date is the
+     SelectedDate. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="DatePickerExample1" Spacing="8">
+    <TextBlock Text="A simple DatePicker with a header." FontSize="18" />
+    <StackPanel Spacing="4">
+      <TextBlock Text="Pick a date" />
+      <DatePicker x:Name="Control1" AutomationProperties.Name="Pick a date" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="DatePickerExample2" Spacing="8">
+    <TextBlock Text="A DatePicker with day formatted and year hidden." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <DatePicker x:Name="Control2" DayFormat="d (ddd)" YearVisible="False" />
+      <TextBlock x:Name="Control2Output" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

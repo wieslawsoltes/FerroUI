@@ -23,13 +23,14 @@ use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 use zbus::object_server::SignalEmitter;
 use zbus::proxy::CacheProperties;
-use zbus::zvariant::{ObjectPath, StructureBuilder, Value};
+use zbus::wire::StructureBuilder;
+use zbus::{ObjectPath, Variant};
 use zbus::Connection;
 
 /// `com.canonical.AppMenu.Registrar` (the proxy the reference generates
 /// from `DBusXml/com.canonical.AppMenu.Registrar.xml`), with the members
 /// that are called.
-#[zbus::proxy(interface = "com.canonical.AppMenu.Registrar", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "com.canonical.AppMenu.Registrar", assume_defaults = false)]
 pub trait Registrar {
     fn register_window(&self, window_id: u32, menu_object_path: &ObjectPath<'_>) -> zbus::Result<()>;
 
@@ -40,11 +41,11 @@ const REGISTRAR_NAME: &str = "com.canonical.AppMenu.Registrar";
 const REGISTRAR_PATH: &str = "/com/canonical/AppMenu/Registrar";
 
 /// The properties of an item, by name.
-pub(crate) type MenuProperties = HashMap<String, Value<'static>>;
+pub(crate) type MenuProperties = HashMap<String, Variant<'static>>;
 
 /// The layout of an item: its identifier, its properties and its
 /// children, each a variant of a layout (`(ia{sv}av)`).
-pub(crate) type MenuLayout = (i32, MenuProperties, Vec<Value<'static>>);
+pub(crate) type MenuLayout = (i32, MenuProperties, Vec<Variant<'static>>);
 
 pub struct DBusMenuExporter;
 
@@ -126,18 +127,18 @@ impl DBusMenuObject {
             .ok_or_else(gone)
     }
 
-    async fn get_property(&self, id: i32, name: String) -> zbus::fdo::Result<Value<'static>> {
+    async fn get_property(&self, id: i32, name: String) -> zbus::fdo::Result<Variant<'static>> {
         self.exporter
-            .call(move |exporter| get_property(&exporter.get_menu(id), &name).unwrap_or(Value::I32(0)))
+            .call(move |exporter| get_property(&exporter.get_menu(id), &name).unwrap_or(Variant::I32(0)))
             .await
             .ok_or_else(gone)
     }
 
-    async fn event(&self, id: i32, event_id: String, _data: Value<'_>, _timestamp: u32) -> zbus::fdo::Result<()> {
+    async fn event(&self, id: i32, event_id: String, _data: Variant<'_>, _timestamp: u32) -> zbus::fdo::Result<()> {
         self.exporter.call(move |exporter| exporter.handle_event(id, &event_id)).await.ok_or_else(gone)
     }
 
-    async fn event_group(&self, events: Vec<(i32, String, Value<'_>, u32)>) -> zbus::fdo::Result<Vec<i32>> {
+    async fn event_group(&self, events: Vec<(i32, String, Variant<'_>, u32)>) -> zbus::fdo::Result<Vec<i32>> {
         let events: Vec<(i32, String)> = events.into_iter().map(|(id, event_id, _, _)| (id, event_id)).collect();
         self.exporter
             .call(move |exporter| {
@@ -275,8 +276,8 @@ impl DBusMenuExporterImpl {
                 };
                 let registrar = async {
                     RegistrarProxy::builder(&this.connection)
-                        .destination(REGISTRAR_NAME)?
-                        .path(REGISTRAR_PATH)?
+                        .destination(REGISTRAR_NAME)
+                        .path(REGISTRAR_PATH)
                         .cache_properties(CacheProperties::No)
                         .build()
                         .await
@@ -414,7 +415,7 @@ impl DBusMenuExporterImpl {
                     self.get_layout(Some(ch), menu_of(ch).as_ref(), if depth == -1 { -1 } else { depth - 1 }, property_names);
                 let child = StructureBuilder::new().add_field(layout.0).add_field(layout.1).add_field(layout.2).build();
                 if let Ok(child) = child {
-                    children.push(Value::Structure(child));
+                    children.push(Variant::Structure(child));
                 }
             }
         }
@@ -440,33 +441,33 @@ fn menu_of(item: &Ref<NativeMenuItemBase>) -> Option<Ref<NativeMenu>> {
 const ALL_PROPERTIES: [&str; 9] =
     ["type", "label", "enabled", "visible", "shortcut", "toggle-type", "children-display", "toggle-state", "icon-data"];
 
-fn get_property(i: &ItemAndMenu, name: &str) -> Option<Value<'static>> {
+fn get_property(i: &ItemAndMenu, name: &str) -> Option<Variant<'static>> {
     let (it, menu) = i;
     let it = it.as_ref()?;
 
     if it.is::<NativeMenuItemSeparator>() {
         if name == "type" {
-            return Some(Value::from("separator"));
+            return Some(Variant::from("separator"));
         }
     } else if let Some(item) = it.cast::<NativeMenuItem>() {
         if name == "type" {
             return None;
         }
         if name == "label" {
-            return Some(Value::from(item.header().unwrap_or_else(|| "<null>".to_string())));
+            return Some(Variant::from(item.header().unwrap_or_else(|| "<null>".to_string())));
         }
         if name == "enabled" {
             if item.menu().is_some_and(|menu| menu.items().snapshot().is_empty()) {
-                return Some(Value::Bool(false));
+                return Some(Variant::Bool(false));
             }
             if !item.is_enabled() {
-                return Some(Value::Bool(false));
+                return Some(Variant::Bool(false));
             }
             return None;
         }
 
         if name == "visible" {
-            return Some(Value::Bool(item.is_visible()));
+            return Some(Variant::Bool(item.is_visible()));
         }
 
         if name == "shortcut" {
@@ -489,20 +490,20 @@ fn get_property(i: &ItemAndMenu, name: &str) -> Option<Value<'static>> {
                 lst.push("Super".to_string());
             }
             lst.push(gesture.key().to_string());
-            return Some(Value::new(vec![lst]));
+            return Some(Variant::new(vec![lst]));
         }
 
         if name == "toggle-type" {
             if item.toggle_type() == MenuItemToggleType::CheckBox {
-                return Some(Value::from("checkmark"));
+                return Some(Variant::from("checkmark"));
             }
             if item.toggle_type() == MenuItemToggleType::Radio {
-                return Some(Value::from("radio"));
+                return Some(Variant::from("radio"));
             }
         }
 
         if name == "toggle-state" && item.toggle_type() != MenuItemToggleType::None {
-            return Some(Value::I32(i32::from(item.is_checked())));
+            return Some(Variant::I32(i32::from(item.is_checked())));
         }
 
         if name == "icon-data" {
@@ -514,7 +515,7 @@ fn get_property(i: &ItemAndMenu, name: &str) -> Option<Value<'static>> {
                     let mut ms = Vec::new();
                     // An icon that cannot be encoded is no icon.
                     if icon.save(&mut ms).is_ok() {
-                        return Some(Value::new(ms));
+                        return Some(Variant::new(ms));
                     }
                 }
             }
@@ -522,7 +523,7 @@ fn get_property(i: &ItemAndMenu, name: &str) -> Option<Value<'static>> {
 
         if name == "children-display" {
             if menu.is_some() {
-                return Some(Value::from("submenu"));
+                return Some(Variant::from("submenu"));
             }
             return None;
         }

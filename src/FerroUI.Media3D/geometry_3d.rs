@@ -6,6 +6,7 @@
 //! ([`Scene3DChange::Structure`]).
 
 use crate::change::{Notifier, Notifying, Scene3DChange, ValueListLink};
+use crate::hit_testing::MeshBvh;
 use crate::{Int32Collection, Point3D, Point3DCollection, Rect3D, Vector3D, Vector3DCollection};
 use ferroui_base::animation::Animatable;
 use ferroui_base::media::Points;
@@ -77,6 +78,8 @@ pub struct MeshGeometry3D {
     id: u64,
     version: Cell<u64>,
     data: RefCell<Option<Arc<MeshData>>>,
+    /// The hierarchy of the hit testing, made of the current version when it is first hit.
+    hierarchy: RefCell<Option<Rc<MeshBvh>>>,
     positions_link: ValueListLink,
     normals_link: ValueListLink,
     texture_coordinates_link: ValueListLink,
@@ -168,6 +171,7 @@ impl MeshGeometry3D {
             id: NEXT_MESH_ID.fetch_add(1, Ordering::Relaxed),
             version: Cell::new(1),
             data: RefCell::new(None),
+            hierarchy: RefCell::new(None),
             positions_link: ValueListLink::default(),
             normals_link: ValueListLink::default(),
             texture_coordinates_link: ValueListLink::default(),
@@ -233,6 +237,7 @@ impl MeshGeometry3D {
     fn content_changed(&self) {
         self.version.set(self.version.get() + 1);
         self.data.borrow_mut().take();
+        self.hierarchy.borrow_mut().take();
         self.notifier().raise(Scene3DChange::Structure);
     }
 
@@ -244,6 +249,20 @@ impl MeshGeometry3D {
         let data = Arc::new(self.build_mesh_data());
         *self.data.borrow_mut() = Some(data.clone());
         data
+    }
+
+    /// The bounding-volume hierarchy of the hit testing, made once per version and kept.
+    pub(crate) fn hit_test_hierarchy(&self) -> Rc<MeshBvh> {
+        if let Some(hierarchy) = self.hierarchy.borrow().as_ref() {
+            return hierarchy.clone();
+        }
+        let positions: Vec<[f64; 3]> = self
+            .get_value(Self::positions_property())
+            .map(|positions| positions.iter().map(|p| [p.x, p.y, p.z]).collect())
+            .unwrap_or_default();
+        let hierarchy = Rc::new(MeshBvh::build(positions, self.mesh_data()));
+        *self.hierarchy.borrow_mut() = Some(hierarchy.clone());
+        hierarchy
     }
 
     fn build_mesh_data(&self) -> MeshData {

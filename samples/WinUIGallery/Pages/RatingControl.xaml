@@ -1,9 +1,13 @@
-<!-- Ported from both pinned RatingControl examples; see ../NOTICE.md. The options keep the
-     source's x:Bind (OneWay, and TwoWay for the placeholder), compiled by the x:Bind core (#525);
-     IsChecked.Value of the nullable CheckBox state is IsChecked. -->
+<!-- Ported from both pinned RatingControl examples of WinUI Gallery (14061eea) and
+     RatingControl1_ValueChanged of RatingControlPage.xaml.cs (feedback_samples.rs); see
+     ../NOTICE.md. The options keep the source's x:Bind (OneWay, and TwoWay for the placeholder),
+     compiled by the x:Bind core (#525); IsChecked.Value of the nullable CheckBox state is
+     IsChecked. The output, the source's OneWay x:Bind of Value, is set by feedback_samples.rs as
+     Value.ToString(). The slider's Header is composed; StepFrequency 0.5 is TickFrequency with
+     IsSnapToTickEnabled. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
-  <TextBlock Text="A RatingControl with a caption" FontSize="18" />
+  <TextBlock Text="A simple RatingControl" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <StackPanel VerticalAlignment="Top" Spacing="12">
       <RatingControl x:Name="RatingControl1" HorizontalAlignment="Left"
@@ -19,7 +23,7 @@
       <CheckBox x:Name="ReadOnly" Content="IsReadOnly" IsChecked="False" />
     </StackPanel>
   </Grid>
-  <TextBlock Text="A RatingControl with a placeholder" FontSize="18" />
+  <TextBlock Text="PlaceholderValue of RatingControl" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <RatingControl x:Name="RatingControl2" HorizontalAlignment="Left" VerticalAlignment="Top"
                          AutomationProperties.Name="RatingControl with placeholder"

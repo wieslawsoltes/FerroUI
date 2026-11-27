@@ -163,6 +163,73 @@ def comparable_units(items: list[dict], allow_build_tool_optimization: bool) -> 
     return sorted(result, key=lambda item: json.dumps(item, sort_keys=True))
 
 
+# The crate whose own dependencies are build-only for every package that uses it: `ferroui-build`
+# is a build dependency, so what it depends on runs in build scripts and is linked into no
+# application (the `toml` parser of the manifest, #850).
+BUILD_ONLY_ROOT = "ferroui-build"
+
+
+def package_name(item: dict) -> str:
+    """The name of the package of a unit, from its package id (`...#name@version`)."""
+    return item.get("package", "").rsplit("#", 1)[-1].split("@", 1)[0]
+
+
+def cargo_metadata(source: Path) -> dict:
+    """`cargo metadata` of the workspace at `source`, from its lock file."""
+    return json.loads(subprocess.check_output(
+        ["cargo", "metadata", "--format-version", "1", "--locked", "--offline"], cwd=source, text=True))
+
+
+def reachable(metadata: dict, roots: list[str], normal_only: bool) -> set[str]:
+    """The ids of the packages the packages named `roots` depend on, directly or not. With
+    `normal_only`, only through normal dependencies: an edge that is a build or dev dependency
+    alone is not followed, so what a build script links is left out."""
+    nodes = {node["id"]: node for node in (metadata.get("resolve") or {}).get("nodes", [])}
+    names = {package["id"]: package["name"] for package in metadata["packages"]}
+    pending = [identifier for identifier, name in names.items() if name in roots]
+    found: set[str] = set()
+    while pending:
+        identifier = pending.pop()
+        for dependency in nodes.get(identifier, {}).get("deps", []):
+            kinds = {kind.get("kind") for kind in dependency.get("dep_kinds", [{"kind": None}])}
+            if normal_only and None not in kinds:
+                continue
+            if dependency["pkg"] not in found:
+                found.add(dependency["pkg"])
+                pending.append(dependency["pkg"])
+    return found
+
+
+def build_only_names(metadata: dict, measured: list[str], root: str = BUILD_ONLY_ROOT) -> set[str]:
+    """The names of the packages that `root` depends on, directly or not, and that no normal
+    dependency path of the `measured` packages reaches: what only build scripts link. A crate that
+    a measured package also links (a markup crate both `root` and the application use) is not
+    among them, so a new runtime dependency of it stays a change of the graph."""
+    names = {package["id"]: package["name"] for package in metadata["packages"]}
+    linked = reachable(metadata, measured, normal_only=True) | {
+        identifier for identifier, name in names.items() if name in measured}
+    return {names[identifier] for identifier in reachable(metadata, [root], normal_only=False) - linked}
+
+
+def build_only_packages(source: Path, measured: list[str], root: str = BUILD_ONLY_ROOT) -> set[str]:
+    """[`build_only_names`] of the lock file of `source`."""
+    return build_only_names(cargo_metadata(source), measured, root)
+
+
+def build_only_additions(reference: list[dict], items: list[dict], packages: set[str]) -> list[dict]:
+    """The units of `items` that `reference` does not build and that belong to a build-only
+    package ([`build_only_packages`]): a new dependency of the build crate, which no application
+    links. Any other added unit stays a change of the graph."""
+    known = {unit_key(item) for item in reference}
+    return [item for item in items if unit_key(item) not in known and package_name(item) in packages]
+
+
+def without_units(items: list[dict], removed: list[dict]) -> list[dict]:
+    """`items` without the units `removed` names (by package, target and kind)."""
+    keys = {unit_key(item) for item in removed}
+    return [item for item in items if unit_key(item) not in keys]
+
+
 def without_features(items: list[dict]) -> list[dict]:
     """The units with their features left out: what an acknowledged change of features keeps."""
     return sorted(({key: value for key, value in item.items() if key != "features"} for item in items),
@@ -300,6 +367,19 @@ def main() -> int:
             for label, source in order:
                 report["records"].append(measure(source, args.output, label, sample, args))
                 (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
+        # The units only the candidate builds because the build crate gained a dependency are not a
+        # change of the graph of the package (they run in build scripts only); they are reported.
+        packages = build_only_packages(args.candidate, args.package)
+        reference_units = next(row["units"] for row in report["records"] if row["label"] == "baseline")
+        build_only: set[str] = set()
+        for row in report["records"]:
+            if row["label"] == "candidate":
+                additions = build_only_additions(reference_units, row["units"], packages)
+                if additions:
+                    row["build_only_units"] = sorted(unit_key(item) for item in additions)
+                    row["units"] = without_units(row["units"], additions)
+                    build_only.update(row["build_only_units"])
+        report["build_only_units"] = sorted(build_only)
         report["summary"] = summary = summarize(report["records"], args.candidate_build_tools)
         (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
         text = ("## Cargo build comparison\n\n"
@@ -313,6 +393,11 @@ def main() -> int:
                 f"({summary['generated_files_per_build']} files/build).\n\n"
                 "Individual samples, source SHAs, Cargo logs and timing HTML are in the artifact. "
                 "This is a compile measurement; tests and cache replay are separate scenarios.\n")
+        if report["build_only_units"]:
+            text += (f"\n### Build-only units of `{BUILD_ONLY_ROOT}`\n\n"
+                     f"The candidate also builds {len(report['build_only_units'])} units of dependencies of "
+                     f"`{BUILD_ONLY_ROOT}`, which run in build scripts only; they are left out of the comparison:\n\n"
+                     + "".join(f"- `{name}`\n" for name in report["build_only_units"][:50]))
         if args.accept_output_changes and summary["changed_generated_outputs"]:
             changed = summary["changed_generated_outputs"]
             text += ("\n### Output changes acknowledged (`build-output-changes`)\n\n"

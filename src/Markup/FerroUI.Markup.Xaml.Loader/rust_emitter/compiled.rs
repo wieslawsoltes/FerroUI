@@ -206,6 +206,7 @@ pub fn compile_documents_with(
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
+                (functions.backend, functions.bytecode_image) = super::transform::selected_xaml_backend();
                 for (name, transformed) in names.iter().zip(&transformed) {
                     if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                         functions.insert_value(build, name, root_class);
@@ -809,6 +810,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
+    (functions.backend, functions.bytecode_image) = super::transform::selected_xaml_backend();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
     for (index, (document, function_name)) in transformed.iter().zip(allocated).enumerate() {
@@ -1197,5 +1199,33 @@ mod tests {
             class_document_group("ferres://Fixture/", &documents, "Missing.xaml"),
             Err("the document `Missing.xaml` of the class is not a document of the group".to_string())
         );
+    }
+
+    /// Not from upstream (#850): the group of a class is found from its includes as the parser of
+    /// the documents reads them: a `Source` with an entity names the decoded file, a `>` in a key
+    /// does not hide an include, and an include written in CDATA is text.
+    #[test]
+    fn the_group_of_a_class_follows_its_includes_as_parsed() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let theme = format!(
+            "<Styles {namespaces} x:Class='Fixture.Theme'>\
+             <Styles.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>\
+             <MergeResourceInclude Source='/A&amp;B.xaml'/>\
+             <ResourceInclude x:Key='a>b' Source='/Keyed.xaml'/>\
+             </ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='Text'><![CDATA[<StyleInclude Source='/Text.xaml'/>]]></x:String>\
+             </ResourceDictionary></Styles.Resources></Styles>"
+        );
+        let dictionary = format!("<ResourceDictionary {namespaces}/>");
+        let styles = format!("<Styles {namespaces}/>");
+        let documents = [
+            ("Theme.xaml", theme.as_str()),
+            ("A&B.xaml", dictionary.as_str()),
+            ("Keyed.xaml", dictionary.as_str()),
+            ("Text.xaml", styles.as_str()),
+        ];
+        let group = class_document_group("ferres://Fixture/", &documents, "Theme.xaml").expect("the group");
+        let names: Vec<&str> = group.iter().map(|(name, _, _)| name.as_str()).collect();
+        assert_eq!(names, ["Theme.xaml", "A&B.xaml", "Keyed.xaml"]);
     }
 }

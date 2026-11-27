@@ -1,6 +1,6 @@
 use crate::animation::animators::{Animator, AnimatorBase};
 use crate::animation::IAnimator;
-use crate::PropertyValue;
+
 use std::any::TypeId;
 use std::rc::Rc;
 
@@ -31,7 +31,7 @@ impl PartialEq for dyn ICustomAnimator {
 pub trait InterpolatingAnimator: 'static {
     /// The type of the values the animator interpolates, which is the value
     /// type of the properties it animates.
-    type Value: PropertyValue + Default;
+    type Value: crate::StyledValue + Default;
 
     /// Interpolates between two values using the specified progress.
     fn interpolate(&self, progress: f64, old_value: &Self::Value, new_value: &Self::Value) -> Self::Value;
@@ -48,12 +48,12 @@ impl<A: InterpolatingAnimator> ICustomAnimator for A {
 }
 
 /// The animator behind every [`InterpolatingAnimator`] of value type `T`.
-pub(crate) struct AnimatorWrapper<T: PropertyValue + Default> {
+pub(crate) struct AnimatorWrapper<T: crate::StyledValue + Default> {
     base: AnimatorBase,
     parent: Rc<dyn InterpolatingAnimator<Value = T>>,
 }
 
-impl<T: PropertyValue + Default> Animator for AnimatorWrapper<T> {
+impl<T: crate::StyledValue + Default> Animator for AnimatorWrapper<T> {
     type Value = T;
 
     fn base(&self) -> &AnimatorBase {

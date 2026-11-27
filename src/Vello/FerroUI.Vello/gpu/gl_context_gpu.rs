@@ -53,6 +53,9 @@ fn unavailable(reason: impl Into<String>) -> VelloWgpuDeviceError {
 pub struct VelloGlGpu {
     gl_context: Rc<dyn IGlContext>,
     device: Arc<VelloWgpuDevice>,
+    /// The import of the frames the producers of the context hand out as its textures, when the
+    /// context shares its frames (#575, `gl_external_objects.rs`).
+    external_objects: Option<Rc<crate::gpu::gl_external_objects::VelloGlExternalObjectsFeature>>,
 }
 
 impl VelloGlGpu {
@@ -65,7 +68,15 @@ impl VelloGlGpu {
         let current = gl_context.make_current();
         let device = Self::create_device(&gl_context);
         current.dispose();
-        Ok(Rc::new(Self { gl_context, device: device? }))
+        let device = device?;
+        let external_objects = gl_context.shared_frame_context_id().map(|context_id| {
+            Rc::new(crate::gpu::gl_external_objects::VelloGlExternalObjectsFeature::new(
+                device.clone(),
+                context_id,
+                gl_context.shared_frame_context_generation(),
+            ))
+        });
+        Ok(Rc::new(Self { gl_context, device, external_objects }))
     }
 
     fn create_device(gl_context: &Rc<dyn IGlContext>) -> Result<Arc<VelloWgpuDevice>, VelloWgpuDeviceError> {
@@ -104,8 +115,30 @@ impl IVelloGpu for VelloGlGpu {
         &self.device
     }
 
+    /// The context of OpenGL the device is made over, as the Skia backend on the context hands it
+    /// out (the producers of the platform draw their frames with it: `NativeGlFrameProducer`
+    /// asks the render interface for it), and the external objects feature of the GPU when the
+    /// context shares the frames of its producers.
+    fn try_get_feature(&self, feature_type: std::any::TypeId) -> Option<Rc<dyn std::any::Any>> {
+        use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
+        if feature_type == std::any::TypeId::of::<dyn IGlContext>() {
+            return Some(Rc::new(self.gl_context.clone()));
+        }
+        if feature_type == std::any::TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
+            return Some(Rc::new(feature));
+        }
+        None
+    }
+
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext> {
         self.gl_context.clone()
+    }
+
+    /// The fences of the frames the producers made with the context (their completions) and
+    /// the textures they retire: without this poll a frame of a producer never becomes ready.
+    fn poll_pending_platform_gpu_work(&self) -> bool {
+        self.gl_context.poll_pending_gpu_work()
     }
 
     fn try_create_render_target(

@@ -1,4 +1,44 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <ToggleSplitButton x:Name="Primary" Content="Bullets"><ToggleSplitButton.Flyout><Flyout><StackPanel Spacing="8"><TextBlock Text="Select a bullet style"/><RadioButton Content="Round" GroupName="Bullets" IsChecked="True"/><RadioButton Content="Square" GroupName="Bullets"/></StackPanel></Flyout></ToggleSplitButton.Flyout></ToggleSplitButton><TextBlock x:Name="Output" Text="Toggle the primary action"/>
+<!-- Adapted from the pinned ToggleSplitButton example of WinUI Gallery (14061eea) and the handlers
+     of ToggleSplitButtonPage.xaml.cs (button_samples.rs); see ../NOTICE.md. The bullet buttons
+     change the symbol, the automation name and the checked state, and close the flyout, as in the
+     source. FerroUI's RichEditBox has no paragraph list type (ParagraphFormat.ListType,
+     MarkerType), so the list of the text is not set: the page stays partial. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ToggleSplitButtonExample1" Spacing="8">
+    <TextBlock Text="Using ToggleSplitButton to control bulleted list functionality in RichEditBox"
+               FontSize="18" TextWrapping="Wrap" />
+    <ToggleSplitButton x:Name="myListButton"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       AutomationProperties.Name="Bullets">
+      <SymbolIcon x:Name="mySymbolIcon" Symbol="List" />
+      <ToggleSplitButton.Flyout>
+        <Flyout Placement="Bottom">
+          <StackPanel Orientation="Horizontal">
+            <StackPanel.Styles>
+              <Style Selector="Button">
+                <Setter Property="Padding" Value="4" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Margin" Value="6" />
+                <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+              </Style>
+            </StackPanel.Styles>
+            <Button x:Name="BulletedListButton" AutomationProperties.Name="Bulleted list">
+              <SymbolIcon Symbol="List" />
+            </Button>
+            <Button x:Name="RomanNumeralsListButton" AutomationProperties.Name="Roman numerals list">
+              <SymbolIcon Symbol="Bullets" />
+            </Button>
+          </StackPanel>
+        </Flyout>
+      </ToggleSplitButton.Flyout>
+    </ToggleSplitButton>
+    <RichEditBox x:Name="myRichEditBox"
+                 Width="240"
+                 MinHeight="96"
+                 HorizontalAlignment="Left"
+                 AutomationProperties.Name="Text entry" />
+  </StackPanel>
 </StackPanel>

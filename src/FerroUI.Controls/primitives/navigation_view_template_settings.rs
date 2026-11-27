@@ -35,7 +35,7 @@ ferro_properties! { impl NavigationViewTemplateSettings {
     );
     ferro_property!(
         /// Defines the `OverflowButtonVisibility` property: whether the overflow button of the top pane
-        /// is shown (always `false`: the overflow of the top pane is not ported).
+        /// is shown: some top-level items of the top pane are in its overflow menu.
         pub fn overflow_button_visibility_property() -> StyledProperty<bool> {
             FerroProperty::register::<NavigationViewTemplateSettings, _>("OverflowButtonVisibility", false)
         }
@@ -157,7 +157,7 @@ impl NavigationViewTemplateSettings {
 
     /// Sets a value that the navigation view computes; a value equal to the current one raises
     /// nothing.
-    pub(crate) fn set<T: ferroui_base::PropertyValue + PartialEq>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub(crate) fn set<T: ferroui_base::StyledValue + PartialEq>(&self, property: &'static StyledProperty<T>, value: T) {
         if self.get_value(property) != value {
             self.set_value(property, value);
         }

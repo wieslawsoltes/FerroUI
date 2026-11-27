@@ -11,7 +11,7 @@ use ferroui_base::Ref;
 use ferroui_controls::automation::peers::AutomationPeer;
 use ferroui_controls::automation::provider::{ISelectionItemProvider, ISelectionProvider};
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiSelectionHandler {
     server: Weak<AtSpiServer>,
@@ -142,11 +142,11 @@ impl DBusInterface for AtSpiSelectionHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         let node = self.node.upgrade()?;
         Some(match name {
-            "version" => Value::from(Self::version()),
-            "NSelectedChildren" => Value::from(Self::n_selected_children(&node)),
+            "version" => Variant::from(Self::version()),
+            "NSelectedChildren" => Variant::from(Self::n_selected_children(&node)),
             _ => return None,
         })
     }

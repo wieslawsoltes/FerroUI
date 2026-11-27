@@ -1,4 +1,69 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel Orientation="Horizontal" Spacing="12"><Button x:Name="Primary" Content="Standard XAML button" AutomationProperties.Name="Standard XAML"/><Button IsEnabled="False" Content="Disabled"/><Button><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Width="16" Height="16" Fill="DodgerBlue"/><TextBlock Text="Graphical content"/></StackPanel></Button></StackPanel><CheckBox x:Name="Disable" Content="Disable button"/><TextBlock x:Name="Output" Text="Click the button"/>
+<!-- Ported from the four pinned Button examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     button_samples.rs ports Button_Click of ButtonPage.xaml.cs. The source binds IsEnabled to
+     DisableButton1.IsChecked.Value.Equals(x:False); the x:Bind here is the same OneWay binding of
+     IsChecked with the BoolConverters.Not converter. The image of the second example is the
+     source's Slices.png, set by the code behind. WinUI's WrapWholeWords is WrapWithOverflow. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ButtonExample1" Spacing="8">
+    <TextBlock Text="A simple Button with text content." FontSize="18" />
+    <Button x:Name="Button1"
+            AutomationProperties.Name="Standard XAML"
+            Content="Standard XAML button"
+            IsEnabled="{x:Bind DisableButton1.IsChecked, Mode=OneWay, Converter={x:Static BoolConverters.Not}}" />
+    <TextBlock x:Name="Control1Output" />
+    <CheckBox x:Name="DisableButton1" Content="Disable button" />
+  </StackPanel>
+
+  <StackPanel x:Name="ButtonExample2" Spacing="8">
+    <TextBlock Text="A Button with graphical content." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <Button x:Name="Button2" Width="50" Height="50" AutomationProperties.Name="Pie">
+        <Image x:Name="Button2Image" AutomationProperties.Name="Slice" />
+      </Button>
+    </StackPanel>
+    <TextBlock x:Name="Control2Output" />
+    <TextBlock x:Name="Button2ImageError" IsVisible="False" TextWrapping="Wrap" />
+  </StackPanel>
+
+  <StackPanel x:Name="ButtonExample3" Spacing="8">
+    <TextBlock Text="Built-in styles applied to Button." FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="AccentStyleButton"
+              AutomationProperties.Name="Accent style"
+              Content="Accent style button"
+              Theme="{DynamicResource AccentButtonStyle}" />
+      <Button x:Name="SubtleStyleButton"
+              AutomationProperties.Name="Subtle style"
+              Content="Subtle style button"
+              Theme="{DynamicResource SubtleButtonStyle}" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="ButtonExample4" Spacing="8">
+    <TextBlock Text="Wrapping Buttons with large content" FontSize="18" />
+    <StackPanel>
+      <TextBlock Margin="0,0,0,8"
+                 Text="The following buttons' content may get clipped if we don't pay careful attention to their layout containers."
+                 TextWrapping="Wrap" />
+      <TextBlock Margin="0,0,0,8"
+                 Text="One option to mitigate clipped content is to place Buttons underneath each other, allowing for more space to grow horizontally:"
+                 TextWrapping="Wrap" />
+      <Button Margin="0,0,0,5" HorizontalAlignment="Stretch"
+              Content="This is some text that is too long and will get cut off" />
+      <Button HorizontalAlignment="Stretch"
+              Content="This is another text that would result in being cut off" />
+      <TextBlock Margin="0,8,0,8" Text="Another option is to explicitly wrap the Button's content" />
+      <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+        <Button x:Name="WrappedButton1" MaxWidth="240" Margin="0,0,8,0">
+          <TextBlock Text="This is some text that is too long and will get cut off without wrapping"
+                     TextWrapping="WrapWithOverflow" />
+        </Button>
+        <Button x:Name="WrappedButton2" MaxWidth="240">
+          <TextBlock Text="This is another text that would result in being cut off without wrapping"
+                     TextWrapping="WrapWithOverflow" />
+        </Button>
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

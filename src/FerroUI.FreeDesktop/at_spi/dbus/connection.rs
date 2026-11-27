@@ -22,7 +22,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::rc::{Rc, Weak};
 use zbus::export::serde::ser::Serialize;
-use zbus::zvariant::DynamicType;
+use zbus::DynamicType;
 
 pub(crate) const INTERFACE_PROPERTIES: &str = "org.freedesktop.DBus.Properties";
 pub(crate) const INTERFACE_INTROSPECTABLE: &str = "org.freedesktop.DBus.Introspectable";
@@ -208,14 +208,15 @@ impl AtSpiConnection {
     fn on_method_call(&self, message: &zbus::Message) {
         let Some(result) = self.objects.dispatch_method_call(message) else { return };
         let header = message.header();
-        if header.primary().flags().contains(zbus::message::Flags::NoReplyExpected) {
+        if header.primary().flags().contains(zbus::message::Flags::NO_REPLY_EXPECTED) {
             return;
         }
 
         let built = match result {
-            Ok(body) => zbus::Message::method_return(&header).and_then(|builder| body.build(self.with_sender(builder))),
-            Err(error) => zbus::Message::error(&header, error.name.as_str())
-                .and_then(|builder| self.with_sender(builder).build(&(error.message.as_str(),))),
+            Ok(body) => body.build(self.with_sender(zbus::Message::method_return(&header))),
+            Err(error) => {
+                self.with_sender(zbus::Message::error(&header, error.name.as_str())).build(&(error.message.as_str(),))
+            }
         };
         match built {
             Ok(reply) => self.send(reply),
@@ -225,10 +226,7 @@ impl AtSpiConnection {
 
     fn with_sender<'a>(&self, builder: zbus::message::Builder<'a>) -> zbus::message::Builder<'a> {
         match self.connection.unique_name() {
-            Some(name) => match builder.clone().sender(name.as_str().to_string()) {
-                Ok(with_sender) => with_sender,
-                Err(_) => builder,
-            },
+            Some(name) => builder.sender(name.as_str().to_string()),
             None => builder,
         }
     }
@@ -239,8 +237,7 @@ impl AtSpiConnection {
     where
         B: Serialize + DynamicType,
     {
-        let built =
-            zbus::Message::signal(path, interface, member).and_then(|builder| self.with_sender(builder).build(body));
+        let built = self.with_sender(zbus::Message::signal(path, interface, member)).build(body);
         match built {
             Ok(message) => self.send(message),
             Err(e) => Self::log(&format!("AT-SPI signal {member} could not be built: {e}")),

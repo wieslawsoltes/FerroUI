@@ -20,6 +20,8 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 ferroui_markup_xaml::include_compiled_xaml!();
+// The units of the Simple theme the view needs: the table the build wrote (`build.rs`).
+use compiled_markup::THEME_PARTS_FERROUI_THEMES_SIMPLE_SIMPLETHEME as THEME_PARTS;
 
 pub mod snapshots;
 
@@ -67,7 +69,7 @@ pub fn app_builder() -> AppBuilder {
                 .instance()
                 .expect("the application has been initialized")
                 .styles()
-                .add(ferroui_themes_simple::SimpleTheme::new().as_style());
+                .add(ferroui_themes_simple::SimpleTheme::with_parts(None, THEME_PARTS).as_style());
         })
 }
 

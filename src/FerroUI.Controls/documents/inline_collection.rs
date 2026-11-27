@@ -15,6 +15,8 @@ use std::rc::{Rc, Weak};
 #[derive(Clone)]
 pub struct InlineCollection(Rc<InlineCollectionData>);
 
+ferroui_base::styled_value!(InlineCollection);
+
 struct InlineCollectionData {
     list: FerroList<Ref<Inline>>,
     /// The element whose logical children mirror the collection.

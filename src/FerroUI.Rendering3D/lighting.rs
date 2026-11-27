@@ -110,8 +110,21 @@ pub fn view_direction(frame: &FrameUniforms, world_position: Float3) -> Float3 {
 ///   it is added (`One, One`).
 /// - An emissive layer: the colour times its alpha, with alpha 0: added, without light.
 pub fn shade(frame: &FrameUniforms, draw: &DrawUniforms, normal: Float3, world_position: Float3) -> [f32; 4] {
-    let color = xyz(draw.color);
-    let alpha = saturate(draw.color[3]);
+    shade_color(frame, draw, draw.color, normal, world_position)
+}
+
+/// [`shade`] with the straight `color` of the layer at the point in place of the colour of the
+/// draw uniforms: the colour of the draw times the sample of its brush
+/// ([`crate::brush::sample_brush`]), as `shade_color` of the shader takes it (step D6).
+pub fn shade_color(
+    frame: &FrameUniforms,
+    draw: &DrawUniforms,
+    color: [f32; 4],
+    normal: Float3,
+    world_position: Float3,
+) -> [f32; 4] {
+    let alpha = saturate(color[3]);
+    let color = xyz(color);
     match draw.kind() {
         LayerKind::Emissive => {
             let rgb = scale(saturate3(color), alpha);

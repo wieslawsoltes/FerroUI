@@ -1,0 +1,272 @@
+diff --git a/src/Markup/FerroUI.Markup/construction_opcodes.rs b/src/Markup/FerroUI.Markup/construction_opcodes.rs
+--- a/src/Markup/FerroUI.Markup/construction_opcodes.rs
++++ b/src/Markup/FerroUI.Markup/construction_opcodes.rs
+@@ -26,3 +26,5 @@
+ pub const DEFER: u8 = 22;
+ pub const STATIC_RESOURCE: u8 = 23;
+ pub const BUILD_SELECTOR: u8 = 24;
++/// Fresh default TemplateBinding followed by a proven first binding setter, source accessor first.
++pub const TEMPLATE_BIND_FROM: u8 = 60;
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
+--- a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
+@@ -484,6 +484,14 @@
+     binding.set_property(Some(source));
+     let _ = target.bind_binding(property, &binding);
+     Ok(())
++}
++
++/// Evaluate the source property before the target, as in explicit fresh TemplateBinding construction.
++#[inline]
++pub fn bind_template_binding_from(
++    target: &Ref<FerroObject>, source: &'static FerroProperty, property: &'static FerroProperty, line: i32, position: i32,
++) -> Result<(), XamlLoadError> {
++    bind_template_binding(target, property, source, line, position)
+ }
+ 
+ /// The build of deferred content that is `{StaticResource key}` alone (a resource of a
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
+--- a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
+@@ -468,16 +468,22 @@
+                             context.set_intermediate_root_object(value(target)?);
+                         }
+                     }
+-                    op::TEMPLATE_BIND => {
+-                        let Import::Property(property) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::Property(source) = import(&mut code)? else {
++                    op::TEMPLATE_BIND | op::TEMPLATE_BIND_FROM => {
++                        let Import::Property(first) = import(&mut code)? else {
++                            return Err(invalid());
++                        };
++                        let Import::Property(second) = import(&mut code)? else {
+                             return Err(invalid());
+                         };
+                         let line = integer(&mut code)? as i32;
+                         let column = integer(&mut code)? as i32;
+-                        bind_template_binding(target, property(), source(), line, column)?;
++                        let first = first();
++                        let second = second();
++                        if opcode == op::TEMPLATE_BIND_FROM {
++                            super::compiled::bind_template_binding_from(target, first, second, line, column)?;
++                        } else {
++                            bind_template_binding(target, first, second, line, column)?;
++                        }
+                     }
+                     op::REGISTER_NAME => {
+                         let Import::Text(name) = import(&mut code)? else {
+@@ -634,6 +640,43 @@
+     }
+ 
+     #[test]
++    fn default_template_binding_choice_evaluates_source_first_and_stays_live() {
++        use ferroui_base::metadata::{from_markup_value, MarkupValue};
++        use ferroui_controls::{ContentControl, presenters::ContentPresenter};
++        thread_local! { static READS: std::cell::RefCell<Vec<&'static str>> = const { std::cell::RefCell::new(Vec::new()) }; }
++        static BIND: ConstructionProgram = ConstructionProgram {
++            code: &[op::TEMPLATE_BIND_FROM, 0, 0, 1, 14, 9],
++            imports: &[
++                ConstructionImport::Property(|| {
++                    READS.with(|r| r.borrow_mut().push("source"));
++                    ContentControl::content_property()
++                }),
++                ConstructionImport::Property(|| {
++                    READS.with(|r| r.borrow_mut().push("target"));
++                    ContentPresenter::content_property()
++                }),
++            ],
++        };
++        crate::register_types();
++        let parent = Button::new();
++        let presenter = ContentPresenter::new();
++        BIND.apply(&[ConstructionInput::Object(presenter.upcast_ref::<FerroObject>())], None, None).unwrap();
++        presenter.set_templated_parent(Some(parent.upcast_ref::<FerroObject>().clone()));
++        let text = |v: &str| -> MarkupValue { Some(Rc::new(v.to_owned())) };
++        let read = || from_markup_value::<String>(&presenter.content()).unwrap();
++        parent.set_content(text("first"));
++        assert_eq!(read(), "first");
++        presenter.set_content(text("local"));
++        parent.set_content(text("second"));
++        assert_eq!(read(), "local");
++        presenter.clear_value(ContentPresenter::content_property());
++        assert_eq!(read(), "second");
++        parent.set_content(None);
++        assert!(presenter.content().is_none());
++        READS.with(|r| assert_eq!(*r.borrow(), ["source", "target"]));
++    }
++
++    #[test]
+     fn reports_invalid_operands_without_reading_past_program_or_imports() {
+         let root = Button::new();
+         for code in [
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
+@@ -44,7 +44,7 @@
+     Complete(Option<&'a str>, i32, i32),
+     Begin(&'a str),
+     End(&'a str, i32, i32),
+-    Bind(theme_styles::TemplateBinding<'a>),
++    Bind(theme_styles::TemplateBinding<'a>, bool),
+     Dynamic(&'a str, &'a str, &'a str, i32, i32),
+     Parent(&'a str, &'a str, u8),
+     Pop,
+@@ -145,7 +145,10 @@
+         ));
+     }
+     if let Some(binding) = theme_styles::template_binding(line) {
+-        return Some(Instruction::Bind(binding));
++        return Some(Instruction::Bind(binding, false));
++    }
++    if let Some(binding) = theme_styles::template_binding_from(line) {
++        return Some(Instruction::Bind(binding, true));
+     }
+     if let Some(args) = line.strip_prefix("rt::register_name_value(name_scope.as_ref(), ") {
+         let (literal, args) =
+@@ -494,17 +497,16 @@
+                 uint(&mut self.code, line as u32);
+                 uint(&mut self.code, column as u32);
+             }
+-            Instruction::Bind(binding) => {
+-                self.code.push(op::TEMPLATE_BIND);
++            Instruction::Bind(binding, source_first) => {
++                let (opcode, first, second) = if source_first {
++                    (op::TEMPLATE_BIND_FROM, binding.source, binding.target)
++                } else {
++                    (op::TEMPLATE_BIND, binding.target, binding.source)
++                };
++                self.code.push(opcode);
+                 self.register(binding.object);
+-                self.import(
+-                    imports,
+-                    format!("Property(|| rt::property({}))", binding.target),
+-                );
+-                self.import(
+-                    imports,
+-                    format!("Property(|| rt::property({}))", binding.source),
+-                );
++                self.import(imports, format!("Property(|| rt::property({first}))"));
++                self.import(imports, format!("Property(|| rt::property({second}))"));
+                 uint(&mut self.code, binding.position.0 as u32);
+                 uint(&mut self.code, binding.position.1 as u32);
+             }
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+@@ -573,7 +573,7 @@
+ /// of `rt::bind` with the provided binding. `rt::bind_template_binding(target, property, source,
+ /// line, position)` makes the same calls in the same order. `None` (the statements are kept) for
+ /// any other shape.
+-fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str) -> Option<String> {
++fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statement: &str, source_first: bool) -> Option<String> {
+     let template_binding = types.framework_path(FrameworkType::TemplateBinding)?;
+     let [.., create, provide] = lines else { return None };
+     let (local, source) = create.strip_prefix("    let ")?.split_once(" = ")?;
+@@ -592,9 +592,12 @@
+     {
+         return None;
+     }
+-    Some(format!(
+-        "rt::bind_template_binding({object}.upcast_ref::<::ferroui_base::FerroObject>(), {property}, {source}, {line}, {column})?;"
+-    ))
++    let receiver = format!("{object}.upcast_ref::<::ferroui_base::FerroObject>()");
++    Some(if source_first {
++        format!("rt::bind_template_binding_from({receiver}, {source}, {property}, {line}, {column})?;")
++    } else {
++        format!("rt::bind_template_binding({receiver}, {property}, {source}, {line}, {column})?;")
++    })
+ }
+ 
+ /// A deferred resource added to a resource dictionary under a text key, as the shared helper of
+@@ -2228,7 +2231,7 @@
+     /// `fused_template_binding_bind`), which replaces the two statements of the value too.
+     fn setter_line(&mut self, statement: String) {
+         let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
+-            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement));
++            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false));
+         match fused {
+             Some(fused) => {
+                 self.lines.truncate(self.lines.len() - 2);
+@@ -2835,8 +2838,24 @@
+             Some(priority_node) => Some(self.priority_value(priority_node)?),
+             None => None,
+         };
++        let value_start = self.lines.len();
+         let value = self.value(&value_node)?;
+         self.position.set((node.line(), node.position()));
++        // A freshly constructed default TemplateBinding provides itself as a non-null binding.
++        // Only eliminate an ordered overload choice when that fact proves its very first branch.
++        // Priority has already been evaluated in source order; this binding setter discards it.
++        if let Some((_, first)) = branches.first().filter(|(condition, first)| {
++            self.documents.backend.uses_construction_programs() && self.lines.len() == value_start + 2
++                && condition.as_deref() == Some("{value}.is_some()")
++                && (first.as_any().is::<BindingSetter>() || first.as_any().is::<BindingWithPrioritySetter>())
++        }) {
++            let bind = self.setter_statement(node, assignment, first, target, &SetterValues::Typed(&value, &value_node), priority.as_deref())?;
++            if let Some(fused) = fused_template_binding_bind(self.types, &self.lines[value_start..], &bind, true) {
++                self.lines.truncate(value_start);
++                self.line(fused);
++                return Ok(());
++            }
++        }
+         let local = self.local_named("value");
+         let untyped = match value.kind {
+             Kind::SystemType { .. } => {
+@@ -5371,6 +5390,32 @@
+ 
+ #[cfg(test)]
+ mod tests {
++    #[cfg(feature = "runtime")]
++    #[test]
++    fn proven_default_template_binding_skips_only_its_nonnull_binding_choice() {
++        use crate::rust_emitter::{compile_documents_with, EmitterHost, TransformOptions, XamlBackend};
++        ferroui_markup_xaml::register_types();
++        let host = EmitterHost::runtime(&[]).unwrap();
++        let emit = |binding: &str, backend| {
++            let text = format!(r#"<ControlTemplate xmlns="https://github.com/ferroui" TargetType="Button">
++                <ContentPresenter Content="{{TemplateBinding {binding}}}" />
++            </ControlTemplate>"#);
++            let options = TransformOptions { backend, ..Default::default() };
++            compile_documents_with(&host, &[("template.xaml", &text)], Some("ferres://Example/"), &options)
++                .pop().unwrap().source.unwrap()
++        };
++        let native = emit("Content", XamlBackend::Native);
++        assert!(native.contains("__markup_ProvideValue_0"));
++        assert!(native.contains(".is_some()"));
++        let optimized = emit("Content", XamlBackend::Bytecode);
++        assert!(!optimized.contains("__markup_ProvideValue_0"));
++        assert!(!optimized.contains("::markup::TemplateBinding"));
++        assert!(!optimized.contains(" = rt::to_value(provided_"));
++        let configured = emit("Content, Mode=TwoWay", XamlBackend::Bytecode);
++        assert!(configured.contains("__markup_ProvideValue_0"));
++        assert!(configured.contains(" = rt::to_value(provided_"));
++    }
++
+     use super::*;
+ 
+     #[test]
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_styles.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_styles.rs
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_styles.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_styles.rs
+@@ -1021,8 +1021,18 @@
+ /// The parts of `statement` if it is the fused statement of a template binding.
+ pub(super) fn template_binding(statement: &str) -> Option<TemplateBinding<'_>> {
+     let arguments = statement.strip_prefix("rt::bind_template_binding(")?.strip_suffix(")?;")?;
++    template_binding_parts(arguments, false)
++}
++
++pub(super) fn template_binding_from(statement: &str) -> Option<TemplateBinding<'_>> {
++    let arguments = statement.strip_prefix("rt::bind_template_binding_from(")?.strip_suffix(")?;")?;
++    template_binding_parts(arguments, true)
++}
++
++fn template_binding_parts(arguments: &str, source_first: bool) -> Option<TemplateBinding<'_>> {
+     let parts: Vec<&str> = arguments.split(", ").collect();
+-    let &[object, target, source, line, column] = parts.as_slice() else { return None };
++    let &[object, first, second, line, column] = parts.as_slice() else { return None };
++    let (target, source) = if source_first { (second, first) } else { (first, second) };
+     let object = object.strip_suffix(&format!(".upcast_ref::<{FERRO_OBJECT}>()"))?;
+     let source = source.strip_prefix("rt::property(")?.strip_suffix(')')?;
+     let position = (line.parse().ok()?, column.parse().ok()?);

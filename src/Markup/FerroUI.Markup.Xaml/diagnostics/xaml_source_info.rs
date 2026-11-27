@@ -25,6 +25,8 @@ pub struct XamlSourceInfo {
     line_position: i32,
 }
 
+ferroui_base::styled_value!(XamlSourceInfo);
+
 ferro_static_type!(XamlSourceInfo);
 
 ferro_properties! {

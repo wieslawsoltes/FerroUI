@@ -1,0 +1,5166 @@
+{
+  "platform": "macOS arm64",
+  "baseline_commit": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "profile": "dist",
+  "normalization": "Apple strip and ad hoc codesign on both executables",
+  "native_catalog": {
+    "bytes": 65498144,
+    "sha256": "33d7a61790af7edd25fb298aa21724739214809614b853e62c16c4f65799affa"
+  },
+  "candidates": {
+    "register-setters": {
+      "bytes": 64193936,
+      "sha256": "416db95549efb12bb2fbc5dc7e6ee8aca426747aa8f33ba964193145ba54dcbe",
+      "allocation": {
+        "Other instructions and code alignment": 12254436,
+        "Rust core, alloc and std": 3445344,
+        "Other FerroUI.Base instructions": 8555004,
+        "Core controls": 3866220,
+        "Other ControlCatalog instructions": 2695980,
+        "FerroUI.Base property store and property types": 4428236,
+        "XAML runtime library": 853708,
+        "FerroUI.Base typed binding expressions": 4515696,
+        "Generated XAML instructions": 4498568,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3955439,
+        "Relocatable constant data": 5349872,
+        "Mach-O link and signing data": 624016,
+        "Other sections, headers and padding": 1267146
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 3060300,
+        "ferroui_controls_color_picker": 457220,
+        "ferroui_controls_inking": 105372,
+        "ferroui_controls_treedatagrid": 58788,
+        "ferroui_dialogs": 13920,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 690616,
+        "treedatagrid_demo": 111760
+      },
+      "saving_file_bytes": 1304208,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 249649,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 3910,
+            "ConstructionProgram_referenced_bytes": 241401,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 248003,
+            "unreferenced_generated_bytes": 1646,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 19993,
+            "ConstructionProgram_references": 1482,
+            "ConstructionProgram_referenced_bytes": 45642,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 19986,
+            "unreferenced_generated_bytes": 7,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 8612,
+            "ConstructionProgram_references": 286,
+            "ConstructionProgram_referenced_bytes": 8807,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "source_referenced_unique_bytes": 8345,
+            "unreferenced_generated_bytes": 267,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2361,
+            "ConstructionProgram_references": 79,
+            "ConstructionProgram_referenced_bytes": 1918,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "source_referenced_unique_bytes": 2353,
+            "unreferenced_generated_bytes": 8,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 18457,
+            "ConstructionProgram_references": 730,
+            "ConstructionProgram_referenced_bytes": 19073,
+            "source_referenced_unique_bytes": 18457,
+            "unreferenced_generated_bytes": 0,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 612,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 22,
+            "ConstructionProgram_referenced_bytes": 660,
+            "source_referenced_unique_bytes": 612,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 168849,
+            "ConstructionProgram_references": 2446,
+            "ConstructionProgram_referenced_bytes": 76610,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "source_referenced_unique_bytes": 159776,
+            "unreferenced_generated_bytes": 9073,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 6644,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 152,
+            "ConstructionProgram_referenced_bytes": 6708,
+            "source_referenced_unique_bytes": 6644,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 475177,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 9107,
+          "ConstructionProgram_referenced_bytes": 400819,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 464176,
+          "unreferenced_generated_bytes": 11001,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            114484625,
+            134087000,
+            141169833,
+            136317542,
+            156682792,
+            142708792,
+            139057417,
+            130938750,
+            133664791,
+            130650167,
+            136367250,
+            132297083,
+            133360375,
+            149843833,
+            149926584
+          ],
+          "median_ns": 136317542
+        },
+        "bytecode": {
+          "samples_ns": [
+            134513667,
+            137997792,
+            138096291,
+            133746792,
+            172670250,
+            170443667,
+            132544792,
+            136092833,
+            140236584,
+            141572167,
+            133820875,
+            143880209,
+            140169791,
+            139001625,
+            204361750
+          ],
+          "median_ns": 139001625
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "light 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "light 03-calendar.png 2200 x 1524 pixels, 0 differ",
+        "dark 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "dark 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "dark 03-calendar.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 03-calendar.png 2200 x 1524 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 1.049166223586883,
+        "bootstrap_95": [
+          0.9811414586686136,
+          1.087553903210398
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "selector-resources": {
+      "bytes": 63614800,
+      "sha256": "21f9855ccbbf67a7d1a47afd321f98067879a8b7558be9b09c14f3c080d7e966",
+      "allocation": {
+        "Other instructions and code alignment": 12302596,
+        "Rust core, alloc and std": 3444484,
+        "Other FerroUI.Base instructions": 8548604,
+        "Core controls": 3861536,
+        "Other ControlCatalog instructions": 2725576,
+        "FerroUI.Base property store and property types": 4428436,
+        "FerroUI.Base typed binding expressions": 4515736,
+        "XAML runtime library": 847604,
+        "Generated XAML instructions": 3822748,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4003087,
+        "Relocatable constant data": 5333680,
+        "Mach-O link and signing data": 618320,
+        "Other sections, headers and padding": 1278122
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 2416684,
+        "ferroui_controls_color_picker": 494372,
+        "ferroui_controls_inking": 92592,
+        "ferroui_controls_treedatagrid": 59336,
+        "ferroui_dialogs": 13096,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 641148,
+        "treedatagrid_demo": 104928
+      },
+      "saving_file_bytes": 1883344,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 275159,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1937,
+            "ConstructionProgram_referenced_bytes": 261777,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 272398,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 24070,
+            "ConstructionProgram_references": 1210,
+            "ConstructionProgram_referenced_bytes": 54126,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24016,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 9122,
+            "ConstructionProgram_references": 212,
+            "ConstructionProgram_referenced_bytes": 9163,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 8783,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2813,
+            "ConstructionProgram_references": 64,
+            "ConstructionProgram_referenced_bytes": 2106,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2655,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 22259,
+            "ConstructionProgram_references": 462,
+            "ConstructionProgram_referenced_bytes": 20951,
+            "source_referenced_unique_bytes": 22259,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 728,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 8,
+            "ConstructionProgram_referenced_bytes": 741,
+            "source_referenced_unique_bytes": 728,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 188339,
+            "ConstructionProgram_references": 1683,
+            "ConstructionProgram_referenced_bytes": 87206,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 172792,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 7179,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 115,
+            "ConstructionProgram_referenced_bytes": 7162,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7179,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 529669,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 5691,
+          "ConstructionProgram_referenced_bytes": 443232,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 510810,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            155635125,
+            139576667,
+            141228584,
+            148692959,
+            141307958,
+            157532083,
+            155055416,
+            166258583,
+            155081250,
+            159602834,
+            152869792,
+            148077291,
+            157874334,
+            160875000,
+            167992875
+          ],
+          "median_ns": 155081250
+        },
+        "bytecode": {
+          "samples_ns": [
+            152815084,
+            139513167,
+            160824916,
+            159327833,
+            157974250,
+            146849375,
+            154924458,
+            152164750,
+            144893459,
+            163296541,
+            169853084,
+            141837958,
+            157341375,
+            148986750,
+            155787083
+          ],
+          "median_ns": 154924458
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.9966241567802908,
+        "bootstrap_95": [
+          0.9321870961358392,
+          1.0231431166190945
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "result-frames": {
+      "bytes": 63039408,
+      "sha256": "ac9e0d1550c6b91c43f4330b4b2b1e9ce343f47421529728b5657b1e9d990a3c",
+      "allocation": {
+        "Other instructions and code alignment": 12287988,
+        "Rust core, alloc and std": 3444464,
+        "Other FerroUI.Base instructions": 8547948,
+        "Core controls": 3860928,
+        "Other ControlCatalog instructions": 2768600,
+        "FerroUI.Base property store and property types": 4428376,
+        "FerroUI.Base typed binding expressions": 4515748,
+        "XAML runtime library": 871036,
+        "Generated XAML instructions": 3196040,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4003279,
+        "Relocatable constant data": 5333680,
+        "Mach-O link and signing data": 616368,
+        "Other sections, headers and padding": 1280682
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 2069168,
+        "ferroui_controls_color_picker": 394708,
+        "ferroui_controls_inking": 71576,
+        "ferroui_controls_treedatagrid": 48304,
+        "ferroui_dialogs": 11224,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 512572,
+        "treedatagrid_demo": 87896
+      },
+      "saving_file_bytes": 2458736,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 275159,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1937,
+            "ConstructionProgram_referenced_bytes": 261777,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 272398,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 24070,
+            "ConstructionProgram_references": 1210,
+            "ConstructionProgram_referenced_bytes": 54126,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24016,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 9122,
+            "ConstructionProgram_references": 212,
+            "ConstructionProgram_referenced_bytes": 9163,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 8783,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2813,
+            "ConstructionProgram_references": 64,
+            "ConstructionProgram_referenced_bytes": 2106,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2655,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 22259,
+            "ConstructionProgram_references": 462,
+            "ConstructionProgram_referenced_bytes": 20951,
+            "source_referenced_unique_bytes": 22259,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 728,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 8,
+            "ConstructionProgram_referenced_bytes": 741,
+            "source_referenced_unique_bytes": 728,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 188339,
+            "ConstructionProgram_references": 1683,
+            "ConstructionProgram_referenced_bytes": 87206,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 172792,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 7179,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 115,
+            "ConstructionProgram_referenced_bytes": 7162,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7179,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 529669,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 5691,
+          "ConstructionProgram_referenced_bytes": 443232,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 510810,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            149487834,
+            157144208,
+            157454625,
+            148952166,
+            142963584,
+            149524833,
+            203260459,
+            173415875,
+            158671458,
+            144620250,
+            155568750,
+            144944333,
+            177748417,
+            144392250,
+            141272708
+          ],
+          "median_ns": 149524833
+        },
+        "bytecode": {
+          "samples_ns": [
+            157900750,
+            156993708,
+            155505542,
+            141973958,
+            149534666,
+            156707875,
+            169850292,
+            157737292,
+            166079166,
+            149109292,
+            147983292,
+            165581333,
+            142400666,
+            143671458,
+            145428250
+          ],
+          "median_ns": 155505542
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.9990422809601739,
+        "bootstrap_95": [
+          0.951240477280945,
+          1.0459633272764062
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "held-ranges": {
+      "bytes": 61922496,
+      "sha256": "06b94e3440a8779bcb0f1a3f5728bdb65d792065301a8beda25d9ab410842c56",
+      "allocation": {
+        "Other instructions and code alignment": 12288500,
+        "Rust core, alloc and std": 3443956,
+        "Other FerroUI.Base instructions": 8548580,
+        "Core controls": 3861632,
+        "Other ControlCatalog instructions": 2870856,
+        "FerroUI.Base property store and property types": 4428492,
+        "FerroUI.Base typed binding expressions": 4515720,
+        "XAML runtime library": 869448,
+        "Generated XAML instructions": 1982520,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4003279,
+        "Relocatable constant data": 5333680,
+        "Mach-O link and signing data": 613568,
+        "Other sections, headers and padding": 1277994
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 1033660,
+        "ferroui_controls_color_picker": 323300,
+        "ferroui_controls_inking": 72432,
+        "ferroui_controls_treedatagrid": 44716,
+        "ferroui_dialogs": 2996,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 445412,
+        "treedatagrid_demo": 59412
+      },
+      "saving_file_bytes": 3575648,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 275159,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1937,
+            "ConstructionProgram_referenced_bytes": 261777,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 272398,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 24070,
+            "ConstructionProgram_references": 1210,
+            "ConstructionProgram_referenced_bytes": 54126,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24016,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 9122,
+            "ConstructionProgram_references": 212,
+            "ConstructionProgram_referenced_bytes": 9163,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 8783,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2813,
+            "ConstructionProgram_references": 64,
+            "ConstructionProgram_referenced_bytes": 2106,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2655,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 22259,
+            "ConstructionProgram_references": 462,
+            "ConstructionProgram_referenced_bytes": 20951,
+            "source_referenced_unique_bytes": 22259,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 728,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 8,
+            "ConstructionProgram_referenced_bytes": 741,
+            "source_referenced_unique_bytes": 728,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 188339,
+            "ConstructionProgram_references": 1683,
+            "ConstructionProgram_referenced_bytes": 87206,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 172792,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 7179,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 115,
+            "ConstructionProgram_referenced_bytes": 7162,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7179,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 529669,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 5691,
+          "ConstructionProgram_referenced_bytes": 443232,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 510810,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            138956250,
+            145848292,
+            126586334,
+            132224708,
+            135885917,
+            169283500,
+            151340500,
+            149745875,
+            152343667,
+            174463125,
+            228252250,
+            161510917,
+            176996625,
+            193659375,
+            185939083
+          ],
+          "median_ns": 152343667
+        },
+        "bytecode": {
+          "samples_ns": [
+            127938000,
+            139090625,
+            124741583,
+            132532417,
+            142851083,
+            132050875,
+            144518667,
+            160234583,
+            162600542,
+            152628000,
+            156054541,
+            146479041,
+            169774084,
+            153832542,
+            144902542
+          ],
+          "median_ns": 144902542
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "frames": {
+        "stock": {
+          "spawn_to_after_setup_ms": 150.694333,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.377,
+                "host-returned": 2.104,
+                "loaded": 11.214
+              },
+              "2": {
+                "constructed": 0.344,
+                "host-returned": 2.049,
+                "loaded": 6.411
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.306,
+                "host-returned": 3.952,
+                "loaded": 18.288
+              },
+              "2": {
+                "constructed": 1.107,
+                "host-returned": 3.422,
+                "loaded": 17.413
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.187,
+                "host-returned": 1.718,
+                "loaded": 6.357
+              },
+              "2": {
+                "constructed": 0.176,
+                "host-returned": 1.742,
+                "loaded": 3.529
+              }
+            }
+          },
+          "total_draws": 2268,
+          "median_of_process_frame_medians_ms": 7.531,
+          "median_of_process_frame_p95_ms": 9.433599999999998
+        },
+        "candidate": {
+          "spawn_to_after_setup_ms": 159.053,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.396,
+                "host-returned": 2.209,
+                "loaded": 11.851
+              },
+              "2": {
+                "constructed": 0.379,
+                "host-returned": 2.136,
+                "loaded": 6.631
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.363,
+                "host-returned": 3.999,
+                "loaded": 18.906
+              },
+              "2": {
+                "constructed": 1.232,
+                "host-returned": 3.631,
+                "loaded": 18.296
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.204,
+                "host-returned": 1.875,
+                "loaded": 6.337
+              },
+              "2": {
+                "constructed": 0.187,
+                "host-returned": 1.813,
+                "loaded": 3.757
+              }
+            }
+          },
+          "total_draws": 2268,
+          "median_of_process_frame_medians_ms": 7.507,
+          "median_of_process_frame_p95_ms": 9.49455
+        }
+      },
+      "after_setup_paired_ratio": {
+        "median": 0.9536664646028217,
+        "bootstrap_95": [
+          0.7943459592389989,
+          1.002327167173627
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "page-styles": {
+      "bytes": 61528256,
+      "sha256": "6b1341fd16e1d6119b346a6ace78907794a2549f527f8adb343bb3c44dfda6c1",
+      "allocation": {
+        "Other instructions and code alignment": 12291464,
+        "Rust core, alloc and std": 3443908,
+        "Other FerroUI.Base instructions": 8540724,
+        "Core controls": 3850364,
+        "Other ControlCatalog instructions": 2852152,
+        "FerroUI.Base property store and property types": 4428452,
+        "FerroUI.Base typed binding expressions": 4515720,
+        "XAML runtime library": 860284,
+        "Generated XAML instructions": 1609676,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4017103,
+        "Relocatable constant data": 5327472,
+        "Mach-O link and signing data": 612544,
+        "Other sections, headers and padding": 1294122
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 749520,
+        "ferroui_controls_color_picker": 302828,
+        "ferroui_controls_inking": 46076,
+        "ferroui_controls_treedatagrid": 43056,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 407224,
+        "treedatagrid_demo": 57688
+      },
+      "saving_file_bytes": 3969888,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 284492,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1296,
+            "ConstructionProgram_referenced_bytes": 270348,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 281731,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 24724,
+            "ConstructionProgram_references": 1118,
+            "ConstructionProgram_referenced_bytes": 54836,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24670,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 9870,
+            "ConstructionProgram_references": 138,
+            "ConstructionProgram_referenced_bytes": 10659,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9531,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2848,
+            "ConstructionProgram_references": 61,
+            "ConstructionProgram_referenced_bytes": 2141,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2690,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 24588,
+            "ConstructionProgram_references": 321,
+            "ConstructionProgram_referenced_bytes": 23243,
+            "source_referenced_unique_bytes": 24588,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 191181,
+            "ConstructionProgram_references": 1459,
+            "ConstructionProgram_referenced_bytes": 89674,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 175634,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 7251,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 7234,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7251,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 545714,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 4506,
+          "ConstructionProgram_referenced_bytes": 458916,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 526855,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            437375792,
+            163301750,
+            157310416,
+            178784542,
+            168743625,
+            163179875,
+            180690584,
+            245233417,
+            187924250,
+            163082708,
+            470427541,
+            159649167,
+            138145750,
+            189582917,
+            187032792
+          ],
+          "median_ns": 178784542
+        },
+        "bytecode": {
+          "samples_ns": [
+            286172791,
+            167045833,
+            165372417,
+            152324375,
+            171369625,
+            177182417,
+            234336834,
+            181633250,
+            172675625,
+            164077125,
+            175931333,
+            210666833,
+            179328125,
+            210800917,
+            246434792
+          ],
+          "median_ns": 177182417
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 1.0229273905515404,
+        "bootstrap_95": [
+          0.851999693575298,
+          1.1119193666589695
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "split-imports": {
+      "bytes": 61221616,
+      "sha256": "84f0f3cf4528fb3eb203c05576764750d9ba3c4fa7c3405fb02e42fc2fa1effa",
+      "allocation": {
+        "Other instructions and code alignment": 12291416,
+        "Rust core, alloc and std": 3443908,
+        "Other FerroUI.Base instructions": 8540724,
+        "Core controls": 3850364,
+        "Other ControlCatalog instructions": 2852152,
+        "FerroUI.Base property store and property types": 4428452,
+        "FerroUI.Base typed binding expressions": 4515720,
+        "XAML runtime library": 860204,
+        "Generated XAML instructions": 1609676,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4015039,
+        "Relocatable constant data": 5013024,
+        "Mach-O link and signing data": 617200,
+        "Other sections, headers and padding": 1299466
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 749520,
+        "ferroui_controls_color_picker": 302828,
+        "ferroui_controls_inking": 46076,
+        "ferroui_controls_treedatagrid": 43056,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 407224,
+        "treedatagrid_demo": 57688
+      },
+      "saving_file_bytes": 4276528,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "modules_with_image": 206,
+            "generated_image_bytes": 283271,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1296,
+            "ConstructionProgram_referenced_bytes": 269157,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 280510,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 24269,
+            "ConstructionProgram_references": 1118,
+            "ConstructionProgram_referenced_bytes": 53918,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24215,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 9870,
+            "ConstructionProgram_references": 138,
+            "ConstructionProgram_referenced_bytes": 10659,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9531,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 2848,
+            "ConstructionProgram_references": 61,
+            "ConstructionProgram_referenced_bytes": 2141,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2690,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "modules_with_image": 12,
+            "generated_image_bytes": 24330,
+            "ConstructionProgram_references": 321,
+            "ConstructionProgram_referenced_bytes": 22978,
+            "source_referenced_unique_bytes": 24330,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 190789,
+            "ConstructionProgram_references": 1459,
+            "ConstructionProgram_referenced_bytes": 89287,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 175242,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "modules_with_image": 10,
+            "generated_image_bytes": 7227,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 7210,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7227,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "modules_with_image": 233,
+          "generated_image_bytes": 543364,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 4506,
+          "ConstructionProgram_referenced_bytes": 456131,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 524505,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            152117792,
+            134278458,
+            118026209,
+            121848833,
+            130013167,
+            131881167,
+            131277167,
+            128288792,
+            131042125,
+            130676458,
+            131463750,
+            130012625,
+            133111000,
+            137878458,
+            140848375
+          ],
+          "median_ns": 131277167
+        },
+        "bytecode": {
+          "samples_ns": [
+            158828833,
+            140343834,
+            117553166,
+            124149500,
+            123571917,
+            130014083,
+            130019125,
+            130436375,
+            127589500,
+            139674208,
+            126110041,
+            123882084,
+            130797417,
+            127157500,
+            143276500
+          ],
+          "median_ns": 130014083
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            813072875,
+            302371250,
+            319317459,
+            310872375,
+            332704292,
+            342539416,
+            365131917,
+            327433167,
+            347670042,
+            439047458,
+            411760541
+          ],
+          "median_ns": 342539416
+        },
+        "bytecode": {
+          "samples_ns": [
+            563908917,
+            331317666,
+            306630958,
+            357971541,
+            327457958,
+            332375625,
+            299060292,
+            307690333,
+            375579000,
+            382044250,
+            411111333
+          ],
+          "median_ns": 332375625
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.990416901668818,
+        "bootstrap_95": [
+          0.9592761578762207,
+          1.01888132157983
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9703281125463237,
+        "bootstrap_95": [
+          0.8701661814427359,
+          1.0802742676344832
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "setter-choice": {
+      "bytes": 61536960,
+      "sha256": "74ea254cc7aa122543f418a92af39d915dbfc3a979641f7da524ec919207d2f5",
+      "allocation": {
+        "Other instructions and code alignment": 12417364,
+        "Rust core, alloc and std": 3443968,
+        "Other FerroUI.Base instructions": 8538820,
+        "Core controls": 3847592,
+        "Other ControlCatalog instructions": 3058924,
+        "FerroUI.Base property store and property types": 4430644,
+        "FerroUI.Base typed binding expressions": 4515728,
+        "XAML runtime library": 863940,
+        "Generated XAML instructions": 1561204,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4017823,
+        "Relocatable constant data": 5045536,
+        "Mach-O link and signing data": 621248,
+        "Other sections, headers and padding": 1289898
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 725056,
+        "ferroui_controls_color_picker": 298444,
+        "ferroui_controls_inking": 44540,
+        "ferroui_controls_treedatagrid": 42456,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 392280,
+        "treedatagrid_demo": 55144
+      },
+      "saving_file_bytes": 3961184,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "class_document_methods": 203,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 206,
+            "generated_image_bytes": 284364,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1296,
+            "ConstructionProgram_referenced_bytes": 270103,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedSetterChoice_references": 115,
+            "TypedSetterChoice_referenced_bytes": 542,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "source_referenced_unique_bytes": 281603,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 24429,
+            "ConstructionProgram_references": 1118,
+            "ConstructionProgram_referenced_bytes": 54280,
+            "TypedSetterChoice_references": 40,
+            "TypedSetterChoice_referenced_bytes": 160,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24375,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 9946,
+            "ConstructionProgram_references": 138,
+            "ConstructionProgram_referenced_bytes": 10803,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9607,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2878,
+            "ConstructionProgram_references": 61,
+            "ConstructionProgram_referenced_bytes": 2167,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "TypedSetterChoice_references": 3,
+            "TypedSetterChoice_referenced_bytes": 12,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2720,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "class_document_methods": 7,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 12,
+            "generated_image_bytes": 24567,
+            "ConstructionProgram_references": 321,
+            "ConstructionProgram_referenced_bytes": 23183,
+            "source_referenced_unique_bytes": 24567,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 25,
+            "TypedSetterChoice_referenced_bytes": 100,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 192241,
+            "ConstructionProgram_references": 1461,
+            "ConstructionProgram_referenced_bytes": 90760,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "TypedSetterChoice_references": 172,
+            "TypedSetterChoice_referenced_bytes": 688,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 176694,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "class_document_methods": 10,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7331,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 7294,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7331,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "class_document_methods": 222,
+          "modules_with_image": 233,
+          "generated_image_bytes": 546516,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 4508,
+          "ConstructionProgram_referenced_bytes": 459371,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedSetterChoice_references": 383,
+          "TypedSetterChoice_referenced_bytes": 1614,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "source_referenced_unique_bytes": 527657,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      }
+    },
+    "whole-documents": {
+      "bytes": 61122896,
+      "sha256": "88430449355693e0a37f547fec171f054debb7043c0ee5fb89f390e1791584c4",
+      "allocation": {
+        "Other instructions and code alignment": 12322164,
+        "Rust core, alloc and std": 3443916,
+        "Other FerroUI.Base instructions": 8539764,
+        "Core controls": 3847872,
+        "Other ControlCatalog instructions": 2873936,
+        "FerroUI.Base property store and property types": 4427148,
+        "FerroUI.Base typed binding expressions": 4515728,
+        "XAML runtime library": 859688,
+        "Generated XAML instructions": 1476192,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4015951,
+        "Relocatable constant data": 5017968,
+        "Mach-O link and signing data": 616784,
+        "Other sections, headers and padding": 1281514
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 687088,
+        "ferroui_controls_color_picker": 293516,
+        "ferroui_controls_inking": 39112,
+        "ferroui_controls_treedatagrid": 41164,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 356920,
+        "treedatagrid_demo": 55108
+      },
+      "saving_file_bytes": 4375248,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "class_document_methods": 203,
+            "whole_class_document_programs": 76,
+            "modules_with_image": 206,
+            "generated_image_bytes": 282726,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1185,
+            "ConstructionProgram_referenced_bytes": 268421,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "TypedSetterChoice_references": 60,
+            "TypedSetterChoice_referenced_bytes": 322,
+            "source_referenced_unique_bytes": 279965,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 24426,
+            "ConstructionProgram_references": 1070,
+            "ConstructionProgram_referenced_bytes": 54112,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 24372,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 9916,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 10691,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9577,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2858,
+            "ConstructionProgram_references": 55,
+            "ConstructionProgram_referenced_bytes": 2146,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2700,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "class_document_methods": 7,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 12,
+            "generated_image_bytes": 24481,
+            "ConstructionProgram_references": 317,
+            "ConstructionProgram_referenced_bytes": 23105,
+            "source_referenced_unique_bytes": 24481,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 23,
+            "TypedSetterChoice_referenced_bytes": 92,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 191711,
+            "ConstructionProgram_references": 1179,
+            "ConstructionProgram_referenced_bytes": 89810,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 176164,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "class_document_methods": 10,
+            "whole_class_document_programs": 2,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7307,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 7270,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7307,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "class_document_methods": 222,
+          "whole_class_document_programs": 78,
+          "modules_with_image": 233,
+          "generated_image_bytes": 544185,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 4025,
+          "ConstructionProgram_referenced_bytes": 456336,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "TypedSetterChoice_references": 142,
+          "TypedSetterChoice_referenced_bytes": 650,
+          "source_referenced_unique_bytes": 525326,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            120804875,
+            125891667,
+            130879209,
+            129764667,
+            125110000,
+            126319791,
+            128936750,
+            130311583,
+            128456750,
+            129067333,
+            131232083,
+            126074708,
+            137224375,
+            130346334,
+            127481125
+          ],
+          "median_ns": 128936750
+        },
+        "bytecode": {
+          "samples_ns": [
+            130469042,
+            121841167,
+            124213333,
+            131687458,
+            130197542,
+            130101250,
+            125495583,
+            126760041,
+            125844708,
+            120075666,
+            124893625,
+            130686750,
+            131174125,
+            129718750,
+            130834042
+          ],
+          "median_ns": 129718750
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            272704750,
+            264250917,
+            265228542,
+            263253375,
+            276379917,
+            282918584,
+            268404709,
+            266940750,
+            277980333,
+            276341417,
+            267777542
+          ],
+          "median_ns": 268404709
+        },
+        "bytecode": {
+          "samples_ns": [
+            262710042,
+            256569583,
+            270742459,
+            267196250,
+            279619541,
+            270974166,
+            278691458,
+            276640333,
+            278922666,
+            276675500,
+            271706750
+          ],
+          "median_ns": 271706750
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "frames": {
+        "stock": {
+          "spawn_to_after_setup_ms": 127.270791,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.353,
+                "host-returned": 2.02,
+                "loaded": 10.492
+              },
+              "2": {
+                "constructed": 0.319,
+                "host-returned": 1.736,
+                "loaded": 5.553
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.196,
+                "host-returned": 3.571,
+                "loaded": 16.89
+              },
+              "2": {
+                "constructed": 1.027,
+                "host-returned": 3.181,
+                "loaded": 16.272
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.174,
+                "host-returned": 1.546,
+                "loaded": 5.644
+              },
+              "2": {
+                "constructed": 0.16,
+                "host-returned": 1.666,
+                "loaded": 3.491
+              }
+            }
+          },
+          "total_draws": 2268,
+          "median_of_process_frame_medians_ms": 7.572,
+          "median_of_process_frame_p95_ms": 7.74125
+        },
+        "candidate": {
+          "spawn_to_after_setup_ms": 126.791084,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.366,
+                "host-returned": 1.983,
+                "loaded": 10.426
+              },
+              "2": {
+                "constructed": 0.333,
+                "host-returned": 1.738,
+                "loaded": 5.334
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.232,
+                "host-returned": 3.521,
+                "loaded": 17.155
+              },
+              "2": {
+                "constructed": 1.076,
+                "host-returned": 3.215,
+                "loaded": 16.542
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.188,
+                "host-returned": 1.57,
+                "loaded": 5.897
+              },
+              "2": {
+                "constructed": 0.168,
+                "host-returned": 1.564,
+                "loaded": 3.428
+              }
+            }
+          },
+          "total_draws": 2268,
+          "median_of_process_frame_medians_ms": 7.555,
+          "median_of_process_frame_p95_ms": 7.71485
+        }
+      },
+      "source_patch_sha256": "f339143e5f4d20ebfacd44bf89d56f96aecce89878b05c43c3cd9b18d17198bd",
+      "source_patch": "typed-application-snapshot.patch.gz",
+      "after_setup_paired_ratio": {
+        "median": 0.979665980962464,
+        "bootstrap_95": [
+          0.9678255114375441,
+          1.0263012818564317
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 1.0117216331604875,
+        "bootstrap_95": [
+          0.9709316656789502,
+          1.0207893047951075
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "extension-targets": {
+      "bytes": 61106672,
+      "sha256": "79e6017d4dc8052fb6c093ab178959b02e0ef426ce54b0718dbe7c36af82b8b5",
+      "allocation": {
+        "Other instructions and code alignment": 12336264,
+        "Rust core, alloc and std": 3443876,
+        "Other FerroUI.Base instructions": 8539784,
+        "Core controls": 3844076,
+        "Other ControlCatalog instructions": 2882900,
+        "FerroUI.Base property store and property types": 4427164,
+        "FerroUI.Base typed binding expressions": 4515744,
+        "XAML runtime library": 860896,
+        "Generated XAML instructions": 1415768,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4020623,
+        "Relocatable constant data": 5024576,
+        "Mach-O link and signing data": 616944,
+        "Other sections, headers and padding": 1293786
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 673964,
+        "ferroui_controls_color_picker": 267980,
+        "ferroui_controls_inking": 39112,
+        "ferroui_controls_treedatagrid": 41076,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 349432,
+        "treedatagrid_demo": 40920
+      },
+      "saving_file_bytes": 4391472,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "class_document_methods": 203,
+            "whole_class_document_programs": 76,
+            "modules_with_image": 206,
+            "generated_image_bytes": 284057,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1193,
+            "ConstructionProgram_referenced_bytes": 269735,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "TypedSetterChoice_references": 60,
+            "TypedSetterChoice_referenced_bytes": 322,
+            "source_referenced_unique_bytes": 281296,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207
+          },
+          "ferroui-controls-color-picker": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 25955,
+            "ConstructionProgram_references": 1014,
+            "ConstructionProgram_referenced_bytes": 57346,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 25901,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2
+          },
+          "ferroui-controls-inking": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 9916,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 10691,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9577,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2
+          },
+          "ferroui-controls-treedatagrid": {
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2887,
+            "ConstructionProgram_references": 55,
+            "ConstructionProgram_referenced_bytes": 2175,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2729,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2
+          },
+          "ferroui-diagnostics": {
+            "class_document_methods": 7,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 12,
+            "generated_image_bytes": 25264,
+            "ConstructionProgram_references": 312,
+            "ConstructionProgram_referenced_bytes": 23798,
+            "source_referenced_unique_bytes": 25264,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 23,
+            "TypedSetterChoice_referenced_bytes": 92,
+            "generated_modules": 13
+          },
+          "ferroui-dialogs": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 193243,
+            "ConstructionProgram_references": 1145,
+            "ConstructionProgram_referenced_bytes": 91321,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 177696,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "treedatagrid-demo": {
+            "class_document_methods": 10,
+            "whole_class_document_programs": 2,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7564,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 102,
+            "ConstructionProgram_referenced_bytes": 7519,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7564,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11
+          }
+        },
+        "total": {
+          "class_document_methods": 222,
+          "whole_class_document_programs": 78,
+          "modules_with_image": 233,
+          "generated_image_bytes": 549646,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 3934,
+          "ConstructionProgram_referenced_bytes": 463366,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "TypedSetterChoice_references": 142,
+          "TypedSetterChoice_referenced_bytes": 650,
+          "source_referenced_unique_bytes": 530787,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            315223458,
+            334216875,
+            362481625,
+            359194042,
+            308987541,
+            306224625,
+            308367417,
+            304509167,
+            279899667,
+            374560250,
+            458568958
+          ],
+          "median_ns": 315223458
+        },
+        "bytecode": {
+          "samples_ns": [
+            412933250,
+            337329750,
+            319080958,
+            378968167,
+            291535708,
+            294133708,
+            291992292,
+            290470333,
+            390625916,
+            305410625,
+            349255791
+          ],
+          "median_ns": 319080958
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9538968427837182,
+        "bootstrap_95": [
+          0.8802679528927846,
+          1.0550513724835113
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "theme-unit-runs": {
+      "bytes": 61024192,
+      "sha256": "2bd363d9b1dc5d14f86917cc11c677781597103bc2090a979f7eafff94c9fcc5",
+      "allocation": {
+        "Other instructions and code alignment": 12333796,
+        "Rust core, alloc and std": 3444044,
+        "Other FerroUI.Base instructions": 8539952,
+        "Core controls": 3844036,
+        "Other ControlCatalog instructions": 2888496,
+        "FerroUI.Base property store and property types": 4427200,
+        "FerroUI.Base typed binding expressions": 4515744,
+        "XAML runtime library": 859992,
+        "Generated XAML instructions": 1337948,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4025199,
+        "Relocatable constant data": 5022928,
+        "Mach-O link and signing data": 616384,
+        "Other sections, headers and padding": 1284202
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 627644,
+        "ferroui_controls_color_picker": 266888,
+        "ferroui_controls_inking": 39116,
+        "ferroui_controls_treedatagrid": 41076,
+        "ferroui_dialogs": 2692,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 326976,
+        "treedatagrid_demo": 32964
+      },
+      "generated_xaml_instructions_by_symbol": {
+        "trait implementations for generated types": 1608412,
+        "directly named generated XAML": 1337948,
+        "other symbols naming a generated module": 296884
+      },
+      "construction_import_instructions_by_symbol": {
+        "trait implementations for generated types": 1510020,
+        "other symbols naming a generated module": 278708,
+        "directly named generated XAML": 2432
+      },
+      "saving_file_bytes": 4473952,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "construction_import_tables": 378,
+            "construction_operation_entries": 16422,
+            "construction_string_entries": 5179,
+            "distinct_operation_initializers_within_modules": 14622,
+            "class_document_methods": 203,
+            "whole_class_document_programs": 80,
+            "modules_with_image": 206,
+            "generated_image_bytes": 285165,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 1133,
+            "ConstructionProgram_referenced_bytes": 270843,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "TypedSetterChoice_references": 60,
+            "TypedSetterChoice_referenced_bytes": 322,
+            "source_referenced_unique_bytes": 282404,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207,
+            "distinct_construction_string_utf8_bytes": 82366
+          },
+          "ferroui-controls-color-picker": {
+            "construction_import_tables": 150,
+            "construction_operation_entries": 3808,
+            "construction_string_entries": 744,
+            "distinct_operation_initializers_within_modules": 494,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 26023,
+            "ConstructionProgram_references": 1004,
+            "ConstructionProgram_referenced_bytes": 57422,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 25969,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 6823
+          },
+          "ferroui-controls-inking": {
+            "construction_import_tables": 35,
+            "construction_operation_entries": 1408,
+            "construction_string_entries": 180,
+            "distinct_operation_initializers_within_modules": 151,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 9918,
+            "ConstructionProgram_references": 106,
+            "ConstructionProgram_referenced_bytes": 10693,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9579,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 500
+          },
+          "ferroui-controls-treedatagrid": {
+            "construction_import_tables": 26,
+            "construction_operation_entries": 386,
+            "construction_string_entries": 29,
+            "distinct_operation_initializers_within_modules": 187,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2887,
+            "ConstructionProgram_references": 55,
+            "ConstructionProgram_referenced_bytes": 2175,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2729,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 450
+          },
+          "ferroui-diagnostics": {
+            "construction_import_tables": 61,
+            "construction_operation_entries": 2086,
+            "construction_string_entries": 290,
+            "distinct_operation_initializers_within_modules": 1635,
+            "class_document_methods": 7,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 12,
+            "generated_image_bytes": 25525,
+            "ConstructionProgram_references": 289,
+            "ConstructionProgram_referenced_bytes": 24059,
+            "source_referenced_unique_bytes": 25525,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 23,
+            "TypedSetterChoice_referenced_bytes": 92,
+            "generated_modules": 13,
+            "distinct_construction_string_utf8_bytes": 3345
+          },
+          "ferroui-dialogs": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 59,
+            "construction_string_entries": 8,
+            "distinct_operation_initializers_within_modules": 59,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 213
+          },
+          "ferroui-themes-winui": {
+            "construction_import_tables": 482,
+            "construction_operation_entries": 10908,
+            "construction_string_entries": 2198,
+            "distinct_operation_initializers_within_modules": 1375,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 196511,
+            "ConstructionProgram_references": 981,
+            "ConstructionProgram_referenced_bytes": 93314,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 180964,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 24985
+          },
+          "treedatagrid-demo": {
+            "construction_import_tables": 36,
+            "construction_operation_entries": 791,
+            "construction_string_entries": 122,
+            "distinct_operation_initializers_within_modules": 716,
+            "class_document_methods": 10,
+            "whole_class_document_programs": 3,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7621,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 90,
+            "ConstructionProgram_referenced_bytes": 7576,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7621,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11,
+            "distinct_construction_string_utf8_bytes": 1804
+          }
+        },
+        "total": {
+          "construction_import_tables": 1170,
+          "construction_operation_entries": 35868,
+          "construction_string_entries": 8750,
+          "distinct_operation_initializers_within_modules": 19239,
+          "class_document_methods": 222,
+          "whole_class_document_programs": 83,
+          "modules_with_image": 233,
+          "generated_image_bytes": 554410,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 3665,
+          "ConstructionProgram_referenced_bytes": 466863,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "TypedSetterChoice_references": 142,
+          "TypedSetterChoice_referenced_bytes": 650,
+          "source_referenced_unique_bytes": 535551,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241,
+          "distinct_construction_string_utf8_bytes": 115377
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            372829833,
+            130977625,
+            124545292,
+            136252042,
+            134181834,
+            132132167,
+            124759083,
+            117465584,
+            130375916,
+            131253458,
+            123887917,
+            131387625,
+            131647291,
+            130691583,
+            131260542
+          ],
+          "median_ns": 131253458
+        },
+        "bytecode": {
+          "samples_ns": [
+            340530834,
+            129374958,
+            131680333,
+            125235083,
+            120847333,
+            122783916,
+            119018500,
+            126294208,
+            130985459,
+            130278458,
+            128482584,
+            133433750,
+            122672875,
+            124831833,
+            131116125
+          ],
+          "median_ns": 128482584
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            615344125,
+            360993959,
+            457072500,
+            337006167,
+            383252750,
+            325022959,
+            395439959,
+            331168042,
+            361086333,
+            344878708,
+            329059166
+          ],
+          "median_ns": 360993959
+        },
+        "bytecode": {
+          "samples_ns": [
+            324529041,
+            320584041,
+            409528875,
+            328212542,
+            334141625,
+            345309750,
+            354943375,
+            338193583,
+            361387667,
+            342742583,
+            367869833
+          ],
+          "median_ns": 342742583
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "light 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "light 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "dark 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "dark 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "dark 03-calendar.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 01-buttons.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 02-listbox.png 1900 x 1360 pixels, 0 differ",
+        "highcontrast 03-calendar.png 1900 x 1360 pixels, 0 differ"
+      ],
+      "frames": {
+        "stock": {
+          "spawn_to_after_setup_ms": 124.377583,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.336,
+                "host-returned": 1.885,
+                "loaded": 10.616
+              },
+              "2": {
+                "constructed": 0.31,
+                "host-returned": 1.642,
+                "loaded": 5.538
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.197,
+                "host-returned": 3.467,
+                "loaded": 16.518
+              },
+              "2": {
+                "constructed": 1.006,
+                "host-returned": 3.099,
+                "loaded": 15.847
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.17,
+                "host-returned": 1.496,
+                "loaded": 5.462
+              },
+              "2": {
+                "constructed": 0.152,
+                "host-returned": 1.505,
+                "loaded": 3.192
+              }
+            }
+          },
+          "total_draws": 2268,
+          "median_of_process_frame_medians_ms": 7.4825,
+          "median_of_process_frame_p95_ms": 7.65185
+        },
+        "candidate": {
+          "spawn_to_after_setup_ms": 123.306334,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.367,
+                "host-returned": 1.917,
+                "loaded": 10.879
+              },
+              "2": {
+                "constructed": 0.325,
+                "host-returned": 1.708,
+                "loaded": 5.653
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.237,
+                "host-returned": 3.617,
+                "loaded": 17.05
+              },
+              "2": {
+                "constructed": 1.096,
+                "host-returned": 3.186,
+                "loaded": 16.133
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.179,
+                "host-returned": 1.5,
+                "loaded": 5.688
+              },
+              "2": {
+                "constructed": 0.167,
+                "host-returned": 1.542,
+                "loaded": 3.5
+              }
+            }
+          },
+          "total_draws": 2266,
+          "median_of_process_frame_medians_ms": 7.4704999999999995,
+          "median_of_process_frame_p95_ms": 7.655399999999999
+        }
+      },
+      "after_setup_paired_ratio": {
+        "median": 0.9877638108035628,
+        "bootstrap_95": [
+          0.9292507554197609,
+          1.0155731942030308
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9739066347708706,
+        "bootstrap_95": [
+          0.8880592957512622,
+          1.0212144292594514
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "source_patch": "typed-theme-unit-snapshot.patch.gz",
+      "source_patch_sha256": "c77d3baae12afdea1b7e38cecf6663a93e206b25e97ea8f532de8ea891fca48e"
+    },
+    "resolved-property-writes": {
+      "bytes": 60924816,
+      "sha256": "21e423cdfe8c52894fe5e58c86bdf6c8fa5399504439ebe9814d5a635af09409",
+      "allocation": {
+        "Other instructions and code alignment": 12356592,
+        "Rust core, alloc and std": 3444044,
+        "Other FerroUI.Base instructions": 8517596,
+        "Core controls": 3837544,
+        "Other ControlCatalog instructions": 2967052,
+        "FerroUI.Base property store and property types": 4427268,
+        "FerroUI.Base typed binding expressions": 4515708,
+        "XAML runtime library": 837728,
+        "Generated XAML instructions": 1185788,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4036799,
+        "Relocatable constant data": 5020224,
+        "Mach-O link and signing data": 615312,
+        "Other sections, headers and padding": 1278890
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 509208,
+        "ferroui_controls_color_picker": 261528,
+        "ferroui_controls_inking": 37308,
+        "ferroui_controls_treedatagrid": 38232,
+        "ferroui_dialogs": 2460,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 305248,
+        "treedatagrid_demo": 31212
+      },
+      "generated_xaml_instructions_by_symbol": {
+        "trait implementations for generated types": 1771088,
+        "directly named generated XAML": 1185788,
+        "other symbols naming a generated module": 296860
+      },
+      "construction_import_instructions_by_symbol": {
+        "trait implementations for generated types": 1672412,
+        "other symbols naming a generated module": 278688,
+        "directly named generated XAML": 2432
+      },
+      "saving_file_bytes": 4573328,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "construction_import_tables": 378,
+            "construction_operation_entries": 16680,
+            "construction_string_entries": 5179,
+            "distinct_operation_initializers_within_modules": 14885,
+            "class_document_methods": 203,
+            "whole_class_document_programs": 106,
+            "modules_with_image": 206,
+            "generated_image_bytes": 293435,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 897,
+            "ConstructionProgram_referenced_bytes": 278945,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "TypedSetterChoice_references": 60,
+            "TypedSetterChoice_referenced_bytes": 322,
+            "source_referenced_unique_bytes": 290674,
+            "unreferenced_generated_bytes": 2761,
+            "generated_modules": 207,
+            "distinct_construction_string_utf8_bytes": 82366
+          },
+          "ferroui-controls-color-picker": {
+            "construction_import_tables": 150,
+            "construction_operation_entries": 3858,
+            "construction_string_entries": 744,
+            "distinct_operation_initializers_within_modules": 504,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 26425,
+            "ConstructionProgram_references": 986,
+            "ConstructionProgram_referenced_bytes": 58202,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 26371,
+            "unreferenced_generated_bytes": 54,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 6823
+          },
+          "ferroui-controls-inking": {
+            "construction_import_tables": 35,
+            "construction_operation_entries": 1416,
+            "construction_string_entries": 180,
+            "distinct_operation_initializers_within_modules": 155,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 10202,
+            "ConstructionProgram_references": 93,
+            "ConstructionProgram_referenced_bytes": 10951,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9863,
+            "unreferenced_generated_bytes": 339,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 500
+          },
+          "ferroui-controls-treedatagrid": {
+            "construction_import_tables": 26,
+            "construction_operation_entries": 391,
+            "construction_string_entries": 29,
+            "distinct_operation_initializers_within_modules": 196,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2963,
+            "ConstructionProgram_references": 49,
+            "ConstructionProgram_referenced_bytes": 2251,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2805,
+            "unreferenced_generated_bytes": 158,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 450
+          },
+          "ferroui-diagnostics": {
+            "construction_import_tables": 61,
+            "construction_operation_entries": 2116,
+            "construction_string_entries": 290,
+            "distinct_operation_initializers_within_modules": 1663,
+            "class_document_methods": 7,
+            "whole_class_document_programs": 1,
+            "modules_with_image": 12,
+            "generated_image_bytes": 26160,
+            "ConstructionProgram_references": 253,
+            "ConstructionProgram_referenced_bytes": 24638,
+            "source_referenced_unique_bytes": 26160,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 23,
+            "TypedSetterChoice_referenced_bytes": 92,
+            "generated_modules": 13,
+            "distinct_construction_string_utf8_bytes": 3345
+          },
+          "ferroui-dialogs": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 61,
+            "construction_string_entries": 8,
+            "distinct_operation_initializers_within_modules": 61,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 784,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 6,
+            "ConstructionProgram_referenced_bytes": 812,
+            "source_referenced_unique_bytes": 784,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 213
+          },
+          "ferroui-themes-winui": {
+            "construction_import_tables": 482,
+            "construction_operation_entries": 11002,
+            "construction_string_entries": 2198,
+            "distinct_operation_initializers_within_modules": 1411,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 199024,
+            "ConstructionProgram_references": 846,
+            "ConstructionProgram_referenced_bytes": 95509,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 183477,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 24985
+          },
+          "treedatagrid-demo": {
+            "construction_import_tables": 36,
+            "construction_operation_entries": 801,
+            "construction_string_entries": 122,
+            "distinct_operation_initializers_within_modules": 726,
+            "class_document_methods": 10,
+            "whole_class_document_programs": 6,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7792,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 79,
+            "ConstructionProgram_referenced_bytes": 7747,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7792,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11,
+            "distinct_construction_string_utf8_bytes": 1804
+          }
+        },
+        "total": {
+          "construction_import_tables": 1170,
+          "construction_operation_entries": 36325,
+          "construction_string_entries": 8750,
+          "distinct_operation_initializers_within_modules": 19601,
+          "class_document_methods": 222,
+          "whole_class_document_programs": 113,
+          "modules_with_image": 233,
+          "generated_image_bytes": 566785,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 3209,
+          "ConstructionProgram_referenced_bytes": 479055,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "TypedSetterChoice_references": 142,
+          "TypedSetterChoice_referenced_bytes": 650,
+          "source_referenced_unique_bytes": 547926,
+          "unreferenced_generated_bytes": 18859,
+          "generated_modules": 241,
+          "distinct_construction_string_utf8_bytes": 115377
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            122867333,
+            133272458,
+            130413416,
+            133509583,
+            128312667,
+            124647625,
+            123334833,
+            133938708,
+            121715667,
+            124938250,
+            119166375,
+            133566000,
+            134003375,
+            131427542,
+            119783042
+          ],
+          "median_ns": 128312667
+        },
+        "bytecode": {
+          "samples_ns": [
+            132610917,
+            124517375,
+            121758792,
+            126625208,
+            124449041,
+            131157666,
+            124665042,
+            128498541,
+            120023958,
+            123321042,
+            130028625,
+            135845500,
+            123222083,
+            125177708,
+            133364125
+          ],
+          "median_ns": 125177708
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            593153250,
+            275795333,
+            268858667,
+            274358583,
+            269299166,
+            274348000,
+            268716375,
+            301425958,
+            272047666,
+            262309959,
+            265930166
+          ],
+          "median_ns": 272047666
+        },
+        "bytecode": {
+          "samples_ns": [
+            500151041,
+            273922792,
+            286828000,
+            290347375,
+            267939416,
+            272796084,
+            272079333,
+            267953167,
+            273488375,
+            288630792,
+            264610083
+          ],
+          "median_ns": 273488375
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 2200 x 1524 pixels, 38694 differ",
+        "light 02-listbox.png 2200 x 1524 pixels, 37782 differ",
+        "light 03-calendar.png 2200 x 1524 pixels, 37674 differ",
+        "dark 01-buttons.png 2200 x 1524 pixels, 39171 differ",
+        "dark 02-listbox.png 2200 x 1524 pixels, 36491 differ",
+        "dark 03-calendar.png 2200 x 1524 pixels, 38343 differ",
+        "highcontrast 01-buttons.png 2200 x 1524 pixels, 1768 differ",
+        "highcontrast 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 03-calendar.png 2200 x 1524 pixels, 0 differ"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.9861011401268499,
+        "bootstrap_95": [
+          0.9484353493936087,
+          1.052227557484549
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9950359787313486,
+        "bootstrap_95": [
+          0.9932103963485125,
+          1.0582769885496894
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "source_patch": "typed-resolved-writes-snapshot.patch.gz",
+      "source_patch_sha256": "c5363b3bb82d4a7e0ed3fb8b1b6ff5fe51c44313e0f7150d989492c7acc7aaee",
+      "screenshots_repeat": {
+        "previous_vs_repeat_native": [
+          "light 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "light 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "light 03-calendar.png 2200 x 1524 pixels, 0 differ",
+          "dark 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "dark 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "dark 03-calendar.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 03-calendar.png 2200 x 1524 pixels, 0 differ"
+        ],
+        "candidate_vs_repeat_native": [
+          "light 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "light 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "light 03-calendar.png 2200 x 1524 pixels, 0 differ",
+          "dark 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "dark 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "dark 03-calendar.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 01-buttons.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 02-listbox.png 2200 x 1524 pixels, 0 differ",
+          "highcontrast 03-calendar.png 2200 x 1524 pixels, 0 differ"
+        ]
+      },
+      "test_results": {
+        "runtime_passed": 281,
+        "loader_passed": 471,
+        "loader_ignored": 1,
+        "catalog_lib_passed": 936,
+        "catalog_lib_ignored": 20,
+        "catalog_compiled_markup_subset_passed": 211
+      }
+    },
+    "shared-setter-decoder": {
+      "bytes": 60859136,
+      "sha256": "2eebd4d06f062c4dc0a83aa881b9faa3a596ea53aa12e4974743a46512d224a8",
+      "allocation": {
+        "Other instructions and code alignment": 12342072,
+        "Rust core, alloc and std": 3444080,
+        "Other FerroUI.Base instructions": 8517492,
+        "Core controls": 3837484,
+        "Other ControlCatalog instructions": 2918536,
+        "FerroUI.Base property store and property types": 4427252,
+        "FerroUI.Base typed binding expressions": 4515724,
+        "XAML runtime library": 837428,
+        "Generated XAML instructions": 1185764,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 4034047,
+        "Relocatable constant data": 5020224,
+        "Mach-O link and signing data": 615168,
+        "Other sections, headers and padding": 1279594
+      },
+      "generated_instructions_by_crate": {
+        "control_catalog": 509208,
+        "ferroui_controls_color_picker": 261528,
+        "ferroui_controls_inking": 37308,
+        "ferroui_controls_treedatagrid": 38232,
+        "ferroui_dialogs": 2460,
+        "ferroui_markup": 592,
+        "ferroui_themes_winui": 305224,
+        "treedatagrid_demo": 31212
+      },
+      "generated_xaml_instructions_by_symbol": {
+        "trait implementations for generated types": 1708272,
+        "directly named generated XAML": 1185764,
+        "other symbols naming a generated module": 296828
+      },
+      "construction_import_instructions_by_symbol": {
+        "trait implementations for generated types": 1609588,
+        "other symbols naming a generated module": 278644,
+        "directly named generated XAML": 2432
+      },
+      "saving_file_bytes": 4639008,
+      "compiler_images": {
+        "packages": {
+          "control-catalog": {
+            "construction_import_tables": 378,
+            "construction_operation_entries": 16680,
+            "construction_string_entries": 5179,
+            "distinct_operation_initializers_within_modules": 14885,
+            "class_document_methods": 203,
+            "whole_class_document_programs": 106,
+            "modules_with_image": 206,
+            "generated_image_bytes": 291200,
+            "BindingPathProgram_references": 493,
+            "BindingPathProgram_referenced_bytes": 1503,
+            "ConstructionProgram_references": 897,
+            "ConstructionProgram_referenced_bytes": 276767,
+            "TypedResourceProgram_references": 57,
+            "TypedResourceProgram_referenced_bytes": 3076,
+            "TypedSelectorProgram_references": 118,
+            "TypedSelectorProgram_referenced_bytes": 936,
+            "TypedStyleProgram_references": 54,
+            "TypedStyleProgram_referenced_bytes": 7714,
+            "TypedSetterChoice_references": 60,
+            "TypedSetterChoice_referenced_bytes": 322,
+            "source_referenced_unique_bytes": 288504,
+            "unreferenced_generated_bytes": 2696,
+            "generated_modules": 207,
+            "distinct_construction_string_utf8_bytes": 82366,
+            "construction_register_setter_imports": 1087
+          },
+          "ferroui-controls-color-picker": {
+            "construction_import_tables": 150,
+            "construction_operation_entries": 3858,
+            "construction_string_entries": 744,
+            "distinct_operation_initializers_within_modules": 504,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 26357,
+            "ConstructionProgram_references": 986,
+            "ConstructionProgram_referenced_bytes": 58062,
+            "TypedSetterChoice_references": 16,
+            "TypedSetterChoice_referenced_bytes": 64,
+            "TypedStyleProgram_references": 40,
+            "TypedStyleProgram_referenced_bytes": 4042,
+            "BindingPathProgram_references": 216,
+            "BindingPathProgram_referenced_bytes": 920,
+            "TypedSelectorProgram_references": 4,
+            "TypedSelectorProgram_referenced_bytes": 24,
+            "TypedResourceProgram_references": 22,
+            "TypedResourceProgram_referenced_bytes": 346,
+            "source_referenced_unique_bytes": 26306,
+            "unreferenced_generated_bytes": 51,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 6823,
+            "construction_register_setter_imports": 86
+          },
+          "ferroui-controls-inking": {
+            "construction_import_tables": 35,
+            "construction_operation_entries": 1416,
+            "construction_string_entries": 180,
+            "distinct_operation_initializers_within_modules": 155,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 10178,
+            "ConstructionProgram_references": 93,
+            "ConstructionProgram_referenced_bytes": 10909,
+            "TypedResourceProgram_references": 68,
+            "TypedResourceProgram_referenced_bytes": 4103,
+            "TypedStyleProgram_references": 38,
+            "TypedStyleProgram_referenced_bytes": 2462,
+            "BindingPathProgram_references": 28,
+            "BindingPathProgram_referenced_bytes": 140,
+            "TypedSelectorProgram_references": 18,
+            "TypedSelectorProgram_referenced_bytes": 186,
+            "source_referenced_unique_bytes": 9842,
+            "unreferenced_generated_bytes": 336,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 500,
+            "construction_register_setter_imports": 42
+          },
+          "ferroui-controls-treedatagrid": {
+            "construction_import_tables": 26,
+            "construction_operation_entries": 391,
+            "construction_string_entries": 29,
+            "distinct_operation_initializers_within_modules": 196,
+            "class_document_methods": 0,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 2942,
+            "ConstructionProgram_references": 49,
+            "ConstructionProgram_referenced_bytes": 2231,
+            "TypedResourceProgram_references": 10,
+            "TypedResourceProgram_referenced_bytes": 188,
+            "TypedStyleProgram_references": 8,
+            "TypedStyleProgram_referenced_bytes": 414,
+            "BindingPathProgram_references": 1,
+            "BindingPathProgram_referenced_bytes": 4,
+            "TypedSelectorProgram_references": 2,
+            "TypedSelectorProgram_referenced_bytes": 10,
+            "source_referenced_unique_bytes": 2787,
+            "unreferenced_generated_bytes": 155,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 450,
+            "construction_register_setter_imports": 20
+          },
+          "ferroui-diagnostics": {
+            "construction_import_tables": 61,
+            "construction_operation_entries": 2116,
+            "construction_string_entries": 290,
+            "distinct_operation_initializers_within_modules": 1663,
+            "class_document_methods": 7,
+            "whole_class_document_programs": 1,
+            "modules_with_image": 12,
+            "generated_image_bytes": 26048,
+            "ConstructionProgram_references": 253,
+            "ConstructionProgram_referenced_bytes": 24526,
+            "source_referenced_unique_bytes": 26048,
+            "unreferenced_generated_bytes": 0,
+            "TypedSelectorProgram_references": 152,
+            "TypedSelectorProgram_referenced_bytes": 1372,
+            "TypedResourceProgram_references": 8,
+            "TypedResourceProgram_referenced_bytes": 644,
+            "BindingPathProgram_references": 167,
+            "BindingPathProgram_referenced_bytes": 451,
+            "TypedSetterChoice_references": 23,
+            "TypedSetterChoice_referenced_bytes": 92,
+            "generated_modules": 13,
+            "distinct_construction_string_utf8_bytes": 3345,
+            "construction_register_setter_imports": 69
+          },
+          "ferroui-dialogs": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 61,
+            "construction_string_entries": 8,
+            "distinct_operation_initializers_within_modules": 61,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 778,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 6,
+            "ConstructionProgram_referenced_bytes": 805,
+            "source_referenced_unique_bytes": 778,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 213,
+            "construction_register_setter_imports": 4
+          },
+          "ferroui-themes-winui": {
+            "construction_import_tables": 482,
+            "construction_operation_entries": 11002,
+            "construction_string_entries": 2198,
+            "distinct_operation_initializers_within_modules": 1411,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 198490,
+            "ConstructionProgram_references": 846,
+            "ConstructionProgram_referenced_bytes": 95031,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 183047,
+            "unreferenced_generated_bytes": 15443,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 24985,
+            "construction_register_setter_imports": 393
+          },
+          "treedatagrid-demo": {
+            "construction_import_tables": 36,
+            "construction_operation_entries": 801,
+            "construction_string_entries": 122,
+            "distinct_operation_initializers_within_modules": 726,
+            "class_document_methods": 10,
+            "whole_class_document_programs": 6,
+            "modules_with_image": 10,
+            "generated_image_bytes": 7749,
+            "BindingPathProgram_references": 72,
+            "BindingPathProgram_referenced_bytes": 148,
+            "ConstructionProgram_references": 79,
+            "ConstructionProgram_referenced_bytes": 7704,
+            "TypedSetterChoice_references": 12,
+            "TypedSetterChoice_referenced_bytes": 48,
+            "TypedSelectorProgram_references": 7,
+            "TypedSelectorProgram_referenced_bytes": 70,
+            "source_referenced_unique_bytes": 7749,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 11,
+            "distinct_construction_string_utf8_bytes": 1804,
+            "construction_register_setter_imports": 34
+          }
+        },
+        "total": {
+          "construction_import_tables": 1170,
+          "construction_operation_entries": 36325,
+          "construction_string_entries": 8750,
+          "distinct_operation_initializers_within_modules": 19601,
+          "class_document_methods": 222,
+          "whole_class_document_programs": 113,
+          "modules_with_image": 233,
+          "generated_image_bytes": 563742,
+          "BindingPathProgram_references": 1173,
+          "BindingPathProgram_referenced_bytes": 3969,
+          "ConstructionProgram_references": 3209,
+          "ConstructionProgram_referenced_bytes": 476035,
+          "TypedResourceProgram_references": 1062,
+          "TypedResourceProgram_referenced_bytes": 61672,
+          "TypedSelectorProgram_references": 335,
+          "TypedSelectorProgram_referenced_bytes": 2868,
+          "TypedStyleProgram_references": 417,
+          "TypedStyleProgram_referenced_bytes": 51588,
+          "TypedSetterChoice_references": 142,
+          "TypedSetterChoice_referenced_bytes": 650,
+          "source_referenced_unique_bytes": 545061,
+          "unreferenced_generated_bytes": 18681,
+          "generated_modules": 241,
+          "distinct_construction_string_utf8_bytes": 115377,
+          "construction_register_setter_imports": 1735
+        }
+      },
+      "after_setup": {
+        "native": {
+          "samples_ns": [
+            393555209,
+            138332875,
+            155590333,
+            149963584,
+            146073375,
+            155257833,
+            157284292,
+            148558542,
+            139485625,
+            154555166,
+            152429167,
+            161859458,
+            140348583,
+            162736208,
+            225081917
+          ],
+          "median_ns": 154555166
+        },
+        "bytecode": {
+          "samples_ns": [
+            364958292,
+            149983166,
+            150476334,
+            154301667,
+            174424292,
+            176388334,
+            160421875,
+            165713750,
+            146831292,
+            141158084,
+            144362250,
+            160596250,
+            135499708,
+            149620500,
+            145781292
+          ],
+          "median_ns": 150476334
+        }
+      },
+      "first_successful_compositor_draw": {
+        "native": {
+          "samples_ns": [
+            841446500,
+            318718750,
+            377893875,
+            338799166,
+            314706667,
+            345669500,
+            335998042,
+            315952625,
+            324448250,
+            334293833,
+            363873917
+          ],
+          "median_ns": 335998042
+        },
+        "bytecode": {
+          "samples_ns": [
+            334625166,
+            307513958,
+            322754500,
+            326383000,
+            331521958,
+            312723959,
+            313349959,
+            320612375,
+            337499208,
+            315689541,
+            315556833
+          ],
+          "median_ns": 320612375
+        }
+      },
+      "screenshots": [
+        "light 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "light 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "light 03-calendar.png 2200 x 1524 pixels, 0 differ",
+        "dark 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "dark 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "dark 03-calendar.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 01-buttons.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 02-listbox.png 2200 x 1524 pixels, 0 differ",
+        "highcontrast 03-calendar.png 2200 x 1524 pixels, 0 differ"
+      ],
+      "frames": {
+        "stock": {
+          "spawn_to_after_setup_ms": 188.171833,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.399,
+                "host-returned": 2.359,
+                "loaded": 12.112
+              },
+              "2": {
+                "constructed": 0.342,
+                "host-returned": 2.039,
+                "loaded": 5.972
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.427,
+                "host-returned": 4.174,
+                "loaded": 19.428
+              },
+              "2": {
+                "constructed": 1.214,
+                "host-returned": 3.799,
+                "loaded": 18.822
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.207,
+                "host-returned": 1.889,
+                "loaded": 7.138
+              },
+              "2": {
+                "constructed": 0.192,
+                "host-returned": 1.982,
+                "loaded": 4.123
+              }
+            }
+          },
+          "total_draws": 2265,
+          "median_of_process_frame_medians_ms": 7.786,
+          "median_of_process_frame_p95_ms": 8.3531
+        },
+        "candidate": {
+          "spawn_to_after_setup_ms": 194.729667,
+          "navigation_ms": {
+            "ListBox": {
+              "1": {
+                "constructed": 0.446,
+                "host-returned": 2.494,
+                "loaded": 13.418
+              },
+              "2": {
+                "constructed": 0.408,
+                "host-returned": 2.273,
+                "loaded": 6.629
+              }
+            },
+            "TreeDataGrid": {
+              "1": {
+                "constructed": 1.483,
+                "host-returned": 4.461,
+                "loaded": 20.257
+              },
+              "2": {
+                "constructed": 1.294,
+                "host-returned": 3.961,
+                "loaded": 19.307
+              }
+            },
+            "Data Validation": {
+              "1": {
+                "constructed": 0.231,
+                "host-returned": 2.161,
+                "loaded": 6.942
+              },
+              "2": {
+                "constructed": 0.205,
+                "host-returned": 2.081,
+                "loaded": 4.492
+              }
+            }
+          },
+          "total_draws": 2261,
+          "median_of_process_frame_medians_ms": 0.481,
+          "median_of_process_frame_p95_ms": 1.0277999999999998
+        }
+      },
+      "after_setup_paired_ratio": {
+        "median": 0.9921956491414916,
+        "bootstrap_95": [
+          0.9470776022806712,
+          1.0842192501240215
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9443474866615322,
+        "bootstrap_95": [
+          0.8672147638435981,
+          1.0147482553753113
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "source_patch": "typed-shared-setter-snapshot.patch.gz",
+      "source_patch_sha256": "bebca9a1017e8aabf35f8b6125b5e252750970667936d39d2da7bd58cd487a7f",
+      "test_results": {
+        "catalog_lib_passed": 936,
+        "catalog_lib_ignored": 20,
+        "runtime_passed": 281,
+        "runtime_new_focused_regression_passed": 1,
+        "loader_passed": 471,
+        "loader_ignored": 1
+      },
+      "frame_comparisons": {
+        "frames": {
+          "summary": {
+            "stock": {
+              "spawn_to_after_setup_ms": 188.171833,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.399,
+                    "host-returned": 2.359,
+                    "loaded": 12.112
+                  },
+                  "2": {
+                    "constructed": 0.342,
+                    "host-returned": 2.039,
+                    "loaded": 5.972
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.427,
+                    "host-returned": 4.174,
+                    "loaded": 19.428
+                  },
+                  "2": {
+                    "constructed": 1.214,
+                    "host-returned": 3.799,
+                    "loaded": 18.822
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.207,
+                    "host-returned": 1.889,
+                    "loaded": 7.138
+                  },
+                  "2": {
+                    "constructed": 0.192,
+                    "host-returned": 1.982,
+                    "loaded": 4.123
+                  }
+                }
+              },
+              "total_draws": 2265,
+              "median_of_process_frame_medians_ms": 7.786,
+              "median_of_process_frame_p95_ms": 8.3531
+            },
+            "candidate": {
+              "spawn_to_after_setup_ms": 194.729667,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.446,
+                    "host-returned": 2.494,
+                    "loaded": 13.418
+                  },
+                  "2": {
+                    "constructed": 0.408,
+                    "host-returned": 2.273,
+                    "loaded": 6.629
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.483,
+                    "host-returned": 4.461,
+                    "loaded": 20.257
+                  },
+                  "2": {
+                    "constructed": 1.294,
+                    "host-returned": 3.961,
+                    "loaded": 19.307
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.231,
+                    "host-returned": 2.161,
+                    "loaded": 6.942
+                  },
+                  "2": {
+                    "constructed": 0.205,
+                    "host-returned": 2.081,
+                    "loaded": 4.492
+                  }
+                }
+              },
+              "total_draws": 2261,
+              "median_of_process_frame_medians_ms": 0.481,
+              "median_of_process_frame_p95_ms": 1.0277999999999998
+            }
+          },
+          "per_process": [
+            {
+              "arm": "stock",
+              "pair": 0,
+              "draws": 323,
+              "median_ms": 7.974
+            },
+            {
+              "arm": "candidate",
+              "pair": 0,
+              "draws": 320,
+              "median_ms": 7.995
+            },
+            {
+              "arm": "candidate",
+              "pair": 1,
+              "draws": 323,
+              "median_ms": 0.481
+            },
+            {
+              "arm": "stock",
+              "pair": 1,
+              "draws": 324,
+              "median_ms": 0.5105
+            },
+            {
+              "arm": "stock",
+              "pair": 2,
+              "draws": 323,
+              "median_ms": 7.939
+            },
+            {
+              "arm": "candidate",
+              "pair": 2,
+              "draws": 324,
+              "median_ms": 7.714
+            },
+            {
+              "arm": "candidate",
+              "pair": 3,
+              "draws": 324,
+              "median_ms": 0.421
+            },
+            {
+              "arm": "stock",
+              "pair": 3,
+              "draws": 323,
+              "median_ms": 7.786
+            },
+            {
+              "arm": "stock",
+              "pair": 4,
+              "draws": 324,
+              "median_ms": 16.5135
+            },
+            {
+              "arm": "candidate",
+              "pair": 4,
+              "draws": 323,
+              "median_ms": 0.365
+            },
+            {
+              "arm": "candidate",
+              "pair": 5,
+              "draws": 324,
+              "median_ms": 0.3575
+            },
+            {
+              "arm": "stock",
+              "pair": 5,
+              "draws": 324,
+              "median_ms": 7.7285
+            },
+            {
+              "arm": "stock",
+              "pair": 6,
+              "draws": 324,
+              "median_ms": 7.755
+            },
+            {
+              "arm": "candidate",
+              "pair": 6,
+              "draws": 323,
+              "median_ms": 7.765
+            }
+          ]
+        },
+        "frames-native-control": {
+          "summary": {
+            "stock": {
+              "spawn_to_after_setup_ms": 166.438917,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.399,
+                    "host-returned": 2.361,
+                    "loaded": 12.624
+                  },
+                  "2": {
+                    "constructed": 0.346,
+                    "host-returned": 2.168,
+                    "loaded": 6.885
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.26,
+                    "host-returned": 4.02,
+                    "loaded": 18.974
+                  },
+                  "2": {
+                    "constructed": 1.207,
+                    "host-returned": 3.997,
+                    "loaded": 19.222
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.202,
+                    "host-returned": 1.922,
+                    "loaded": 6.615
+                  },
+                  "2": {
+                    "constructed": 0.207,
+                    "host-returned": 1.993,
+                    "loaded": 4.478
+                  }
+                }
+              },
+              "total_draws": 2267,
+              "median_of_process_frame_medians_ms": 7.7165,
+              "median_of_process_frame_p95_ms": 9.70585
+            },
+            "candidate": {
+              "spawn_to_after_setup_ms": 174.813708,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.405,
+                    "host-returned": 2.593,
+                    "loaded": 14.404
+                  },
+                  "2": {
+                    "constructed": 0.361,
+                    "host-returned": 2.024,
+                    "loaded": 6.032
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.369,
+                    "host-returned": 4.211,
+                    "loaded": 19.265
+                  },
+                  "2": {
+                    "constructed": 1.122,
+                    "host-returned": 3.496,
+                    "loaded": 18.912
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.22,
+                    "host-returned": 1.936,
+                    "loaded": 6.981
+                  },
+                  "2": {
+                    "constructed": 0.194,
+                    "host-returned": 1.941,
+                    "loaded": 3.943
+                  }
+                }
+              },
+              "total_draws": 2265,
+              "median_of_process_frame_medians_ms": 0.408,
+              "median_of_process_frame_p95_ms": 0.7543000000000001
+            }
+          },
+          "per_process": [
+            {
+              "arm": "stock",
+              "pair": 0,
+              "draws": 324,
+              "median_ms": 7.663
+            },
+            {
+              "arm": "candidate",
+              "pair": 0,
+              "draws": 323,
+              "median_ms": 16.558
+            },
+            {
+              "arm": "candidate",
+              "pair": 1,
+              "draws": 323,
+              "median_ms": 7.769
+            },
+            {
+              "arm": "stock",
+              "pair": 1,
+              "draws": 323,
+              "median_ms": 0.477
+            },
+            {
+              "arm": "stock",
+              "pair": 2,
+              "draws": 324,
+              "median_ms": 7.640499999999999
+            },
+            {
+              "arm": "candidate",
+              "pair": 2,
+              "draws": 323,
+              "median_ms": 0.408
+            },
+            {
+              "arm": "candidate",
+              "pair": 3,
+              "draws": 324,
+              "median_ms": 0.3955
+            },
+            {
+              "arm": "stock",
+              "pair": 3,
+              "draws": 324,
+              "median_ms": 7.723
+            },
+            {
+              "arm": "stock",
+              "pair": 4,
+              "draws": 323,
+              "median_ms": 7.842
+            },
+            {
+              "arm": "candidate",
+              "pair": 4,
+              "draws": 324,
+              "median_ms": 0.388
+            },
+            {
+              "arm": "candidate",
+              "pair": 5,
+              "draws": 324,
+              "median_ms": 16.607
+            },
+            {
+              "arm": "stock",
+              "pair": 5,
+              "draws": 325,
+              "median_ms": 7.727
+            },
+            {
+              "arm": "stock",
+              "pair": 6,
+              "draws": 324,
+              "median_ms": 7.7165
+            },
+            {
+              "arm": "candidate",
+              "pair": 6,
+              "draws": 324,
+              "median_ms": 0.3355
+            }
+          ]
+        },
+        "frames-repeat": {
+          "summary": {
+            "stock": {
+              "spawn_to_after_setup_ms": 203.7655,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.457,
+                    "host-returned": 2.485,
+                    "loaded": 12.355
+                  },
+                  "2": {
+                    "constructed": 0.39,
+                    "host-returned": 2.167,
+                    "loaded": 7.124
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.291,
+                    "host-returned": 4.102,
+                    "loaded": 20.099
+                  },
+                  "2": {
+                    "constructed": 1.22,
+                    "host-returned": 3.797,
+                    "loaded": 20.053
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.279,
+                    "host-returned": 3.463,
+                    "loaded": 8.423
+                  },
+                  "2": {
+                    "constructed": 0.204,
+                    "host-returned": 2.178,
+                    "loaded": 4.424
+                  }
+                }
+              },
+              "total_draws": 2265,
+              "median_of_process_frame_medians_ms": 7.963,
+              "median_of_process_frame_p95_ms": 9.9849
+            },
+            "candidate": {
+              "spawn_to_after_setup_ms": 193.773208,
+              "navigation_ms": {
+                "ListBox": {
+                  "1": {
+                    "constructed": 0.502,
+                    "host-returned": 3.136,
+                    "loaded": 13.088
+                  },
+                  "2": {
+                    "constructed": 0.4,
+                    "host-returned": 2.21,
+                    "loaded": 6.578
+                  }
+                },
+                "TreeDataGrid": {
+                  "1": {
+                    "constructed": 1.407,
+                    "host-returned": 4.473,
+                    "loaded": 22.276
+                  },
+                  "2": {
+                    "constructed": 1.292,
+                    "host-returned": 4.057,
+                    "loaded": 20.162
+                  }
+                },
+                "Data Validation": {
+                  "1": {
+                    "constructed": 0.238,
+                    "host-returned": 2.4,
+                    "loaded": 7.612
+                  },
+                  "2": {
+                    "constructed": 0.209,
+                    "host-returned": 2.259,
+                    "loaded": 4.693
+                  }
+                }
+              },
+              "total_draws": 2264,
+              "median_of_process_frame_medians_ms": 7.947,
+              "median_of_process_frame_p95_ms": 9.8895
+            }
+          },
+          "per_process": [
+            {
+              "arm": "stock",
+              "pair": 0,
+              "draws": 324,
+              "median_ms": 7.7379999999999995
+            },
+            {
+              "arm": "candidate",
+              "pair": 0,
+              "draws": 323,
+              "median_ms": 7.876
+            },
+            {
+              "arm": "candidate",
+              "pair": 1,
+              "draws": 324,
+              "median_ms": 0.4835
+            },
+            {
+              "arm": "stock",
+              "pair": 1,
+              "draws": 324,
+              "median_ms": 7.963
+            },
+            {
+              "arm": "stock",
+              "pair": 2,
+              "draws": 323,
+              "median_ms": 7.993
+            },
+            {
+              "arm": "candidate",
+              "pair": 2,
+              "draws": 324,
+              "median_ms": 8.0425
+            },
+            {
+              "arm": "candidate",
+              "pair": 3,
+              "draws": 324,
+              "median_ms": 8.1345
+            },
+            {
+              "arm": "stock",
+              "pair": 3,
+              "draws": 324,
+              "median_ms": 0.4235
+            },
+            {
+              "arm": "stock",
+              "pair": 4,
+              "draws": 323,
+              "median_ms": 16.609
+            },
+            {
+              "arm": "candidate",
+              "pair": 4,
+              "draws": 324,
+              "median_ms": 0.364
+            },
+            {
+              "arm": "candidate",
+              "pair": 5,
+              "draws": 322,
+              "median_ms": 7.9775
+            },
+            {
+              "arm": "stock",
+              "pair": 5,
+              "draws": 323,
+              "median_ms": 7.817
+            },
+            {
+              "arm": "stock",
+              "pair": 6,
+              "draws": 324,
+              "median_ms": 8.021
+            },
+            {
+              "arm": "candidate",
+              "pair": 6,
+              "draws": 323,
+              "median_ms": 7.947
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hello_result_extraction": {
+    "native": {
+      "bytes": 16290272,
+      "sha256": "a3bfd530075f6cd08c0cca40f6589670389efcdd4636501c15e0a2be9bf3a885"
+    },
+    "bytecode": {
+      "bytes": 16300320,
+      "sha256": "f083703c2fc825af30338359f5c82daf8ea99c854e8c525e85e8cd58971fa93d"
+    },
+    "compiler_images": {
+      "packages": {
+        "ferroui-dialogs": {
+          "modules_with_image": 1,
+          "generated_image_bytes": 728,
+          "BindingPathProgram_references": 2,
+          "BindingPathProgram_referenced_bytes": 4,
+          "ConstructionProgram_references": 8,
+          "ConstructionProgram_referenced_bytes": 741,
+          "source_referenced_unique_bytes": 728,
+          "unreferenced_generated_bytes": 0,
+          "generated_modules": 2
+        },
+        "ferroui-themes-winui": {
+          "modules_with_image": 1,
+          "generated_image_bytes": 188339,
+          "ConstructionProgram_references": 1683,
+          "ConstructionProgram_referenced_bytes": 87206,
+          "TypedResourceProgram_references": 897,
+          "TypedResourceProgram_referenced_bytes": 53315,
+          "TypedStyleProgram_references": 277,
+          "TypedStyleProgram_referenced_bytes": 36956,
+          "BindingPathProgram_references": 194,
+          "BindingPathProgram_referenced_bytes": 799,
+          "TypedSelectorProgram_references": 34,
+          "TypedSelectorProgram_referenced_bytes": 270,
+          "source_referenced_unique_bytes": 172792,
+          "unreferenced_generated_bytes": 15547,
+          "generated_modules": 2
+        },
+        "hello-world": {
+          "modules_with_image": 2,
+          "generated_image_bytes": 82,
+          "ConstructionProgram_references": 2,
+          "ConstructionProgram_referenced_bytes": 82,
+          "source_referenced_unique_bytes": 82,
+          "unreferenced_generated_bytes": 0,
+          "generated_modules": 3
+        }
+      },
+      "total": {
+        "modules_with_image": 4,
+        "generated_image_bytes": 189149,
+        "BindingPathProgram_references": 196,
+        "BindingPathProgram_referenced_bytes": 803,
+        "ConstructionProgram_references": 1693,
+        "ConstructionProgram_referenced_bytes": 88029,
+        "source_referenced_unique_bytes": 173602,
+        "generated_modules": 7,
+        "TypedResourceProgram_references": 897,
+        "TypedResourceProgram_referenced_bytes": 53315,
+        "TypedStyleProgram_references": 277,
+        "TypedStyleProgram_referenced_bytes": 36956,
+        "TypedSelectorProgram_references": 34,
+        "TypedSelectorProgram_referenced_bytes": 270,
+        "unreferenced_generated_bytes": 15547
+      }
+    },
+    "after_setup": {
+      "hello-native": {
+        "samples_ns": [
+          143728000,
+          90857250,
+          85606291,
+          83743958,
+          81443042,
+          75412459,
+          82582625,
+          88548792,
+          92840667,
+          83496125,
+          76173250,
+          98814792,
+          92201542,
+          88771875,
+          103863958
+        ],
+        "median_ns": 88548792
+      },
+      "hello": {
+        "samples_ns": [
+          97924750,
+          92528333,
+          83032792,
+          83786958,
+          88709458,
+          83426500,
+          90507792,
+          81797625,
+          103285750,
+          86299334,
+          86313125,
+          92763209,
+          93381625,
+          105128666,
+          123816041
+        ],
+        "median_ns": 90507792
+      }
+    },
+    "smoke": [
+      "Will close the main window after 150 ms",
+      "Timer fired: closing the main window"
+    ]
+  },
+  "hello_candidates": {
+    "result-frames": {
+      "native": {
+        "bytes": 16290272,
+        "sha256": "a3bfd530075f6cd08c0cca40f6589670389efcdd4636501c15e0a2be9bf3a885"
+      },
+      "bytecode": {
+        "bytes": 16300320,
+        "sha256": "f083703c2fc825af30338359f5c82daf8ea99c854e8c525e85e8cd58971fa93d"
+      },
+      "compiler_images": {
+        "packages": {
+          "ferroui-dialogs": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 728,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 8,
+            "ConstructionProgram_referenced_bytes": 741,
+            "source_referenced_unique_bytes": 728,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "modules_with_image": 1,
+            "generated_image_bytes": 188339,
+            "ConstructionProgram_references": 1683,
+            "ConstructionProgram_referenced_bytes": 87206,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 172792,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "hello-world": {
+            "modules_with_image": 2,
+            "generated_image_bytes": 82,
+            "ConstructionProgram_references": 2,
+            "ConstructionProgram_referenced_bytes": 82,
+            "source_referenced_unique_bytes": 82,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 3
+          }
+        },
+        "total": {
+          "modules_with_image": 4,
+          "generated_image_bytes": 189149,
+          "BindingPathProgram_references": 196,
+          "BindingPathProgram_referenced_bytes": 803,
+          "ConstructionProgram_references": 1693,
+          "ConstructionProgram_referenced_bytes": 88029,
+          "source_referenced_unique_bytes": 173602,
+          "generated_modules": 7,
+          "TypedResourceProgram_references": 897,
+          "TypedResourceProgram_referenced_bytes": 53315,
+          "TypedStyleProgram_references": 277,
+          "TypedStyleProgram_referenced_bytes": 36956,
+          "TypedSelectorProgram_references": 34,
+          "TypedSelectorProgram_referenced_bytes": 270,
+          "unreferenced_generated_bytes": 15547
+        }
+      },
+      "after_setup": {
+        "hello-native": {
+          "samples_ns": [
+            143728000,
+            90857250,
+            85606291,
+            83743958,
+            81443042,
+            75412459,
+            82582625,
+            88548792,
+            92840667,
+            83496125,
+            76173250,
+            98814792,
+            92201542,
+            88771875,
+            103863958
+          ],
+          "median_ns": 88548792
+        },
+        "hello": {
+          "samples_ns": [
+            97924750,
+            92528333,
+            83032792,
+            83786958,
+            88709458,
+            83426500,
+            90507792,
+            81797625,
+            103285750,
+            86299334,
+            86313125,
+            92763209,
+            93381625,
+            105128666,
+            123816041
+          ],
+          "median_ns": 90507792
+        }
+      },
+      "first_successful_compositor_draw": {
+        "hello-native": {
+          "samples_ns": [
+            380968958,
+            255020250,
+            226648292,
+            247876125,
+            248580916,
+            257779583,
+            229291708,
+            233075500,
+            258118042,
+            291489542,
+            275085000
+          ],
+          "median_ns": 255020250
+        },
+        "hello": {
+          "samples_ns": [
+            339335541,
+            240765250,
+            260980000,
+            235671833,
+            272318583,
+            251892583,
+            283808209,
+            277952875,
+            244065792,
+            277200458,
+            235518083
+          ],
+          "median_ns": 260980000
+        }
+      },
+      "smoke": [
+        "Will close the main window after 150 ms",
+        "Timer fired: closing the main window"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 1.0335729232943445,
+        "bootstrap_95": [
+          1.000513469879224,
+          1.1125054713361764
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9509790852119148,
+        "bootstrap_95": [
+          0.9441024781365401,
+          1.1514756969798827
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "whole-documents": {
+      "native": {
+        "bytes": 16290272,
+        "sha256": "a3bfd530075f6cd08c0cca40f6589670389efcdd4636501c15e0a2be9bf3a885"
+      },
+      "bytecode": {
+        "bytes": 16283984,
+        "sha256": "0596fcd572c8226958447e042113cbb9b9e04a098dd90d9206ae5ba2a2390eef"
+      },
+      "compiler_images": {
+        "packages": {
+          "ferroui-dialogs": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2
+          },
+          "ferroui-themes-winui": {
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 191711,
+            "ConstructionProgram_references": 1179,
+            "ConstructionProgram_referenced_bytes": 89810,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 176164,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2
+          },
+          "hello-world": {
+            "class_document_methods": 2,
+            "whole_class_document_programs": 2,
+            "modules_with_image": 2,
+            "generated_image_bytes": 82,
+            "ConstructionProgram_references": 2,
+            "ConstructionProgram_referenced_bytes": 82,
+            "source_referenced_unique_bytes": 82,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 3
+          }
+        },
+        "total": {
+          "class_document_methods": 4,
+          "modules_with_image": 4,
+          "generated_image_bytes": 192553,
+          "BindingPathProgram_references": 196,
+          "BindingPathProgram_referenced_bytes": 803,
+          "ConstructionProgram_references": 1188,
+          "ConstructionProgram_referenced_bytes": 90673,
+          "source_referenced_unique_bytes": 177006,
+          "generated_modules": 7,
+          "TypedResourceProgram_references": 897,
+          "TypedResourceProgram_referenced_bytes": 53315,
+          "TypedStyleProgram_references": 277,
+          "TypedStyleProgram_referenced_bytes": 36956,
+          "TypedSetterChoice_references": 31,
+          "TypedSetterChoice_referenced_bytes": 124,
+          "TypedSelectorProgram_references": 34,
+          "TypedSelectorProgram_referenced_bytes": 270,
+          "unreferenced_generated_bytes": 15547,
+          "whole_class_document_programs": 2
+        }
+      },
+      "after_setup": {
+        "hello-native": {
+          "samples_ns": [
+            131709542,
+            88110250,
+            83688750,
+            88708583,
+            92565458,
+            89637042,
+            91371541,
+            88930584,
+            87047709,
+            89541875,
+            82750875,
+            77586917,
+            83524042,
+            81623542,
+            84149916
+          ],
+          "median_ns": 88110250
+        },
+        "hello": {
+          "samples_ns": [
+            88888084,
+            87687875,
+            84304500,
+            88117167,
+            87308708,
+            92344834,
+            82914708,
+            97014250,
+            86843750,
+            82826625,
+            90564583,
+            89408000,
+            88364125,
+            89721084,
+            84347208
+          ],
+          "median_ns": 88117167
+        }
+      },
+      "first_successful_compositor_draw": {
+        "hello-native": {
+          "samples_ns": [
+            177113750,
+            153195083,
+            173103542,
+            175515667,
+            162381208,
+            173141833,
+            163561542,
+            225906875,
+            225341166,
+            217490667,
+            251212542
+          ],
+          "median_ns": 175515667
+        },
+        "hello": {
+          "samples_ns": [
+            173006750,
+            186743334,
+            167577917,
+            173623500,
+            180377833,
+            168942959,
+            212529916,
+            208129000,
+            265920750,
+            198729291,
+            208658333
+          ],
+          "median_ns": 186743334
+        }
+      },
+      "smoke": [
+        "Will close the main window after 150 ms",
+        "Timer fired: closing the main window"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 1.0023445299695843,
+        "bootstrap_95": [
+          0.993333046476461,
+          1.0908986046914975
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9768115123755213,
+        "bootstrap_95": [
+          0.9213044091730276,
+          1.180080651575221
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "theme-unit-runs": {
+      "native": {
+        "bytes": 16290272,
+        "sha256": "a3bfd530075f6cd08c0cca40f6589670389efcdd4636501c15e0a2be9bf3a885"
+      },
+      "bytecode": {
+        "bytes": 16283888,
+        "sha256": "97452edbea647f08a2235e929dcc43ac52ac2b9f01a48d95b331ba20b8514958"
+      },
+      "compiler_images": {
+        "packages": {
+          "ferroui-dialogs": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 59,
+            "construction_string_entries": 8,
+            "distinct_operation_initializers_within_modules": 59,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 760,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 7,
+            "ConstructionProgram_referenced_bytes": 781,
+            "source_referenced_unique_bytes": 760,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 213
+          },
+          "ferroui-themes-winui": {
+            "construction_import_tables": 482,
+            "construction_operation_entries": 10908,
+            "construction_string_entries": 2198,
+            "distinct_operation_initializers_within_modules": 1375,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 196511,
+            "ConstructionProgram_references": 981,
+            "ConstructionProgram_referenced_bytes": 93314,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 180964,
+            "unreferenced_generated_bytes": 15547,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 24985
+          },
+          "hello-world": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 12,
+            "distinct_operation_initializers_within_modules": 12,
+            "class_document_methods": 2,
+            "whole_class_document_programs": 2,
+            "modules_with_image": 2,
+            "generated_image_bytes": 82,
+            "ConstructionProgram_references": 2,
+            "ConstructionProgram_referenced_bytes": 82,
+            "source_referenced_unique_bytes": 82,
+            "unreferenced_generated_bytes": 0,
+            "construction_string_entries": 1,
+            "generated_modules": 3,
+            "distinct_construction_string_utf8_bytes": 13
+          }
+        },
+        "total": {
+          "construction_import_tables": 486,
+          "construction_operation_entries": 10979,
+          "construction_string_entries": 2207,
+          "distinct_operation_initializers_within_modules": 1446,
+          "class_document_methods": 4,
+          "modules_with_image": 4,
+          "generated_image_bytes": 197353,
+          "BindingPathProgram_references": 196,
+          "BindingPathProgram_referenced_bytes": 803,
+          "ConstructionProgram_references": 990,
+          "ConstructionProgram_referenced_bytes": 94177,
+          "source_referenced_unique_bytes": 181806,
+          "generated_modules": 7,
+          "TypedResourceProgram_references": 897,
+          "TypedResourceProgram_referenced_bytes": 53315,
+          "TypedStyleProgram_references": 277,
+          "TypedStyleProgram_referenced_bytes": 36956,
+          "TypedSetterChoice_references": 31,
+          "TypedSetterChoice_referenced_bytes": 124,
+          "TypedSelectorProgram_references": 34,
+          "TypedSelectorProgram_referenced_bytes": 270,
+          "unreferenced_generated_bytes": 15547,
+          "whole_class_document_programs": 2,
+          "distinct_construction_string_utf8_bytes": 25211
+        }
+      },
+      "after_setup": {
+        "hello-native": {
+          "samples_ns": [
+            121027709,
+            80041375,
+            81610250,
+            81935250,
+            81722500,
+            83273833,
+            82239333,
+            82177458,
+            80617875,
+            82616667,
+            81388583,
+            77090625,
+            78517166,
+            77075917,
+            80148958
+          ],
+          "median_ns": 81610250
+        },
+        "hello": {
+          "samples_ns": [
+            71892625,
+            79647583,
+            80373834,
+            81907792,
+            79752666,
+            82900958,
+            80114166,
+            83802375,
+            81617167,
+            82426916,
+            81578083,
+            81804833,
+            71700208,
+            76553958,
+            80225584
+          ],
+          "median_ns": 80373834
+        }
+      },
+      "first_successful_compositor_draw": {
+        "hello-native": {
+          "samples_ns": [
+            163820500,
+            158217958,
+            155485250,
+            156399292,
+            154079792,
+            143355042,
+            154693833,
+            144690291,
+            143379458,
+            173675417,
+            159456083
+          ],
+          "median_ns": 155485250
+        },
+        "hello": {
+          "samples_ns": [
+            150360291,
+            163810708,
+            156295375,
+            151879958,
+            155231667,
+            154227084,
+            154886333,
+            150916541,
+            147175458,
+            147236417,
+            151787791
+          ],
+          "median_ns": 151879958
+        }
+      },
+      "smoke": [
+        "Will close the main window after 150 ms",
+        "Timer fired: closing the main window"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.9955223029063643,
+        "bootstrap_95": [
+          0.9758960628957754,
+          1.0023283363957818
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 1.0052103012986762,
+        "bootstrap_95": [
+          0.951909692902716,
+          1.0353483894666369
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    },
+    "shared-setter-decoder": {
+      "native": {
+        "bytes": 16290272,
+        "sha256": "a3bfd530075f6cd08c0cca40f6589670389efcdd4636501c15e0a2be9bf3a885"
+      },
+      "bytecode": {
+        "bytes": 16267248,
+        "sha256": "109df049fb542cf5f26d732cc69266cf083195ba8af9e64e21af4561fead87b5"
+      },
+      "compiler_images": {
+        "packages": {
+          "ferroui-dialogs": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 61,
+            "construction_string_entries": 8,
+            "distinct_operation_initializers_within_modules": 61,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 778,
+            "BindingPathProgram_references": 2,
+            "BindingPathProgram_referenced_bytes": 4,
+            "ConstructionProgram_references": 6,
+            "ConstructionProgram_referenced_bytes": 805,
+            "source_referenced_unique_bytes": 778,
+            "unreferenced_generated_bytes": 0,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 213
+          },
+          "ferroui-themes-winui": {
+            "construction_import_tables": 482,
+            "construction_operation_entries": 11002,
+            "construction_string_entries": 2198,
+            "distinct_operation_initializers_within_modules": 1411,
+            "class_document_methods": 1,
+            "whole_class_document_programs": 0,
+            "modules_with_image": 1,
+            "generated_image_bytes": 198490,
+            "ConstructionProgram_references": 846,
+            "ConstructionProgram_referenced_bytes": 95031,
+            "TypedResourceProgram_references": 897,
+            "TypedResourceProgram_referenced_bytes": 53315,
+            "TypedStyleProgram_references": 277,
+            "TypedStyleProgram_referenced_bytes": 36956,
+            "BindingPathProgram_references": 194,
+            "BindingPathProgram_referenced_bytes": 799,
+            "TypedSetterChoice_references": 31,
+            "TypedSetterChoice_referenced_bytes": 124,
+            "TypedSelectorProgram_references": 34,
+            "TypedSelectorProgram_referenced_bytes": 270,
+            "source_referenced_unique_bytes": 183047,
+            "unreferenced_generated_bytes": 15443,
+            "generated_modules": 2,
+            "distinct_construction_string_utf8_bytes": 24985
+          },
+          "hello-world": {
+            "construction_import_tables": 2,
+            "construction_operation_entries": 12,
+            "distinct_operation_initializers_within_modules": 12,
+            "class_document_methods": 2,
+            "whole_class_document_programs": 2,
+            "modules_with_image": 2,
+            "generated_image_bytes": 84,
+            "ConstructionProgram_references": 2,
+            "ConstructionProgram_referenced_bytes": 84,
+            "source_referenced_unique_bytes": 84,
+            "unreferenced_generated_bytes": 0,
+            "construction_string_entries": 1,
+            "generated_modules": 3,
+            "distinct_construction_string_utf8_bytes": 13
+          }
+        },
+        "total": {
+          "construction_import_tables": 486,
+          "construction_operation_entries": 11075,
+          "construction_string_entries": 2207,
+          "distinct_operation_initializers_within_modules": 1484,
+          "class_document_methods": 4,
+          "modules_with_image": 4,
+          "generated_image_bytes": 199352,
+          "BindingPathProgram_references": 196,
+          "BindingPathProgram_referenced_bytes": 803,
+          "ConstructionProgram_references": 854,
+          "ConstructionProgram_referenced_bytes": 95920,
+          "source_referenced_unique_bytes": 183909,
+          "generated_modules": 7,
+          "TypedResourceProgram_references": 897,
+          "TypedResourceProgram_referenced_bytes": 53315,
+          "TypedStyleProgram_references": 277,
+          "TypedStyleProgram_referenced_bytes": 36956,
+          "TypedSetterChoice_references": 31,
+          "TypedSetterChoice_referenced_bytes": 124,
+          "TypedSelectorProgram_references": 34,
+          "TypedSelectorProgram_referenced_bytes": 270,
+          "unreferenced_generated_bytes": 15443,
+          "whole_class_document_programs": 2,
+          "distinct_construction_string_utf8_bytes": 25211
+        }
+      },
+      "after_setup": {
+        "hello-native": {
+          "samples_ns": [
+            186349250,
+            129250916,
+            154024041,
+            162465708,
+            160592125,
+            128925125,
+            158701292,
+            144243750,
+            201772542,
+            132561250,
+            143309417,
+            119295750,
+            161410042,
+            127893875,
+            119377208
+          ],
+          "median_ns": 144243750
+        },
+        "hello": {
+          "samples_ns": [
+            144583833,
+            143596500,
+            116450958,
+            142439375,
+            123506750,
+            158179792,
+            134924000,
+            105262042,
+            158297000,
+            159083083,
+            127362334,
+            124642000,
+            121541875,
+            109833333,
+            132719958
+          ],
+          "median_ns": 132719958
+        }
+      },
+      "first_successful_compositor_draw": {
+        "hello-native": {
+          "samples_ns": [
+            215856709,
+            212358792,
+            239371875,
+            216519000,
+            219051125,
+            190232792,
+            222356833,
+            239646500,
+            258380584,
+            235879125,
+            244426917
+          ],
+          "median_ns": 222356833
+        },
+        "hello": {
+          "samples_ns": [
+            209056458,
+            210201292,
+            206762708,
+            208474459,
+            236857792,
+            198263166,
+            230442542,
+            244262666,
+            238428500,
+            213079250,
+            220262000
+          ],
+          "median_ns": 213079250
+        }
+      },
+      "smoke": [
+        "Will close the main window after 150 ms",
+        "Timer fired: closing the main window"
+      ],
+      "after_setup_paired_ratio": {
+        "median": 0.8587849339931252,
+        "bootstrap_95": [
+          0.7758755830785474,
+          1.1109901921314043
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      },
+      "first_successful_compositor_draw_paired_ratio": {
+        "median": 0.9684964575272942,
+        "bootstrap_95": [
+          0.9033408530746415,
+          1.0363636632655224
+        ],
+        "seed": 9890,
+        "resamples": 10000
+      }
+    }
+  }
+}

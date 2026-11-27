@@ -3,7 +3,8 @@
 //! compiled markup of each class is partitioned into units, whether the class can be constructed
 //! from some of them or not.
 
-/// The application class [`crate::App`]: an ordinary class with `new()` only.
+/// The application class [`crate::App`]: an ordinary class with `new()` only. Its resources merge
+/// `Dictionaries/Part.xaml`, a file of the directory the build embeds as assets.
 pub const APP: &[(&str, &str)] = &[
     (
         "App.xaml",
@@ -14,6 +15,7 @@ pub const APP: &[(&str, &str)] = &[
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <MergeResourceInclude Source='/AppResources.xaml'/>
+        <MergeResourceInclude Source='/Dictionaries/Part.xaml'/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
@@ -28,6 +30,9 @@ pub const APP: &[(&str, &str)] = &[
   <x:Double x:Key='AppSpacing'>4</x:Double>
 </ResourceDictionary>",
     ),
+    // A dictionary of a directory the build also embeds (`Build::embed_assets`): compiled into a
+    // unit of the class, and not embedded again (#850).
+    ("Dictionaries/Part.xaml", include_str!("Dictionaries/Part.xaml")),
 ];
 
 /// The theme `GeneratedRust.Library.A_B.PartsTheme`, constructed from selected units

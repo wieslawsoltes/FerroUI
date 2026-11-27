@@ -668,6 +668,8 @@ impl<T: PropertyValue> IItemsList for ferroui_system::collections::object_model:
 #[derive(Clone)]
 pub struct ItemsSource(Rc<dyn IItemsList>);
 
+ferroui_base::styled_value!(ItemsSource);
+
 impl ItemsSource {
     /// Wraps a list.
     pub fn new(list: Rc<dyn IItemsList>) -> Self {

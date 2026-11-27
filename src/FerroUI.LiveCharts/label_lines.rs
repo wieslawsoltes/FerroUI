@@ -3,7 +3,8 @@
 //! `DrawingTextExtensions` (`Tokenize` and `BlobArray.Measure`) does, and drawn as one text of
 //! the scene per line.
 
-use crate::scene::{Geometry, PaintStyle, PointId, Primitive, TextAnchor};
+use crate::scene::{Geometry, PaintStyle, PointId, Primitive, Scene, TextAnchor};
+use crate::series::DATA_LABELS_PADDING;
 use ferroui_base::{Point, Size};
 
 /// The text of a label broken into lines, with the size of the block of its lines (without the
@@ -152,6 +153,62 @@ fn finite(value: f64) -> f64 {
     }
 }
 
+/// `DataLabelsMaxWidth` of every series of a measured scene (`MaxWidth` of the data labels of
+/// the source's series): a data label, a text of a point of series `i`, whose text is wider than
+/// `max_widths[i]` less the label padding breaks into lines, one text of the scene each, from the
+/// left of their block. A `centred` label keeps its middle where the one line had it; another
+/// keeps its last line where the one line was (a label above its point). A series without a
+/// width keeps its labels.
+pub fn wrap_data_labels(
+    scene: &mut Scene,
+    max_widths: &[f64],
+    mut measure_text: impl FnMut(&str, f64) -> Size,
+    centred: impl Fn(PointId) -> bool,
+) {
+    let primitives = std::mem::take(&mut scene.primitives);
+    for primitive in primitives {
+        let Some(id) = primitive.id else {
+            scene.primitives.push(primitive);
+            continue;
+        };
+        let Geometry::Text {
+            origin,
+            ref text,
+            size,
+            rotation,
+            anchor,
+        } = primitive.geometry
+        else {
+            scene.primitives.push(primitive);
+            continue;
+        };
+        let Some(&max_width) = max_widths.get(id.series) else {
+            scene.primitives.push(primitive);
+            continue;
+        };
+        let lines = LabelLines::wrap(
+            &mut measure_text,
+            text,
+            size,
+            max_width - DATA_LABELS_PADDING.0 * 2.0,
+        );
+        if lines.lines.len() <= 1 {
+            scene.primitives.push(primitive);
+            continue;
+        }
+        let extra = lines.line_height * (lines.lines.len() - 1) as f64;
+        let shift = if centred(id) { extra * 0.5 } else { extra };
+        let (sin, cos) = rotation.to_radians().sin_cos();
+        let top = Point::new(origin.x + shift * sin, origin.y - shift * cos);
+        let mut texts = lines.texts(top, anchor, rotation, size, &primitive.style, id);
+        for text in &mut texts {
+            text.clip = primitive.clip;
+            text.entity_key = primitive.entity_key;
+        }
+        scene.primitives.extend(texts);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -251,5 +308,56 @@ mod tests {
         assert!((origins[0].x - 100.0).abs() < 1e-9);
         assert!((origins[0].y - (10.0 - two.size.width)).abs() < 1e-9);
         assert!((origins[1].x - (100.0 - 18.0)).abs() < 1e-9);
+    }
+
+    /// `DataLabelsMaxWidth` of a scene: a label of a box series ("Min 1 Q1 2 ...") wider than
+    /// 100 less the padding breaks into lines that end where the one line was; a centred label
+    /// keeps its middle; a series without a width and a text without a point stay.
+    #[test]
+    fn data_labels_of_a_scene_break_at_the_width_of_their_series() {
+        let label = |series: usize, origin: Point| {
+            Primitive::new(
+                Geometry::Text {
+                    origin,
+                    text: "Min 1 Q1 2 Median 3 Q3 4 Max 5".into(),
+                    size: 15.0,
+                    rotation: 0.0,
+                    anchor: TextAnchor::Start,
+                },
+                PaintStyle::default(),
+            )
+            .identified(PointId { series, point: 0 })
+        };
+        let mut scene = Scene::new(
+            Size::new(400.0, 400.0),
+            ferroui_base::Rect::new(0.0, 0.0, 400.0, 400.0),
+        );
+        scene.primitives.push(label(0, Point::new(10.0, 200.0)));
+        scene.primitives.push(label(1, Point::new(10.0, 300.0)));
+        scene.primitives.push(label(2, Point::new(10.0, 100.0)));
+        let mut axis = label(0, Point::new(0.0, 0.0));
+        axis.id = None;
+        scene.primitives.push(axis);
+        wrap_data_labels(&mut scene, &[100.0, 100.0], metrics, |id| id.series == 1);
+        let lines = |series: usize| -> Vec<Point> {
+            scene
+                .primitives
+                .iter()
+                .filter(|p| p.id.is_some_and(|id| id.series == series))
+                .map(|p| match p.geometry {
+                    Geometry::Text { origin, .. } => origin,
+                    _ => panic!("a text"),
+                })
+                .collect()
+        };
+        let above = lines(0);
+        assert!(above.len() > 1);
+        let last = *above.last().unwrap();
+        assert!((last.y - 200.0).abs() < 1e-9, "the last line is where the one line was");
+        let centred = lines(1);
+        let middle = (centred[0].y + centred.last().unwrap().y) * 0.5;
+        assert!((middle - 300.0).abs() < 1e-9, "the middle stays");
+        assert_eq!(lines(2), vec![Point::new(10.0, 100.0)], "no width, no break");
+        assert!(scene.primitives.iter().any(|p| p.id.is_none()));
     }
 }

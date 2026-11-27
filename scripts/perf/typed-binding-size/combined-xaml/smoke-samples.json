@@ -1,0 +1,149 @@
+{
+  "reference": "frozen-native",
+  "settings": {
+    "FERROUI_CATALOG_THEME_VARIANT": "light",
+    "FERROUI_SMOKE_WINDOW_SIZE": "950x680",
+    "FERROUI_SMOKE_EXTEND_CLIENT_AREA": "0",
+    "FERROUI_SMOKE_WINDOW_POSITION": "20,40",
+    "FERROUI_SMOKE_SCREENSHOT_PAGES": "Buttons,ListBox,Data Validation,TreeDataGrid",
+    "FERROUI_SMOKE_PAGES": "1800"
+  },
+  "captures": {
+    "frozen-native": {
+      "01-buttons.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "1a8ce72339fdab587eb61191ea3adae5094ca4f9cb307b9dd3a85bf102bb1c26",
+        "differing_pixels": 0
+      },
+      "02-listbox.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "9b115403327d0836857884adcdbd2904e4b35cd8292bdd2d4ad358d8127d3ae3",
+        "differing_pixels": 0
+      },
+      "03-data-validation.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "7c7f20faf510b651179445c152a9e9182e6a4ae45039082afc37896638d833cc",
+        "differing_pixels": 0
+      },
+      "04-treedatagrid.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "a74ac76a66e75bbaa5e0da3b81c6f0e34ac07e8243b08d35a08d474a5e5a22a8",
+        "differing_pixels": 0
+      }
+    },
+    "frozen-native-binding": {
+      "01-buttons.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "1a8ce72339fdab587eb61191ea3adae5094ca4f9cb307b9dd3a85bf102bb1c26",
+        "differing_pixels": 0
+      },
+      "02-listbox.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "9b115403327d0836857884adcdbd2904e4b35cd8292bdd2d4ad358d8127d3ae3",
+        "differing_pixels": 0
+      },
+      "03-data-validation.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "7c7f20faf510b651179445c152a9e9182e6a4ae45039082afc37896638d833cc",
+        "differing_pixels": 0
+      },
+      "04-treedatagrid.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "a74ac76a66e75bbaa5e0da3b81c6f0e34ac07e8243b08d35a08d474a5e5a22a8",
+        "differing_pixels": 0
+      }
+    },
+    "typed": {
+      "01-buttons.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "1a8ce72339fdab587eb61191ea3adae5094ca4f9cb307b9dd3a85bf102bb1c26",
+        "differing_pixels": 0
+      },
+      "02-listbox.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "9b115403327d0836857884adcdbd2904e4b35cd8292bdd2d4ad358d8127d3ae3",
+        "differing_pixels": 0
+      },
+      "03-data-validation.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "7c7f20faf510b651179445c152a9e9182e6a4ae45039082afc37896638d833cc",
+        "differing_pixels": 0
+      },
+      "04-treedatagrid.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "a74ac76a66e75bbaa5e0da3b81c6f0e34ac07e8243b08d35a08d474a5e5a22a8",
+        "differing_pixels": 0
+      }
+    },
+    "combined": {
+      "01-buttons.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "1a8ce72339fdab587eb61191ea3adae5094ca4f9cb307b9dd3a85bf102bb1c26",
+        "differing_pixels": 0
+      },
+      "02-listbox.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "9b115403327d0836857884adcdbd2904e4b35cd8292bdd2d4ad358d8127d3ae3",
+        "differing_pixels": 0
+      },
+      "03-data-validation.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "7c7f20faf510b651179445c152a9e9182e6a4ae45039082afc37896638d833cc",
+        "differing_pixels": 0
+      },
+      "04-treedatagrid.png": {
+        "size": [
+          1900,
+          1360
+        ],
+        "pixels_sha256": "a74ac76a66e75bbaa5e0da3b81c6f0e34ac07e8243b08d35a08d474a5e5a22a8",
+        "differing_pixels": 0
+      }
+    }
+  }
+}

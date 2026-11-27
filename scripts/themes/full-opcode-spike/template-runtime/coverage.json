@@ -1,0 +1,174 @@
+{
+  "winui": {
+    "native": {
+      "type_keys": 104,
+      "distinct_string_keys": 2984,
+      "type_setter_and_string_inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c"
+    },
+    "stock": {
+      "type_keys": 104,
+      "distinct_string_keys": 2984,
+      "type_setter_and_string_inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c",
+      "generated_source_sha256": "939e465a589ad5d3f2e2e7f46c0efac0e40ff006c078634b3a4aad8a9c5fb19b",
+      "template_binding_provide_sites": 246,
+      "some_value_branches": 172,
+      "construction_program_regions": 1683,
+      "single_result_regions": 0,
+      "button_factory": "build_controls_winuicontrols_xaml_deferred_90",
+      "button_programs": [
+        {
+          "bytes": 47,
+          "mode": "results"
+        },
+        {
+          "bytes": 5,
+          "mode": "results"
+        },
+        {
+          "bytes": 40,
+          "mode": "results"
+        },
+        {
+          "bytes": 19,
+          "mode": "hold"
+        },
+        {
+          "bytes": 4,
+          "mode": "apply"
+        }
+      ]
+    },
+    "single": {
+      "type_keys": 104,
+      "distinct_string_keys": 2984,
+      "type_setter_and_string_inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c",
+      "generated_source_sha256": "9654e15a067c43fbdf536ef0ced9e1522ddfdf54390d50cd6f79813338a1eff3",
+      "template_binding_provide_sites": 246,
+      "some_value_branches": 172,
+      "construction_program_regions": 1683,
+      "single_result_regions": 585,
+      "button_factory": "build_controls_winuicontrols_xaml_deferred_90",
+      "button_programs": [
+        {
+          "bytes": 47,
+          "mode": "single"
+        },
+        {
+          "bytes": 5,
+          "mode": "single"
+        },
+        {
+          "bytes": 40,
+          "mode": "results"
+        },
+        {
+          "bytes": 19,
+          "mode": "single"
+        },
+        {
+          "bytes": 4,
+          "mode": "apply"
+        }
+      ]
+    },
+    "fused": {
+      "type_keys": 104,
+      "distinct_string_keys": 2984,
+      "type_setter_and_string_inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c",
+      "generated_source_sha256": "6bb866ec30482423a39c6f2a7aa4297e31347e2c20d5074769461d2c371d41e4",
+      "template_binding_provide_sites": 105,
+      "some_value_branches": 31,
+      "construction_program_regions": 1403,
+      "single_result_regions": 0,
+      "button_factory": "build_controls_winuicontrols_xaml_deferred_90",
+      "button_programs": [
+        {
+          "bytes": 93,
+          "mode": "results"
+        },
+        {
+          "bytes": 19,
+          "mode": "hold"
+        },
+        {
+          "bytes": 4,
+          "mode": "apply"
+        }
+      ]
+    }
+  },
+  "fluent": {
+    "native": {
+      "type_keys": 83,
+      "distinct_string_keys": 1111,
+      "type_setter_and_string_inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3"
+    },
+    "stock": {
+      "type_keys": 83,
+      "distinct_string_keys": 1111,
+      "type_setter_and_string_inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3",
+      "generated_source_sha256": "7eac8451c0a995a44bace48e6045d85262a6f98e48c738a411b2e3488281972c",
+      "template_binding_provide_sites": 139,
+      "some_value_branches": 123,
+      "construction_program_regions": 933,
+      "single_result_regions": 0,
+      "button_factory": "build_controls_fluentcontrols_xaml_deferred_1",
+      "button_programs": [
+        {
+          "bytes": 41,
+          "mode": "results"
+        },
+        {
+          "bytes": 5,
+          "mode": "results"
+        },
+        {
+          "bytes": 28,
+          "mode": "apply"
+        }
+      ]
+    },
+    "single": {
+      "type_keys": 83,
+      "distinct_string_keys": 1111,
+      "type_setter_and_string_inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3",
+      "generated_source_sha256": "d5e9831da19b805953ecdf0488c75a27fe1b40cf500a2980ff1711fe2419a049",
+      "template_binding_provide_sites": 139,
+      "some_value_branches": 123,
+      "construction_program_regions": 933,
+      "single_result_regions": 268,
+      "button_factory": "build_controls_fluentcontrols_xaml_deferred_1",
+      "button_programs": [
+        {
+          "bytes": 41,
+          "mode": "single"
+        },
+        {
+          "bytes": 5,
+          "mode": "single"
+        },
+        {
+          "bytes": 28,
+          "mode": "apply"
+        }
+      ]
+    },
+    "fused": {
+      "type_keys": 83,
+      "distinct_string_keys": 1111,
+      "type_setter_and_string_inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3",
+      "generated_source_sha256": "f6988b27a1f9100ad937aafd40893604fd3a54317e221aa50e68f3592bc295d3",
+      "template_binding_provide_sites": 51,
+      "some_value_branches": 35,
+      "construction_program_regions": 760,
+      "single_result_regions": 0,
+      "button_factory": "build_controls_fluentcontrols_xaml_deferred_1",
+      "button_programs": [
+        {
+          "bytes": 75,
+          "mode": "results"
+        }
+      ]
+    }
+  }
+}

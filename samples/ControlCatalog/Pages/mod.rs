@@ -54,7 +54,12 @@ mod ink_canvas_page;
 mod ink_toolbar_page;
 mod icon_element_page;
 mod info_badge_page;
+mod swipe_control_page;
 mod info_bar_page;
+mod grid_view_page;
+mod list_view_page;
+mod pivot_page;
+mod tab_view_page;
 mod navigation_view_page;
 mod auto_suggest_box_page;
 mod rich_edit_box_page;
@@ -77,6 +82,10 @@ mod numeric_up_down_page;
 mod open_gl_page;
 mod platform_info_page;
 mod progress_ring_page;
+// Not from upstream: the pages of FerroUI's 3D API (the section "3D", docs/porting/media3d.md).
+mod interaction_3d_page;
+mod transforms_3d_page;
+mod viewport_3d_page;
 mod platform_settings_page;
 mod pointer_canvas;
 mod progress_bar_page;
@@ -93,6 +102,8 @@ mod settings_page;
 mod slider_page;
 mod split_view_page;
 mod tab_control_page;
+mod content_dialog_page;
+mod selector_bar_page;
 mod tab_strip_page;
 mod text_block_page;
 mod text_box_page;
@@ -214,8 +225,16 @@ pub use ink_canvas_page::InkCanvasPage;
 pub use ink_toolbar_page::InkToolbarPage;
 pub use icon_element_page::IconElementPage;
 pub use info_badge_page::InfoBadgePage;
+pub use swipe_control_page::SwipeControlPage;
 pub use info_bar_page::InfoBarPage;
+pub use grid_view_page::GridViewPage;
+pub use list_view_page::ListViewPage;
+pub use pivot_page::PivotPage;
+pub use tab_view_page::TabViewPage;
 pub use progress_ring_page::ProgressRingPage;
+pub use interaction_3d_page::{Cube3D, Interaction3DPage, CUBE_COLOURS, CUBE_NAMES, SELECTED_COLOUR};
+pub use transforms_3d_page::{Transforms3DPage, Transforms3DScene, SPIN_AXES};
+pub use viewport_3d_page::{Viewport3DPage, Viewport3DScene, MATERIAL_COLOURS};
 pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
 pub use rich_edit_box_page::RichEditBoxPage;
@@ -264,6 +283,8 @@ pub use settings_page::SettingsPage;
 pub use slider_page::SliderPage;
 pub use split_view_page::SplitViewPage;
 pub use tab_control_page::TabControlPage;
+pub use content_dialog_page::ContentDialogPage;
+pub use selector_bar_page::SelectorBarPage;
 pub use tab_strip_page::TabStripPage;
 pub use tabbed_demo_page::TabbedDemoPage;
 pub use table_view_page::TableViewPage;
@@ -325,8 +346,16 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     InkToolbarPage::TYPE,
     IconElementPage::TYPE,
     InfoBadgePage::TYPE,
+    SwipeControlPage::TYPE,
     InfoBarPage::TYPE,
+    ListViewPage::TYPE,
+    GridViewPage::TYPE,
+    PivotPage::TYPE,
+    TabViewPage::TYPE,
     ProgressRingPage::TYPE,
+    Interaction3DPage::TYPE,
+    Transforms3DPage::TYPE,
+    Viewport3DPage::TYPE,
     NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
     RichEditBoxPage::TYPE,
@@ -415,6 +444,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     SliderPage::TYPE,
     SplitViewPage::TYPE,
     TabControlPage::TYPE,
+    ContentDialogPage::TYPE,
+    SelectorBarPage::TYPE,
     TabStripPage::TYPE,
     TextBlockPage::TYPE,
     TextBoxPage::TYPE,
@@ -434,8 +465,16 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &InkToolbarPage::XAML_CLASS,
     &IconElementPage::XAML_CLASS,
     &InfoBadgePage::XAML_CLASS,
+    &SwipeControlPage::XAML_CLASS,
     &InfoBarPage::XAML_CLASS,
+    &ListViewPage::XAML_CLASS,
+    &GridViewPage::XAML_CLASS,
+    &PivotPage::XAML_CLASS,
+    &TabViewPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
+    &Interaction3DPage::XAML_CLASS,
+    &Transforms3DPage::XAML_CLASS,
+    &Viewport3DPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,
     &RichEditBoxPage::XAML_CLASS,
@@ -519,6 +558,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &SliderPage::XAML_CLASS,
     &SplitViewPage::XAML_CLASS,
     &TabControlPage::XAML_CLASS,
+    &ContentDialogPage::XAML_CLASS,
+    &SelectorBarPage::XAML_CLASS,
     &TabStripPage::XAML_CLASS,
     &TextBlockPage::XAML_CLASS,
     &TextBoxPage::XAML_CLASS,

@@ -15,6 +15,8 @@ pub enum OverlayControlList {
     /// General source IList, including nonnotifying and custom implementations.
     General(ListHandle<Option<Ref<Control>>>),
 }
+
+ferroui_base::styled_value!(OverlayControlList);
 impl Default for OverlayControlList {
     fn default() -> Self {
         Self::new()

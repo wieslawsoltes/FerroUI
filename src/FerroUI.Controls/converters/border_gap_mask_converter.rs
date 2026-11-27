@@ -16,11 +16,19 @@ use std::rc::Rc;
 ///
 /// Derived from the converter of the same name in the WPF sources (.NET
 /// Foundation, MIT license).
-#[derive(Default)]
+// Made only through `new` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct BorderGapMaskConverter;
+
+impl Default for BorderGapMaskConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BorderGapMaskConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self
     }
 

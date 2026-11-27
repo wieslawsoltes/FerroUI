@@ -89,7 +89,12 @@ fn create_tree(
         for visual in tree.get_self_and_visual_descendants() {
             let i = visual.cast::<Interactive>().unwrap();
             let handler = handler.clone();
-            i.add_handler_as::<RoutedEventArgs, _>(&ev, move |s, e| handler(s, e), handler_routes, handled_events_too);
+            i.add_handler_as::<RoutedEventArgs, _>(
+                &ev,
+                move |s, e| handler(s, e),
+                handler_routes,
+                handled_events_too,
+            );
         }
     }
 
@@ -848,4 +853,39 @@ fn a_class_handler_is_reached_when_no_instance_handler_is_attached() {
 
     assert_eq!(*seen.borrow(), ["child", "parent"]);
     drop(parent);
+}
+
+#[test]
+fn an_error_a_fallible_handler_returns_reaches_the_dispatcher_and_the_route_goes_on() {
+    #[derive(Debug)]
+    struct HandlerFailed;
+    impl std::fmt::Display for HandlerFailed {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("the handler failed")
+        }
+    }
+    impl std::error::Error for HandlerFailed {}
+
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let dispatcher = crate::threading::Dispatcher::current_dispatcher();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let seen = received.clone();
+    let _handler = dispatcher.unhandled_exception(move |args| {
+        assert!(args.error().is_some_and(|error| error.is::<HandlerFailed>()));
+        seen.borrow_mut().push(args.exception_message().unwrap_or_default().to_owned());
+        args.set_handled(true);
+    });
+
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    child.add_fallible_handler(&ev, |_, _| Err(HandlerFailed));
+    let reached = Rc::new(Cell::new(false));
+    let parent_reached = reached.clone();
+    parent.add_handler(&ev, move |_, _| parent_reached.set(true));
+
+    child.raise_event(&RoutedEventArgs::with_event_and_source(&ev, &child));
+
+    assert_eq!(*received.borrow(), ["the handler failed"]);
+    assert!(reached.get(), "a handled error does not stop the route");
 }

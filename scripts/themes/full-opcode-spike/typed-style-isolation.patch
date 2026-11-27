@@ -1,0 +1,48 @@
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+@@ -2974,7 +2974,7 @@
+             let name = format!("{prefix}_ROWS_{next}");
+             next += 1;
+             name
+-        }, self.documents.typed_bytecode);
++        }, true);
+         let document_text = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
+         for (name, run) in runs {
+             for slot in &run.slots {
+@@ -3020,7 +3020,7 @@
+         let outer_names = std::mem::take(&mut self.local_names);
+         // The same local identifier can represent a different class or overload in a
+         // nested factory. Keep the register and call metadata with its declaring body.
+-        let outer_metadata = self.documents.typed_bytecode.then(|| (
++        let outer_metadata = false.then(|| (
+             std::mem::take(&mut self.local_types),
+             std::mem::take(self.resolved_calls.get_mut()),
+         ));
+@@ -3044,7 +3044,7 @@
+         let returned = body?;
+         let body_lines = self.apply_row_runs(body_lines);
+         // Runs of template bindings on one object, as tables (#568, step 5).
+-        let body_lines = if self.documents.typed_bytecode {
++        let body_lines = if false {
+             body_lines
+         } else {
+             theme_styles::template_binding_runs(&mut self.theme_styles, body_lines)
+@@ -4443,7 +4443,7 @@
+     fn declared_call(&self, node: &Rc<dyn IXamlAstNode>, method: &MethodInfo<'a>, arguments: &[Typed<'a>]) -> EmitResult<String> {
+         let (function, texts, fallible) = self.declared_call_parts(node, &method, arguments)?;
+         let expression = invoked(format!("{function}({})", texts.join(", ")), fallible, node);
+-        if self.documents.typed_bytecode {
++        if false {
+             self.record_construction_call(node, method, arguments, &expression);
+         }
+         Ok(expression)
+@@ -5099,7 +5099,7 @@
+         _ => (lines.into_iter().filter(|line| theme_units::unit_marker(line).is_none()).collect(), Vec::new()),
+     };
+     let calls = emitter.resolved_calls.borrow();
+-    let (body, parts) = split_into_parts_with_backend(function_name, &document_text, &lines, &local_types, documents.typed_bytecode.then_some(&*calls));
++    let (body, parts) = split_into_parts_with_backend(function_name, &document_text, &lines, &local_types, false.then_some(&*calls));
+     for line in &body {
+         source.push_str(line);
+         source.push('\n');

@@ -124,8 +124,8 @@ impl MarkupDelegate {
     /// `method`. The delegate keeps the target alive.
     ///
     /// [`invoke`](Self::invoke) calls the method with the arguments given
-    /// (after the instance) and discards a failure;
-    /// [`try_invoke`](Self::try_invoke) reports it.
+    /// (after the instance) and raises a failure on the dispatcher;
+    /// [`try_invoke`](Self::try_invoke) returns it.
     pub fn for_method(target: MarkupValue, declaring_type: &'static MarkupType, method: &'static MarkupMethod) -> Self {
         let target = DelegateTarget::Strong(if method.is_static { None } else { target });
         Self::bound(target, declaring_type, method)
@@ -161,14 +161,27 @@ impl MarkupDelegate {
         let bound = target.clone();
         Self {
             call: Rc::new(move |arguments| match bound.get() {
-                Ok(target) => invoke_method(method, &target, arguments).ok().flatten(),
+                Ok(target) => match invoke_method(method, &target, arguments) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        // The exception of the delegate of the reference: a handler named in
+                        // markup that fails (a `try fn`) reaches the dispatcher (#567).
+                        crate::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+                        None
+                    }
+                },
                 Err(()) => None,
             }),
             method: Some(Rc::new(MarkupDelegateMethod { target, declaring_type, method })),
         }
     }
 
-    /// Calls the callback.
+    /// Calls the callback. For the delegate of a declared method
+    /// ([`for_method`](Self::for_method)) a failure of the call (wrong
+    /// arguments, a failing `try fn` member, such as the handler of a markup
+    /// event) goes to
+    /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
+    /// and the result is `None`; [`try_invoke`](Self::try_invoke) returns it.
     pub fn invoke(&self, arguments: &[MarkupValue]) -> MarkupValue {
         (self.call)(arguments)
     }
@@ -1166,14 +1179,14 @@ impl MarkupType {
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register`](Self::register) or
     /// [`register_all`](Self::register_all), which always register.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_table(types: &[&'static MarkupType]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline(always)]
     pub fn register_table(types: &[&'static MarkupType]) {
         let _ = types;
@@ -1191,14 +1204,14 @@ impl MarkupType {
     /// by handle (the text of an enumeration member, the parsing of text) then knows the type
     /// with the tables of types trimmed. With `type-tables` the tables already hold
     /// every type, and this does nothing.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_used(type_: &'static MarkupType) {
         let _ = type_;
     }
 
     /// Trimmed (without `type-tables`): see the other definition.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     pub fn register_used(type_: &'static MarkupType) {
         registry().write().unwrap_or_else(|e| e.into_inner()).insert(type_);
     }
@@ -1206,12 +1219,12 @@ impl MarkupType {
     /// [`Self::register_used`] for the metadata of `T`, which is asked of the crate that
     /// declares `T` ([`MarkupTyped::__markup`]). With the tables of types every type is
     /// registered already and nothing is asked.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_used_of<T: MarkupTyped + ?Sized>() {}
 
     /// Trimmed (without `type-tables`): see the other definition.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline]
     pub fn register_used_of<T: MarkupTyped + ?Sized>() {
         Self::register_used(T::__markup());
@@ -1394,7 +1407,7 @@ impl MarkupRegistry {
         }
         // Trimmed, the metadata of the value types of the properties is not in a table: it
         // is registered with the type, as a binding through a property finds it by handle.
-        #[cfg(not(any(feature = "type-tables", test)))]
+        #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
         for property in type_.properties.iter().chain(type_.static_properties) {
             if let Some(value) = (property.value_markup)() {
                 self.insert(value);

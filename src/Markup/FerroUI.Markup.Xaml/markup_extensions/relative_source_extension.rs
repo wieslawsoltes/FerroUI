@@ -32,15 +32,6 @@ impl RelativeSourceExtension {
         this
     }
 
-    /// Creates the relative source the extension describes.
-    ///
-    /// # Panics
-    /// Panics if the ancestor level is less than 1. Use
-    /// [`try_provide_value`](Self::try_provide_value) to handle it.
-    pub fn provide_value(&self, service_provider: &Rc<dyn IServiceProvider>) -> Rc<RelativeSource> {
-        crate::throw(self.try_provide_value(service_provider))
-    }
-
     /// [`provide_value`](Self::provide_value) without the panic: an
     /// ancestor level less than 1 is an error.
     pub fn try_provide_value(

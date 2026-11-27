@@ -7,6 +7,7 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
+build = "build.rs"
 
 # The tests are a module of the library (`tests.rs`), not integration test targets.
 autotests = false
@@ -31,13 +32,19 @@ default = ["app"]
 # crate is the sections of the gallery, which the ControlCatalog shows as its pages (it depends on
 # the crate without the default features, so that it links neither this application nor its
 # entry point).
-app = ["dep:ferroui-themes-winui", "dep:ferroui-desktop"]
+app = ["dep:ferroui-themes-winui", "dep:ferroui-desktop", "dep:ferroui-markup-xaml"]
 
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-desktop = { workspace = true, optional = true }
+# The runtime library of markup: the table of the units of the theme the build writes
+# (`build.rs`) names the type of a unit.
+ferroui-markup-xaml = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
 
 [dev-dependencies]
 # The test application (a dispatcher of the thread) with the Skia render interface and font

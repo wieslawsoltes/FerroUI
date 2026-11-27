@@ -32,6 +32,8 @@ pub(crate) struct TriggerHost {
 #[derive(Clone)]
 pub(crate) struct TriggerHostRef(Rc<TriggerHost>);
 
+ferroui_base::styled_value!(TriggerHostRef);
+
 impl PartialEq for TriggerHostRef {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)

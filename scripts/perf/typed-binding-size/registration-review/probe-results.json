@@ -1,0 +1,158 @@
+{
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "base_rlib": "libferroui_base-3d08cc0236938f5b.rlib",
+  "base_features": [
+    "full-themes",
+    "markup-functions",
+    "type-tables"
+  ],
+  "method_count": 32,
+  "receiver_types": 4,
+  "warmup_calls_per_process": 100000,
+  "timed_calls_per_process": 1000000,
+  "arms": {
+    "stock": {
+      "file_bytes": 3260720,
+      "text_bytes": 2628456,
+      "sha256": "3dbf164dcfeca11561dd456951bfc26923cedd3342684ddac957a919259365b0",
+      "median_ns_per_call": 9.411166
+    },
+    "shared": {
+      "file_bytes": 3244192,
+      "text_bytes": 2614056,
+      "sha256": "2e9a79253d47b05cdd89c14b117a5c2b2b8d3d87de8ff4dcd412ab6731516738",
+      "median_ns_per_call": 8.944209
+    }
+  },
+  "paired_median_ratio": 0.9513381436434987,
+  "paired_median_ratio_bootstrap_95pct": [
+    0.9441542237352545,
+    0.960337988494976
+  ],
+  "pairs_elapsed_ns": [
+    {
+      "stock": 9275291,
+      "shared": 8975458
+    },
+    {
+      "stock": 9285500,
+      "shared": 8903792
+    },
+    {
+      "shared": 8831000,
+      "stock": 9378084
+    },
+    {
+      "shared": 8956792,
+      "stock": 9326708
+    },
+    {
+      "stock": 9230166,
+      "shared": 8882334
+    },
+    {
+      "stock": 9608125,
+      "shared": 9079667
+    },
+    {
+      "stock": 9234625,
+      "shared": 8970000
+    },
+    {
+      "shared": 8609042,
+      "stock": 9696291
+    },
+    {
+      "stock": 9471625,
+      "shared": 8906833
+    },
+    {
+      "stock": 9384208,
+      "shared": 8888875
+    },
+    {
+      "stock": 9473250,
+      "shared": 8944209
+    },
+    {
+      "stock": 9749334,
+      "shared": 8848709
+    },
+    {
+      "stock": 9325792,
+      "shared": 9088958
+    },
+    {
+      "shared": 8812875,
+      "stock": 9411500
+    },
+    {
+      "stock": 9363083,
+      "shared": 8907458
+    },
+    {
+      "shared": 8938417,
+      "stock": 9357375
+    },
+    {
+      "stock": 10094875,
+      "shared": 8945333
+    },
+    {
+      "stock": 9564291,
+      "shared": 9529750
+    },
+    {
+      "shared": 9957083,
+      "stock": 15100583
+    },
+    {
+      "stock": 9425875,
+      "shared": 9013417
+    },
+    {
+      "shared": 9038750,
+      "stock": 9475292
+    },
+    {
+      "shared": 9804208,
+      "stock": 9411166
+    },
+    {
+      "shared": 8898375,
+      "stock": 9231459
+    },
+    {
+      "stock": 9388375,
+      "shared": 8858875
+    },
+    {
+      "shared": 8846333,
+      "stock": 9747541
+    },
+    {
+      "shared": 8942541,
+      "stock": 9442000
+    },
+    {
+      "stock": 9450042,
+      "shared": 8950083
+    },
+    {
+      "stock": 9554250,
+      "shared": 8947416
+    },
+    {
+      "stock": 9263167,
+      "shared": 8931041
+    },
+    {
+      "stock": 9328416,
+      "shared": 9007625
+    },
+    {
+      "shared": 9005375,
+      "stock": 9181583
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+// The cost of calls through the generated Osprey bindings of FerroUI (docs/osprey.md, section
+// 6), the same operations as the Rust benchmark of the ABI (cargo bench -p ferroui-capi
+// --no-default-features --bench call_overhead): a property write and a read with layer 1, an
+// event dispatched to the one dispatcher, and frames of layer 2 (one text block whose text
+// changes; 100 text blocks of which one changes; the same 100 as memo elements; building the
+// view of the 100 alone; 100 setter calls against 100 signal writes and one apply; a read of a
+// watched signal). No window: the thread is made the UI thread with ferro_init. Each
+// case runs `iterations` times per sample; the median of 9 samples is printed in nanoseconds
+// per operation. The clock is the one of macOS.
+
+import ferroui::*
+import ferroviews::*
+import ferroobjects::{fontSize as setFontSize, getFontSize, onClick as subscribeClick}
+
+// Nanoseconds of the monotonic clock of macOS (CLOCK_UPTIME_RAW).
+extern fn clock_gettime_nsec_np(clock: int32) -> int
+
+fn now() -> int = clock_gettime_nsec_np(toInt32(8))
+
+type Message = Nothing
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = 0
+
+// The text of iteration `i`: two values in turn (a write of the value a property has is skipped).
+fn textOf(i: int) -> string = match i % 2 {
+    0 => "Hello, World!"
+    _ => "Clicked 1 time"
+}
+
+fn sizeOf(i: int) -> float = match i % 2 {
+    0 => 12.0
+    _ => 13.0
+}
+
+fn oneText(i: int) -> Element<Message> = border([], [textBlock([key(1), text(textOf(i))])])
+
+fn item(n: int, i: int) -> Element<Message> = match n {
+    0 => textBlock([key(1), text(textOf(i))])
+    _ => textBlock([key(n + 1), text("Item ${n}")])
+}
+
+fn manyTexts(i: int) -> Element<Message> =
+    border([], [stackPanel([], range(0, 100) |> map(fn(n: int) => item(n, i)) |> toList)])
+
+// The item `n` as a memo element: its version is the text it shows (two for the first).
+fn memoItem(n: int, i: int) -> Element<Message> = match n {
+    0 => textBlock([key(1), memo(i % 2 + 1), text(textOf(i))])
+    _ => textBlock([key(n + 1), memo(1), text("Item ${n}")])
+}
+
+fn manyMemoTexts(i: int) -> Element<Message> =
+    border([], [stackPanel([], range(0, 100) |> map(fn(n: int) => memoItem(n, i)) |> toList)])
+
+// The frame of a border element, committed under `root` (not a window: no application runs).
+fn commitUnder(root: int, element: Element<Message>) -> int = {
+    let _ = ferro_frame_begin()
+    let _ = writeChildren(root: root, children: element.elementChildren, tag: 1)
+    toInt(ferro_frame_commit(root: root))
+}
+
+fn runCase(case: int, i: int, object: int, root: int) -> int = match case {
+    0 => setFontSize(object, sizeOf(i))
+    1 => getFontSize(object) > 0.0 ? 0 : 1
+    2 => toInt(ferro_raise(object: object, event: clickEventId()))
+    3 => commitUnder(root, oneText(i))
+    4 => commitUnder(root, manyTexts(i))
+    5 => commitUnder(root, manyMemoTexts(i))
+    6 => manyTexts(i).elementType
+    // 100 setter calls, and 100 signal writes with one apply (`root` is the first of 100 slots
+    // bound to the FontSize of `object`); a read of a watched signal (`root` is its slot).
+    7 => range(0, 100) |> fold(0, fn(acc: int, n: int) => acc + setFontSize(object, sizeOf(n + i)))
+    8 => {
+        let _ = range(0, 100) |> fold(0, fn(acc: int, n: int) => {
+            signalSetNumber(root + n, sizeOf(n + i))
+            acc
+        })
+        signalsApply()
+    }
+    _ => signalReadNumber(root) > 0.0 ? 0 : 1
+}
+
+// The nanoseconds of one operation over one sample.
+fn sample(case: int, iterations: int, object: int, root: int) -> float = {
+    let start = now()
+    let _ = range(0, iterations) |> fold(0, fn(acc: int, i: int) => acc + runCase(case, i, object, root))
+    toFloat(now() - start) / toFloat(iterations)
+}
+
+fn insert(sorted: List<float>, value: float) -> List<float> = match sorted {
+    [] => [value]
+    [first, ...rest] => match value < first {
+        true => listConcat([value, first], rest)
+        false => listConcat([first], insert(rest, value))
+    }
+}
+
+fn median(case: int, iterations: int, object: int, root: int) -> float = {
+    let _ = sample(case, iterations, object, root)
+    let samples = range(0, 9) |> fold([], fn(acc: List<float>, n: int) => insert(acc, sample(case, iterations, object, root)))
+    match listGet(samples, 4) {
+        Success { value } => value
+        Error { message } => 0.0
+    }
+}
+
+fn main() = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    report("api", checkApi())
+    let _ = ferro_init()
+    let _ = registerTypes()
+    let _ = ferro_frame_dispatcher(function: dispatch)
+    let text = ferro_create(typeId: textBlockTypeId())
+    let button = ferro_create(typeId: buttonTypeId())
+    let _ = subscribeClick(button, 1)
+    let trampolined = ferro_create(typeId: buttonTypeId())
+    let _ = ferro_subscribe(object: trampolined, event: clickEventId(), function: dispatchEvent, token: 1)
+    let root = ferro_create(typeId: borderTypeId())
+    print("benchmark: the median of 9 samples, nanoseconds per operation")
+    print("write FontSize (layer 1 setter)           ${median(0, 100000, text, root)} ns")
+    print("read FontSize (layer 1 getter)            ${median(1, 100000, text, root)} ns")
+    print("raise Click to the one dispatcher         ${median(2, 100000, button, root)} ns")
+    print("raise Click through the trampoline        ${median(2, 100000, trampolined, root)} ns")
+    print("frame: one text block, its text changes   ${median(3, 100000, text, root)} ns")
+    print("frame: 100 text blocks, one changes       ${median(4, 1000, text, root)} ns")
+    let _ = ferro_frame_clear(root: root)
+    print("frame: 100 memo text blocks, one changes  ${median(5, 1000, text, root)} ns")
+    print("the view of 100 text blocks alone         ${median(6, 1000, text, root)} ns")
+    let _ = signalsInit(256)
+    let first = signalNumber(12.0)
+    let _ = signalBind(text, fontSizePropertyId(), first)
+    let _ = range(1, 100) |> fold(0, fn(acc: int, n: int) => signalBind(text, fontSizePropertyId(), signalNumber(12.0)))
+    let _ = signalsApply()
+    print("100 setter calls (layer 1)                ${median(7, 1000, text, root)} ns")
+    print("100 signal writes and one apply           ${median(8, 1000, text, first)} ns")
+    let watched = signalNumber(0.0)
+    let _ = signalWatch(text, fontSizePropertyId(), watched)
+    print("read a watched signal (FontSize)          ${median(9, 100000, text, watched)} ns")
+}

@@ -269,7 +269,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-android"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -285,14 +285,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-base"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
+ "ferroui-ident-macros",
  "ferroui-system",
  "icu_locale_core",
  "libc",
- "paste",
  "rust_decimal",
  "rustc-hash",
  "smallvec",
@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-browser"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -315,19 +315,20 @@ dependencies = [
 
 [[package]]
 name = "ferroui-build"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup-xaml-loader",
  "roxmltree",
  "serde_json",
+ "toml",
  "xamlx",
 ]
 
 [[package]]
 name = "ferroui-build-scan"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -336,7 +337,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-controls"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-base",
@@ -349,7 +350,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-dialogs"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -361,7 +362,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-fonts-inter"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -370,7 +371,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-harfbuzz"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -378,15 +379,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-ident-macros"
+version = "0.6.0-preview.1"
+
+[[package]]
 name = "ferroui-markup"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-markup-xaml"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -397,19 +402,21 @@ dependencies = [
 
 [[package]]
 name = "ferroui-markup-xaml-loader"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "quote",
  "roxmltree",
+ "syn 2.0.119",
  "url",
  "xamlx",
 ]
 
 [[package]]
 name = "ferroui-media"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -417,14 +424,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-media-camera"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-media",
 ]
 
 [[package]]
 name = "ferroui-media-camera-controls"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -436,7 +443,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-media-controls"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -446,14 +453,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-media-video"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-media",
 ]
 
 [[package]]
 name = "ferroui-media-video-controls"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -464,43 +471,42 @@ dependencies = [
 
 [[package]]
 name = "ferroui-metal"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-opengl"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
  "libc",
- "paste",
 ]
 
 [[package]]
 name = "ferroui-reactive"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-system",
 ]
 
 [[package]]
 name = "ferroui-reactiveui"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-ident-macros",
  "ferroui-reactive",
  "ferroui-splat",
  "ferroui-system",
- "paste",
  "uuid",
 ]
 
 [[package]]
 name = "ferroui-remote-protocol"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-system",
  "uuid",
@@ -508,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-skia"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "cc",
  "ferroui-base",
@@ -522,7 +528,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-splat"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-system",
  "uuid",
@@ -530,14 +536,16 @@ dependencies = [
 
 [[package]]
 name = "ferroui-system"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
+ "icu_locale_core",
  "smallvec",
+ "url",
 ]
 
 [[package]]
 name = "ferroui-themes-winui"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -550,7 +558,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-vulkan"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
@@ -1008,12 +1016,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "paste"
-version = "1.0.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1157,9 +1159,9 @@ checksum = "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
 
 [[package]]
 name = "rustix"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "891efababe418670775f199f0d233d84843c227a0949a883ce15b37c78d6629d"
+checksum = "e5e76742e5294153d4dde1207dbec5bdd81eef6fabdc0d2118babadabfd858aa"
 dependencies = [
  "bitflags 2.13.2",
  "errno",
@@ -1688,7 +1690,7 @@ checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
 name = "xamlx"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "roxmltree",
 ]

@@ -492,25 +492,25 @@ fn resolve_by_name_metadata_constructs_and_provides() {
 fn relative_source_extension_provides_a_relative_source() {
     let sp = TestServiceProvider::new().sp();
 
-    let default = RelativeSourceExtension::new().provide_value(&sp);
+    let default = RelativeSourceExtension::new().try_provide_value(&sp).unwrap();
     assert_eq!(default.mode(), RelativeSourceMode::FindAncestor);
     assert_eq!(default.ancestor_level(), 1);
     assert_eq!(default.tree(), TreeType::Visual);
     assert!(default.ancestor_type().is_none());
 
     let extension = RelativeSourceExtension::with_mode(RelativeSourceMode::TemplatedParent);
-    assert_eq!(extension.provide_value(&sp).mode(), RelativeSourceMode::TemplatedParent);
+    assert_eq!(extension.try_provide_value(&sp).unwrap().mode(), RelativeSourceMode::TemplatedParent);
 
     extension.set_mode(RelativeSourceMode::FindAncestor);
     extension.set_ancestor_type(Some(<Border as StaticType>::TYPE));
     extension.set_ancestor_level(3);
     extension.set_tree(TreeType::Logical);
-    let source = extension.provide_value(&sp);
+    let source = extension.try_provide_value(&sp).unwrap();
     assert!(std::ptr::eq(source.ancestor_type().unwrap(), <Border as StaticType>::TYPE));
     assert_eq!(source.ancestor_level(), 3);
     assert_eq!(source.tree(), TreeType::Logical);
     // Every call provides a new relative source.
-    assert!(!Rc::ptr_eq(&source, &extension.provide_value(&sp)));
+    assert!(!Rc::ptr_eq(&source, &extension.try_provide_value(&sp).unwrap()));
 }
 
 #[test]
@@ -518,7 +518,7 @@ fn relative_source_extension_provides_a_relative_source() {
 fn relative_source_extension_rejects_an_invalid_ancestor_level() {
     let extension = RelativeSourceExtension::new();
     extension.set_ancestor_level(0);
-    let _ = extension.provide_value(&TestServiceProvider::new().sp());
+    let _ = extension.try_provide_value(&TestServiceProvider::new().sp()).unwrap();
 }
 
 #[test]
@@ -1007,7 +1007,7 @@ fn on_form_factor_asks_the_runtime_platform_of_the_service_provider() {
     register_types();
     // A provider without the service provides no option.
     let none = TestServiceProvider::new().sp();
-    assert!(!OnFormFactorExtension::should_provide_option(&none, FormFactorType::Mobile));
+    assert!(!OnFormFactorExtension::try_should_provide_option(&none, FormFactorType::Mobile).unwrap());
 
     // The root and the deferred service providers offer the registered platform.
     let scope = FerroLocator::enter_scope();
@@ -1016,19 +1016,19 @@ fn on_form_factor_asks_the_runtime_platform_of_the_service_provider() {
     assert!(FerroLocator::current().get_service::<dyn IRuntimePlatform>().is_some());
 
     let root = crate::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v2();
-    assert!(OnFormFactorExtension::should_provide_option(&root, FormFactorType::Mobile));
-    assert!(!OnFormFactorExtension::should_provide_option(&root, FormFactorType::Desktop));
-    assert!(!OnFormFactorExtension::should_provide_option(&root, FormFactorType::TV));
-    assert!(OnFormFactorExtensionOf::<i32>::should_provide_option(&root, FormFactorType::Mobile));
+    assert!(OnFormFactorExtension::try_should_provide_option(&root, FormFactorType::Mobile).unwrap());
+    assert!(!OnFormFactorExtension::try_should_provide_option(&root, FormFactorType::Desktop).unwrap());
+    assert!(!OnFormFactorExtension::try_should_provide_option(&root, FormFactorType::TV).unwrap());
+    assert!(OnFormFactorExtensionOf::<i32>::try_should_provide_option(&root, FormFactorType::Mobile).unwrap());
 
     let seen = Rc::new(std::cell::Cell::new(false));
     let flag = seen.clone();
     let declared = TestServiceProvider::new().with_parents(vec![]).with_root(Some(boxed(1i32))).sp();
     let builder = crate::xaml_il::runtime::DeferredContentBuilder::new(move |sp| {
-        flag.set(OnFormFactorExtension::should_provide_option(sp, FormFactorType::Mobile));
+        flag.set(OnFormFactorExtension::try_should_provide_option(sp, FormFactorType::Mobile).unwrap());
         None
     });
-    let content = crate::xaml_il::runtime::XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<BoxedValue>(builder, &declared);
+    let content = crate::xaml_il::runtime::XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<BoxedValue>(builder, &declared).unwrap();
     content.build_with(None);
     assert!(seen.get());
 
@@ -1080,7 +1080,7 @@ fn a_root_service_provider_without_a_registered_platform_reports_it() {
 fn asking_a_root_service_provider_without_a_platform_for_an_option_panics() {
     let _scope = ferroui_base::FerroLocator::enter_scope();
     let root = crate::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v2();
-    let _ = OnFormFactorExtension::should_provide_option(&root, ferroui_base::platform::FormFactorType::Mobile);
+    let _ = OnFormFactorExtension::try_should_provide_option(&root, ferroui_base::platform::FormFactorType::Mobile).unwrap();
 }
 
 #[test]

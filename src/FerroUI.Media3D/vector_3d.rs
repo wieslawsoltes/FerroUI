@@ -24,6 +24,8 @@ pub struct Vector3D {
     pub z: f64,
 }
 
+ferroui_base::styled_value!(Vector3D);
+
 impl Vector3D {
     /// A vector with the given components.
     #[inline]

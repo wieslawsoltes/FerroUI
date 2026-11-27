@@ -13,7 +13,7 @@ use crate::at_spi::dbus::types::{AtSpiAttributeSet, AtSpiTextRange};
 use ferroui_controls::automation::provider::IValueProvider;
 use ferroui_controls::utils::StringUtils;
 use std::rc::Weak;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 // `TextGranularity`
 const GRANULARITY_CHAR: u32 = 0;
@@ -403,12 +403,12 @@ impl DBusInterface for AtSpiTextHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         self.node.upgrade()?;
         Some(match name {
-            "version" => Value::from(self.version()),
-            "CharacterCount" => Value::from(self.character_count()),
-            "CaretOffset" => Value::from(self.caret_offset()),
+            "version" => Variant::from(self.version()),
+            "CharacterCount" => Variant::from(self.character_count()),
+            "CaretOffset" => Variant::from(self.caret_offset()),
             _ => return None,
         })
     }

@@ -1,0 +1,83 @@
+<!-- Material 3 Expressive theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/ListView.xaml),
+     as docs/porting/material-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of ListView)
+    controls/dev/CommonStyles/ListViewItem_themeresources.xaml (the implicit style of
+    ListViewItem, based on DefaultListViewItemStyle of Controls/ListBoxItem.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The templates of WinUI's ListView and ListViewItem, which FerroUI ports as controls
+  (ferroui-controls, docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document
+  for them. Translation notes (docs/porting/winui-theme.md, section 4):
+  - The template keeps WinUI's structure, Border > ScrollViewer (the part ScrollViewer) >
+    ItemsPresenter. FerroUI's ItemsPresenter has no Header and Footer: the header and the footer
+    are content presenters above and below it, in a vertical StackPanel, with the padding of the
+    list around the three, as WinUI's presenter lays them out.
+  - The scroll modes and rails of the scroll viewer (HorizontalScrollMode, VerticalScrollMode,
+    IsHorizontalRailEnabled, IsVerticalRailEnabled) are not FerroUI properties: the scroll bar
+    visibilities say the same (Disabled horizontally). ZoomMode stays Disabled, the default.
+  - ItemContainerTransitions (AddDeleteThemeTransition, ContentThemeTransition,
+    ReorderThemeTransition, EntranceThemeTransition) are theme transitions, which the theme does
+    not port (G-22).
+  - The items are ListViewItems drawn with DefaultListViewItemStyle (decision D6: the chrome of
+    ListViewItemPresenter drawn with elements, LBI-6 to LBI-9).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="300" Height="200">
+      <ListView>
+        <ListViewItem Content="First" />
+        <ListViewItem Content="Second" />
+        <ListViewItem Content="Third" />
+      </ListView>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultListViewStyle" TargetType="ListView">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="IsSwipeEnabled" Value="True" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <ItemsStackPanel Orientation="Vertical" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                Background="{TemplateBinding Background}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="ScrollViewer"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        AutomationProperties.AccessibilityView="Raw">
+            <StackPanel Margin="{TemplateBinding Padding}">
+              <ContentPresenter Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}" />
+              <ItemsPresenter x:Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}" />
+              <ContentPresenter Content="{TemplateBinding Footer}"
+                                ContentTemplate="{TemplateBinding FooterTemplate}" />
+            </StackPanel>
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ListView}" TargetType="ListView" BasedOn="{StaticResource DefaultListViewStyle}" />
+
+  <ControlTheme x:Key="{x:Type ListViewItem}" TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}" />
+</ResourceDictionary>

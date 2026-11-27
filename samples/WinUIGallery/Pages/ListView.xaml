@@ -1,4 +1,248 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <ListBox Width="300" Height="200" HorizontalAlignment="Left" SelectedIndex="0"><x:String>Blue</x:String><x:String>Green</x:String><x:String>Red</x:String><x:String>Yellow</x:String></ListBox><TextBlock Text="Multiple selection"/><ListBox Width="300" Height="150" HorizontalAlignment="Left" SelectionMode="Multiple"><x:String>Alpha</x:String><x:String>Beta</x:String><x:String>Gamma</x:String></ListBox>
+<!-- Ported from the ten pinned ListView examples of WinUI Gallery (14061eea) and the code behind
+     of ListViewPage.xaml.cs (list_samples.rs); see ../NOTICE.md. FerroUI has no ListView: each
+     list is a ListBox. The data templates keep the markup of the source page; x:Bind becomes
+     {Binding} over the markup types of list_samples.rs (Contact, Message, CustomDataObject),
+     ThemeResource becomes DynamicResource, the style names are their values (BaseTextBlockStyle is
+     semibold, TitleTextBlockStyle 28 semibold, CaptionTextBlockStyle 12), and the Headers of the
+     options are composed above them. The lists get their items from list_samples.rs, as the
+     source's OnNavigatedTo; the group headers of GroupStyle.HeaderTemplate are built there. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Styles>
+    <!-- WinUI's SelectionMode None (list_samples.rs): items that are not selected, hit or focused. -->
+    <Style Selector="ListBox.selection-none ListBoxItem">
+      <Setter Property="IsHitTestVisible" Value="False" />
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+  </StackPanel.Styles>
+  <StackPanel.Resources>
+    <DataTemplate x:Key="ContactListViewTemplate">
+      <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">
+        <Ellipse x:Name="Ellipse" Grid.RowSpan="2" Width="32" Height="32" Margin="6"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Fill="{DynamicResource ControlStrongFillColorDefaultBrush}" />
+        <TextBlock Grid.Column="1" Margin="12,6,0,0" FontWeight="SemiBold" Text="{Binding Name}" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Margin="12,0,0,6" Text="{Binding Company}" />
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="BasicListViewTemplate">
+      <TextBlock Margin="0,5,0,5" Text="{Binding Name}" />
+    </DataTemplate>
+    <DataTemplate x:Key="MessageViewTemplate">
+      <Grid Margin="4" HorizontalAlignment="{Binding MsgAlignment}">
+        <!-- WinUI's StackPanel has a Background, a Padding and a CornerRadius: a Border here. -->
+        <Border Width="350" MinHeight="75" Padding="10,0,0,10" CornerRadius="4">
+          <Border.Background>
+            <SolidColorBrush Color="{DynamicResource SystemColorHighlightColor}" />
+          </Border.Background>
+          <StackPanel>
+            <TextBlock Padding="0,10,0,0" FontSize="20" Text="{Binding MsgText}">
+              <TextBlock.Foreground>
+                <SolidColorBrush Color="{DynamicResource SystemColorHighlightTextColor}" />
+              </TextBlock.Foreground>
+            </TextBlock>
+            <TextBlock Padding="0,0,0,10" FontSize="15" Text="{Binding MsgDateTime}">
+              <TextBlock.Foreground>
+                <SolidColorBrush Color="{DynamicResource SystemColorHighlightTextColor}" />
+              </TextBlock.Foreground>
+            </TextBlock>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="ImageTemplate">
+      <Grid Margin="0,12,0,12" AutomationProperties.Name="{Binding Title}">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" MinWidth="150" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Image MaxHeight="100" Source="{Binding Image}" Stretch="Fill" />
+        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+          <TextBlock Margin="0,0,0,6" HorizontalAlignment="Left" FontSize="14" FontWeight="SemiBold"
+                     LineHeight="20" Text="{Binding Title}" />
+          <TextBlock x:Name="Description" Width="350" MaxHeight="60" Margin="0,0,0,10"
+                     FontWeight="Normal" Text="{Binding Description}" TextTrimming="CharacterEllipsis"
+                     TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="0" FontSize="12" Text="{Binding Views}" />
+            <TextBlock FontSize="12" Text=" Views " />
+            <TextBlock FontSize="12" Text=" &#x22C5; " />
+            <TextBlock Margin="5,0,0,0" FontSize="12" Text="{Binding Likes}" />
+            <TextBlock FontSize="12" Text=" Likes" />
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="StringTemplate">
+      <TextBlock Margin="0,8,0,8" Text="{Binding}" />
+    </DataTemplate>
+  </StackPanel.Resources>
+
+  <StackPanel x:Name="ListViewExample1" Spacing="8">
+    <TextBlock Text="Basic ListView with Simple DataTemplate" FontSize="18" />
+    <TextBlock Margin="0,0,0,16" TextWrapping="Wrap"
+               Text="This is a basic ListView that has the full source code below. Other samples on this page display only the additional markup needed to customize a simple ListView like this one." />
+    <ListBox x:Name="BaseExample" Width="350" Height="400" HorizontalAlignment="Left"
+             BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+             ItemTemplate="{StaticResource BasicListViewTemplate}" />
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample2" Spacing="8">
+    <TextBlock Text="ListView with Selection Support" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel>
+        <RichTextBlock Margin="0,0,0,15" TextWrapping="Wrap">
+          <Paragraph><Run Text="You can enable four different selection modes on the right." /></Paragraph>
+          <Paragraph><Bold><Run Text="None" /></Bold><Run Text=" disables selection all together." /></Paragraph>
+          <Paragraph><Bold><Run Text="Single" /></Bold><Run Text=" allows for only one item to be selected in the list." /></Paragraph>
+          <Paragraph><Bold><Run Text="Multiple" /></Bold><Run Text=" causes checkboxes to appear next to items, so that multiple items can be chosen from the list." /></Paragraph>
+          <Paragraph><Bold><Run Text="Extended" /></Bold><Run Text=" allows the user to select multiple items by using Ctrl+Click to select the individual items they want, or Shift+Click to select a range of contiguous items." /></Paragraph>
+        </RichTextBlock>
+        <ListBox x:Name="Control2" Width="400" Height="400" HorizontalAlignment="Left"
+                 BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+                 ItemTemplate="{StaticResource ContactListViewTemplate}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Margin="0,12,0,0" Spacing="4">
+        <TextBlock Text="SelectionMode" />
+        <ComboBox x:Name="SelectionModeComboBox" HorizontalAlignment="Stretch" SelectedIndex="1"
+                  AutomationProperties.Name="SelectionMode">
+          <x:String>None</x:String>
+          <x:String>Single</x:String>
+          <x:String>Multiple</x:String>
+          <x:String>Extended</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample3" Spacing="8">
+    <TextBlock Text="ListViews with Drag, Drop, and Reordering Support" FontSize="18" />
+    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="1*,1*">
+      <TextBlock TextWrapping="Wrap"
+                 Text="In these ListView controls, you can drag and drop within a list to reorder items, or drag and drop between lists to move items." />
+      <ListBox x:Name="DragDropListView" Grid.Row="1" Grid.Column="0" Height="400" MinWidth="350"
+               Margin="12" DragDrop.AllowDrop="True"
+               BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+               ItemTemplate="{StaticResource ContactListViewTemplate}" SelectionMode="Single" />
+      <ListBox x:Name="DragDropListView2" Grid.Row="1" Grid.Column="1" Height="400" MinWidth="350"
+               DragDrop.AllowDrop="True"
+               BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+               ItemTemplate="{StaticResource ContactListViewTemplate}" SelectionMode="Single" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample4" Spacing="8">
+    <TextBlock Text="ListView with Grouped Headers" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel>
+        <TextBlock Margin="0,0,0,15" TextWrapping="Wrap"
+                   Text="Switch the toggle on the right to enable sticky group headers, which makes the headers stay put at the top of the ListView while scrolling." />
+        <ListBox x:Name="GroupedListViewCtrl" Width="400" Height="400" HorizontalAlignment="Left"
+                 BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+                 ItemTemplate="{StaticResource ContactListViewTemplate}" SelectionMode="Single" />
+      </StackPanel>
+      <StackPanel Grid.Column="1">
+        <ToggleSwitch x:Name="StickySwitch" Content="Sticky Headers" IsChecked="False" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample5" Spacing="8">
+    <TextBlock Text="ListView with filtering" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <ListBox x:Name="FilteredListView" Width="400" Height="400" HorizontalAlignment="Left"
+               BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+               ItemTemplate="{StaticResource ContactListViewTemplate}" SelectionMode="Single" />
+      <StackPanel Grid.Column="1" Width="200">
+        <TextBlock Margin="8,8,8,4" FontWeight="SemiBold" Text="Filter by..." />
+        <TextBlock Margin="8,8,8,0" Text="First name" />
+        <TextBox x:Name="FilterByFirstName" Margin="8" HorizontalAlignment="Stretch"
+                 AutomationProperties.Name="First name" />
+        <TextBlock Margin="8,8,8,0" Text="Last name" />
+        <TextBox x:Name="FilterByLastName" Margin="8" HorizontalAlignment="Stretch"
+                 AutomationProperties.Name="Last name" />
+        <TextBlock Margin="8,8,8,0" Text="Company" />
+        <TextBox x:Name="FilterByCompany" Margin="8" HorizontalAlignment="Stretch"
+                 AutomationProperties.Name="Company" />
+        <TextBlock x:Name="FilteredCount" Margin="8" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample6" Spacing="8">
+    <TextBlock Text="ListView for Messaging or Data Logging" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel>
+        <TextBlock Margin="0,0,0,15" TextWrapping="Wrap"
+                   Text="This ListView is inverted to grow from the bottom up. It's a good way to display logs or messages, with most recent at the bottom." />
+        <ListBox x:Name="InvertedListView" Height="400"
+                 BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+                 ItemTemplate="{StaticResource MessageViewTemplate}">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel VerticalAlignment="Bottom" />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+          </ListBox.Styles>
+        </ListBox>
+      </StackPanel>
+      <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+        <Button x:Name="SendMessage" Margin="0,0,0,10" Content="Send Message" />
+        <Button x:Name="ReceiveMessage" Content="Receive Message" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample7" Spacing="8">
+    <TextBlock Text="ListView with Images" FontSize="18" />
+    <ListBox x:Name="Control4" Height="400" MinWidth="550"
+             BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+             ItemTemplate="{StaticResource ImageTemplate}" />
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample8" Spacing="8">
+    <TextBlock Text="ListView with context menus" FontSize="18" />
+    <TextBlock Margin="0,0,0,15" TextWrapping="Wrap"
+               Text="This ListView allows users to right click to open a context menu. In this case, the context menu provides the option to delete an entry." />
+    <ListBox x:Name="ContextMenuList" Width="400" Height="400" HorizontalAlignment="Left"
+             BorderThickness="1" SelectionMode="Single"
+             ItemTemplate="{StaticResource ContactListViewTemplate}" />
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample9" Spacing="8">
+    <TextBlock Text="Save and restore the scroll position using ListViewPersistenceHelper." FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <ListBox x:Name="RestoreScrollListView" Width="400" Height="220" HorizontalAlignment="Left"
+               BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+               ItemTemplate="{StaticResource StringTemplate}" />
+      <StackPanel Grid.Column="1" Spacing="8">
+        <Button x:Name="SavePositionButton" Content="Save position" />
+        <Button x:Name="RestorePositionButton" Content="Restore position" IsEnabled="False" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ListViewExample10" Spacing="8">
+    <TextBlock Text="Scroll a ListView programmatically with ScrollIntoView." FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <ListBox x:Name="ScrollIntoViewListView" Width="400" Height="220" HorizontalAlignment="Left"
+               BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}" BorderThickness="1"
+               ItemTemplate="{StaticResource StringTemplate}" />
+      <StackPanel Grid.Column="1" Spacing="8">
+        <NumberBox x:Name="ScrollIndexNumberBox" Header="Index" LargeChange="10" Maximum="999"
+                   Minimum="0" SmallChange="1" SpinButtonPlacementMode="Inline"
+                   ValidationMode="InvalidInputOverwritten" Value="10" />
+        <TextBlock Text="Alignment" />
+        <ComboBox x:Name="ScrollAlignmentComboBox" SelectedIndex="0" AutomationProperties.Name="Alignment">
+          <ComboBoxItem Content="Default" />
+          <ComboBoxItem Content="Leading" />
+        </ComboBox>
+        <Button x:Name="ScrollIntoViewButton" Content="Scroll into view" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

@@ -5,8 +5,10 @@ use crate::harness::Registry;
 pub mod bidi_scaling_benchmark;
 pub mod codepoint_benchmark;
 pub mod glyph_bounds_benchmark;
+pub mod glyph_run_creation_benchmark;
 pub mod huge_text_layout;
 pub mod rich_text_editing;
+pub mod selectable_text_block_widths;
 pub mod shaped_buffer_ops;
 pub mod text_block_changing_text_benchmark;
 pub mod text_block_constraint_benchmark;
@@ -30,8 +32,10 @@ pub fn register(registry: &mut Registry) {
     codepoint_benchmark::register(registry);
     unicode_trie_benchmark::register(registry);
     glyph_bounds_benchmark::register(registry);
+    glyph_run_creation_benchmark::register(registry);
     rich_text_editing::register(registry);
     text_pipeline_benchmark::register(registry);
     text_block_constraint_benchmark::register(registry);
     text_block_changing_text_benchmark::register(registry);
+    selectable_text_block_widths::register(registry);
 }

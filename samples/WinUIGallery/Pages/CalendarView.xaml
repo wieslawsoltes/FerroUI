@@ -1,4 +1,26 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Calendar HorizontalAlignment="Left"/>
+<!-- Ported from the pinned CalendarView example of WinUI Gallery (14061eea) and
+     SelectionMode_SelectionChanged of CalendarViewPage.xaml.cs (date_samples.rs); see
+     ../NOTICE.md. WinUI's CalendarView is FerroUI's Calendar; its SelectionMode Single is
+     SingleDate and Multiple is MultipleRange. FerroUI's Calendar has no IsGroupLabelVisible,
+     IsOutOfScopeEnabled or CalendarIdentifier (only the Gregorian calendar), and its day and
+     month names follow the current culture, not a Language of the calendar: those options and
+     their x:Bind are left out. The ComboBox's Header is composed above it. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="CalendarViewExample1" Spacing="8">
+    <TextBlock Text="A basic calendar view." FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Calendar x:Name="Control1" HorizontalAlignment="Left" VerticalAlignment="Top"
+                SelectionMode="SingleDate" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="SelectionMode" />
+        <ComboBox x:Name="selectionMode" HorizontalAlignment="Stretch" SelectedIndex="1"
+                  AutomationProperties.Name="SelectionMode">
+          <x:String>None</x:String>
+          <x:String>Single</x:String>
+          <x:String>Multiple</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

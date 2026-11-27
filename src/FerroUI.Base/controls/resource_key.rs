@@ -78,6 +78,9 @@ impl PartialEq for ResourceKey {
 impl Eq for ResourceKey {}
 
 impl Hash for ResourceKey {
+    // Inlined into the look-up of a resource dictionary, where it runs for every host a resource
+    // is searched in (pinned: the inlining shifted with unrelated changes of the crate, #986).
+    #[inline]
     fn hash<H: Hasher>(&self, state: &mut H) {
         match self {
             ResourceKey::String(s) => {

@@ -17,7 +17,7 @@ mod value_store;
 pub(crate) use binding_entry::{BindingEntry, BindingSource};
 pub(crate) use boxed_binding_entry::BoxedBindingEntry;
 pub(crate) use boxed_local_value_binding_observer::BoxedLocalValueBindingObserver;
-pub(crate) use effective_value::{EffectiveValue, EffectiveValueDyn, UncommonFields};
+pub(crate) use effective_value::{cast_effective_value, EffectiveValue, EffectiveValueDyn, UncommonFields};
 pub(crate) use frame_priority::{FramePriority, FrameType};
 pub(crate) use hot_value::advance_metadata_generation;
 #[doc(hidden)]

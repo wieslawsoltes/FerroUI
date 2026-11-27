@@ -29,6 +29,25 @@ impl<T: Clone + 'static> Clone for MediaCollection<T> {
     }
 }
 
+impl<T: Clone + 'static> crate::StyledValue for MediaCollection<T> {
+    type Storage = Self;
+
+    #[inline(always)]
+    fn into_storage(self) -> Self {
+        self
+    }
+
+    #[inline(always)]
+    fn from_storage(storage: Self) -> Self {
+        storage
+    }
+
+    #[inline(always)]
+    fn with_storage<R>(storage: &Self, read: impl FnOnce(&Self) -> R) -> R {
+        read(storage)
+    }
+}
+
 impl<T: Clone + 'static> PartialEq for MediaCollection<T> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
@@ -299,6 +318,8 @@ macro_rules! media_collection_type {
         $(#[$meta])*
         #[derive(Clone, PartialEq)]
         pub struct $name($crate::media::MediaCollection<$item>);
+
+        $crate::styled_value!($name);
 
         impl ::std::ops::Deref for $name {
             type Target = $crate::media::MediaCollection<$item>;

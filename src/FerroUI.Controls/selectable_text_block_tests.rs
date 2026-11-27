@@ -876,6 +876,55 @@ fn select_all_hotkey_selects_all_text() {
 }
 
 #[test]
+fn turning_selection_off_clears_it_and_keeps_it_empty() {
+    let _scope = test_scope();
+    let target = text_block("abcd");
+    assert!(target.is_text_selection_enabled());
+    assert!(target.focusable());
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    assert!(target.can_copy());
+
+    target.set_is_text_selection_enabled(false);
+
+    assert_eq!(target.selection_start(), target.selection_end());
+    assert!(!target.can_copy());
+    assert!(!target.focusable());
+    target.select_all();
+    assert_eq!(target.selection_start(), target.selection_end());
+    target.set_selection_end(2);
+    assert_eq!(target.selection_start(), target.selection_end());
+
+    target.set_is_text_selection_enabled(true);
+    assert!(target.focusable());
+    target.select_all();
+    assert_eq!((0, 4), (target.selection_start(), target.selection_end()));
+}
+
+#[test]
+fn a_block_with_selection_off_leaves_pointer_and_keys_alone() {
+    let _services = window_services();
+    let target = text_block("hello world");
+    let _root = root_with(&target, Size::new(300.0, 100.0));
+    target.set_is_text_selection_enabled(false);
+
+    assert!(!raise_key_down(&target, Key::A, KeyModifiers::CONTROL).handled());
+    let press_handled = Rc::new(Cell::new(None));
+    let flag = press_handled.clone();
+    target.add_handler_with(
+        InputElement::pointer_pressed_event(),
+        move |_, e: &PointerPressedEventArgs| flag.set(Some(e.handled())),
+        ferroui_base::interactivity::RoutingStrategies::BUBBLE,
+        true,
+    );
+    let mouse = Mouse::new();
+    mouse.down(&target, MouseButton::Left, Point::new(13.0, 5.0));
+    mouse.up(&target, MouseButton::Left, Point::new(13.0, 5.0));
+    assert_eq!(press_handled.get(), Some(false));
+    assert_eq!((0, 0), (target.selection_start(), target.selection_end()));
+}
+
+#[test]
 fn losing_focus_clears_the_selection() {
     let _scope = test_scope();
     let target = text_block("abcd");
@@ -1005,4 +1054,34 @@ fn hit_testing_follows_the_text_with_the_layout_rounding_above() {
     let (offset, above) = press(TextLayoutRoundingPlacement::Above);
     assert!((offset - 0.6).abs() < 1e-9, "{offset}");
     assert_eq!(0, above);
+}
+
+/// Not in the reference tests: a selectable text block keeps the shaped runs of its text between
+/// layouts at other widths, as a text block does, and shapes again once its selection changes
+/// (step 4 of docs/porting/text-layout-performance.md).
+#[test]
+fn a_selectable_text_block_shapes_its_text_once_for_layouts_at_other_widths() {
+    use ferroui_base::diagnostics::perf_counters::{self, PerfCounter};
+    use ferroui_base::media::TextWrapping;
+    let _scope = test_scope();
+    let block = SelectableTextBlock::new();
+    block.set_text(Some("a text of several words that wraps"));
+    block.set_text_wrapping(TextWrapping::Wrap);
+    block.measure(Size::new(500.0, 100.0));
+    assert_eq!(block.text_layout().text_lines().len(), 1);
+
+    let before = perf_counters::snapshot();
+    block.measure(Size::new(60.0, 100.0));
+    let shaped = perf_counters::snapshot().since(&before).get(PerfCounter::TextRunsShaped);
+    assert!(block.text_layout().text_lines().len() > 1, "the narrower layout wraps");
+    if perf_counters::ENABLED {
+        assert_eq!(shaped, 0, "the runs of the first layout are kept");
+    }
+
+    // A selection with its brush: the layout is made again, its text drawn in two colours.
+    block.set_selection_foreground_brush(Some(ferroui_base::media::Brushes::red()));
+    block.set_selection_start(2);
+    block.set_selection_end(6);
+    block.measure(Size::new(80.0, 100.0));
+    assert!(block.text_layout().text_lines().len() > 1);
 }

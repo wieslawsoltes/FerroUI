@@ -696,3 +696,56 @@ phase = "C5"
 pull = 545
 behaviour = "test"
 notes = "Step X1 (section 3.7). HashMap where nothing depends on the order: the dock's DockableControlMap, DockableObjectMap, ContextLocatorMap, HostWindowLocatorMap and DockableLocatorMap. IndexMap where a caller enumerates in the order of addition: IObservableCache.KeyValues of DynamicData (re-exported as ferroui_dynamic_data::IndexMap; built in the order of the cache, so unchanged), the dictionary of ChangeAwareCache's constructor and into_dictionary, and the dock's DockTargetOperations (the order of the hit test). ChangeAwareCache.GetDictionary is internal, as upstream. Add is insert of a new key; a removal from an IndexMap is shift_remove or swap_remove."
+
+# C3: the derived transform exceptions of the compiler extensions are constructors of the xamlx
+# XamlError through an extension trait of the loader (0.5.1).
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.Transformers.XamlBindingsTransformException"
+rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTransformErrors::bindings_transform"
+kind = "type"
+phase = "C3"
+pull = 896
+deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlBindingsTransformException"
+behaviour = "same"
+notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Bindings, whose type name selects the diagnostic code as before."
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.Transformers.XamlDataContextException"
+rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTransformErrors::data_context"
+kind = "type"
+phase = "C3"
+pull = 896
+deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlDataContextException"
+behaviour = "same"
+notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::DataContext, whose type name selects the diagnostic code as before."
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.Transformers.XamlPropertyPathException"
+rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTransformErrors::property_path"
+kind = "type"
+phase = "C3"
+pull = 896
+deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlPropertyPathException"
+behaviour = "same"
+notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::PropertyPath, whose type name selects the diagnostic code as before."
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.Transformers.XamlSelectorsTransformException"
+rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTransformErrors::selectors_transform"
+kind = "type"
+phase = "C3"
+pull = 896
+deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlSelectorsTransformException"
+behaviour = "same"
+notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Selectors, whose type name selects the diagnostic code as before."
+
+[[name]]
+upstream = "Avalonia.Markup.Xaml.XamlIl.CompilerExtensions.Transformers.XamlStyleTransformException"
+rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTransformErrors::style_transform"
+kind = "type"
+phase = "C3"
+pull = 896
+deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlStyleTransformException"
+behaviour = "same"
+notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Style, whose type name selects the diagnostic code as before."

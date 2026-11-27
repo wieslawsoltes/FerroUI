@@ -16,6 +16,64 @@ use std::rc::Rc;
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 use std::time::Instant;
 
+/// Every how many flushes without an upload the uploaded images that nothing else holds are
+/// dropped.
+pub(crate) const UPLOADED_IMAGE_SWEEP_INTERVAL: u64 = 60;
+/// Whether flush number `flush` drops the textures of the uploaded images nothing else holds,
+/// when the last image was uploaded before flush number `last_upload_flush + 1`: with every
+/// flush until UPLOADED_IMAGE_SWEEP_INTERVAL flushes after an upload, then every
+/// UPLOADED_IMAGE_SWEEP_INTERVAL flushes.
+pub(crate) fn uploaded_image_sweep_due(flush: u64, last_upload_flush: u64) -> bool {
+    flush.saturating_sub(last_upload_flush) <= UPLOADED_IMAGE_SWEEP_INTERVAL
+        || flush % UPLOADED_IMAGE_SWEEP_INTERVAL == 0
+}
+
+/// Every how many flushes Graphite is asked to free what it has not used for
+/// DEFERRED_CLEANUP_AGE_MS (scratch textures, atlas pages): about two seconds at 60 frames a
+/// second.
+pub(crate) const DEFERRED_CLEANUP_INTERVAL: u64 = 120;
+/// How long a resource has to be unused before the periodic cleanup frees it.
+const DEFERRED_CLEANUP_AGE_MS: i64 = 15_000;
+
+/// The submit info of a flush: a frame boundary with the frame's id (`fMarkBoundary`,
+/// `fFrameID`), so that Graphite knows where a frame ends. skia-safe has no setter, so the
+/// native fields are set through `skia-bindings`, as for `fRequireOrderedRecordings`
+/// (desktop-performance.md, section 9.17).
+fn frame_submit_info(frame_id: u64) -> graphite::SubmitInfo {
+    // `SubmitInfo` is a struct of the one native field: of the same size, the field is at offset 0.
+    const _: () = assert!(
+        std::mem::size_of::<graphite::SubmitInfo>()
+            == std::mem::size_of::<skia_bindings::skgpu_graphite_SubmitInfo>()
+    );
+    let mut info = graphite::SubmitInfo::new();
+    // SAFETY: by the assertion the value is the native structure; both fields are plain values.
+    unsafe {
+        let native = &mut *(&mut info as *mut graphite::SubmitInfo).cast::<skia_bindings::skgpu_graphite_SubmitInfo>();
+        native.fMarkBoundary = skia_bindings::skgpu_graphite_MarkFrameBoundary::kYes;
+        native.fFrameID = frame_id;
+    }
+    info
+}
+
+/// Asks the context and the recorder to free the resources they have not used for
+/// DEFERRED_CLEANUP_AGE_MS (`performDeferredCleanup`, which skia-safe does not have). It frees
+/// on the CPU what the GPU no longer uses and waits for nothing.
+fn perform_deferred_cleanup(context: &mut graphite::Context, recorder: &mut graphite::Recorder) {
+    // A `std::chrono::milliseconds` is its count; a disengaged `std::optional` of the longest
+    // purge time is all zeros (no limit).
+    // SAFETY: the duration is an `i64` in a structure of that size (checked by `transmute`).
+    let age = unsafe { std::mem::transmute::<i64, skia_bindings::std_chrono_milliseconds>(DEFERRED_CLEANUP_AGE_MS) };
+    let no_limit = || skia_bindings::__BindgenOpaqueArray([0u64; 2]);
+    // SAFETY: `RefHandle` is `repr(transparent)` over the pointer to the native object, which
+    // both handles own and which is alive for the call; the context is behind its lock.
+    unsafe {
+        let context = *(context as *mut graphite::Context).cast::<*mut skia_bindings::skgpu_graphite_Context>();
+        (*context).performDeferredCleanup(age, no_limit());
+        let recorder = *(recorder as *mut graphite::Recorder).cast::<*mut skia_bindings::skgpu_graphite_Recorder>();
+        (*recorder).performDeferredCleanup(age, no_limit());
+    }
+}
+
 /// An image that was uploaded for drawing: the image it was made from and
 /// its textures on the recorder.
 struct UploadedImage {
@@ -84,6 +142,11 @@ struct GraphiteState {
     context: Arc<SharedContext>,
     frame_completion: GpuCompletion,
     completion_handler: Option<Box<dyn Fn(GpuCompletion)>>,
+    /// The flushes of the context so far: the id of the frame each one ends, and the clock of the
+    /// periodic cleanup and sweep.
+    flushes: u64,
+    /// The value of `flushes` when an image was last uploaded.
+    last_upload_flush: u64,
     /// A recording failed to insert. With ordered recordings (section 9.17) the context refuses
     /// every later recording of the recorder, so the context reports itself lost and is made
     /// again, as after a lost device.
@@ -131,12 +194,16 @@ pub struct GraphiteGrContext {
     /// When the last flush ended: where the cost of a frame that a layer
     /// drew directly ends.
     last_flush_end: Cell<Option<Instant>>,
+    /// The flushes so far: a texture drawn since the last one is read by
+    /// commands not submitted yet (the outputs of 3D scenes, `scene3d.rs`).
+    flushes: Cell<u64>,
 }
 
 impl GraphiteGrContext {
     /// Wraps a Graphite context, creating its recorder. Returns `None` when
     /// the recorder cannot be created.
     pub fn new(mut context: graphite::Context) -> Option<Self> {
+        crate::graphite_metal_ownership::report_once();
         let recorder = context.make_recorder(None)?;
         Some(Self {
             state: RefCell::new(Some(GraphiteState {
@@ -146,6 +213,8 @@ impl GraphiteGrContext {
                 context: Arc::new(SharedContext(Mutex::new(context))),
                 frame_completion: GpuCompletion::new(),
                 completion_handler: None,
+                flushes: 0,
+                last_upload_flush: 0,
                 recording_failed: false,
             })),
             frame_context_id: crate::gpu::next_frame_context_id(),
@@ -153,6 +222,7 @@ impl GraphiteGrContext {
             direct_only_draws: Cell::new(0),
             layer_blit: Cell::new(false),
             last_flush_end: Cell::new(None),
+            flushes: Cell::new(0),
         })
     }
 
@@ -170,6 +240,13 @@ impl GraphiteGrContext {
     /// When the last flush of the context ended; `None` before the first.
     pub(super) fn last_flush_end(&self) -> Option<Instant> {
         self.last_flush_end.get()
+    }
+
+    /// How many times the context was flushed: what is drawn with it after
+    /// a flush is submitted by a later one.
+    #[cfg_attr(not(feature = "media3d"), allow(dead_code))]
+    pub(crate) fn flush_count(&self) -> u64 {
+        self.flushes.get()
     }
 
     /// Runs `f` with what pipelining a frame of a layer needs: the threads,
@@ -196,6 +273,27 @@ impl GraphiteGrContext {
             .expect("the Graphite context has been disposed"))
     }
 
+    /// Submits the band recordings the threads of the pipelined layers inserted since the last
+    /// submit, without waiting for anything (the threads may still be inserting the rest of a
+    /// frame; those go with the next submit). Called at the start of a frame, so that the GPU
+    /// draws the bands of the frame before while this one is recorded. Nothing happens when no
+    /// band was inserted, or when the context is in use.
+    pub(crate) fn submit_inserted_bands(&self) {
+        let Ok(state) = self.state.try_borrow() else { return };
+        let Some(state) = state.as_ref() else { return };
+        if state.bands.take_unsubmitted() == 0 {
+            return;
+        }
+        let _ = state.context.lock().submit(None);
+    }
+
+    /// How many band recordings the threads inserted that no submit has taken (for the tests;
+    /// reading it takes them).
+    #[cfg(test)]
+    pub(crate) fn take_unsubmitted_band_inserts(&self) -> usize {
+        self.state.borrow().as_ref().map_or(0, |state| state.bands.take_unsubmitted())
+    }
+
     /// Runs `f` with the recorder, for creating surfaces that wrap platform
     /// textures.
     pub fn with_recorder<R>(&self, f: impl FnOnce(&mut graphite::Recorder) -> R) -> R {
@@ -209,6 +307,9 @@ impl GraphiteGrContext {
 
     /// Releases the recorder and the context.
     pub fn dispose(&self) {
+        // The outputs of 3D scenes drawn with the context go before it.
+        #[cfg(feature = "media3d")]
+        crate::scene3d::release_context(self.frame_context_id);
         let mut state = self.state.borrow_mut();
         if let Some(state) = state.as_mut() {
             self.flush_now(state);
@@ -224,6 +325,7 @@ impl GraphiteGrContext {
     /// Flushes the recorder and notes when the flush ended.
     fn flush_now(&self, state: &mut GraphiteState) {
         Self::flush_state(state, self.layer_blit.take());
+        self.flushes.set(self.flushes.get().wrapping_add(1));
         self.last_flush_end.set(Some(Instant::now()));
     }
 
@@ -236,13 +338,23 @@ impl GraphiteGrContext {
         // frame they are playing sampled, drawn anew. Nothing is waited for
         // when no frame is in the threads.
         state.bands.wait_for_released();
+        state.flushes += 1;
+        let flush = state.flushes;
+        // Every flush ends a frame of the window (or a read-back): Graphite is told where, with the frame's id.
+        let submit_info = frame_submit_info(flush);
         let completion = std::mem::take(&mut state.frame_completion);
         if let Some(mut recording) = state.recorder.snap() {
             let info = InsertRecordingInfo::new(&mut recording);
             let (inserted, submitted) = {
                 let mut context = state.context.lock();
                 let inserted = context.insert_recording(&info) == graphite::InsertStatus::Success;
-                (inserted, context.submit(None))
+                // The submit takes the band recordings inserted before it too.
+                state.bands.take_unsubmitted();
+                let submitted = context.submit(Some(&submit_info));
+                if flush % DEFERRED_CLEANUP_INTERVAL == 0 {
+                    perform_deferred_cleanup(&mut context, &mut state.recorder);
+                }
+                (inserted, submitted)
             };
             state.recording_failed |= !inserted;
             if inserted && submitted {
@@ -259,7 +371,13 @@ impl GraphiteGrContext {
             }
         } else {
             // Preserve the context's ordinary empty-flush processing too.
-            let _ = state.context.lock().submit(None);
+            let mut context = state.context.lock();
+            state.bands.take_unsubmitted();
+            let _ = context.submit(Some(&submit_info));
+            if flush % DEFERRED_CLEANUP_INTERVAL == 0 {
+                perform_deferred_cleanup(&mut context, &mut state.recorder);
+            }
+            drop(context);
             // A fully clipped draw can retain a lease without recording a GPU
             // read. No recording means no read was submitted, so no fence is
             // required and an empty-submit result must not quarantine storage.
@@ -274,10 +392,15 @@ impl GraphiteGrContext {
 
         // The texture of an image nothing else holds cannot be asked for
         // again. The recording that was just inserted keeps the textures it
-        // draws with alive by itself.
-        state
-            .uploaded_images
-            .retain(|_, uploaded| uploaded.is_source_in_use());
+        // draws with alive by itself. The map is walked with every flush while
+        // images are uploaded (content that changes, whose old images go as
+        // fast as the new ones come), and every UPLOADED_IMAGE_SWEEP_INTERVAL
+        // flushes once nothing was uploaded for that long.
+        if uploaded_image_sweep_due(flush, state.last_upload_flush) {
+            state
+                .uploaded_images
+                .retain(|_, uploaded| uploaded.is_source_in_use());
+        }
     }
 
     /// Makes a copy of a texture image that has mipmaps.
@@ -416,6 +539,8 @@ impl ISkiaGrContext for GraphiteGrContext {
         let Some(GraphiteState {
             uploaded_images,
             recorder,
+            flushes,
+            last_upload_flush,
             ..
         }) = state.as_mut()
         else {
@@ -426,6 +551,7 @@ impl ISkiaGrContext for GraphiteGrContext {
         // another image while the entry holds the image.
         let uploaded = uploaded_images.entry(image.unique_id()).or_insert_with(|| {
             self.uploads.set(self.uploads.get() + 1);
+            *last_upload_flush = *flushes;
             let texture = graphite::images::texture_from_image(recorder, image);
             if texture.is_none() {
                 Self::log_upload_failure(
@@ -497,5 +623,42 @@ impl ISkiaGrContext for GraphiteGrContext {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod schedule_tests {
+    use super::*;
+
+    #[test]
+    fn released_images_are_swept_with_every_flush_while_images_are_uploaded() {
+        for flush in 1..=UPLOADED_IMAGE_SWEEP_INTERVAL {
+            assert!(uploaded_image_sweep_due(flush, 0), "flush {flush}");
+        }
+        assert!(uploaded_image_sweep_due(1000, 999));
+        assert!(uploaded_image_sweep_due(1000 + UPLOADED_IMAGE_SWEEP_INTERVAL, 1000));
+    }
+
+    #[test]
+    fn without_uploads_released_images_are_swept_every_interval() {
+        let last_upload = 10;
+        let first_idle = last_upload + UPLOADED_IMAGE_SWEEP_INTERVAL + 1;
+        let idle = first_idle..(last_upload + 10 * UPLOADED_IMAGE_SWEEP_INTERVAL);
+        let swept: Vec<u64> = idle.filter(|flush| uploaded_image_sweep_due(*flush, last_upload)).collect();
+        assert!(swept.iter().all(|flush| flush % UPLOADED_IMAGE_SWEEP_INTERVAL == 0), "{swept:?}");
+        // At least one sweep in every interval: a released image goes within that many flushes.
+        assert!(swept.windows(2).all(|pair| pair[1] - pair[0] == UPLOADED_IMAGE_SWEEP_INTERVAL));
+        assert!(!swept.is_empty());
+    }
+
+    #[test]
+    fn a_flush_marks_a_frame_boundary_with_its_id() {
+        let info = frame_submit_info(42);
+        // SAFETY: as in `frame_submit_info`, the value is the native structure.
+        let native =
+            unsafe { &*(&info as *const graphite::SubmitInfo).cast::<skia_bindings::skgpu_graphite_SubmitInfo>() };
+        assert_eq!(native.fMarkBoundary, skia_bindings::skgpu_graphite_MarkFrameBoundary::kYes);
+        assert_eq!(native.fFrameID, 42);
+        assert_eq!(native.fSync, skia_bindings::skgpu_graphite_SyncToCpu::No);
     }
 }

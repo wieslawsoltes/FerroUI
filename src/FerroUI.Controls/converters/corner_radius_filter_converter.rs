@@ -21,6 +21,7 @@ impl Default for CornerRadiusFilterConverter {
 
 impl CornerRadiusFilterConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self { filter: Cell::new(Corners::NONE), scale: Cell::new(1.0) }
     }
 

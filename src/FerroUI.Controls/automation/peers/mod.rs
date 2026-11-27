@@ -30,7 +30,9 @@ mod expander_automation_peer;
 mod foundation_automation_peer_tests;
 mod image_automation_peer;
 mod info_bar_automation_peer;
+mod tab_view_automation_peer;
 mod person_picture_automation_peer;
+mod pivot_automation_peer;
 mod pager_control_automation_peer;
 mod title_bar_automation_peer;
 mod interop_automation_peer;
@@ -40,6 +42,7 @@ mod items_control_automation_peer;
 mod label_automation_peer;
 mod list_box_automation_peer;
 mod list_item_automation_peer;
+mod list_view_automation_peer;
 mod menu_item_automation_peer;
 #[cfg(test)]
 mod menu_item_automation_peer_tests;
@@ -117,7 +120,9 @@ pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomation
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
 pub use info_bar_automation_peer::InfoBarAutomationPeer;
+pub use tab_view_automation_peer::{TabViewAutomationPeer, TabViewItemAutomationPeer};
 pub use person_picture_automation_peer::PersonPictureAutomationPeer;
+pub use pivot_automation_peer::{PivotAutomationPeer, PivotItemAutomationPeer};
 pub use pager_control_automation_peer::PagerControlAutomationPeer;
 pub use title_bar_automation_peer::TitleBarAutomationPeer;
 pub use interop_automation_peer::InteropAutomationPeer;
@@ -128,6 +133,9 @@ pub use items_control_automation_peer::{
 pub use label_automation_peer::LabelAutomationPeer;
 pub use list_box_automation_peer::ListBoxAutomationPeer;
 pub use list_item_automation_peer::ListItemAutomationPeer;
+pub use list_view_automation_peer::{
+    GridViewAutomationPeer, GridViewItemAutomationPeer, ListViewAutomationPeer, ListViewBaseAutomationPeer, ListViewBaseItemAutomationPeer, ListViewItemAutomationPeer,
+};
 pub use menu_item_automation_peer::MenuItemAutomationPeer;
 pub use native_control_host_peer::NativeControlHostPeer;
 pub use native_menu_bar_automation_peer::NativeMenuBarAutomationPeer;

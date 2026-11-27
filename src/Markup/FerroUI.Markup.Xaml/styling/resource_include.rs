@@ -57,17 +57,6 @@ impl ResourceInclude {
         })
     }
 
-    /// The loaded resource dictionary; loads it on first use.
-    ///
-    /// # Panics
-    /// Panics if [`source`](Self::source) is not set, if the document cannot
-    /// be loaded or if it is not a resource dictionary. Use
-    /// [`try_loaded`](Self::try_loaded) to handle a document that cannot be
-    /// loaded.
-    pub fn loaded(&self) -> Rc<dyn IResourceDictionary> {
-        crate::throw(self.try_loaded())
-    }
-
     /// The loaded resource dictionary for the members of the resource contracts, which have
     /// no error channel: inside an error scope of a load
     /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a

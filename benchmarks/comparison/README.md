@@ -10,7 +10,7 @@ comparison's own harness, beside the same application built from the published c
 | Path | What it is |
 | --- | --- |
 | `upstream/` | The comparison's repository, a git submodule. Nothing in it is changed. |
-| `ferroui-local/Cargo.toml` | A manifest of this repository for the comparison's application (`upstream/benchmarks/compose-vs-cranpose/ferro-app/src/main.rs` and its data crate `perf-data`), with the FerroUI crates of this checkout as path dependencies. |
+| `ferroui-local/Cargo.toml` | A manifest of this repository for the comparison's application (`upstream/.../ferro-app/src/main.rs` and its data crate `perf-data`), with the FerroUI crates of this checkout as path dependencies. |
 | `compare.py` | Builds the two sides and runs the comparison's harness on each. |
 
 The two sides:
@@ -40,7 +40,7 @@ python3 benchmarks/comparison/compare.py run --scenario gauntlet:16 --rounds 2
 `run` prints, for a first start and a second start of each scenario, the frames a second over
 the run, the time to the first frame and the CPU a frame, for the two sides beside each other.
 The harness is the comparison's (`desktop.py`): it measures from outside the application, needs
-macOS, a display at 60 Hz and its frame counter (`upstream/benchmarks/compose-vs-cranpose/framecount/build.sh`),
+macOS, a display at 60 Hz and its frame counter (`upstream/.../framecount/build.sh`),
 and refuses a display on which something else moves. `--diagnostic` measures anyway, for work
 in progress. Its other arguments (`--scenario NAME[:TIER]`, `--rounds N`, `--run SECONDS`) pass
 through; the comparison's README describes the screens and the tiers.

@@ -1,4 +1,22 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <RepeatButton x:Name="Primary" Content="Click and hold"/><TextBlock x:Name="Output" Text="Press and hold to repeat"/>
+<!-- Ported from the pinned RepeatButton example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     button_samples.rs ports RepeatButton_Click of RepeatButtonPage.xaml.cs; the output is a polite
+     live region, as in the source. The source binds IsEnabled to
+     DisableControl1.IsChecked.Value.Equals(x:False); the x:Bind here is the same OneWay binding of
+     IsChecked with the BoolConverters.Not converter. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="RepeatButtonExample1" Spacing="8">
+    <TextBlock Text="A simple RepeatButton with text content." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <RepeatButton x:Name="RepeatButton1"
+                    Content="Click and hold"
+                    IsEnabled="{x:Bind DisableRepeatButton1.IsChecked, Mode=OneWay, Converter={x:Static BoolConverters.Not}}" />
+      <TextBlock x:Name="RepeatButton1Output"
+                 Margin="8,0,0,0"
+                 VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite"
+                 AutomationProperties.Name="Control output" />
+    </StackPanel>
+    <CheckBox x:Name="DisableRepeatButton1" Content="Disable RepeatButton" />
+  </StackPanel>
 </StackPanel>

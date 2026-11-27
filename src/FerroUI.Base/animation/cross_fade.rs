@@ -34,6 +34,11 @@ impl CrossFade {
 
     /// Creates a cross-fade with the given duration.
     pub fn with_duration(duration: SignedDuration) -> Self {
+        // The casts of the transition to `IPageTransition` (its `ValueTypeRegistration`), which
+        // compiled markup needs before it sets a transition, are registered with the first one
+        // made (#612): every transition of the type is made here.
+        static CASTS: std::sync::Once = std::sync::Once::new();
+        CASTS.call_once(crate::data::core::ValueTypes::register_used::<Self>);
         let opacity_animation = |from: f64, to: f64| {
             let animation = Animation::new();
             animation.set_fill_mode(FillMode::Forward);

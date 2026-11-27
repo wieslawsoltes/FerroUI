@@ -182,3 +182,38 @@ fn the_other_cameras_and_lights_load_from_xaml() {
     assert_eq!(camera.kind, Scene3DCameraKind::Orthographic);
     assert_eq!((camera.near_plane_distance, camera.far_plane_distance), (1.0, 20.0));
 }
+
+#[test]
+fn interactive_elements_load_from_xaml() {
+    let _scope = xaml_test_base();
+    let viewport = load_as::<Ref<Viewport3D>>(&format!(
+        "<Viewport3D {NS}>
+           <Viewport3D.Camera>
+             <OrthographicCamera Position='0,0,5' LookDirection='0,0,-1' Width='4'/>
+           </Viewport3D.Camera>
+           <ContainerUIElement3D>
+             <ModelUIElement3D IsHitTestVisible='False'>
+               <GeometryModel3D>
+                 <GeometryModel3D.Geometry>
+                   <MeshGeometry3D Positions='-1,-1,0 1,-1,0 1,1,0 -1,1,0' TriangleIndices='0 1 2 0 2 3'/>
+                 </GeometryModel3D.Geometry>
+                 <GeometryModel3D.Material>
+                   <DiffuseMaterial Brush='Red'/>
+                 </GeometryModel3D.Material>
+               </GeometryModel3D>
+             </ModelUIElement3D>
+             <ModelUIElement3D/>
+           </ContainerUIElement3D>
+         </Viewport3D>"
+    ));
+    let container = viewport.children().get(0).cast::<ContainerUIElement3D>().expect("a container");
+    assert_eq!(container.children().len(), 2);
+    let element = container.children().get(0).cast::<ModelUIElement3D>().expect("a model element");
+    assert!(!element.is_hit_test_visible());
+    assert!(element.model().and_then(|model| model.cast::<GeometryModel3D>()).is_some());
+    let empty = container.children().get(1).cast::<ModelUIElement3D>().expect("a model element");
+    assert!(empty.is_hit_test_visible() && empty.model().is_none());
+    viewport.measure(Size::new(100.0, 100.0));
+    viewport.arrange(Rect::new(0.0, 0.0, 100.0, 100.0));
+    assert_eq!(viewport.snapshot().models.len(), 1);
+}

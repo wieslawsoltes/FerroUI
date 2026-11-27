@@ -13,6 +13,10 @@ fn main() {
     Build::from_env()
         .type_system(TypeSystem::Model)
         .input("documents.rs")
+        .input("Dictionaries/Part.xaml")
+        // The files of `Dictionaries/` are embedded as assets, except the documents the compiler
+        // consumed (#850): `Part.xaml` is merged into `App.xaml`, `Loose.xaml` is no document's.
+        .embed_assets(&["Dictionaries"])
         .compile_group(XamlGroup::new("compiled_app").documents(documents::APP).class_document("App.xaml"))
         .compile_group(
             XamlGroup::new("compiled_parts_theme").documents(documents::PARTS_THEME).class_document("A_B/PartsTheme.xaml"),

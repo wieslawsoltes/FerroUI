@@ -1,0 +1,132 @@
+{
+  "revision": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "target": "aarch64-apple-darwin",
+  "profile": "dist",
+  "patch_sha256": "6f3a2948fda17d7bc93760fc209ce63b4ccafb69072cce03dfcdf64734cc41a8",
+  "base_features": [
+    "full-themes",
+    "markup-functions",
+    "type-tables"
+  ],
+  "arms": {
+    "stock": {
+      "file_bytes": 65859504,
+      "sha256": "d4f688efc80179ccb64cb8e8ed7a19dac9efc5e597e33553a3c5f3bc0dd7d98d",
+      "linkmap_sha256": "5e0f015ec72355e60774ccd1214b3e76b915718997d9660dfccb15ec87fa588b",
+      "text_bytes": 51347192,
+      "read_only_const_bytes": 7321870,
+      "relocatable_const_bytes": 5013344,
+      "linkedit_segment_bytes": 1044400,
+      "default_window_log": [
+        "Will close the main window after 750 ms",
+        "App activated: Background",
+        "Timer fired: closing the main window"
+      ],
+      "verification": {
+        "default_window_launch": "passed",
+        "production_declaration_checks": "passed",
+        "captured_pages": [
+          "DrawerPage",
+          "TabbedPage",
+          "ListBox"
+        ]
+      }
+    },
+    "candidate": {
+      "file_bytes": 65760720,
+      "sha256": "4dea5068b900aa61643d522e25d8aeb544adde712e051ea7089fbb03d122f001",
+      "linkmap_sha256": "48560c4a20dcd79414e96324e0ec2404afb7c87543d9ac5a2e09c78d2a0fa702",
+      "text_bytes": 51240632,
+      "read_only_const_bytes": 7321870,
+      "relocatable_const_bytes": 5013344,
+      "linkedit_segment_bytes": 1043920,
+      "default_window_log": [
+        "Will close the main window after 750 ms",
+        "App activated: Background",
+        "Timer fired: closing the main window"
+      ],
+      "verification": {
+        "default_window_launch": "passed",
+        "production_declaration_checks": "passed",
+        "captured_pages": [
+          "DrawerPage",
+          "TabbedPage",
+          "ListBox"
+        ]
+      }
+    }
+  },
+  "methods": {
+    "method_rows_compared": 1138,
+    "identity_signature_differences": 0,
+    "specialized": {
+      "stock": {
+        "method_rows": 340,
+        "invokers": 337,
+        "invoker_text_bytes": 221980
+      },
+      "candidate": {
+        "method_rows": 340,
+        "invokers": 337,
+        "invoker_text_bytes": 7932
+      }
+    },
+    "matching_signature_without_adapter": {
+      "stock": {
+        "method_rows": 8,
+        "invokers": 8,
+        "invoker_text_bytes": 5304
+      },
+      "candidate": {
+        "method_rows": 8,
+        "invokers": 8,
+        "invoker_text_bytes": 5304
+      }
+    },
+    "unrelated_rows_using_adapter": 0,
+    "shared_adapter": {
+      "unique_code_addresses": 94,
+      "direct_text_bytes": 72728
+    },
+    "other_routed_method_names": {
+      "ButtonStartCustomVisual": 1,
+      "ButtonStopCustomVisual": 1,
+      "ButtonThreadSleep": 1,
+      "ConicBrushCreateAnimate_Click": 1,
+      "LinearBrushCreateAnimate_Click": 1,
+      "PreciseDirtyRectsCheckboxCustomVisualChanged": 1,
+      "RadialBrushCreateAnimate_Click": 1,
+      "SolidBrushCreateAnimate_Click": 1
+    }
+  },
+  "captures": {
+    "01-drawerpage.png": {
+      "dimensions": [
+        2200,
+        1524
+      ],
+      "pixels_different": 0,
+      "stock_pixels_sha256": "30a1a839136edc4fdf3492d98596169b2ca7d77522d73120686de3d18f684f58",
+      "candidate_pixels_sha256": "30a1a839136edc4fdf3492d98596169b2ca7d77522d73120686de3d18f684f58"
+    },
+    "02-tabbedpage.png": {
+      "dimensions": [
+        2200,
+        1524
+      ],
+      "pixels_different": 0,
+      "stock_pixels_sha256": "5a1248ac88bf1edeb058092f17e472739ea66fed117c85d7da269cd2f83fb09a",
+      "candidate_pixels_sha256": "5a1248ac88bf1edeb058092f17e472739ea66fed117c85d7da269cd2f83fb09a"
+    },
+    "03-listbox.png": {
+      "dimensions": [
+        2200,
+        1524
+      ],
+      "pixels_different": 0,
+      "stock_pixels_sha256": "c5813aecf25a3d27389398f32c7fa12ca0ea9c6db3b3ce336735ed3ded30b872",
+      "candidate_pixels_sha256": "c5813aecf25a3d27389398f32c7fa12ca0ea9c6db3b3ce336735ed3ded30b872"
+    }
+  }
+}

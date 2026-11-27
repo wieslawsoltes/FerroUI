@@ -1,6 +1,43 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <NumberBox x:Name="Number" Header="Enter an integer:" Value="1" SpinButtonPlacementMode="Inline" SmallChange="10" LargeChange="100"/>
-  <NumberBox x:Name="Expression" Header="Enter an expression:" Value="NaN" PlaceholderText="1 + 2^2" AcceptsExpression="True"/>
-  <TextBlock x:Name="Output" Text="Value: 1"/>
+<!-- Ported from the three pinned NumberBox examples of WinUI Gallery (14061eea) and the code behind
+     of NumberBoxPage.xaml.cs (text_input_samples.rs); see ../NOTICE.md. The constructor's
+     SetNumberBoxNumberFormatter gives the dollar box a formatter of two fraction digits that
+     rounds half up to 0.25, and SpinButtonPlacementGroup_SelectionChanged sets the spin buttons'
+     placement. As in the source, the spin button box keeps its markup placement (Compact) until
+     the selection changes. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="NumberBoxExample1" Spacing="8">
+    <TextBlock Text="A NumberBox that evaluates expressions." FontSize="18" />
+    <NumberBox x:Name="Expression"
+               AcceptsExpression="True"
+               Header="Enter an expression:"
+               PlaceholderText="1 + 2^2"
+               Value="NaN" />
+  </StackPanel>
+
+  <StackPanel x:Name="NumberBoxExample2" Spacing="8">
+    <TextBlock Text="A NumberBox with a spin button." FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <NumberBox x:Name="NumberBoxSpinButtonPlacementExample"
+                 VerticalAlignment="Top"
+                 AutomationProperties.Name="NumberBox with spin button"
+                 Header="Enter an integer:"
+                 LargeChange="100"
+                 SmallChange="10"
+                 SpinButtonPlacementMode="Compact"
+                 Value="10" />
+      <RadioButtons x:Name="SpinButtonPlacementGroup" Grid.Column="1"
+                    Header="SpinButton placement" SelectedIndex="0">
+        <x:String>Inline</x:String>
+        <x:String>Compact</x:String>
+      </RadioButtons>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="NumberBoxExample3" Spacing="8">
+    <TextBlock Text="A formatted NumberBox that rounds to the nearest 0.25." FontSize="18" />
+    <NumberBox x:Name="FormattedNumberBox"
+               Header="Enter a dollar amount:"
+               PlaceholderText="0.00" />
+  </StackPanel>
 </StackPanel>

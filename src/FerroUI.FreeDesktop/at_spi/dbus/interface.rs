@@ -12,7 +12,7 @@
 
 use zbus::export::serde::ser::Serialize;
 use zbus::export::serde::Deserialize;
-use zbus::zvariant::{DynamicType, Type, Value};
+use zbus::{DynamicType, Type, Variant};
 
 pub(crate) const ERROR_UNKNOWN_METHOD: &str = "org.freedesktop.DBus.Error.UnknownMethod";
 pub(crate) const ERROR_UNKNOWN_INTERFACE: &str = "org.freedesktop.DBus.Error.UnknownInterface";
@@ -130,13 +130,13 @@ pub(crate) trait DBusInterface {
 
     /// The value of a property (`TryGetProperty`); `None` for a name the
     /// interface does not have.
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         let _ = name;
         None
     }
 
     /// Every property (`GetAllProperties`), in the order of the description.
-    fn get_all_properties(&self) -> Vec<(&'static str, Value<'static>)> {
+    fn get_all_properties(&self) -> Vec<(&'static str, Variant<'static>)> {
         self.description()
             .properties
             .iter()
@@ -146,7 +146,7 @@ pub(crate) trait DBusInterface {
 
     /// Sets a property (`TrySetProperty`); false for a property that does
     /// not exist, cannot be written or was given a value of another type.
-    fn set_property(&self, name: &str, value: &Value<'_>) -> bool {
+    fn set_property(&self, name: &str, value: &Variant<'_>) -> bool {
         let _ = (name, value);
         false
     }

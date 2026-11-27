@@ -100,6 +100,8 @@ fn untyped_conversion_temporary_drops_before_validation_or_coercion() {
         dropped: Rc<Cell<bool>>,
         writes: Rc<Cell<usize>>,
     }
+
+    crate::styled_value!(Output);
     impl Default for Output {
         fn default() -> Self {
             Self { number: 0, temporary: false, dropped: Rc::new(Cell::new(false)), writes: Rc::new(Cell::new(0)) }
@@ -211,6 +213,8 @@ fn untyped_conversion_releases_its_temporary_when_value_clone_panics() {
         drops: Rc<Cell<usize>>,
         writes: Rc<Cell<usize>>,
     }
+
+    crate::styled_value!(Output);
     impl Default for Output {
         fn default() -> Self {
             Self { temporary: false, drops: Rc::new(Cell::new(0)), writes: Rc::new(Cell::new(0)) }
@@ -598,4 +602,18 @@ fn disposing_animation_set_value_reverts_to_previous_local_value() {
     d.expect("a disposable").dispose();
 
     assert_eq!("foo", target.get_value(Class1::foo_property()));
+}
+
+// Not from upstream: a value of the type of a styled or attached property is set without an
+// untyped value; a value of another type is given back.
+#[test]
+fn try_set_value_typed_sets_styled_and_attached_values_and_gives_back_another_type() {
+    let target = Class2::new();
+
+    assert_eq!(Ok(()), target.try_set_value_typed(Class1::foo_property(), s("typed")));
+    assert_eq!("typed", target.get_value(Class1::foo_property()));
+    assert_eq!(Ok(()), target.try_set_value_typed(AttachedOwner::attached_property(), Some(s("attached"))));
+    assert_eq!(Some(s("attached")), target.get_value(AttachedOwner::attached_property()));
+    assert_eq!(Err(3), target.try_set_value_typed(Class2::flob_property(), 3));
+    assert_eq!(0.0, target.get_value(Class2::flob_property()));
 }

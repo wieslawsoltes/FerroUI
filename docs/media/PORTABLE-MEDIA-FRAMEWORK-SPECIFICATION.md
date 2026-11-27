@@ -1001,9 +1001,13 @@ Metal/Graphite), the Vello backend's GPU modes on Metal (macOS) and browser WebG
 Vello imports a shared frame as a texture of its device, converts it once on the
 device into the canvas's premultiplied RGBA (BGRA storage, a bottom-up first row,
 full-range Rec. 709 video; counted as a GPU conversion) and gives the frame's lease
-back once its queue has done that pass. Vello on OpenGL, Vulkan and Direct3D 12,
-browser Graphite/WebGPU and render-worker media bridges are deferred and must
-report unavailable import capabilities.
+back once its queue has done that pass. Vello on the OpenGL context of the
+platform (Linux and Windows without a hardware Vulkan or Direct3D 12 adapter)
+imports the frames a producer of that context hands out as its textures
+(`SHARED_GL_TEXTURE`) the same way, the texture borrowed by `wgpu` over the same
+context and ordered by its commands (#575). Vello on its own Vulkan and Direct3D 12
+devices, Vello in the browser, browser Graphite/WebGPU and render-worker media
+bridges are deferred and must report unavailable import capabilities.
 Windows uses Media Foundation and compatible D3D11 surfaces/device management,
 with native audio/timing. Apple uses AVFoundation/CoreVideo/Metal. Android uses
 native playback, CameraX and external GLES textures. Linux uses system GStreamer

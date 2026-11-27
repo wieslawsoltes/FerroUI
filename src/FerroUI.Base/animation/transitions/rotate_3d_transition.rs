@@ -40,13 +40,18 @@ impl Deref for Rotate3DTransition {
 impl Rotate3DTransition {
     /// Creates a horizontal rotation with a zero duration.
     pub fn new() -> Self {
-        Self { base: PageSlide::new(), depth: Cell::new(None) }
+        Self::with_duration(SignedDuration::ZERO, SlideAxis::Horizontal, None)
     }
 
     /// Creates a rotation with the given duration and axis. `depth`
     /// defines the depth of the 3D effect; when `None` it is calculated
     /// automatically.
     pub fn with_duration(duration: SignedDuration, orientation: SlideAxis, depth: Option<f64>) -> Self {
+        // The casts of the transition to `IPageTransition` (its `ValueTypeRegistration`), which
+        // compiled markup needs before it sets a transition, are registered with the first one
+        // made (#612): every transition of the type is made here.
+        static CASTS: std::sync::Once = std::sync::Once::new();
+        CASTS.call_once(crate::data::core::ValueTypes::register_used::<Self>);
         Self { base: PageSlide::with_duration(duration, orientation), depth: Cell::new(depth) }
     }
 

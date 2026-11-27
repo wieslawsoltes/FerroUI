@@ -34,7 +34,7 @@ use xamlx::transform::{AstTransformationContext, IXamlAstTransformer};
 use xamlx::type_system::IXamlType;
 use xamlx::XamlNamespaces;
 
-use super::{FerroXamlIlWellKnownTypesExtensions, XamlBindingsTransformException};
+use super::{FerroTransformErrors, FerroXamlIlWellKnownTypesExtensions};
 
 /// `x:DefaultBindMode`.
 pub const DEFAULT_BIND_MODE: &str = "DefaultBindMode";
@@ -52,7 +52,7 @@ const MAX_PHASE: i32 = 25;
 const LOAD_NOT_SUPPORTED: &str = "x:Load cannot be used on the root of a Page, User Control or DataTemplate, or direct children of a Resource Dictionary, and can only be used on elements of type UIElement or FlyoutBase";
 
 fn error(message: impl Into<String>, line_info: &dyn IXamlLineInfo) -> XamlError {
-    XamlBindingsTransformException::new(message, line_info, None)
+    XamlError::bindings_transform(message, line_info, None)
 }
 
 /// The directive `x:name` of `children`, the children of an object node.

@@ -18,6 +18,21 @@ use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
+/// The rejection of a setter without a property.
+const NO_SETTER_PROPERTY: &str = "No Setter property assigned.";
+
+/// The rejection of a preview of the transform animator on a CSS `TransformOperations` value.
+const CSS_TRANSFORM_TARGET: &str = "The native component animator cannot target an existing CSS \
+    TransformOperations value; use a native TransformGroup or a registered transform animator.";
+
+/// The rejection of a property no animator is registered for.
+fn no_animator_message(property: &'static FerroProperty) -> String {
+    format!(
+        "No animator registered for the property {property}. Add an animator to the \
+         Animation.Animators collection that matches this property to animate it."
+    )
+}
+
 struct PreviewTransform {
     target: WeakRef<Visual>,
     transform: Rc<dyn crate::media::ITransform>,
@@ -211,7 +226,7 @@ impl Animation {
         for keyframe in self.children.snapshot().iter() {
             for setter in keyframe.setters().snapshot().iter() {
                 let Some(property) = setter.property() else {
-                    panic!("No Setter property assigned.");
+                    panic!("{NO_SETTER_PROPERTY}");
                 };
 
                 if property == Visual::is_visible_property().as_property() {
@@ -222,9 +237,7 @@ impl Animation {
                     .or_else(|| Animation::get_animator_type(property));
 
                 let Some((type_, factory)) = handler else {
-                    panic!(
-                        "No animator registered for the property {property}. Add an animator to the Animation.Animators collection that matches this property to animate it."
-                    );
+                    panic!("{}", no_animator_message(property));
                 };
 
                 if !handler_list
@@ -297,6 +310,10 @@ impl Animation {
     /// `on_complete` runs when the animation ends by itself.
     /// `is_manually_started` tells an animation started by code from one
     /// started by a style. Disposing the result removes the animation.
+    ///
+    /// A program an animator rejects ([`IAnimator::apply`]) goes to
+    /// [`Dispatcher::raise_unhandled_exception`] and applies nothing (#567);
+    /// [`try_apply`](Self::try_apply) returns it.
     pub fn apply(
         &self,
         control: &Animatable,
@@ -305,7 +322,34 @@ impl Animation {
         on_complete: Option<Rc<dyn Fn()>>,
         is_manually_started: bool,
     ) -> Rc<dyn IDisposable> {
+        match self.try_apply(control, clock, match_, on_complete, is_manually_started) {
+            Ok(applied) => applied,
+            Err(error) => {
+                Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+                Disposable::empty()
+            }
+        }
+    }
+
+    /// [`apply`](Self::apply) that returns the rejection of an animator (the
+    /// type of its property, its target, the timing of an instance) before
+    /// anything is left applied (#567).
+    pub fn try_apply(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        match_: Rc<dyn IObservable<bool>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+        is_manually_started: bool,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
         let (animators, mut subscriptions, animates_visibility) = self.interpret_keyframes(control);
+        // The steps applied before a rejection are removed with it.
+        let reject = |subscriptions: Vec<Rc<dyn IDisposable>>, error: AnimationError| {
+            for subscription in subscriptions {
+                subscription.dispose();
+            }
+            Err(error)
+        };
 
         let should_pause_on_invisible = match self.playback_behavior.get() {
             PlaybackBehavior::Auto => !(animates_visibility || is_manually_started),
@@ -314,14 +358,17 @@ impl Animation {
         };
 
         if animators.len() == 1 {
-            let subscription = animators[0].clone().apply(
+            let subscription = match animators[0].clone().apply(
                 self,
                 control,
                 clock,
                 match_,
                 on_complete,
                 should_pause_on_invisible,
-            );
+            ) {
+                Ok(subscription) => subscription,
+                Err(error) => return reject(subscriptions, error),
+            };
 
             if let Some(subscription) = subscription {
                 self.retain_preview_subscription(&subscription);
@@ -357,14 +404,17 @@ impl Animation {
                         action
                     });
 
-                let subscription = animator.clone().apply(
+                let subscription = match animator.clone().apply(
                     self,
                     control,
                     clock.clone(),
                     match_.clone(),
                     animator_on_complete,
                     should_pause_on_invisible,
-                );
+                ) {
+                    Ok(subscription) => subscription,
+                    Err(error) => return reject(subscriptions, error),
+                };
 
                 if let Some(subscription) = subscription {
                     self.retain_preview_subscription(&subscription);
@@ -379,7 +429,7 @@ impl Animation {
             }
         }
 
-        Rc::new(CompositeDisposable::from_disposables(subscriptions))
+        Ok(Rc::new(CompositeDisposable::from_disposables(subscriptions)))
     }
 
     /// Applies an isolated snapshot using the framework animators, retaining final fill
@@ -393,6 +443,18 @@ impl Animation {
         clock: Option<Rc<dyn IClock>>,
         on_complete: Option<Rc<dyn Fn()>>,
     ) -> Rc<dyn IDisposable> {
+        match self.apply_for_preview_core(control, clock, on_complete) {
+            Ok(applied) => applied,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    fn apply_for_preview_core(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
         let preview = Animation::new();
         preview.set_duration(self.duration());
         preview.set_iteration_count(self.iteration_count());
@@ -428,13 +490,13 @@ impl Animation {
                                 setter.property().and_then(Animation::get_animator_type)
                             });
                             if handler.is_some_and(|(kind, _)| kind == TypeId::of::<crate::animation::animators::TransformAnimator>()) {
-                                panic!("The native component animator cannot target an existing CSS TransformOperations value; use a native TransformGroup or a registered transform animator.");
+                                panic!("{CSS_TRANSFORM_TARGET}");
                             }
                         }
                     }
                 }
             }
-            preview.apply(
+            preview.try_apply(
                 control,
                 clock,
                 Observable::single_value(true),
@@ -443,7 +505,12 @@ impl Animation {
             )
         }));
         let applied = match applied {
-            Ok(applied) => applied,
+            Ok(Ok(applied)) => applied,
+            Ok(Err(error)) => {
+                // An animator rejected the program: what was set up before it goes.
+                values.dispose();
+                return Err(error);
+            }
             Err(error) => {
                 // A redirected transform can be created before a later animator validates
                 // its timing or target. Remove every completed setup step on failure.
@@ -451,13 +518,81 @@ impl Animation {
                 std::panic::resume_unwind(error);
             }
         };
-        Disposable::create(move || {
+        Ok(Disposable::create(move || {
             // Mark the scope disposed before unsubscribing: ordinary forward-fill teardown
             // must not author a final value while a preview is being removed.
             values.dispose();
             applied.dispose();
             drop(preview);
-        })
+        }))
+    }
+
+    /// [`apply_for_preview`](Self::apply_for_preview), with the programs the framework rejects
+    /// as `Err` instead of a panic (#567): a setter without a property, a property no animator
+    /// is registered for, a CSS `TransformOperations` target of the transform animator, a
+    /// transform animation of a target that is not a `Visual`, and a negative speed ratio,
+    /// delay, duration or delay between iterations (or an iteration count above `i64::MAX`).
+    /// The error has the message `apply_for_preview` panics with; nothing is applied then.
+    ///
+    /// What an animator checks itself as it is applied ([`IAnimator::apply`]: an animator
+    /// given explicitly for a property of another value type, the checks of an application's
+    /// animator) is `Err` too, and what was set up before it is removed.
+    pub fn try_apply_for_preview(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+    ) -> Result<Rc<dyn IDisposable>, AnimationError> {
+        self.validate_for_preview(control)?;
+        self.apply_for_preview_core(control, clock, on_complete)
+    }
+
+    /// The first rejection of [`try_apply_for_preview`](Self::try_apply_for_preview), in the
+    /// order `apply_for_preview` meets them: the CSS target, the key frames
+    /// (`interpret_keyframes`), then each animator as it is applied (the target of the
+    /// transform animator, the timing of the instance it creates).
+    fn validate_for_preview(&self, control: &Animatable) -> Result<(), AnimationError> {
+        let transform_animator = TypeId::of::<crate::animation::animators::TransformAnimator>();
+        let visual = control.downcast_ref::<Visual>();
+        let css_target = visual.is_some_and(|visual| {
+            visual
+                .render_transform()
+                .is_some_and(|value| value.as_any().is::<crate::media::transformation::TransformOperations>())
+        });
+        let keyframes = self.children.snapshot();
+        if css_target {
+            for keyframe in keyframes.iter() {
+                for setter in keyframe.setters().snapshot().iter() {
+                    let handler = Animation::get_animator(setter)
+                        .or_else(|| setter.property().and_then(Animation::get_animator_type));
+                    if handler.is_some_and(|(kind, _)| kind == transform_animator) {
+                        return Err(AnimationError(CSS_TRANSFORM_TARGET.to_string()));
+                    }
+                }
+            }
+        }
+        let mut animators: Vec<(TypeId, &'static FerroProperty)> = Vec::new();
+        for keyframe in keyframes.iter() {
+            for setter in keyframe.setters().snapshot().iter() {
+                let Some(property) = setter.property() else {
+                    return Err(AnimationError(NO_SETTER_PROPERTY.to_string()));
+                };
+                let Some((kind, _)) = Animation::get_animator(setter).or_else(|| Animation::get_animator_type(property))
+                else {
+                    return Err(AnimationError(no_animator_message(property)));
+                };
+                if !animators.contains(&(kind, property)) {
+                    animators.push((kind, property));
+                }
+            }
+        }
+        for (kind, _) in animators {
+            if kind == transform_animator && visual.is_none() {
+                return Err(AnimationError(crate::animation::animators::not_a_visual_message(control)));
+            }
+            crate::animation::animation_instance::validate_timing(self)?;
+        }
+        Ok(())
     }
 
     pub(crate) fn retain_preview_subscription(&self, subscription: &Rc<dyn IDisposable>) {

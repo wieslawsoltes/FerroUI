@@ -200,9 +200,28 @@ fn template_parts_name_classes() {
 /// controls (docs/porting/winui-controls.md).
 const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextLayoutRoundingPlacement",
+    "EasingMode",
     "Symbol",
     "InfoBarSeverity",
     "ZoomMode",
+    "ListViewSelectionMode",
+    "ScrollIntoViewAlignment",
+    "ListViewReorderMode",
+    "IncrementalLoadingTrigger",
+    "ItemsUpdatingScrollMode",
+    "GroupHeaderPlacement",
+    "ItemClickEventArgs",
+    "ListViewItemTemplateSettings",
+    "GridViewItemTemplateSettings",
+    "TabViewWidthMode",
+    "TabViewCloseButtonOverlayMode",
+    "TabViewTabCloseRequestedEventArgs",
+    "PivotHeaderFocusVisualPlacement",
+    "PivotSlideInAnimationGroup",
+    "PivotItemEventArgs",
+    "SwipeMode",
+    "SwipeBehaviorOnInvoked",
+    "SwipeItemInvokedEventArgs",
     "InfoBarCloseReason",
     "InfoBarClosingEventArgs",
     "InfoBarClosedEventArgs",
@@ -818,6 +837,23 @@ fn converters_are_created_configured_and_assignable_to_their_contract() {
         &unbox::<Rc<MenuScrollingVisibilityConverter>>(&(find("MenuScrollingVisibilityConverter").find_field("Instance").unwrap().get)()),
         &MenuScrollingVisibilityConverter::instance()
     ));
+}
+
+#[test]
+fn a_converter_made_in_code_is_assignable_to_its_contract() {
+    use crate::converters::*;
+    use ferroui_base::data::converters::{IMultiValueConverter, IValueConverter};
+
+    // The casts are registered by the construction of the converter, not by the start-up
+    // registration of the crate (#612): a converter made by code, without markup, converts too.
+    let value = boxed(Rc::new(BorderGapMaskConverter::new()));
+    assert!(from_markup_value::<Rc<dyn IMultiValueConverter>>(&value).is_some());
+    // The nullable form of the contract comes with the start-up registration of the crates.
+    crate::register_types();
+    let value = boxed(Rc::new(EnumToBoolConverter::default()));
+    assert!(from_markup_value::<Option<Rc<dyn IValueConverter>>>(&value).is_some_and(|c| c.is_some()));
+    let value = boxed(TreeViewItemIndentConverter::instance());
+    assert!(from_markup_value::<Rc<dyn IMultiValueConverter>>(&value).is_some());
 }
 
 #[test]

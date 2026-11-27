@@ -16,6 +16,7 @@ mod chart_series;
 mod collections;
 mod decorations;
 mod enums;
+mod gauges;
 mod geo_models;
 mod identity;
 mod legends;
@@ -24,6 +25,7 @@ mod register_types;
 pub mod renderer;
 pub mod scene_transition;
 mod series_classes;
+mod tooltip_motion;
 mod visual_elements;
 
 pub use axis::{Axis, DateTimeAxis, TimeSpanAxis};
@@ -40,9 +42,10 @@ pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, 
 pub use ferroui_livecharts::{
     AxisPosition, BrushSpace, ChartPointFormatter, DataLabelsPosition, DrawnMap, FindingStrategy,
     GeoLand, GeoTooltipFormatter, GeoTooltipValue, Labeler, Labelers, MapProjection, MapViewport,
-    Maps, PolarLabelsPosition, PolarScale, RadialAlignment, SankeyLabelPosition, SankeyLayoutKind,
-    SeriesKind, ZoomDirection,
+    Maps, NodeTooltipFormatter, NodeTooltipPoint, PolarLabelsPosition, PolarScale, RadialAlignment,
+    SankeyLabelPosition, SankeyLayoutKind, SeriesKind, ZoomDirection,
 };
+pub use gauges::{GaugeGenerator, GaugeItem};
 pub use geo_models::{GeoMarker, HeatLand};
 pub use legends::{ChartLegend, HeatLegend};
 pub use node_models::{SankeyLink, SankeyNode, TreemapNode};

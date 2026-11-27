@@ -47,8 +47,8 @@ impl AtSpiRegistryEventTracker {
 
     async fn initialize_core(self: &Rc<Self>) -> zbus::Result<()> {
         let registry_proxy = OrgA11yAtspiRegistryProxy::builder(&self.connection)
-            .destination(BUS_NAME_REGISTRY)?
-            .path(REGISTRY_PATH)?
+            .destination(BUS_NAME_REGISTRY)
+            .path(REGISTRY_PATH)
             .cache_properties(CacheProperties::No)
             .build()
             .await?;

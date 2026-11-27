@@ -97,7 +97,7 @@ pub struct TypeInfo {
     class_init: Option<fn()>,
     /// The default constructor, kept only with the type tables
     /// ([`with_constructor`](Self::with_constructor)).
-    #[cfg(feature = "type-tables")]
+    #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
     constructor: Option<fn() -> Ref<FerroObject>>,
     handles: Option<fn() -> [TypeId; 2]>,
     handle_registration: Option<fn()>,
@@ -231,7 +231,7 @@ impl TypeInfo {
             identity: None,
             module_path: "",
             class_init: None,
-            #[cfg(feature = "type-tables")]
+            #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
             constructor: None,
             handles: None,
             handle_registration: None,
@@ -321,7 +321,7 @@ impl TypeInfo {
     /// it statically ([`DefaultConstructible`]), or makes its constructor
     /// reachable by reflection with
     /// [`register_constructor`](Self::register_constructor).
-    #[cfg(feature = "type-tables")]
+    #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
     pub const fn with_constructor(mut self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         self.constructor = constructor;
         self
@@ -329,7 +329,7 @@ impl TypeInfo {
 
     /// Without the tables of types the constructor is not kept; see the
     /// other definition.
-    #[cfg(not(feature = "type-tables"))]
+    #[cfg(not(all(feature = "type-tables", not(ferroui_bounded_reflection))))]
     pub const fn with_constructor(self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         let _ = constructor;
         self
@@ -506,21 +506,32 @@ impl TypeInfo {
             T::new_instance().upcast::<FerroObject>()
         }
         let type_ = T::TYPE;
-        if type_.stored_constructor().is_none() {
-            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(construct::<T>);
-        }
+        Self::register_constructor_of(type_, construct::<T>);
         type_
+    }
+
+    /// Makes `constructor` the default constructor of `type_`, as
+    /// [`register_constructor`](Self::register_constructor) does for a class it
+    /// names statically: for a type made at run time (a class another language
+    /// registers through the C ABI), whose constructor is a function of its
+    /// own. Without the tables of types the type carries no constructor, so
+    /// this is what [`create_instance`](Self::create_instance) finds. A type
+    /// that carries one (with the tables), or one registered before, keeps it.
+    pub fn register_constructor_of(type_: &'static TypeInfo, constructor: fn() -> Ref<FerroObject>) {
+        if type_.stored_constructor().is_none() {
+            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(constructor);
+        }
     }
 
     /// The default constructor the type carries: the declared one with the
     /// tables of types, none without them.
     #[inline]
     fn stored_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
-        #[cfg(feature = "type-tables")]
+        #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
         {
             self.constructor
         }
-        #[cfg(not(feature = "type-tables"))]
+        #[cfg(not(all(feature = "type-tables", not(ferroui_bounded_reflection))))]
         {
             None
         }
@@ -627,14 +638,14 @@ impl TypeInfo {
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register_all`](Self::register_all), which always
     /// registers.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         let _ = types;
@@ -1170,6 +1181,18 @@ impl<T: ObjectType> Ref<T> {
             Ok(Ref { ptr: self.ptr, _marker: PhantomData })
         } else {
             Err(self)
+        }
+    }
+
+    /// Borrows the existing handle as class `U` if its runtime type derives from `U`.
+    #[inline]
+    pub fn cast_ref<U: ObjectType>(&self) -> Option<&Ref<U>> {
+        if self.is::<U>() {
+            // SAFETY: Ref is transparent over the same Rc for every marker type.
+            // The dynamic class check establishes the target invariant for this borrow.
+            Some(unsafe { &*(self as *const Ref<T> as *const Ref<U>) })
+        } else {
+            None
         }
     }
 

@@ -12,14 +12,22 @@
 //! - `inherited_held`: the font size, which the panel above the controls holds: the value of the
 //!   nearest ancestor that has one, kept by the store of the control between two changes of the
 //!   tree (section 9.3);
-//! - `attached_unset`: `Canvas.Left` of a control that never had one.
+//! - `attached_unset`: `Canvas.Left` of a control that never had one;
+//! - `enum_local`: `HorizontalAlignment`, an enumeration set on the control beside the six other
+//!   values and a clip;
+//! - `enum_unset`: `VerticalAlignment` of the same controls, which never had one: the default;
+//! - `handle_local`: `Clip`, a handle to a geometry set on the control: the read hands out one
+//!   more owner of it (#986: the values of enumerations and of handles are kept by one store for
+//!   each of the two kinds).
 //!
 //! The controls are the children of one panel, shown and laid out. Each invocation reads the
 //! property of every control, as often as it takes to make ten thousand reads.
 
 use crate::harness::Registry;
 use crate::trees::fixture::Fixture;
-use ferroui_base::{CornerRadius, Ref, Thickness};
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+use ferroui_base::media::RectangleGeometry;
+use ferroui_base::{CornerRadius, Rect, Ref, Thickness};
 use ferroui_controls::documents::TextElement;
 use ferroui_controls::{Border, Canvas, StackPanel};
 
@@ -37,9 +45,16 @@ impl ControlRead {
     /// `objects` controls in a panel that holds a font size, shown and laid out. A control with
     /// `values` holds six local values; `opacity` gives it a seventh.
     fn new(objects: usize, values: bool, opacity: bool) -> Self {
+        Self::with(objects, values, opacity, false)
+    }
+
+    /// As [`new`](Self::new); a control with `kinds` also holds a horizontal alignment and a
+    /// clip, the one geometry of all the controls.
+    fn with(objects: usize, values: bool, opacity: bool, kinds: bool) -> Self {
         let fixture = Fixture::new();
         let panel = StackPanel::new();
         TextElement::set_font_size_on(&panel, 20.0);
+        let clip = RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 8.0, 4.0));
         let controls: Vec<Ref<Border>> = (0..objects)
             .map(|_| {
                 let control = Border::new();
@@ -53,6 +68,10 @@ impl ControlRead {
                 }
                 if opacity {
                     control.set_opacity(0.5);
+                }
+                if kinds {
+                    control.set_horizontal_alignment(HorizontalAlignment::Left);
+                    control.set_clip(clip.clone());
                 }
                 panel.children().add(&control);
                 control
@@ -73,6 +92,10 @@ impl ControlRead {
 
     fn with_opacity(objects: usize) -> Self {
         Self::new(objects, true, true)
+    }
+
+    fn with_kinds(objects: usize) -> Self {
+        Self::with(objects, true, false, true)
     }
 
     /// Reads a number of every control, `rounds` times.
@@ -109,12 +132,24 @@ impl ControlRead {
     fn canvas_left(&mut self) -> f64 {
         self.sum(|control| Canvas::get_left(control))
     }
+
+    fn horizontal_alignment(&mut self) -> f64 {
+        self.sum(|control| if control.horizontal_alignment() == HorizontalAlignment::Left { 1.0 } else { 0.0 })
+    }
+
+    fn vertical_alignment(&mut self) -> f64 {
+        self.sum(|control| if control.vertical_alignment() == VerticalAlignment::Stretch { 1.0 } else { 0.0 })
+    }
+
+    fn clip(&mut self) -> f64 {
+        self.sum(|control| if control.clip().is_some() { 1.0 } else { 0.0 })
+    }
 }
 
 type Setup = fn(usize) -> ControlRead;
 type Body = fn(&mut ControlRead) -> f64;
 
-const READERS: [(&str, Setup, Body); 8] = [
+const READERS: [(&str, Setup, Body); 11] = [
     ("hot_copy", ControlRead::with_values, ControlRead::width),
     ("unset_empty_store", ControlRead::bare, ControlRead::opacity),
     ("unset_beside_values", ControlRead::with_values, ControlRead::opacity),
@@ -123,6 +158,9 @@ const READERS: [(&str, Setup, Body); 8] = [
     ("inherited_unheld", ControlRead::with_values, ControlRead::use_layout_rounding),
     ("inherited_held", ControlRead::with_values, ControlRead::font_size),
     ("attached_unset", ControlRead::with_values, ControlRead::canvas_left),
+    ("enum_local", ControlRead::with_kinds, ControlRead::horizontal_alignment),
+    ("enum_unset", ControlRead::with_kinds, ControlRead::vertical_alignment),
+    ("handle_local", ControlRead::with_kinds, ControlRead::clip),
 ];
 
 /// A walk that stays in the first cache of the processor, and one that does not.

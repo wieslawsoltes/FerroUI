@@ -2,7 +2,7 @@ use crate::{catalog, examples, navigation::NavigationHistory, GalleryView, CATAL
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, CheckBox, ComboBox, Slider, TextBlock, TextBox};
+use ferroui_controls::{Button, CheckBox, ComboBox, TextBlock, TextBox};
 use std::collections::HashSet;
 
 pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
@@ -21,6 +21,9 @@ pub(crate) fn start() -> ferroui_controls::testing::UnitTestApplicationScope {
         "SystemFillColorSuccessBrush",
         "SystemFillColorCautionBrush",
         "SystemFillColorCriticalBrush",
+        // The StaticResources of the XamlResources page's second example.
+        "SolidBackgroundFillColorBaseBrush",
+        "TextFillColorPrimaryBrush",
     ] {
         application.resources().add(
             ferroui_base::controls::ResourceKey::from(name),
@@ -174,19 +177,27 @@ fn adaptation_port_states_match_port_status() {
 fn button_click_and_disabled_option_update_native_controls() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary");
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    primary.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    // `Button_Click` of the source: the name of the clicked button picks its output.
+    let first = root.get_control::<Button>("Button1");
+    first.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Clicked 2 times")
+        root.get_control::<TextBlock>("Control1Output").text().as_deref(),
+        Some("You clicked: Button1")
     );
-    root.get_control::<CheckBox>("Disable")
+    assert_eq!(root.get_control::<TextBlock>("Control2Output").text().as_deref(), None);
+    root.get_control::<Button>("Button2")
+        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert_eq!(
+        root.get_control::<TextBlock>("Control2Output").text().as_deref(),
+        Some("You clicked: Button2")
+    );
+    // The Disable option is the source's OneWay x:Bind of IsChecked, negated.
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(true));
-    assert!(!primary.is_enabled());
-    root.get_control::<CheckBox>("Disable")
+    assert!(!first.is_enabled());
+    root.get_control::<CheckBox>("DisableButton1")
         .set_is_checked(Some(false));
-    assert!(primary.is_enabled());
+    assert!(first.is_enabled());
 }
 
 #[test]
@@ -207,23 +218,11 @@ fn three_state_checkbox_preserves_null_and_reports_each_state() {
 }
 
 #[test]
-fn textbox_counts_unicode_scalar_values() {
-    let _application = start();
-    let root = examples::create(examples::find("TextBox").unwrap()).unwrap();
-    root.get_control::<TextBox>("Primary")
-        .set_text(Some("A🦀é"));
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("3 characters")
-    );
-}
-
-#[test]
 fn password_examples_keep_source_validation_and_reveal_behavior() {
     let _application = start();
     let root = examples::create(examples::find("PasswordBox").unwrap()).unwrap();
     let password = root.get_control::<TextBox>("SimplePassword");
-    let validation = root.get_control::<TextBlock>("PasswordValidation");
+    let validation = root.get_control::<TextBlock>("Control1Output");
     password.set_text(Some("Password"));
     assert_eq!(password.text().as_deref(), Some(""));
     assert_eq!(
@@ -285,24 +284,6 @@ fn checkbox_select_all_keeps_source_aggregate_and_user_cycle_behavior() {
             .text()
             .as_deref(),
         Some("You unchecked the box.")
-    );
-}
-
-#[test]
-fn slider_and_combobox_outputs_observe_shared_properties() {
-    let _application = start();
-    let root = examples::create(examples::find("Slider").unwrap()).unwrap();
-    root.get_control::<Slider>("Primary").set_range_value(900.0);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 900")
-    );
-    let root = examples::create(examples::find("ComboBox").unwrap()).unwrap();
-    root.get_control::<ComboBox>("Primary")
-        .set_selected_index(2);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Selected index: 2")
     );
 }
 
@@ -475,46 +456,43 @@ fn contrast_calculation_matches_original_endpoints_symmetry_and_thresholds() {
 }
 
 #[test]
-fn contrast_inputs_update_ratio_and_report_invalid_values() {
+fn contrast_pickers_update_the_ratio_the_checks_and_the_preview() {
+    use crate::accessibility_samples::{hex, picker_color, ratio_text};
+    use ferroui_base::media::{Color, Colors};
+    use ferroui_controls_color_picker::ColorView;
+    assert_eq!(ratio_text(21.0), "21:1");
+    assert_eq!(ratio_text(4.4776), "4.48:1");
+    assert_eq!(hex(Color::from_rgb(0x12, 0xab, 0x00)), "#12AB00");
     let _application = start();
     let root = examples::create(examples::find("AccessibilityColorContrast").unwrap()).unwrap();
-    let ratio = root.get_control::<TextBlock>("ContrastRatio");
-    assert_eq!(ratio.text().as_deref(), Some("21.00:1"));
-    let input = root.get_control::<TextBox>("TextColor");
+    let ratio = root.get_control::<TextBlock>("ContrastRatioPresenter");
+    // The text picker starts Black and the background picker White, as the source's.
+    assert_eq!(picker_color(&root, "Text"), Some(Colors::BLACK));
+    assert_eq!(picker_color(&root, "Background"), Some(Colors::WHITE));
+    assert_eq!(root.get_control::<TextBox>("TextColorHex").text().as_deref(), Some("#000000"));
+    assert_eq!(ratio.text().as_deref(), Some("21:1"));
+    // ColorHex_TextChanged: a hex color sets the picker, other text is ignored.
+    let input = root.get_control::<TextBox>("TextColorHex");
     input.set_text(Some("#777777"));
     assert_eq!(ratio.text().as_deref(), Some("4.48:1"));
-    assert!(root
-        .get_control::<TextBlock>("ContrastChecks")
-        .text()
-        .unwrap()
-        .starts_with("Regular text (4.5:1): Fail"));
-    input.set_text(Some("invalid"));
     assert_eq!(
-        ratio.text().as_deref(),
-        Some("Enter two six-digit RGB colors.")
+        root.get_control::<TextBlock>("NormalTextCheckResult").text().as_deref(),
+        Some("Fail")
     );
-    input.set_text(Some("#FFFFFF"));
-    assert_eq!(ratio.text().as_deref(), Some("1.00:1"));
-}
-
-#[test]
-fn winui_numberbox_example_keeps_expression_nan_and_valuechanged_behavior() {
-    use ferroui_controls::NumberBox;
-    let _application = start();
-    let root = examples::create(examples::find("NumberBox").unwrap()).unwrap();
-    let expression = root.get_control::<NumberBox>("Expression");
-    assert!(expression.value().is_nan());
-    expression.set_text("1 + 2^2");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert_eq!(expression.value(), 5.0);
-    expression.set_text("");
-    press(&expression, ferroui_base::input::Key::Enter, true);
-    assert!(expression.value().is_nan());
-    root.get_control::<NumberBox>("Number")
-        .set_numeric_value(31.0);
     assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Value: 31")
+        root.get_control::<TextBlock>("LargeTextCheckResult").text().as_deref(),
+        Some("Pass")
+    );
+    input.set_text(Some("invalid"));
+    assert_eq!(ratio.text().as_deref(), Some("4.48:1"));
+    // Picker_ColorChanged: the picker's color writes the hex and the ratio.
+    root.get_control::<ColorView>("BackgroundColorView")
+        .set_color(Color::from_rgb(0x77, 0x77, 0x77));
+    assert_eq!(root.get_control::<TextBox>("BackgroundColorHex").text().as_deref(), Some("#777777"));
+    assert_eq!(ratio.text().as_deref(), Some("1:1"));
+    assert_eq!(
+        root.get_control::<TextBlock>("ComponentsCheckResult").text().as_deref(),
+        Some("Fail")
     );
 }
 
@@ -543,39 +521,27 @@ fn page_transition_sample_uses_winui_frame_journal_and_source_page_types() {
         frame.current_source_page_type(),
         Some(FirstSamplePage::PAGE_TYPE)
     );
-    assert!(frame.can_go_forward());
-    root.get_control::<Button>("NavigationForward")
+    // BackwardButton1_Click does nothing without a back stack.
+    root.get_control::<Button>("NavigationBack")
         .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
         frame.current_source_page_type(),
-        Some(SecondSamplePage::PAGE_TYPE)
+        Some(FirstSamplePage::PAGE_TYPE)
     );
     assert!(root
         .get_control::<TextBlock>("NavigationStatus")
         .text()
         .unwrap()
-        .starts_with("Second page · Forward"));
-}
-
-#[test]
-fn command_bar_examples_keep_click_and_three_state_handlers() {
-    let _application = start();
-    for page in ["AppBarButton", "CommandBar"] {
-        let root = examples::create(examples::find(page).unwrap()).unwrap();
-        root.get_control::<Button>("Primary")
-            .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-        assert_eq!(
-            root.get_control::<TextBlock>("Output").text().as_deref(),
-            Some("Clicked 1 times")
-        );
-    }
-    let root = examples::create(examples::find("AppBarToggleButton").unwrap()).unwrap();
-    root.get_control::<ToggleButton>("Primary")
-        .set_is_checked(None);
-    assert_eq!(
-        root.get_control::<TextBlock>("Output").text().as_deref(),
-        Some("Indeterminate")
-    );
+        .starts_with("First page · Back"));
+    // TransitionRadioButton_Checked keeps the mode's NavigationTransitionInfo.
+    let modes = root.get_control::<ferroui_controls::RadioButtons>("TransitionModes");
+    let value = root.get_control::<TextBlock>("TransitionValue");
+    modes.set_selected_index(2);
+    assert_eq!(value.text().as_deref(), Some(", new DrillInNavigationTransitionInfo()"));
+    modes.set_selected_index(4);
+    assert!(value.text().unwrap().contains("SlideNavigationTransitionEffect.FromRight"));
+    modes.set_selected_index(0);
+    assert_eq!(value.text().as_deref(), Some(""));
 }
 
 #[test]
@@ -596,9 +562,22 @@ fn radio_groups_port_original_selection_and_color_handlers() {
     let background = root.get_control::<RadioButtons>("BackgroundRadioButtons");
     let border = root.get_control::<RadioButtons>("BorderRadioButtons");
     assert_eq!(background.max_columns(), 3);
+    let output = root.get_control::<Border>("ControlOutput");
+    // As in the source, the border keeps its markup colors until a selection changes (Green and
+    // Yellow are selected, the background is white).
+    assert_eq!((background.selected_index(), border.selected_index()), (0, 1));
+    assert_eq!(
+        output.background().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
+    background.set_selected_index(2);
+    border.set_selected_index(2);
+    assert_eq!(
+        output.border_brush().unwrap().as_solid_color_brush().unwrap().color(),
+        Color::from_rgb(255, 255, 255)
+    );
     background.set_selected_index(0);
     border.set_selected_index(0);
-    let output = root.get_control::<Border>("ControlOutput");
     assert_eq!(
         output
             .background()
@@ -658,57 +637,23 @@ fn icon_examples_preserve_source_symbol_and_font_glyph() {
 fn dropping_native_example_releases_handler_targets() {
     let _application = start();
     let root = examples::create(examples::find("Button").unwrap()).unwrap();
-    let primary = root.get_control::<Button>("Primary").downgrade();
-    let output = root.get_control::<TextBlock>("Output").downgrade();
+    let primary = root.get_control::<Button>("Button1").downgrade();
+    let output = root.get_control::<TextBlock>("Control1Output").downgrade();
     drop(root);
     assert!(primary.upgrade().is_none());
     assert!(output.upgrade().is_none());
 }
 
+/// With the WinUI theme: the page's ToggleSwitches and TextBox are laid out in the window, with
+/// the theme's templates.
+#[cfg(feature = "theme")]
 #[test]
-fn popup_sample_opens_closes_and_observes_offset_options() {
-    use ferroui_controls::primitives::Popup;
-    use ferroui_controls::{Control, Window};
-    let _application = start();
-    let root = examples::create(examples::find("Popup").unwrap()).unwrap();
-    let window = Window::new();
-    window.set_content(Some(Control::boxed(root.clone())));
-    window.show();
-    let popup = root.get_control::<Popup>("StandardPopup");
-    root.get_control::<Slider>("HorizontalOffset")
-        .set_range_value(42.0);
-    root.get_control::<Slider>("VerticalOffset")
-        .set_range_value(-12.0);
-    assert_eq!(popup.horizontal_offset(), 42.0);
-    assert_eq!(popup.vertical_offset(), -12.0);
-    root.get_control::<Button>("ShowPopup")
-        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    assert!(popup.is_open());
-    assert!(popup.host().is_some());
-    assert_eq!(
-        root.get_control::<TextBlock>("PopupOutput")
-            .text()
-            .as_deref(),
-        Some("Open")
-    );
-    root.get_control::<Button>("ClosePopup")
-        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
-    assert!(!popup.is_open());
-    assert_eq!(
-        root.get_control::<TextBlock>("PopupOutput")
-            .text()
-            .as_deref(),
-        Some("Closed")
-    );
-    window.close();
-}
-
-#[test]
-fn clipboard_sample_uses_host_service_for_copy_paste_formats_and_clear() {
+fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() {
+    use crate::platform_samples::{COPIED_TEXT, RAINIER};
     use ferroui_base::input::platform::IClipboard;
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
-    use ferroui_controls::{Control, Window};
-    let _application = start();
+    use ferroui_controls::{Control, Image, ToggleSwitch, Window};
+    let _application = start_winui();
     let root = examples::create(examples::find("Clipboard").unwrap()).unwrap();
     let clipboard = TestClipboardImpl::new();
     let platform = MockWindowingPlatform::create_window_mock();
@@ -720,48 +665,78 @@ fn clipboard_sample_uses_host_service_for_copy_paste_formats_and_clear() {
         root.get_control::<Button>(name)
             .raise_event(&RoutedEventArgs::with_event(&Button::click_event()))
     };
+    let text = |name| root.get_control::<TextBlock>(name).text();
+    // CopyText_Click copies the editor's text and shows the confirmation.
     click("CopyText");
-    assert_eq!(clipboard.text().as_deref(), Some("Copy this text"));
-    assert_eq!(clipboard.set_data_count(), 1);
+    assert_eq!(
+        clipboard.text().map(|text| text.trim_end().to_string()).as_deref(),
+        Some(COPIED_TEXT)
+    );
+    assert!(root.get_control::<TextBlock>("ConfirmationTextBlock").is_visible());
+    // PasteText_Click.
     clipboard.set_text(Some("External text 🦀"));
     click("PasteText");
-    assert_eq!(
-        root.get_control::<TextBox>("PastedText").text().as_deref(),
-        Some("External text 🦀")
-    );
+    assert_eq!(text("PasteClipboard2").as_deref(), Some("External text 🦀"));
+    // CopyImage_Click and PasteImage_Click, where the test platform decodes the source's image.
+    let decoded = crate::assets::load_bitmap(RAINIER).is_ok();
+    click("CopyImage");
+    if decoded {
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Image copied to clipboard."));
+        click("PasteImage");
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Image pasted from clipboard."));
+        assert!(root.get_control::<Image>("PastedImage").is_visible());
+    } else {
+        assert_eq!(text("ImageStatusText").as_deref(), Some("Error copying image to clipboard."));
+    }
+    // CopyWithOptions_Click copies the text without the Windows history and roaming options.
+    click("CopyWithOptions");
+    assert_eq!(clipboard.text().as_deref(), Some("Text with clipboard options"));
+    assert!(text("HistoryRoamingStatusText").unwrap().starts_with("Text copied to clipboard."));
+    // ShowFormats_Click and ClearClipboard_Click.
     click("ShowClipboardFormats");
-    assert!(root
-        .get_control::<TextBlock>("ClipboardOutput")
-        .text()
+    assert!(text("OtherOperationsStatusText")
         .unwrap()
-        .starts_with("Available formats: "));
+        .starts_with("Available formats on the clipboard:"));
+    let cleared = clipboard.clear_count();
     click("ClearClipboard");
-    assert_eq!(clipboard.clear_count(), 1);
+    assert_eq!(clipboard.clear_count(), cleared + 1);
+    assert_eq!(text("OtherOperationsStatusText").as_deref(), Some("Clipboard has been cleared."));
     assert!(clipboard.text().is_none());
-    click("PasteText");
+    // An empty clipboard has no bitmap and no files.
+    click("PasteImage");
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
-            .text()
-            .as_deref(),
-        Some("The clipboard has no text.")
+        text("ImageStatusText").as_deref(),
+        Some("Bitmap format is not available in the clipboard.")
     );
+    assert!(!root.get_control::<Image>("PastedImage").is_visible());
+    click("PasteFiles");
+    assert_eq!(
+        text("FilesStatusText").as_deref(),
+        Some("StorageItems format is not available in the clipboard.")
+    );
+    // The ContentChanged monitor: FerroUI's clipboard raises no ContentChanged.
+    root.get_control::<ToggleSwitch>("ContentChangedToggle")
+        .set_is_checked(Some(true));
+    assert!(text("OtherOperationsStatusText").unwrap().contains("ContentChanged"));
     window.close();
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn clipboard_sample_reports_missing_service_and_platform_failure() {
+    use crate::platform_samples::NO_CLIPBOARD;
     use ferroui_base::input::platform::{ClipboardErrorKind, IClipboard};
     use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl};
     use ferroui_controls::{Control, Window};
-    let _application = start();
+    let _application = start_winui();
     let root = examples::create(examples::find("Clipboard").unwrap()).unwrap();
     let copy = root.get_control::<Button>("CopyText");
     copy.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
+        root.get_control::<TextBlock>("ConfirmationTextBlock")
             .text()
             .as_deref(),
-        Some("This window has no clipboard service.")
+        Some(NO_CLIPBOARD)
     );
     let clipboard = TestClipboardImpl::throwing(ClipboardErrorKind::AccessDenied);
     let platform = MockWindowingPlatform::create_window_mock();
@@ -771,7 +746,7 @@ fn clipboard_sample_reports_missing_service_and_platform_failure() {
     window.show();
     copy.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
     assert_eq!(
-        root.get_control::<TextBlock>("ClipboardOutput")
+        root.get_control::<TextBlock>("ConfirmationTextBlock")
             .text()
             .as_deref(),
         Some("Clipboard operation failed: Access to the clipboard was denied.")
@@ -1070,8 +1045,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        132,
-        "108 control images, 22 sample media files and two explicit source-path case aliases"
+        145,
+        "108 control images, 27 sample media files, eight design images and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -1109,7 +1084,7 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
         .iter()
         .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
         .collect();
-    assert_eq!(media.len(), 22);
+    assert_eq!(media.len(), 27);
     for (path, expected) in media {
         let uri = UriRef::from(UriRef::parse_absolute(&format!("ferres://WinUIGallery/{path}")).unwrap());
         let mut actual = Vec::new();
@@ -1119,6 +1094,8 @@ fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
             assert!(actual.starts_with(&[0xff, 0xd8, 0xff]), "{path}");
         } else if path.ends_with(".gif") {
             assert!(actual.starts_with(b"GIF8"), "{path}");
+        } else if path.ends_with(".png") {
+            assert!(actual.starts_with(b"\x89PNG"), "{path}");
         } else {
             assert!(path.ends_with(".svg"), "Unexpected media type: {path}");
             assert!(std::str::from_utf8(&actual).unwrap().contains("<svg"));

@@ -6,8 +6,8 @@
 //! tiles at its densest, and a form of templated controls ([`STARTUP_SCENES`]).
 //!
 //! They are FerroUI's own regression benchmarks, kept apart from the ports of other frameworks'
-//! benchmarks (`samples/GauntletBenchmark` follows the Cranpose benchmark and is synced with it):
-//! a finding of a cross-framework comparison gets a scene or a micro-benchmark here or in
+//! benchmarks (`samples/GauntletBenchmark` follows the comparison's benchmark and is synced with
+//! it): a finding of a cross-framework comparison gets a scene or a micro-benchmark here or in
 //! `tests/FerroUI.Benchmarks` (category `trees`), so that the gate guards it.
 //!
 //! - `tests/frames.rs`: every scene in a headless window over the compositor, rendered into a raster

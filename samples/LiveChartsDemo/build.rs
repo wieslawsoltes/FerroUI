@@ -14,5 +14,8 @@ fn main() {
             XamlGroup::new("compiled_xaml")
                 .documents(&[("MainView.xaml", include_str!("MainView.xaml"))]),
         )
+        // The Simple theme the application constructs in code (`app_builder`), from the units
+        // the view needs (docs/xaml-themes.md, section 3).
+        .theme("SimpleTheme")
         .run();
 }

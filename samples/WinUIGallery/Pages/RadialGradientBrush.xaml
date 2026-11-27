@@ -1,4 +1,67 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Rectangle Width="300" Height="220" HorizontalAlignment="Left"><Rectangle.Fill><RadialGradientBrush Center="50%,50%" GradientOrigin="35%,35%" RadiusX="50%" RadiusY="50%"><GradientStop Color="White" Offset="0"/><GradientStop Color="DodgerBlue" Offset="0.5"/><GradientStop Color="MidnightBlue" Offset="1"/></RadialGradientBrush></Rectangle.Fill></Rectangle>
+<!-- Ported from the pinned RadialGradientBrush example of WinUI Gallery (14061eea) and the code behind
+     of RadialGradientBrushPage.xaml.cs (brush_samples.rs); see ../NOTICE.md. FerroUI's
+     RadialGradientBrush has no MappingMode: each of its points and radii has a unit, Relative for
+     RelativeToBoundingBox (the percentages of the markup) and Absolute for Absolute, which the
+     handlers set. The Headers of the options are composed; SelectedValue is the index of the
+     source's value. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="RadialGradientBrush Sample" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+        <Rectangle x:Name="Rect" Width="200" Height="200">
+          <Rectangle.Fill>
+            <RadialGradientBrush Center="25%,25%" GradientOrigin="50%,25%" RadiusX="50%" RadiusY="50%"
+                                 SpreadMethod="Pad">
+              <GradientStop Offset="0.0" Color="Yellow" />
+              <GradientStop Offset="1" Color="Blue" />
+            </RadialGradientBrush>
+          </Rectangle.Fill>
+        </Rectangle>
+      </StackPanel>
+      <Grid Grid.Column="1" Width="320" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*"
+            ColumnSpacing="12">
+        <StackPanel Grid.ColumnSpan="2">
+          <TextBlock Text="MappingMode" />
+          <ComboBox x:Name="MappingModeComboBox" SelectedIndex="0" AutomationProperties.Name="MappingMode">
+            <x:String>RelativeToBoundingBox</x:String>
+            <x:String>Absolute</x:String>
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Row="1">
+          <TextBlock Text="Center.X" />
+          <Slider x:Name="CenterXSlider" AutomationProperties.Name="Center.X" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1">
+          <TextBlock Text="Center.Y" />
+          <Slider x:Name="CenterYSlider" AutomationProperties.Name="Center.Y" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="2">
+          <TextBlock Text="RadiusX" />
+          <Slider x:Name="RadiusXSlider" AutomationProperties.Name="RadiusX" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="1">
+          <TextBlock Text="RadiusY" />
+          <Slider x:Name="RadiusYSlider" AutomationProperties.Name="RadiusY" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="3">
+          <TextBlock Text="GradientOrigin.X" />
+          <Slider x:Name="OriginXSlider" AutomationProperties.Name="GradientOrigin.X" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="3" Grid.Column="1">
+          <TextBlock Text="GradientOrigin.Y" />
+          <Slider x:Name="OriginYSlider" AutomationProperties.Name="GradientOrigin.Y" SmallChange="0.05" />
+        </StackPanel>
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0">
+          <TextBlock Text="SpreadMethod" />
+          <ComboBox x:Name="SpreadMethodComboBox" SelectedIndex="0" AutomationProperties.Name="SpreadMethod">
+            <x:String>Pad</x:String>
+            <x:String>Reflect</x:String>
+            <x:String>Repeat</x:String>
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+    </Grid>
+  </StackPanel>
 </StackPanel>

@@ -3,6 +3,8 @@
 //! synthetic binding members, `x:DataType`, the data context type inference, the path parser,
 //! the start type of the path transformer and the metadata remover.
 
+use crate::compiler_extensions::transformers::{FerroTransformErrorKind, FerroTransformErrors};
+use xamlx::exceptions::XamlError;
 use std::rc::Rc;
 
 use ferroui_base::data::core::parsers::Node;
@@ -193,15 +195,15 @@ fn throws_on_invalid_binding_path_when_compiled_through_the_directive() {
 #[test]
 fn bindings_exceptions_are_tagged_transform_exceptions() {
     let line_info = xamlx::ast::XamlLineInfo::new(2, 5);
-    let e = XamlBindingsTransformException::new("bad", &line_info, None);
-    assert!(XamlBindingsTransformException::is(&e));
-    assert!(!XamlDataContextException::is(&e));
+    let e = XamlError::bindings_transform("bad", &line_info, None);
+    assert_eq!(e.transform_kind(), Some(FerroTransformErrorKind::Bindings));
+    assert_ne!(e.transform_kind(), Some(FerroTransformErrorKind::DataContext));
     assert_eq!(e.type_name(), "XamlBindingsTransformException");
     assert_eq!((e.line_number(), e.line_position()), (Some(2), Some(5)));
 
     let inner = xamlx::exceptions::XamlError::invalid_operation("inner");
-    let e = XamlDataContextException::new("bad", &line_info, Some(inner));
-    assert!(XamlDataContextException::is(&e));
+    let e = XamlError::data_context("bad", &line_info, Some(inner));
+    assert_eq!(e.transform_kind(), Some(FerroTransformErrorKind::DataContext));
     assert_eq!(e.type_name(), "XamlDataContextException");
     assert_eq!(e.inner_exception().map(|i| i.message()), Some("inner".to_string()));
 }

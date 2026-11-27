@@ -175,7 +175,7 @@ impl ComponentReloadTarget {
     /// initial population, before application overrides. Binding/animation changes
     /// and externally changed values require restart. Custom property callbacks must
     /// support reversible assignment; no arbitrary user side effects are rolled back.
-    pub fn with_owned_root_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {
@@ -196,7 +196,7 @@ impl ComponentReloadTarget {
     /// attribute is unchanged. Call immediately after initial population. Dynamic
     /// resources, bindings and application overrides require another adapter or restart.
     /// Property callbacks must support reversible assignment.
-    pub fn with_owned_root_static_resource_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_static_resource_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {
@@ -220,7 +220,7 @@ impl ComponentReloadTarget {
     /// defers the candidate root binding and recreates it for the preserved root;
     /// its new namescope belongs to the candidate children. Custom binding kinds,
     /// delayed/asynchronous update modes and lifecycle properties need an adapter.
-    pub fn with_owned_root_binding_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_binding_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {

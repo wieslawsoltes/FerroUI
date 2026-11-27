@@ -1,4 +1,21 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Button Content="Empty cart"><Button.Flyout><Flyout><StackPanel Spacing="12"><TextBlock Text="All items will be removed. Do you want to continue?"/><Button Content="Yes, empty my cart"/></StackPanel></Flyout></Button.Flyout></Button>
+<!-- Ported from the pinned Flyout example of WinUI Gallery (14061eea) and
+     DeleteConfirmation_Click of FlyoutPage.xaml.cs (menu_samples.rs); see ../NOTICE.md. The
+     source's SharedFlyout resource is used by no example of the page and is left out. The
+     message's BaseTextBlockStyle is its semibold weight. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="FlyoutExample1" Spacing="8">
+    <TextBlock Text="A button with a flyout" FontSize="18" />
+    <Button x:Name="Control1" Content="Empty cart">
+      <Button.Flyout>
+        <Flyout>
+          <StackPanel>
+            <TextBlock Margin="0,0,0,12" FontWeight="SemiBold"
+                       Text="All items will be removed. Do you want to continue?" />
+            <Button x:Name="DeleteConfirmation" Content="Yes, empty my cart" />
+          </StackPanel>
+        </Flyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
 </StackPanel>

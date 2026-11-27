@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="using:ControlCatalog.Controls"
+                    xmlns:winui="using:FerroUI.Themes.WinUI"
                     xmlns:hr="https://github.com/ferroui/hot-reload"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="hr">
@@ -34,6 +35,25 @@
       <SolidColorBrush x:Key="CatalogCodeKeyword" Color="#22863A" />
       <SolidColorBrush x:Key="CatalogCodeAttribute" Color="#6F42C1" />
       <SolidColorBrush x:Key="CatalogCodeString" Color="#032F62" />
+    </ResourceDictionary>
+    <!-- Not from upstream: the catalog's own brushes in the high contrast variant of the WinUI theme
+         (#560), from the system colours, as the theme's own controls take them. Without it the
+         variant falls back to the dark dictionary, whose cards stay dark in a light contrast theme. -->
+    <ResourceDictionary x:Key="{x:Static winui:WinUITheme.HighContrast}">
+      <!-- Brushes here, colours in the other variants: the hamburger menu sets them as brush values. -->
+      <SolidColorBrush x:Key="HamburgerBaseHighColor" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <SolidColorBrush x:Key="HamburgerChromeLowColor" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="CatalogCardBackground" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="CatalogCardBorderBrush" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <SolidColorBrush x:Key="CatalogCardBorderBrushHover" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="CatalogSubtleForeground" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <SolidColorBrush x:Key="CatalogAccentBackground" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="CatalogAccentForeground" Color="{DynamicResource SystemColorHighlightTextColor}" />
+      <SolidColorBrush x:Key="CatalogStageBackground" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="CatalogCodeComment" Color="{DynamicResource SystemColorWindowTextColor}" />
+      <SolidColorBrush x:Key="CatalogCodeKeyword" Color="{DynamicResource SystemColorHotlightColor}" />
+      <SolidColorBrush x:Key="CatalogCodeAttribute" Color="{DynamicResource SystemColorHotlightColor}" />
+      <SolidColorBrush x:Key="CatalogCodeString" Color="{DynamicResource SystemColorWindowTextColor}" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 

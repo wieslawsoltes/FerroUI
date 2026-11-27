@@ -52,6 +52,58 @@ pub struct DocumentSource<'s> {
 /// Receives a diagnostic of a transform and returns the severity it has from then on.
 pub type DiagnosticHandler = Rc<dyn Fn(&XamlDiagnostic) -> XamlDiagnosticSeverity>;
 
+/// Representation used for the operations that the build-time host resolves.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum XamlBackend {
+    /// Existing typed Rust factories and resource tables.
+    #[default]
+    Native,
+    /// Bytecode for resource runs and recognized control styles. Keep native template and page construction.
+    ThemeBytecode,
+    /// Also lower construction, resolved calls and compiled binding paths in pages and templates.
+    Bytecode,
+}
+
+impl XamlBackend {
+    pub fn uses_theme_programs(self) -> bool {
+        self != Self::Native
+    }
+
+    pub(super) fn uses_construction_programs(self) -> bool {
+        self == Self::Bytecode
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The representation the emitter writes on this thread and where its instruction streams
+    /// go: what [`with_xaml_backend`] selects, [`XamlBackend::Native`] outside it.
+    static BACKEND: RefCell<(XamlBackend, super::BytecodeImage)> = RefCell::new(Default::default());
+}
+
+/// Runs `compile` with the operations the XAML compiler resolves emitted as `backend`, their
+/// instruction streams packed into `image` ([`BytecodeImage::default`](super::BytecodeImage)
+/// writes them as byte literals of the generated source), and restores the previous selection
+/// afterwards. Outside it the emitter writes [`XamlBackend::Native`]. The selection is scoped
+/// rather than a field of [`TransformOptions`], whose public fields stay as they are within 0.5.
+pub fn with_xaml_backend<R>(backend: XamlBackend, image: &super::BytecodeImage, compile: impl FnOnce() -> R) -> R {
+    struct Restore(Option<(XamlBackend, super::BytecodeImage)>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            if let Some(previous) = self.0.take() {
+                BACKEND.with(|selected| *selected.borrow_mut() = previous);
+            }
+        }
+    }
+    let previous = BACKEND.with(|selected| selected.replace((backend, image.clone())));
+    let _restore = Restore(Some(previous));
+    compile()
+}
+
+/// The representation [`with_xaml_backend`] selected on this thread, and its image.
+pub(super) fn selected_xaml_backend() -> (XamlBackend, super::BytecodeImage) {
+    BACKEND.with(|selected| selected.borrow().clone())
+}
+
 /// What a transform depends on beside the documents and the type system.
 #[derive(Clone, Default)]
 pub struct TransformOptions {

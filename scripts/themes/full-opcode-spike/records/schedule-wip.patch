@@ -1,0 +1,549 @@
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+index 6105fd3125df7d48cd8a2675c883c62e405a0cfd..c04755fb490c491652dc5949b4633a7e1d54a032 100644
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/emitter.rs
+@@ -5309,6 +5309,7 @@ pub fn emit_function<'a>(
+             &local_types,
+             &format!("::ferroui_base::Ref<{}>", absolute(&dictionary)),
+             units,
++            documents.backend.uses_construction_programs().then_some((&documents.bytecode_image, &document_constant)),
+         ),
+         // Without the units there are no markers, and without the path of the dictionary they
+         // are dropped.
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_rows.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_rows.rs
+index 88cd8dd3a441fd4bc640409018e5605aa02ac301..085efcdd28f944fcf8b57bca8343207897e689e2 100644
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_rows.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_rows.rs
+@@ -193,7 +193,7 @@ fn position_of(text: &str) -> Option<(i32, i32)> {
+ }
+ 
+ /// The Rust string literal at the start of `text` and the text after it.
+-fn split_string_literal(text: &str) -> Option<(&str, &str)> {
++pub(super) fn split_string_literal(text: &str) -> Option<(&str, &str)> {
+     if !text.starts_with('"') {
+         return None;
+     }
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_run_program.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_run_program.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..36b07d669abea8a9f0dab401f5fe9e0ac5840576
+--- /dev/null
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_run_program.rs
+@@ -0,0 +1,207 @@
++//! Lower a complete extracted run. Only exact resolved emitter forms are accepted. An
++//! unsupported operation leaves that run intact, including its locals and evaluation order.
++use super::super::{is_identifier, theme_rows::split_string_literal, BytecodeImage};
++use ferroui_markup::{compiled_operands as wire, theme_run_opcodes as op};
++
++pub(super) fn compile(
++    lines: &[String],
++    dictionary: &str,
++    image: &BytecodeImage,
++    document: &str,
++) -> Option<String> {
++    let statements: Vec<_> = lines
++        .iter()
++        .map(|line| line.trim_start())
++        .filter(|s| !s.starts_with("//"))
++        .collect();
++    let mut input = statements.as_slice();
++    let mut run = Encoder {
++        code: vec![op::VERSION],
++        imports: vec![],
++    };
++    while let Some((&line, rest)) = input.split_first() {
++        input = rest;
++        if let Some((name, args)) = line.split_once(".add_") {
++            if !is_identifier(name) {
++                return None;
++            }
++            let (method, arguments) = args.strip_suffix(")?;")?.split_once('(')?;
++            let (opcode, uses_context) = match method {
++                "resource_aliases" => (op::ALIAS, true),
++                "dynamic_brushes" => (op::DYNAMIC_BRUSH, true),
++                "static_brushes" => (op::STATIC_BRUSH, true),
++                "literal_brushes" => (op::LITERAL_BRUSH, true),
++                "double_resources" => (op::DOUBLE, false),
++                "thickness_resources" => (op::THICKNESS, false),
++                "corner_radius_resources" => (op::CORNER_RADIUS, false),
++                "color_resources" => (op::COLOR, false),
++                "string_resources" => (op::TEXT, false),
++                _ => return None,
++            };
++            let suffix = if uses_context {
++                format!(", &context, &{document}")
++            } else {
++                String::new()
++            };
++            if arguments != format!("&{dictionary}{suffix}") {
++                return None;
++            }
++            run.code.push(opcode);
++            run.import(format!("Rows(&{name})"));
++        } else if let Some(args) =
++            line.strip_prefix(&format!("rt::add_deferred_resource(&{dictionary}, "))
++        {
++            let (key, rest) = split_string_literal(args)?;
++            let (factory, position) = rest
++                .strip_prefix(", ::ferroui_base::data::core::ValueType::object(), &context, ")?
++                .strip_suffix(")?;")?
++                .split_once(", ")?;
++            if !is_identifier(factory) {
++                return None;
++            }
++            run.code.push(op::DEFER_TEXT);
++            run.import(format!("Text({key})"));
++            run.import(format!("Factory({factory})"));
++            run.position(position)?;
++        } else if let Some((local, rhs)) =
++            line.strip_prefix("let ").and_then(|s| s.split_once(" = "))
++        {
++            if !is_identifier(local) {
++                return None;
++            }
++            let (&next, rest) = input.split_first()?;
++            input = rest;
++            if let Some(args) = rhs.strip_prefix(
++                "rt::defer(::ferroui_base::data::core::ValueType::object(), &context, ",
++            ) {
++                let (factory, declaration) = args.strip_suffix(")?;")?.split_once(", ")?;
++                let args = next.strip_prefix(&format!("rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&{dictionary}, rt::boxed(<"))?;
++                let (ty, insert) = args.split_once(&format!(" as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&{local}) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), "))?;
++                if !absolute_path(ty) || !is_identifier(factory) {
++                    return None;
++                }
++                run.code.push(op::DEFER_TYPE);
++                run.import(format!("Type(<{ty} as ::ferroui_base::StaticType>::TYPE)"));
++                run.import(format!("Factory({factory})"));
++                run.position(declaration)?;
++                run.position(insert.strip_suffix(")?;")?)?;
++            } else {
++                let (key, val, position) = value_add(next, dictionary)?;
++                if val != format!("::core::clone::Clone::clone(&{local})") {
++                    return None;
++                }
++                if let Some(args) = rhs.strip_prefix("rt::invoked(") {
++                    let (parser, rest) = args.split_once("(::std::string::String::from(")?;
++                    if !absolute_path(parser) {
++                        return None;
++                    }
++                    let (text, rest) = split_string_literal(rest)?;
++                    let source = rest.strip_prefix(")), ")?.strip_suffix(")?;")?;
++                    run.value(op::PARSE, key, position)?;
++                    run.import(format!("Parse(|text, line, column| rt::invoked({parser}(::std::string::String::from(text)), line, column).map(rt::to_object))"));
++                    run.import(format!("Text({text})"));
++                    run.position(source)?;
++                } else {
++                    let (ctor, ticks) = rhs.strip_suffix("_i64);")?.split_once('(')?;
++                    if !absolute_path(ctor) {
++                        return None;
++                    }
++                    let ticks: i64 = ticks.parse().ok()?;
++                    run.value(op::FROM_I64, key, position)?;
++                    run.import(format!("FromI64(|ticks| rt::to_object({ctor}(ticks)))"));
++                    run.code.extend(ticks.to_le_bytes());
++                }
++            }
++        } else {
++            let (key, value, position) = value_add(line, dictionary)?;
++            if let Some(flag) = value
++                .strip_prefix("::core::clone::Clone::clone(&")
++                .and_then(|s| s.strip_suffix(')'))
++            {
++                let flag = flag.parse::<bool>().ok()?;
++                run.value(op::BOOL, key, position)?;
++                run.code.push(flag.into());
++            } else if let Some(n) = value.strip_suffix("_i32") {
++                let n = n.parse().ok()?;
++                run.value(op::INT, key, position)?;
++                wire::signed(&mut run.code, n);
++            } else if absolute_path(value) {
++                run.value(op::CONSTANT, key, position)?;
++                run.import(format!("Constant(|| rt::to_object({value}))"));
++            } else {
++                let (ctor, args) = value.strip_suffix(')')?.split_once('(')?;
++                let (amount, unit) = args.split_once(", ")?;
++                if !absolute_path(ctor) || !absolute_path(unit) {
++                    return None;
++                }
++                let amount = amount.strip_suffix("_f64")?.parse().ok()?;
++                run.value(op::FROM_DOUBLE, key, position)?;
++                run.import(format!(
++                    "FromDouble(|value| rt::to_object({ctor}(value, {unit})))"
++                ));
++                wire::number(&mut run.code, amount);
++            }
++        }
++    }
++    let bytes = image.program(&run.code);
++    let imports = run
++        .imports
++        .iter()
++        .map(|item| format!("rt::ThemeRunImport::{item}"))
++        .collect::<Vec<_>>()
++        .join(", ");
++    Some(format!(
++        "    rt::apply_theme_run({bytes}, &[{imports}], &{document}, context, dictionary)\n"
++    ))
++}
++
++fn absolute_path(text: &str) -> bool {
++    text.strip_prefix("::")
++        .is_some_and(|path| path.split("::").all(is_identifier))
++}
++
++fn value_add<'a>(line: &'a str, dictionary: &str) -> Option<(&'a str, &'a str, &'a str)> {
++    let args = line.strip_prefix(&format!("rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast({dictionary}.clone(), "))?;
++    let (cast, args) = args.split_once(")?, rt::string_object(")?;
++    let (key, args) = split_string_literal(args)?;
++    let (value, position) = args
++        .strip_prefix("), rt::to_object(")?
++        .strip_suffix(")?;")?
++        .rsplit_once(")), ")?;
++    (position == cast).then_some((key, value, position))
++}
++
++struct Encoder {
++    code: Vec<u8>,
++    imports: Vec<String>,
++}
++
++impl Encoder {
++    fn import(&mut self, item: String) {
++        let index = self
++            .imports
++            .iter()
++            .position(|s| s == &item)
++            .unwrap_or_else(|| {
++                self.imports.push(item);
++                self.imports.len() - 1
++            });
++        wire::unsigned(
++            &mut self.code,
++            index.try_into().expect("theme run import fits in 32 bits"),
++        );
++    }
++
++    fn position(&mut self, source: &str) -> Option<()> {
++        let (line, column) = source.split_once(", ")?;
++        wire::signed(&mut self.code, line.parse().ok()?);
++        wire::signed(&mut self.code, column.parse().ok()?);
++        Some(())
++    }
++
++    fn value(&mut self, opcode: u8, key: &str, position: &str) -> Option<()> {
++        self.code.push(opcode);
++        self.import(format!("Text({key})"));
++        self.position(position)
++    }
++}
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units.rs
+index 2b14d8b87eb5e40625542f3b30eac71e3eb704ba..877d94fb716defadb11d79adc81203612c01a816 100644
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units.rs
+@@ -28,6 +28,9 @@ use xamlx::ast::IXamlAstNode;
+ 
+ use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
+ 
++#[path = "theme_run_program.rs"]
++mod bytecode;
++
+ use super::{brace_balance, declared_local, identifiers};
+ 
+ /// The start of the marker that opens an entry of a unit; the index of the unit follows. A
+@@ -186,6 +189,7 @@ pub(super) fn extract_runs(
+     local_types: &HashMap<String, String>,
+     dictionary_type: &str,
+     units: &UnitEmission,
++    bytecode: Option<(&super::BytecodeImage, &str)>,
+ ) -> (Vec<String>, Vec<String>) {
+     if !lines.iter().any(|line| unit_marker(line).is_some()) {
+         return (lines, Vec::new());
+@@ -205,6 +209,7 @@ pub(super) fn extract_runs(
+         function_name,
+         document_text,
+         dictionary_type,
++        bytecode,
+         local_types,
+         units,
+         declared: ["context", "name_scope", "root", "service_provider"].iter().map(|name| name.to_string()).collect(),
+@@ -258,6 +263,7 @@ struct Extractor<'e> {
+     function_name: &'e str,
+     document_text: &'e str,
+     dictionary_type: &'e str,
++    bytecode: Option<(&'e super::BytecodeImage, &'e str)>,
+     local_types: &'e HashMap<String, String>,
+     units: &'e UnitEmission,
+     /// The locals declared in the body so far.
+@@ -361,7 +367,8 @@ impl Extractor<'_> {
+     fn flush(&mut self) {
+         let Some(run) = self.run.take() else { return };
+         let function = format!("{}_unit_{}", self.function_name, self.functions.len());
+-        let uses_context = run
++        let schedule = self.bytecode.and_then(|(image, document)| bytecode::compile(&run.lines, &run.dictionary, image, document));
++        let uses_context = schedule.is_some() || run
+             .lines
+             .iter()
+             .map(|line| line.trim_start())
+@@ -382,15 +389,19 @@ impl Extractor<'_> {
+         ));
+         text.push_str(&format!("    dictionary: &{},\n", self.dictionary_type));
+         text.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {\n");
+-        if uses_context {
+-            text.push_str("    let context = ::core::clone::Clone::clone(context);\n");
+-        }
+-        text.push_str(&format!("    let {} = ::core::clone::Clone::clone(dictionary);\n", run.dictionary));
+-        for line in &run.lines {
+-            text.push_str(line);
+-            text.push('\n');
++        if let Some(schedule) = schedule {
++            text.push_str(&schedule);
++        } else {
++            if uses_context {
++                text.push_str("    let context = ::core::clone::Clone::clone(context);\n");
++            }
++            text.push_str(&format!("    let {} = ::core::clone::Clone::clone(dictionary);\n", run.dictionary));
++            for line in &run.lines {
++                text.push_str(line);
++                text.push('\n');
++            }
++            text.push_str("    ::core::result::Result::Ok(())\n");
+         }
+-        text.push_str("    ::core::result::Result::Ok(())\n");
+         text.push_str("}\n");
+         self.functions.push(text);
+         let index = self.units.push_run(run.unit, function);
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units_tests.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units_tests.rs
+index c05d39a5ee71bef65e0ebc9559b4f78d15b0187e..cadb66e2e283352f8d696d10606a9174a2b9eba8 100644
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units_tests.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/theme_units_tests.rs
+@@ -28,7 +28,7 @@ fn local_types() -> HashMap<String, String> {
+ }
+ 
+ fn extract(lines: Vec<String>, units: &UnitEmission) -> (Vec<String>, Vec<String>) {
+-    extract_runs("build_t_xaml", "t.xaml", lines, &local_types(), DICTIONARY, units)
++    extract_runs("build_t_xaml", "t.xaml", lines, &local_types(), DICTIONARY, units, None)
+ }
+ 
+ #[test]
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
+index 0cb5495b9c78e23fe0662cb1c254ed46962d9e18..4662699230f36d2d6c4d2f651567860ad0ee3df6 100644
+--- a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/compiled.rs
+@@ -62,6 +62,7 @@ pub use super::theme_styles::{
+ };
+ // The units of a compiled theme (#568, `theme_units.rs`): a unit, its runs and the function the
+ // builds of the dictionaries apply them with.
++pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
+ pub use super::theme_units::{
+     active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
+     registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys, ThemeParts, ThemeUnit, ThemeUnitRun,
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/mod.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/mod.rs
+index 588bf7e45e0ed88eeed99dd1a0cbe72020e0efa8..cc91f832b6709c5568933178ce74d49b9b3eddb2 100644
+--- a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/mod.rs
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/mod.rs
+@@ -12,6 +12,7 @@ mod runtime_list;
+ mod theme_resources;
+ mod theme_styles;
+ mod theme_units;
++mod theme_run_program;
+ mod xaml_il_context;
+ mod xaml_il_parent_stack_provider_wrapper;
+ mod xaml_il_runtime_helpers;
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/theme_run_program.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/theme_run_program.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..b03d6c4f9562fb4ad0652a634089078eefb22680
+--- /dev/null
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/theme_run_program.rs
+@@ -0,0 +1,161 @@
++//! The instructions and imports of a single extracted dictionary run. Activation uses
++//! the caller's dictionary and context, including any lexical namespace scope. Deferred
++//! factory imports are registered in declaration order and run only on resource lookup.
++use super::{compiled as rt, XamlIlContext};
++use crate::XamlLoadError;
++use ferroui_base::controls::{IDeferredContent, IResourceDictionary, ResourceDictionary};
++use ferroui_base::data::core::ValueType;
++use ferroui_base::metadata::MarkupValue;
++use ferroui_base::{Ref, TypeInfo};
++use ferroui_markup::{compiled_operands as wire, theme_run_opcodes as op};
++use std::rc::Rc;
++
++type Result<T> = std::result::Result<T, XamlLoadError>;
++
++pub trait ScheduledRows: Sync {
++    fn apply(
++        &'static self,
++        opcode: u8,
++        dictionary: &Ref<ResourceDictionary>,
++        context: &Rc<XamlIlContext>,
++        document: &'static rt::DocumentInfo,
++    ) -> Result<()>;
++}
++
++// A retained row program references just the implementation for its concrete row type.
++macro_rules! row_methods {
++    ($ty:ty, $( $tag:path => $method:ident $(($ctx:ident, $doc:ident))? ),+) => {
++        impl ScheduledRows for rt::TypedResourceProgram<$ty> {
++            #[allow(unused_variables)]
++            fn apply(&'static self, opcode: u8, dictionary: &Ref<ResourceDictionary>, context: &Rc<XamlIlContext>, document: &'static rt::DocumentInfo) -> Result<()> {
++                match opcode {
++                    $( $tag => { $(let ($ctx, $doc) = (context, document);)? self.$method(dictionary $(, $ctx, $doc)?) }, )+
++                    _ => Err(invalid()),
++                }
++            }
++        }
++    }
++}
++row_methods!(rt::ResourceAliasRow, op::ALIAS => add_resource_aliases(c, d));
++row_methods!(rt::DynamicBrushRow, op::DYNAMIC_BRUSH => add_dynamic_brushes(c, d));
++row_methods!(rt::StaticBrushRow, op::STATIC_BRUSH => add_static_brushes(c, d));
++row_methods!(rt::LiteralBrushRow, op::LITERAL_BRUSH => add_literal_brushes(c, d));
++row_methods!(rt::ValueRow<f64>, op::DOUBLE => add_double_resources);
++row_methods!(rt::ValueRow<[f64; 4]>, op::THICKNESS => add_thickness_resources, op::CORNER_RADIUS => add_corner_radius_resources);
++row_methods!(rt::ValueRow<u32>, op::COLOR => add_color_resources);
++row_methods!(rt::ValueRow<&'static str>, op::TEXT => add_string_resources);
++
++pub enum ThemeRunImport {
++    Rows(&'static dyn ScheduledRows),
++    Text(&'static str),
++    Type(&'static TypeInfo),
++    Factory(rt::DeferredBuild),
++    Constant(fn() -> MarkupValue),
++    Parse(fn(&str, i32, i32) -> Result<MarkupValue>),
++    FromDouble(fn(f64) -> MarkupValue),
++    FromI64(fn(i64) -> MarkupValue),
++}
++
++#[cold]
++fn invalid() -> XamlLoadError {
++    XamlLoadError::with_message("Invalid compiled XAML dictionary run or import")
++}
++
++#[inline(never)]
++pub fn apply_theme_run(
++    mut code: &[u8],
++    imports: &'static [ThemeRunImport],
++    document: &'static rt::DocumentInfo,
++    context: &Rc<XamlIlContext>,
++    dictionary: &Ref<ResourceDictionary>,
++) -> Result<()> {
++    if wire::take(&mut code) != Ok([op::VERSION]) {
++        return Err(invalid());
++    }
++    macro_rules! operand {
++        ($variant:ident) => {{
++            let index = wire::read_unsigned(&mut code).map_err(|_| invalid())? as usize;
++            match imports.get(index) {
++                Some(ThemeRunImport::$variant(value)) => *value,
++                _ => return Err(invalid()),
++            }
++        }};
++    }
++    let pos = |bytes: &mut &[u8]| wire::read_signed(bytes).map_err(|_| invalid());
++    while !code.is_empty() {
++        let [opcode] = wire::take(&mut code).map_err(|_| invalid())?;
++        match opcode {
++            op::ALIAS..=op::TEXT => operand!(Rows).apply(opcode, dictionary, context, document)?,
++            op::DEFER_TEXT => {
++                let key = operand!(Text);
++                let factory = operand!(Factory);
++                rt::add_deferred_resource(
++                    dictionary,
++                    key,
++                    ValueType::object(),
++                    context,
++                    factory,
++                    pos(&mut code)?,
++                    pos(&mut code)?,
++                )?;
++            }
++            op::DEFER_TYPE => {
++                let key = operand!(Type);
++                let factory = operand!(Factory);
++                let deferred = rt::defer(
++                    ValueType::object(),
++                    context,
++                    factory,
++                    pos(&mut code)?,
++                    pos(&mut code)?,
++                )?;
++                let result = ResourceDictionary::__markup_AddDeferred_1(
++                    dictionary,
++                    rt::boxed(key),
++                    deferred as Rc<dyn IDeferredContent>,
++                );
++                rt::invoked(result, pos(&mut code)?, pos(&mut code)?)?;
++            }
++            op::CONSTANT | op::BOOL | op::INT | op::PARSE | op::FROM_DOUBLE | op::FROM_I64 => {
++                let key = operand!(Text);
++                let line = pos(&mut code)?;
++                let column = pos(&mut code)?;
++                // In the source these locals are evaluated before the interface cast.
++                let prepared = match opcode {
++                    op::PARSE => Some(operand!(Parse)(
++                        operand!(Text),
++                        pos(&mut code)?,
++                        pos(&mut code)?,
++                    )?),
++                    op::FROM_I64 => Some(operand!(FromI64)(i64::from_le_bytes(
++                        wire::take(&mut code).map_err(|_| invalid())?,
++                    ))),
++                    _ => None,
++                };
++                let target: Rc<dyn IResourceDictionary> =
++                    rt::cast(dictionary.clone(), line, column)?;
++                let key = rt::string_object(key);
++                let value = match opcode {
++                    op::CONSTANT => operand!(Constant)(),
++                    op::INT => rt::to_object(pos(&mut code)?),
++                    op::BOOL => match wire::take(&mut code) {
++                        Ok([0]) => rt::to_object(false),
++                        Ok([1]) => rt::to_object(true),
++                        _ => return Err(invalid()),
++                    },
++                    op::FROM_DOUBLE => {
++                        operand!(FromDouble)(wire::read_number(&mut code).map_err(|_| invalid())?)
++                    }
++                    _ => prepared.ok_or_else(invalid)?,
++                };
++                rt::invoked(
++                    <dyn IResourceDictionary>::__markup_Add_0(&target, key, value),
++                    line,
++                    column,
++                )?;
++            }
++            _ => return Err(invalid()),
++        }
++    }
++    Ok(())
++}
+diff --git a/src/Markup/FerroUI.Markup/lib.rs b/src/Markup/FerroUI.Markup/lib.rs
+index 45357beff61944ba5e06efa215005673339b5577..2895858080b45b8cda3ee82432c9fed42512842b 100644
+--- a/src/Markup/FerroUI.Markup/lib.rs
++++ b/src/Markup/FerroUI.Markup/lib.rs
+@@ -17,6 +17,8 @@ pub mod path_opcodes;
+ pub mod resource_opcodes;
+ #[doc(hidden)]
+ pub mod style_opcodes;
++#[doc(hidden)]
++pub mod theme_run_opcodes;
+ 
+ #[cfg(test)]
+ mod tests;
+diff --git a/src/Markup/FerroUI.Markup/theme_run_opcodes.rs b/src/Markup/FerroUI.Markup/theme_run_opcodes.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..4e79a14d50c1e60a8e56c5a4f4daceba374a1556
+--- /dev/null
++++ b/src/Markup/FerroUI.Markup/theme_run_opcodes.rs
+@@ -0,0 +1,12 @@
++//! A theme run applies dictionary instructions in XAML declaration order. Row opcodes
++//! 1 through 9 are shared with the homogeneous resource programs they invoke.
++pub use crate::resource_opcodes::{ALIAS, COLOR, CORNER_RADIUS, DOUBLE, DYNAMIC_BRUSH, LITERAL_BRUSH, STATIC_BRUSH, TEXT, THICKNESS};
++pub const VERSION: u8 = 1;
++pub const DEFER_TEXT: u8 = 10;
++pub const DEFER_TYPE: u8 = 11;
++pub const CONSTANT: u8 = 12;
++pub const PARSE: u8 = 13;
++pub const INT: u8 = 14;
++pub const BOOL: u8 = 15;
++pub const FROM_DOUBLE: u8 = 16;
++pub const FROM_I64: u8 = 17;
