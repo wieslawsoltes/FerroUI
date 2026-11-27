@@ -1,7 +1,10 @@
 use crate::data_transfer_item_to_frn_clipboard_data_item_wrapper::DataTransferItemToFrnClipboardDataItemWrapper;
 use crate::interop::*;
-use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, MAP_ENABLED};
-use ferroui_base::input::{DataFormat, DataFormatKind, IDataTransfer};
+#[cfg(feature = "chromium-clipboard-map")]
+use ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard;
+use ferroui_base::input::IDataTransfer;
+#[cfg(feature = "chromium-clipboard-map")]
+use ferroui_base::input::{DataFormat, DataFormatKind};
 use ferroui_microcom::{ComPtr, HResult};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -11,6 +14,9 @@ use std::rc::Rc;
 pub(crate) struct DataTransferToFrnClipboardDataSourceWrapper {
     data_transfer: RefCell<Option<Rc<dyn IDataTransfer>>>,
     items: RefCell<Option<Vec<ComPtr<IFrnClipboardDataItem>>>>,
+    /// Whether the web custom formats of a browser are published (the clipboard, not a drag;
+    /// the `chromium-clipboard-map` feature).
+    #[cfg(feature = "chromium-clipboard-map")]
     publish_web_formats: bool,
 }
 
@@ -19,32 +25,29 @@ impl DataTransferToFrnClipboardDataSourceWrapper {
         Self {
             data_transfer: RefCell::new(Some(data_transfer)),
             items: RefCell::new(None),
+            #[cfg(feature = "chromium-clipboard-map")]
             publish_web_formats: false,
         }
     }
 
+    /// The source of the clipboard: with the `chromium-clipboard-map` feature it publishes the
+    /// web custom formats too; without it, it is the source of a drag.
     pub(crate) fn for_clipboard(data_transfer: Rc<dyn IDataTransfer>) -> Self {
+        #[cfg_attr(not(feature = "chromium-clipboard-map"), allow(unused_mut))]
         let mut source = Self::new(data_transfer);
-        source.publish_web_formats = true;
+        #[cfg(feature = "chromium-clipboard-map")]
+        {
+            source.publish_web_formats = true;
+        }
         source
     }
 
-    fn data_transfer(&self) -> Rc<dyn IDataTransfer> {
-        match self.data_transfer.borrow().clone() {
-            Some(data_transfer) => data_transfer,
-            None => panic!("Cannot access a disposed object: DataTransferToFrnClipboardDataSourceWrapper"),
-        }
-    }
-
-    fn items(&self) -> Vec<ComPtr<IFrnClipboardDataItem>> {
-        if let Some(items) = self.items.borrow().as_ref() {
-            return items.clone();
-        }
-
+    #[cfg(feature = "chromium-clipboard-map")]
+    fn web_items(&self) -> Vec<ComPtr<IFrnClipboardDataItem>> {
         let transfer = self.data_transfer();
         let source_items = transfer.items();
         let clipboard = ChromiumClipboard::MacOs;
-        let mut web_item = if MAP_ENABLED && self.publish_web_formats {
+        let mut web_item = if self.publish_web_formats {
             let mut formats: Vec<_> = transfer
                 .formats()
                 .iter()
@@ -76,7 +79,7 @@ impl DataTransferToFrnClipboardDataSourceWrapper {
         };
         // Chromium reads each type from the first item that offers it. Keep
         // a text item's map and data slots together with that text.
-        let items: Vec<_> = source_items
+        source_items
             .iter()
             .enumerate()
             .map(|(index, item)| {
@@ -89,7 +92,30 @@ impl DataTransferToFrnClipboardDataSourceWrapper {
                     DataTransferItemToFrnClipboardDataItemWrapper::new(item.clone(), map),
                 )
             })
+            .collect()
+    }
+
+    fn data_transfer(&self) -> Rc<dyn IDataTransfer> {
+        match self.data_transfer.borrow().clone() {
+            Some(data_transfer) => data_transfer,
+            None => panic!("Cannot access a disposed object: DataTransferToFrnClipboardDataSourceWrapper"),
+        }
+    }
+
+    fn items(&self) -> Vec<ComPtr<IFrnClipboardDataItem>> {
+        if let Some(items) = self.items.borrow().as_ref() {
+            return items.clone();
+        }
+
+        #[cfg(not(feature = "chromium-clipboard-map"))]
+        let items: Vec<ComPtr<IFrnClipboardDataItem>> = self
+            .data_transfer()
+            .items()
+            .iter()
+            .map(|item| IFrnClipboardDataItem::from_impl(DataTransferItemToFrnClipboardDataItemWrapper::new(item.clone())))
             .collect();
+        #[cfg(feature = "chromium-clipboard-map")]
+        let items = self.web_items();
         *self.items.borrow_mut() = Some(items.clone());
         if items.is_empty() {
             self.destroyed();
@@ -127,7 +153,7 @@ impl IFrnClipboardDataSourceImpl for DataTransferToFrnClipboardDataSourceWrapper
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "chromium-clipboard-map"))]
 mod tests {
     use super::*;
     use crate::frn_string::frn_string_array_to_vec;

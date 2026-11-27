@@ -21,6 +21,11 @@ path = "lib.rs"
 # links none of it; `ferroui-edit` turns it on, so every application that links the editor has it.
 # Without it the accessibility of text fields is the one without span support (docs/binary-size.md).
 text-editor = []
+# The web custom formats a browser exchanges application formats with (Chromium's map and its
+# numbered slots) on the macOS clipboard, and the checks of a pasteboard that changes while it is
+# read: the Rust side and clipboard.mm. Off by default, so an application without it has main's
+# clipboard and links none of it; `ferroui-edit` turns it on.
+chromium-clipboard-map = ["ferroui-base/chromium-clipboard-map"]
 
 [dependencies]
 ferroui-base.workspace = true
@@ -35,7 +40,6 @@ ferroui-opengl.workspace = true
 url.workspace = true
 
 [dev-dependencies]
-ferroui-base = { workspace = true, features = ["chromium-clipboard-map"] }
 ferroui-harfbuzz.workspace = true
 # The example of a window and the accessibility test draw with the Skia backend.
 ferroui-skia.workspace = true

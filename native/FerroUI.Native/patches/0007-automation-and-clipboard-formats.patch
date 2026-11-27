@@ -337,10 +337,14 @@ diff --git a/native/FerroUI.Native/src/OSX/automation.mm b/native/FerroUI.Native
 diff --git a/native/FerroUI.Native/src/OSX/clipboard.mm b/native/FerroUI.Native/src/OSX/clipboard.mm
 --- a/native/FerroUI.Native/src/OSX/clipboard.mm
 +++ b/native/FerroUI.Native/src/OSX/clipboard.mm
-@@ -2,11 +2,48 @@
- #include "common.h"
+@@ -3,10 +3,55 @@
  #include "clipboard.h"
  #include "FrnString.h"
+ 
++// The web custom formats of Chromium and the checks of a pasteboard read that changes while it
++// is read: the `chromium-clipboard-map` feature of ferroui-native (FRN_WEB_CUSTOM_FORMATS).
++// Without it the clipboard is main's.
++#if FRN_WEB_CUSTOM_FORMATS
 +#include <limits>
 +
 +// Chromium stores its web custom format map and numbered slots under these UTIs.
@@ -367,12 +371,14 @@ diff --git a/native/FerroUI.Native/src/OSX/clipboard.mm b/native/FerroUI.Native/
 +    }
 +    return true;
 +}
- 
++#endif // FRN_WEB_CUSTOM_FORMATS
++
  class Clipboard : public ComSingleObject<IFrnClipboard, &IID_IFrnClipboard>
  {
  private:
      NSPasteboard* _pasteboard;
 +
++#if FRN_WEB_CUSTOM_FORMATS
 +    NSPasteboardItem* ItemAtChangeCount(int index, int64_t changeCount)
 +    {
 +        if (index < 0 || changeCount != [_pasteboard changeCount])
@@ -382,59 +388,73 @@ diff --git a/native/FerroUI.Native/src/OSX/clipboard.mm b/native/FerroUI.Native/
 +            return nil;
 +        return [items objectAtIndex:index];
 +    }
++#endif // FRN_WEB_CUSTOM_FORMATS
 +
  public:
      FORWARD_IUNKNOWN()
      
-@@ -54,10 +91,9 @@
+@@ -54,10 +99,16 @@
          if (ret == nullptr)
              return E_POINTER;
          
--        if (changeCount != [_pasteboard changeCount])
++#if FRN_WEB_CUSTOM_FORMATS
 +        auto item = ItemAtChangeCount(index, changeCount);
 +        if (item == nil)
++            return COR_E_OBJECTDISPOSED;
++#else
+         if (changeCount != [_pasteboard changeCount])
              return COR_E_OBJECTDISPOSED;
--
--        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+ 
+         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
++#endif
          
          *ret = ConvertPasteboardTypes([item types]);
          return S_OK;
-@@ -93,11 +129,13 @@
+@@ -93,11 +144,21 @@
          if (ret == nullptr)
              return E_POINTER;
          
--        if (changeCount != [_pasteboard changeCount])
++#if FRN_WEB_CUSTOM_FORMATS
 +        auto item = ItemAtChangeCount(index, changeCount);
 +        if (item == nil)
-             return COR_E_OBJECTDISPOSED;
-         
--        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
-         auto value = [item stringForType:[NSString stringWithUTF8String:format]];
++            return COR_E_OBJECTDISPOSED;
++        
++        auto value = [item stringForType:[NSString stringWithUTF8String:format]];
 +        if (changeCount != [_pasteboard changeCount])
 +            return COR_E_OBJECTDISPOSED;
++#else
+         if (changeCount != [_pasteboard changeCount])
+             return COR_E_OBJECTDISPOSED;
+         
+         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+         auto value = [item stringForType:[NSString stringWithUTF8String:format]];
++#endif
          *ret = value == nil ? nullptr : CreateFrnString(value);
          return S_OK;
      }
-@@ -109,10 +147,10 @@
+@@ -109,10 +170,17 @@
          if (ret == nullptr)
              return E_POINTER;
          
--        if (changeCount != [_pasteboard changeCount])
++#if FRN_WEB_CUSTOM_FORMATS
 +        auto item = ItemAtChangeCount(index, changeCount);
 +        if (item == nil)
++            return COR_E_OBJECTDISPOSED;
++#else
+         if (changeCount != [_pasteboard changeCount])
              return COR_E_OBJECTDISPOSED;
          
--        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
++#endif
++        
          auto formatStr = [NSString stringWithUTF8String:format];
          
          auto value = [item dataForType: formatStr];
-@@ -152,9 +190,17 @@
+@@ -152,9 +220,23 @@
              }
          }
  
--        *ret = value == nil || [value length] == 0
--            ? nullptr
--            : CreateByteArray((void*)[value bytes], (int)[value length]);
++#if FRN_WEB_CUSTOM_FORMATS
 +        if (changeCount != [_pasteboard changeCount])
 +            return COR_E_OBJECTDISPOSED;
 +
@@ -446,25 +466,34 @@ diff --git a/native/FerroUI.Native/src/OSX/clipboard.mm b/native/FerroUI.Native/
 +            *ret = IsWebCustomPasteboardType(formatStr) ? CreateFrnString(@"") : nullptr;
 +        else
 +            *ret = CreateByteArray((void*)[value bytes], static_cast<int>(length));
++#else
+         *ret = value == nil || [value length] == 0
+             ? nullptr
+             : CreateByteArray((void*)[value bytes], (int)[value length]);
++#endif
          return S_OK;
      }
  
-@@ -236,6 +282,9 @@
+@@ -236,6 +318,11 @@
  
  NSString* TryConvertFormatToUti(NSString* format)
  {
++#if FRN_WEB_CUSTOM_FORMATS
 +    if (IsWebCustomPasteboardType(format))
 +        return format;
++#endif
 +
      if (@available(macOS 11.0, *))
      {
          auto type = [UTType typeWithIdentifier:format];
-@@ -331,6 +380,8 @@
+@@ -331,6 +418,10 @@
          return GetNSStringAndRelease(value->AsString());
      
      auto length = value->GetByteLength();
++#if FRN_WEB_CUSTOM_FORMATS
 +    if (length == 0)
 +        return [NSData data];
++#endif
      auto buffer = malloc(length);
      value->CopyBytesTo(buffer);
      return [NSData dataWithBytesNoCopy:buffer length:length];
