@@ -8,13 +8,13 @@ ferroui_base::theme_keys! {
     ::ferroui_base::BoxedValue =>
         BorderGapMaskConverter, BottomCornerRadiusFilterConverter, ContentControlThemeFontFamily, DrawerPaneButtonIcon,
         Icons, KeyGestureConverter, LeftCornerRadiusFilterConverter, LevelUp,
-        NavigationPageBackIcon, NavigationPageMenuIcon, PasswordBoxHideButtonData, PasswordBoxRevealButtonData,
-        PrimaryButtonBorderMultiplier, Refresh, RightCornerRadiusFilterConverter, SecondaryButtonBorderMultiplier,
-        SelectableTextBlockContextFlyout, SeparatorBorderMultiplier, SimpleHorizontalScrollBarContextFlyout, SimpleTextBoxContextFlyout,
-        SimpleVerticalScrollBarContextFlyout, SplitViewPaneAnimationCloseDuration, SplitViewPaneAnimationEasing, SplitViewPaneAnimationOpenDuration,
-        StringFormatConverter, SymbolThemeFontFamily, TableViewColumnHeaderResizerTemplate, TextBoxClearButtonData,
-        TextCaretHandleDrawing, TextCaretHandlePath, TextSelectionHandleDrawing, TextSelectionHandlePath,
-        ToggleSwitchPostContentMargin, ToggleSwitchPreContentMargin, TopCornerRadiusFilterConverter,
+        ManagedStorageFallback, NavigationPageBackIcon, NavigationPageMenuIcon, PasswordBoxHideButtonData,
+        PasswordBoxRevealButtonData, PrimaryButtonBorderMultiplier, Refresh, RightCornerRadiusFilterConverter,
+        SecondaryButtonBorderMultiplier, SelectableTextBlockContextFlyout, SeparatorBorderMultiplier, SimpleHorizontalScrollBarContextFlyout,
+        SimpleTextBoxContextFlyout, SimpleVerticalScrollBarContextFlyout, SplitViewPaneAnimationCloseDuration, SplitViewPaneAnimationEasing,
+        SplitViewPaneAnimationOpenDuration, StringFormatConverter, SymbolThemeFontFamily, TableViewColumnHeaderResizerTemplate,
+        TextBoxClearButtonData, TextCaretHandleDrawing, TextCaretHandlePath, TextSelectionHandleDrawing,
+        TextSelectionHandlePath, ToggleSwitchPostContentMargin, ToggleSwitchPreContentMargin, TopCornerRadiusFilterConverter,
     ;
     ::ferroui_base::CornerRadius =>
         TabbedPageTabItemHeaderCornerRadius, TabbedPageTabItemHeaderIndicatorCornerRadius, TabbedPageTabStripCornerRadius,
