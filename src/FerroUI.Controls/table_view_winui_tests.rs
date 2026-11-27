@@ -180,3 +180,27 @@ fn a_row_background_the_table_did_not_set_is_kept() {
 
     assert!(same_brush(&row.background(), &own_brush));
 }
+
+#[test]
+fn the_headers_get_the_pseudo_classes_of_the_presentation_options() {
+    let _app = start();
+    let target = table(&["a"]);
+    let _root = prepare(&target);
+    let presenter = get_column_headers_presenter(&target);
+
+    assert!(!header(&presenter, 0).classes().contains(":noverticalgridlines"));
+    target.set_grid_lines_visibility(TableViewGridLinesVisibility::Horizontal);
+    target.set_density(TableViewDensity::Compact);
+    assert!(header(&presenter, 0).classes().contains(":noverticalgridlines"));
+    assert!(header(&presenter, 0).classes().contains(":compact"));
+
+    // A header created later gets them too.
+    target.columns().add(column());
+    assert!(header(&presenter, 1).classes().contains(":noverticalgridlines"));
+    assert!(header(&presenter, 1).classes().contains(":compact"));
+
+    target.set_grid_lines_visibility(TableViewGridLinesVisibility::All);
+    target.set_density(TableViewDensity::Standard);
+    assert!(!header(&presenter, 1).classes().contains(":noverticalgridlines"));
+    assert!(!header(&presenter, 1).classes().contains(":compact"));
+}

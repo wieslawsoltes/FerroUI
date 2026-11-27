@@ -111,5 +111,18 @@
     <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
+    <!-- GridLinesVisibility and Density of the table (WinUI): the table gives the header its
+         pseudo-classes. -->
+    <Style Selector="^:noverticalgridlines">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="^:compact">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingCompact}" />
+    </Style>
+    <Style Selector="^:comfortable">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingComfortable}" />
+    </Style>
   </ControlTheme>
 </ResourceDictionary>

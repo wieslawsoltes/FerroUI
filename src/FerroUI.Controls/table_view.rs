@@ -4,7 +4,8 @@ use crate::presenters::TableViewColumnHeadersPresenter;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::IDataTemplate;
 use crate::{
-    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn, TableViewRow,
+    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn,
+    TableViewColumnHeader, TableViewRow,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetBehavior};
 use ferroui_base::input::InputElementImpl;
@@ -98,10 +99,12 @@ impl FerroObjectImpl for TableView {
             }
         } else if property == Self::grid_lines_visibility_property().as_property() {
             this.update_grid_lines_pseudo_classes();
+            this.update_headers_presentation();
         } else if property == Self::density_property().as_property() {
             let density = this.density();
             this.pseudo_classes().set(":compact", density == TableViewDensity::Compact);
             this.pseudo_classes().set(":comfortable", density == TableViewDensity::Comfortable);
+            this.update_headers_presentation();
         } else if property == Self::row_background_property().as_property()
             || property == Self::alternating_row_background_property().as_property()
         {
@@ -365,6 +368,16 @@ impl TableView {
         let vertical = matches!(visibility, TableViewGridLinesVisibility::All | TableViewGridLinesVisibility::Vertical);
         self.pseudo_classes().set(":nohorizontalgridlines", !horizontal);
         self.pseudo_classes().set(":noverticalgridlines", !vertical);
+    }
+
+    /// Gives the headers the pseudo-classes of the presentation options.
+    fn update_headers_presentation(&self) {
+        let Some(headers_presenter) = self.headers_presenter() else { return };
+        for child in headers_presenter.children().snapshot().iter() {
+            if let Some(header) = child.downcast_ref::<TableViewColumnHeader>() {
+                header.update_presentation_pseudo_classes(Some(self));
+            }
+        }
     }
 
     /// Sets the background of a row from [`row_background`](Self::row_background) and

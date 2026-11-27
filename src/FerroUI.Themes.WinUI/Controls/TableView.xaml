@@ -183,37 +183,34 @@
     </Setter>
 
     <!-- GridLinesVisibility (WinUI): the lines the table leaves out. -->
-    <Style Selector="^:nohorizontalgridlines TableViewRow">
-      <Setter Property="BorderThickness" Value="0" />
+    <Style Selector="^:nohorizontalgridlines">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
     </Style>
-    <Style Selector="^:noverticalgridlines TableViewCell">
-      <Setter Property="BorderThickness" Value="0" />
-    </Style>
-    <Style Selector="^:noverticalgridlines TableViewColumnHeader">
-      <Setter Property="BorderThickness" Value="0" />
+    <Style Selector="^:noverticalgridlines">
+      <Style Selector="^ TableViewCell">
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
     </Style>
     <!-- Density (WinUI): the compact and comfortable sizes of the resources. -->
-    <Style Selector="^:compact TableViewRow">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+    <Style Selector="^:compact">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+      </Style>
+      <Style Selector="^ TableViewCell">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+        <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingCompact}" />
+      </Style>
     </Style>
-    <Style Selector="^:compact TableViewCell">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
-      <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingCompact}" />
-    </Style>
-    <Style Selector="^:compact TableViewColumnHeader">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
-      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingCompact}" />
-    </Style>
-    <Style Selector="^:comfortable TableViewRow">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
-    </Style>
-    <Style Selector="^:comfortable TableViewCell">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
-      <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingComfortable}" />
-    </Style>
-    <Style Selector="^:comfortable TableViewColumnHeader">
-      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
-      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingComfortable}" />
+    <Style Selector="^:comfortable">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+      </Style>
+      <Style Selector="^ TableViewCell">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+        <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingComfortable}" />
+      </Style>
     </Style>
     <!-- EmptyTemplate (WinUI). -->
     <Style Selector="^:empty /template/ ContentPresenter#PART_EmptyStatePresenter">

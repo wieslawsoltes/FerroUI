@@ -1317,6 +1317,7 @@ fn the_table_view_presentation_options_come_from_the_theme() {
     assert_eq!(30.0, rows()[0].min_height());
     assert_eq!(30.0, first_cell().min_height());
     assert_eq!(Thickness::new(8.0, 2.0, 8.0, 2.0), first_cell().padding());
+    assert_eq!(30.0, first_header().min_height());
 
     table.set_items_source(Some(ItemsSource::from_items(std::iter::empty::<Option<BoxedValue>>())));
     window.update_layout();

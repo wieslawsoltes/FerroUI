@@ -119,11 +119,15 @@
     </Setter>
 
     <!-- Density (WinUI): the theme draws no grid lines, so GridLinesVisibility changes nothing. -->
-    <Style Selector="^:compact TableViewRow">
-      <Setter Property="Padding" Value="6,4,6,6" />
+    <Style Selector="^:compact">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="Padding" Value="6,4,6,6" />
+      </Style>
     </Style>
-    <Style Selector="^:comfortable TableViewRow">
-      <Setter Property="Padding" Value="6,13,6,16" />
+    <Style Selector="^:comfortable">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="Padding" Value="6,13,6,16" />
+      </Style>
     </Style>
     <!-- EmptyTemplate (WinUI). -->
     <Style Selector="^:empty /template/ ContentPresenter#PART_EmptyStatePresenter">
