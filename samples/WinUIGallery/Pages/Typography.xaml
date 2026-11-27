@@ -1,9 +1,9 @@
 <!-- Ported from the pinned Typography example of WinUI Gallery (14061eea), the code behind of
      TypographyPage.xaml.cs and the gallery's TypographyControl (brush_samples.rs); see
      ../NOTICE.md. The header image is the source's Typography.dark.png or Typography.light.png of
-     the page's theme, set by brush_samples.rs (the ThemeDictionaries of HeaderImage). FerroUI has
-     no TeachingTip: each tip is the Flyout of its button with the tip's title, which the button's
-     click opens and closes as ShowTypographyButtonClick toggles IsOpen, so the page is partial.
+     the page's theme, set by brush_samples.rs (the ThemeDictionaries of HeaderImage). Each tip
+     is the TeachingTip of ferroui-controls-teaching-tip, whose target and IsOpen toggle the code
+     behind wires as ShowTypographyButtonClick does.
      Each TypographyControl is a row of the table: the example in the theme's style of its
      resource name (a ControlTheme, DynamicResource as the source's StaticResource of the theme),
      its variable font, size and line height, and the resource name with the copy button of
@@ -13,6 +13,9 @@
      SelectableTextBlocks. HorizontalScrollMode is the bar's visibility. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.TeachingTip/Themes/WinUI/WinUI.xaml" />
+  </StackPanel.Styles>
   <RichTextBlock Margin="0,4,0,0" TextWrapping="Wrap">
     <Paragraph><Run Text="Typography helps provide structure and hierarchy to UI. The default font for Windows is " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/downloads/#fonts"><Run Text="Segoe UI Variable" /></Hyperlink><Run Text=" . Best practice is to use Regular weight for most text, use Semibold for titles. The minimum values should be 12px Regular, 14px Semibold." /></Paragraph>
   </RichTextBlock>
@@ -25,48 +28,28 @@
         <Button x:Name="ShowTypographyButton1" Canvas.Left="650" Canvas.Top="60" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show typography" ToolTip.Tip="Caption">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="Caption" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowTypographyInfoTooltip1" Title="Caption" />
         <Button x:Name="ShowTypographyButton2" Canvas.Left="190" Canvas.Top="280" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show typography" ToolTip.Tip="Body">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="Body" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowTypographyInfoTooltip2" Title="Body" />
         <Button x:Name="ShowTypographyButton3" Canvas.Left="83" Canvas.Top="245" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show typography" ToolTip.Tip="Body Strong">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="Body Strong" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowTypographyInfoTooltip3" Title="Body Strong" />
         <Button x:Name="ShowTypographyButton4" Canvas.Left="320" Canvas.Top="20" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show typography" ToolTip.Tip="Title">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="Title" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowTypographyInfoTooltip4" Title="Title" />
         <Button x:Name="ShowTypographyButton5" Canvas.Left="160" Canvas.Top="110" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show typography">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="Display" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowTypographyInfoTooltip5" Title="Display" />
       </Canvas>
     </ScrollViewer>
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">

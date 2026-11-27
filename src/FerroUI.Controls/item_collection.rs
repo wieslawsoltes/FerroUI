@@ -1,8 +1,9 @@
-use crate::items_source::{ItemsChangedEventArgs, ItemsSource};
+use crate::items_source::{IItemsList, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource};
 use crate::ItemsSourceView;
 use ferroui_base::collections::{FerroList, ResetBehavior};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::BoxedValue;
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -196,5 +197,39 @@ impl ItemCollection {
             "Operation is not valid while ItemsSource is in use.\
              Access and modify elements with ItemsControl.ItemsSource instead."
         );
+    }
+}
+
+/// The items of an item collection as an untyped, notifying list: what the collection is to an
+/// items control that uses it as its items source (a menu flyout's items, a tab view's tabs).
+pub(crate) struct ItemCollectionList(pub(crate) Rc<ItemsSourceView>);
+
+impl IItemsList for ItemCollectionList {
+    fn count(&self) -> usize {
+        self.0.count()
+    }
+
+    fn get_at(&self, index: usize) -> Option<BoxedValue> {
+        self.0.get_at(index)
+    }
+
+    fn index_of(&self, item: &Option<BoxedValue>) -> i32 {
+        self.0.index_of(item)
+    }
+
+    fn is_notifying(&self) -> bool {
+        true
+    }
+
+    fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
+        Some(self.0.add_collection_changed(handler))
+    }
+
+    fn remove_collection_changed(&self, token: u64) {
+        self.0.remove_collection_changed(token);
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
