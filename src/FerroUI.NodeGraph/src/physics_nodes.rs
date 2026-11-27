@@ -736,44 +736,44 @@ impl PhysicsGraphTemplate {
 fn build_attractor_graph_mapper(reg: &NodeRegistry) -> NodeGraph {
     let mut g = NodeGraph::new("Grasshopper Attractor & GraphMapper Field");
 
-    let md = g.add_node(reg, "params.md_slider", 24.0, 28.0).unwrap();
-    let s_cols = g.add_node(reg, "params.int_slider", 24.0, 224.0).unwrap();
-    g.configure_slider(s_cols, "Grid Cols", 8.0, 4.0, 12.0, 1.0, true);
-    let s_rows = g.add_node(reg, "params.int_slider", 24.0, 314.0).unwrap();
-    g.configure_slider(s_rows, "Grid Rows", 4.0, 2.0, 7.0, 1.0, true);
-    let s_rad = g.add_node(reg, "params.slider", 24.0, 404.0).unwrap();
-    g.configure_slider(s_rad, "Attractor Range", 7.2, 2.5, 13.0, 0.2, false);
+    let md = g.add_node(reg, "params.md_slider", 30.0, 30.0).unwrap();
+    let s_cols = g.add_node(reg, "params.int_slider", 30.0, 210.0).unwrap();
+    g.configure_slider(s_cols, "Cols", 8.0, 4.0, 12.0, 1.0, true);
+    let s_rows = g.add_node(reg, "params.int_slider", 30.0, 272.0).unwrap();
+    g.configure_slider(s_rows, "Rows", 4.0, 2.0, 7.0, 1.0, true);
+    let s_rad = g.add_node(reg, "params.slider", 30.0, 334.0).unwrap();
+    g.configure_slider(s_rad, "Range", 7.2, 2.5, 13.0, 0.2, false);
 
     // Map MD Slider [0..1]x[0..1] into arena [2..14] x [1.5..8.5]
-    let map_x = g.add_node(reg, "math.lerp", 260.0, 24.0).unwrap();
+    let map_x = g.add_node(reg, "math.lerp", 330.0, 24.0).unwrap();
     g.set_input_default(map_x, 0, Value::Float(2.0));
     g.set_input_default(map_x, 1, Value::Float(14.0));
-    let map_y = g.add_node(reg, "math.lerp", 260.0, 114.0).unwrap();
+    let map_y = g.add_node(reg, "math.lerp", 330.0, 114.0).unwrap();
     g.set_input_default(map_y, 0, Value::Float(1.5));
     g.set_input_default(map_y, 1, Value::Float(8.5));
-    let attr_pt = g.add_node(reg, "vector.point2d", 470.0, 56.0).unwrap();
+    let attr_pt = g.add_node(reg, "vector.point2d", 520.0, 62.0).unwrap();
 
-    let grid = g.add_node(reg, "geom.rect_grid", 260.0, 230.0).unwrap();
+    let grid = g.add_node(reg, "geom.rect_grid", 330.0, 224.0).unwrap();
     g.set_input_default(grid, 0, Value::Vec2([8.0, 7.4]));
     g.set_input_default(grid, 1, Value::Float(1.25));
     g.set_input_default(grid, 2, Value::Float(-1.15));
     g.set_input_default(grid, 5, Value::Bool(false));
 
-    let attr = g.add_node(reg, "geom.attractor", 470.0, 200.0).unwrap();
-    let gmap = g.add_node(reg, "params.graph_mapper", 690.0, 120.0).unwrap();
-    let pview = g.add_node(reg, "params.param_viewer", 470.0, 355.0).unwrap();
+    let attr = g.add_node(reg, "geom.attractor", 520.0, 194.0).unwrap();
+    let gmap = g.add_node(reg, "params.graph_mapper", 720.0, 110.0).unwrap();
+    let pview = g.add_node(reg, "params.param_viewer", 520.0, 330.0).unwrap();
 
-    let rad_map = g.add_node(reg, "math.lerp", 950.0, 96.0).unwrap();
+    let rad_map = g.add_node(reg, "math.lerp", 955.0, 96.0).unwrap();
     g.set_input_default(rad_map, 0, Value::Float(0.18));
     g.set_input_default(rad_map, 1, Value::Float(0.56));
-    let shape = g.add_node(reg, "physics.shape_circle", 1160.0, 96.0).unwrap();
-    let hsv = g.add_node(reg, "geom.color_hsv", 950.0, 224.0).unwrap();
+    let shape = g.add_node(reg, "physics.shape_circle", 1150.0, 96.0).unwrap();
+    let hsv = g.add_node(reg, "geom.color_hsv", 955.0, 224.0).unwrap();
 
-    let bodies = g.add_node(reg, "physics.rigid_body", 1160.0, 210.0).unwrap();
+    let bodies = g.add_node(reg, "physics.rigid_body", 1150.0, 204.0).unwrap();
     g.set_input_default(bodies, 3, Value::Float(0.72));
-    let wcfg = g.add_node(reg, "physics.world_config", 950.0, 360.0).unwrap();
+    let wcfg = g.add_node(reg, "physics.world_config", 955.0, 344.0).unwrap();
     g.set_input_default(wcfg, 0, Value::Float(2.5));
-    let scene_out = g.add_node(reg, "physics.scene_output", 1400.0, 210.0).unwrap();
+    let scene_out = g.add_node(reg, "physics.scene_output", 1365.0, 204.0).unwrap();
 
     let _ = g.connect(md, 1, map_x, 2, false);
     let _ = g.connect(md, 2, map_y, 2, false);

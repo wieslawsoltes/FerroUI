@@ -4,8 +4,8 @@
 use crate::data_tree::{DataTree, Value};
 use crate::node::NodeRegistry;
 use crate::types::{
-    AlignMode, DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier, ParamWidget,
-    WireDisplay, WireId,
+    AlignMode, CanvasTheme, DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier,
+    ParamWidget, WireDisplay, WireId,
 };
 use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -98,6 +98,7 @@ pub struct NodeGraph {
     pub show_profiler: bool,
     pub snap_to_grid: bool,
     pub solution_locked: bool,
+    pub theme: CanvasTheme,
     pub generation: u64,
     next_node_id: u32,
     next_wire_id: u32,
@@ -127,6 +128,7 @@ impl NodeGraph {
             show_profiler: true,
             snap_to_grid: false,
             solution_locked: false,
+            theme: CanvasTheme::ClassicGrasshopper,
             generation: 0,
             next_node_id: 1,
             next_wire_id: 1,

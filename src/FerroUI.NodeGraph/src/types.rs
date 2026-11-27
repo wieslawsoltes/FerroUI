@@ -394,6 +394,33 @@ pub enum ParamWidget {
     },
 }
 
+/// Visual theme for the Rhino Grasshopper canvas (`Classic` warm drafting parchment or `Dark` studio).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum CanvasTheme {
+    /// Authentic Rhino Grasshopper warm drafting parchment canvas, silver/charcoal capsules,
+    /// yellow sticky Panels, and signature Grasshopper Green selection & wires.
+    #[default]
+    ClassicGrasshopper,
+    /// Sleek dark computational design studio theme.
+    DarkStudio,
+}
+
+impl CanvasTheme {
+    pub fn toggle(self) -> Self {
+        match self {
+            Self::ClassicGrasshopper => Self::DarkStudio,
+            Self::DarkStudio => Self::ClassicGrasshopper,
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::ClassicGrasshopper => "☀ Classic GH",
+            Self::DarkStudio => "☾ Dark GH",
+        }
+    }
+}
+
 /// Multi-node canvas alignment & distribution operations (Grasshopper Align widget).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AlignMode {

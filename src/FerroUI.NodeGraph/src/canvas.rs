@@ -1,20 +1,19 @@
-//! **Visual-Tree Grasshopper Canvas Coordination & Hardware Vector Wire/Grid Layer**.
+//! **Authentic Rhino Grasshopper Visual-Tree Coordinator & Hardware Vector Wire/Grid Layer**.
 //!
-//! Every node, port socket, slider, toggle, expression box, panel, GraphMapper, and MD Slider
-//! is built from **real FerroUI UI Visuals** hosted inside a GPU-transformed `Canvas` (`MatrixTransform`).
-//! [`WireBackdropLayer`] sits directly behind that visual tree and renders:
-//! - Infinite adaptive Rhino Grasshopper minor/major grid
-//! - Colored Grasshopper Node Groups measured directly from mounted real node visuals
-//! - **Fancy Bezier Wires** whose endpoints are queried pixel-perfectly from the **real FerroUI port
-//!   socket `Visual`s** via `Visual::translate_point`!
-//! - Live drag-to-connect Bezier preview wire with magnetic socket snapping & compatibility glow
-//! - Marquee box selection, interactive bottom-right Minimap, and double-click wire Relay insertion!
+//! Renders behind the real FerroUI node visual tree with both **Classic Grasshopper Warm Parchment**
+//! and **Dark Studio** themes:
+//! - Adaptive Rhino drafting grid + origin crosshair
+//! - Pastel Grasshopper Node Groups measured directly from mounted real node visuals
+//! - **Signature Grasshopper Fancy Wires**: charcoal single Item wire, double-line List wire,
+//!   dashed double-line DataTree wire, luminous **Grasshopper Green** selected wires, orange Empty wire
+//! - **Rhino Window vs Crossing Marquee** (left→right Blue Window Select, right→left Green Crossing Select!)
+//! - Magnetic port snap halo + `+` Shift multi-wire badge, interactive minimap, and DataTree tooltips!
 
 use crate::eval::evaluate_graph;
 use crate::graph::{NodeGraph, NodeInstance};
 use crate::node::NodeRegistry;
 use crate::types::{
-    NodeId, PortDirection, WireDataKind, WireDisplay, WireId,
+    CanvasTheme, NodeId, PortDirection, WireDataKind, WireDisplay, WireId,
 };
 use ferroui_base::input::{
     InputElement, InputElementImpl, Key, KeyEventArgs, KeyModifiers, PointerEventArgs,
@@ -51,8 +50,8 @@ pub struct ActiveWireDrag {
     pub snap_target: Option<(NodeId, usize, PortDirection, Point, bool)>,
 }
 
-/// Shared coordinator connecting the real FerroUI node visual tree, port sockets,
-/// persistent `MatrixTransform` camera, and [`WireBackdropLayer`].
+/// Shared reactive coordinator connecting real FerroUI node visuals, port sockets,
+/// GPU `MatrixTransform` camera, and [`WireBackdropLayer`].
 #[derive(Clone)]
 pub struct VisualGraphState {
     pub graph: Rc<RefCell<NodeGraph>>,
@@ -65,15 +64,11 @@ pub struct VisualGraphState {
     pub marquee: Rc<RefCell<Option<(Point, Point)>>>,
     pub hover_port: Rc<RefCell<Option<(NodeId, PortDirection, usize, Point)>>>,
     pub on_evaluated: Rc<dyn Fn(&NodeGraph)>,
-    /// Incremented ONLY when nodes are added/removed/loaded to reconcile `for_each` cleanly.
     pub topology_rev: Signal<u64>,
-    /// Incremented when node outputs/values/errors change so live node UI badges refresh.
     pub eval_rev: Signal<u64>,
-    /// Incremented when selection changes so node borders & Align bar refresh.
     pub selection_rev: Signal<u64>,
-    /// Floating Grasshopper Quick-Search popup position `(screen_pt, canvas_pt)`.
+    pub theme: Signal<CanvasTheme>,
     pub quick_search: Signal<Option<(Point, [f64; 2])>>,
-    /// Floating Grasshopper Node Context Menu `(node_id, screen_pt)`.
     pub context_menu: Signal<Option<(NodeId, Point)>>,
     pub status_msg: Signal<String>,
 }
@@ -84,6 +79,7 @@ impl VisualGraphState {
         registry: Rc<NodeRegistry>,
         on_evaluated: Rc<dyn Fn(&NodeGraph)>,
     ) -> Self {
+        let init_theme = graph.borrow().theme;
         Self {
             graph,
             registry,
@@ -98,16 +94,15 @@ impl VisualGraphState {
             topology_rev: signal(0),
             eval_rev: signal(0),
             selection_rev: signal(0),
+            theme: signal(init_theme),
             quick_search: signal(None),
             context_menu: signal(None),
             status_msg: signal(String::from(
-                "Real FerroUI Visual Nodes · Drag sliders/curves/expressions live · Double-click or Space for Search · Right-drag Pan · Wheel Zoom",
+                "Double-click / Space = Search · Double-click wire = Relay · Shift-wire = Multi-input · Right-drag = Pan · Wheel = Zoom",
             )),
         }
     }
 
-    /// Updates the persistent GPU `MatrixTransform` on the FerroUI node visual container
-    /// (zero layout passes!) and repaints the vector wire/grid layer in lockstep.
     pub fn sync_camera_transform(&self) {
         let (pan, z) = {
             let g = self.graph.borrow();
@@ -153,8 +148,6 @@ impl VisualGraphState {
         self.invalidate_wires();
     }
 
-    /// Updates `Canvas.Left` / `Canvas.Top` on every mounted node visual to match `NodeGraph::nodes`
-    /// (used after Auto-Layout, Align, Undo/Redo, or dragging!).
     pub fn sync_all_node_positions(&self) {
         let g = self.graph.borrow();
         let visuals = self.node_visuals.borrow();
@@ -169,6 +162,21 @@ impl VisualGraphState {
         self.invalidate_wires();
     }
 
+    pub fn sync_measured_node_sizes(&self) {
+        let mut g = self.graph.borrow_mut();
+        let visuals = self.node_visuals.borrow();
+        for (nid, node) in &mut g.nodes {
+            if let Some(weak) = visuals.get(nid) {
+                if let Some(vis) = weak.upgrade() {
+                    let b = vis.bounds();
+                    if b.width > 12.0 && b.height > 12.0 {
+                        node.size = [b.width, b.height];
+                    }
+                }
+            }
+        }
+    }
+
     pub fn screen_to_canvas(&self, pt: Point) -> [f64; 2] {
         let g = self.graph.borrow();
         let z = g.camera_zoom.max(0.1);
@@ -176,15 +184,18 @@ impl VisualGraphState {
     }
 
     pub fn fit_view(&self) {
+        self.sync_measured_node_sizes();
         let (w, h) = self
             .wire_layer
             .borrow()
             .as_ref()
             .and_then(|w| w.upgrade())
-            .map(|l| (l.bounds().width.max(400.0), l.bounds().height.max(300.0)))
-            .unwrap_or((900.0, 600.0));
-        self.graph.borrow_mut().fit_to_view(w, h);
-        self.sync_camera_transform();
+            .map(|l| (l.bounds().width, l.bounds().height))
+            .unwrap_or((0.0, 0.0));
+        if w > 120.0 && h > 100.0 {
+            self.graph.borrow_mut().fit_to_view(w, h);
+            self.sync_camera_transform();
+        }
     }
 
     pub fn zoom_at(&self, screen_pt: Point, wheel_dy: f64) {
@@ -207,8 +218,6 @@ impl VisualGraphState {
         self.sync_camera_transform();
     }
 
-    /// Queries the exact screen-space center of a real FerroUI port socket `Visual` relative to
-    /// `WireBackdropLayer`, falling back cleanly to analytical canvas math on frame 0 before layout.
     pub fn port_screen_pos(
         &self,
         layer: &WireBackdropLayer,
@@ -227,7 +236,6 @@ impl VisualGraphState {
                 }
             }
         }
-        // Fallback before initial layout pass finishes
         let g = self.graph.borrow();
         let node = g.nodes.get(&node_id)?;
         let c = fallback_port_canvas(node, &self.registry, dir, port_idx);
@@ -237,7 +245,6 @@ impl VisualGraphState {
         ))
     }
 
-    /// Finds the nearest compatible real FerroUI port socket within magnetic snap radius (`22px`).
     pub fn find_snap_socket(
         &self,
         screen_pt: Point,
@@ -253,7 +260,7 @@ impl VisualGraphState {
         };
 
         let mut best: Option<(f64, NodeId, usize, Point, bool)> = None;
-        let max_d2 = 24.0 * 24.0;
+        let max_d2 = 26.0 * 26.0;
 
         for (&nid, node) in &g.nodes {
             if nid == from_node {
@@ -282,7 +289,6 @@ impl VisualGraphState {
         best.map(|(_, nid, pidx, sp, ok)| (nid, pidx, want_dir, sp, ok))
     }
 
-    /// Completes an active wire drag initiated from a real port socket visual.
     pub fn finish_wire_drag(&self, screen_pt: Point, shift: bool) {
         let Some(drag) = self.active_wire.borrow_mut().take() else {
             return;
@@ -330,13 +336,13 @@ fn fallback_port_canvas(
     if count <= 1 {
         [x, node.position[1] + node.size[1] * 0.5]
     } else {
-        let usable = (node.size[1] - 32.0).max(1.0);
-        [x, node.position[1] + 22.0 + usable * (port_idx as f64 / (count - 1) as f64)]
+        let usable = (node.size[1] - 24.0).max(1.0);
+        [x, node.position[1] + 12.0 + usable * (port_idx as f64 / (count - 1) as f64)]
     }
 }
 
 // =============================================================================
-// Vector Wire, Grid, Group, Marquee & Minimap Backdrop Control
+// Authentic Rhino Grasshopper Vector Wire, Grid, Group & Minimap Backdrop
 // =============================================================================
 
 #[derive(Clone, Debug)]
@@ -347,10 +353,11 @@ enum BackdropDrag {
     Minimap,
 }
 
-struct WirePalette {
+struct ThemeBrushes {
     bg: Rc<dyn IBrush>,
     minor_grid: Rc<dyn IPen>,
     major_grid: Rc<dyn IPen>,
+    origin_pen: Rc<dyn IPen>,
     wire_empty: Rc<dyn IPen>,
     wire_item: Rc<dyn IPen>,
     wire_list_outer: Rc<dyn IPen>,
@@ -358,11 +365,14 @@ struct WirePalette {
     wire_tree_outer: Rc<dyn IPen>,
     wire_tree_inner: Rc<dyn IPen>,
     wire_selected: Rc<dyn IPen>,
+    wire_selected_inner: Rc<dyn IPen>,
     wire_faint: Rc<dyn IPen>,
     wire_preview_ok: Rc<dyn IPen>,
     wire_preview_bad: Rc<dyn IPen>,
-    marquee_fill: Rc<dyn IBrush>,
-    marquee_border: Rc<dyn IPen>,
+    window_fill: Rc<dyn IBrush>,
+    window_border: Rc<dyn IPen>,
+    crossing_fill: Rc<dyn IBrush>,
+    crossing_border: Rc<dyn IPen>,
     minimap_bg: Rc<dyn IBrush>,
     minimap_border: Rc<dyn IPen>,
     minimap_view: Rc<dyn IPen>,
@@ -375,31 +385,84 @@ struct WirePalette {
     snap_bad_pen: Rc<dyn IPen>,
     node_dot: Rc<dyn IBrush>,
     node_dot_sel: Rc<dyn IBrush>,
+    badge_bg: Rc<dyn IBrush>,
 }
 
-impl WirePalette {
-    fn new() -> Self {
+impl ThemeBrushes {
+    fn classic_grasshopper() -> Self {
         let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
-        let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 4.0]), 0.0));
+        let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
+        let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
+        let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFE07A00));
+        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF343434));
+        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFD5D3C8));
+        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22A033));
+        Self {
+            // Original Rhino Grasshopper warm drafting parchment!
+            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFD5D3C8)),
+            minor_grid: Rc::new(ImmutablePen::from_uint32(0xFFC8C5B9, 1.0)),
+            major_grid: Rc::new(ImmutablePen::from_uint32(0xFFB5B2A5, 1.1)),
+            origin_pen: Rc::new(ImmutablePen::from_uint32(0xFF9E9A8C, 1.5)),
+            wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.9, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
+            wire_item: Rc::new(ImmutablePen::from_uint32(0xFF3A3A3A, 2.0)),
+            wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xFF343434, 4.6)),
+            wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFFD5D3C8, 1.8)),
+            wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
+            wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.8, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
+            // Signature Rhino Grasshopper luminous lime-green selected wire!
+            wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF28B838, 3.6)),
+            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFFD9F7DC, 1.3)),
+            wire_faint: Rc::new(ImmutablePen::from_uint32(0x55484848, 1.2)),
+            wire_preview_ok: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 2.8)),
+            wire_preview_bad: Rc::new(ImmutablePen::from_uint32(0xFFD9383A, 2.8)),
+            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x280284C7)),
+            window_border: Rc::new(ImmutablePen::from_uint32(0xCC0284C7, 1.4)),
+            crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2828B838)),
+            crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
+            minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xE8EAE8DF)),
+            minimap_border: Rc::new(ImmutablePen::from_uint32(0xFF9A988E, 1.2)),
+            minimap_view: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 1.6)),
+            text_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF55544E)),
+            text_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF222220)),
+            text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF1A1A18)),
+            tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF8FFFCE8)),
+            tooltip_border: Rc::new(ImmutablePen::from_uint32(0xFF888472, 1.2)),
+            snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 2.6)),
+            snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFD9383A, 2.6)),
+            node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF5A5A54)),
+            node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF28B838)),
+            badge_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22A033)),
+        }
+    }
+
+    fn dark_studio() -> Self {
+        let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
+        let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
+        let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xCCF59E0B));
         let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xDDA78BFA));
         let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0A0F1A));
+        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF34D399));
         Self {
             bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0A0F1A)),
             minor_grid: Rc::new(ImmutablePen::from_uint32(0xFF111827, 1.0)),
             major_grid: Rc::new(ImmutablePen::from_uint32(0xFF1A253A, 1.0)),
+            origin_pen: Rc::new(ImmutablePen::from_uint32(0xFF2B3A55, 1.4)),
             wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.8, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
             wire_item: Rc::new(ImmutablePen::from_uint32(0xCC94A3B8, 2.2)),
             wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD38BDF8, 4.8)),
             wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFF0A0F1A, 1.9)),
             wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
             wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.9, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
-            wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF10B981, 3.4)),
+            wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF22C55E, 3.6)),
+            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFF0A0F1A, 1.3)),
             wire_faint: Rc::new(ImmutablePen::from_uint32(0x4494A3B8, 1.2)),
             wire_preview_ok: Rc::new(ImmutablePen::from_uint32(0xFF34D399, 2.8)),
             wire_preview_bad: Rc::new(ImmutablePen::from_uint32(0xFFF43F5E, 2.8)),
-            marquee_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2238BDF8)),
-            marquee_border: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 1.4)),
+            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2238BDF8)),
+            window_border: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 1.4)),
+            crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2234D399)),
+            crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
             minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDE0B101D)),
             minimap_border: Rc::new(ImmutablePen::from_uint32(0xFF2B3B58, 1.2)),
             minimap_view: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 1.5)),
@@ -408,10 +471,11 @@ impl WirePalette {
             text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF1F5F9)),
             tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF00F172A)),
             tooltip_border: Rc::new(ImmutablePen::from_uint32(0xFF38BDF8, 1.2)),
-            snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF10B981, 2.4)),
-            snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFF43F5E, 2.4)),
+            snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF10B981, 2.6)),
+            snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFF43F5E, 2.6)),
             node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF64748B)),
-            node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF38BDF8)),
+            node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22C55E)),
+            badge_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF10B981)),
         }
     }
 }
@@ -421,7 +485,8 @@ pub struct WireBackdropLayer {
     base: Control,
     state: RefCell<Option<VisualGraphState>>,
     drag: RefCell<BackdropDrag>,
-    palette: WirePalette,
+    classic: ThemeBrushes,
+    dark: ThemeBrushes,
 }
 
 ferro_class!(WireBackdropLayer: Control);
@@ -446,7 +511,8 @@ impl WireBackdropLayer {
             base: Control::construct(),
             state: RefCell::new(None),
             drag: RefCell::new(BackdropDrag::Idle),
-            palette: WirePalette::new(),
+            classic: ThemeBrushes::classic_grasshopper(),
+            dark: ThemeBrushes::dark_studio(),
         }
     }
 
@@ -528,7 +594,6 @@ impl InputElementImpl for WireBackdropLayer {
         let alt = mods.contains(KeyModifiers::ALT);
         let shift = mods.contains(KeyModifiers::SHIFT);
 
-        // Minimap jump
         let mm = this.minimap_rect();
         if !is_right && mm.contains(pt) && this.bounds().width > 340.0 {
             *this.drag.borrow_mut() = BackdropDrag::Minimap;
@@ -536,7 +601,6 @@ impl InputElementImpl for WireBackdropLayer {
             return;
         }
 
-        // Right-click wire disconnects; otherwise right-drag pans!
         if is_right {
             if let Some(wid) = this.hit_test_wire_screen(&st, pt) {
                 {
@@ -558,18 +622,13 @@ impl InputElementImpl for WireBackdropLayer {
             return;
         }
 
-        // Click or double-click a wire (double-click inserts a Grasshopper Relay right on the wire!)
+        // Click or double-click wire (double-click drops inline Grasshopper Relay!)
         if let Some(wid) = this.hit_test_wire_screen(&st, pt) {
             if e.click_count() >= 2 {
                 let c = st.screen_to_canvas(pt);
-                let inserted = st
-                    .graph
-                    .borrow_mut()
-                    .insert_relay_on_wire(wid, c[0], c[1], &st.registry)
-                    .is_some();
-                if inserted {
+                if st.graph.borrow_mut().insert_relay_on_wire(wid, c[0], c[1], &st.registry).is_some() {
                     st.notify_topology_changed();
-                    st.status_msg.set("Inserted Grasshopper Relay node inline on wire!".into());
+                    st.status_msg.set("Inserted Grasshopper Relay node inline on wire.".into());
                 }
                 return;
             }
@@ -583,14 +642,12 @@ impl InputElementImpl for WireBackdropLayer {
             return;
         }
 
-        // Double-click empty canvas opens the floating Grasshopper Quick-Search Popup!
         if e.click_count() >= 2 {
             let c = st.screen_to_canvas(pt);
             st.quick_search.set(Some((pt, c)));
             return;
         }
 
-        // Empty space drag -> Marquee box selection!
         if !shift {
             let mut g = st.graph.borrow_mut();
             g.selected_nodes.clear();
@@ -620,6 +677,7 @@ impl InputElementImpl for WireBackdropLayer {
             }
             BackdropDrag::Marquee { start_screen } => {
                 *st.marquee.borrow_mut() = Some((start_screen, pt));
+                let crossing = pt.x < start_screen.x; // Rhino CAD convention: Right→Left = Crossing!
                 let c0 = st.screen_to_canvas(start_screen);
                 let c1 = st.screen_to_canvas(pt);
                 let x0 = c0[0].min(c1[0]);
@@ -633,10 +691,15 @@ impl InputElementImpl for WireBackdropLayer {
                         .nodes
                         .values()
                         .filter(|n| {
-                            n.position[0] + n.size[0] >= x0
-                                && n.position[0] <= x1
-                                && n.position[1] + n.size[1] >= y0
-                                && n.position[1] <= y1
+                            let nx0 = n.position[0];
+                            let ny0 = n.position[1];
+                            let nx1 = nx0 + n.size[0];
+                            let ny1 = ny0 + n.size[1];
+                            if crossing {
+                                nx1 >= x0 && nx0 <= x1 && ny1 >= y0 && ny0 <= y1
+                            } else {
+                                nx0 >= x0 && nx1 <= x1 && ny0 >= y0 && ny1 <= y1
+                            }
                         })
                         .map(|n| n.id)
                         .collect();
@@ -675,7 +738,7 @@ impl InputElementImpl for WireBackdropLayer {
         match e.key {
             Key::Space => {
                 let b = this.bounds();
-                let center = Point::new(b.width * 0.5, b.height * 0.42);
+                let center = Point::new(b.width * 0.5 - 124.0, b.height * 0.34);
                 st.quick_search.set(Some((center, st.screen_to_canvas(center))));
                 e.set_handled(true);
             }
@@ -720,7 +783,7 @@ impl InputElementImpl for WireBackdropLayer {
                 }
             }
             Key::G if cmd => {
-                if st.graph.borrow_mut().group_selection("Group", 0x2238BDF8).is_some() {
+                if st.graph.borrow_mut().group_selection("Group", 0x337C3AED).is_some() {
                     st.invalidate_wires();
                     e.set_handled(true);
                 }
@@ -754,39 +817,52 @@ impl VisualImpl for WireBackdropLayer {
         let clip = dc.push_clip(Rect::new(0.0, 0.0, w, h));
         let mut dc = dc.scope(clip);
 
-        dc.fill_rectangle(&this.palette.bg, Rect::new(0.0, 0.0, w, h), 0.0);
-
-        let Some(st) = this.state.borrow().clone() else { return };
+        let Some(st) = this.state.borrow().clone() else {
+            dc.fill_rectangle(&this.classic.bg, Rect::new(0.0, 0.0, w, h), 0.0);
+            return;
+        };
         let g = st.graph.borrow();
+        let pal = match g.theme {
+            CanvasTheme::ClassicGrasshopper => &this.classic,
+            CanvasTheme::DarkStudio => &this.dark,
+        };
 
-        // 1. Adaptive Infinite Rhino Grasshopper Grid
+        // 1. Rhino Grasshopper Drafting Canvas & Adaptive Grid
+        dc.fill_rectangle(&pal.bg, Rect::new(0.0, 0.0, w, h), 0.0);
         let z = g.camera_zoom.clamp(0.25, 2.8);
         let minor = 24.0 * z;
         let major = minor * 5.0;
         if minor >= 9.0 {
             let mut x = g.camera_pan[0].rem_euclid(minor);
             while x < w {
-                dc.draw_line(&this.palette.minor_grid, Point::new(x, 0.0), Point::new(x, h));
+                dc.draw_line(&pal.minor_grid, Point::new(x, 0.0), Point::new(x, h));
                 x += minor;
             }
             let mut y = g.camera_pan[1].rem_euclid(minor);
             while y < h {
-                dc.draw_line(&this.palette.minor_grid, Point::new(0.0, y), Point::new(w, y));
+                dc.draw_line(&pal.minor_grid, Point::new(0.0, y), Point::new(w, y));
                 y += minor;
             }
         }
         let mut x = g.camera_pan[0].rem_euclid(major);
         while x < w {
-            dc.draw_line(&this.palette.major_grid, Point::new(x, 0.0), Point::new(x, h));
+            dc.draw_line(&pal.major_grid, Point::new(x, 0.0), Point::new(x, h));
             x += major;
         }
         let mut y = g.camera_pan[1].rem_euclid(major);
         while y < h {
-            dc.draw_line(&this.palette.major_grid, Point::new(0.0, y), Point::new(w, y));
+            dc.draw_line(&pal.major_grid, Point::new(0.0, y), Point::new(w, y));
             y += major;
         }
+        // Subtle canvas origin axes (0, 0)
+        if g.camera_pan[0] >= 0.0 && g.camera_pan[0] <= w {
+            dc.draw_line(&pal.origin_pen, Point::new(g.camera_pan[0], 0.0), Point::new(g.camera_pan[0], h));
+        }
+        if g.camera_pan[1] >= 0.0 && g.camera_pan[1] <= h {
+            dc.draw_line(&pal.origin_pen, Point::new(0.0, g.camera_pan[1]), Point::new(w, g.camera_pan[1]));
+        }
 
-        // 2. Colored Grasshopper Node Groups (measured from real mounted node visuals!)
+        // 2. Authentic Rhino Grasshopper Pastel Group Envelopes
         let node_vis_map = st.node_visuals.borrow();
         for group in g.groups.values() {
             let mut min_x = f64::INFINITY;
@@ -826,19 +902,35 @@ impl VisualImpl for WireBackdropLayer {
                 }
             }
             if any {
-                let pad_x = 16.0 * z;
-                let pad_top = 26.0 * z;
+                let pad_x = 18.0 * z;
+                let pad_top = 28.0 * z;
                 let pad_bot = 16.0 * z;
-                let rect = Rect::new(min_x - pad_x, min_y - pad_top, (max_x - min_x) + pad_x * 2.0, (max_y - min_y) + pad_top + pad_bot);
-                let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(group.color_argb));
-                let border_pen: Rc<dyn IPen> = Rc::new(ImmutablePen::from_uint32((group.color_argb & 0x00FF_FFFF) | 0x8800_0000, 1.5));
-                dc.draw_rectangle(Some(&fill), Some(&border_pen), rect, 12.0, 12.0, &BoxShadows::default());
-                draw_text(&mut dc, &group.title, Point::new(rect.x + 10.0, rect.y + 5.0), (11.5 * z).clamp(9.0, 15.0), &this.palette.text_accent);
+                let rect = Rect::new(
+                    min_x - pad_x,
+                    min_y - pad_top,
+                    (max_x - min_x) + pad_x * 2.0,
+                    (max_y - min_y) + pad_top + pad_bot,
+                );
+                let fill_col = match g.theme {
+                    CanvasTheme::ClassicGrasshopper => (group.color_argb & 0x00FF_FFFF) | 0x3800_0000,
+                    CanvasTheme::DarkStudio => group.color_argb,
+                };
+                let border_col = (group.color_argb & 0x00FF_FFFF) | 0x9900_0000;
+                let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(fill_col));
+                let border_pen: Rc<dyn IPen> = Rc::new(ImmutablePen::from_uint32(border_col, 1.4));
+                dc.draw_rectangle(Some(&fill), Some(&border_pen), rect, 14.0, 14.0, &BoxShadows::default());
+                draw_text(
+                    &mut dc,
+                    &group.title,
+                    Point::new(rect.x + 12.0, rect.y + 6.0),
+                    (12.0 * z).clamp(9.5, 16.0),
+                    &pal.text_accent,
+                );
             }
         }
         drop(node_vis_map);
 
-        // 3. Pixel-Perfect Grasshopper Fancy Bezier Wires anchored to Real FerroUI Port Visuals!
+        // 3. Signature Grasshopper Fancy Bezier Wires anchored to real FerroUI port sockets!
         for wire in g.wires.values() {
             if wire.display == WireDisplay::Hidden {
                 continue;
@@ -857,7 +949,7 @@ impl VisualImpl for WireBackdropLayer {
 
             draw_fancy_wire(
                 &mut dc,
-                &this.palette,
+                pal,
                 p0,
                 p3,
                 data_kind,
@@ -867,7 +959,7 @@ impl VisualImpl for WireBackdropLayer {
             );
         }
 
-        // 4. Live Drag-to-Wire Preview + Magnetic Target Snap Halo
+        // 4. Live Drag-to-Wire Preview + Magnetic Target Halo + Shift `+` Badge
         if let Some(drag) = st.active_wire.borrow().as_ref() {
             if let Some(anchor) = st.port_screen_pos(this, drag.from_node, drag.from_dir, drag.from_port) {
                 let (end_pt, ok) = match drag.snap_target {
@@ -878,25 +970,35 @@ impl VisualImpl for WireBackdropLayer {
                     PortDirection::Output => (anchor, end_pt),
                     PortDirection::Input => (end_pt, anchor),
                 };
-                let pen = if ok { &this.palette.wire_preview_ok } else { &this.palette.wire_preview_bad };
+                let pen = if ok { &pal.wire_preview_ok } else { &pal.wire_preview_bad };
                 draw_bezier(&mut dc, pen, p0, p3);
                 if let Some((_, _, _, sp, compat)) = drag.snap_target {
-                    let ring = if compat { &this.palette.snap_ok_pen } else { &this.palette.snap_bad_pen };
-                    dc.draw_ellipse_at(None, Some(ring), sp, 10.0, 10.0);
+                    let ring = if compat { &pal.snap_ok_pen } else { &pal.snap_bad_pen };
+                    dc.draw_ellipse_at(None, Some(ring), sp, 9.5, 9.5);
+                }
+                if drag.multi_wire {
+                    let badge = Rect::new(end_pt.x + 10.0, end_pt.y - 10.0, 18.0, 18.0);
+                    dc.fill_rectangle(&pal.badge_bg, badge, 9.0);
+                    draw_text(&mut dc, "+", Point::new(badge.x + 5.0, badge.y + 1.0), 12.0, &this.dark.text_primary);
                 }
             }
         }
 
-        // 5. Marquee Selection Rectangle
+        // 5. Authentic Rhino Window (Blue, L→R) vs Crossing (Green Dashed, R→L) Marquee!
         if let Some((s0, s1)) = *st.marquee.borrow() {
+            let crossing = s1.x < s0.x;
             let rect = Rect::new(s0.x.min(s1.x), s0.y.min(s1.y), (s1.x - s0.x).abs(), (s1.y - s0.y).abs());
-            dc.draw_rectangle(Some(&this.palette.marquee_fill), Some(&this.palette.marquee_border), rect, 3.0, 3.0, &BoxShadows::default());
+            if crossing {
+                dc.draw_rectangle(Some(&pal.crossing_fill), Some(&pal.crossing_border), rect, 2.0, 2.0, &BoxShadows::default());
+            } else {
+                dc.draw_rectangle(Some(&pal.window_fill), Some(&pal.window_border), rect, 2.0, 2.0, &BoxShadows::default());
+            }
         }
 
         // 6. Interactive Minimap (bottom-right)
         if w > 340.0 && h > 220.0 {
             let mm = this.minimap_rect();
-            dc.draw_rectangle(Some(&this.palette.minimap_bg), Some(&this.palette.minimap_border), mm, 8.0, 8.0, &BoxShadows::default());
+            dc.draw_rectangle(Some(&pal.minimap_bg), Some(&pal.minimap_border), mm, 7.0, 7.0, &BoxShadows::default());
             if let Some([min_x, min_y, max_x, max_y]) = g.content_bounds() {
                 let pad = 120.0;
                 let bx0 = min_x - pad;
@@ -910,11 +1012,7 @@ impl VisualImpl for WireBackdropLayer {
                     let ny = mm.y + (n.position[1] - by0) * sy;
                     let nw = (n.size[0] * sx).max(4.0);
                     let nh = (n.size[1] * sy).max(3.0);
-                    let br = if g.selected_nodes.contains(&n.id) {
-                        &this.palette.node_dot_sel
-                    } else {
-                        &this.palette.node_dot
-                    };
+                    let br = if g.selected_nodes.contains(&n.id) { &pal.node_dot_sel } else { &pal.node_dot };
                     dc.fill_rectangle(br, Rect::new(nx, ny, nw, nh), 1.5);
                 }
                 let vx0 = (-g.camera_pan[0]) / z;
@@ -923,11 +1021,11 @@ impl VisualImpl for WireBackdropLayer {
                 let ry = (mm.y + (vy0 - by0) * sy).clamp(mm.y, mm.y + mm.height - 8.0);
                 let rw = ((w / z) * sx).clamp(8.0, mm.x + mm.width - rx);
                 let rh = ((h / z) * sy).clamp(8.0, mm.y + mm.height - ry);
-                dc.draw_rectangle_outline(&this.palette.minimap_view, Rect::new(rx, ry, rw, rh), 2.0);
+                dc.draw_rectangle_outline(&pal.minimap_view, Rect::new(rx, ry, rw, rh), 2.0);
             }
         }
 
-        // 7. Live Port Hover DataTree Tooltip
+        // 7. Crisp Grasshopper Port Hover DataTree Tooltip
         if let Some((nid, dir, pidx, spt)) = *st.hover_port.borrow() {
             if let Some(node) = g.nodes.get(&nid) {
                 if let Some(comp) = st.registry.get(&node.type_id) {
@@ -940,38 +1038,38 @@ impl VisualImpl for WireBackdropLayer {
                             PortDirection::Output => node
                                 .output_tree(pidx)
                                 .map(|t| format!("{} br · {} items · {}", t.branch_count(), t.item_count(), t.format_panel(1)))
-                                .unwrap_or_else(|| "<empty>".into()),
+                                .unwrap_or_else(|| "Empty parameter".into()),
                             PortDirection::Input => {
                                 let wcnt = g.incoming_wires(nid, pidx).len();
                                 let m = node.input_modifiers.get(pidx).map(|x| x.badge()).unwrap_or_default();
                                 if m.is_empty() {
-                                    format!("{wcnt} wire(s) · default {}", spec.default_value.short_summary())
+                                    format!("{wcnt} source(s) · default {}", spec.default_value.short_summary())
                                 } else {
-                                    format!("{wcnt} wire(s) · [{m}]")
+                                    format!("{wcnt} source(s) · modifier [{m}]")
                                 }
                             }
                         };
-                        let tx = (spt.x + 14.0).min(w - 258.0).max(8.0);
+                        let tx = (spt.x + 14.0).min(w - 262.0).max(8.0);
                         let ty = (spt.y - 48.0).clamp(8.0, h - 58.0);
-                        dc.draw_rectangle(Some(&this.palette.tooltip_bg), Some(&this.palette.tooltip_border), Rect::new(tx, ty, 248.0, 44.0), 6.0, 6.0, &BoxShadows::default());
-                        draw_text(&mut dc, &format!("{} ({}) · {}", spec.name, spec.nickname, spec.port_type.label()), Point::new(tx + 8.0, ty + 5.0), 10.5, &this.palette.text_accent);
-                        let short: String = detail.chars().take(36).collect();
-                        draw_text(&mut dc, &short, Point::new(tx + 8.0, ty + 22.0), 10.0, &this.palette.text_primary);
+                        dc.draw_rectangle(Some(&pal.tooltip_bg), Some(&pal.tooltip_border), Rect::new(tx, ty, 252.0, 44.0), 5.0, 5.0, &BoxShadows::default());
+                        draw_text(&mut dc, &format!("{} ({}) · {}", spec.name, spec.nickname, spec.port_type.label()), Point::new(tx + 8.0, ty + 5.0), 10.5, &pal.text_accent);
+                        let short: String = detail.chars().take(38).collect();
+                        draw_text(&mut dc, &short, Point::new(tx + 8.0, ty + 22.0), 10.0, &pal.text_primary);
                     }
                 }
             }
         }
 
-        // 8. Bottom-left Rhino Grasshopper shortcut legend
+        // 8. Subtle bottom-left status watermark
         draw_text(
             &mut dc,
             &format!(
-                "Zoom {:.0}% · Real FerroUI Visual Nodes · Double-click / Space Search · Double-click Wire = Relay · Right-drag Pan · Wheel Zoom · F Fit · L Layout",
+                "{:.0}% · Double-click / Space Search · Double-click Wire = Relay · L→R Window / R→L Crossing Select · Right-drag Pan · Wheel Zoom",
                 z * 100.0
             ),
             Point::new(12.0, h - 20.0),
-            10.5,
-            &this.palette.text_muted,
+            10.0,
+            &pal.text_muted,
         );
     }
 }
@@ -994,7 +1092,7 @@ fn draw_bezier(dc: &mut DrawingContext, pen: &Rc<dyn IPen>, p0: Point, p3: Point
 #[allow(clippy::too_many_arguments)]
 fn draw_fancy_wire(
     dc: &mut DrawingContext,
-    pal: &WirePalette,
+    pal: &ThemeBrushes,
     p0: Point,
     p3: Point,
     kind: WireDataKind,
@@ -1009,7 +1107,7 @@ fn draw_fancy_wire(
     if selected {
         draw_bezier(dc, &pal.wire_selected, p0, p3);
         if fancy && matches!(kind, WireDataKind::List | WireDataKind::Tree) {
-            draw_bezier(dc, &pal.wire_list_inner, p0, p3);
+            draw_bezier(dc, &pal.wire_selected_inner, p0, p3);
         }
         return;
     }
