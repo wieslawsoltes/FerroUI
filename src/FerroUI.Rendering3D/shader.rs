@@ -166,6 +166,28 @@ pub mod glsl {
     }
 }
 
+/// The shader in SPIR-V 1.0 (feature `spirv`, step D9, `docs/porting/media3d.md`, section 3.21):
+/// [`SCENE3D_WGSL`] translated by naga at build time (`build.rs`), one module per entry point, each
+/// with the `@group` and `@binding` of the source as its descriptor sets and bindings. The clip
+/// space is the source's: the executor draws with a viewport of negative height. Nothing of naga
+/// is linked.
+#[cfg(feature = "spirv")]
+pub mod spirv {
+    use crate::brush::BrushShader;
+
+    include!(concat!(env!("OUT_DIR"), "/scene3d_spirv.rs"));
+
+    /// The fragment module of the draws of a brush shader, and its entry point.
+    pub fn fragment_module(shader: BrushShader) -> (&'static [u8], &'static std::ffi::CStr) {
+        match shader {
+            BrushShader::Solid => (FRAGMENT, c"fs_main"),
+            BrushShader::Gradient => (GRADIENT_FRAGMENT, c"fs_gradient"),
+            BrushShader::GradientTexture => (GRADIENT_TEXTURE_FRAGMENT, c"fs_gradient_texture"),
+            BrushShader::Image => (IMAGE_FRAGMENT, c"fs_image"),
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "shader_tests.rs"]
 mod tests;
