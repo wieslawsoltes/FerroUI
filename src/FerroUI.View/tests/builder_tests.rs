@@ -396,6 +396,34 @@ fn an_element_going_from_text_to_typed_lengths_keeps_the_typed_ones() {
 }
 
 #[test]
+fn an_element_going_from_typed_lengths_to_text_keeps_the_text() {
+    use crate::{auto, px, rerender, GridDefinitionSizes, GridDefinitionsText};
+    let owner = Owner::new_root();
+    let (text, control) = owner.with(|| {
+        let text = signal(false);
+        let control = rerender(move || {
+            if text.get() {
+                grid().set(GridDefinitionsText::rows_property(), "Auto,20,30")
+            } else {
+                grid().set(GridDefinitionSizes::rows_property(), [auto(), px(10.0)])
+            }
+        })
+        .into_element()
+        .mount();
+        (text, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    text.set(true);
+    assert_eq!(grid.row_definitions().count(), 3);
+    assert_eq!(grid.row_definitions().snapshot()[2].height(), px(30.0));
+    text.set(false);
+    assert_eq!(grid.row_definitions().count(), 2);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    owner.dispose();
+}
+
+#[test]
 #[should_panic(expected = "are not row definitions")]
 fn row_definitions_that_do_not_parse_say_so() {
     let _ = grid().row_definitions("Auto,nonsense");
