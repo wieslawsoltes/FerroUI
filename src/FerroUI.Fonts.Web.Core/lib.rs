@@ -5,6 +5,7 @@
 //!
 //! - [`css`]: the `@font-face` rule and each of its descriptors (CSS Fonts 4 and 5).
 //! - [`sfnt`]: the OpenType container and the sanitizer every font from the network goes through.
+//! - [`matching`]: which declared face a text uses (CSS Fonts 4, section 5.2).
 //! - [`FontDecoder`]: from the bytes of a file, whatever its container, to a sanitized font.
 
 #![forbid(unsafe_code)]
@@ -13,6 +14,7 @@ pub mod css;
 mod decoder;
 mod error;
 mod limits;
+pub mod matching;
 pub mod sfnt;
 mod woff;
 pub mod woff2;
