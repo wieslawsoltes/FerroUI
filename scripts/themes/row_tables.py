@@ -4,8 +4,8 @@
 For each generated file (`compiled_xaml.rs` of a theme crate, or the `$OUT_DIR/xaml` copy of a
 build) it prints the row tables by shape: the number of tables and rows, and the bytes the rows
 take as the present slices of row structs on a 64-bit target (the sizes of the structs, without
-the strings they point to, which both forms keep). For packed tables (`rt::PackedRows`) it
-prints the records, the pools of strings and the namespace tables.
+the strings they point to, which both forms keep). For packed tables (`rt::PackedRows`,
+`rt::PackedValueRows`) it prints the records and the pools of strings.
 
 With `--parts <theme_parts.txt>` (the units an application keeps, from its `$OUT_DIR/xaml`), it
 counts only the tables that the runs of the kept units call, and the tables outside every unit:
@@ -29,13 +29,13 @@ ROW_BYTES = {
     'rt::StaticBrushRow': 64,
     'rt::ValueRow<f64>': 32,
     'rt::ValueRow<[f64; 4]>': 56,
-    'rt::ValueRow<u32>': 24,
+    'rt::ValueRow<u32>': 32,
     "rt::ValueRow<&'static str>": 40,
     'rt::TemplateBindingRow': 24,
 }
 
 TABLE = re.compile(r'^static (\w+): &\[(rt::[^\]]+?)\] = &\[$')
-PACKED = re.compile(r'^static (\w+): rt::PackedRows = rt::PackedRows \{$')
+PACKED = re.compile(r'^static (\w+): (rt::Packed(?:Value)?Rows) = rt::Packed(?:Value)?Rows \{$')
 FUNCTION = re.compile(r'^(?:pub )?fn (\w+)')
 UNIT = re.compile(r'^pub static THEME_UNIT_(\d+): rt::ThemeUnit = rt::ThemeUnit \{ name: "((?:[^"\\]|\\.)*)", index: \d+, runs: &\[(.*)\] \};$')
 CALL = re.compile(r'rt::add_\w+\(&\w+, (?:&context, &\w+, )?&?(\w+_ROWS_\d+)\)\?;')
@@ -94,7 +94,7 @@ def main():
                         records += 1
                         strings += 2 * fields
                     index += 1
-                tables[packed.group(1)] = ('rt::PackedRows', records, strings, 0)
+                tables[packed.group(1)] = (packed.group(2), records, strings, 0)
             index += 1
         by_kind = collections.Counter()
         rows_of = collections.Counter()
@@ -111,10 +111,10 @@ def main():
                     outside += 1
             by_kind[kind] += 1
             rows_of[kind] += rows
-            bytes_of[kind] += rows * ROW_BYTES.get(kind, 0) + (strings if kind == 'rt::PackedRows' else 0)
+            bytes_of[kind] += rows * ROW_BYTES.get(kind, 0) + (strings if kind.startswith('rt::Packed') else 0)
         print(f'# {path}' + (' (kept units only)' if names is not None else ''))
         for kind in sorted(by_kind):
-            note = 'bytes of the records and the pools' if kind == 'rt::PackedRows' else 'bytes of the row structs'
+            note = 'bytes of the records and the pools' if kind.startswith('rt::Packed') else 'bytes of the row structs'
             print(f'{kind:34s} {by_kind[kind]:6d} tables {rows_of[kind]:7d} rows {bytes_of[kind]:9d} {note}')
         print(f'total {sum(by_kind.values())} tables, {sum(rows_of.values())} rows'
               + (f', {outside} tables outside every unit' if names is not None else ''))
