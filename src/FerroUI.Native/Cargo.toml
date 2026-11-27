@@ -56,6 +56,12 @@ name = "text_input_options"
 path = "tests/text_input_options.rs"
 harness = false
 
+# The backend as a library of its own, loaded through `ferro_native_library_path` (#1049).
+[[test]]
+name = "native_library_path"
+path = "tests/native_library_path.rs"
+harness = false
+
 # The paints of a window that is shown and resized, counted on the real AppKit view
 # (section 9.23 of docs/porting/desktop-performance.md).
 [[test]]

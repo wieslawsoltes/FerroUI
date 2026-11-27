@@ -1,13 +1,15 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
 use crate::media::i_immutable_glyph_run_reference::release_platform_impl;
 use crate::media::text_formatting::shaped_buffer::GlyphRange;
-use crate::media::text_formatting::{ShapedBuffer, ShapedTextRun, TextLineMetricsMode, TextRun, TextShaperOptions};
-use crate::media::{FlowDirection, GlyphInfoList};
+use crate::media::text_formatting::{
+    ShapedBuffer, ShapedTextRun, TextEndOfLine, TextEndOfParagraph, TextLineMetricsMode, TextRun, TextShaperOptions,
+};
+use crate::media::{FlowDirection, GlyphInfoList, GlyphRun, IBrush, TextDecorationCollection};
 use crate::platform::IGlyphRunImpl;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
@@ -36,6 +38,10 @@ struct State {
     long: Option<Box<LongText>>,
     /// Whether a layout is being made.
     in_layout: bool,
+    /// Whether the foreground or the decorations changed since the cached runs were styled
+    /// (`restyle_later`): the next `apply_style_change` gives them the new style, and an
+    /// invalidation drops it with them.
+    style_changed: bool,
 }
 
 /// What a run cache keeps of a long text.
@@ -50,6 +56,10 @@ struct LongText {
     /// The platform glyph runs of the lines of the layout that is being made, by the glyphs they
     /// are made of (`keep_line_glyph_runs`).
     line_runs: GlyphRunTable,
+    /// The glyph runs of the lines of the last layout that had no platform glyph run when the
+    /// line was finished: a line makes it when it is drawn or its ink is asked for, and what it
+    /// made by the next layout, or by the time the layout is let go, goes to `line_runs`.
+    line_glyph_runs: Vec<(Weak<GlyphRun>, GlyphRange)>,
     /// While a layout is made (`begin_layout`): the platform glyph runs of the lines of the
     /// layout before, which a line of the same glyphs takes. Empty between layouts.
     previous_line_runs: GlyphRunTable,
@@ -143,6 +153,80 @@ impl TextRunCache {
         Self::invalidate_entries(&mut state);
     }
 
+    /// The foreground or the decorations of the text changed, which do not change its shaping: the
+    /// cached runs get the new style when the next layout takes them (`apply_style_change`), not
+    /// now. A text that changes its style more than once before that, or its font with it (an
+    /// element that moves to another parent hears both), restyles once or not at all.
+    pub fn restyle_later(&self) {
+        let mut state = self.state.borrow_mut();
+        state.style_changed =
+            state.single.is_some() || state.entries.as_ref().is_some_and(|entries| !entries.is_empty());
+    }
+
+    /// Gives the cached runs the style `style` returns when it changed since they were styled
+    /// (`restyle_later`); `style` is not called otherwise.
+    pub fn apply_style_change(
+        &self,
+        style: impl FnOnce() -> (Option<Rc<dyn IBrush>>, Option<TextDecorationCollection>),
+    ) {
+        if !std::mem::take(&mut self.state.borrow_mut().style_changed) {
+            return;
+        }
+        let (foreground, decorations) = style();
+        self.restyle(foreground.as_ref(), decorations.as_ref());
+    }
+
+    /// The foreground or the decorations of the text changed, which do not change its shaping: the
+    /// cached runs are kept with the new style, over the same glyphs. Returns `false`, with the
+    /// cache emptied, when a cached run is not a shaped run.
+    pub fn restyle(
+        &self,
+        foreground: Option<&Rc<dyn IBrush>>,
+        decorations: Option<&TextDecorationCollection>,
+    ) -> bool {
+        let restyled = |result: &CachedShapingResult| -> Option<CachedShapingResult> {
+            let runs = result
+                .shaped_runs
+                .iter()
+                .map(|run| match run.downcast_ref::<ShapedTextRun>() {
+                    Some(shaped) => Some(Rc::new(shaped.restyled(foreground, decorations)) as Rc<dyn TextRun>),
+                    // The end of a line or a paragraph draws nothing: its style does not show.
+                    None if run.is::<TextEndOfLine>() || run.is::<TextEndOfParagraph>() => Some(run.clone()),
+                    None => None,
+                })
+                .collect::<Option<Vec<_>>>()?;
+            Some(CachedShapingResult { shaped_runs: runs.into(), ..result.clone() })
+        };
+        let mut state = self.state.borrow_mut();
+        state.style_changed = false;
+        let single = match &state.single {
+            Some((key, result)) => restyled(result).map(|new| Some((*key, new))),
+            None => Some(None),
+        };
+        let entries = match &state.entries {
+            Some(entries) => entries
+                .iter()
+                .map(|(key, result)| restyled(result).map(|new| (*key, new)))
+                .collect::<Option<HashMap<_, _>>>()
+                .map(Some),
+            None => Some(None),
+        };
+        let (Some(single), Some(entries)) = (single, entries) else {
+            drop(state);
+            self.invalidate();
+            return false;
+        };
+        if let Some((_, old)) = std::mem::replace(&mut state.single, single) {
+            Self::dispose_cached_runs(&old);
+        }
+        if let Some(old) = std::mem::replace(&mut state.entries, entries) {
+            for result in old.values() {
+                Self::dispose_cached_runs(result);
+            }
+        }
+        true
+    }
+
     /// A layout starts: the platform glyph runs of the lines of the layout before are kept until
     /// [`end_layout`](Self::end_layout) for the lines of this one, and the lines of this one are
     /// kept for the next layout (docs/porting/text-layout-performance.md, step 7). A line of the
@@ -155,6 +239,8 @@ impl TextRunCache {
         let mut state = self.state.borrow_mut();
         state.in_layout = true;
         if let Some(long) = &mut state.long {
+            Self::keep_made_glyph_runs(long);
+            long.line_glyph_runs.clear();
             release_glyph_runs(&mut long.previous_line_runs);
             std::mem::swap(&mut long.line_runs, &mut long.previous_line_runs);
         }
@@ -210,13 +296,36 @@ impl TextRunCache {
             let Some((run, range)) = Self::glyph_range_of(run) else {
                 continue;
             };
-            let Some(platform_impl) = run.glyph_run().created_platform_impl() else {
+            match run.glyph_run().created_platform_impl() {
+                Some(platform_impl) => Self::keep_glyph_run(long, range, platform_impl),
+                None => long.line_glyph_runs.push((Rc::downgrade(run.glyph_run()), range)),
+            }
+        }
+    }
+
+    /// A layout is let go: the platform glyph runs its lines made since they were finished stay
+    /// for the next layout of the text.
+    pub(crate) fn keep_drawn_glyph_runs(&self) {
+        if let Some(long) = &mut self.state.borrow_mut().long {
+            Self::keep_made_glyph_runs(long);
+        }
+    }
+
+    fn keep_made_glyph_runs(long: &mut LongText) {
+        for index in 0..long.line_glyph_runs.len() {
+            let (glyph_run, range) = &long.line_glyph_runs[index];
+            let range = *range;
+            let Some(platform_impl) = glyph_run.upgrade().and_then(|run| run.created_platform_impl()) else {
                 continue;
             };
-            let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
-            if let Some(replaced) = long.line_runs.insert((range.storage, range.start), kept) {
-                release_platform_impl(Some(replaced.platform_impl));
-            }
+            Self::keep_glyph_run(long, range, platform_impl);
+        }
+    }
+
+    fn keep_glyph_run(long: &mut LongText, range: GlyphRange, platform_impl: Arc<dyn IGlyphRunImpl>) {
+        let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
+        if let Some(replaced) = long.line_runs.insert((range.storage, range.start), kept) {
+            release_platform_impl(Some(replaced.platform_impl));
         }
     }
 
@@ -272,6 +381,7 @@ impl TextRunCache {
     }
 
     fn invalidate_entries(state: &mut State) {
+        state.style_changed = false;
         if let Some((_, value)) = state.single.take() {
             Self::dispose_cached_runs(&value);
             return;

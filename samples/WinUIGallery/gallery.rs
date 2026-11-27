@@ -323,6 +323,10 @@ impl GalleryState {
             match examples::create(adaptation) {
                 Ok(control) => {
                     self.wire_gallery_links(entry.id, &control);
+                    // The options of the shell, which the ScratchPad page loads its markup with.
+                    if entry.id == "ScratchPad" {
+                        control.set_tag(Some(Rc::new(self.preview_options.clone()) as BoxedValue));
+                    }
                     *self.native_example.borrow_mut() = Some(control.clone());
                     self.body.children().add(control);
                 }
@@ -337,15 +341,10 @@ impl GalleryState {
             self.body
                 .children()
                 .add(source_expander("FerroUI XAML", adaptation.xaml));
-        } else if entry.id == "ScratchPad" {
-            self.body.children().add(text("Port state: partial. The editor runs the explicit WinUI XAML migration policy; compiled bindings, platform features and code-behind remain separate requirements."));
         } else {
             self.body.children().add(text("This page's source is available below. Its full native behavior is pending; source coverage does not establish feature parity."));
         }
 
-        if entry.id == "ScratchPad" {
-            self.body.children().add(scratch_pad(&self.preview_options));
-        }
         for sample in entry.samples {
             self.body
                 .children()
@@ -486,46 +485,4 @@ fn preview_status(xaml: &str, options: &WinUIXamlOptions) -> String {
         }
     }
     result
-}
-
-fn scratch_pad(options: &WinUIXamlOptions) -> Ref<StackPanel> {
-    let panel = StackPanel::new();
-    panel.set_spacing(8.0);
-    let editor = TextBox::new();
-    editor.set_accepts_return(true);
-    editor.set_height(180.0);
-    editor.set_text(Some("<StackPanel xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" Spacing=\"12\"><TextBlock Text=\"WinUI markup on FerroUI\"/><Button Content=\"Try me\"/></StackPanel>"));
-    AutomationProperties::set_name(&editor, Some("WinUI XAML editor"));
-    let button = Button::new();
-    button.set_content(box_text("Apply XAML"));
-    let output = ContentControl::new();
-    let status = text("Enter WinUI XAML to inspect its compatibility diagnostics.");
-    let weak_editor = editor.downgrade();
-    let weak_output = output.downgrade();
-    let weak_status = status.downgrade();
-    let options = options.clone();
-    button.click(move |_, _| {
-        if let (Some(editor), Some(output), Some(status)) = (
-            weak_editor.upgrade(),
-            weak_output.upgrade(),
-            weak_status.upgrade(),
-        ) {
-            let xaml = editor.text().unwrap_or_default();
-            match load_winui_preview_with_options(&xaml, &options) {
-                Ok(root) => {
-                    output.set_content(boxed_control(root));
-                    status.set_text(Some(&preview_status(&xaml, &options)));
-                }
-                Err(error) => {
-                    output.set_content(None);
-                    status.set_text(Some(&error.to_string()));
-                }
-            }
-        }
-    });
-    panel.children().add(editor);
-    panel.children().add(button);
-    panel.children().add(status);
-    panel.children().add(output);
-    panel
 }
