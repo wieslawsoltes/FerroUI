@@ -2,6 +2,7 @@ use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{
     FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationAxis, FontVariationDesign,
     FontVariationInstance, FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
+    IPlatformTypefaceSimulator,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
 use kurbo::{Affine, BezPath, Diagonal2, Join, Shape};
@@ -403,6 +404,36 @@ impl VelloTypeface {
         }))
     }
 
+    /// A typeface of the same font data at the same position with other simulations and the
+    /// attributes it reports: the bytes of the font are shared, not copied. The bounds of the
+    /// glyphs are measured again, as the simulations change the outlines.
+    fn simulated(
+        &self,
+        font_simulations: FontSimulations,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Rc<Self> {
+        let face = &self.face;
+        Rc::new(Self {
+            face: Arc::new(VelloFontFace {
+                data: face.data.clone(),
+                normalized_coords: face.normalized_coords.clone(),
+                normalized_coord_bits: face.normalized_coord_bits.clone(),
+                units_per_em: face.units_per_em,
+                has_head_table: face.has_head_table,
+                font_simulations,
+                glyph_bounds: Mutex::new(HashMap::new()),
+            }),
+            variations: self.variations.clone(),
+            family_name: self.family_name.clone(),
+            font_simulations,
+            weight,
+            style,
+            stretch,
+        })
+    }
+
     /// The font as the renderers and the glyph runs use it.
     pub fn face(&self) -> &Arc<VelloFontFace> {
         &self.face
@@ -446,6 +477,21 @@ impl IFontMemory for VelloTypeface {
     fn dispose(&self) {
         // The font data is reference counted and released with the last
         // handle to it: this object, a glyph run, a scene.
+    }
+}
+
+/// The simulations of a typeface are applied to its outlines when they are drawn
+/// (`VelloFontFace::glyph_path`), so every variant can be made.
+impl IPlatformTypefaceSimulator for VelloTypeface {
+    fn try_create_simulated_typeface(
+        &self,
+        font_simulations: FontSimulations,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Option<Rc<dyn IPlatformTypeface>> {
+        let typeface: Rc<dyn IPlatformTypeface> = self.simulated(font_simulations, style, weight, stretch);
+        Some(typeface)
     }
 }
 
@@ -539,6 +585,10 @@ impl IPlatformTypeface for VelloTypeface {
         Some(typeface)
     }
 
+    fn as_simulator(&self) -> Option<&dyn IPlatformTypefaceSimulator> {
+        Some(self)
+    }
+
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         let bytes = self.face.data.data.data();
 
@@ -586,5 +636,30 @@ mod font_data_tests {
         assert_eq!(reader.0.capacity(), 0);
         let typeface = typeface.as_any().downcast_ref::<VelloTypeface>().expect("a Vello typeface");
         assert_eq!(typeface.face.data.data.data().as_ptr(), address, "no copy was made");
+    }
+
+    #[test]
+    fn a_simulated_variant_shares_the_font_data() {
+        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf").to_vec();
+        let source = VelloTypeface::from_bytes(bytes, FontSimulations::Bold).expect("a typeface");
+        let simulations = FontSimulations::Oblique;
+        let variant = source
+            .as_simulator()
+            .expect("a simulator")
+            .try_create_simulated_typeface(simulations, FontStyle::Oblique, FontWeight::Bold, FontStretch::Normal)
+            .expect("a variant");
+        let variant = VelloTypeface::try_get(&*variant).expect("a Vello typeface");
+        assert_eq!(variant.face.data.data.data().as_ptr(), source.face.data.data.data().as_ptr());
+        assert_eq!(variant.face.data.data.id(), source.face.data.data.id(), "the same blob");
+        assert_eq!(variant.font_simulations(), simulations, "the bold of the source is left out");
+        assert_eq!(variant.face.font_simulations(), simulations);
+        assert_eq!(
+            (variant.style(), variant.weight(), variant.stretch()),
+            (FontStyle::Oblique, FontWeight::Bold, FontStretch::Normal)
+        );
+        assert_eq!(variant.family_name(), source.family_name());
+        let upright = source.face.glyph_path(36, 16.0).expect("an outline").bounding_box();
+        let slanted = variant.face.glyph_path(36, 16.0).expect("an outline").bounding_box();
+        assert_ne!(upright, slanted, "the variant draws with its own simulations");
     }
 }

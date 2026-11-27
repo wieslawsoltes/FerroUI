@@ -3,7 +3,7 @@ use crate::skia_sharp_extensions::slant_to_font_style;
 use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{
     FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationAxis, FontVariationDesign,
-    FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
+    FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface, IPlatformTypefaceSimulator,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
 use skia_safe::{Font, Typeface};
@@ -34,6 +34,25 @@ impl SkiaTypeface {
             stretch: FontStretch::from_i32(*font_style.width()).unwrap_or(FontStretch::Normal),
             sk_typeface: typeface,
             font_simulations,
+            glyph_bounds: GlyphBoundsCache::default(),
+        })
+    }
+
+    /// A typeface over the same Skia typeface with other simulations and the attributes it
+    /// reports: the Skia typeface is shared, not copied.
+    fn simulated(
+        &self,
+        font_simulations: FontSimulations,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Rc<Self> {
+        Rc::new(Self {
+            sk_typeface: self.sk_typeface.clone(),
+            font_simulations,
+            weight,
+            style,
+            stretch,
             glyph_bounds: GlyphBoundsCache::default(),
         })
     }
@@ -78,6 +97,21 @@ impl IFontMemory for SkiaTypeface {
     fn dispose(&self) {
         // The Skia typeface is reference counted and released with the last
         // handle to this object.
+    }
+}
+
+/// Skia applies the simulations of a typeface when it draws (`create_sk_font`), so every variant
+/// can be made.
+impl IPlatformTypefaceSimulator for SkiaTypeface {
+    fn try_create_simulated_typeface(
+        &self,
+        font_simulations: FontSimulations,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Option<Rc<dyn IPlatformTypeface>> {
+        let typeface: Rc<dyn IPlatformTypeface> = self.simulated(font_simulations, style, weight, stretch);
+        Some(typeface)
     }
 }
 
@@ -158,6 +192,10 @@ impl IPlatformTypeface for SkiaTypeface {
         let typeface = self.sk_typeface.clone_with_arguments(&arguments)?;
         let typeface: Rc<dyn IPlatformTypeface> = SkiaTypeface::new(typeface, self.font_simulations);
         Some(typeface)
+    }
+
+    fn as_simulator(&self) -> Option<&dyn IPlatformTypefaceSimulator> {
+        Some(self)
     }
 
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {

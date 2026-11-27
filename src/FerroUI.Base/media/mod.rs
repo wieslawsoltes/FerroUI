@@ -339,6 +339,7 @@ mod i_font_memory;
 mod i_glyph_drawing;
 mod i_immutable_glyph_run_reference;
 mod i_platform_typeface;
+mod i_platform_typeface_simulator;
 mod i_text_shaper_typeface;
 mod normalized_variation_position;
 mod text_alignment;
@@ -387,6 +388,7 @@ pub use i_font_memory::IFontMemory;
 pub use i_glyph_drawing::IGlyphDrawing;
 pub use i_immutable_glyph_run_reference::IImmutableGlyphRunReference;
 pub use i_platform_typeface::IPlatformTypeface;
+pub use i_platform_typeface_simulator::IPlatformTypefaceSimulator;
 pub use i_text_shaper_typeface::ITextShaperTypeface;
 #[allow(unused_imports)] // used by the variable font support, which is not ported yet
 pub(crate) use normalized_variation_position::{

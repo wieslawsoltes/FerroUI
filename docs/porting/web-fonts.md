@@ -380,6 +380,10 @@ no origin, so the limits above and the HTTPS default are its protection.
 - Encoded bytes are dropped once the font is decoded, unless the budget policy keeps them to
   allow a cheap re-decode.
 - Tables are parsed lazily by the existing readers.
+- A synthetic bold or oblique face is a variant of the loaded platform typeface
+  (`IPlatformTypefaceSimulator`), which shares its font data: Skia, Vello, Quartz and Direct2D
+  make one without a copy of the font. Only a backend without a simulator makes the face from
+  a copy, through the stream of the typeface.
 - Over the budget, the least recently used faces with no live glyph typeface are evicted. Their
   status stays `loaded` to script, as the standard has no other state for them, and they are
   fetched or decoded again when next used.

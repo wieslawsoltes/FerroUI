@@ -812,16 +812,34 @@ impl Shared {
         if made.is_none() {
             let simulations = simulations_for(&base, &descriptors, axes.as_deref(), request);
             if simulations != FontSimulations::None {
-                made = base.platform_typeface().try_get_stream().and_then(|mut stream| {
-                    let typeface = self.platform.try_create_glyph_typeface_from_stream(&mut *stream, simulations)?;
-                    GlyphTypeface::try_create(typeface, simulations)
-                });
+                made = self.simulated(&base, simulations);
             }
         }
         let instance = made.unwrap_or(base);
         self.register_features(id, &instance);
         self.with_slot(id, |slot| slot.instances.push((key, instance.clone())));
         Some(instance)
+    }
+
+    /// A face with simulations: a variant of the platform typeface that shares its font data
+    /// where the backend has a simulator (`None` where it refuses one: the face is then used as
+    /// it is), else a typeface made from a copy of the font.
+    fn simulated(&self, base: &GlyphTypeface, simulations: FontSimulations) -> Option<Rc<GlyphTypeface>> {
+        let platform = base.platform_typeface();
+        let typeface = match platform.as_simulator() {
+            Some(simulator) => {
+                let bold = simulations.contains(FontSimulations::Bold) && platform.weight().0 < 600;
+                let weight = if bold { FontWeight::Bold } else { platform.weight() };
+                let oblique = simulations.contains(FontSimulations::Oblique);
+                let style = if oblique { FontStyle::Oblique } else { platform.style() };
+                simulator.try_create_simulated_typeface(simulations, style, weight, platform.stretch())?
+            }
+            None => {
+                let mut stream = platform.try_get_stream()?;
+                self.platform.try_create_glyph_typeface_from_stream(&mut *stream, simulations)?
+            }
+        };
+        GlyphTypeface::try_create(typeface, simulations)
     }
 
     /// What is on the screen has to be set again: one generation of lookups, one layout pass.
@@ -1610,6 +1628,33 @@ mod tests {
         assert!(bold.font_simulations().contains(FontSimulations::Bold));
         let italic = lookup_with(&harness, "A", FontStyle::Italic, 400).unwrap();
         assert!(italic.font_simulations().contains(FontSimulations::Oblique));
+    }
+
+    #[test]
+    fn a_simulated_face_is_a_variant_of_the_loaded_typeface() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        let regular = lookup_with(&harness, "A", FontStyle::Normal, 400).unwrap();
+        let bytes = |typeface: &GlyphTypeface| {
+            let vello = ferroui_vello::VelloTypeface::try_get(&**typeface.platform_typeface()).expect("Vello");
+            vello.face().data().data.data().as_ptr()
+        };
+        let both = FontSimulations::Bold | FontSimulations::Oblique;
+        for (style, weight, simulations) in [
+            (FontStyle::Normal, 700, FontSimulations::Bold),
+            (FontStyle::Italic, 400, FontSimulations::Oblique),
+            (FontStyle::Italic, 700, both),
+        ] {
+            let found = lookup_with(&harness, "A", style, weight).unwrap();
+            assert_eq!(found.font_simulations(), simulations);
+            assert_eq!(found.platform_typeface().font_simulations(), simulations);
+            assert_eq!(bytes(&found), bytes(&regular), "{style:?} {weight}: no copy of the font is made");
+        }
+        let italic = lookup_with(&harness, "A", FontStyle::Italic, 400).unwrap();
+        assert_eq!(italic.platform_typeface().style(), FontStyle::Oblique);
+        assert_eq!(italic.platform_typeface().weight(), regular.platform_typeface().weight());
     }
 
     #[test]
