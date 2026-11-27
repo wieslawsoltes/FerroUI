@@ -144,6 +144,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: SelectorBar of WinUI (docs/porting/winui-controls.md, G2).
             s.add("/Pages/SelectorBarPage.xaml", "SelectorBar", Icons::HORIZONTAL_DOTS, "A strip of items of which one can be selected");
             s.add("/Pages/TabStripPage.xaml", "TabStrip", Icons::TAB, "A standalone strip of selectable tabs");
+            // Not from upstream: TabView of WinUI (#418).
+            s.add("/Pages/TabViewPage.xaml", "TabView", Icons::TAB, "Tabs that can be added and closed, with three width modes");
         }),
         section("Layout", Icons::LAYOUTS, &mut unavailable, |s| {
             s.add("/Pages/BorderPage.xaml", "Border", Icons::BORDER, "Decorate elements with borders and corner radii");
