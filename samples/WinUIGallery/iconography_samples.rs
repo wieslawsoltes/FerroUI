@@ -10,7 +10,7 @@
 
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
-use ferroui_base::{ferro_markup_type, BoxedValue, Ref};
+use ferroui_base::{ferro_markup_type, BoxedValue, Ref, WeakRef};
 use ferroui_controls::{AutoSuggestBox, Border, Control, ItemsSource, Symbol, TextBlock};
 use ferroui_controls_items_view::ItemsView;
 use std::cell::RefCell;
@@ -155,22 +155,12 @@ fn items(icons: &[Rc<IconData>]) -> ItemsSource {
     ItemsSource::from_items(icons.iter().map(|icon| Some(Rc::new(icon.clone()) as BoxedValue)))
 }
 
-/// The page's controls and its state: the icons of the source, those the search shows, and the
-/// selected one (`SelectedItem`).
+/// The page's state: the icons of the source and those the search shows. The handlers of the
+/// page's controls hold it, and it holds the page weakly, so replacing the page releases both.
 struct IconographyPage {
     all: Vec<Rc<IconData>>,
     shown: RefCell<Vec<Rc<IconData>>>,
-    search: Ref<AutoSuggestBox>,
-    found: Ref<TextBlock>,
-    icons: Ref<ItemsView>,
-    side_panel: Ref<Border>,
-    tags: Ref<ItemsView>,
-    no_tags: Ref<TextBlock>,
-    font_xaml: Ref<TextBlock>,
-    font_csharp: Ref<TextBlock>,
-    symbol_xaml: Ref<TextBlock>,
-    symbol_csharp: Ref<TextBlock>,
-    symbol_labels: [Ref<TextBlock>; 2],
+    root: WeakRef<Control>,
 }
 
 impl IconographyPage {
@@ -178,117 +168,119 @@ impl IconographyPage {
         let page = Rc::new(Self {
             all: icons(),
             shown: RefCell::new(Vec::new()),
-            search: root.get_control("IconsAutoSuggestBox"),
-            found: root.get_control("IconsFoundText"),
-            icons: root.get_control("IconsItemsView"),
-            side_panel: root.get_control("SidePanel"),
-            tags: root.get_control("TagsItemsView"),
-            no_tags: root.get_control("NoTagsTextBlock"),
-            font_xaml: root.get_control("XAMLCodePresenterFont"),
-            font_csharp: root.get_control("CSharpCodePresenterFont"),
-            symbol_xaml: root.get_control("XAMLCodePresenterSymbol"),
-            symbol_csharp: root.get_control("CSharpCodePresenterSymbol"),
-            symbol_labels: [
-                root.get_control("SymbolXamlLabel"),
-                root.get_control("SymbolCSharpLabel"),
-            ],
+            root: root.downgrade(),
         });
 
         // IconsItemsView_Loaded: the icons, the first one selected and the side panel shown. The
         // repeater of the view realizes only the icons in view, so they are set at once.
-        page.show(page.all.clone());
-        page.side_panel.set_is_visible(true);
+        page.show(root, page.all.clone());
+        root.get_control::<Border>("SidePanel").set_is_visible(true);
 
-        let weak = Rc::downgrade(&page);
-        page.search
+        let handler = page.clone();
+        let search = root.get_control::<AutoSuggestBox>("IconsAutoSuggestBox");
+        let sender = search.downgrade();
+        search
             .text_changed(move |_| {
-                if let Some(page) = weak.upgrade() {
-                    page.filter(&page.search.text());
+                if let Some(search) = sender.upgrade() {
+                    handler.filter(&search.text());
                 }
             })
             .detach();
-        let weak = Rc::downgrade(&page);
-        page.icons.selection_changed(move |_| {
-            if let Some(page) = weak.upgrade() {
-                page.on_selection_changed();
-            }
-        });
-        let weak = Rc::downgrade(&page);
-        page.tags.item_invoked(move |args| {
-            let tag = args
-                .invoked_item
-                .as_ref()
-                .and_then(|item| item.downcast_ref::<String>().cloned());
-            if let (Some(page), Some(tag)) = (weak.upgrade(), tag) {
-                page.search.set_text(tag);
-            }
-        });
+        let handler = page.clone();
+        root.get_control::<ItemsView>("IconsItemsView")
+            .selection_changed(move |_| handler.on_selection_changed());
+        let weak = root.downgrade();
+        root.get_control::<ItemsView>("TagsItemsView")
+            .item_invoked(move |args| {
+                let tag = args
+                    .invoked_item
+                    .as_ref()
+                    .and_then(|item| item.downcast_ref::<String>().cloned());
+                if let (Some(root), Some(tag)) = (weak.upgrade(), tag) {
+                    root.get_control::<AutoSuggestBox>("IconsAutoSuggestBox").set_text(tag);
+                }
+            });
     }
 
     /// `Filter`: the icons of a search; the first is selected. The filter runs on the UI thread
     /// (the source starts a thread for it).
     fn filter(&self, search: &str) {
+        let Some(root) = self.root.upgrade() else { return };
         let found = filter(&self.all, search);
-        self.found.set_text(Some(&found_text(found.len())));
-        self.show(found);
+        root.get_control::<TextBlock>("IconsFoundText")
+            .set_text(Some(&found_text(found.len())));
+        self.show(&root, found);
     }
 
-    fn show(&self, icons: Vec<Rc<IconData>>) {
+    fn show(&self, root: &Ref<Control>, icons: Vec<Rc<IconData>>) {
+        let view = root.get_control::<ItemsView>("IconsItemsView");
         let first = icons.first().cloned();
-        self.icons.set_items_source(Some(items(&icons)));
+        view.set_items_source(Some(items(&icons)));
         *self.shown.borrow_mut() = icons;
         if let Some(first) = first {
-            self.set_selected_item(&first);
-            self.icons.select(0);
+            set_selected_item(root, &first);
+            view.select(0);
         }
     }
 
     /// `IconsItemsView_SelectionChanged`: the current item of the view is the selected icon.
     fn on_selection_changed(&self) {
-        let index = self.icons.current_item_index();
+        let Some(root) = self.root.upgrade() else { return };
+        let index = root.get_control::<ItemsView>("IconsItemsView").current_item_index();
         let icon = usize::try_from(index)
             .ok()
             .and_then(|index| self.shown.borrow().get(index).cloned());
         if let Some(icon) = icon {
-            self.set_selected_item(&icon);
+            set_selected_item(&root, &icon);
         }
     }
+}
 
-    /// The `SelectedItem` setter with `SetSampleCodePresenterCode`, and the `x:Load` of the tags and
-    /// of their empty text.
-    fn set_selected_item(&self, icon: &Rc<IconData>) {
-        self.side_panel
-            .set_data_context(Some(Rc::new(icon.clone()) as BoxedValue));
-        self.font_xaml
-            .set_text(Some(&format!("<FontIcon Glyph=\"{}\" />", icon.text_glyph())));
-        self.font_csharp.set_text(Some(&format!(
+/// The `SelectedItem` setter with `SetSampleCodePresenterCode`, and the `x:Load` of the tags and of
+/// their empty text.
+fn set_selected_item(root: &Ref<Control>, icon: &Rc<IconData>) {
+    let text = |name: &str, value: &str| root.get_control::<TextBlock>(name).set_text(Some(value));
+    root.get_control::<Border>("SidePanel")
+        .set_data_context(Some(Rc::new(icon.clone()) as BoxedValue));
+    text(
+        "XAMLCodePresenterFont",
+        &format!("<FontIcon Glyph=\"{}\" />", icon.text_glyph()),
+    );
+    text(
+        "CSharpCodePresenterFont",
+        &format!(
             "FontIcon icon = new FontIcon();\nicon.Glyph = \"{}\";",
             icon.code_glyph()
-        )));
-        let symbol = icon.symbol_name();
-        match &symbol {
-            Some(symbol) => {
-                self.symbol_xaml
-                    .set_text(Some(&format!("<SymbolIcon Symbol=\"{symbol}\" />")));
-                self.symbol_csharp.set_text(Some(&format!(
-                    "SymbolIcon icon = new SymbolIcon();\nicon.Symbol = Symbol.{symbol};"
-                )));
-            }
-            None => {
-                self.symbol_xaml.set_text(Some(""));
-                self.symbol_csharp.set_text(Some(""));
-            }
+        ),
+    );
+    let symbol = icon.symbol_name();
+    match &symbol {
+        Some(symbol) => {
+            text(
+                "XAMLCodePresenterSymbol",
+                &format!("<SymbolIcon Symbol=\"{symbol}\" />"),
+            );
+            text(
+                "CSharpCodePresenterSymbol",
+                &format!("SymbolIcon icon = new SymbolIcon();\nicon.Symbol = Symbol.{symbol};"),
+            );
         }
-        for label in &self.symbol_labels {
-            label.set_is_visible(symbol.is_some());
+        None => {
+            text("XAMLCodePresenterSymbol", "");
+            text("CSharpCodePresenterSymbol", "");
         }
-        let has_tags = !icon.tags().is_empty();
-        self.tags.set_items_source(Some(ItemsSource::from_items(
-            icon.tags()
-                .iter()
-                .map(|tag| Some(Rc::new(tag.to_string()) as BoxedValue)),
-        )));
-        self.tags.set_is_visible(has_tags);
-        self.no_tags.set_is_visible(!has_tags);
     }
+    for label in ["SymbolXamlLabel", "SymbolCSharpLabel"] {
+        root.get_control::<TextBlock>(label).set_is_visible(symbol.is_some());
+    }
+    let has_tags = !icon.tags().is_empty();
+    let tags = root.get_control::<ItemsView>("TagsItemsView");
+    tags.set_items_source(Some(ItemsSource::from_items(
+        icon.tags()
+            .iter()
+            .map(|tag| Some(Rc::new(tag.to_string()) as BoxedValue)),
+    )));
+    tags.set_is_visible(has_tags);
+    root.get_control::<TextBlock>("NoTagsTextBlock")
+        .set_is_visible(!has_tags);
 }

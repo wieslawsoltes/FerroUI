@@ -3,7 +3,9 @@
 use crate::iconography_samples::{filter, found_text, icons, IconData};
 use crate::{examples, tests::start};
 use ferroui_base::Ref;
-use ferroui_controls::{AutoSuggestBox, Border, Control, TextBlock};
+use ferroui_controls::{Border, Control, TextBlock};
+#[cfg(feature = "theme")]
+use ferroui_controls::AutoSuggestBox;
 use ferroui_controls_items_view::ItemsView;
 use std::rc::Rc;
 
@@ -109,6 +111,24 @@ fn window_page() -> (Ref<ferroui_controls::Window>, Ref<Control>) {
     (window, root)
 }
 
+/// [`crate::tests::start_winui`] with the real keyboard focus, for the keys of the tags.
+#[cfg(feature = "theme")]
+fn start_winui_with_focus() -> ferroui_controls::testing::UnitTestApplicationScope {
+    use ferroui_controls::testing::{TestServices, UnitTestApplication};
+    ferroui_markup_xaml::register_types();
+    ferroui_themes_winui::register_types();
+    let focus = TestServices::real_focus();
+    let mut services = TestServices::styled_window()
+        .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style())
+        .with_global_clock(Rc::new(crate::tests::IdleClock::default()));
+    services.keyboard_device = focus.keyboard_device;
+    services.keyboard_navigation = focus.keyboard_navigation;
+    services.input_manager = focus.input_manager;
+    let scope = UnitTestApplication::start(services);
+    ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
+    scope
+}
+
 /// Fires the timer of `AutoSuggestBox.TextChanged` and runs the jobs it posts.
 #[cfg(feature = "theme")]
 fn tick() {
@@ -168,7 +188,7 @@ fn iconography_tags_search_for_their_text_when_invoked() {
     use ferroui_controls_items_view::ItemContainer;
     use ferroui_controls_repeater::{FlowLayout, ItemsRepeater};
 
-    let _application = crate::tests::start_winui();
+    let _application = start_winui_with_focus();
     let (_window, root) = window_page();
 
     let repeater = |view: &Ref<ItemsView>| {

@@ -51,7 +51,7 @@ pub(crate) fn start_winui() -> ferroui_controls::testing::UnitTestApplicationSco
 /// the theme's own test host, so a transition stays at its start until a test moves it.
 #[cfg(feature = "theme")]
 #[derive(Default)]
-struct IdleClock {
+pub(crate) struct IdleClock {
     ticks: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::SignedDuration>,
     state: std::cell::Cell<ferroui_base::animation::PlayState>,
 }
