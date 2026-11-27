@@ -11,8 +11,6 @@ on:
       - 'samples/CApi/**'
       - 'bindings/**'
       - 'docs/c-abi.md'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/capi.yml'
   push:
     branches: [main]
@@ -61,6 +59,8 @@ jobs:
         run: cargo test --locked -p ferroui-capi --no-default-features --lib
       - name: C tests of the ABI
         run: make -C samples/CApi test CARGO_FLAGS="--no-default-features --features type-tables"
+      - name: Tests of the C++ bindings
+        run: make -C samples/CApi test-cpp CARGO_FLAGS="--no-default-features --features type-tables"
       # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
       # a shared runner is not a quiet machine.
       - name: Call overhead (informative)
@@ -133,6 +133,7 @@ jobs:
         run: |
           make -C samples/CApi run CARGO_FLAGS="--no-default-features --features desktop"
           make -C samples/CApi run-gauge CARGO_FLAGS="--no-default-features --features desktop"
+          make -C samples/CApi run-cpp CARGO_FLAGS="--no-default-features --features desktop"
 
   sample-linux:
     name: C hello world (Linux, X11 under Xvfb)
@@ -163,3 +164,38 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
         run: xvfb-run -a make -C samples/CApi run
+      - name: The C++ hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-cpp
+      # The Go bindings (#636): the toolchain is installed here, and this is their only check.
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: '1.22'
+          cache: false
+      - name: Tests of the Go bindings
+        run: make -C samples/CApi test-go
+      - name: The Go hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-go
+      # The Dart bindings (#636): the SDK is installed here, and this is their only check.
+      - uses: dart-lang/setup-dart@2286a0c042b44434fe26d292bbce8d34f7ec662b # v1.8.2
+        with:
+          sdk: '3.5.4'
+      - name: Tests of the Dart bindings
+        run: make -C samples/CApi test-dart
+      - name: The Dart hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-dart
+      # The C# bindings (#636): the SDK is installed here, and this is their only check.
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '8.0.x'
+      - name: Tests of the C# bindings
+        run: make -C samples/CApi test-csharp
+      - name: The C# hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-csharp

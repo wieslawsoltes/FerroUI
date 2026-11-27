@@ -6,6 +6,7 @@
 use ferroui_base::{ObjectType, Ref};
 use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::{CheckBox, Control, TextBlock, TextBox};
+use ferroui_controls_password_box::{PasswordBox, PasswordRevealMode};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -20,43 +21,49 @@ fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {
 }
 
 fn wire_password(root: &Ref<Control>) {
-    let Some(password) = find::<TextBox>(root, "SimplePassword") else {
+    let Some(password) = find::<PasswordBox>(root, "SimplePassword") else {
         return;
     };
+    // `PasswordBox_PasswordChanged`.
     let weak_password = password.downgrade();
     let weak_output = root
         .get_control::<TextBlock>("Control1Output")
         .downgrade();
-    password.property_changed(move |change| {
-        if change.property() != TextBox::text_property().as_property() {
-            return;
-        }
-        if let (Some(password), Some(output)) = (weak_password.upgrade(), weak_output.upgrade()) {
-            let text = password.text().unwrap_or_default();
+    password
+        .password_changed(move || {
+            let (Some(password), Some(output)) = (weak_password.upgrade(), weak_output.upgrade())
+            else {
+                return;
+            };
+            let text = password.password();
             if text.is_empty() || text == "Password" {
                 output.set_text(Some("'Password' is not allowed."));
                 output.set_is_visible(true);
-                // A nonempty invalid value raises one further Text change when
-                // cleared. Re-clearing the empty string would recurse forever.
+                // A nonempty invalid value raises one further change when cleared.
                 if !text.is_empty() {
-                    password.set_text(Some(""));
+                    password.set_password("");
                 }
             } else {
                 output.set_text(Some(""));
                 output.set_is_visible(false);
             }
-        }
-    });
+        })
+        .detach();
+    // `RevealModeCheckbox_Changed`.
     let reveal = root.get_control::<CheckBox>("revealModeCheckBox");
     let weak_reveal = reveal.downgrade();
     let weak_password = root
-        .get_control::<TextBox>("passworBoxWithRevealmode")
+        .get_control::<PasswordBox>("passworBoxWithRevealmode")
         .downgrade();
     reveal.property_changed(move |change| {
         if change.property() == ToggleButton::is_checked_property().as_property() {
             if let (Some(reveal), Some(password)) = (weak_reveal.upgrade(), weak_password.upgrade())
             {
-                password.set_reveal_password(reveal.is_checked() == Some(true));
+                password.set_password_reveal_mode(if reveal.is_checked() == Some(true) {
+                    PasswordRevealMode::Visible
+                } else {
+                    PasswordRevealMode::Hidden
+                });
             }
         }
     });

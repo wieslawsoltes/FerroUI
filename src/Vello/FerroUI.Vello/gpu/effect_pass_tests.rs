@@ -143,7 +143,12 @@ fn the_device_draws_the_exact_light_and_steady_frames_allocate_nothing() {
             if frame == 2 {
                 allocations_after_first = Some(allocations);
             } else if let Some(previous) = allocations_after_first {
-                assert_eq!(previous, allocations, "{mode:?}: frame {frame} allocated a texture");
+                assert_eq!(
+                    previous,
+                    allocations,
+                    "{mode:?}: frame {frame} allocated a texture; pools: {}",
+                    super::effect_passes::texture_pool_report()
+                );
             }
         }
     }
@@ -627,7 +632,12 @@ fn steady_frames_of_the_layers_allocate_no_texture() {
             if frame == 2 {
                 allocations_after_first = Some(allocations);
             } else if let Some(previous) = allocations_after_first {
-                assert_eq!(previous, allocations, "{mode:?}: frame {frame} allocated a texture");
+                assert_eq!(
+                    previous,
+                    allocations,
+                    "{mode:?}: frame {frame} allocated a texture; pools: {}",
+                    super::effect_passes::texture_pool_report()
+                );
             }
         }
     }
@@ -1044,7 +1054,12 @@ fn steady_frames_of_the_shader_effects_allocate_no_texture() {
             if frame == 2 {
                 allocations_after_first = Some(allocations);
             } else if let Some(previous) = allocations_after_first {
-                assert_eq!(previous, allocations, "{mode:?}: frame {frame} allocated a texture");
+                assert_eq!(
+                    previous,
+                    allocations,
+                    "{mode:?}: frame {frame} allocated a texture; pools: {}",
+                    super::effect_passes::texture_pool_report()
+                );
             }
         }
     }
@@ -1428,7 +1443,11 @@ fn frames_of_the_interactive_effects_compile_their_pipelines_once() {
             if frame == 1 {
                 after_first = Some(counts);
             } else if let Some(previous) = after_first {
-                assert_eq!(previous, counts, "{mode:?}: frame {frame} compiled a pipeline or allocated a texture");
+                assert_eq!(
+                    previous, counts,
+                    "{mode:?}: frame {frame} compiled a pipeline or allocated a texture; pools: {}",
+                    super::effect_passes::texture_pool_report()
+                );
             }
         }
     }
@@ -1528,7 +1547,8 @@ fn frames_of_the_whole_library_compile_and_allocate_nothing_in_the_gpu_modes() {
             } else if let Some(previous) = after_first {
                 assert_eq!(
                     previous, counts,
-                    "{mode:?}: frame {frame} compiled a pipeline, allocated a texture or uploaded an image"
+                    "{mode:?}: frame {frame} compiled a pipeline, allocated a texture or uploaded an image; pools: {}",
+                    super::effect_passes::texture_pool_report()
                 );
             }
         }
