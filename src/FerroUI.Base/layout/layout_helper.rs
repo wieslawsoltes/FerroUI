@@ -104,7 +104,7 @@ impl LayoutHelper {
 
     // The two below run for every child that is measured and arranged with a border or padding:
     // inlined, as the check of the rounding of the parent they replaced was.
-    #[inline]
+    #[inline(always)]
     fn layout_border_insets(child: Option<&Layoutable>, padding: Thickness, border: Thickness) -> Thickness {
         let Some((scale, winui)) = Self::parent_layout_rounding(child) else {
             return padding + border;
