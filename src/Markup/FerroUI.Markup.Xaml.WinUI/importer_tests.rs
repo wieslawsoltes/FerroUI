@@ -1068,3 +1068,18 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
         &XBindings::get_for_root(&second).unwrap()
     ));
 }
+
+#[test]
+fn variable_sized_wrap_grid_and_its_spans_stay_in_the_default_namespace() {
+    let result = migrate(
+        "<VariableSizedWrapGrid Orientation='Horizontal' MaximumRowsOrColumns='3' ItemHeight='44' ItemWidth='44'>\
+         <Rectangle VariableSizedWrapGrid.RowSpan='2' VariableSizedWrapGrid.ColumnSpan='2'/></VariableSizedWrapGrid>",
+    );
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let grid = document.descendants().find(|node| node.tag_name().name() == "VariableSizedWrapGrid").unwrap();
+    assert_eq!(grid.tag_name().namespace(), Some(FERRO_XML_NAMESPACE));
+    let tile = document.descendants().find(|node| node.tag_name().name() == "Rectangle").unwrap();
+    assert_eq!(tile.attribute("VariableSizedWrapGrid.RowSpan"), Some("2"));
+    assert_eq!(tile.attribute("VariableSizedWrapGrid.ColumnSpan"), Some("2"));
+}

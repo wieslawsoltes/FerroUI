@@ -117,6 +117,8 @@ pub use window_transparency_level::{WindowTransparencyLevel, WindowTransparencyL
 mod system_backdrop_element;
 pub use system_backdrop_element::SystemBackdropElement;
 pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment, WrapPanelItemsStretch};
+mod variable_sized_wrap_grid;
+pub use variable_sized_wrap_grid::VariableSizedWrapGrid;
 
 mod button;
 mod button_spinner;

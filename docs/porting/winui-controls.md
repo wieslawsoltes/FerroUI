@@ -508,6 +508,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ProgressRing | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
 | RatingControl | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
 | ToolTip | 3 of 3 | ported | `status_samples.rs` (no code-behind upstream) | `status_samples_tests.rs` |
+| VariableSizedWrapGrid | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Viewbox | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs`, `x_bind_tests.rs` |
 | WrapPanel | 1 ported, 1 partial: no ItemsStretch (and no Padding: the host Border's) | partial | `layout_samples.rs` | `layout_samples_tests.rs` |
 | TabView | 7 ported, 3 pending: no TabItemsSource example, no BitmapIconSource, no windowing (tear-out) | partial | `tab_view_samples.rs` | `tab_view_samples_tests.rs`, `src/Markup/FerroUI.Markup.Xaml.WinUI/compiled_tests.rs` |
@@ -553,3 +554,25 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.19 VariableSizedWrapGrid (#1271)
+
+`src/FerroUI.Controls/variable_sized_wrap_grid/` (`VariableSizedWrapGrid` and its occupancy map),
+from `dxaml/xcp/dxaml/lib/VariableSizedWrapGrid_Partial.cpp` and
+`VariableSizedWrapGrid_OccupancyMap.cpp`, with `WrapGrid::ComputeAlignmentOffsets` of
+`WrapGrid_Partial.cpp`. The tests are WinUI's integration tests
+(`dxaml/test/native/external/controls/variablesizedwrapgrid`: the horizontal and vertical
+wrapping and the row and column spans of eight items in a 300 by 300 panel), the layout of the
+gallery example, the children alignments, a tile longer than a line and the arrow-key
+navigation over the map. The panel has no template, so it is the same in every theme; the
+gallery page and a ControlCatalog page (`VariableSizedWrapGridPage`) use it.
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The occupancy map allocates its columns in blocks of 50 (`OccupancyBlock`) as the fill reaches them. | Each column of cells is allocated when an element is first written to it; a column never written reads as free. | The same cells with one allocation per used column. |
+| The cells of a line are `available / cell` (or the tiles' cells along the line when it is infinite), so a zero cell size gives an unbounded cast. | The cells of a line are also capped by the tiles' cells along the line. | Every child fits in that many cells, so no placement changes, and the map stays bounded. |
+| `ComputeHorizontalAndVerticalAlignment` reads `Orientation` after it decides which counts go with which axis, so it uses the counts of a vertical grid in both orientations; the arrange step counts the justification lines by child index. | The same. | The same layout as WinUI. |
+| The children the map could not place (the panel is full) are not arranged. | The same: a child that never fitted is not shown. | |
+| `ISupportsKeyNavigationAction` / `GetTargetIndexFromNavigationAction` give the selector the arrow-key targets over the map; Next and Previous are left to the selector. | `INavigableContainer`: the arrow keys and First and Last over the map of the last measure, Next and Previous by the order of the children; the panel registers itself as a navigable container when its class is first used. | FerroUI's directional navigation of panels. |
+| `LogicalOrientation` and `PhysicalOrientation` of the items host. | Left out. | FerroUI's items hosts have no such properties. |
+

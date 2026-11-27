@@ -1,0 +1,42 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="VariableSizedWrapGrid"
+             x:Class="ControlCatalog.Pages.VariableSizedWrapGridPage">
+  <!-- Not from upstream: WinUI's VariableSizedWrapGrid (docs/porting/winui-controls.md, section
+       10.19). A panel without a template, so it looks the same in every theme. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A VariableSizedWrapGrid lays its children out in cells of one size; each child spans the rows and columns of VariableSizedWrapGrid.RowSpan and VariableSizedWrapGrid.ColumnSpan, and the cells wrap after MaximumRowsOrColumns or at the panel's edge.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Vertical: three cells per column</TextBlock>
+    <VariableSizedWrapGrid x:Name="VerticalGrid" Margin="2" HorizontalAlignment="Left" ItemWidth="44" ItemHeight="44"
+                           MaximumRowsOrColumns="3">
+      <Rectangle Fill="Red" />
+      <Rectangle Height="80" Fill="Blue" VariableSizedWrapGrid.RowSpan="2" />
+      <Rectangle Width="80" Fill="Green" VariableSizedWrapGrid.ColumnSpan="2" />
+      <Rectangle Width="80" Height="80" Fill="Yellow" VariableSizedWrapGrid.ColumnSpan="2"
+                 VariableSizedWrapGrid.RowSpan="2" />
+      <Rectangle Fill="Orange" />
+      <Rectangle Fill="Purple" />
+    </VariableSizedWrapGrid>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Horizontal: tiles in rows of four cells</TextBlock>
+    <VariableSizedWrapGrid x:Name="HorizontalGrid" Margin="2" HorizontalAlignment="Left" Orientation="Horizontal"
+                           ItemWidth="60" ItemHeight="60" MaximumRowsOrColumns="4">
+      <Border Margin="2" Background="SteelBlue" VariableSizedWrapGrid.ColumnSpan="2" VariableSizedWrapGrid.RowSpan="2">
+        <TextBlock Text="2 x 2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <Border Margin="2" Background="SeaGreen" VariableSizedWrapGrid.ColumnSpan="2">
+        <TextBlock Text="1 x 2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <Border Margin="2" Background="IndianRed">
+        <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <Border Margin="2" Background="DarkOrange">
+        <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+      <Border Margin="2" Background="SlateBlue" VariableSizedWrapGrid.ColumnSpan="4">
+        <TextBlock Text="1 x 4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Border>
+    </VariableSizedWrapGrid>
+  </StackPanel>
+</ContentPage>

@@ -1,6 +1,7 @@
-//! The code behind of the pinned Border, Canvas, StackPanel, Viewbox and WrapPanel pages in Rust:
-//! the handlers of `BorderPage.xaml.cs`, `CanvasPage.xaml.cs`, `StackPanelPage.xaml.cs`,
-//! `ViewboxPage.xaml.cs` and `WrapPanelPage.xaml.cs`. The Grid and RelativePanel pages have no code-behind upstream; their
+//! The code behind of the pinned Border, Canvas, StackPanel, VariableSizedWrapGrid, Viewbox and
+//! WrapPanel pages in Rust: the handlers of `BorderPage.xaml.cs`, `CanvasPage.xaml.cs`,
+//! `StackPanelPage.xaml.cs`, `VariableSizedWrapGridPage.xaml.cs`, `ViewboxPage.xaml.cs` and
+//! `WrapPanelPage.xaml.cs`. The Grid and RelativePanel pages have no code-behind upstream; their
 //! options are x:Bind of the markup. The panels own layout; the sample owns only its options.
 
 use ferroui_base::layout::Orientation;
@@ -10,8 +11,8 @@ use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::{RangeBase, SelectingItemsControl, ToggleButton};
 use ferroui_controls::{
-    Border, Control, Image, RadioButton, RadioButtons, Slider, StackPanel, Viewbox, WrapPanel,
-    WrapPanelItemsStretch,
+    Border, Control, Image, RadioButton, RadioButtons, Slider, StackPanel, VariableSizedWrapGrid, Viewbox,
+    WrapPanel, WrapPanelItemsStretch,
 };
 use std::rc::Rc;
 
@@ -20,6 +21,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "Border" => wire_border(root),
         "Canvas" => wire_canvas(root),
         "StackPanel" => wire_stack_panel(root),
+        "VariableSizedWrapGrid" => wire_variable_sized_wrap_grid(root),
         "Viewbox" => wire_viewbox(root),
         "WrapPanel" => wire_wrap_panel(root),
         _ => {}
@@ -158,6 +160,29 @@ fn selected_tag(group: &RadioButtons) -> Option<String> {
         .and_then(|item| Control::from_boxed(&item))
         .and_then(|item| item.tag())
         .and_then(|tag| tag.downcast_ref::<String>().cloned())
+}
+
+/// `OrientationGroup_SelectionChanged` of `VariableSizedWrapGridPage.xaml.cs`: the Tag of the
+/// selected option, parsed as an `Orientation`, sets the panel's Orientation (an unknown Tag
+/// changes nothing, as the source's `Enum.TryParse`).
+fn wire_variable_sized_wrap_grid(root: &Ref<Control>) {
+    let panel = root.get_control::<VariableSizedWrapGrid>("Control1");
+    let group = root.get_control::<RadioButtons>("OrientationGroup");
+    let weak_group = group.downgrade();
+    let weak_panel = panel.downgrade();
+    group.property_changed(move |change| {
+        if change.property() != SelectingItemsControl::selected_index_property().as_property() {
+            return;
+        }
+        let (Some(group), Some(panel)) = (weak_group.upgrade(), weak_panel.upgrade()) else {
+            return;
+        };
+        match selected_tag(&group).as_deref() {
+            Some("Horizontal") => panel.set_orientation(Orientation::Horizontal),
+            Some("Vertical") => panel.set_orientation(Orientation::Vertical),
+            _ => {}
+        }
+    });
 }
 
 /// `Stretch_SelectionChanged` and `StretchDirection_SelectionChanged` of `ViewboxPage.xaml.cs`:

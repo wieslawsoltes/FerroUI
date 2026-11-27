@@ -195,6 +195,12 @@ with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
 directly (`controls/dev/NavigationView` with the English texts of its
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
 
+The files under `variable_sized_wrap_grid/` (WinUI's `VariableSizedWrapGrid` and its occupancy
+map) are ported from the WinUI project directly
+(`dxaml/xcp/dxaml/lib/VariableSizedWrapGrid_Partial.cpp`, `VariableSizedWrapGrid_Partial.h`,
+`VariableSizedWrapGrid_OccupancyMap.cpp` and `WrapGrid::ComputeAlignmentOffsets` of
+`WrapGrid_Partial.cpp`, at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
