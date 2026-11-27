@@ -5,7 +5,6 @@ use crate::helpers::drawing_context_helper;
 use crate::i_drawable_bitmap_impl::try_get_drawable_bitmap;
 use crate::i_skia_api_lease_feature::{ISkiaApiLease, ISkiaApiLeaseFeature, ISkiaPlatformGraphicsApiLease};
 use crate::sk_paint_cache::SkPaintCache;
-use crate::sk_round_rect_cache::SkRoundRectCache;
 use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
 use crate::skia_region_impl::SkiaRegionImpl;
@@ -36,6 +35,7 @@ use skia_safe as sk;
 use skia_safe::canvas::SaveLayerRec;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
+use std::ptr::NonNull;
 use std::rc::Rc;
 
 /// What a drawing context draws to.
@@ -91,6 +91,9 @@ impl CanvasSource {
 /// one upstream would have set.
 struct ContextCanvas {
     source: CanvasSource,
+    /// The canvas of a recording source, for reading its matrix from `&self`
+    /// ([`local_to_device`](Self::local_to_device)).
+    recording_canvas: Option<NonNull<sk::Canvas>>,
     /// The transform of the context the canvas does not have yet.
     pending_transform: Option<Matrix>,
     /// What a transform is multiplied with before it is set on the canvas
@@ -103,8 +106,30 @@ struct ContextCanvas {
 }
 
 impl ContextCanvas {
-    fn new(source: CanvasSource, post_transform: Option<Matrix>) -> Self {
-        Self { source, pending_transform: None, post_transform, eager: false }
+    fn new(mut source: CanvasSource, post_transform: Option<Matrix>) -> Self {
+        let recording_canvas = match &mut source {
+            CanvasSource::Recorder { recorder, .. } => recorder.recording_canvas().map(NonNull::from),
+            _ => None,
+        };
+        Self { source, recording_canvas, pending_transform: None, post_transform, eager: false }
+    }
+
+    /// The matrix the canvas has now, without a pending transform; `None`
+    /// when the drawing has ended.
+    fn local_to_device(&self) -> Option<sk::M44> {
+        match &self.source {
+            // A clone of the surface is a reference to it; its canvas is the surface's one.
+            CanvasSource::Surface(surface) => Some(surface.clone().canvas().local_to_device()),
+            CanvasSource::Recorder { .. } => {
+                let canvas = self.recording_canvas?;
+                // SAFETY: the pointer is the recording canvas of the recorder that `source` owns, taken when the
+                // context was made; the recorder keeps that canvas, at the same address, until the recording is
+                // finished, and finishing replaces `source` with `Finished` first. The canvas is only read here
+                // (`Canvas` methods take `&self`).
+                Some(unsafe { canvas.as_ref() }.local_to_device())
+            }
+            CanvasSource::Finished => None,
+        }
     }
 
     /// The canvas, with the transform of the context on it.
@@ -170,6 +195,45 @@ impl ContextCanvas {
         self.eager = true;
         self.apply_pending_transform();
     }
+}
+
+/// The Skia rounded rectangle of `rounded_rect` with the bounds `rectangle`, a value on the stack.
+pub(crate) fn sk_round_rect(rectangle: &sk::Rect, rounded_rect: &RoundedRect) -> sk::RRect {
+    let radius = |radius: ferroui_base::Vector| sk::Vector::new(radius.x as f32, radius.y as f32);
+    let radii = [
+        radius(rounded_rect.radii_top_left),
+        radius(rounded_rect.radii_top_right),
+        radius(rounded_rect.radii_bottom_right),
+        radius(rounded_rect.radii_bottom_left),
+    ];
+    sk::RRect::new_rect_radii(rectangle, &radii)
+}
+
+/// The one pair of radii of a rounded rectangle whose four corners have the same positive radii, when they fit
+/// in `rectangle` as they are: Skia's calls that take one pair (`draw_round_rect`, `RRect::new_rect_xy`) then make
+/// the rounded rectangle that the four radii make. Radii that would be scaled down to fit are left to the general
+/// path, whose scaling is the one of four radii.
+pub(crate) fn uniform_radii(rectangle: &sk::Rect, rounded_rect: &RoundedRect) -> Option<(f32, f32)> {
+    if !rounded_rect.is_uniform() {
+        return None;
+    }
+    let (rx, ry) = (rounded_rect.radii_top_left.x as f32, rounded_rect.radii_top_left.y as f32);
+    (rx > 0.0 && ry > 0.0 && rx + rx <= rectangle.width() && ry + ry <= rectangle.height()).then_some((rx, ry))
+}
+
+/// The transform of a drawing context as the context knows it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum ContextTransform {
+    /// None was set: the identity.
+    Unset,
+    /// The transform, without the post transform.
+    Known(Matrix),
+    /// The canvas was restored since the transform was last known: the
+    /// transform is the canvas's matrix less the post transform, read when
+    /// it is asked for. Almost every restore (the pop of a clip, a layer, an
+    /// opacity or an effect) is followed by a new transform, so the read is
+    /// usually never needed.
+    Restored,
 }
 
 /// The leases of the Skia API of a drawing context that records the frame of a surface as a
@@ -563,6 +627,12 @@ pub(crate) fn effective_text_options(
 /// Skia based drawing context.
 pub struct DrawingContextImpl {
     disposables: Vec<Box<dyn FnOnce()>>,
+    /// What the end of the frame does, run before `disposables`.
+    frame_end: Option<FrameEnd>,
+    /// The paint of `draw_bitmap`, kept with its values (`image_state`): an image draw sets only the values that
+    /// differ from the last one's.
+    image_paint: sk::Paint,
+    image_state: Option<ImagePaintState>,
     // TODO: Get rid of this value, it's currently used to calculate
     // intermediate sizes for tile brushes but does so ignoring the current
     // transform.
@@ -583,16 +653,24 @@ pub struct DrawingContextImpl {
     render_options_stack: Vec<RenderOptions>,
     text_options_stack: Vec<TextOptions>,
     post_transform: Option<Matrix>,
+    /// The inverse of `post_transform`, computed once.
+    post_transform_inverse: Option<Matrix>,
     current_opacity: f64,
     disable_subpixel_text_rendering: bool,
     text_rendering: TextRenderingSettings,
     frame_text_rendering: Option<Rc<Cell<TextRenderingSettings>>>,
-    current_transform: Option<Matrix>,
+    current_transform: Cell<ContextTransform>,
     disposed: bool,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
     stroke_paint: Option<sk::Paint>,
+    /// The values of `stroke_paint` when it is the paint of an undashed solid stroke that nothing else changed
+    /// since (`PaintWrapper::release_stroke`): the next solid stroke sets only the values that differ.
+    stroke_state: Option<SolidStrokeState>,
     fill_paint: Option<sk::Paint>,
+    /// The values of `fill_paint` when it is the paint of a solid fill that nothing else changed since
+    /// (`PaintWrapper::release_fill`): the next solid fill sets only the values that differ.
+    fill_state: Option<SolidFillState>,
     box_shadow_paint: Option<sk::Paint>,
     session: Option<Rc<dyn ISkiaGpuRenderSession>>,
     leased: Rc<Cell<bool>>,
@@ -612,6 +690,16 @@ impl DrawingContextImpl {
     /// # Panics
     /// Panics when the create info holds neither a canvas nor a surface.
     pub fn new(create_info: CreateInfo, disposables: Vec<Box<dyn FnOnce()>>) -> Self {
+        Self::with_frame_end(create_info, disposables, None)
+    }
+
+    /// [`new`](Self::new) for a frame, which the context ends with `frame_end` (before the disposables) when it
+    /// is disposed.
+    pub(crate) fn with_frame_end(
+        create_info: CreateInfo,
+        disposables: Vec<Box<dyn FnOnce()>>,
+        frame_end: Option<FrameEnd>,
+    ) -> Self {
         let canvas = match (create_info.canvas, &create_info.surface) {
             (Some(canvas), _) => canvas,
             (None, Some(surface)) => CanvasSource::Surface(surface.clone()),
@@ -639,6 +727,9 @@ impl DrawingContextImpl {
 
         let mut context = Self {
             disposables,
+            frame_end,
+            image_paint: sk::Paint::default(),
+            image_state: None,
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
@@ -650,16 +741,19 @@ impl DrawingContextImpl {
             render_options_stack: Vec::new(),
             text_options_stack: Vec::new(),
             post_transform,
+            post_transform_inverse: post_transform.and_then(|post_transform| post_transform.try_invert()),
             current_opacity: 1.0,
             disable_subpixel_text_rendering: create_info.disable_subpixel_text_rendering,
             text_rendering: create_info.text_rendering,
             frame_text_rendering: create_info.frame_text_rendering,
-            current_transform: None,
+            current_transform: Cell::new(ContextTransform::Unset),
             disposed: false,
             gr_context: create_info.gr_context,
             gpu: create_info.gpu,
             stroke_paint: Some(SkPaintCache::get()),
+            stroke_state: None,
             fill_paint: Some(SkPaintCache::get()),
+            fill_state: None,
             box_shadow_paint: Some(SkPaintCache::get()),
             session: create_info.current_session,
             leased: Rc::new(Cell::new(false)),
@@ -784,21 +878,33 @@ impl DrawingContextImpl {
     }
 
     /// Restores the canvas state. The transform of the context is what the
-    /// canvas has afterwards, less the post transform of a scaled context.
+    /// canvas has afterwards, less the post transform of a scaled context,
+    /// read when it is asked for ([`ContextTransform::Restored`]).
     fn restore_canvas(&mut self) {
         let canvas = self.canvas.restore();
         let level = canvas.save_count();
         self.rounded_clip_elements.retain(|saved| *saved <= level);
-        // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
-        // transform back from the canvas (`Canvas.TotalMatrix44`), post
-        // transform included, so a scaled context (a render target bitmap of
-        // more than 96 DPI) scaled the transforms pushed after a restore
-        // twice. The transform of the context is the logical one.
-        let total = matrix44_to_matrix(&canvas.local_to_device());
-        self.current_transform = Some(match self.post_transform {
-            Some(post_transform) => total * post_transform.invert(),
-            None => total,
-        });
+        self.current_transform.set(ContextTransform::Restored);
+    }
+
+    /// The transform of the context after a restore: the matrix of the
+    /// canvas, less the post transform.
+    ///
+    /// Deviation (DEVIATIONS.md, Skia backend): upstream reads the transform
+    /// back from the canvas (`Canvas.TotalMatrix44`), post transform
+    /// included, so a scaled context (a render target bitmap of more than 96
+    /// DPI) scaled the transforms pushed after a restore twice. The transform
+    /// of the context is the logical one.
+    fn restored_transform(&self) -> Matrix {
+        // A disposed context reports the identity, as one that never had a transform.
+        let Some(matrix) = self.canvas.local_to_device() else { return Matrix::IDENTITY };
+        let total = matrix44_to_matrix(&matrix);
+        match (self.post_transform, self.post_transform_inverse) {
+            (Some(_), Some(inverse)) => total * inverse,
+            // Not invertible: the panic of the inversion, as when it was inverted at every restore.
+            (Some(post_transform), None) => total * post_transform.invert(),
+            (None, _) => total,
+        }
     }
 
     /// The relative transform of a brush conjugated into target space: the
@@ -850,9 +956,10 @@ impl DrawingContextImpl {
     fn configure_gradient_brush(paint: &mut sk::Paint, target_rect: Rect, gradient_brush: &dyn IGradientBrush) {
         let tile_mode = to_sk_shader_tile_mode(gradient_brush.spread_method());
         let gradient_stops = gradient_brush.gradient_stops();
-        let mut stop_colors: Vec<sk::Color4f> =
+        // On the stack up to GRADIENT_STOPS_ON_STACK stops.
+        let mut stop_colors: GradientColors =
             gradient_stops.iter().map(|s| sk::Color4f::from(to_sk_color(s.color()))).collect();
-        let mut stop_offsets: Vec<f32> = gradient_stops.iter().map(|s| s.offset() as f32).collect();
+        let mut stop_offsets: GradientOffsets = gradient_stops.iter().map(|s| s.offset() as f32).collect();
 
         if stop_colors.is_empty() {
             // Skia cannot build a gradient without stops.
@@ -945,9 +1052,10 @@ impl DrawingContextImpl {
 
                     let count = stop_offsets.len();
 
-                    let mut reversed_colors = vec![sk::Color4f::new(0.0, 0.0, 0.0, 0.0); count];
+                    let mut reversed_colors: GradientColors =
+                        smallvec::smallvec![sk::Color4f::new(0.0, 0.0, 0.0, 0.0); count];
                     // And then reverse the reference point of the stops.
-                    let mut reversed_stops = vec![0f32; count];
+                    let mut reversed_stops: GradientOffsets = smallvec::smallvec![0f32; count];
 
                     for i in 0..count {
                         let mut offset = 1.0 - gradient_stops[i].offset();
@@ -1459,18 +1567,29 @@ impl DrawingContextImpl {
     /// `paint` is a reset paint, or the paint of an earlier solid colour fill
     /// ([`PaintWrapper::release_fill`]): the anti-aliasing and the colour are set on every
     /// path. It travels in the wrapper and comes back from [`PaintWrapper::dispose`].
-    fn create_paint(&mut self, mut paint: sk::Paint, brush: &dyn IBrush, target_rect: Rect) -> PaintWrapper {
-        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
-
+    /// Configures `paint` for `brush`. `known` is what a kept solid paint has (see `fill_state`); a solid brush
+    /// then sets only the values that differ, any other brush sets every value it needs.
+    fn create_paint(
+        &mut self,
+        mut paint: sk::Paint,
+        known: Option<SolidFillState>,
+        brush: &dyn IBrush,
+        target_rect: Rect,
+    ) -> PaintWrapper {
+        let anti_alias = self.render_options.edge_mode != EdgeMode::Aliased;
         let opacity = brush.opacity() * if self.use_opacity_save_layer { 1.0 } else { self.current_opacity };
 
         if let Some(solid) = brush.as_solid_color_brush() {
             let color = solid.color();
-            paint.set_color(sk::Color::from_argb((color.a as f64 * opacity) as u8, color.r, color.g, color.b));
-
-            return PaintWrapper::solid_fill(paint);
+            let wanted = SolidFillState {
+                anti_alias,
+                color: sk::Color::from_argb((color.a as f64 * opacity) as u8, color.r, color.g, color.b),
+            };
+            wanted.apply(&mut paint, known);
+            return PaintWrapper::solid_fill(paint, wanted);
         }
 
+        paint.set_anti_alias(anti_alias);
         paint.set_color(sk::Color::from_argb((255.0 * opacity) as u8, 255, 255, 255));
 
         if let Some(gradient) = brush.as_gradient_brush() {
@@ -1519,6 +1638,7 @@ impl DrawingContextImpl {
     fn try_create_paint(
         &mut self,
         paint: sk::Paint,
+        known: Option<SolidStrokeState>,
         pen: &dyn IPen,
         target_rect: Rect,
     ) -> Result<PaintWrapper, sk::Paint> {
@@ -1531,7 +1651,25 @@ impl DrawingContextImpl {
             return Err(paint);
         }
 
-        let mut rv = self.create_paint(paint, &*brush, target_rect);
+        if brush.as_solid_color_brush().is_some() && !has_dashes(pen) {
+            // An undashed solid stroke: only the values that differ from the kept stroke paint are set.
+            let mut rv = self.create_paint(paint, known.map(|known| known.fill), &*brush, target_rect);
+            let fill = rv.solid.take().expect("a solid brush makes a solid paint");
+            let wanted = SolidStrokeState {
+                fill,
+                width: pen.thickness() as f32,
+                cap: to_sk_stroke_cap(pen.line_cap()),
+                join: to_sk_stroke_join(pen.line_join()),
+                miter: pen.miter_limit() as f32,
+            };
+            wanted.apply(&mut rv.paint, known);
+            rv.stroke = Some(wanted);
+            return Ok(rv);
+        }
+
+        // Any other stroke starts from a reset paint, as every stroke did before solid strokes were kept.
+        let paint = if known.is_some() { reset_paint(paint) } else { paint };
+        let mut rv = self.create_paint(paint, None, &*brush, target_rect);
         let paint = rv.paint_mut();
 
         paint.set_stroke(true);
@@ -1553,28 +1691,53 @@ impl DrawingContextImpl {
         Ok(rv)
     }
 
+    /// Replaces the kept fill and stroke paints with new ones, so that the next draw has paints no draw before
+    /// it has used.
+    #[cfg(test)]
+    pub(crate) fn reset_kept_paints_for_tests(&mut self) {
+        self.fill_paint = Some(sk::Paint::default());
+        self.fill_state = None;
+        self.stroke_paint = Some(sk::Paint::default());
+        self.stroke_state = None;
+    }
+
     fn create_fill(&mut self, brush: &dyn IBrush, target_rect: Rect) -> PaintWrapper {
-        let paint = self.fill_paint.take().unwrap_or_default();
-        self.create_paint(paint, brush, target_rect)
+        // The state goes with the paint: a paint that is not the kept one has no known values.
+        let known = self.fill_state.take();
+        let (paint, known) = match self.fill_paint.take() {
+            Some(paint) => (paint, known),
+            None => (sk::Paint::default(), None),
+        };
+        self.create_paint(paint, known, brush, target_rect)
     }
 
     fn release_fill(&mut self, fill: PaintWrapper) {
-        self.fill_paint = Some(fill.release_fill());
+        let (paint, state) = fill.release_fill();
+        self.fill_paint = Some(paint);
+        self.fill_state = state;
     }
 
     fn create_stroke(&mut self, pen: &dyn IPen, target_rect: Rect) -> Option<PaintWrapper> {
-        let paint = self.stroke_paint.take().unwrap_or_default();
-        match self.try_create_paint(paint, pen, target_rect) {
+        let known = self.stroke_state.take();
+        let (paint, known) = match self.stroke_paint.take() {
+            Some(paint) => (paint, known),
+            None => (sk::Paint::default(), None),
+        };
+        match self.try_create_paint(paint, known, pen, target_rect) {
             Ok(stroke) => Some(stroke),
             Err(paint) => {
+                // Not configured: the paint keeps its values.
                 self.stroke_paint = Some(paint);
+                self.stroke_state = known;
                 None
             }
         }
     }
 
     fn release_stroke(&mut self, stroke: PaintWrapper) {
-        self.stroke_paint = Some(stroke.dispose());
+        let (paint, state) = stroke.release_stroke();
+        self.stroke_paint = Some(paint);
+        self.stroke_state = state;
     }
 
     /// Creates a new render target compatible with this drawing context.
@@ -1621,19 +1784,25 @@ impl DrawingContextImpl {
 
 impl IDrawingContextImpl for DrawingContextImpl {
     fn transform(&self) -> Matrix {
-        // The transform is set when the context is created and re-read from
-        // the canvas after every restore, so the cached value is always
-        // present here.
-        self.current_transform.unwrap_or(Matrix::IDENTITY)
+        match self.current_transform.get() {
+            ContextTransform::Unset => Matrix::IDENTITY,
+            ContextTransform::Known(transform) => transform,
+            ContextTransform::Restored => {
+                let transform = self.restored_transform();
+                self.current_transform.set(ContextTransform::Known(transform));
+                transform
+            }
+        }
     }
 
     fn set_transform(&mut self, value: Matrix) {
         self.check_lease();
-        if self.current_transform == Some(value) {
+        // After a restore the transform is not compared: reading it back would cost what the comparison saves.
+        if self.current_transform.get() == ContextTransform::Known(value) {
             return;
         }
 
-        self.current_transform = Some(value);
+        self.current_transform.set(ContextTransform::Known(value));
 
         // The canvas takes the transform with its next use (9.28).
         self.canvas.set_transform(value);
@@ -1652,16 +1821,19 @@ impl IDrawingContextImpl for DrawingContextImpl {
         let d = to_sk_rect(dest_rect);
         let is_upscaling = d.width() > s.width() || d.height() > s.height();
 
-        let mut paint = SkPaintCache::get();
         let sampling_options =
             to_sk_sampling_options_scaled(self.render_options.bitmap_interpolation_mode, is_upscaling);
 
-        paint.set_color(sk::Color::from_argb((255.0 * opacity * self.current_opacity) as u8, 255, 255, 255));
-        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
-        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
+        let wanted = ImagePaintState {
+            color: sk::Color::from_argb((255.0 * opacity * self.current_opacity) as u8, 255, 255, 255),
+            blend_mode: to_sk_blend_mode(self.render_options.bitmap_blending_mode),
+            anti_alias: self.render_options.edge_mode != EdgeMode::Aliased,
+        };
+        wanted.apply(&mut self.image_paint, self.image_state);
+        self.image_state = Some(wanted);
 
-        drawable_image.draw(self.gr_context.as_deref(), self.canvas.get(), &s, &d, sampling_options, &paint);
-        SkPaintCache::return_reset(paint);
+        let canvas = self.canvas.get();
+        drawable_image.draw(self.gr_context.as_deref(), canvas, &s, &d, sampling_options, &self.image_paint);
     }
 
     fn draw_bitmap_with_mask(
@@ -1736,8 +1908,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         let rc = to_sk_rect(rect.rect);
         let is_rounded = rect.is_rounded();
-        let need_round_rect = rect.is_rounded() || box_shadows.has_inset_shadows();
-        let sk_round_rect = if need_round_rect { Some(SkRoundRectCache::get_and_set_radii(&rc, &rect)) } else { None };
+        // The shadow loops below do nothing for an empty collection: their iterator is the range of its count.
+        let has_shadows = box_shadows.count() > 0;
+        // Four equal corners and no shadow: Skia's call for a rectangle with one pair of radii.
+        let uniform = if is_rounded && !has_shadows { uniform_radii(&rc, &rect) } else { None };
+        let need_round_rect = uniform.is_none() && (is_rounded || box_shadows.has_inset_shadows());
+        let sk_round_rect = if need_round_rect { Some(sk_round_rect(&rc, &rect)) } else { None };
 
         for box_shadow in box_shadows.iter() {
             if box_shadow != BoxShadow::default() && !box_shadow.is_inset {
@@ -1752,8 +1928,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
                 self.canvas.get().save();
                 if let (true, Some(sk_round_rect)) = (is_rounded, &sk_round_rect) {
-                    let mut shadow_rect =
-                        SkRoundRectCache::get_and_set_radii_points(sk_round_rect.rect(), sk_round_rect.radii_ref());
+                    let mut shadow_rect = *sk_round_rect;
                     if spread != 0.0 {
                         shadow_rect.outset((spread, spread));
                     }
@@ -1765,7 +1940,6 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     );
                     self.canvas.get().draw_rrect(shadow_rect, &shadow_paint);
                     self.set_transform(old_transform);
-                    SkRoundRectCache::return_item(shadow_rect);
                 } else {
                     let mut shadow_rect = rc;
                     if spread != 0.0 {
@@ -1787,8 +1961,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         if let Some(brush) = brush {
             let fill = self.create_fill(brush, rect.rect);
-            match (is_rounded, &sk_round_rect) {
-                (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, fill.paint()),
+            match (uniform, is_rounded, &sk_round_rect) {
+                (Some((rx, ry)), ..) => self.canvas.get().draw_round_rect(rc, rx, ry, fill.paint()),
+                (None, true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, fill.paint()),
                 _ => self.canvas.get().draw_rect(rc, fill.paint()),
             };
             self.release_fill(fill);
@@ -1811,8 +1986,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     Self::area_casting_shadow_in_hole(rc, box_shadow.blur as f32, spread, offset_x, offset_y);
 
                 self.canvas.get().save();
-                let mut shadow_rect =
-                    SkRoundRectCache::get_and_set_radii_points(sk_round_rect.rect(), sk_round_rect.radii_ref());
+                let mut shadow_rect = *sk_round_rect;
                 if spread != 0.0 {
                     shadow_rect.inset((spread, spread));
                 }
@@ -1826,23 +2000,19 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 self.canvas.get().draw_drrect(outer_rrect, shadow_rect, &shadow_paint);
                 self.set_transform(old_transform);
                 self.restore_canvas();
-                SkRoundRectCache::return_item(shadow_rect);
                 self.box_shadow_paint = Some(reset_paint(shadow_paint));
             }
         }
 
         if let Some(pen) = pen {
             if let Some(stroke) = self.create_stroke(pen, rect.rect.inflate(pen.thickness() / 2.0)) {
-                match (is_rounded, &sk_round_rect) {
-                    (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, stroke.paint()),
+                match (uniform, is_rounded, &sk_round_rect) {
+                    (Some((rx, ry)), ..) => self.canvas.get().draw_round_rect(rc, rx, ry, stroke.paint()),
+                    (None, true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, stroke.paint()),
                     _ => self.canvas.get().draw_rect(rc, stroke.paint()),
                 };
                 self.release_stroke(stroke);
             }
-        }
-
-        if let Some(sk_round_rect) = sk_round_rect {
-            SkRoundRectCache::return_item(sk_round_rect);
         }
     }
 
@@ -1908,7 +2078,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
             .downcast_ref::<GlyphRunImpl>()
             .unwrap_or_else(|| panic!("The glyph run was not created by the Skia backend"));
 
-        let paint_wrapper = self.create_fill(foreground, glyph_run.bounds());
+        // A solid fill needs no bounds; the run's bounds are read only for a brush that maps onto them.
+        let bounds = if foreground.as_solid_color_brush().is_some() { Rect::default() } else { glyph_run.bounds() };
+        let paint_wrapper = self.create_fill(foreground, bounds);
 
         let effective_text_options = effective_text_options(
             self.text_options,
@@ -1950,17 +2122,21 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn push_clip_rounded(&mut self, clip: RoundedRect) {
         self.check_lease();
 
-        // Get the rounded rectangle.
         let rc = to_sk_rect(clip.rect);
-
-        // Get a round rect from the cache.
-        let round_rect = SkRoundRectCache::get_and_set_radii(&rc, &clip);
-
+        if !clip.is_rounded() {
+            // No corner is rounded: the rectangle clip a rounded rectangle of that type is in Skia, antialiased as
+            // the rounded clip is.
+            let canvas = self.canvas.get();
+            canvas.save();
+            canvas.clip_rect(rc, sk::ClipOp::Intersect, true);
+            return;
+        }
+        let round_rect = match uniform_radii(&rc, &clip) {
+            Some((rx, ry)) => sk::RRect::new_rect_xy(rc, rx, ry),
+            None => sk_round_rect(&rc, &clip),
+        };
         self.canvas.get().save();
         self.clip_rounded_rect(&round_rect, sk::ClipOp::Intersect);
-
-        // Should not need to reset as setting the radii overrides the values.
-        SkRoundRectCache::return_item(round_rect);
     }
 
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
@@ -2071,7 +2247,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         canvas.save_layer(&SaveLayerRec::default().bounds(&sk_bounds).paint(&paint));
         let total_matrix = canvas.local_to_device();
 
-        let mask_paint = self.create_paint(paint, mask, bounds);
+        let mask_paint = self.create_paint(paint, None, mask, bounds);
         self.mask_stack.push((total_matrix, mask_paint));
     }
 
@@ -2221,6 +2397,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         self.gr_context = None;
 
+        if let Some(frame_end) = self.frame_end.take() {
+            frame_end.run();
+        }
         for disposable in std::mem::take(&mut self.disposables) {
             disposable();
         }
@@ -2243,7 +2422,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
     fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
         self.check_lease();
-        let mut device = self.current_transform.unwrap_or(Matrix::IDENTITY);
+        let mut device = self.transform();
         if let Some(post_transform) = self.post_transform {
             device *= post_transform;
         }
@@ -2842,13 +3021,12 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
         let rc = to_sk_rect(rect.rect);
 
         // The kept fill paint may carry the colour of a solid fill.
+        self.fill_state = None;
         let paint = self.fill_paint.take().map(reset_paint).unwrap_or_default();
         let fill = self.create_acrylic_paint(paint, material);
 
         if rect.is_rounded() {
-            let sk_round_rect = SkRoundRectCache::get_and_set_radii(&rc, &rect);
-            self.canvas.get().draw_rrect(sk_round_rect, fill.paint());
-            SkRoundRectCache::return_item(sk_round_rect);
+            self.canvas.get().draw_rrect(sk_round_rect(&rc, &rect), fill.paint());
         } else {
             self.canvas.get().draw_rect(rc, fill.paint());
         }
@@ -2892,6 +3070,120 @@ fn color_matrix_filter(
         .unwrap_or_else(|| sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None))
 }
 
+/// The number of gradient stops a gradient brush is configured with on the stack; more take the heap.
+const GRADIENT_STOPS_ON_STACK: usize = 16;
+type GradientColors = smallvec::SmallVec<[sk::Color4f; GRADIENT_STOPS_ON_STACK]>;
+type GradientOffsets = smallvec::SmallVec<[f32; GRADIENT_STOPS_ON_STACK]>;
+
+/// The values `draw_bitmap` sets on its paint, which has no others: the image draws only read it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ImagePaintState {
+    color: sk::Color,
+    blend_mode: sk::BlendMode,
+    anti_alias: bool,
+}
+
+impl ImagePaintState {
+    /// Sets the values on `paint` whose values are `known` (none known: every value).
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        if known.map(|known| known.color) != Some(self.color) {
+            paint.set_color(self.color);
+        }
+        if known.map(|known| known.blend_mode) != Some(self.blend_mode) {
+            paint.set_blend_mode(self.blend_mode);
+        }
+        if known.map(|known| known.anti_alias) != Some(self.anti_alias) {
+            paint.set_anti_alias(self.anti_alias);
+        }
+    }
+}
+
+/// What the end of a frame does when its drawing context is disposed, before the disposables: typed, so that the
+/// drawing context of a frame needs no boxed closure and no vector of them.
+pub(crate) enum FrameEnd {
+    /// A frame of a [`SurfaceRenderTarget`]: its version goes up, and a surface the frame was drawn on directly
+    /// (not recorded) is told the frame ended.
+    Surface { version: Rc<Cell<i32>>, drawn: Option<Rc<dyn crate::gpu::ISkiaSurface>> },
+    /// A frame of a GPU render target: its rendering session ends.
+    Session(Rc<dyn ISkiaGpuRenderSession>),
+}
+
+impl FrameEnd {
+    fn run(self) {
+        match self {
+            Self::Surface { version, drawn } => {
+                version.set(version.get() + 1);
+                if let Some(drawn) = drawn {
+                    drawn.end_drawn_frame();
+                }
+            }
+            Self::Session(session) => session.dispose(),
+        }
+    }
+}
+
+/// The values a solid fill sets on a paint that is otherwise a reset paint.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct SolidFillState {
+    anti_alias: bool,
+    color: sk::Color,
+}
+
+impl SolidFillState {
+    /// Sets the values on `paint` whose values are `known` (none known: every value).
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        if known.map(|known| known.anti_alias) != Some(self.anti_alias) {
+            paint.set_anti_alias(self.anti_alias);
+        }
+        if known.map(|known| known.color) != Some(self.color) {
+            paint.set_color(self.color);
+        }
+    }
+}
+
+/// The values an undashed solid stroke sets on a paint that is otherwise a reset paint.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct SolidStrokeState {
+    fill: SolidFillState,
+    width: f32,
+    cap: sk::PaintCap,
+    join: sk::PaintJoin,
+    miter: f32,
+}
+
+impl SolidStrokeState {
+    /// Sets the stroke values on `paint` whose values are `known` (none known: every value, the
+    /// style too). The fill values were set by [`SolidFillState::apply`].
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        let Some(known) = known else {
+            paint.set_stroke(true);
+            paint.set_stroke_width(self.width);
+            paint.set_stroke_cap(self.cap);
+            paint.set_stroke_join(self.join);
+            paint.set_stroke_miter(self.miter);
+            return;
+        };
+        if known.width != self.width {
+            paint.set_stroke_width(self.width);
+        }
+        if known.cap != self.cap {
+            paint.set_stroke_cap(self.cap);
+        }
+        if known.join != self.join {
+            paint.set_stroke_join(self.join);
+        }
+        if known.miter != self.miter {
+            paint.set_stroke_miter(self.miter);
+        }
+    }
+}
+
+/// Whether the pen may draw dashes: it has a dash style. (A style without dashes draws none, and
+/// takes the general path of strokes; reading its dashes here would allocate them.)
+fn has_dashes(pen: &dyn IPen) -> bool {
+    pen.dash_style().is_some()
+}
+
 fn reset_paint(mut paint: sk::Paint) -> sk::Paint {
     paint.reset();
     paint
@@ -2901,9 +3193,12 @@ fn reset_paint(mut paint: sk::Paint) -> sk::Paint {
 /// released) with it.
 pub(crate) struct PaintWrapper {
     paint: sk::Paint,
-    /// The paint differs from a reset paint in its anti-aliasing and its colour only: the
-    /// paint of a solid colour fill that nothing changed since ([`Self::release_fill`]).
-    solid_fill: bool,
+    /// The paint differs from a reset paint in its anti-aliasing and its colour only, which are
+    /// these: the paint of a solid colour fill that nothing changed since ([`Self::release_fill`]).
+    solid: Option<SolidFillState>,
+    /// The paint differs from a reset paint in these values only: the paint of an undashed solid
+    /// stroke that nothing changed since ([`Self::release_stroke`]).
+    stroke: Option<SolidStrokeState>,
     // We are saving memory allocations here: up to three disposables without
     // a collection.
     disposable1: Option<Box<dyn FnOnce()>>,
@@ -2913,13 +3208,13 @@ pub(crate) struct PaintWrapper {
 
 impl PaintWrapper {
     pub fn new(paint: sk::Paint) -> Self {
-        Self { paint, solid_fill: false, disposable1: None, disposable2: None, disposable3: None }
+        Self { paint, solid: None, stroke: None, disposable1: None, disposable2: None, disposable3: None }
     }
 
-    /// The wrapper of a paint whose anti-aliasing and colour were set, and nothing else, since
-    /// it was reset or came back from [`Self::release_fill`].
-    fn solid_fill(paint: sk::Paint) -> Self {
-        Self { paint, solid_fill: true, disposable1: None, disposable2: None, disposable3: None }
+    /// The wrapper of a paint whose anti-aliasing and colour are `state`, and that differs from a
+    /// reset paint in nothing else.
+    fn solid_fill(paint: sk::Paint, state: SolidFillState) -> Self {
+        Self { paint, solid: Some(state), stroke: None, disposable1: None, disposable2: None, disposable3: None }
     }
 
     /// The configured paint.
@@ -2928,8 +3223,11 @@ impl PaintWrapper {
     }
 
     /// The paint, to configure further.
+    /// Anything set through it (a shader, a blend mode, a filter, a path effect) makes the paint
+    /// one whose values are not known: it is reset when it is released.
     pub fn paint_mut(&mut self) -> &mut sk::Paint {
-        self.solid_fill = false;
+        self.solid = None;
+        self.stroke = None;
         &mut self.paint
     }
 
@@ -2963,12 +3261,23 @@ impl PaintWrapper {
     /// values that every fill sets first (FerroUI addition, desktop-performance.md,
     /// section 9.31). A paint from here is given to [`DrawingContextImpl::create_paint`] only,
     /// or reset.
-    pub fn release_fill(mut self) -> sk::Paint {
-        if !self.solid_fill {
+    pub fn release_fill(mut self) -> (sk::Paint, Option<SolidFillState>) {
+        if self.solid.is_none() {
             self.paint.reset();
         }
         self.release_disposables();
-        self.paint
+        (self.paint, self.solid)
+    }
+
+    /// Releases the disposables and hands back the paint for the next stroke: reset, unless it
+    /// is the paint of an undashed solid stroke, whose values are handed back with it, so that
+    /// the next stroke sets only those that differ.
+    pub fn release_stroke(mut self) -> (sk::Paint, Option<SolidStrokeState>) {
+        if self.stroke.is_none() {
+            self.paint.reset();
+        }
+        self.release_disposables();
+        (self.paint, self.stroke)
     }
 
     fn release_disposables(&mut self) {

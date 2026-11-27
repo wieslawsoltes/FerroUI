@@ -25,6 +25,8 @@ ferroui-opengl.workspace = true
 ferroui-metal.workspace = true
 ferroui-vulkan.workspace = true
 skia-safe.workspace = true
+# Stack buffers for gradient stops and dash intervals (already a dependency of ferroui-base).
+smallvec.workspace = true
 # The CPU reference of 3D scenes (`Viewport3D`, #608), drawn as an image where the backend has no GPU
 # executor (feature `media3d`; Graphite draws them with the Metal executor of `ferroui-metal`).
 ferroui-render3d = { workspace = true, optional = true }
