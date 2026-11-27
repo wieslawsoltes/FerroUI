@@ -17,7 +17,8 @@ use ferroui_base::data::BindingMode;
 use ferroui_base::input::navigation::XYFocusHelpers;
 use ferroui_base::input::{
     FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, KeyboardNavigation,
-    NavigationMethod, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs, PointerUpdateKind,
+    NavigationMethod, PointerCaptureLostEventArgs, PointerEventArgs, PointerPressedEventArgs,
+    PointerReleasedEventArgs, PointerUpdateKind,
     PointerWheelEventArgs,
 };
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
@@ -252,6 +253,11 @@ impl InputElementImpl for ComboBox {
         } else {
             this.pseudo_classes().set(Self::PC_PRESSED, true);
         }
+    }
+
+    fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
+        Self::parent_on_pointer_capture_lost(this, e);
+        this.pseudo_classes().set(Self::PC_PRESSED, false);
     }
 
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
@@ -832,18 +838,16 @@ impl ComboBox {
 
         let count = self.item_count();
 
-        let mut i = start_index + step;
-        while i != start_index {
+        // Every item is inspected at most once, so that nothing to select ends the search.
+        let mut i = start_index;
+        for _ in 0..count {
+            i += step;
+
             if i < 0 || i >= count {
-                if wrap {
-                    if i < 0 {
-                        i += count;
-                    } else if i >= count {
-                        i %= count;
-                    }
-                } else {
+                if !wrap {
                     return false;
                 }
+                i = i.rem_euclid(count);
             }
 
             let item = self.items_view().get_at(i as usize);
@@ -856,8 +860,6 @@ impl ComboBox {
                 self.set_selected_index(i);
                 return true;
             }
-
-            i += step;
         }
 
         false

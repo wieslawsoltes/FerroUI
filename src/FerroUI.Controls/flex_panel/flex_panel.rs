@@ -227,7 +227,7 @@ impl FlexPanel {
         let flex_constraint = match basis.kind() {
             FlexBasisKind::Auto => max.u,
             FlexBasisKind::Absolute => basis.value(),
-            FlexBasisKind::Relative => max.u * basis.value() / 100.0,
+            FlexBasisKind::Relative => max.u * basis.value(),
         };
         element.measure(Uv::to_size(max.with_u(flex_constraint), is_column));
 

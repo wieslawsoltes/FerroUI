@@ -597,6 +597,32 @@ fn removing_selected_item_should_update_selection_with_always_selected() {
 }
 
 #[test]
+fn setting_selected_index_during_initialize_raises_selection_changed_once() {
+    use crate::{ComboBox, ListBox};
+    let _scope = start();
+    let controls: [Ref<SelectingItemsControl>; 2] = [ComboBox::new().upcast(), ListBox::new().upcast()];
+    for target in controls {
+        // The order markup uses: rooted, index set and inline items added before the end of init.
+        let root = TestRoot::new();
+        root.begin_init();
+        target.begin_init();
+        root.set_child(&target);
+        target.set_selected_index(0);
+        let raised = all_selection_changed(&target);
+        target.items().add(boxed_str("first"));
+        target.items().add(boxed_str("second"));
+        target.end_init();
+        root.end_init();
+
+        let raised = raised.borrow();
+        assert_eq!(1, raised.len());
+        assert_eq!(1, raised[0].added_items().len());
+        assert!(raised[0].removed_items().is_empty());
+        assert_eq!(Some("first".to_string()), target.selected_item().as_ref().and_then(string_of));
+    }
+}
+
+#[test]
 fn removing_selected_item_should_clear_selection_with_begin_init() {
     let _scope = start();
     let items = item_list(&[Item::new(), Item::new()]);

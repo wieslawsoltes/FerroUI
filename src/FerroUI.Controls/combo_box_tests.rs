@@ -455,6 +455,82 @@ fn wrap_selection_should_work() {
     assert_eq!(target.selected_index(), 0);
 }
 
+fn wrap_selection_target(items: &[(&str, bool)]) -> Ref<ComboBox> {
+    let target = ComboBox::new();
+    for (content, enabled) in items {
+        let item = combo_box_item(content);
+        item.set_is_enabled(*enabled);
+        target.items().add(Some(Control::boxed(item)));
+    }
+    target.set_template(get_template());
+    target.set_wrap_selection(true);
+    target
+}
+
+fn focus_for_keys(target: &Ref<ComboBox>) {
+    target.apply_template();
+    target.presenter().unwrap().apply_template();
+    target.focus();
+    assert!(target.is_focused());
+}
+
+#[test]
+fn wrap_selection_with_empty_items_does_not_throw() {
+    let _app = start_app(TestServices::real_focus());
+    let target = wrap_selection_target(&[]);
+    let _root = TestRoot::with_child(&target);
+    focus_for_keys(&target);
+
+    raise_key_down(&target, Key::Down, KeyModifiers::NONE);
+    raise_key_down(&target, Key::Up, KeyModifiers::NONE);
+
+    assert_eq!(target.selected_index(), -1);
+}
+
+#[test]
+fn wrap_selection_with_all_items_disabled_does_not_hang() {
+    let _app = start_app(TestServices::real_focus());
+    let target = wrap_selection_target(&[("a", false), ("b", false), ("c", false)]);
+    let _root = TestRoot::with_child(&target);
+    focus_for_keys(&target);
+
+    raise_key_down(&target, Key::Down, KeyModifiers::NONE);
+
+    assert_eq!(target.selected_index(), -1);
+}
+
+#[test]
+fn wrap_selection_on_single_item_with_nothing_selected_does_not_throw() {
+    let _app = start_app(TestServices::real_focus());
+    let target = wrap_selection_target(&[("only", true)]);
+    let _root = TestRoot::with_child(&target);
+    focus_for_keys(&target);
+
+    raise_key_down(&target, Key::Up, KeyModifiers::NONE);
+
+    assert_eq!(target.selected_index(), 0);
+}
+
+#[test]
+fn losing_pointer_capture_should_clear_pressed_pseudo_class() {
+    use ferroui_base::input::{IPointer, Pointer, PointerCaptureLostEventArgs, PointerType};
+
+    let _scope = start();
+    let helper = MouseTestHelper::new();
+    let target = ComboBox::new();
+    target.set_items_source(Some(ItemsSource::from_strs(["Foo", "Bar"])));
+
+    helper.down(&target);
+    assert!(target.classes().contains(ComboBox::PC_PRESSED));
+
+    // For example a context menu opening takes the pointer, so the release never arrives.
+    let pointer: Rc<dyn IPointer> = Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true);
+    target.raise_event(&PointerCaptureLostEventArgs::new(target.clone(), pointer));
+
+    assert!(!target.classes().contains(ComboBox::PC_PRESSED));
+    assert!(!target.is_drop_down_open());
+}
+
 #[test]
 fn focuses_next_item_on_key_down() {
     let _app = start_app(TestServices::real_focus());

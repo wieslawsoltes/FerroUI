@@ -545,6 +545,26 @@ fn should_not_fire_click_event_on_space_key_when_it_is_not_focus() {
 }
 
 #[test]
+fn should_not_fire_click_event_on_space_key_up_without_a_key_down() {
+    let _app = UnitTestApplication::start(TestServices::focusable_window());
+    let target = Button::new();
+    let other = Button::new();
+    let panel = crate::StackPanel::new();
+    panel.children().add(&target);
+    panel.children().add(&other);
+    let window = window_with_content(&panel);
+    window.show();
+
+    let raised = count_clicks(&other);
+    target.focus();
+    target.raise_event(&create_key_down_event(Key::Space, None));
+    assert!(other.focus());
+    other.raise_event(&create_key_up_event(Key::Space));
+
+    assert_eq!(0, raised.get());
+}
+
+#[test]
 fn button_unpressed_when_disabled() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let helper = MouseTestHelper::new();
