@@ -171,15 +171,10 @@ impl IAssetLoader for StandardAssetLoader {
             }
 
             let name = assembly.name().unwrap_or_default();
-            let Ok(root) = url::Url::parse(&format!("{ASSET_SCHEME}://{name}/")) else { return Vec::new() };
             return resources
                 .keys()
                 .filter(|key| key.starts_with(&path))
-                .filter_map(|key| {
-                    let mut uri = root.clone();
-                    uri.path_segments_mut().ok()?.clear().extend(key.trim_start_matches('/').split('/'));
-                    Some(uri)
-                })
+                .filter_map(|key| UriRef::parse_absolute(&format!("{ASSET_SCHEME}://{name}{}", escape_path(key))).ok())
                 .collect();
         }
 
@@ -193,6 +188,23 @@ impl IAssetLoader for StandardAssetLoader {
     fn invalidate_assembly_cache_all(&self) {
         self.assembly_descriptor_resolver.invalidate_assembly_cache_all();
     }
+}
+
+/// `path` with the characters that a URI path does not keep as they are escaped (`%` among them), so
+/// that the URI of an asset names it whatever characters its name has.
+fn escape_path(path: &str) -> String {
+    let mut escaped = String::with_capacity(path.len());
+    for byte in path.bytes() {
+        if byte.is_ascii_alphanumeric() || b"-._~!$&'()*+,;=:@/".contains(&byte) {
+            escaped.push(byte as char);
+        } else {
+            const HEX: &[u8; 16] = b"0123456789ABCDEF";
+            escaped.push('%');
+            escaped.push(HEX[usize::from(byte >> 4)] as char);
+            escaped.push(HEX[usize::from(byte & 15)] as char);
+        }
+    }
+    escaped
 }
 
 #[cfg(test)]
