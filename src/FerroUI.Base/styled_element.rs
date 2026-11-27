@@ -1068,7 +1068,12 @@ impl StyledElement {
             self.apply_control_theme_core(&based_on, type_)?;
         }
 
-        theme.try_attach_checked(self, type_)?;
+        // The setters of a theme are for the control it is applied to. An element of its template
+        // takes the nested styles only: when the target type is a base class of that element,
+        // the setters (a `Template` above all) would replace the element's own theme.
+        if type_ == FrameType::Theme {
+            theme.try_attach_checked(self, type_)?;
+        }
 
         if theme.has_children() {
             match theme.candidates(self) {
