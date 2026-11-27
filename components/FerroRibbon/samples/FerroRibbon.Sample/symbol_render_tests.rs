@@ -8,6 +8,8 @@ use ferroui_base::{
 };
 use ferroui_controls::{Control, Grid, TextBlock, Window};
 
+const SYMBOL_FONT: &str = "ferres://FerroRibbon/Assets/Fonts/uno-fluentui-assets.ttf#Symbols";
+
 #[test]
 #[ignore = "Explicit Skia/HarfBuzz symbol glyphs"]
 fn source_symbol_mapping_renders_bundled_glyphs_without_reconstruction() {
@@ -21,7 +23,9 @@ fn source_symbol_mapping_renders_bundled_glyphs_without_reconstruction() {
         .dispatch(
             move || {
                 register_types();
-                let family = FontFamily::new(SymbolIcon::FONT_FAMILY);
+                // The ribbon's bundled symbol font (`primitives/ribbon_icon_presenter.rs`), which a
+                // ribbon symbol icon gets as its `SymbolThemeFontFamily`.
+                let family = FontFamily::new(SYMBOL_FONT);
                 let glyphs = FontManager::current()
                     .try_get_glyph_typeface(&Typeface::new(family.clone()))
                     .expect("bundled source font");
@@ -29,6 +33,8 @@ fn source_symbol_mapping_renders_bundled_glyphs_without_reconstruction() {
                 window.set_width(40.);
                 window.set_height(40.);
                 let icon = SymbolIcon::new();
+                icon.resources()
+                    .set("SymbolThemeFontFamily", Some(std::rc::Rc::new(family.clone())));
                 icon.set_foreground(Some(SolidColorBrush::from_uint32(0xffff0000).into()));
                 window.set_content(Some(Control::boxed(icon.clone())));
                 window.show();
@@ -51,12 +57,12 @@ fn source_symbol_mapping_renders_bundled_glyphs_without_reconstruction() {
                     ("Accept", Symbol::Accept),
                     ("Emoji", Symbol::Emoji),
                 ] {
-                    let unit = SymbolIcon::convert_symbol_value_to_glyph(symbol.raw());
+                    let unit = symbol.glyph();
                     assert_ne!(
-                        glyphs.character_to_glyph_map().get_glyph(i32::from(unit)),
+                        glyphs.character_to_glyph_map().get_glyph(unit as i32),
                         0
                     );
-                    icon.set_symbol(symbol).unwrap();
+                    icon.set_symbol(symbol);
                     window.set_content(Some(Control::boxed(icon.clone())));
                     let actual = frame(&format!("symbol-{name}.png"));
                     assert!(
@@ -73,7 +79,7 @@ fn source_symbol_mapping_renders_bundled_glyphs_without_reconstruction() {
                     // Independent native TextBlock uses the oracle's resulting unit.
                     let root = Grid::new();
                     let text = TextBlock::new();
-                    text.set_text(Some(&char::from_u32(u32::from(unit)).unwrap().to_string()));
+                    text.set_text(Some(&unit.to_string()));
                     text.set_font_family(family.clone());
                     text.set_font_size(20.);
                     text.set_foreground(icon.foreground());
