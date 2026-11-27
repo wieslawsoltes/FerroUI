@@ -2,6 +2,7 @@
 //! top-levels, its native handle and the receiver of the native top-level
 //! events.
 
+#[cfg(feature = "platform-wheel-delta")]
 use ferroui_base::input::PlatformWheelDelta;
 use crate::clipboard_data_transfer::ClipboardDataTransfer;
 use crate::clipboard_read_session::ClipboardReadSession;
@@ -45,6 +46,7 @@ use ferroui_controls::platform::{
 use ferroui_controls::{
     AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
 };
+#[cfg(any(feature = "text-editor", feature = "platform-wheel-delta"))]
 use ferroui_microcom::{make_com_with, InterfaceEntry};
 use ferroui_microcom::{ComPtr, HResult, ImplementedBy};
 use std::any::{Any, TypeId};
@@ -518,6 +520,7 @@ impl TopLevelImpl {
         args.handled()
     }
 
+    #[cfg(feature = "platform-wheel-delta")]
     pub(crate) fn raw_mouse_wheel_event(
         &self,
         time_stamp: u64,
@@ -1152,18 +1155,24 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
 pub(crate) struct TopLevelEvents<P>(pub(crate) Rc<P>);
 
 impl<P: TopLevelParent> TopLevelEvents<P> {
-    /// The events object of a top-level. It answers `IFrnTopLevelWheelEvents`, through which the
-    /// view sends the platform wheel data. With the `text-editor` feature it also answers
+    /// The events object of a top-level. With the `text-editor` feature it also answers
     /// `IFrnTextInputMethodEvents`, through which the view tags the text an input method
     /// commits; without it the view sends every commit as a text input event, as on main.
+    /// With the `platform-wheel-delta` feature it also answers `IFrnTopLevelWheelEvents`,
+    /// through which the view sends the platform wheel data; without it the view sends wheel
+    /// events without it, as on main.
     pub(crate) fn for_parent<I: ImplementedBy<Self>>(parent: Rc<P>) -> ComPtr<I> {
-        #[cfg(feature = "text-editor")]
+        #[cfg(all(feature = "text-editor", feature = "platform-wheel-delta"))]
         return make_com_with(
             Self(parent),
             [InterfaceEntry::of::<IFrnTextInputMethodEvents>(), InterfaceEntry::of::<IFrnTopLevelWheelEvents>()],
         );
-        #[cfg(not(feature = "text-editor"))]
-        make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTopLevelWheelEvents>()])
+        #[cfg(all(feature = "text-editor", not(feature = "platform-wheel-delta")))]
+        return make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTextInputMethodEvents>()]);
+        #[cfg(all(not(feature = "text-editor"), feature = "platform-wheel-delta"))]
+        return make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTopLevelWheelEvents>()]);
+        #[cfg(not(any(feature = "text-editor", feature = "platform-wheel-delta")))]
+        ferroui_microcom::make_com(Self(parent))
     }
 
     fn dispatch_text(&self, time_stamp: u64, text: Option<&CStr>, from_input_method: bool) -> bool {
@@ -1199,6 +1208,7 @@ fn c_str_to_string(s: Option<&CStr>) -> Option<String> {
     s.map(|s| s.to_string_lossy().into_owned())
 }
 
+#[cfg(feature = "platform-wheel-delta")]
 impl<P: TopLevelParent> IFrnTopLevelWheelEventsImpl for TopLevelEvents<P> {
     fn raw_mouse_wheel_event(
         &self, time_stamp: u64, modifiers: FrnInputModifiers, point: FrnPoint,
@@ -1622,6 +1632,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "platform-wheel-delta")]
     fn platform_wheel_extension_preserves_bits_and_emits_once() {
         let _dispatcher = Dispatcher::unit_test_scope();
         let _scope = FerroLocator::enter_scope();
@@ -1659,6 +1670,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "platform-wheel-delta")]
     fn platform_wheel_extension_ignores_missing_input_root() {
         let _dispatcher = Dispatcher::unit_test_scope();
         let _scope = FerroLocator::enter_scope();
