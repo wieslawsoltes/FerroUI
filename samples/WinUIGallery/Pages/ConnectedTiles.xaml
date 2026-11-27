@@ -4,7 +4,10 @@
   <TextBlock x:Name="CollectionImageErrors" TextWrapping="Wrap" MaxLines="3"
              Margin="0,0,0,12" IsVisible="False" />
   <ScrollViewer x:Name="CollectionScroll" Grid.Row="1" KeyboardNavigation.TabNavigation="Once">
-    <WrapPanel x:Name="CollectionItems" ItemWidth="166" ItemHeight="136"
-               XYFocus.NavigationModes="Enabled" />
+    <ItemsRepeater x:Name="CollectionItems" XYFocus.NavigationModes="Enabled">
+      <ItemsRepeater.Layout>
+        <UniformGridLayout MinColumnSpacing="8" MinRowSpacing="8" MinItemWidth="150" MinItemHeight="120" />
+      </ItemsRepeater.Layout>
+    </ItemsRepeater>
   </ScrollViewer>
 </Grid>
