@@ -176,11 +176,18 @@ changes behavior upstream defines.
    Done for the first: a `SelectableTextBlock` gives its layouts the run cache of the text block
    (`TextBlock::text_run_cache`), which a change of the text, of the selection or of the brush of
    the selection invalidates, as every property the shaping is made of does; a layout with the
-   foreground of a selection shapes without the cache, so no kept shaping holds those runs. Left:
-   the second. The shaped runs hold their run properties, and the drawing takes the foreground
-   and the decorations from there (also of the runs a font fallback made, which copy them), so
-   keeping the runs across a foreground or decoration change needs the kept runs given the new
-   properties, a change of the run cache of its own.
+   foreground of a selection shapes without the cache, so no kept shaping holds those runs.
+
+   Done for the second, for a plain text: `TextRunCache::restyle` replaces the cached runs with
+   runs of the new foreground and decorations over the same glyphs. Each new run has a shaped
+   buffer of its own (`ShapedBuffer::shared_view`), because a layout that still holds an old run
+   disposes that buffer when it ends. A run a font fallback made keeps its typeface and scale,
+   and the end of a line or a paragraph is kept as it is, since it draws nothing. The runs of
+   inlines have styles of their own, so a text block with inlines still drops its shaping.
+   The change only marks the cache (`TextRunCache::restyle_later`); the runs are restyled when
+   the next layout takes the cache (`apply_style_change`). A text block that moves to another
+   parent hears its foreground and its font change together: restyling at once made new runs
+   that the font change then dropped (`InheritanceParent.text_moved` of the benchmarks).
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
 

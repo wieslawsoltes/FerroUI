@@ -10,7 +10,9 @@
 //! of the framework), so that this module's [`NavigationEventArgs`] does not collide with the
 //! `NavigationEventArgs` of the upstream pages (docs/porting/winui-controls.md, section 7).
 
+mod navigation_transition_info;
 mod page_stack_entry;
+pub use navigation_transition_info::NavigationTransitionInfo;
 pub use page_stack_entry::PageStackEntry;
 
 use crate::{Frame, FramePage, PageType};
