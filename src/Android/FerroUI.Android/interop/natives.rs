@@ -56,6 +56,9 @@ pub(crate) const FERRO_INPUT_CONNECTION: &str = "org/ferroui/android/FerroInputC
 pub(crate) const NATIVE_CLICK_LISTENER: &str = "org/ferroui/android/NativeClickListener";
 pub(crate) const PLATFORM_HELPER: &str = "org/ferroui/android/PlatformHelper";
 pub(crate) const CONFIGURATION_CHANGED_RECEIVER: &str = "org/ferroui/android/ConfigurationChangedReceiver";
+/// Found and registered by the spell checker of the application only
+/// ([`register_spell_checker_natives`]), not when the library is loaded.
+pub(crate) const SPELL_CHECKER_HELPER: &str = "org/ferroui/android/SpellCheckerHelper";
 
 /// A `boolean` argument of a native method: one byte, zero for false.
 type JBoolean = u8;
@@ -1020,6 +1023,48 @@ unsafe extern "system" fn connection_send_key_event(
 
 unsafe extern "system" fn click_listener_on_click(_env: *mut JNIEnv, _class: jobject, handle: jlong) {
     guard((), || super::listeners::on_click(handle));
+}
+
+// ---- SpellCheckerHelper -------------------------------------------------------------------
+
+/// Registers the native method of `SpellCheckerHelper`, once. Called by the spell checker of
+/// Android when it is created (on the UI thread, which finds the classes of the application), so
+/// an application that does not check spelling neither looks the class up nor registers it.
+pub(crate) fn register_spell_checker_natives() {
+    static REGISTERED: OnceLock<()> = OnceLock::new();
+    REGISTERED.get_or_init(|| {
+        // SAFETY: the function is declared below with the parameters of the signature after the
+        // environment and the class: a `long`, an `int`, two `int[]` and a `String[]`.
+        unsafe {
+            register_natives(
+                &JavaClass::find(SPELL_CHECKER_HELPER),
+                &[native!(
+                    c"nativeOnSentenceSuggestions",
+                    c"(JI[I[I[Ljava/lang/String;)V",
+                    spell_checker_on_sentence_suggestions as unsafe extern "system" fn(_, _, _, _, _, _, _)
+                )],
+            );
+        }
+    });
+}
+
+unsafe extern "system" fn spell_checker_on_sentence_suggestions(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    sequence: jint,
+    ranges: jarray,
+    suggestion_counts: jarray,
+    suggestions: jobject,
+) {
+    guard((), || {
+        // SAFETY: the references are the two `int[]` and the `String[]` of the signature, or
+        // null.
+        let (ranges, suggestion_counts, suggestions) =
+            unsafe { (read_int_array(ranges), read_int_array(suggestion_counts), JavaObject::from_raw(suggestions)) };
+        let suggestions = suggestions.map(|suggestions| string_array_of(&suggestions)).unwrap_or_default();
+        crate::spell_checker::on_sentence_suggestions(handle, sequence, &ranges, &suggestion_counts, &suggestions);
+    });
 }
 
 // ---- ConfigurationChangedReceiver ---------------------------------------------------------
