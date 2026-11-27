@@ -3,9 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RowDefinitions="Auto,*">
   <TextBlock x:Name="CardImageErrors" TextWrapping="Wrap" MaxLines="3"
              Margin="0,0,0,12" IsVisible="False" />
-  <ScrollViewer x:Name="CardScroll" Grid.Row="1">
-    <WrapPanel x:Name="CardItems" ItemWidth="166" ItemHeight="126" />
-  </ScrollViewer>
+  <GridView x:Name="CardItems" Grid.Row="1" MaxWidth="1400" HorizontalAlignment="Center"
+            IsItemClickEnabled="True" SelectionMode="None" />
   <Grid x:Name="SmokeGrid" Grid.Row="1" Background="#66000000" IsVisible="False">
     <Border x:Name="DestinationElement" Width="400" Height="320"
             HorizontalAlignment="Center" VerticalAlignment="Center"

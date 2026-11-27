@@ -1,9 +1,9 @@
 <!-- Ported from the six pinned AppBarButton examples of WinUI Gallery (14061eea) and
      AppBarButton_Click of AppBarButtonPage.xaml.cs (command_samples.rs); see ../NOTICE.md.
      WinUI's AppBarButton is FerroUI's CommandBarButton. Icon="Like" is a SymbolIcon; the source's
-     AppBarButton.Content of the path icon is the Icon (the template presents the Icon). FerroUI
-     has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, set by the code
-     behind, which is not drawn in the foreground's single color as a BitmapIcon is. The
+     AppBarButton.Content of the path icon is the Icon (the template presents the Icon). BitmapIcon
+     is the control of ferroui-controls-icons, with the source's Slices2.png loaded by the code
+     behind. The
      KeyboardAccelerator Ctrl+S is the HotKey. The outputs are polite live regions, for the
      source's UIHelper.AnnounceActionForAccessibility. The glyphs of the symbol icons need the
      symbol font of the platform (Segoe Fluent Icons on Windows). -->
@@ -24,7 +24,7 @@
     <TextBlock Text="An AppBarButton with a bitmap icon." FontSize="18" />
     <StackPanel Orientation="Horizontal">
       <CommandBarButton x:Name="Button2" Label="BitmapIcon">
-        <CommandBarButton.Icon><Image x:Name="Button2Icon" /></CommandBarButton.Icon>
+        <CommandBarButton.Icon><BitmapIcon x:Name="Button2Icon" /></CommandBarButton.Icon>
       </CommandBarButton>
       <TextBlock x:Name="Control2Output" Margin="8,0,0,0" VerticalAlignment="Center"
                  AutomationProperties.LiveSetting="Polite" />
