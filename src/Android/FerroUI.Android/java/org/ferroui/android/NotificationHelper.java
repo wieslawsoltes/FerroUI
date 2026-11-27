@@ -25,6 +25,9 @@ final class NotificationHelper {
     /** The channel the notifications of the application are posted to. */
     static final String CHANNEL_ID = "org.ferroui.android.notifications";
 
+    /** The channel of the notifications that play no sound (the sound is the channel's). */
+    static final String SILENT_CHANNEL_ID = "org.ferroui.android.notifications.silent";
+
     /** The extra of the launch intent with the arguments of what was clicked. */
     static final String EXTRA_ARGUMENTS = "org.ferroui.android.notification.arguments";
 
@@ -68,11 +71,12 @@ final class NotificationHelper {
                 return false;
             }
             CharSequence label = context.getApplicationInfo().loadLabel(context.getPackageManager());
-            NotificationChannel channel =
-                new NotificationChannel(CHANNEL_ID, label, NotificationManager.IMPORTANCE_DEFAULT);
+            String channelId = silent ? SILENT_CHANNEL_ID : CHANNEL_ID;
+            NotificationChannel channel = new NotificationChannel(channelId, label,
+                silent ? NotificationManager.IMPORTANCE_LOW : NotificationManager.IMPORTANCE_DEFAULT);
             manager.createNotificationChannel(channel);
             int code = (tag + "/" + id).hashCode();
-            Notification.Builder builder = new Notification.Builder(context, CHANNEL_ID)
+            Notification.Builder builder = new Notification.Builder(context, channelId)
                 .setSmallIcon(context.getApplicationInfo().icon)
                 .setContentTitle(title)
                 .setContentText(body)
@@ -86,9 +90,6 @@ final class NotificationHelper {
             }
             if (progress >= 0) {
                 builder.setProgress(100, progress, false);
-            }
-            if (silent && Build.VERSION.SDK_INT >= 31) {
-                builder.setSilent(true);
             }
             manager.notify(tag, id, builder.build());
             return true;
