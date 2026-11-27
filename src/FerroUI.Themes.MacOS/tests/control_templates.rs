@@ -259,6 +259,7 @@ control_tests! {
     progress_ring => "ProgressRing";
     info_badge => "InfoBadge";
     info_bar => "InfoBar";
+    content_dialog => "ContentDialog";
     font_icon => "FontIcon";
     symbol_icon => "SymbolIcon";
     progress_bar => "ProgressBar";
@@ -313,6 +314,9 @@ control_tests! {
     pivot_header_item => "PivotHeaderItem";
     pivot_item => "PivotItem";
     swipe_control => "SwipeControl";
+    tab_view => "TabView";
+    tab_view_item => "TabViewItem";
+    tab_view_list_view => "TabViewListView";
 }
 
 /// The window itself is themed: its template is applied when it is shown

@@ -210,6 +210,10 @@
       <Rectangle x:Name="colorRectangle" Grid.Column="1" Width="150" Height="150" Margin="10,0,0,0"
                  AutomationProperties.Name="ColorRectangle"
                  Stroke="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+      <!-- UIHelper.AnnounceActionForAccessibility: a live region that is not seen. -->
+      <TextBlock x:Name="AnimatedAnnouncement" Grid.Column="1" Width="1" Height="1" Opacity="0"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 AutomationProperties.LiveSetting="Polite" />
     </Grid>
   </StackPanel>
 
@@ -229,6 +233,9 @@
         <TextBlock Margin="0,0,0,10" Text="Sort by number of ingredients" />
         <Button x:Name="SortAscending" Margin="0,0,0,5" Content="Least to most" />
         <Button x:Name="SortDescending" Content="Most to least" />
+        <!-- The source's RaiseNotificationEvent of the result count: a live region that is not seen. -->
+        <TextBlock x:Name="RecipesAnnouncement" Width="1" Height="1" Opacity="0"
+                   HorizontalAlignment="Left" AutomationProperties.LiveSetting="Polite" />
       </StackPanel>
     </Grid>
   </StackPanel>

@@ -51,6 +51,7 @@ const REFUSED: &[(&str, &str)] = &[];
 /// `rt::argument` or `rt::instance`): what the models answer only when every registration
 /// of a cast is read.
 const ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED: &[&str] = &[
+    "control_theme_base_class_template.xaml",
     "control_theme_resources.xaml",
     "control_theme_template.xaml",
     "dynamic_resource_local.xaml",

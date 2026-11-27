@@ -496,7 +496,7 @@ public:
 
 };
 
-extern "C" IFerroNativeFactory* CreateFerroNative()
+extern "C" __attribute__((visibility("default"))) IFerroNativeFactory* CreateFerroNative()
 {
     return new FerroNative();
 };
