@@ -1,0 +1,41 @@
+<!-- Ported from the pinned SemanticZoom example of WinUI Gallery (14061eea) and the code behind of
+     SemanticZoomPage.xaml.cs (semantic_zoom_samples.rs); see ../NOTICE.md. The zoomed-in view is a
+     GridView of the controls of the gallery under the headers of its GroupStyle, the zoomed-out view
+     a ListView of the groups; both get their items from semantic_zoom_samples.rs (the source's
+     cvsGroups: a CollectionViewSource with IsSourceGrouped and ItemsPath, its View and its
+     View.CollectionGroups). x:Bind in the templates becomes {Binding} over the markup types of
+     semantic_zoom_samples.rs (ControlInfoDataGroup, ControlInfoDataItem) and of ferroui-controls
+     (CollectionViewGroup), ThemeResource becomes DynamicResource, and the style names are their
+     values (BaseTextBlockStyle is semibold, SubtitleTextBlockStyle 20 semibold). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="8">
+  <StackPanel.Resources>
+    <DataTemplate x:Key="ZoomedInTemplate">
+      <StackPanel MinWidth="200" Margin="12,6,12,6">
+        <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+        <TextBlock Width="300" HorizontalAlignment="Left" Text="{Binding Subtitle}" TextWrapping="Wrap" />
+      </StackPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="ZoomedInGroupHeaderTemplate">
+      <TextBlock Foreground="{DynamicResource ApplicationForegroundThemeBrush}" FontSize="20" FontWeight="SemiBold"
+                 Text="{Binding Title}" />
+    </DataTemplate>
+    <DataTemplate x:Key="ZoomedOutTemplate">
+      <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding Group.Title}" TextWrapping="Wrap" />
+    </DataTemplate>
+  </StackPanel.Resources>
+
+  <TextBlock Text="A simple SemanticZoom" FontSize="18" />
+  <SemanticZoom x:Name="Control1" Height="500">
+    <SemanticZoom.ZoomedInView>
+      <GridView x:Name="ZoomedInGridView" ItemTemplate="{StaticResource ZoomedInTemplate}" SelectionMode="None">
+        <GridView.GroupStyle>
+          <GroupStyle HeaderTemplate="{StaticResource ZoomedInGroupHeaderTemplate}" />
+        </GridView.GroupStyle>
+      </GridView>
+    </SemanticZoom.ZoomedInView>
+    <SemanticZoom.ZoomedOutView>
+      <ListView x:Name="ZoomedOutListView" ItemTemplate="{StaticResource ZoomedOutTemplate}" SelectionMode="None" />
+    </SemanticZoom.ZoomedOutView>
+  </SemanticZoom>
+</StackPanel>

@@ -90,6 +90,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Expander.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/PipsPager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RefreshContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SemanticZoom.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RefreshVisualizer.xaml" />
         <!-- B3: flyouts, menus, lists and selection. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/FlyoutPresenter.xaml" />

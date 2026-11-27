@@ -173,6 +173,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::automation::peers::PersonPictureAutomationPeer,
     crate::automation::peers::PagerControlAutomationPeer,
     crate::automation::peers::ScrollBarAutomationPeer,
+    crate::automation::peers::SemanticZoomAutomationPeer,
     crate::automation::peers::ScrollViewerAutomationPeer,
     crate::automation::peers::SelectingItemsControlAutomationPeer,
     crate::automation::peers::SplitButtonAutomationPeer,
@@ -503,6 +504,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::pips_pager::PipsPager,
     // FerroUI.Controls.Primitives
     crate::pips_pager::PipsPagerTemplateSettings,
+    // --- WinUI's SemanticZoom (docs/porting/winui-controls.md, section 10.20) ---
+    crate::semantic_zoom::SemanticZoom,
     // --- connected-animation ---
     // --- tableview ---
     crate::TableView,

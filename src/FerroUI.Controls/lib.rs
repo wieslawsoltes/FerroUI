@@ -884,6 +884,13 @@ pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, Dra
 mod pips_pager;
 pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
 
+// --- WinUI's SemanticZoom (docs/porting/winui-controls.md, section 10.20) ---
+mod semantic_zoom;
+pub use semantic_zoom::{
+    as_semantic_zoom_information, register_semantic_zoom_information, ISemanticZoomInformation, SemanticZoom,
+    SemanticZoomLocation, SemanticZoomViewChangedEventArgs,
+};
+
 // --- connected-animation ---
 
 // --- tableview ---

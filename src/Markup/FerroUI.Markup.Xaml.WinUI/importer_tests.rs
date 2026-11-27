@@ -1068,3 +1068,18 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
         &XBindings::get_for_root(&second).unwrap()
     ));
 }
+
+#[test]
+fn semantic_zoom_and_its_views_stay_in_the_default_namespace() {
+    let result = migrate(
+        "<SemanticZoom IsZoomedInViewActive='False' CanChangeViews='True'>\
+         <SemanticZoom.ZoomedInView><GridView/></SemanticZoom.ZoomedInView>\
+         <SemanticZoom.ZoomedOutView><ListView/></SemanticZoom.ZoomedOutView></SemanticZoom>",
+    );
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let zoom = document.descendants().find(|node| node.tag_name().name() == "SemanticZoom").unwrap();
+    assert_eq!(zoom.tag_name().namespace(), Some(FERRO_XML_NAMESPACE));
+    assert_eq!(zoom.attribute("IsZoomedInViewActive"), Some("False"));
+    assert!(document.descendants().any(|node| node.tag_name().name() == "SemanticZoom.ZoomedOutView"));
+}

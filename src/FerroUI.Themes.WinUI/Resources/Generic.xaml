@@ -29,6 +29,7 @@
       <x:Double x:Key="FlyoutThemeTouchMinWidth">240</x:Double>
       <x:Double x:Key="GridViewItemSelectedBorderThemeThickness">4</x:Double>
       <x:Double x:Key="GridViewItemReorderHintThemeOffset">16.0</x:Double>
+      <x:Double x:Key="SemanticZoomButtonFontSize">4</x:Double>
       <x:Double x:Key="TextControlBackgroundThemeOpacity">0.8</x:Double>
       <x:Double x:Key="TextControlBorderThemeOpacity">0.8</x:Double>
       <x:Double x:Key="TextControlBorderThemeBrushOpacity">1</x:Double>
@@ -285,6 +286,15 @@
       <SolidColorBrush x:Key="MediaDownloadProgressIndicatorThemeBrush" Color="#38FFFFFF" />
       <SolidColorBrush x:Key="MediaErrorBackgroundThemeBrush" Color="#FF000000" />
       <SolidColorBrush x:Key="MediaTextThemeBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBackgroundThemeBrush" Color="#59D5D5D5" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBorderThemeBrush" Color="#59D5D5D5" />
+      <SolidColorBrush x:Key="SemanticZoomButtonForegroundThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBackgroundThemeBrush" Color="#FFDADADA" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBorderThemeBrush" Color="#FFDADADA" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverForegroundThemeBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBackgroundThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBorderThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedForegroundThemeBrush" Color="#FFFFFFFF" />
       <SolidColorBrush x:Key="TextSelectionHighlightColorThemeBrush" Color="#FF4617b4" />
       <SolidColorBrush x:Key="ThumbBackgroundThemeBrush" Color="#FFCDCDCD" />
       <SolidColorBrush x:Key="ThumbBorderThemeBrush" Color="#3B555555" />
@@ -326,6 +336,7 @@
       <x:Double x:Key="FlyoutThemeTouchMinWidth">240</x:Double>
       <x:Double x:Key="GridViewItemSelectedBorderThemeThickness">4</x:Double>
       <x:Double x:Key="GridViewItemReorderHintThemeOffset">16.0</x:Double>
+      <x:Double x:Key="SemanticZoomButtonFontSize">4</x:Double>
       <x:Double x:Key="TextControlBackgroundThemeOpacity">0.8</x:Double>
       <x:Double x:Key="TextControlBorderThemeOpacity">0.45</x:Double>
       <x:Double x:Key="TextControlBorderThemeBrushOpacity">0.5625</x:Double>
@@ -581,6 +592,15 @@
       <SolidColorBrush x:Key="MediaDownloadProgressIndicatorThemeBrush" Color="#38FFFFFF" />
       <SolidColorBrush x:Key="MediaErrorBackgroundThemeBrush" Color="#FF000000" />
       <SolidColorBrush x:Key="MediaTextThemeBrush" Color="#FFFFFFFF" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBackgroundThemeBrush" Color="#59D5D5D5" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBorderThemeBrush" Color="#59D5D5D5" />
+      <SolidColorBrush x:Key="SemanticZoomButtonForegroundThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBackgroundThemeBrush" Color="#FFDADADA" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBorderThemeBrush" Color="#FFDADADA" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverForegroundThemeBrush" Color="#FF000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBackgroundThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBorderThemeBrush" Color="#99000000" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedForegroundThemeBrush" Color="#FFFFFFFF" />
       <SolidColorBrush x:Key="TextSelectionHighlightColorThemeBrush" Color="#FF4617b4" />
       <SolidColorBrush x:Key="ThumbBackgroundThemeBrush" Color="#FFCDCDCD" />
       <SolidColorBrush x:Key="ThumbBorderThemeBrush" Color="#3B555555" />
@@ -810,6 +830,7 @@
       <x:Double x:Key="FlyoutThemeTouchMinWidth">240</x:Double>
       <x:Double x:Key="GridViewItemSelectedBorderThemeThickness">4</x:Double>
       <x:Double x:Key="GridViewItemReorderHintThemeOffset">16.0</x:Double>
+      <x:Double x:Key="SemanticZoomButtonFontSize">4</x:Double>
       <x:Double x:Key="TextControlBackgroundThemeOpacity">1</x:Double>
       <x:Double x:Key="TextControlBorderThemeOpacity">1</x:Double>
       <x:Double x:Key="TextControlBorderThemeBrushOpacity">1</x:Double>
@@ -896,6 +917,15 @@
       <SolidColorBrush x:Key="MediaDownloadProgressIndicatorThemeBrush" Color="{DynamicResource SystemColorHotlightColor}" />
       <SolidColorBrush x:Key="MediaErrorBackgroundThemeBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
       <SolidColorBrush x:Key="MediaTextThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBackgroundThemeBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonBorderThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonForegroundThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBackgroundThemeBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverBorderThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPointerOverForegroundThemeBrush" Color="{DynamicResource SystemColorHighlightTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBackgroundThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedBorderThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SemanticZoomButtonPressedForegroundThemeBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
       <SolidColorBrush x:Key="TextSelectionHighlightColorThemeBrush" Color="{DynamicResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="ThumbBackgroundThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
       <SolidColorBrush x:Key="ThumbBorderThemeBrush" Color="{DynamicResource SystemColorButtonTextColor}" />

@@ -11,7 +11,7 @@ use crate::templates::{FuncTemplate, ITemplateOf};
 use crate::{
     ContentControl, ContentControlImpl, Control, ControlImpl, ItemsControl, ItemsControlImpl, ListBoxItem, Panel,
 };
-use ferroui_base::input::InputElementImpl;
+use ferroui_base::input::{InputElementImpl, InputElementImplExt, TappedEventArgs};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::{
@@ -209,12 +209,27 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    InputElementImpl,
     ControlImpl,
     TemplatedControlImpl,
     ContentControlImpl,
     FerroObjectImpl
 );
+
+impl InputElementImpl for ListViewBaseHeaderItem {
+    /// A tap on a group header of the zoomed-in view of a semantic zoom shows the zoomed-out view
+    /// (WinUI's `OnGroupHeaderInteraction`), handled so that no scroll viewer above takes it.
+    fn on_tapped(this: &Self, e: &TappedEventArgs) {
+        Self::parent_on_tapped(this, e);
+        if e.handled() {
+            return;
+        }
+        if let Some(list) = this.find_ancestor_of_type::<ListViewBase>(false) {
+            if list.group_header_interaction(this) {
+                e.set_handled(true);
+            }
+        }
+    }
+}
 
 impl ListViewBaseHeaderItem {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].

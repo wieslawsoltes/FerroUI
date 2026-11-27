@@ -234,6 +234,8 @@ pub struct ListViewBase {
     container_content_changing: HandlerList<ContainerContentChangingHandler>,
     choosing_item_container: HandlerList<ChoosingItemContainerHandler>,
     group_style: FerroList<Ref<GroupStyle>>,
+    /// The list as a view of a semantic zoom (`list_view_base_semantic_zoom.rs`), once one takes it.
+    pub(super) semantic_zoom: RefCell<Option<Box<super::list_view_base_semantic_zoom::SemanticZoomViewState>>>,
 }
 
 ferro_class!(ListViewBase: SelectingItemsControl);
@@ -474,6 +476,11 @@ impl SelectingItemsControlImpl for ListViewBase {
             }
             _ => false,
         };
+        if invoked && this.zoomed_out_item_invoked(container, key.is_some()) {
+            // The zoomed-out view of a semantic zoom: the item is the target of the jump.
+            args.set_handled(true);
+            return true;
+        }
         if invoked && this.is_item_click_enabled() && key.is_none_or(|key| key.key == Key::Return) {
             this.raise_item_click(index, container);
         }
@@ -505,6 +512,7 @@ impl ListViewBase {
             container_content_changing: HandlerList::new(),
             choosing_item_container: HandlerList::new(),
             group_style: FerroList::new(),
+            semantic_zoom: RefCell::new(None),
         }
     }
 

@@ -276,6 +276,7 @@ document_tests! {
     controls_pips_pager => "/Controls/PipsPager.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
     controls_refresh_container => "/Controls/RefreshContainer.xaml";
+    controls_semantic_zoom => "/Controls/SemanticZoom.xaml";
     controls_refresh_visualizer => "/Controls/RefreshVisualizer.xaml";
     controls_slider => "/Controls/Slider.xaml";
     controls_split_button => "/Controls/SplitButton.xaml";
