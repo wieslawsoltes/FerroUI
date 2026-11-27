@@ -177,7 +177,7 @@ Four rules follow from the requirements.
 
 1. **The feature is a crate.** Nothing in the framework depends on `ferroui-fonts-web`. An
    application that does not name it links none of it, which is how hello world stays the size
-   it is. The only addition to `ferroui-base` is one provided trait method (section 4.2).
+   it is. `ferroui-base` does not change at all (section 4.2).
 2. **The core has no framework dependency.** `ferroui-fonts-web-core` is plain data in, plain
    data out, so it runs on any thread and its tests build without the framework.
 3. **Decoded fonts are plain OpenType.** After the decoder, every backend gets the same sfnt
@@ -199,25 +199,18 @@ Four rules follow from the requirements.
 6. On the UI thread, at a frame boundary, all faces that finished are installed together, and
    the glyph typeface generation advances once. Layout runs once for the whole batch.
 
-### 4.2 The seam in `ferroui-base`
+### 4.2 The seam to the backends
 
-```rust
-pub trait IFontManagerImpl: 'static {
-    // ... existing members ...
+`IFontManagerImpl` does not change. A new method would put a vtable entry, and with it code, in
+every application, whether or not it uses web fonts.
 
-    /// Creates a typeface over immutable font data that the caller shares. The default
-    /// forwards to `try_create_glyph_typeface_from_stream`, so a backend that does not
-    /// override it, ProGPU included, works unchanged.
-    fn try_create_glyph_typeface_from_data(
-        &self,
-        data: &FontData,
-        font_simulations: FontSimulations,
-    ) -> Option<Rc<dyn IPlatformTypeface>>;
-}
-```
-
-`FontData` holds an `Arc<[u8]>`, a face index for collections and the variation settings. It
-is `Send + Sync`, so a worker can build it and hand it over.
+The crate reaches the active backend through what every backend already has:
+`FontManager::current().platform_impl()` and `try_create_glyph_typeface_from_stream`. It passes a
+small `Read` type that owns the decoded `Vec<u8>` and overrides `read_to_end`: into an empty
+vector, it hands its buffer over instead of copying it. Every backend reads a font with
+`read_to_end` into an empty vector, so the buffer moves in. A backend that reads another way
+still works, through plain `read`, with a copy. An application never names its backend, and a
+new backend (ProGPU) works with nothing added.
 
 ## 5. Platforms and backends
 
@@ -252,21 +245,21 @@ application has enabled that API.
 
 | Backend | Typeface from data | Shaping | GPU glyph path |
 | --- | --- | --- | --- |
-| Skia | `new_from_data` over one `SkData` | HarfBuzz over the table access | Unchanged |
-| Vello, CPU | Shared `Blob` wrapping the `Arc`, no copy | Same | CPU mode stays what it is |
+| Skia | The stream path: one `SkData`, the moved buffer dropped | HarfBuzz over the table access | Unchanged |
+| Vello, CPU | The stream path: a `Blob` over the moved buffer, no copy | Same | CPU mode stays what it is |
 | Vello, hybrid and GPU | Same | Same | Unchanged: `glifo` outlines |
 | Vello, WebGL2 | Same | Same | Unchanged |
-| Quartz | `CGFontCreateWithDataProvider` over the data | Core Text | Unchanged |
-| Direct2D | The existing in-memory path | DirectWrite | Unchanged |
-| ProGPU | Seam only: the default forwards to the stream path | | Implemented with #369 |
+| Quartz | The stream path: a data provider over one shared buffer | Core Text | Unchanged |
+| Direct2D | The stream path: an in-memory file over one shared buffer | DirectWrite | Unchanged |
+| ProGPU | Seam only: the stream path, with nothing added | | Implemented with #369 |
 
 No backend gets a new rasterizer. A face that a backend cannot draw on the GPU today is treated
 as it is today.
 
 There is exactly one long-lived copy of a decoded font. Skia's safe API has no release callback
-for external memory, so the decoded bytes are copied once into `SkData` and our buffer is
-released as soon as Skia owns its copy; the two overlap only during creation, and a test shows
-the buffer is gone afterwards. Vello shares the `Arc` directly.
+for external memory, so the moved buffer is copied once into `SkData` and dropped when the call
+returns. Vello keeps the moved buffer itself. Quartz and Direct2D turn it into one `Arc<[u8]>`,
+a short overlap, and hand the native font a reference to that buffer with a release callback.
 
 ### 5.3 Color formats
 
@@ -393,7 +386,7 @@ Each step is one draft pull request, stacked on the one below.
 5. WOFF2 decoder (the Brotli step waits for approval, behind an internal seam).
 6. Font matching and composite faces.
 7. `FontFace`, `FontFaceSet` and the display timeline, as state machines.
-8. The `ferroui-base` seam and the Skia, Vello, Quartz and Direct2D implementations.
+8. One long-lived copy of a font in the stream path of every backend.
 9. `ferroui-fonts-web`: `WebFontCollection`, the scheduler and the swap.
 10. Fetchers: `data:`, `file:`, assets, the worker thread, and `https:` behind `http`.
 11. The browser: `fetch()`, CORS, and time-sliced decoding.
