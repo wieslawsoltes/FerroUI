@@ -789,8 +789,19 @@ mod imp {
                 }
 
                 WindowsMessage::WM_SYSCOMMAND => {
-                    // Disable system handling of Alt/F10 menu keys.
-                    if get_sys_command(w_param) == SysCommands::SC_KEYMENU && high_word(to_int32(l_param)) <= 0 {
+                    // Disable system handling of Alt/F10 menu keys, but let Alt+Space open the system menu.
+                    if get_sys_command(w_param) == SysCommands::SC_KEYMENU
+                        && high_word(to_int32(l_param)) <= 0
+                        && to_int32(l_param) != i32::from(b' ')
+                    {
+                        return 0;
+                    }
+                }
+
+                WindowsMessage::WM_SYSCHAR => {
+                    // DefWindowProc turns WM_SYSCHAR into SC_KEYMENU (Alt+Space opens the system
+                    // menu), so skip it when the preceding WM_SYSKEYDOWN was handled.
+                    if self.ignore_wm_char() {
                         return 0;
                     }
                 }
@@ -1380,14 +1391,14 @@ mod imp {
                     let args = e.args();
                     input(args.clone());
 
-                    if message == WindowsMessage::WM_KEYDOWN {
+                    if message == WindowsMessage::WM_KEYDOWN || message == WindowsMessage::WM_SYSKEYDOWN {
                         if matches!(&e, RawEvent::Key(key_args) if key_args.key() == Key::ImeProcessed) {
                             self.set_ignore_wm_char(true);
                         } else {
-                            // Handling a WM_KEYDOWN message should cause the subsequent WM_CHAR message to
-                            // be ignored. This should be safe to do as WM_CHAR should only be produced in
-                            // response to the call to TranslateMessage/DispatchMessage after a WM_KEYDOWN
-                            // is handled.
+                            // Handling a WM_KEYDOWN or WM_SYSKEYDOWN message should cause the subsequent
+                            // WM_CHAR or WM_SYSCHAR message to be ignored. This should be safe to do as
+                            // these should only be produced in response to the call to
+                            // TranslateMessage/DispatchMessage after such a key down is handled.
                             self.set_ignore_wm_char(args.handled());
                         }
                     }
