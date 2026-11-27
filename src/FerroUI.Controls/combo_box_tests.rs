@@ -1458,3 +1458,43 @@ fn items_of_font_families_are_laid_out_when_the_font_manager_does_not_have_a_fam
     window.layout_manager().execute_layout_pass();
     window.close();
 }
+
+#[test]
+fn an_editable_box_submits_a_custom_text_once_and_not_an_item() {
+    let _scope = start();
+    let target = ComboBox::new();
+    target.set_display_member_binding(empty_binding());
+    target.set_is_editable(true);
+    target.set_items_source(Some(ItemsSource::from_strs(["Foo"])));
+    target.set_selected_item(None);
+    let submitted = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let seen = submitted.clone();
+    target
+        .text_submitted(move |args| seen.borrow_mut().push(args.text().to_owned()))
+        .detach();
+    let press = |key| {
+        let mut args = KeyEventArgs::new();
+        args.set_routed_event(Some(InputElement::key_down_event()));
+        args.key = key;
+        target.raise_event(&args);
+        args.handled()
+    };
+
+    target.set_text(Some("Foo".to_string()));
+    assert!(press(Key::Enter));
+    assert!(submitted.borrow().is_empty(), "the text of an item is a selection");
+
+    target.set_text(Some("   ".to_string()));
+    press(Key::Enter);
+    assert!(submitted.borrow().is_empty(), "a blank text is not submitted");
+
+    target.set_text(Some("custom".to_string()));
+    assert!(press(Key::Enter));
+    press(Key::Tab);
+    assert_eq!(*submitted.borrow(), ["custom"], "the same text is submitted once");
+
+    target.set_text(Some("other".to_string()));
+    press(Key::Tab);
+    assert_eq!(*submitted.borrow(), ["custom", "other"]);
+}
+
