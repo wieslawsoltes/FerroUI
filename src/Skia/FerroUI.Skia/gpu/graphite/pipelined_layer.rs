@@ -77,20 +77,21 @@ use super::graphite_gr_context::{GraphiteGrContext, SharedContext};
 use crate::drawing_context_impl::{CanvasSource, RecordedLeases};
 use crate::gpu::metal::AutoReleasePool;
 use crate::gpu::ISkiaSurface;
-use crate::SkiaFramePipelining;
+use crate::{SkiaFramePipelining, MAX_FRAME_PIPELINING_BANDS};
 use ferroui_base::PixelSize;
 use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::{
-    Canvas, ClipOp, Color, ColorType, IRect, Picture, PictureRecorder, Point, Rect, SamplingOptions, Surface,
-    SurfaceProps,
+    BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Paint, Picture, Point, Rect,
+    SamplingOptions, Surface, SurfaceProps,
 };
 use std::cell::{Cell, RefCell};
 use std::ffi::c_void;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{mpsc, Arc, Condvar, Mutex, MutexGuard, PoisonError};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use super::band_queue;
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -499,6 +500,14 @@ impl BandBalance {
     /// The index of each band and the rows it draws in a layer `width` pixels wide, from the top.
     fn clips(&self, width: i32) -> Vec<(usize, IRect)> {
         let mut clips = Vec::with_capacity(self.bands());
+        self.clips_into(width, &mut clips);
+        clips
+    }
+
+    /// [`clips`](Self::clips) into `clips`, which is emptied first: a frame reuses the vector of
+    /// the frame before.
+    fn clips_into(&self, width: i32, clips: &mut Vec<(usize, IRect)>) {
+        clips.clear();
         let mut top = 0;
         for index in 0..self.bands() {
             let bottom = self.edges.get(index).copied().unwrap_or(self.height);
@@ -508,7 +517,6 @@ impl BandBalance {
             }
             top = bottom;
         }
-        clips
     }
 
     /// How long the threads worked on the bands of a frame, by band. Returns whether the bands were moved.
@@ -856,23 +864,25 @@ unsafe impl Send for BandRecorder {}
 /// A thread of a band: a recorder of its own and the jobs it is sent.
 struct BandWorker {
     recorder: BandRecorder,
-    jobs: mpsc::Receiver<BandJob>,
-    results: mpsc::Sender<BandOutput>,
+    jobs: band_queue::Receiver<BandJob>,
+    results: band_queue::Sender<BandOutput>,
     /// The context the thread inserts its recordings into.
     context: Arc<SharedContext>,
     order: Arc<InsertOrder>,
+    /// Counts the recordings this thread inserted, until a submit takes them.
+    unsubmitted: Arc<AtomicUsize>,
 }
 
 impl BandWorker {
     fn run(self) {
-        let BandWorker { recorder, jobs, results, context, order } = self;
+        let BandWorker { recorder, jobs, results, context, order, unsubmitted } = self;
         let mut recorder = recorder.0;
         let mut held: Vec<Held> = Vec::new();
         // The surfaces that wrap the textures of the layers, by layer. They
         // belong to the recorder, so they are made, used and dropped here.
         let mut surfaces: Vec<(u64, Surface)> = Vec::new();
 
-        while let Ok(job) = jobs.recv() {
+        while let Some(job) = jobs.recv() {
             let pool = AutoReleasePool::new();
             match job {
                 BandJob::Play(band) => {
@@ -898,6 +908,9 @@ impl BandWorker {
                             catch_unwind(AssertUnwindSafe(|| insert(&mut context.lock(), &mut recording)))
                                 .unwrap_or(false)
                         });
+                        if inserted {
+                            unsubmitted.fetch_add(1, Ordering::Release);
+                        }
                         drop(turn);
                         gone |= results.send(BandOutput { layer, index, recorded, inserted, busy }).is_err();
                     }
@@ -937,7 +950,7 @@ fn play(
 }
 
 struct WorkerHandle {
-    jobs: mpsc::Sender<BandJob>,
+    jobs: band_queue::Sender<BandJob>,
     thread: thread::JoinHandle<()>,
 }
 
@@ -947,7 +960,7 @@ struct WorkerHandle {
 #[derive(Default)]
 pub(super) struct BandPool {
     workers: Vec<WorkerHandle>,
-    results: Option<mpsc::Receiver<BandOutput>>,
+    results: Option<band_queue::Receiver<BandOutput>>,
     /// The threads failed or could not be made: the layers of the context
     /// draw directly from then on.
     disabled: bool,
@@ -962,9 +975,17 @@ pub(super) struct BandPool {
     /// is sent.
     order: Arc<InsertOrder>,
     next_turn: u64,
+    /// The band recordings the threads inserted that no submit has taken yet.
+    unsubmitted: Arc<AtomicUsize>,
 }
 
 impl BandPool {
+    /// Takes the count of the band recordings inserted since the last submit: what a submit now
+    /// sends to the GPU (`GraphiteGrContext::submit_inserted_bands`, and every flush).
+    pub(super) fn take_unsubmitted(&self) -> usize {
+        self.unsubmitted.swap(0, Ordering::Acquire)
+    }
+
     /// Makes the threads, each with a recorder of the context: `bands` of
     /// them, for the first layer of the context that pipelines a frame.
     /// Returns how many there are, which is how many bands a frame can
@@ -977,19 +998,20 @@ impl BandPool {
             return self.workers.len();
         }
 
-        let (results_sender, results) = mpsc::channel();
+        let (results_sender, results) = band_queue::channel();
         for index in 0..bands.max(1) {
             let Some(recorder) = context.lock().make_recorder(None) else {
                 self.disable();
                 return 0;
             };
-            let (jobs, job_receiver) = mpsc::channel();
+            let (jobs, job_receiver) = band_queue::channel();
             let worker = BandWorker {
                 recorder: BandRecorder(recorder),
                 jobs: job_receiver,
                 results: results_sender.clone(),
                 context: context.clone(),
                 order: self.order.clone(),
+                unsubmitted: self.unsubmitted.clone(),
             };
             let spawned =
                 thread::Builder::new().name(format!("ferroui-skia-band-{index}")).spawn(move || worker.run());
@@ -1031,7 +1053,7 @@ impl BandPool {
             return Some(self.stash.swap_remove(position));
         }
         loop {
-            let output = self.results.as_ref()?.recv().ok()?;
+            let output = self.results.as_ref()?.recv()?;
             self.released = self.released.saturating_sub(1);
             if output.layer == layer {
                 return Some(output);
@@ -1059,7 +1081,7 @@ impl BandPool {
     /// drawn anew.
     pub(super) fn wait_for_released(&mut self) {
         while self.released > 0 {
-            let Some(output) = self.results.as_ref().and_then(|results| results.recv().ok()) else {
+            let Some(output) = self.results.as_ref().and_then(|results| results.recv()) else {
                 self.released = 0;
                 break;
             };
@@ -1122,7 +1144,10 @@ pub(super) struct BandParts<'a> {
 
 /// A frame whose bands were sent and whose answers were not received yet.
 struct PendingFrame {
+    /// The bands of the frame that were played: those the frame's dirty rows touch.
     clips: Vec<(usize, IRect)>,
+    /// How many bands the layer has; `clips` has fewer when the frame left clean bands out.
+    bands: usize,
     sent: usize,
     /// The time since the frame before this one was handed to the threads, when the two follow each
     /// other.
@@ -1130,6 +1155,33 @@ struct PendingFrame {
     /// Held until the bands have answered, so that what the picture holds is
     /// released on the render thread, and for the bands that fail.
     picture: Picture,
+}
+
+/// The bands of a frame that its dirty rows touch, all of them without rows.
+fn dirty_band_clips(mut clips: Vec<(usize, IRect)>, rows: Option<(i32, i32)>) -> Vec<(usize, IRect)> {
+    if let Some((top, bottom)) = rows {
+        clips.retain(|(_, clip)| clip.top < bottom && clip.bottom > top);
+    }
+    clips
+}
+
+/// How long the threads worked on each band of a frame, by the index of the band: on the stack.
+struct BandTimes {
+    times: [Duration; MAX_FRAME_PIPELINING_BANDS],
+    bands: usize,
+}
+
+impl BandTimes {
+    fn as_slice(&self) -> &[Duration] {
+        &self.times[..self.bands]
+    }
+}
+
+/// Whether the times of a collected frame move the bands: only a frame of which every band was
+/// played and sent. A band left out because the frame did not change it took no time, and is not
+/// a cheap band; counting it would move the band edges back and forth.
+fn feeds_balance(frame: &PendingFrame) -> bool {
+    frame.clips.len() == frame.bands && frame.sent == frame.bands
 }
 
 /// Receives the answers for the bands of a frame, which waits until the
@@ -1140,19 +1192,21 @@ fn collect_bands(
     recording_failed: &mut bool,
     layer: u64,
     pending: &PendingFrame,
-) -> (Vec<IRect>, Vec<Duration>) {
+) -> (Vec<IRect>, BandTimes) {
     // The bands of a frame that no flush has told to insert yet: a frame
     // that was drawn and not shown.
     pool.release();
     // By the index of the band; the indices of the bands of a frame are
     // below their number.
-    let mut inserted = vec![false; pending.clips.len()];
-    let mut busy = vec![Duration::ZERO; pending.clips.len()];
+    let bands = pending.bands.min(MAX_FRAME_PIPELINING_BANDS);
+    let mut inserted = [false; MAX_FRAME_PIPELINING_BANDS];
+    let mut busy = BandTimes { times: [Duration::ZERO; MAX_FRAME_PIPELINING_BANDS], bands };
+    let inserted = &mut inserted[..bands];
     for _ in 0..pending.sent {
         let Some(output) = pool.receive(layer) else {
             break;
         };
-        if let Some(band) = busy.get_mut(output.index) {
+        if let Some(band) = busy.times[..bands].get_mut(output.index) {
             *band = output.busy;
         }
         if output.inserted {
@@ -1167,6 +1221,7 @@ fn collect_bands(
         }
     }
 
+    // Allocates only when a band is missing, which ends the threads.
     let missing: Vec<IRect> = pending
         .clips
         .iter()
@@ -1236,9 +1291,39 @@ struct PipelinedLayer {
     balance: RefCell<BandBalance>,
     /// The frame the threads are playing.
     pending: RefCell<Option<PendingFrame>>,
+    /// The paint of a blit that replaces the target's pixels (`BlendMode::Src`), made once.
+    src_paint: Paint,
+    /// The rows the next frame can change, as the compositor tells them
+    /// (`ISkiaSurface::set_frame_dirty_rows`); taken by the frame when it begins.
+    dirty_rows: Cell<Option<(i32, i32)>>,
+    /// The rows the recorded frame can change: the bands outside them are not played.
+    frame_rows: Cell<Option<(i32, i32)>>,
+    /// The vector of the bands of the frame before, reused by the next.
+    clips_scratch: RefCell<Vec<(usize, IRect)>>,
+    /// The leases of the frame before, reused by the next when nothing else holds them.
+    leases: RefCell<Option<Rc<RecordedLeases>>>,
 }
 
 impl PipelinedLayer {
+    /// Draws the layer onto the canvas, which draws with the recorder of the context: the texture
+    /// itself is drawn, not a copy of it, over the canvas (`SrcOver`) or, with `paint`, as the
+    /// paint blends. The draw is inserted with the recording of that recorder by the next flush,
+    /// and a frame the threads are playing is inserted after that flush.
+    fn blit(&self, canvas: &Canvas, paint: Option<&Paint>) {
+        let Some(mut surface) = self.surface.borrow().clone() else {
+            return;
+        };
+        let image = match graphite::surfaces::as_image(&surface) {
+            Some(image) => image,
+            None => surface.image_snapshot(),
+        };
+        self.context.note_layer_blit();
+        let old_matrix = canvas.local_to_device();
+        canvas.reset_matrix();
+        canvas.draw_image_with_sampling_options(image, Point::new(0.0, 0.0), SamplingOptions::default(), paint);
+        canvas.set_matrix(&old_matrix);
+    }
+
     fn release(&self) {
         self.flush_pending();
         let had_surface = self.surface.borrow_mut().take().is_some();
@@ -1257,6 +1342,9 @@ impl PipelinedLayer {
 
     /// The beginning of a frame. Returns whether it is pipelined.
     fn begin_frame(&self, now: Instant) -> bool {
+        // The bands of the frame before were inserted by the threads after the last flush; they go to the GPU now,
+        // while this frame is recorded, not with this frame's flush.
+        self.context.submit_inserted_bands();
         let previous_cost = match self.last_frame.get() {
             Some(LastFrame::Direct { begun }) => {
                 self.context.last_flush_end().and_then(|end| end.checked_duration_since(begun))
@@ -1328,13 +1416,17 @@ impl PipelinedLayer {
         let Some((missing, busy)) = collected else {
             return;
         };
-        self.busy.set(busy.iter().sum());
+        self.busy.set(busy.as_slice().iter().sum());
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
-        } else if previous.sent == busy.len() && self.balance.borrow_mut().frame_after(&busy, previous.period) {
+        } else if feeds_balance(&previous)
+            && self.balance.borrow_mut().frame_after(busy.as_slice(), previous.period)
+        {
             ferroui_base::perf_count!(SkiaBandsMoved);
         }
+        // The vector of the bands goes back to the layer for the next frame.
+        *self.clips_scratch.borrow_mut() = previous.clips;
     }
 
     /// Hands the picture to the threads. `Err` tells why it was not.
@@ -1365,13 +1457,18 @@ impl PipelinedLayer {
             // A band has a thread of its own: a layer that asks for more
             // bands than the first pipelined layer of the context did has
             // as many as there are threads.
-            let clips = {
+            let (clips, bands) = {
                 let mut balance = self.balance.borrow_mut();
                 let (least, most) = (self.bands.min(threads), self.most.min(threads));
                 if !balance.follows(least, most) {
                     *balance = BandBalance::following(self.size.1, least, most);
                 }
-                balance.clips(self.size.0)
+                let mut clips = std::mem::take(&mut *self.clips_scratch.borrow_mut());
+                balance.clips_into(self.size.0, &mut clips);
+                let bands = clips.len();
+                // The bands the frame cannot change keep their pixels: the layer has one texture, which every frame
+                // draws on, so a band left out still shows the frame before, and every frame since that drew it.
+                (dirty_band_clips(clips, self.frame_rows.take()), bands)
             };
 
             // What the recorder of the context has pending comes before the
@@ -1408,7 +1505,7 @@ impl PipelinedLayer {
             }
             // A band that was not sent is found missing when the frame is
             // collected, and played on the recorder of the context then.
-            *self.pending.borrow_mut() = Some(PendingFrame { clips, sent, period, picture: picture.clone() });
+            *self.pending.borrow_mut() = Some(PendingFrame { clips, bands, sent, period, picture: picture.clone() });
             Ok(())
         });
 
@@ -1516,6 +1613,15 @@ impl PipelinedLayerSurface {
             busy: Cell::new(Duration::ZERO),
             balance: RefCell::new(BandBalance::following(height, bands, most)),
             pending: RefCell::new(None),
+            dirty_rows: Cell::new(None),
+            frame_rows: Cell::new(None),
+            clips_scratch: RefCell::new(Vec::new()),
+            leases: RefCell::new(None),
+            src_paint: {
+                let mut paint = Paint::default();
+                paint.set_blend_mode(BlendMode::Src);
+                paint
+            },
         })))
     }
 }
@@ -1564,18 +1670,19 @@ impl ISkiaSurface for PipelinedLayerSurface {
     /// is inserted with the recording of that recorder by the next flush,
     /// and a frame the threads are playing is inserted after that flush.
     fn blit(&self, canvas: &Canvas) {
-        let Some(mut surface) = self.0.surface.borrow().clone() else {
-            return;
-        };
-        let image = match graphite::surfaces::as_image(&surface) {
-            Some(image) => image,
-            None => surface.image_snapshot(),
-        };
-        self.0.context.note_layer_blit();
-        let old_matrix = canvas.local_to_device();
-        canvas.reset_matrix();
-        canvas.draw_image_with_sampling_options(image, Point::new(0.0, 0.0), SamplingOptions::default(), None);
-        canvas.set_matrix(&old_matrix);
+        self.0.blit(canvas, None);
+    }
+
+    /// The full-window layer replaces the pixels of the window's canvas: with the `Src` blend mode
+    /// (its cached paint) the GPU does not read the target, which a tile-based GPU otherwise loads,
+    /// and the clear before it is left out.
+    fn blit_replacing(&self, canvas: &Canvas) -> bool {
+        self.0.blit(canvas, Some(&self.0.src_paint));
+        true
+    }
+
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        self.0.dirty_rows.set(rows);
     }
 
     fn dispose(&self) {
@@ -1588,15 +1695,27 @@ impl ISkiaSurface for PipelinedLayerSurface {
             return None;
         }
         let started = Instant::now();
+        // The rows belong to this frame alone, whether it is recorded or drawn directly.
+        let rows = layer.dirty_rows.take();
         if !layer.begin_frame(started) {
             return None;
         }
+        layer.frame_rows.set(rows);
 
         let (width, height) = layer.size;
         let bounds = Rect::new(0.0, 0.0, width as f32, height as f32);
-        let mut recorder = PictureRecorder::new();
+        // The recorder and the leases of an earlier frame, when they are free again.
+        let mut recorder = crate::drawing_context_impl::take_picture_recorder();
         recorder.begin_recording(bounds, false);
-        let leases = Rc::new(RecordedLeases::new(bounds));
+        let kept = layer.leases.borrow_mut().take().filter(|leases| Rc::strong_count(leases) == 1);
+        let leases = match kept {
+            Some(leases) => {
+                leases.reset();
+                leases
+            }
+            None => Rc::new(RecordedLeases::new(bounds)),
+        };
+        *layer.leases.borrow_mut() = Some(leases.clone());
 
         let frame_leases = leases.clone();
         Some(CanvasSource::Recorder {
@@ -1960,6 +2079,37 @@ mod tests {
 
         let mut policy = PipelinePolicy::new(SkiaFramePipelining::Off);
         assert!(!run(&mut policy, &mut now, 10, FRAME, Duration::from_millis(30)).iter().any(|pipelined| *pipelined));
+    }
+
+    #[test]
+    fn a_frame_plays_the_bands_its_dirty_rows_touch() {
+        let clips = band_clips((100, 256), 4);
+        let rows = |rows| dirty_band_clips(clips.clone(), rows).iter().map(|(index, _)| *index).collect::<Vec<_>>();
+        assert_eq!(rows(None), vec![0, 1, 2, 3], "no rows: every band");
+        assert_eq!(rows(Some((0, 10))), vec![0], "a clock at the top");
+        assert_eq!(rows(Some((60, 70))), vec![0, 1], "rows across an edge");
+        assert_eq!(rows(Some((200, 256))), vec![3]);
+        assert_eq!(rows(Some((0, 256))), vec![0, 1, 2, 3]);
+        assert!(rows(Some((300, 310))).is_empty(), "rows below the layer");
+    }
+
+    #[test]
+    fn only_frames_of_which_every_band_was_played_move_the_bands() {
+        let picture = {
+            let mut recorder = skia_safe::PictureRecorder::new();
+            recorder.begin_recording(Rect::from_wh(1.0, 1.0), false);
+            recorder.finish_recording_as_picture(None).expect("a picture")
+        };
+        let frame = |played: usize, sent: usize| PendingFrame {
+            clips: band_clips((100, 256), 4).into_iter().take(played).collect(),
+            bands: 4,
+            sent,
+            period: None,
+            picture: picture.clone(),
+        };
+        assert!(feeds_balance(&frame(4, 4)));
+        assert!(!feeds_balance(&frame(1, 1)), "a frame that left bands out");
+        assert!(!feeds_balance(&frame(4, 3)), "a band that was not sent");
     }
 
     #[test]
