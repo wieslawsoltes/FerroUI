@@ -30,6 +30,9 @@ quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
 # `ferroui-edit` turns it on through `ferroui-native`; this forwards it for an application that
 # implements span operations of its own.
 text-editor = ["ferroui-native/text-editor"]
+# The AppKit wheel axes of the wheel events on macOS (`ferroui-native/platform-wheel-delta`), for an
+# application that reads `PointerWheelEventArgs::platform_delta`.
+platform-wheel-delta = ["ferroui-native/platform-wheel-delta"]
 
 [dependencies]
 ferroui-base.workspace = true
