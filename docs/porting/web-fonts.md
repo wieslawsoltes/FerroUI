@@ -389,23 +389,77 @@ no origin, so the limits above and the HTTPS default are its protection.
 
 ## 9. Incremental Font Transfer
 
-IFT is implemented last, in milestone 0.7.0 (#1204). It does not block 0.6.0, by the owner's
-decision, for these reasons:
+IFT is in milestone 0.7.0 (#1204), behind the feature `incremental` of `ferroui-fonts-web`, which
+is off by default and needs `woff2`. It follows the Candidate Recommendation Draft of
+13 October 2026, whose test suite is still in development.
 
-- It is a Candidate Recommendation Draft whose test suite is still in development.
-- Table-keyed patches use the LZ77 dictionary of the Shared Brotli format (draft 15, section
-  3.2). The custom dictionary of `brotli-decompressor` 5.0.3 is a prefix of its ring buffer: the
-  addressing is the same only while the dictionary and the output fit in the window, so those
-  patches need a decoder with real Shared Brotli support. Glyph-keyed patches are plain RFC 7932.
-- `unicode-range` segments already give on-demand loading for most of the same cases.
+Scope of the client: **glyph-keyed patches only**. Table-keyed patches use the LZ77 dictionary of
+the Shared Brotli format (draft 15, section 3.2). The custom dictionary of `brotli-decompressor`
+5.0.3 is a prefix of its ring buffer: the addressing is the same only while the dictionary and
+the output fit in the window, so those patches need a decoder with real Shared Brotli support.
+FerroUI does not write its own Shared Brotli addressing and does not take a second decoder for it.
+A font with an active table-keyed entry is never decoded approximately: the face moves on to its
+next `src` entry. Without the feature, an entry with `tech(incremental)` is skipped, as the
+standard requires of an unsupported technology.
 
-Scope of the client: **glyph-keyed patches only**. FerroUI does not write its own Shared Brotli
-addressing and does not take a second decoder for it. A font that needs a table-keyed patch is
-never decoded approximately: the face fails over to the next `src` entry, as for any font that
-cannot be used.
+How it works:
 
-Until the client lands, an `src` entry with `tech(incremental)` is skipped, as the standard
-requires of an unsupported technology, so a page-style declaration with a WOFF2 fallback works.
+- The text is seen where it is shaped, by the wrapper shaper that already adds the features of a
+  face. It is installed only for a face that needs it.
+- The patches for what has been seen are fetched, at most eight at a time, and applied as one
+  batch: on a worker thread, or in slices of the UI thread in a browser build without threads.
+- The extended font goes through the sanitizer again and replaces the font in use. Only one copy
+  is kept between extensions; while a batch is applied there are two.
+
+Limits, each of them deliberate:
+
+- **A glyph whose patch has not arrived draws empty** until the swap, as text does in a block
+  period. It does not fall back to another font for that time.
+- **Any failed patch ends the extension** and the face moves to its next `src` entry. The standard
+  would allow continuing without that patch, and then falling back for what it held.
+- **Patch URLs must stay on the origin of the font**, and for a font on disk inside its folder.
+  The standard allows other origins with CORS, which a native client does not have.
+- **The design space of the target is the whole range of each axis**, so a variable font fetches
+  the variation data of a glyph for every instance.
+- After a failed extension with no further `src`, the status of the face stays `loaded`, since
+  the state machine of CSS has no way back from it. Its text falls back.
+
+### 9.1 Checked against the text of the standard
+
+The decoder was compared, field by field, with the normative text of the draft of
+13 October 2026. The examples of the standard for sparse bit sets, URL templates and entry
+intersection are tests.
+
+| Section | What was checked | Result |
+| --- | --- | --- |
+| 3.4 | Big-endian fields | Matches |
+| 4.2, Appendix A | The 65 default feature tags | Matches |
+| 4.3, steps 2 to 4 | No `IFT `: not incremental; equal compatibility ids are an error | Matches |
+| 4.3, step 5 | An entry with any URL already applied is removed | **Fixed:** only the URL itself was skipped |
+| 4.3, steps 8 to 10 | Order of the maps; the first URL is applied, the others are loaded ahead | **Fixed:** every URL was applied |
+| 4.3, step 9 | At most 2000 patches in one run | **Fixed:** it counted the life of the face |
+| 4.3, intersection | Empty sets, design space, child entries | Matches |
+| 4.3, Load patch file | Resolved against the URL of the initial font | Matches, and limited to its origin (below) |
+| 4.6 | A font renders a text when no entry is left for it | Matches for `check`; the `cmap` test is not used |
+| 5.2 | The CharStrings INDEX is last, and its offset is in `IFT ` | **Fixed:** neither was checked |
+| 5.3 | Header and Mapping Entry: fields, order, widths | Matches |
+| 5.3 | Reserved bit 7 of `formatFlags` | **Fixed:** it was refused, and is now not read |
+| 5.3.1 | Ids: deltas, string lengths, range, ignored entries | Matches |
+| 5.3.2 | Removing an entry by its first URL | Matches |
+| 5.3.3 | Sparse bit set | Matches. **Fixed:** reserved bit 7 of the header was refused |
+| 5.3.4 | Opcodes, id32, d1 to d4, id64 | Matches. **Fixed:** a bad template was an error even with no entry to expand |
+| 6.1 | Format numbers | Matches |
+| 6.3 | Patch header and `GlyphPatches` | Matches. **Fixed:** offsets had to start after the header, which the text does not require |
+| 6.3.1, step 2 | The id is compared with the table that listed the patch | **Fixed:** any table was accepted |
+| 6.3.1, step 4 | An id past the last glyph has no glyph to replace | **Fixed:** it was an error, and is now ignored |
+| 6.3.1, step 4 | Offset sizes, missing tables, other tables ignored | Matches |
+| 6.3.1, steps 5 to 7 | Entry removed, other tables copied, checksums | Matches; `head.checkSumAdjustment` is also written |
+
+Stricter than the text, on purpose: patch URLs stay on the origin of the font; a failed patch
+ends the extension; an offset past the end of a patch is an error; a patch of more than 65536
+glyphs is refused as a limit on work; and table-keyed patches are not supported.
+
+No file from a real encoder has been loaded: that is still to be done (section 11).
 
 ## 10. Phases
 
@@ -436,7 +490,15 @@ Each step is one draft pull request, stacked on the one below.
 
 16. Color capability answers, `@font-palette-values` and `font-palette`.
 17. Level 5 descriptors and Local Font Access.
-18. Incremental Font Transfer, glyph-keyed patches only (milestone 0.7.0).
+18. `font-language-override`, through the culture of the run (section 3.6).
+
+**Phase D, milestone 0.7.0**
+
+19. Incremental Font Transfer, glyph-keyed patches only (#1204).
+20. Size-aware font lookup for the `font-size` descriptor (#1292), measured against hello world,
+    start-up and layout.
+21. The whole language of a culture in the HarfBuzz path, cached per culture, then `ZHT` and `ZHH`
+    in the language table (#1299).
 
 ## 11. What must be measured
 

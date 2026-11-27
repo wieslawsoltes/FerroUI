@@ -12,6 +12,8 @@ use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_fonts_web_core::css::{FontFaceDescriptors, FontFeatureSetting};
 use ferroui_fonts_web_core::language::opentype_language_to_bcp47;
+#[cfg(feature = "incremental")]
+use ferroui_fonts_web_core::loading::FontFaceId;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -52,12 +54,18 @@ pub(crate) fn needs_shaper(face: &FontFaceDescriptors) -> bool {
         || face.language_override.as_deref().is_some_and(|tag| opentype_language_to_bcp47(tag).is_some())
 }
 
+/// Told of the text set in an incremental face, and of the features of the run.
+#[cfg(feature = "incremental")]
+pub(crate) type TextObserver = Rc<dyn Fn(FontFaceId, &[u16], Option<&[FontFeature]>)>;
+
 /// What a face adds to its runs. The typeface is held so that the address used as the key stays
 /// that of this face.
 struct FaceShaping {
     _typeface: Rc<GlyphTypeface>,
     features: Rc<Vec<FontFeature>>,
     language: Option<Locale>,
+    #[cfg(feature = "incremental")]
+    observed: Option<FontFaceId>,
 }
 
 /// A shaper that adds the features and the language of a face to the runs set in it.
@@ -65,13 +73,20 @@ pub(crate) struct FontFeatureShaper {
     inner: Rc<dyn ITextShaperImpl>,
     /// By the address of the typeface, which the entry keeps alive.
     faces: RefCell<HashMap<*const GlyphTypeface, FaceShaping>>,
+    #[cfg(feature = "incremental")]
+    observer: RefCell<Option<TextObserver>>,
 }
 
 impl FontFeatureShaper {
     /// Wraps the active shaper; `None` when there is none.
     pub(crate) fn install() -> Option<Rc<Self>> {
         let inner = FerroLocator::current().get_service::<dyn ITextShaperImpl>()?;
-        let shaper = Rc::new(Self { inner, faces: RefCell::new(HashMap::new()) });
+        let shaper = Rc::new(Self {
+            inner,
+            faces: RefCell::new(HashMap::new()),
+            #[cfg(feature = "incremental")]
+            observer: RefCell::new(None),
+        });
         let as_impl: Rc<dyn ITextShaperImpl> = shaper.clone();
         let locator = FerroLocator::current_mutable();
         locator.bind::<dyn ITextShaperImpl>().to_constant(as_impl.clone());
@@ -85,8 +100,27 @@ impl FontFeatureShaper {
         features: Rc<Vec<FontFeature>>,
         language: Option<Locale>,
     ) {
-        let shaping = FaceShaping { _typeface: typeface.clone(), features, language };
+        let shaping = FaceShaping {
+            _typeface: typeface.clone(),
+            features,
+            language,
+            #[cfg(feature = "incremental")]
+            observed: None,
+        };
         self.faces.borrow_mut().insert(Rc::as_ptr(typeface), shaping);
+    }
+
+    /// Reports the text of this typeface, which belongs to an incremental face.
+    #[cfg(feature = "incremental")]
+    pub(crate) fn observe(&self, typeface: &Rc<GlyphTypeface>, id: FontFaceId) {
+        if let Some(entry) = self.faces.borrow_mut().get_mut(&Rc::as_ptr(typeface)) {
+            entry.observed = Some(id);
+        }
+    }
+
+    #[cfg(feature = "incremental")]
+    pub(crate) fn set_observer(&self, observer: TextObserver) {
+        *self.observer.borrow_mut() = Some(observer);
     }
 
     pub(crate) fn remove(&self, typeface: &Rc<GlyphTypeface>) {
@@ -96,6 +130,15 @@ impl FontFeatureShaper {
 
 impl ITextShaperImpl for FontFeatureShaper {
     fn shape_text(&self, text: &ReadOnlyMemory<u16>, options: &TextShaperOptions) -> Rc<ShapedBuffer> {
+        #[cfg(feature = "incremental")]
+        {
+            let key = Rc::as_ptr(options.glyph_typeface());
+            let observed = self.faces.borrow().get(&key).and_then(|entry| entry.observed);
+            let observer = self.observer.borrow().clone();
+            if let (Some(id), Some(observer)) = (observed, observer) {
+                observer(id, text.span(), options.font_features().map(|features| features.as_slice()));
+            }
+        }
         let face = self
             .faces
             .borrow()
