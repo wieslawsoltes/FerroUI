@@ -16,6 +16,9 @@ pub struct SanitizeOptions {
     /// Removes the TrueType programs (`fpgm`, `prep`, `cvt `, `cvar`) and the instructions of
     /// each glyph. Off by default, as in browsers: hinting changes how text looks.
     pub strip_hinting: bool,
+    /// Keeps the patch maps of an incremental font (`IFT `, `IFTX`), which are validated. Off by
+    /// default: a font that was not declared with `tech(incremental)` has no use for them.
+    pub keep_patch_maps: bool,
 }
 
 /// The tables that are kept when they pass. Anything else is dropped, including `DSIG`, which no
@@ -175,6 +178,10 @@ impl<D: AsRef<[u8]>> Sanitizer<D> {
     fn check_table(&self, record: &TableRecord) -> Result<Output, FontDecodeError> {
         let table = &self.data.as_ref()[record.offset..][..record.length];
         let tag = &record.tag;
+        if self.options.keep_patch_maps && (*tag == crate::ift::IFT_TABLE || *tag == crate::ift::IFTX_TABLE) {
+            crate::ift::parse_patch_map(*tag, table)?;
+            return Ok(Output::Keep);
+        }
         if !KEPT_TABLES.contains(&tag) {
             return Ok(Output::Drop);
         }
