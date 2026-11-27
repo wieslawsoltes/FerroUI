@@ -44,6 +44,16 @@ pub trait IResourceProvider: IResourceNode {
         super::resource_provenance::source(self.as_object()?)
     }
 
+    /// The dictionary represented by this provider, when it represents one.
+    ///
+    /// This preserves dictionary identity and permits native consumers to inspect
+    /// own entries and child dictionaries without changing normal resource lookup
+    /// precedence. Lazy includes load on first use and propagate their usual load
+    /// failures. Providers that do not represent dictionaries return `None`.
+    fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        super::resource_dictionary::dictionary_of_object(self.as_object())
+    }
+
     /// The provider as an object, when it is a class instance. Used for
     /// identity comparison and type tests.
     fn as_object(&self) -> Option<&FerroObject> {
