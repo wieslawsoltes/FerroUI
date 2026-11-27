@@ -158,7 +158,11 @@ pub(crate) fn apply(
 pub(crate) fn loader_branches(documents: &[(String, Answer)], literal: impl Fn(&str) -> String) -> String {
     let mut text = String::new();
     for (uri, answer) in documents {
-        text.push_str(&format!("        if ::ferroui_markup_xaml::xaml_il::runtime::compiled::uri_equals(uri, {}, \"\") {{\n", literal(uri)));
+        let compare = match uri_needs_unescaping(uri) {
+            true => "uri_equals_escaped",
+            false => "uri_equals",
+        };
+        text.push_str(&format!("        if ::ferroui_markup_xaml::xaml_il::runtime::compiled::{compare}(uri, {}, \"\") {{\n", literal(uri)));
         match answer {
             Answer::Build(function) => {
                 text.push_str("            let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
@@ -219,3 +223,10 @@ pub(crate) fn report(plan: &ExportPlan, documents: &[DocumentModel], applied: &A
 #[cfg(test)]
 #[path = "export_plan_tests.rs"]
 mod tests;
+
+/// Whether the URI of a document may be requested escaped: it has a character that a URI escapes, or
+/// an escape (as `rt::uri_needs_unescaping`, which the emitter does not link). Such a document is
+/// compared with a request by `rt::uri_equals_escaped`, any other by `rt::uri_equals`.
+fn uri_needs_unescaping(uri: &str) -> bool {
+    uri.chars().any(|c| !c.is_ascii() || c.is_ascii_control() || " %\"<>`{}#?^|\\".contains(c))
+}

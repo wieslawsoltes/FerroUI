@@ -19,8 +19,8 @@ fn loader(
     _: Option<&Rc<dyn ferroui_base::metadata::IServiceProvider>>,
     uri: &str,
 ) -> Result<Option<BoxedValue>, XamlLoadError> {
-    use ferroui_markup_xaml::xaml_il::runtime::compiled::uri_equals;
-    if !DOCUMENTS.iter().any(|doc| uri_equals(uri, doc, "")) {
+    use ferroui_markup_xaml::xaml_il::runtime::compiled::uri_equals_escaped;
+    if !DOCUMENTS.iter().any(|doc| uri_equals_escaped(uri, doc, "")) {
         return Ok(None);
     }
     BUILDS.with(|n| n.set(n.get() + 1));

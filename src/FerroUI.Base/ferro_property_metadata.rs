@@ -1,7 +1,7 @@
 use crate::data::BindingMode;
-use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, UncommonFields};
+use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, ExplicitFns, UncommonFields};
 use crate::{FerroObject, StyledValue, TypeInfo};
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::cell::{OnceCell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -13,6 +13,49 @@ pub struct FerroPropertyMetadata {
     enable_data_validation: Option<bool>,
     is_read_only: bool,
     binding_writeback_uses_change_value: Option<bool>,
+    /// Whether the store coerces an unchanged input again when it reevaluates the property
+    /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); `None` inherits it, by default
+    /// it does. Kept here, untyped, so that the typed metadata of every value type is what it is
+    /// without it.
+    /// One address: the metadata is copied by the code of every value type.
+    reevaluation: Option<&'static ExplicitCoercion>,
+}
+
+/// The untyped head of the table of the typed operations of explicit coercion of one value type
+/// (`ExplicitFns`, whose first field it is), or `COERCE_ON_REEVALUATION`.
+pub(crate) struct ExplicitCoercion {
+    /// The type of the table, checked where it is read.
+    of: fn() -> TypeId,
+    /// The table of the storage type.
+    pub(crate) storage: fn() -> &'static ExplicitCoercion,
+}
+
+impl std::fmt::Debug for ExplicitCoercion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(if self.is_explicit() { "Explicit" } else { "Coerce" })
+    }
+}
+
+/// The policy of a property that coerces an unchanged input again (`with_coerce_on_reevaluation(true)`).
+static COERCE_ON_REEVALUATION: ExplicitCoercion =
+    ExplicitCoercion { of: TypeId::of::<()>, storage: || &COERCE_ON_REEVALUATION };
+
+impl ExplicitCoercion {
+    pub(crate) const fn new(of: fn() -> TypeId, storage: fn() -> &'static ExplicitCoercion) -> Self {
+        Self { of, storage }
+    }
+
+    fn is_explicit(&self) -> bool {
+        !std::ptr::eq(self, &COERCE_ON_REEVALUATION)
+    }
+
+    /// The table, of the value type `T` it was made for.
+    pub(crate) fn ops<T: 'static>(&'static self) -> &'static ExplicitFns<T> {
+        assert!((self.of)() == TypeId::of::<ExplicitFns<T>>(), "explicit coercion of another value type");
+        // SAFETY: an `ExplicitCoercion` of that type is the first field of the constant table
+        // `ExplicitFns::<T>::get` (`repr(C)`), valid for the whole program.
+        unsafe { &*(self as *const ExplicitCoercion).cast::<ExplicitFns<T>>() }
+    }
 }
 
 impl FerroPropertyMetadata {
@@ -22,7 +65,18 @@ impl FerroPropertyMetadata {
             enable_data_validation,
             is_read_only: false,
             binding_writeback_uses_change_value: None,
+            reevaluation: None,
         }
+    }
+
+    /// A copy for the metadata of the storage type of the value type: explicit coercion takes
+    /// the table of the storage type.
+    pub(crate) fn for_storage(&self) -> Self {
+        let mut copy = self.clone();
+        if let Some(explicit) = copy.reevaluation {
+            copy.reevaluation = Some((explicit.storage)());
+        }
+        copy
     }
 
     /// The default binding mode for the property.
@@ -66,6 +120,9 @@ impl FerroPropertyMetadata {
         }
         if self.enable_data_validation.is_none() {
             self.enable_data_validation = base.enable_data_validation;
+        }
+        if self.reevaluation.is_none() {
+            self.reevaluation = base.reevaluation;
         }
         if self.binding_writeback_uses_change_value.is_none() {
             self.binding_writeback_uses_change_value = base.binding_writeback_uses_change_value;
@@ -322,7 +379,6 @@ pub struct StyledPropertyMetadata<T> {
     base: FerroPropertyMetadata,
     default_value: Option<T>,
     coerce: Option<Coercion<T>>,
-    coerce_on_reevaluation: Option<bool>,
     /// The metadata of the storage type of a value type that is not its own storage type
     /// ([`StyledValue::Storage`]): what the property store reads, made the first time it is
     /// asked for (`for_storage`). Empty for a type that is its own storage type.
@@ -343,7 +399,6 @@ impl<T: Clone> Clone for StyledPropertyMetadata<T> {
             base: self.base.clone(),
             default_value: self.default_value.clone(),
             coerce: self.coerce.clone(),
-            coerce_on_reevaluation: self.coerce_on_reevaluation,
             storage: OnceCell::new(),
         }
     }
@@ -364,7 +419,6 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
             base: FerroPropertyMetadata::new(BindingMode::Default, Some(false)),
             default_value,
             coerce: None,
-            coerce_on_reevaluation: None,
             storage: OnceCell::new(),
         }
     }
@@ -383,19 +437,18 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
         self
     }
 
-    /// Whether frame reevaluation recalculates coercion for an unchanged input.
-    /// Defaults to true. A control returning false must explicitly coerce when
-    /// its external dependencies change. Explicit writes, changed bindings and
-    /// changed winning frame entries still coerce. Removing a winning frame
-    /// restores the default without automatically coercing that fallback.
-    /// Clearing an input also resets its coercion output without a callback.
-    pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
-        self.coerce_on_reevaluation = Some(value);
-        self
+    /// Whether frame reevaluation recalculates coercion for an unchanged input
+    /// (`with_coerce_on_reevaluation`).
+    pub fn coerce_on_reevaluation(&self) -> bool {
+        !self.base.reevaluation.is_some_and(|policy| policy.is_explicit())
     }
 
-    pub fn coerce_on_reevaluation(&self) -> bool {
-        self.coerce_on_reevaluation.unwrap_or(true)
+    /// The typed operations of explicit coercion, for a property whose coercion is explicit.
+    pub(crate) fn explicit_coercion(&self) -> Option<&'static crate::property_store::ExplicitFns<T>> {
+        match self.base.reevaluation {
+            Some(explicit) if explicit.is_explicit() => Some(explicit.ops::<T>()),
+            _ => None,
+        }
     }
 
     pub fn with_enable_data_validation(mut self, enable: bool) -> Self {
@@ -433,6 +486,22 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
 }
 
 impl<T: StyledValue> StyledPropertyMetadata<T> {
+    /// Whether frame reevaluation recalculates coercion for an unchanged input.
+    /// Defaults to true. A control returning false must explicitly coerce when
+    /// its external dependencies change. Explicit writes, changed bindings and
+    /// changed winning frame entries still coerce. Removing a winning frame
+    /// restores the default without automatically coercing that fallback.
+    /// Clearing an input also resets its coercion output without a callback.
+    /// `FerroObject::reset_coercion` applies to a property whose coercion is explicit.
+    pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
+        self.base.reevaluation = Some(if value {
+            &COERCE_ON_REEVALUATION
+        } else {
+            crate::property_store::ExplicitFns::<T>::get().head()
+        });
+        self
+    }
+
     /// The metadata as the property store reads it, of the storage type of `T`: this metadata
     /// itself for a type that is its own storage type, else a copy with the default value
     /// converted and the coercion callback wrapped once, made the first time it is asked for.
@@ -472,10 +541,9 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
                 Coercion::new(wrapped)
             });
             let copy = Rc::new(StyledPropertyMetadata::<T::Storage> {
-                base: self.base.clone(),
+                base: self.base.for_storage(),
                 default_value: self.default_value.clone().map(T::into_storage),
                 coerce,
-                coerce_on_reevaluation: self.coerce_on_reevaluation,
                 storage: OnceCell::new(),
             }) as Rc<dyn Any>;
             match copy.downcast() {
@@ -575,9 +643,6 @@ impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
         if self.coerce.is_none() {
             self.coerce = base.coerce.clone();
         }
-        if self.coerce_on_reevaluation.is_none() {
-            self.coerce_on_reevaluation = base.coerce_on_reevaluation;
-        }
     }
 
     fn freeze(&mut self) {
@@ -592,7 +657,7 @@ impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
             .with_default_binding_mode(this.default_binding_mode())
             .with_enable_data_validation(this.enable_data_validation().unwrap_or(false));
         copy.base.binding_writeback_uses_change_value = this.base.binding_writeback_uses_change_value;
-        copy.coerce_on_reevaluation = this.coerce_on_reevaluation;
+        copy.base.reevaluation = this.base.reevaluation;
         copy.freeze();
         Rc::new(copy)
     }

@@ -23,6 +23,7 @@ impl View for Model {
 }
 fn register() {
     ValueTypes::register_reference::<Model>();
+    ValueTypes::register_erased_value::<Model>();
     ValueTypes::register_reference_view::<Rc<dyn View>>(|v| v.clone());
 }
 fn same(model: &Rc<Model>, value: BoxedValue) {
@@ -129,6 +130,7 @@ fn declared_model_view_with_unregistered_concrete_type_fails_instead_of_retainin
 fn reference_view_callback_can_register_types_without_a_registry_borrow() {
     ValueTypes::register_reference_view::<Rc<dyn View>>(|v| {
         ValueTypes::register_reference::<Model>();
+        ValueTypes::register_erased_value::<Model>();
         v.clone()
     });
     let model = Rc::new(Model(Cell::new(9)));
