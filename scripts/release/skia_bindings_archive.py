@@ -22,6 +22,7 @@ import os
 import re
 import subprocess
 import sys
+import tarfile
 import tomllib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -91,10 +92,30 @@ def archive_bytes():
         capture_output=True,
         check=True,
     ).stdout
+    # `git archive` of a tree (`HEAD:<path>`) stamps every entry with the current time, so two
+    # archives made in different seconds differ. Every entry gets the time of the commit instead.
+    commit_time = int(
+        subprocess.run(
+            ["git", "-C", ROOT, "log", "-1", "--format=%ct", "HEAD"], capture_output=True, check=True, text=True
+        ).stdout.strip()
+    )
+    tar = restamp(tar, commit_time)
     buffer = io.BytesIO()
     with gzip.GzipFile(filename="", mode="wb", fileobj=buffer, mtime=0) as packed:
         packed.write(tar)
     return buffer.getvalue()
+
+
+def restamp(tar, mtime):
+    """The tar archive `tar` with the modification time of every entry set to `mtime`."""
+    source = tarfile.open(fileobj=io.BytesIO(tar), mode="r:")
+    output = io.BytesIO()
+    with tarfile.open(fileobj=output, mode="w:", format=tarfile.PAX_FORMAT) as packed:
+        for member in source.getmembers():
+            member.mtime = mtime
+            packed.addfile(member, source.extractfile(member) if member.isfile() else None)
+    source.close()
+    return output.getvalue()
 
 
 def main(argv):
