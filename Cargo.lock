@@ -2964,6 +2964,7 @@ dependencies = [
  "ferroui-vulkan",
  "skia-bindings",
  "skia-safe",
+ "smallvec",
  "url",
 ]
 
