@@ -155,11 +155,22 @@ counted on the WinUI theme, the pools of all its tables are 266,234 bytes with o
 table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
 and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
 pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
-16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
+16 bits in the pool of its unit keeps a pool of its own.
 It is on because the measurement kept it: on macOS the stripped executables were smaller in
 every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
 34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
 typed backend encodes the same runs as its programs; with it no packed table is written.
+
+A run of plain values (numbers, thicknesses, corner radii, colours, texts) is written as an
+`rt::PackedValueRows` when the 48 bytes of that table and its records are smaller than the slice
+of rows; a shorter run keeps its slice. A record is the key as an offset and a length in the pool
+of strings, the line and the position, then the index of the number, the indices of the four
+components, the two halves of the colour, or the text in the pool. The tables of one unit share
+its pool of strings and a static of its numbers, `{DOCUMENT}_UNIT_{n}_NUMBERS`, so a trimmed unit
+takes both with it. `rt::add_packed_double_resources`, `add_packed_thickness_resources`,
+`add_packed_corner_radius_resources`, `add_packed_color_resources` and
+`add_packed_string_resources` add the values in the same order, with the same errors at the same
+positions as the helpers of the slices.
 
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
@@ -459,7 +470,9 @@ document with its build or populate path, whether it is public and whether the l
 answers it, and every embedded asset with its size and whether it is registered.
 
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
-name, the first time the control looks for its theme. Release builds do not check.
+name, the first time the control looks for its theme. Release builds do not check. A debug
+build of a declarative application also keeps the controls of its inspector (Shift+F12), which
+its sources do not name (#954).
 
 **How a build applies its runs.** The function of a document that merges units calls
 `rt::apply_theme_unit(active_theme_units(), unit, run, ..)` where the entries of a run were:
@@ -636,24 +649,38 @@ Documents loaded at run time bind the way the built application does (#604):
 
 ### 5.1 Property lookups by name in compiled themes (#603)
 
-Two run-time helpers of compiled markup still find a declared (plain) property by its name:
+Two run-time helpers of compiled markup find a declared (plain) property by its name:
 
-- `rt::clr_property_info`: the provide-value target of a nested markup extension, such as
-  `TemplateBinding.Converter` with a `{StaticResource}`, or `MultiBinding.Bindings` and `Converter`.
+- `rt::clr_property_info`: the provide-value target of a nested markup extension. The checked-in
+  themes no longer call it (see below).
 - `rt::path_property`: a plain property in a compiled binding path, such as
   `ProgressBar.TemplateSettings`, `CommandBar.VisiblePrimaryCommands` or the view models of the
   managed file chooser.
 
 `python3 scripts/themes/by_name_lookups.py` counts the calls in the checked-in compiled themes;
-`--by-property` breaks them down by owner and property. On the branch of the change the counts were:
+`--by-property` breaks them down by owner and property. The counts now are:
 
 | Theme | `rt::clr_property_info` | `rt::path_property` |
 |---|---:|---:|
-| WinUI | 70 | 59 |
-| Fluent | 65 | 53 |
-| Simple | 36 | 43 |
-| macOS | 67 | 43 |
-| All four | 238 | 198 |
+| WinUI | 0 | 59 |
+| Fluent | 0 | 53 |
+| Simple | 0 | 43 |
+| macOS | 0 | 43 |
+| All four | 0 | 198 |
+
+**The targets of nested markup extensions.** The five members the themes describe this way have
+a `MarkupProperty` of their own, as `Setter.Value` has, and generated code calls one helper per
+member. It names neither the declaration of the binding nor that of the type of the member:
+
+| Member | Helper |
+|---|---|
+| `TemplateBinding.Converter` | `rt::template_binding_converter_property()` |
+| `CompiledBinding.Converter` | `rt::compiled_binding_converter_property()` |
+| `MultiBinding.Bindings` | `rt::multi_binding_bindings_property()` |
+| `MultiBinding.Converter` | `rt::multi_binding_converter_property()` |
+| `ReflectionBinding.RelativeSource` | `rt::reflection_binding_relative_source_property()` |
+
+A nested extension on any other plain property is still written with `rt::clr_property_info`.
 
 **Resolving the property at compile time.** The emitter can resolve the declared property at compile
 time wherever the type system knows the declaring type. It then writes
@@ -741,7 +768,8 @@ section 9).
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
 | `rt::clr_property_info` and `rt::path_property` counted (`scripts/themes/by_name_lookups.py`); declared properties resolved at compile time behind `Build::compile_time_declared_properties` (off by default) | #603 follow-up | In review |
-| `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
+| The targets of markup extensions nested in bindings described from the member alone (no `rt::clr_property_info` in the checked-in themes) | #603 follow-up | In review |
+| `rt::path_property` of plain path elements resolved to typed accessors | #603 follow-up | Planned |
 | Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
