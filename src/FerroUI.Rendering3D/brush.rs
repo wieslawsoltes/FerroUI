@@ -386,16 +386,14 @@ impl MaterialBrush {
                 return MaterialBrush { shader: BrushShader::Image, uniforms, texture: None, unsampled: false };
             };
             let sampling = on_device(&*bitmap);
+            // A stored frame whose first row is its bottom (GL) is sampled upside down.
+            let flip_rows = sampling == DeviceBitmap::Stored && !metadata.top_left_origin;
             if sampling == DeviceBitmap::NotOnDevice
-                || !frame_uniforms(&mut uniforms, tile, &metadata, texture_bounds)
+                || !frame_uniforms(&mut uniforms, tile, &metadata, texture_bounds, flip_rows)
             {
                 return unsampled;
             }
             if sampling == DeviceBitmap::Stored {
-                // The rows of a stored frame start at its top; the 2D path takes no other.
-                if !metadata.top_left_origin {
-                    return unsampled;
-                }
                 match (metadata.color, metadata.alpha) {
                     (FrameColor::Srgb, _) => {}
                     (FrameColor::Rec709Full, FrameAlpha::Opaque) => uniforms.metadata[2] = 1.0,
@@ -670,14 +668,15 @@ fn image_uniforms(uniforms: &mut BrushUniforms, tile: &dyn ITileBrush, image: Si
 /// brush places, turned and mirrored as the 2D path shows it (`FrameMetadata::orient`). `false`
 /// for a frame without a visible region.
 ///
-/// A frame that is neither turned nor mirrored is an image whose viewbox is inside the visible
-/// region. Otherwise the point of the brush is mapped to a pixel of the stored frame by the rows
+/// A frame that is neither turned nor mirrored, stored from its top, is an image whose viewbox is
+/// inside the visible region. Otherwise the point of the brush is mapped to a pixel of the stored frame by the rows
 /// of the brush, and the frame is drawn as one tile: the tile modes are not applied to it.
 fn frame_uniforms(
     uniforms: &mut BrushUniforms,
     tile: &dyn ITileBrush,
     frame: &FrameMetadata,
     bounds: Rect,
+    flip_rows: bool,
 ) -> bool {
     let crop = frame.visible;
     if crop.width == 0 || crop.height == 0 || frame.width == 0 || frame.height == 0 {
@@ -688,7 +687,7 @@ fn frame_uniforms(
     let (crop_width, crop_height) = (f64::from(crop.width), f64::from(crop.height));
     let turned = matches!(frame.rotation, FrameRotation::Clockwise90 | FrameRotation::Clockwise270);
     let shown = if turned { Size::new(crop_height, crop_width) } else { Size::new(crop_width, crop_height) };
-    if frame.rotation == FrameRotation::None && !frame.mirrored {
+    if frame.rotation == FrameRotation::None && !frame.mirrored && !flip_rows {
         placed_image_uniforms(uniforms, tile, image, shown, origin, bounds);
         return true;
     }
@@ -717,6 +716,11 @@ fn frame_uniforms(
         * shown_to_stored
         * Matrix::create_scale(crop_width, crop_height)
         * Matrix::create_translation(origin.x, origin.y);
+    // The rows of the texture from its bottom: the same pixel of the frame, in the other row.
+    let to_stored = match flip_rows {
+        true => to_stored * Matrix::create_scale(1.0, -1.0) * Matrix::create_translation(0.0, image.height),
+        false => to_stored,
+    };
     // A point of the brush to a point of what is shown, as `placed_image_uniforms` places it.
     let to_shown = Matrix::create_translation(-destination.x, -destination.y)
         * Matrix::create_scale(1.0 / scale.x, 1.0 / scale.y)

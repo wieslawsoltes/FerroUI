@@ -626,6 +626,8 @@ fn embedded_family_matching_keeps_real_faces_and_font_data() {
     }
 }
 
+extern "C" fn ignore_release(_: *mut std::ffi::c_void, _: *const std::ffi::c_void, _: usize) {}
+
 #[test]
 #[cfg(feature = "metal")]
 fn unavailable_metal_and_oversized_surfaces_are_recoverable() {
@@ -647,7 +649,7 @@ fn unavailable_metal_and_oversized_surfaces_are_recoverable() {
     draw.clear(Colors::RED);
     draw.dispose();
     unsafe {
-        assert!(ffi::q_font_data(std::ptr::null(), 0).is_null());
+        assert!(ffi::q_font_data(std::ptr::null(), 0, std::ptr::null_mut(), ignore_release).is_null());
         assert!(ffi::q_font_variations(
             std::ptr::null_mut(),
             std::ptr::null(),

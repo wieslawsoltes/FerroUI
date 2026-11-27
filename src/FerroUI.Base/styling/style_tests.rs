@@ -1690,6 +1690,23 @@ fn templated_parent_theme_is_applied_to_template_children() {
 }
 
 #[test]
+fn the_setters_of_a_templated_parent_theme_stay_off_a_template_child_of_its_target_type() {
+    let control_theme = ControlTheme::for_type::<Class1>();
+    control_theme.add_setter(foo_setter("parent"));
+
+    let templated_parent = Class1::new();
+    templated_parent.set_theme(control_theme);
+    let part = Class1::new();
+    part.set_templated_parent(templated_parent.clone().upcast::<FerroObject>());
+    set_child(&templated_parent, &part);
+
+    let _root = TestRoot::with_child(&templated_parent);
+
+    assert_eq!(templated_parent.foo(), "parent");
+    assert_eq!(part.foo(), "foodefault");
+}
+
+#[test]
 fn primary_theme_is_not_detached_from_template_controls_when_templated_parent_theme_cleared() {
     let parent_theme = ControlTheme::for_type::<Class1>();
     parent_theme.children().add(Style::with_setters(
