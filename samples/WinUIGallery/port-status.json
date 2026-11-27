@@ -1570,18 +1570,170 @@
     },
     "TabView": {
       "status": "partial",
+      "source_page": {
+        "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml",
+        "sha256": "205fcddee8cce1976697856c69cbe053e850f73bba831eeea1b3851ec831921c"
+      },
+      "source_code_behind": {
+        "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml.cs",
+        "sha256": "ae5d1aa75dc6e817ac04aa57f77969ce379b6b9c97de3b2d60659e188c43a779"
+      },
       "implementation": [
         "samples/WinUIGallery/Pages/TabView.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/tab_view_samples.rs",
+        "src/FerroUI.Controls/tab_view/tab_view.rs",
+        "src/FerroUI.Themes.WinUI/Controls/TabView.xaml"
       ],
       "tests": [
         {
           "path": "samples/WinUIGallery/tests.rs",
           "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+          "name": "new_tabs_are_documents_with_a_frame_on_a_sample_page"
+        },
+        {
+          "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+          "name": "the_examples_start_with_three_tabs_and_add_and_close_tabs"
+        },
+        {
+          "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+          "name": "the_option_boxes_set_the_width_mode_and_the_close_button_overlay_mode"
+        },
+        {
+          "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+          "name": "the_keyboard_accelerators_add_close_and_select_tabs"
+        },
+        {
+          "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+          "name": "the_tab_views_take_the_templates_of_the_winui_theme"
         }
       ],
-      "notes": "Native TabControl displays tab content; WinUI add/close/drag contracts remain pending. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
-      "examples": []
+      "notes": "Seven of the ten source examples use the native TabView with the code behind of TabViewPage.xaml.cs in Rust (tab_view_samples.rs): TabView_Loaded, TabView_AddButtonClick, TabView_TabCloseRequested, CreateNewTab (a Frame on a sample page), the two option boxes and the keyboard accelerators as a key handler. Pending: the TabItemsSource example, the full colour icons (BitmapIconSource), the windowing sample, the context menu of the tabs and dragging tabs.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewSupportAddingClosing.txt",
+          "source_sha256": "690875b32f6de062d3ba7a96545e13dbe0a6d8667dd3454be3bd5039af8736cb",
+          "status": "ported",
+          "target_control": "TabView1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_examples_start_with_three_tabs_and_add_and_close_tabs"
+            },
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_tab_views_take_the_templates_of_the_winui_theme"
+            }
+          ],
+          "notes": "TabView_Loaded adds three tabs; TabView_AddButtonClick and TabView_TabCloseRequested add and remove tabs."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewTabviewitemsDefinedMarkup.txt",
+          "source_sha256": "a53a0cc729956bfbde71647a731d345515022efc760c2b8897cdda7b40f74c98",
+          "status": "ported",
+          "target_control": "TabViewMarkup",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_examples_start_with_three_tabs_and_add_and_close_tabs"
+            },
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_tab_views_take_the_templates_of_the_winui_theme"
+            }
+          ],
+          "notes": "Three TabViewItems of markup with the Placeholder symbol; the close button removes its tab. The content of each tab is the text of its sample page, and the context menu of the tabs is not ported."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewBoundCollectionMydata.txt",
+          "source_sha256": "24e395f4b4365327da438f587cdaebc33bfeb67b29636bd290598bba8a987c29",
+          "status": "pending",
+          "tests": [],
+          "notes": "TabItemsSource with a TabItemTemplate that makes TabViewItems from MyData is not ported."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewKeyboardingSupport.txt",
+          "source_sha256": "7763d6276eee7171a2414690afe6cb6fd348872e133b63dfd48493383355480c",
+          "status": "ported",
+          "target_control": "TabView2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_keyboard_accelerators_add_close_and_select_tabs"
+            }
+          ],
+          "notes": "Ctrl+T, Ctrl+W, Ctrl+1 to Ctrl+8 and Ctrl+9 as a key handler of the tab view (the source's KeyboardAccelerators)."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabViewYouPutCustomContent.txt",
+          "source_sha256": "9e88c1d9bc028f862e27be8c2ffb38a5b4974cd44da3b931885b0413d73be255",
+          "status": "ported",
+          "target_control": "TabViewCustomContent",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_examples_start_with_three_tabs_and_add_and_close_tabs"
+            }
+          ],
+          "notes": "TabStripHeader and TabStripFooter texts; BaseTextBlockStyle is a semibold TextBlock."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabViewTabWidthsEitherBe.txt",
+          "source_sha256": "f28bfb9e7183e7f2d1d056da0d1a2bd64840e57094d76330db071bebcef228ba",
+          "status": "ported",
+          "target_control": "TabView3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_option_boxes_set_the_width_mode_and_the_close_button_overlay_mode"
+            }
+          ],
+          "notes": "TabWidthBehaviorComboBox_SelectionChanged sets SizeToContent, Equal or Compact."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabViewCloseButtonBePersistent.txt",
+          "source_sha256": "6496092bc501f0283f3abbe208eac35dedf25b0fede41a6bc03564da899b3d6f",
+          "status": "ported",
+          "target_control": "TabView4",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_option_boxes_set_the_width_mode_and_the_close_button_overlay_mode"
+            }
+          ],
+          "notes": "TabCloseButtonOverlayModeComboBox_SelectionChanged sets Auto, Always or OnPointerOver (OnHover)."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewColorTabIcons.txt",
+          "source_sha256": "cf65bca20687cf36250f3be1c8c6ccf47685937c049350ff5334445f4de2f31e",
+          "status": "pending",
+          "tests": [],
+          "notes": "BitmapIconSource with ShowAsMonochrome is not in this branch."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/TabviewAccentColoredTabstrip.txt",
+          "source_sha256": "98c8448ba296bb7843c4bed7a5fae498b9afbb9de01516c832fdb81cdfea4a3f",
+          "status": "ported",
+          "target_control": "TabViewAccent",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tab_view_samples_tests.rs",
+              "name": "the_examples_start_with_three_tabs_and_add_and_close_tabs"
+            }
+          ],
+          "notes": "TabViewBackground in the theme dictionaries of the tab view, SystemAccentColorLight2 and SystemAccentColorDark2."
+        },
+        {
+          "source": "WinUIGallery/Samples/TabView/CompleteTabviewWindowingSample.txt",
+          "source_sha256": "38a5eb80692c02f5ff80f11292b080e882a6ece3fe86937b6bb96ed1c79f54cf",
+          "status": "pending",
+          "tests": [],
+          "notes": "The windowing sample (tearing tabs out into windows, dragging tabs) is not ported."
+        }
+      ]
     },
     "Templates": {
       "status": "ported",

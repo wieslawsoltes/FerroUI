@@ -1804,6 +1804,45 @@ pub fn tab_strip_item() -> El<ferroui_controls::primitives::TabStripItem> {
     El::new()
 }
 
+pub use ferroui_controls::TabView;
+
+impl ViewClass for ferroui_controls::TabView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::TabView>::new()
+    }
+}
+
+/// Starts an element of [`TabView`](ferroui_controls::TabView).
+pub fn tab_view() -> El<ferroui_controls::TabView> {
+    El::new()
+}
+
+pub use ferroui_controls::TabViewItem;
+
+impl ViewClass for ferroui_controls::TabViewItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::TabViewItem>::new()
+    }
+}
+
+/// Starts an element of [`TabViewItem`](ferroui_controls::TabViewItem).
+pub fn tab_view_item() -> El<ferroui_controls::TabViewItem> {
+    El::new()
+}
+
+pub use ferroui_controls::TabViewListView;
+
+impl ViewClass for ferroui_controls::TabViewListView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::TabViewListView>::new()
+    }
+}
+
+/// Starts an element of [`TabViewListView`](ferroui_controls::TabViewListView).
+pub fn tab_view_list_view() -> El<ferroui_controls::TabViewListView> {
+    El::new()
+}
+
 pub use ferroui_controls::TabbedPage;
 
 impl ViewClass for ferroui_controls::TabbedPage {
@@ -9077,6 +9116,133 @@ pub trait TabItemProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TabItem>> TabItemProps for El<T> {}
+
+/// The properties and routed events of [`TabView`](ferroui_controls::TabView).
+pub trait TabViewProps: ElementBuilder {
+    /// Sets [`TabView::tab_width_mode_property`](ferroui_controls::TabView::tab_width_mode_property).
+    fn tab_width_mode<M>(self, value: impl IntoProp<ferroui_controls::TabViewWidthMode, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_width_mode_property(), value)
+    }
+
+    /// Sets [`TabView::close_button_overlay_mode_property`](ferroui_controls::TabView::close_button_overlay_mode_property).
+    fn close_button_overlay_mode<M>(self, value: impl IntoProp<ferroui_controls::TabViewCloseButtonOverlayMode, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::close_button_overlay_mode_property(), value)
+    }
+
+    /// Sets [`TabView::tab_strip_header_property`](ferroui_controls::TabView::tab_strip_header_property).
+    fn tab_strip_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_strip_header_property(), value)
+    }
+
+    /// Sets [`TabView::tab_strip_header_template_property`](ferroui_controls::TabView::tab_strip_header_template_property).
+    fn tab_strip_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_strip_header_template_property(), value)
+    }
+
+    /// Sets [`TabView::tab_strip_footer_property`](ferroui_controls::TabView::tab_strip_footer_property).
+    fn tab_strip_footer<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_strip_footer_property(), value)
+    }
+
+    /// Sets [`TabView::tab_strip_footer_template_property`](ferroui_controls::TabView::tab_strip_footer_template_property).
+    fn tab_strip_footer_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_strip_footer_template_property(), value)
+    }
+
+    /// Sets [`TabView::is_add_tab_button_visible_property`](ferroui_controls::TabView::is_add_tab_button_visible_property).
+    fn is_add_tab_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::is_add_tab_button_visible_property(), value)
+    }
+
+    /// Sets [`TabView::add_tab_button_command_property`](ferroui_controls::TabView::add_tab_button_command_property).
+    fn add_tab_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::add_tab_button_command_property(), value)
+    }
+
+    /// Sets [`TabView::add_tab_button_command_parameter_property`](ferroui_controls::TabView::add_tab_button_command_parameter_property).
+    fn add_tab_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::add_tab_button_command_parameter_property(), value)
+    }
+
+    /// Sets [`TabView::tab_items_source_property`](ferroui_controls::TabView::tab_items_source_property).
+    fn tab_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_items_source_property(), value)
+    }
+
+    /// Sets [`TabView::tab_item_template_property`](ferroui_controls::TabView::tab_item_template_property).
+    fn tab_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::tab_item_template_property(), value)
+    }
+
+    /// Sets [`TabView::can_drag_tabs_property`](ferroui_controls::TabView::can_drag_tabs_property).
+    fn can_drag_tabs<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::can_drag_tabs_property(), value)
+    }
+
+    /// Sets [`TabView::can_reorder_tabs_property`](ferroui_controls::TabView::can_reorder_tabs_property).
+    fn can_reorder_tabs<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::can_reorder_tabs_property(), value)
+    }
+
+    /// Sets [`TabView::allow_drop_tabs_property`](ferroui_controls::TabView::allow_drop_tabs_property).
+    fn allow_drop_tabs<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::allow_drop_tabs_property(), value)
+    }
+
+    /// Sets [`TabView::can_tear_out_tabs_property`](ferroui_controls::TabView::can_tear_out_tabs_property).
+    fn can_tear_out_tabs<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::can_tear_out_tabs_property(), value)
+    }
+
+    /// Sets [`TabView::selected_index_property`](ferroui_controls::TabView::selected_index_property).
+    fn selected_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::selected_index_property(), value)
+    }
+
+    /// Sets [`TabView::selected_item_property`](ferroui_controls::TabView::selected_item_property).
+    fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::TabView>::selected_item_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::TabView>> TabViewProps for El<T> {}
+
+/// The properties and routed events of [`TabViewItem`](ferroui_controls::TabViewItem).
+pub trait TabViewItemProps: ElementBuilder {
+    /// Sets [`TabViewItem::header_property`](ferroui_controls::TabViewItem::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItem>::header_property(), value)
+    }
+
+    /// Sets [`TabViewItem::header_template_property`](ferroui_controls::TabViewItem::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItem>::header_template_property(), value)
+    }
+
+    /// Sets [`TabViewItem::icon_source_property`](ferroui_controls::TabViewItem::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItem>::icon_source_property(), value)
+    }
+
+    /// Sets [`TabViewItem::is_closable_property`](ferroui_controls::TabViewItem::is_closable_property).
+    fn is_closable<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItem>::is_closable_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::TabViewItem>> TabViewItemProps for El<T> {}
+
+/// The properties and routed events of [`TabViewItemTemplateSettings`](ferroui_controls::TabViewItemTemplateSettings).
+pub trait TabViewItemTemplateSettingsProps: ElementBuilder {
+    /// Sets [`TabViewItemTemplateSettings::icon_element_property`](ferroui_controls::TabViewItemTemplateSettings::icon_element_property).
+    fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItemTemplateSettings>::icon_element_property(), value)
+    }
+
+    /// Sets [`TabViewItemTemplateSettings::tab_geometry_property`](ferroui_controls::TabViewItemTemplateSettings::tab_geometry_property).
+    fn tab_geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
+        self.prop(<ferroui_controls::TabViewItemTemplateSettings>::tab_geometry_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::TabViewItemTemplateSettings>> TabViewItemTemplateSettingsProps for El<T> {}
 
 /// The properties and routed events of [`TabbedPage`](ferroui_controls::TabbedPage).
 pub trait TabbedPageProps: ElementBuilder {

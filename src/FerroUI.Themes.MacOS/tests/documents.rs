@@ -281,6 +281,7 @@ document_tests! {
     controls_grid_view => "/Controls/GridView.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
+    controls_tab_view => "/Controls/TabView.xaml";
 }
 
 #[test]
