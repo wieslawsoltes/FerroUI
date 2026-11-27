@@ -763,6 +763,17 @@ impl ValueStore {
         }
     }
 
+    /// The effective value of a styled property, when it has one, read as `get_value` reads it
+    /// first; always inlined. The fast path of the untyped read (`StyledCodec::get_value_boxed`),
+    /// whose one call of `get_value` thin LTO otherwise leaves out of line for some value types
+    /// after unrelated changes. `get_value` itself is left to the compiler as before.
+    #[inline(always)]
+    pub(crate) fn try_get_effective_value_inlined<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+        let values = self.effective_values.borrow();
+        Self::find(&values, property.id())
+            .map(|index| T::from_storage(cast_effective_value::<T::Storage>(&*values[index].1).value()))
+    }
+
     // Keep the inherited value's temporary Rc and its unwind cleanup off the
     // hot paths for a local value or the default of a non-inheriting property.
     #[inline(never)]
