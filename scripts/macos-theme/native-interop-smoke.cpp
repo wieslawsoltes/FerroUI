@@ -5,6 +5,7 @@
 #define COM_GUIDS_MATERIALIZE
 #include "comimpl.h"
 #include "ferro-native.h"
+#include "FrnTextInputDispatch.h"
 #include <cassert>
 #include <cstdio>
 
@@ -50,6 +51,30 @@ public:
     }
 };
 
+static void checkTextInputDispatch()
+{
+    FrnTextInputDispatch dispatch;
+    assert(dispatch.IsInputMethodCommit(false, false));
+    {
+        FrnTextInputDispatch::KeyEvent ordinaryKey(dispatch, false);
+        assert(!dispatch.IsInputMethodCommit(false, false));
+        assert(dispatch.IsInputMethodCommit(true, false));
+        assert(dispatch.IsInputMethodCommit(false, true));
+        {
+            FrnTextInputDispatch::KeyEvent compositionKey(dispatch, true);
+            assert(dispatch.IsInputMethodCommit(false, false));
+        }
+        assert(!dispatch.IsInputMethodCommit(false, false));
+        dispatch.MarkComposition();
+        assert(dispatch.IsInputMethodCommit(false, false));
+    }
+    assert(dispatch.IsInputMethodCommit(false, false));
+    {
+        FrnTextInputDispatch::KeyEvent nextKey(dispatch, false);
+        assert(!dispatch.IsInputMethodCommit(false, false));
+    }
+}
+
 int main()
 {
     // Literal UUID bytes are the public IDL/Rust contract. Comparing only two
@@ -91,5 +116,7 @@ int main()
         assert(!callbackDestroyed);
     }
     assert(callbackDestroyed);
+    checkTextInputDispatch();
     std::puts("Native ABI: UUID bytes, dual-interface QI, IUnknown identity, reference counts and callback disposal passed.");
+    std::puts("Native text input: keyboard, marked text, replacement ranges and delayed commits passed.");
 }

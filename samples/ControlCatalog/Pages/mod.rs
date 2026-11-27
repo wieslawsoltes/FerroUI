@@ -47,6 +47,7 @@ mod expander_page;
 mod flyouts_page;
 mod focus_page;
 mod ferro_board_page;
+mod ferro_edit_page;
 mod headered_content_page;
 mod home_page;
 mod image_page;
@@ -217,6 +218,7 @@ pub use flex_page::FlexPage;
 pub use flyouts_page::FlyoutsPage;
 pub use focus_page::FocusPage;
 pub use ferro_board_page::FerroBoardPage;
+pub use ferro_edit_page::FerroEditPage;
 pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPage, GestureSwipePage};
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
@@ -360,6 +362,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     AutoSuggestBoxPage::TYPE,
     RichEditBoxPage::TYPE,
     FerroBoardPage::TYPE,
+    FerroEditPage::TYPE,
     RichTextBlockPage::TYPE,
     NumberBoxPage::TYPE,
     RadioButtonsPage::TYPE,
@@ -479,6 +482,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &AutoSuggestBoxPage::XAML_CLASS,
     &RichEditBoxPage::XAML_CLASS,
     &FerroBoardPage::XAML_CLASS,
+    &FerroEditPage::XAML_CLASS,
     &RichTextBlockPage::XAML_CLASS,
     &NumberBoxPage::XAML_CLASS,
     &RadioButtonsPage::XAML_CLASS,

@@ -74,7 +74,8 @@ jobs:
           cargo run --locked -p microcom-codegen -- src/FerroUI.Native/frn.idl \
             --cpp "$RUNNER_TEMP/macos-theme-interop/ferro-native.h"
           c++ -std=gnu++11 -Wno-attributes -Wno-unknown-pragmas \
-            -I native/FerroUI.Native/inc -I "$RUNNER_TEMP/macos-theme-interop" \
+            -I native/FerroUI.Native/inc -I native/FerroUI.Native/src/OSX \
+            -I "$RUNNER_TEMP/macos-theme-interop" \
             scripts/macos-theme/native-interop-smoke.cpp \
             -o "$RUNNER_TEMP/macos-theme-interop/native-interop-smoke"
           "$RUNNER_TEMP/macos-theme-interop/native-interop-smoke"

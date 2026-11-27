@@ -77,6 +77,24 @@ fn main() {
 
 `launch` uses the Fluent theme with the control theme of every control; `launch_themed` takes the theme of the application. An application that ships constructs its theme from the units it uses: a build script of one statement (`ferroui_build::Build::theme`) and `WinUITheme::with_parts` instead of `WinUITheme::new()`, as the hello world samples do (docs/xaml-themes.md, section 3, "An application without markup"). Hello world is 39 % smaller that way (docs/binary-size.md, section 4.24).
 
+### Typed forms and text forms
+
+What has a text form in XAML also has a typed form in the builders. The typed form is the default: the compiler checks it and it links no parser. Text is the form for a value that comes from data at run time, or one copied from XAML.
+
+| What | Typed | Text | Section |
+|---|---|---|---|
+| Style selector | `style(of::<Button>().class("accent").pressed())` | `style("Button.accent:pressed")` | 10.2 |
+| Grid rows and columns | `row_definitions([auto(), star(1.0), px(40.0)])` | `row_definitions("Auto,*,40")` | 4 |
+| Path geometry | `path!("M0 0L10 10z")`, `path_data()` | `Geometry::parse(..)` | 10.7 |
+| Key gesture | `ctrl(KeyCode::S).shift()` | `KeyGesture::parse("Ctrl+Shift+S")` | 4.3 |
+| Transform | `translate(10.0, 5.0).rotate(45.0)` | `TransformOperations::parse(..)` | 4.3 |
+| Shadow, effect | `shadow(0.0, 2.0, 4.0, color)`, `blur(5.0)` | `BoxShadows::parse(..)`, `Effect::parse(..)` | 4.3 |
+| Brush | `rgb(0x1E293B)`, `linear_gradient(..)` | `"#1E293B"` | 4.3 |
+| Binding to a view model | `Person::NAME.two_way()` | a `Binding` with a path | 4.4 |
+| Route | `#[derive(Route)]`, `navigate_to(&route)` | `route("/people/:id", ..)` | 13.3 |
+| Resource reference | `.dynamic_resource(property, keys::Name)` | the same with `"Name"` | 10.3 |
+| Control theme, dictionary | `control_theme::<T>()`, `resource_dictionary()` | XAML | 10.3 |
+
 ## 2. The crates
 
 | Crate | What it holds |
@@ -120,20 +138,25 @@ The element also has its own methods:
 | `key(..)`, `name(..)`, `class("a b")` | The key, the `Name`, style classes |
 | `child(..)`, `children((a, b, c))` | Children: elements, builders, text, vectors, arrays, tuples |
 | `set(property, value)` | Any property, also one the generator left out or one of another crate |
-| `bind(property, binding)` | A binding of the property system (`Binding`, a path on the data context) |
+| `bind(property, binding)` | A binding of the property system (`Binding`, a path on the data context). For a view model, a typed binding (section 4.4) goes straight to the setter |
 | `on(event, handler)` | Any routed event, with the control that handles it |
 | `on_changed(property, handler)` | The new value of a property whenever it changes |
 | `with(|control| ..)` | The control once it was made (a call the class has no property for) |
 | `node_ref(r)` | Keeps the control in a `NodeRef` |
-| `row_definitions("Auto,*")`, `column_definitions(..)` | The rows and columns of a grid, as XAML writes them |
+| `row_definitions([auto(), star(1.0)])`, `column_definitions(..)` | The rows and columns of a grid: typed lengths (`auto()`, `star(2.0)`, `px(40.0)`), or the text XAML takes (`"Auto,*"`) |
 
-The rows and columns are values of the grid in their text form (`GridDefinitionsText::rows_property()`,
-`columns_property()`): a component that runs again with another text, or a text that follows state
-(`.set(GridDefinitionsText::columns_property(), move || format!("{filled}*,{rest}*"))`), gives the grid
-the new sizes. Where the grid has as many definitions as the text names, each of the same kind (pixels,
-`Auto`, stars), the definitions it has take the new sizes and stay in the grid; otherwise the grid gets
-a new collection. A collection given to the grid directly (`Grid::set_column_definitions`) is always
-the one the grid then has.
+The rows and columns are values of the grid (`GridDefinitionSizes::rows_property()`,
+`columns_property()`): a component that runs again with other lengths, or lengths that follow state
+(`.set(GridDefinitionSizes::columns_property(), move || [star(filled.get()), star(rest.get())])`), give
+the grid the new sizes, with no text formatted or parsed. Where the grid has as many definitions as there
+are lengths, each of the same kind (pixels, `Auto`, stars), the definitions it has take the new sizes and
+stay in the grid; otherwise the grid gets a new collection. A collection given to the grid directly
+(`Grid::set_column_definitions`) is always the one the grid then has.
+
+The text form stays for definitions that come from data or are copied from XAML:
+`row_definitions("Auto,*")` parses the text into the same lengths, and text that follows state goes
+through `GridDefinitionsText` (`.set(GridDefinitionsText::columns_property(), move || format!(..))`).
+A text that does not parse panics when it is set; a typed form cannot be wrong.
 
 ### 4.1 What a setter takes
 
@@ -163,13 +186,70 @@ Upstream writes properties and bindings in code with indexers and operators on p
 | `control.Classes.Add("accent")` | `.class("accent")` |
 | `new Style(x => x.OfType<Button>())` | the styles API of the port (`Selectors`, `Style`, `Setter`), unchanged |
 
+### 4.3 Short typed values
+
+The values that have a text form also have a short typed one, which setters take through `IntoValue`. A typed value cannot be misspelled and links no parser. Text stays the form for a value that comes from data, or one copied from XAML.
+
+| Value | Text | Typed |
+|---|---|---|
+| Key gesture | `KeyGesture::parse("Ctrl+Shift+S")` | `ctrl(KeyCode::S).shift()`; `shift`, `alt`, `meta` start one too, and a `KeyCode` alone is the gesture of that key |
+| Transform | `TransformOperations::parse("translate(10px, 5px) rotate(45deg)")` | `translate(10.0, 5.0).rotate(45.0)`, with `scale`, `skew` and `.matrix(..)`; angles in degrees |
+| Box shadow | `BoxShadows::parse("0 2 4 1 Black")` | `shadow(0.0, 2.0, 4.0, Colors::BLACK).spread(1.0)`, `.inset()`; an array gives several |
+| Effect | `Effect::parse("blur(5)")` | `blur(5.0)`, `drop_shadow(x, y, radius, color)` |
+| Solid brush | `"#1E293B"` | `rgb(0x1E293B)`, `argb(0x801E293B)` |
+| Gradient brush | XAML | `linear_gradient(&[(0.0, a), (1.0, b)])`, with `.horizontal()`, `.vertical()`, `.points(..)`, `.opacity(..)`, `.spread_method(..)` |
+
+- The keyboard key is `KeyCode` in the prelude, because `Key` there is the key of an element among its siblings.
+- Every element that names one color shares one brush, whichever form names it, and the same holds for one gradient. Both tables are bounded, and a value past the bound gets a brush of its own.
+- `rgb` refuses a value of more than 24 bits, so a color with alpha is not silently cut. In a `const` this is a compile error.
+- A transform or an effect is a new object each time it is converted. A component that runs again with one gives the control a new value, as it does with one parsed from text.
+
+### 4.4 Typed bindings to a view model
+
+Signals are the default for state a component owns. A view model, state that lives outside of a component and notifies its changes, is declared with `#[derive(ViewModel)]`:
+
+```rust
+#[derive(ViewModel)]
+#[computed(greeting: String, depends_on(name))]
+struct Person {
+    #[property] name: RefCell<String>,
+    #[property] age: Cell<f64>,
+    property_changed: Event<str>,
+}
+
+impl Person {
+    fn greeting(&self) -> String { format!("Hello, {}", self.name()) }
+}
+
+stack_panel()
+    .data_context(person as BoxedValue)
+    .child(text_box().text(Person::NAME.two_way()))
+    .child(text_block().text(Person::GREETING.one_way()))
+```
+
+- One declaration gives the getter (`name()`), a setter that raises the change when the value differs (`set_name(..)`), and the typed property (`Person::NAME`). The name of the change comes from the field, so the setter and the binding cannot disagree.
+- A `#[computed]` property has its getter written by hand and is raised with the properties in its `depends_on`, which must be `#[property]` fields.
+- `one_way`, `two_way`, `one_time` and `one_way_to_source` make the binding, and a setter takes it, in builders and `rsx!`. A read-only property has no `two_way`.
+- A misspelled property, a dependency that does not exist, a value of another type, or a two-way binding of a read-only property does not compile. A property of type `V` takes a binding of `V`, and a property of type `Option<V>` too.
+- The result is the existing `CompiledBinding` with one typed path element, which reads and writes without boxing when the types are the same. There is no reflection and no path text.
+- A path through several objects, a converter or a fallback value is still written with `CompiledBindingPathBuilder` and `.bind(property, binding)`.
+
+**A model with setters of its own.** A model that already implements `INotifyPropertyChanged` raises names the compiler cannot see, so it names them by hand:
+
+```rust
+const TITLE: ModelProperty<Existing, String> =
+    ModelProperty::with_raised_name("Title", Existing::title, Existing::set_title);
+```
+
+The accessors are checked, and **the name is not**: a name that differs from what the model raises compiles, shows the first value, and then does not update. Use this form only for a model that cannot be declared with the derive.
+
 ## 5. The macros
 
 ### 5.1 `rsx!`
 
 ```rust
 rsx! {
-    Grid { row_definitions: "Auto,*", column_definitions: "*,Auto",
+    Grid { row_definitions: [auto(), star(1.0)], column_definitions: [star(1.0), auto()],
         TextBox { Grid.row: 0, text: draft.two_way() }
         Button { Grid.column: 1, class: "accent", on_click: add, "Add" }
         ListBox { Grid.row: 1, { for_each(move || todos.get(), |t| t.id, |t| rsx! { ListBoxItem { content: t.title } }) } }
@@ -470,16 +550,38 @@ The classes of a group derive from the classes of `ferroui-controls`, so their e
 
 ```rust
 stack_panel().styles([
-    style("Button.accent")
+    style(of::<Button>().class("accent"))
         .set(TemplatedControl::background_property(), "#0063B1")
         .set(TemplatedControl::foreground_property(), "White")
-        .nested(style("^:pointerover").set(Visual::opacity_property(), 0.85)),
+        .nested(style(nesting().pointer_over()).set(Visual::opacity_property(), 0.85)),
 ])
 ```
 
-- `style(selector)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. `style_of(selector)` takes a selector built with the selectors API.
+`style(..)` takes a typed selector or text. The typed form is the default: a misspelled class or pseudo-class does not compile, and the application links no selector parser. Text is the form for a selector that comes from data at run time, or one copied from XAML.
+
+| Text | Typed |
+|---|---|
+| `Button` | `of::<Button>()` |
+| `:is(Control)` | `is_type::<Control>()` |
+| `.accent` | `any().class("accent")` |
+| `#title` | `any().name("title")` |
+| `:pressed` | `any().pressed()` |
+| `Button.accent:focus` | `of::<Button>().class("accent").focus()` |
+| `StackPanel > TextBlock` | `of::<StackPanel>().child().of::<TextBlock>()` |
+| `StackPanel TextBlock` | `of::<StackPanel>().descendant().of::<TextBlock>()` |
+| `Button /template/ ContentPresenter` | `of::<Button>().template().of::<ContentPresenter>()` |
+| `Button:not(.accent)` | `of::<Button>().not(any().class("accent"))` |
+| `:nth-child(2n+1)`, `:nth-last-child(2)` | `any().nth_child(2, 1)`, `any().nth_last_child(0, 2)` |
+| `Button[IsEnabled=False]` | `of::<Button>().property_equals(InputElement::is_enabled_property(), false)` |
+| `Button, TextBlock` | `any_of([of::<Button>(), of::<TextBlock>()])` |
+| `^:pointerover` | `nesting().pointer_over()` |
+
+- `of::<T>()` and `is_type::<T>()` name the class by its identity: a selector does not keep a class in the executable that the application never makes. They chain too (`.of::<T>()`, `.is_type::<T>()`).
+- Every pseudo-class a class of the framework declares is a method (`PseudoClassSelectors`, generated into `generated/pseudo_classes.rs` by `scripts/generate_view_builders.py`). `:pointerover` is `pointer_over()`, `:focus-within` is `focus_within()`. A pseudo-class of an application's own control is written `.class(":name")`.
+- One prefix can start several selectors with the pseudo-class methods and `with_class`, which leave other handles of the selector as they were. `.class(..)` extends the node it is called on, as upstream's selectors do, so a clone of the selector gets the class too.
+- `style(text)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. A name that is not registered is matched by name, so a misspelled type never applies. A syntax error panics when the style is built. `style_of(selector)` takes a `Selector`.
 - `.set(property, value)` takes what converts to the value of the property, as the setters of elements do.
-- `.nested(style("^..."))` adds a nested style; its selector starts with `^`, the selector of the style it is in (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
+- `.nested(style(nesting()...))` adds a nested style; its selector starts with the selector of the style it is in. In text that is `^` (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
 - `.styles([..])` of an element (`styles: [..]` in `rsx!`) adds the styles to the `Styles` of the control when it is made.
 
 ### 10.3 The theme variant and resources
@@ -490,8 +592,75 @@ stack_panel().styles([
 | `use_theme_variant()` | The `ActualThemeVariant` of that control: `Light`, `Dark`, or one of the application. |
 | `use_resource(key)` | The resource as that control finds it (its resources, its ancestors', the application's and the theme's, for its theme variant), followed through the resource observable of the port. |
 | `use_resource_as::<T>(key)` | The same, converted from the markup value (`Rc<dyn IBrush>` for a brush of a theme). |
+| `use_theme_resource(keys::Name)` | The same for a typed key of a theme, as the type of the key. |
 
 A `ThemeVariantScope` element (`requested_theme_variant: variant`) switches the variant of a part of the tree; components below it read the new variant and resources.
+
+#### Typed keys and resource references
+
+Each theme crate has a `keys` module, with a constant per key of its dictionaries that carries the type of the value (`scripts/generate_theme_keys.py`):
+
+```rust
+use ferroui_themes_fluent::keys;
+
+border()
+    // Follows the resource through a change of the theme variant, with no component running again.
+    .dynamic_resource(Border::background_property(), keys::SystemControlBackgroundAltHighBrush)
+    // Takes the first value the control finds.
+    .static_resource(Border::corner_radius_property(), keys::ControlCornerRadius)
+```
+
+- `dynamic_resource(property, key)` is `{DynamicResource}` and `static_resource(property, key)` is `{StaticResource}`, in builders and `rsx!`. Both go through the resource observable of the control. A component that runs again keeps its reference.
+- A key that does not exist does not compile, and neither does a key whose value does not convert to the property. A `Color` key on a brush property is a brush, as in a setter. `use_theme_resource(key)` is the typed form of `use_resource_as`.
+- A key whose definitions have different types, or whose type the generator does not know, is a `ThemeResourceKey<BoxedValue>`: the key is checked and the value is not. It is used through its text, `key.name()`.
+- **Trimming.** A typed key is a root the trimmer reads exactly: what follows `keys::` in a path, a `use` item or a macro. An identifier that merely equals a key is no root. `use keys::*` or `keys as k` hides which keys are named, so every upper-case name of the crate may then root a key.
+- Text keys keep working in all of these, and are the form for a key that comes from data or a custom dictionary. A string literal that equals a key roots it, whatever the code does with it.
+
+#### Control themes and resource dictionaries
+
+A custom control's theme and template can be written in Rust, with no XAML. The builders make the runtime objects compiled XAML makes.
+
+```rust
+let chip = control_theme::<ToggleButton>()
+    .set(TemplatedControl::padding_property(), (12.0, 4.0))
+    .dynamic_resource(TemplatedControl::background_property(), keys::SystemControlBackgroundAltHighBrush)
+    .template(|| {
+        border()
+            .name("PART_Border")
+            .template_bind(Border::background_property(), TemplatedControl::background_property())
+            .child(
+                content_presenter()
+                    .name("PART_ContentPresenter")
+                    .template_bind(ContentPresenter::content_property(), ContentControl::content_property()),
+            )
+            .into_element()
+    })
+    .nested(
+        style(nesting().checked().template().of::<Border>())
+            .dynamic_resource(Border::background_property(), keys::SystemControlHighlightAccentBrush),
+    )
+    .build();
+
+toggle_button().theme(chip)
+```
+
+| XAML | Builder |
+|---|---|
+| `<ControlTheme TargetType="X">` | `control_theme::<X>()` |
+| `BasedOn="{StaticResource Y}"` | `.based_on(y)` |
+| `<Setter Property="P" Value="V"/>` | `.set(P, v)` |
+| `<Setter Property="P" Value="{DynamicResource K}"/>` | `.dynamic_resource(P, keys::K)` |
+| `<ControlTemplate>` | `.template(\|\| element)`, or `control_template_with(..)` to capture |
+| `{TemplateBinding P}` | `.template_bind(Target, P)` on an element |
+| `Name="PART_X"` in a template | `.name("PART_X")`, registered in the name scope of the template |
+| `<Style Selector="^:checked /template/ Border">` | `.nested(style(nesting().checked().template().of::<Border>())...)` |
+| `<ResourceDictionary>` | `resource_dictionary()` with `.value`, `.typed`, `.deferred`, `.merged` |
+| `<ResourceDictionary.ThemeDictionaries>` | `.theme_variant(ThemeVariant::dark(), resource_dictionary()...)` |
+| A theme under `{x:Type X}` | `.control_theme(theme)` of a dictionary |
+
+- A template body and a deferred resource are plain `fn`s: a closure that captures nothing coerces, so a theme adds no generic copy per closure. A template that must capture uses `control_template_with`, which only boxes the closure.
+- Values an element of a template gives are at the priority of a template, as in XAML, so a style with a condition overrides them. A reactive value (a signal, a closure) on an element of a template stays a local value, which such a style does not override.
+- XAML stays the better form for a theme designers edit, or one that is hot reloaded.
 
 ### 10.4 Transitions and animations
 
@@ -524,6 +693,26 @@ Flyouts (`flyout`, `context_flyout`) are not controls (`FlyoutBase` derives from
 | Light | Dark |
 |---|---|
 | ![The gallery, light](images/declarative-ui/view-gallery.png) | ![The gallery, dark](images/declarative-ui/view-gallery-dark.png) |
+
+### 10.7 Path geometry
+
+```rust
+// Fixed data: checked when the crate is compiled, kept as a static table.
+Path { data: path!("M8 3v5H3v2h5v5h2V10h5V8h-5V3z"), fill: "#1E293B" }
+
+// Computed from values: a fluent builder.
+Path { data: path_data().move_to(0.0, 0.0).line_to(width, 0.0).line_to(width / 2.0, height).close() }
+```
+
+| Form | Use it for | Parser linked |
+|---|---|---|
+| `path!("M...")` | Icons and shapes whose data is known when the crate is compiled | No |
+| `path_data()` with `move_to`, `line_to`, `quad_to`, `cubic_to`, `arc_to`, `close`, `fill_rule` | A path computed from values | No |
+| `Geometry::parse(text)` | Data that arrives at run time | Yes |
+
+- `path!` reads the grammar of `Geometry::parse`. The tests of `ferroui-view` compare its table with the calls of the parser on the data of the parser's tests. Invalid data is a compile error at the literal, with the byte it stopped at.
+- Every element that names one `path!` holds one geometry, for one platform on one thread, so a list of a thousand icons holds one, and a component that runs again gives its shape the geometry it already has. `PathData::to_geometry()` makes a geometry of its own, for one that will be changed.
+- A builder makes a new geometry each time it is converted.
 
 ## 11. Tools (phase 4)
 
@@ -719,6 +908,34 @@ router("/", vec![
 - **Paths, not view models.** The entries of the stack are paths: a path names its view and its parameters. State that outlives navigation lives above the router, in signals or contexts, as the view models of ReactiveUI live in the screen.
 - **Views.** The view of the current route is a component of its own. Another route mounts its view anew and takes the view before out, with its state. The same route with other parameters runs its view again with the new `RouteMatch`, and the reconciler patches its controls.
 - **The handle.** `current()`, `can_go_back()` and `stack()` are reactive: a component that reads them runs again when the path changes. A component calls `use_router()` while it runs and keeps the handle, which is `Copy`, for its handlers.
+
+#### Typed routes
+
+A route can be a Rust type that declares its pattern, with its parameters as fields:
+
+```rust
+#[derive(Route)]
+#[route("/people/:id")]
+struct PersonRoute { id: u32 }
+
+#[derive(Route)]
+#[route("/files/*")]
+struct FileRoute { #[route(rest)] path: String }
+
+router("/", vec![
+    route("/", |_| rsx! { Home {} }),
+    typed_route::<PersonRoute>(|route| rsx! { Person { id: route.id } }),
+    route("*", |m| rsx! { NotFound { path: m.path().to_string() } }),
+])
+
+use_router().navigate_to(&PersonRoute { id: 42 });
+```
+
+- `#[derive(Route)]` checks the pattern against the fields: a parameter with no field, a field with no parameter, or a `*` with no `#[route(rest)]` field does not compile, and a field's type must implement `FromStr` and `Display`.
+- Paths stay the entries of the stack, so typed and text routes share a router, and a deep link is an ordinary path.
+- **An invalid value in a deep link.** A path whose value does not parse (`/people/abc`) does not match the typed route. The router goes on to the next route, usually the last `route("*", ..)`, and shows nothing when there is none.
+- A value is escaped in its segment (`/` as `%2F`, `%` as `%25`, an empty value as a lone `%`) and read back unescaped, so any text survives the path. The field of a `*` holds the rest of the path as it is.
+- `navigate_to`, `navigate_and_reset_to` and `current_route::<T>()` are the typed forms of the router's methods. Text routes are the form for a pattern that is not known when the crate is compiled.
 
 ### 13.4 The samples
 

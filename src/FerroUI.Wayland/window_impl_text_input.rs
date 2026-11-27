@@ -263,12 +263,24 @@ impl IWaylandTextInputV3Events for WaylandTextInputMethod {
         // Clear the existing preedit before we mutate the document with
         // delete or commit (it's about to be replaced anyway, and any
         // ongoing composition needs to be torn down first).
-        if self.has_preedit.get() && (has_delete || has_commit) {
+        if (has_delete || has_commit) && self.has_preedit.replace(false) {
             client.set_preedit_text_with_cursor(None, None);
-            self.has_preedit.set(false);
+        }
+        if self.client_epoch.get() != session_token {
+            return;
         }
 
-        if let (true, Some(input)) = (has_delete, &input) {
+        let contextual = has_delete && client.supports_surrounding_text_edits();
+        if contextual {
+            if let Some(connection) = client.surrounding_text_edit_connection() {
+                let _ = connection.replace_surrounding_text(
+                    delete_before_chars.max(0) as usize,
+                    delete_after_chars.max(0) as usize,
+                    commit_text.as_deref().unwrap_or_default(),
+                    0,
+                );
+            }
+        } else if let (true, Some(input)) = (has_delete, &input) {
             // Select the to-be-deleted range, then synthesize a Backspace
             // keypress. TextBox handles "Backspace with non-empty selection"
             // by deleting the selection — same pattern iOS uses for
@@ -276,9 +288,15 @@ impl IWaylandTextInputV3Events for WaylandTextInputMethod {
             let sel = client.selection();
             let anchor = sel.start.min(sel.end);
             let cursor = sel.start.max(sel.end);
-            client.set_selection(TextSelection::new((anchor - delete_before_chars).max(0), cursor + delete_after_chars));
+            client.set_selection(TextSelection::new(
+                anchor.saturating_sub(delete_before_chars).max(0),
+                cursor.saturating_add(delete_after_chars),
+            ));
 
             for type_ in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
+                if self.client_epoch.get() != session_token {
+                    return;
+                }
                 input(Rc::new(RawKeyEventArgs::new(
                     owner.base().keyboard(),
                     0,
@@ -293,20 +311,25 @@ impl IWaylandTextInputV3Events for WaylandTextInputMethod {
             }
         }
 
-        if let (Some(commit_text), Some(input)) = (commit_text, &input) {
-            input(Rc::new(RawTextInputEventArgs::new(owner.base().keyboard(), 0, input_root.clone(), commit_text)));
+        if self.client_epoch.get() != session_token {
+            return;
+        }
+        if let (false, Some(commit_text), Some(input)) = (contextual, commit_text, &input) {
+            input(Rc::new(RawTextInputEventArgs::new(owner.base().keyboard(), 0, input_root.clone(), commit_text).with_input_method_origin()));
         }
 
+        if self.client_epoch.get() != session_token {
+            return;
+        }
         if let Some(preedit_text) = preedit_text {
             self.has_preedit.set(true);
             client.set_preedit_text_with_cursor(
                 Some(&preedit_text),
                 (preedit_cursor_end_char >= 0).then_some(preedit_cursor_end_char),
             );
-        } else if self.has_preedit.get() {
+        } else if self.has_preedit.replace(false) {
             // No new preedit: clear any leftover composition.
             client.set_preedit_text_with_cursor(None, None);
-            self.has_preedit.set(false);
         }
     }
 }

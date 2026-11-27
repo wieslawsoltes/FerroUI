@@ -1,25 +1,23 @@
-use crate::sk_cache_base::SkCacheBase;
 use ferroui_base::RoundedRect;
 use skia_safe::{RRect, Rect, Vector};
 
-ferroui_base::ferro_thread_local! {
-    static SHARED: SkCacheBase<RRect> = const { SkCacheBase::new() };
-}
-
-/// Cache of rounded rectangles that can be shared.
+/// Rounded rectangles for the drawing context's call sites.
 ///
-/// A Skia rounded rectangle is a plain value here, so the cache hands out
-/// values rather than pooled heap objects; the type exists to keep the call
-/// sites of the drawing context shaped like the paint cache's.
+/// A Skia rounded rectangle is a plain value in Rust, so there is nothing to
+/// pool: every function makes or takes a value on the stack. The pool this
+/// type had (a thread-local vector of values) only added a thread-local
+/// access, a borrow flag and vector traffic to every rounded draw; the drawing
+/// context builds its values directly and does not use this type.
 pub struct SkRoundRectCache;
 
 impl SkRoundRectCache {
-    /// Gets a cached, empty rounded rectangle.
+    /// An empty rounded rectangle.
     pub fn get() -> RRect {
-        SHARED.with(|cache| cache.get())
+        RRect::default()
     }
 
-    /// Gets a cached round rect and sets it with the radii of `rounded_rect`.
+    /// A rounded rectangle with the bounds `rectangle` and the radii of
+    /// `rounded_rect`.
     pub fn get_and_set_radii(rectangle: &Rect, rounded_rect: &RoundedRect) -> RRect {
         let radii = [
             Vector::new(rounded_rect.radii_top_left.x as f32, rounded_rect.radii_top_left.y as f32),
@@ -30,27 +28,42 @@ impl SkRoundRectCache {
         Self::get_and_set_radii_points(rectangle, &radii)
     }
 
-    /// Gets a cached round rect and sets it with the specified radii
-    /// (top-left, top-right, bottom-right, bottom-left).
+    /// A rounded rectangle with the specified radii (top-left, top-right,
+    /// bottom-right, bottom-left).
     pub fn get_and_set_radii_points(rectangle: &Rect, radii: &[Vector; 4]) -> RRect {
-        let mut item = Self::get();
-        item.set_rect_radii(rectangle, radii);
-        item
+        RRect::new_rect_radii(rectangle, radii)
     }
 
-    /// Returns a round rect for reuse later, without resetting it.
+    /// Takes a rounded rectangle back: nothing to do for a value.
     pub fn return_item(rect: RRect) {
-        SHARED.with(|cache| cache.return_item(rect));
+        let _ = rect;
     }
 
-    /// Returns a round rect and resets it for reuse later.
-    pub fn return_reset(mut rect: RRect) {
-        rect.set_empty();
-        SHARED.with(|cache| cache.return_item(rect));
+    /// Takes a rounded rectangle back: nothing to do for a value.
+    pub fn return_reset(rect: RRect) {
+        let _ = rect;
     }
 
-    /// Clears all cached round rects.
-    pub fn clear() {
-        SHARED.with(|cache| cache.clear());
+    /// Nothing is cached.
+    pub fn clear() {}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_rounded_rectangle_is_made_with_the_radii_of_its_corners() {
+        let rounded = RoundedRect::new(
+            ferroui_base::Rect::new(0.0, 0.0, 40.0, 30.0),
+            ferroui_base::Vector::new(1.0, 2.0),
+            ferroui_base::Vector::new(3.0, 4.0),
+            ferroui_base::Vector::new(5.0, 6.0),
+            ferroui_base::Vector::new(7.0, 8.0),
+        );
+        let made = SkRoundRectCache::get_and_set_radii(&Rect::from_wh(40.0, 30.0), &rounded);
+        let radii = [Vector::new(1.0, 2.0), Vector::new(3.0, 4.0), Vector::new(5.0, 6.0), Vector::new(7.0, 8.0)];
+        assert_eq!(made.radii_ref(), &radii);
+        assert!(SkRoundRectCache::get().is_empty());
     }
 }

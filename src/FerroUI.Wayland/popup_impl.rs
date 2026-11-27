@@ -10,6 +10,7 @@ use crate::server::persistent::i_w_xdg_top_level::{IWXdgPopup, WXdgPopupProxy, W
 use crate::server::persistent::xdg_popup_positioner_params::XdgPopupPositionerParams;
 use crate::wayland_conversion_extensions::positioner_parameters_to_wayland;
 use crate::window_impl_base::{get, set, ISinkOwner, WindowBaseImpl};
+use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::raw::IRawInputEventArgs;
 use ferroui_base::input::IInputRoot;
 use ferroui_base::platform::storage::file_io::BclLauncher;
@@ -252,6 +253,11 @@ impl ISinkOwner for PopupImpl {
 
 impl IOptionalFeatureProvider for PopupImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            let clipboard = FerroLocator::current().get_service::<dyn IClipboard>()?;
+            return Some(Rc::new(clipboard));
+        }
+
         if feature_type == TypeId::of::<dyn IScreenImpl>() {
             let screens = FerroLocator::current().get_service::<dyn IScreenImpl>()?;
             return Some(Rc::new(screens));
@@ -262,7 +268,6 @@ impl IOptionalFeatureProvider for PopupImpl {
             return Some(Rc::new(launcher));
         }
 
-        // The clipboard is a feature of a later part of stage 2.
         None
     }
 }

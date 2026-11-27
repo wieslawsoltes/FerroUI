@@ -21,10 +21,7 @@ impl EmbeddableTopLevelImpl {
             base: TopLevelImpl::new(factory.clone()),
         });
 
-        let e: ComPtr<IFrnTopLevelEvents> = ferroui_microcom::make_com_with(
-            TopLevelEvents(this.clone()),
-            [ferroui_microcom::InterfaceEntry::of::<IFrnTopLevelWheelEvents>()],
-        );
+        let e = TopLevelEvents::for_parent::<IFrnTopLevelEvents>(this.clone());
         let native = factory.create_top_level(Some(&e)).check().expect("the native top-level");
         this.base.init(MacOSTopLevelHandle::from_top_level(native));
         this
