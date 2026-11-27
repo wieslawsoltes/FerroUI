@@ -268,6 +268,19 @@ pub(crate) fn navigation_view_template() -> Rc<dyn IControlTemplate> {
         let top_menu = named(StackPanel::new(), "TopNavMenuItemsHost").register_in_name_scope(&**scope);
         top_menu.set_orientation(Orientation::Horizontal);
         top_grid.children().add(&top_menu);
+        // TopNavOverflowButton and its Flyout with TopNavMenuItemsOverflowHost.
+        let overflow_button = named(Button::new(), "TopNavOverflowButton").register_in_name_scope(&**scope);
+        overflow_button.set_width(40.0);
+        overflow_button.bind_binding(
+            Visual::is_visible_property().as_property(),
+            &*templated_parent_binding("TemplateSettings.OverflowButtonVisibility"),
+        );
+        top_grid.children().add(&overflow_button);
+        let overflow_popup = named(Popup::new(), "TopNavOverflowFlyout").register_in_name_scope(&**scope);
+        overflow_popup.set_is_light_dismiss_enabled(true);
+        overflow_popup.set_child(named(StackPanel::new(), "TopNavMenuItemsOverflowHost").register_in_name_scope(&**scope));
+        overflow_popup.set_placement_target(overflow_button.clone());
+        top_grid.children().add(&overflow_popup);
         top_grid.children().add(content_part(scope, "PaneCustomContentOnTopPane"));
         top_grid.children().add(content_part(scope, "TopPaneAutoSuggestBoxPresenter"));
         top_grid.children().add(content_part(scope, "PaneFooterOnTopPane"));

@@ -4,7 +4,8 @@
 //! dispatches the Gallery's Category/Header/Separator models; it is an explicit
 //! adaptation of its custom DataTemplateSelector and x:Bind expressions. The
 //! adaptive trigger reads the host's client width, or the sample bounds when
-//! there is no host. Navigation transition animations remain unsupported.
+//! there is no host. The samples 7 and 9 navigate with the recommended transition of the
+//! selection, as the source's handlers do.
 
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
@@ -161,10 +162,13 @@ fn categories(nav: &NavigationView) {
 /// updates, the Top sample's fourth item targeting SamplePage3, and every Category
 /// displaying SamplePage1. The tabs snippet recommends disabling history, but the
 /// actual page handler calls Navigate; this port retains that observable behavior.
+/// With `transition`, a page of an item comes in with the recommended transition of the
+/// selection (`Navigate(pageType, null, args.RecommendedNavigationTransitionInfo)`).
 fn wire_selection(
     root: &Ref<Control>,
     number: &str,
     update_header: bool,
+    transition: bool,
 ) -> Result<(), NavigationError> {
     let nav = root.get_control::<NavigationView>(&format!("nvSample{number}"));
     let frame = root.get_control::<Frame>(&format!("contentFrame{number}"));
@@ -210,7 +214,12 @@ fn wire_selection(
             })
         };
         let Some(target) = target else { return };
-        match frame.navigate(target, None) {
+        let navigated = if transition && !args.is_settings_selected() {
+            frame.navigate_with_transition(target, None, args.recommended_navigation_transition_info())
+        } else {
+            frame.navigate(target, None)
+        };
+        match navigated {
             Ok(_) => {
                 error.set_text(None);
                 error.set_is_visible(false);
@@ -458,17 +467,17 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
         XamlLoadError::with_inner("Could not initialize NavigationView samples.", error)
     };
     categories(&root.get_control::<NavigationView>("nvSample4"));
-    for (number, header) in [
-        ("", true),
-        ("2", false),
-        ("4", true),
-        ("5", true),
-        ("6", false),
-        ("7", false),
-        ("8", true),
-        ("9", false),
+    for (number, header, transition) in [
+        ("", true, false),
+        ("2", false, false),
+        ("4", true, false),
+        ("5", true, false),
+        ("6", false, false),
+        ("7", false, true),
+        ("8", true, false),
+        ("9", false, true),
     ] {
-        wire_selection(root, number, header).map_err(convert_error)?;
+        wire_selection(root, number, header, transition).map_err(convert_error)?;
     }
     wire_options(root);
     wire_adaptive(root);
