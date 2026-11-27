@@ -309,6 +309,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-opengl",
  "ferroui-skia",
+ "js-sys",
  "url",
  "wasm-bindgen",
 ]
