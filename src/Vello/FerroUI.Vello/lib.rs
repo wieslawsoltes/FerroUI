@@ -24,6 +24,8 @@ pub mod gpu;
 pub mod gl_window;
 pub mod helpers;
 pub mod perf;
+#[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
+mod shadow_gaussian;
 pub mod scene;
 pub mod vello_extensions;
 #[cfg(feature = "hybrid-webgl")]
