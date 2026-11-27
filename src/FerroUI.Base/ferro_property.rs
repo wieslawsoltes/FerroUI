@@ -56,6 +56,12 @@ impl<T: PartialEq + 'static> AnyValue for T {
     }
 
     fn any_value_eq(&self, other: &dyn AnyValue) -> bool {
+        // The scalars the property system compares most keep the type check inline: for them the
+        // call of the shared check below cost more than the comparison itself. The test is a
+        // constant of each copy, so every other type keeps the small shared form (#566).
+        if is_common_value_type::<T>() {
+            return other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| value_equals(self, other));
+        }
         data_of_type(other, TypeId::of::<T>()).is_some_and(|other| {
             // SAFETY: `data_of_type` returned the data of a value whose type is `T`, which `other`
             // keeps alive for this call.
@@ -66,6 +72,19 @@ impl<T: PartialEq + 'static> AnyValue for T {
     fn any_value_type_name(&self) -> &'static str {
         std::any::type_name::<T>()
     }
+}
+
+/// Whether `T` is one of the scalar value types whose boxed comparison keeps its type check
+/// inline ([`AnyValue::any_value_eq`]): numbers, flags and nullable numbers, the values of most
+/// styled properties, setters and bindings. A constant of each monomorphized copy.
+#[inline(always)]
+fn is_common_value_type<T: 'static>() -> bool {
+    let id = TypeId::of::<T>();
+    id == TypeId::of::<f64>()
+        || id == TypeId::of::<f32>()
+        || id == TypeId::of::<bool>()
+        || id == TypeId::of::<i32>()
+        || id == TypeId::of::<Option<f64>>()
 }
 
 /// The data of `other` if it holds a value of the type `expected`: the type check of
@@ -1374,6 +1393,23 @@ mod boxed_equality_tests {
 
     fn equal(a: &BoxedValue, b: &BoxedValue) -> bool {
         a.value_eq(&**b)
+    }
+
+    /// The scalars of the inline type check and the types of the shared one answer alike, for
+    /// equal values, different values, other types and a value that answers for another one.
+    #[test]
+    fn the_inline_and_the_shared_type_checks_agree() {
+        assert!(is_common_value_type::<f64>() && is_common_value_type::<Option<f64>>());
+        assert!(!is_common_value_type::<i64>() && !is_common_value_type::<String>());
+        assert!(equal(&boxed(1.5f64), &boxed(1.5f64)) && equal(&boxed(7i64), &boxed(7i64)));
+        assert!(!equal(&boxed(1.5f64), &boxed(2.5f64)) && !equal(&boxed(7i64), &boxed(8i64)));
+        assert!(!equal(&boxed(1.5f64), &boxed(1.5f32)) && !equal(&boxed(7i64), &boxed(7i32)));
+        assert!(equal(&boxed(true), &boxed(true)) && !equal(&boxed(true), &boxed(1i32)));
+        assert!(equal(&boxed(Some(f64::NAN)), &boxed(Some(f64::NAN))));
+        let probe: BoxedValue = Rc::new(Probe(boxed(1.5f64)));
+        let probed_long: BoxedValue = Rc::new(Probe(boxed(7i64)));
+        assert!(boxed(1.5f64).value_eq(&*probe));
+        assert!(boxed(7i64).value_eq(&*probed_long));
     }
 
     #[test]
