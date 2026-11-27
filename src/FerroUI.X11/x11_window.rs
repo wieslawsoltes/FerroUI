@@ -60,7 +60,7 @@ use ferroui_controls::{
 use crate::native_dialogs::GtkSystemDialog;
 use crate::x11_native_control_host::X11NativeControlHost;
 use ferroui_controls::platform::INativeControlHostImpl;
-use ferroui_dialogs::ManagedStorageProvider;
+use ferroui_controls::platform::managed_storage_fallback;
 use ferroui_freedesktop::dbus_system_dialog::ParentLeaseProvider;
 use ferroui_controls::platform::ITopLevelNativeMenuExporter;
 use ferroui_freedesktop::{
@@ -925,7 +925,7 @@ impl X11Window {
                 .upgrade()
                 .and_then(|window| window.input_root.borrow().clone())
                 .and_then(|input_root| input_root.focus_root().cast::<TopLevel>())
-                .map(|tl| Rc::new(ManagedStorageProvider::new(Some(&tl), None)) as Rc<dyn IStorageProvider>);
+                .map(|tl| managed_storage_fallback(&tl));
             Box::pin(std::future::ready(provider))
         })]));
         *window.storage_provider.borrow_mut() = Some(storage_provider);

@@ -375,3 +375,41 @@ fn nested_change_can_preserve_property_notification_value_in_both_binding_modes(
         );
     }
 }
+
+/// The writeback policy of the target is read once, when the expression starts, and only for a
+/// binding that writes back: a one-way binding to a property with the policy publishes as before
+/// and resolves nothing; a two-way one resolves it and writes the value of the notification.
+#[test]
+fn the_writeback_policy_is_resolved_once_and_only_for_a_binding_that_writes_back() {
+    use crate::data::core::BindingExpression;
+    let resolved = |expression: &Rc<dyn crate::data::BindingExpressionBase>| {
+        expression
+            .as_any()
+            .downcast_ref::<BindingExpression>()
+            .expect("a reflection binding makes an untyped expression")
+            .writes_back_change_values()
+    };
+    for (mode, writes_back) in [(BindingMode::OneWay, false), (BindingMode::TwoWay, true)] {
+        let vm = Model::new_model(Vm { value: Cell::new(4.), changed: Event::new() });
+        let target = Target::new();
+        target.set_data_context(Some(vm.clone()));
+        let binding = ReflectionBinding::new("Value");
+        binding.set_mode(mode);
+        let expression = target.bind_binding(Target::value_property(), &*binding);
+        assert_eq!(resolved(&expression), writes_back, "{mode:?}");
+        // The class handler corrects a value above 10 in the target; the source keeps its own.
+        vm.set(25.);
+        assert_eq!(target.get_value(Target::value_property()), 10., "{mode:?}");
+        assert_eq!(vm.value.get(), 25., "{mode:?}");
+        vm.set(8.);
+        assert_eq!(target.get_value(Target::value_property()), 8., "{mode:?}");
+    }
+    // A target whose metadata turns the policy off resolves it off.
+    let vm = Model::new_model(Vm { value: Cell::new(4.), changed: Event::new() });
+    let target = CurrentTarget::new();
+    target.set_data_context(Some(vm.clone()));
+    let binding = ReflectionBinding::new("Value");
+    binding.set_mode(BindingMode::TwoWay);
+    let expression = target.bind_binding(Target::value_property(), &*binding);
+    assert!(!resolved(&expression));
+}

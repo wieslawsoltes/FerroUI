@@ -709,8 +709,10 @@ impl ValueTypes {
     /// view of the SAME allocation; it neither clones `T` nor creates a proxy.
     ///
     /// Registrations are thread-local, like the other value-type registrations.
-    /// Nullable, object and reference-type registration install the relevant
-    /// boxers automatically. Other Rust payloads may opt in explicitly.
+    /// A reference (model) type registered with [`register_reference`](Self::register_reference)
+    /// gets the boxer of its model, which its reference views need. Every other type opts in
+    /// here: the hundreds of nullable and handle types the framework registers get no boxer, so
+    /// an application that never recovers values from `Rc<dyn Any>` pays nothing for it.
     pub fn register_erased_value<T: AnyValue>() {
         fn box_value<T: AnyValue>(
             value: Rc<dyn std::any::Any>,
@@ -815,8 +817,6 @@ impl ValueTypes {
     /// treat `None` as null and `Some(v)` as `v`, and convert a `T` (or null)
     /// to `Option<T>` when a target requires it.
     pub fn register_nullable<T: PropertyValue>() {
-        Self::register_erased_value::<T>();
-        Self::register_erased_value::<Option<T>>();
         insert_nullable(TypeId::of::<Option<T>>(), ValueType::of::<T>(), nullable_operation::<T>);
     }
 
@@ -1367,9 +1367,9 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
+        // The model itself: a reference view returns the allocation of the model, which
+        // `box_erased` recovers. Its handles opt in with `register_erased_value` where needed.
         Self::register_erased_value::<T>();
-        Self::register_erased_value::<Rc<T>>();
-        Self::register_erased_value::<Option<Rc<T>>>();
         // The nullable handle of a model unwraps to the model object itself,
         // cloning its Rc, never the object (the type need not be Clone).
         fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
@@ -2274,6 +2274,13 @@ fn number_text_to_invariant(text: &str, kind: NumberKind, info: &crate::utilitie
 }
 
 /// The name of the runtime library type a primitive mirrors.
+/// Whether `id` is a primitive value (a number, a boolean, a character or a string): such a value
+/// is never a reference handle, view or nullable reference, so a binding source of one needs no
+/// lookup of the reference tables.
+pub(crate) fn is_primitive_value(id: TypeId) -> bool {
+    primitive_full_name(id).is_some()
+}
+
 fn primitive_full_name(id: TypeId) -> Option<&'static str> {
     macro_rules! names {
         ($($type_:ty => $name:literal),* $(,)?) => {
@@ -3529,6 +3536,11 @@ mod erased_reference_tests {
     }
     #[test]
     fn built_in_and_nullable_values_recover_without_copying_or_normalizing() {
+        // A nullable registration installs no boxer: the types opt in.
+        let unregistered: Rc<dyn std::any::Any> = Rc::new(Option::<f32>::Some(1.0));
+        assert!(ValueTypes::box_erased(unregistered).is_err());
+        ValueTypes::register_erased_value::<String>();
+        ValueTypes::register_erased_value::<Option<String>>();
         let value: Rc<dyn std::any::Any> = Rc::new(String::from("same"));
         let boxed = ValueTypes::box_erased(value.clone()).unwrap();
         let same: Rc<dyn std::any::Any> = boxed.clone();
@@ -3563,6 +3575,8 @@ mod erased_reference_tests {
         let changed = changes.clone();
         object.add_property_changed_handler(Rc::new(move |_| changed.set(changed.get() + 1)));
         let erased: Rc<dyn std::any::Any> = Rc::new(object.clone());
+        assert!(ValueTypes::box_erased(erased.clone()).is_err(), "object handles opt in");
+        ValueTypes::register_erased_value::<Ref<FerroObject>>();
         let boxed = ValueTypes::box_erased(erased.clone()).unwrap();
         assert_eq!(ValueTypes::as_object(&*boxed), Some(object));
         let same: Rc<dyn std::any::Any> = boxed;

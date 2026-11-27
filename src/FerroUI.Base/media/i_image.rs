@@ -66,11 +66,26 @@ pub trait IImage: 'static {
         None
     }
 
+    /// Whether the image may report a load ([`subscribe_load`](Self::subscribe_load)). An image
+    /// that overrides `subscribe_load` answers `true`; for every other image an `Image` control
+    /// subscribes to nothing and allocates nothing for it.
+    fn reports_load(&self) -> bool {
+        false
+    }
+
     /// Subscribes to the pending load, if any. The callback runs at most once,
     /// on the UI thread. A source that has already announced its result does
     /// not replay it, and an image supplied ready to draw has no load to report.
     fn subscribe_load(&self, _handler: ImageLoadHandler) -> Option<Subscription> {
         None
+    }
+
+    /// Whether the image selects variants for a display, theme or palette
+    /// ([`resolve_for_context`](Self::resolve_for_context)). An image that overrides
+    /// `resolve_for_scaling` or `resolve_for_context` answers `true`; for every other image an
+    /// `Image` control builds no context and reads no platform settings.
+    fn has_variants(&self) -> bool {
+        false
     }
 
     /// Selects a concrete image for a display scale. A source with variants
