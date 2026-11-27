@@ -13,7 +13,7 @@ use crate::utilities::CultureInfo;
 use icu_locale_core::Locale;
 use crate::{AnyValue, BoxedValue, FerroObject, ObjectType, PropertyValue, Ref, StyledElement, TypeInfo, Upcast};
 use std::any::TypeId;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::{BuildHasherDefault, Hasher};
@@ -301,9 +301,33 @@ type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
 type ReferenceViewFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
 
+/// The registrations that recover values from `Rc<dyn Any>` (the erased boxers and the reference
+/// views), apart from the table: only an application that makes one links them and their maps.
+#[derive(Default)]
+struct ErasedRegistry {
+    boxes: IdMap<TypeId, ErasedBoxFn>,
+    /// Declared model views (for example `Rc<dyn Trait>`) -> the same object allocation.
+    views: IdMap<TypeId, ReferenceViewFn>,
+}
+
+thread_local! {
+    static ERASED: RefCell<ErasedRegistry> = RefCell::new(ErasedRegistry::default());
+    /// The lookup of a reference view (`find_reference_view`), installed by the first view
+    /// registered: until then `reference_object` reads no view.
+    static VIEW_LOOKUP: Cell<Option<fn(TypeId) -> Option<ReferenceViewFn>>> = const { Cell::new(None) };
+}
+
+fn find_reference_view(id: TypeId) -> Option<ReferenceViewFn> {
+    ERASED.with(|r| r.borrow().views.get(&id).cloned())
+}
+
+fn insert_reference_view(id: TypeId, view: ReferenceViewFn) {
+    ERASED.with(|r| r.borrow_mut().views.insert(id, view));
+    VIEW_LOOKUP.with(|lookup| lookup.set(Some(find_reference_view)));
+}
+
 #[derive(Default)]
 struct Registry {
-    erased_boxes: IdMap<TypeId, ErasedBoxFn>,
     display: IdMap<TypeId, DisplayFn>,
     /// `Option<T>` → its operation: unwraps to the contained `T`, makes a
     /// boxed `None`, wraps a `T`.
@@ -318,8 +342,6 @@ struct Registry {
     /// Typed interface/class views of an enclosing reference object's identity.
     reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
     conversions: IdMap<(TypeId, TypeId), ErasedConversion>,
-    /// Declared model views (for example `Rc<dyn Trait>`) -> the same object allocation.
-    reference_views: IdMap<TypeId, ReferenceViewFn>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
     casts: IdMap<(TypeId, TypeId), ErasedConversion>,
@@ -709,19 +731,17 @@ impl ValueTypes {
     /// view of the SAME allocation; it neither clones `T` nor creates a proxy.
     ///
     /// Registrations are thread-local, like the other value-type registrations.
-    /// A reference (model) type registered with [`register_reference`](Self::register_reference)
-    /// gets the boxer of its model, which its reference views need. Every other type opts in
-    /// here: the hundreds of nullable and handle types the framework registers get no boxer, so
-    /// an application that never recovers values from `Rc<dyn Any>` pays nothing for it.
+    /// Every type opts in here, the concrete model behind a reference view
+    /// ([`register_reference_view`](Self::register_reference_view)) too: the hundreds of
+    /// reference, nullable and handle types the framework registers get no boxer, so an
+    /// application that never recovers values from `Rc<dyn Any>` pays nothing for it.
     pub fn register_erased_value<T: AnyValue>() {
         fn box_value<T: AnyValue>(
             value: Rc<dyn std::any::Any>,
         ) -> Result<BoxedValue, Rc<dyn std::any::Any>> {
             value.downcast::<T>().map(|v| v as BoxedValue)
         }
-        with_registry(|r| {
-            r.erased_boxes.insert(TypeId::of::<T>(), box_value::<T>);
-        });
+        ERASED.with(|r| r.borrow_mut().boxes.insert(TypeId::of::<T>(), box_value::<T>));
     }
 
     /// Recovers a registered property's native value without changing its
@@ -732,7 +752,7 @@ impl ValueTypes {
     /// `AnyValue` type with [`Self::register_erased_value`] before retrying.
     pub fn box_erased(value: Rc<dyn std::any::Any>) -> Result<BoxedValue, Rc<dyn std::any::Any>> {
         let id = value.as_ref().type_id();
-        let boxer = with_registry(|r| r.erased_boxes.get(&id).copied());
+        let boxer = ERASED.with(|r| r.borrow().boxes.get(&id).copied());
         match boxer {
             Some(boxer) => boxer(value),
             None => Err(value),
@@ -1185,19 +1205,18 @@ impl ValueTypes {
     /// itself and ordinary values return `None`.
     pub fn reference_object(value: &BoxedValue) -> Option<BoxedValue> {
         let handle = value_type_id(&**value);
-        let (cast, view, nullable) = with_registry(|r| {
+        let (cast, nullable) = with_registry(|r| {
             (
                 r.reference_handles
                     .get(&handle)
                     .and_then(|object| r.casts.get(&(handle, *object)).cloned()),
-                r.reference_views.get(&handle).cloned(),
                 r.nullable_inner.contains_key(&handle),
             )
         });
         if let Some(cast) = cast {
             return cast.apply(value);
         }
-        if let Some(view) = view {
+        if let Some(view) = VIEW_LOOKUP.with(Cell::get).and_then(|find| find(handle)) {
             return view(value);
         }
         if nullable {
@@ -1213,7 +1232,8 @@ impl ValueTypes {
 
     /// Declares a handle which views a plain reference model through a
     /// contract. `object` must return the SAME allocation, erased to `Any`;
-    /// the actual concrete type must be registered with `register_reference`.
+    /// the actual concrete type must be registered with `register_reference`
+    /// and its boxer with `register_erased_value`.
     /// No payload clone, wrapper object, inferred cast or owning cache is made.
     ///
     /// This complements `register_reference::<T>()`, which describes a concrete
@@ -1237,11 +1257,9 @@ impl ValueTypes {
                 "Reference view requires register_reference for its concrete model"
             );
             Some(Self::box_erased(model)
-                .unwrap_or_else(|_| unreachable!("registered reference model has an erased boxer")))
+                .unwrap_or_else(|_| panic!("the model of a reference view registers its boxer (register_erased_value)")))
         });
-        with_registry(|r| {
-            r.reference_views.insert(TypeId::of::<I>(), view);
-        });
+        insert_reference_view(TypeId::of::<I>(), view);
     }
 
     /// Registers a reference view whose implementation may decline normalization.
@@ -1257,9 +1275,9 @@ impl ValueTypes {
             assert!(Self::is_reference(model.as_ref().type_id()),
                 "Reference view requires register_reference for its concrete model");
             Some(Self::box_erased(model)
-                .unwrap_or_else(|_| unreachable!("registered reference model has an erased boxer")))
+                .unwrap_or_else(|_| panic!("the model of a reference view registers its boxer (register_erased_value)")))
         });
-        with_registry(|r| { r.reference_views.insert(TypeId::of::<I>(), view); });
+        insert_reference_view(TypeId::of::<I>(), view);
     }
 
     /// Registers the enclosing object identity of a typed view. `identity`
@@ -1367,9 +1385,6 @@ impl ValueTypes {
     /// weakly, treat null as a valid value of the type, and convert between
     /// the object and `Rc<T>` / `Option<Rc<T>>` typed properties.
     pub fn register_reference<T: PartialEq + 'static>() {
-        // The model itself: a reference view returns the allocation of the model, which
-        // `box_erased` recovers. Its handles opt in with `register_erased_value` where needed.
-        Self::register_erased_value::<T>();
         // The nullable handle of a model unwraps to the model object itself,
         // cloning its Rc, never the object (the type need not be Clone).
         fn nullable<T: PartialEq + 'static>(request: NullableRequest<'_>) -> Option<BoxedValue> {
@@ -3513,6 +3528,7 @@ mod erased_reference_tests {
     #[test]
     fn erased_registered_reference_keeps_allocation_type_mutation_casts_and_lifetime() {
         ValueTypes::register_reference::<Payload>();
+        ValueTypes::register_erased_value::<Payload>();
         let value = Rc::new(Payload(Cell::new(3)));
         let weak = Rc::downgrade(&value);
         let erased: Rc<dyn std::any::Any> = value.clone();

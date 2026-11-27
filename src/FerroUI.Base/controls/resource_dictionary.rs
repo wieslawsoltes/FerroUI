@@ -669,6 +669,24 @@ impl IResourceNode for ResourceDictionaryHandle {
     }
 }
 
+impl dyn IResourceProvider + '_ {
+    /// The dictionary represented by this provider, when it represents one.
+    ///
+    /// This preserves dictionary identity and permits native consumers to inspect
+    /// own entries and child dictionaries without changing normal resource lookup
+    /// precedence. Lazy includes load on first use and propagate their usual load
+    /// failures. Providers that do not represent dictionaries return `None`.
+    /// (One function for every provider, not a method of each: only what reads it links it.)
+    pub fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        if let Some(handle) = self.as_any().and_then(|any| any.downcast_ref::<ResourceDictionaryHandle>()) {
+            return Some(handle.0.clone().into());
+        }
+        self.as_object()
+            .and_then(|object| object.to_ref().cast::<ResourceDictionary>())
+            .map(Into::into)
+    }
+}
+
 impl IResourceProvider for ResourceDictionaryHandle {
     fn as_any(&self) -> Option<&dyn std::any::Any> {
         Some(self)
@@ -676,10 +694,6 @@ impl IResourceProvider for ResourceDictionaryHandle {
 
     fn as_resource_dictionary(&self) -> Option<&dyn IResourceDictionary> {
         Some(self)
-    }
-
-    fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
-        Some(self.0.clone().into())
     }
 
     fn owner(&self) -> Option<ResourceHostRef> {
