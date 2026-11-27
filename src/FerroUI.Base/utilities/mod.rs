@@ -48,7 +48,7 @@ mod uri_extensions;
 
 pub use disposable_lock::DisposableLock;
 pub use option_cell::OptionCell;
-pub use ref_countable::{RefCountable, RefCounted};
+pub use ref_countable::{RefCountable, RefCounted, WeakRefCounted};
 pub use release_excess::{ReleaseExcess, RETAINED_BUFFER_BYTES};
 pub use resting::{
     register_resting_buffers, release_free_pages, release_resting_buffers, rest_after_burst, ReleaseAtRest,

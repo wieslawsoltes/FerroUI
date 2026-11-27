@@ -53,10 +53,11 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
-// Packed row tables of the deferred shapes (#855, `packed_resource_rows.rs`).
+// Packed row tables (#855, `packed_resource_rows.rs`).
 pub use super::theme_resources::{
+    add_packed_color_resources, add_packed_corner_radius_resources, add_packed_double_resources,
     add_packed_dynamic_brushes, add_packed_literal_brushes, add_packed_resource_aliases, add_packed_static_brushes,
-    PackedRows,
+    add_packed_string_resources, add_packed_thickness_resources, PackedRows, PackedValueRows,
 };
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.
@@ -765,6 +766,48 @@ pub fn setter_value_property() -> MarkupValue {
         );
     }
     boxed(INFO.with(Rc::clone))
+}
+
+/// The target property of a markup extension nested in a binding, made from the declared member
+/// alone as [`setter_value_property`] is: the themes name these members only for this, and
+/// naming the whole declaration kept every member of the binding in every application with a
+/// theme (#603). The type is the first handle of the type of the property, what
+/// [`markup_handle`] gives, without naming the declaration of that type either.
+macro_rules! binding_target_properties {
+    ($($function:ident => $owner:literal, $member:expr, $name:literal, $handle:ty;)*) => {$(
+        #[inline(never)]
+        pub fn $function() -> MarkupValue {
+            ferroui_base::ferro_thread_local! {
+                static INFO: Rc<dyn IPropertyInfo> = new_clr_property_info(
+                    $owner.to_string(),
+                    $member,
+                    $name,
+                    false,
+                    ValueType::of::<$handle>(),
+                    false,
+                );
+            }
+            boxed(INFO.with(Rc::clone))
+        }
+    )*};
+}
+
+binding_target_properties! {
+    template_binding_converter_property => "FerroUI.Data.TemplateBinding",
+        ferroui_base::data::TemplateBinding::__converter_markup_property(), "Converter",
+        Rc<dyn ferroui_base::data::converters::IValueConverter>;
+    compiled_binding_converter_property => "FerroUI.Data.CompiledBinding",
+        ferroui_base::data::CompiledBinding::__converter_markup_property(), "Converter",
+        Rc<dyn ferroui_base::data::converters::IValueConverter>;
+    multi_binding_bindings_property => "FerroUI.Data.MultiBinding",
+        ferroui_base::data::MultiBinding::__bindings_markup_property(), "Bindings",
+        ferroui_base::collections::FerroList<Rc<dyn ferroui_base::data::BindingBase>>;
+    multi_binding_converter_property => "FerroUI.Data.MultiBinding",
+        ferroui_base::data::MultiBinding::__converter_markup_property(), "Converter",
+        Rc<dyn ferroui_base::data::converters::IMultiValueConverter>;
+    reflection_binding_relative_source_property => "FerroUI.Data.ReflectionBinding",
+        ferroui_base::data::ReflectionBinding::__relative_source_markup_property(), "RelativeSource",
+        Rc<ferroui_base::data::RelativeSource>;
 }
 
 /// The Rust type the declaration of the plain property `name` of `markup` states for its
@@ -1858,10 +1901,14 @@ pub fn delegate_result<T: PartialEq + 'static>(value: T) -> MarkupValue {
 /// root object is gone does nothing, as does one that is called with other arguments than
 /// the method takes. A failure of the method reaches the dispatcher, as it does from the
 /// delegate the run-time loader creates.
+///
+/// `method` is a plain function: the closure generated code writes captures nothing and coerces to
+/// it, so there is one copy of this function and of its delegate per `This`, not one per handler
+/// of a document (#998).
 pub fn method_delegate<This: Clone + 'static>(
     context: &Rc<XamlIlContext>,
     parameters: usize,
-    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+    method: fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError>,
 ) -> ferroui_base::metadata::MarkupDelegate {
     let instance = context.root_object_field().as_ref().map(ferroui_base::data::core::WeakValue::new);
     ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
@@ -2395,6 +2442,80 @@ mod tests {
         assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
         let read = by_name.get_boxed(&setter).expect("the value");
         assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
+    }
+
+    /// Not from upstream (#603): the target property of a markup extension nested in a binding
+    /// is made from the declared member alone and describes what the declaration declares: the
+    /// same name, type, accessors and attributes, one description per thread.
+    #[test]
+    fn the_binding_target_properties_are_the_declared_members() {
+        use super::{
+            clr_property_info, compiled_binding_converter_property, markup_handle, multi_binding_bindings_property,
+            multi_binding_converter_property, reflection_binding_relative_source_property,
+            template_binding_converter_property,
+        };
+        use ferroui_base::collections::FerroList;
+        use ferroui_base::data::converters::{IMultiValueConverter, IValueConverter};
+        use ferroui_base::data::core::IPropertyInfo;
+        use ferroui_base::data::{
+            BindingBase, CompiledBinding, MultiBinding, ReflectionBinding, RelativeSource, TemplateBinding,
+        };
+        use ferroui_base::metadata::{MarkupProperty, MarkupType, MarkupTyped, MarkupValue};
+        use std::rc::Rc;
+
+        type Case = (&'static MarkupType, &'static MarkupType, &'static MarkupProperty, fn() -> MarkupValue);
+        let cases: [Case; 5] = [
+            (
+                <TemplateBinding as MarkupTyped>::MARKUP,
+                <dyn IValueConverter as MarkupTyped>::MARKUP,
+                TemplateBinding::__converter_markup_property(),
+                template_binding_converter_property,
+            ),
+            (
+                <CompiledBinding as MarkupTyped>::MARKUP,
+                <dyn IValueConverter as MarkupTyped>::MARKUP,
+                CompiledBinding::__converter_markup_property(),
+                compiled_binding_converter_property,
+            ),
+            (
+                <MultiBinding as MarkupTyped>::MARKUP,
+                <FerroList<Rc<dyn BindingBase>> as MarkupTyped>::MARKUP,
+                MultiBinding::__bindings_markup_property(),
+                multi_binding_bindings_property,
+            ),
+            (
+                <MultiBinding as MarkupTyped>::MARKUP,
+                <dyn IMultiValueConverter as MarkupTyped>::MARKUP,
+                MultiBinding::__converter_markup_property(),
+                multi_binding_converter_property,
+            ),
+            (
+                <ReflectionBinding as MarkupTyped>::MARKUP,
+                <RelativeSource as MarkupTyped>::MARKUP,
+                ReflectionBinding::__relative_source_markup_property(),
+                reflection_binding_relative_source_property,
+            ),
+        ];
+        for (owner, value_type, alone, target) in cases {
+            let declared = owner.find_property(alone.name).expect("a declared member");
+            assert_eq!((alone.type_)(), (declared.type_)(), "{}", alone.name);
+            assert_eq!((alone.get.is_some(), alone.set.is_some()), (declared.get.is_some(), declared.set.is_some()));
+            assert_eq!(
+                alone.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>(),
+                declared.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>(),
+                "{}",
+                alone.name
+            );
+
+            let value = target().expect("a property description");
+            let info = value.downcast_ref::<Rc<dyn IPropertyInfo>>().expect("an IPropertyInfo").clone();
+            let by_name = clr_property_info(owner, declared.name, false, markup_handle(value_type), false);
+            assert_eq!(info.name(), by_name.name());
+            assert_eq!(info.property_type(), by_name.property_type(), "{}", alone.name);
+            assert_eq!((info.can_get(), info.can_set()), (by_name.can_get(), by_name.can_set()));
+            let again = target().expect("a property description");
+            assert!(Rc::ptr_eq(&info, again.downcast_ref::<Rc<dyn IPropertyInfo>>().unwrap()));
+        }
     }
 
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
