@@ -11,15 +11,13 @@ use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_fonts_web_core::css::{parse_stylesheet, FontFaceDescriptors, FontSource, FontTech, FontTechs};
-#[cfg(not(target_family = "wasm"))]
+#[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
 use ferroui_fonts_web_core::decode_font_with_brotli;
 use ferroui_fonts_web_core::loading::{
     check_faces, find_matching_faces, FontDisplayPhase, FontDisplayTimeline, FontFaceId, FontFaceLoadStatus,
     FontFaceSetError, FontFaceSetEvent, FontFaceSetLoadStatus, FontFaceSetState, FontFaceView,
 };
-use ferroui_fonts_web_core::matching::{
-    face_for_character, family_matches, match_font_faces, FontMatchRequest, FontStyleRequest,
-};
+use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
 use ferroui_fonts_web_core::sfnt::{make_invisible_font, SanitizeOptions};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
@@ -32,8 +30,11 @@ use std::time::{Duration, Instant};
 /// Separates a family from the id of one of its faces in the name a fallback typeface carries. A
 /// private use character, so that it cannot be part of a declared name.
 const FACE_SEPARATOR: char = '\u{E000}';
-/// The bytes decoded in one slice of work on the UI thread.
-const DECODE_SLICE: usize = 32 * 1024;
+/// The work between two looks at the clock while decoding on the UI thread.
+const DECODE_STEP: usize = 2 * 1024;
+/// How long one slice of decoding may run on the UI thread before it yields to the page. Well
+/// under the 50 ms of a long task, with room for what a single step cannot divide.
+const DECODE_SLICE: Duration = Duration::from_millis(4);
 /// The most fonts fetched at the same time.
 const MAX_CONCURRENT_FETCHES: usize = 8;
 
@@ -251,7 +252,7 @@ impl Shared {
             return;
         };
         let bytes: Arc<[u8]> = bytes.into();
-        #[cfg(not(target_family = "wasm"))]
+        #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
         if this.use_dispatcher && Self::decode_off_thread(this, id, bytes.clone()) {
             return;
         }
@@ -266,7 +267,7 @@ impl Shared {
 
     /// Decodes on a worker thread. False when no thread could be started: the decode then runs
     /// in slices on the UI thread.
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
     fn decode_off_thread(this: &Rc<Self>, id: FontFaceId, bytes: Arc<[u8]>) -> bool {
         let options = this.options;
         let weak = Rc::downgrade(this);
@@ -305,12 +306,24 @@ impl Shared {
 
     /// One slice of decoding, then the fonts that finished. Returns whether work remains.
     fn run_slice(this: &Rc<Self>) -> bool {
-        let job = this.jobs.borrow_mut().pop_front();
-        if let Some(mut job) = job {
-            match job.decoder.step(DECODE_SLICE) {
+        Self::run_slice_for(this, DECODE_SLICE)
+    }
+
+    /// Decodes in small steps until `duration` has passed, at least one step.
+    fn run_slice_for(this: &Rc<Self>, duration: Duration) -> bool {
+        let started = Instant::now();
+        loop {
+            let job = this.jobs.borrow_mut().pop_front();
+            let Some(mut job) = job else {
+                break;
+            };
+            match job.decoder.step(DECODE_STEP) {
                 Ok(None) => this.jobs.borrow_mut().push_front(job),
                 Ok(Some(font)) => this.finished.borrow_mut().push((job.id, Ok(font))),
                 Err(error) => this.finished.borrow_mut().push((job.id, Err(error))),
+            }
+            if started.elapsed() >= duration {
+                break;
             }
         }
         // Fonts that finish together are installed together, for one layout pass. A font is
@@ -564,6 +577,12 @@ impl WebFontCollection {
             Shared::request_load(&self.shared, *id);
         }
         ids
+    }
+
+    /// One slice of the queued work, of at least one step. Returns whether work remains.
+    #[doc(hidden)]
+    pub fn run_one_slice(&self, duration: Duration) -> bool {
+        Shared::run_slice_for(&self.shared, duration)
     }
 
     /// Runs the decoding that is queued to its end, for tests and for a caller that has nothing
@@ -925,6 +944,25 @@ mod tests {
         harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
         assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
         assert!(harness.lookup("A").is_none(), "the text keeps its fallback");
+    }
+
+    #[test]
+    fn decoding_on_the_ui_thread_is_cut_into_slices() {
+        let harness = Harness::new();
+        let ids = harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+        harness.lookup("A");
+        let pending: Vec<_> = harness.pending.borrow_mut().drain(..).collect();
+        for (_, completion) in pending {
+            completion(Ok(inter()));
+        }
+        assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loading), "nothing ran yet");
+        let mut slices = 1;
+        while harness.collection.run_one_slice(Duration::ZERO) {
+            slices += 1;
+            assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loading));
+        }
+        assert!(slices > 16, "{slices} slices");
+        assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
     }
 
     #[test]

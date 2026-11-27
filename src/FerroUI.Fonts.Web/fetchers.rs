@@ -170,6 +170,10 @@ impl IFontFaceFetcher for DefaultFontFaceFetcher {
             return;
         }
         let Ok(parsed) = url::Url::parse(url) else {
+            // A relative URL: the page resolves it against its own address.
+            #[cfg(all(feature = "browser", target_family = "wasm"))]
+            crate::browser_fetcher::fetch(url, options.max_size, completion);
+            #[cfg(not(all(feature = "browser", target_family = "wasm")))]
             completion(Err(FontFetchError::NotFound));
             return;
         };
@@ -191,6 +195,14 @@ impl IFontFaceFetcher for DefaultFontFaceFetcher {
                 let (work, shared) = shared_completion(completion);
                 let result = crate::off_thread::run_off_thread(move || fetch_http(&address, &options), work);
                 finish_if_not_started(result, shared);
+            }
+            #[cfg(all(feature = "browser", target_family = "wasm"))]
+            "https" | "http" => {
+                if parsed.scheme() == "http" && !options.allow_insecure_http {
+                    completion(Err(FontFetchError::Forbidden("plain HTTP is not allowed".into())));
+                    return;
+                }
+                crate::browser_fetcher::fetch(url, options.max_size, completion);
             }
             _ => completion(Err(FontFetchError::Forbidden(format!("the scheme {} is not available", parsed.scheme())))),
         }

@@ -2076,8 +2076,10 @@ dependencies = [
  "ferroui-controls",
  "ferroui-fonts-web-core",
  "ferroui-vello",
+ "js-sys",
  "ureq",
  "url",
+ "wasm-bindgen",
 ]
 
 [[package]]
