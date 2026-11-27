@@ -26,6 +26,15 @@ type SuppressedLocalValueHandler = dyn Fn(&FerroObject, &'static FerroProperty);
 #[derive(Default)]
 struct SuppressedLocalValueHandlers(HandlerList<SuppressedLocalValueHandler>);
 
+type SuppressedLocalValueHooks = (fn(&FerroObject) -> bool, fn(&FerroObject, &'static FerroProperty));
+
+thread_local! {
+    /// The check and the notification of watchers of suppressed local writes, installed by the
+    /// first watcher (`FerroObject::suppressed_local_value_changed`): until then a coerced write
+    /// reads no instance data for them.
+    static SUPPRESSED_LOCAL_VALUES: Cell<Option<SuppressedLocalValueHooks>> = const { Cell::new(None) };
+}
+
 /// The virtual table of [`FerroObject`].
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1117,6 +1126,9 @@ impl FerroObject {
         property: &'static FerroProperty,
         handler: impl Fn(&FerroObject) + 'static,
     ) -> Rc<dyn IDisposable> {
+        SUPPRESSED_LOCAL_VALUES.with(|hooks| {
+            hooks.set(Some((Self::has_suppressed_local_value_handlers_core, Self::notify_suppressed_local_value_changed_core)))
+        });
         let handlers = self.instance_data::<SuppressedLocalValueHandlers>().unwrap_or_else(|| {
             let handlers = Rc::new(SuppressedLocalValueHandlers::default());
             self.set_instance_data(Some(handlers.clone()));
@@ -1138,6 +1150,10 @@ impl FerroObject {
     // One copy: the coerced write of every value type calls it.
     #[inline(never)]
     pub(crate) fn has_suppressed_local_value_handlers(&self) -> bool {
+        SUPPRESSED_LOCAL_VALUES.with(Cell::get).is_some_and(|(has, _)| has(self))
+    }
+
+    fn has_suppressed_local_value_handlers_core(&self) -> bool {
         self.instance_data::<SuppressedLocalValueHandlers>()
             .is_some_and(|handlers| !handlers.0.is_empty())
     }
@@ -1145,6 +1161,12 @@ impl FerroObject {
     // One copy: the coerced write of every value type calls it.
     #[inline(never)]
     pub(crate) fn notify_suppressed_local_value_changed(&self, property: &'static FerroProperty) {
+        if let Some((_, notify)) = SUPPRESSED_LOCAL_VALUES.with(Cell::get) {
+            notify(self, property);
+        }
+    }
+
+    fn notify_suppressed_local_value_changed_core(&self, property: &'static FerroProperty) {
         if let Some(handlers) = self.instance_data::<SuppressedLocalValueHandlers>() {
             for (_, handler) in handlers.0.snapshot().iter() {
                 handler(self, property);
