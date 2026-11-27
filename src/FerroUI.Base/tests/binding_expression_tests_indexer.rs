@@ -149,6 +149,12 @@ impl NonIntegerIndexer {
     pub fn property_changed_subscription_count(&self) -> usize {
         self.property_changed.handler_count()
     }
+
+    /// Stores `value` and raises `notification` instead of the indexer name.
+    fn set_with_notification(&self, key: &str, value: &str, notification: &str) {
+        self.storage.borrow_mut().insert(s(key), s(value));
+        self.property_changed.raise(notification);
+    }
 }
 
 impl INotifyPropertyChanged for NonIntegerIndexer {
@@ -405,6 +411,22 @@ fn should_track_non_integer_indexer(f: Flavor) {
     assert_eq!(Some(s("bar2")), target.string());
 }
 
+fn should_track_indexer_notified_by_item_with_key(f: Flavor) {
+    let data = NonIntegerIndexerData::new(NonIntegerIndexer::new());
+    data.foo.set("foo", "bar");
+    let target = string_target(data.clone(), non_integer_indexer_nodes(f));
+    assert_eq!(Some(s("bar")), target.string());
+
+    data.foo.set_with_notification("foo", "keyed", "Item[foo]");
+    assert_eq!(Some(s("keyed")), target.string());
+
+    data.foo.set_with_notification("foo", "all", "Item[]");
+    assert_eq!(Some(s("all")), target.string());
+
+    data.foo.set_with_notification("foo", "other", "Items");
+    assert_eq!(Some(s("all")), target.string());
+}
+
 fn should_set_array_index(f: Flavor) {
     let data = StringArrayData::new(BindableArray::new(strings(&["foo", "bar"])));
     let target =
@@ -507,6 +529,7 @@ both_flavors!(
     should_track_incc_move,
     should_track_incc_reset,
     should_track_non_integer_indexer,
+    should_track_indexer_notified_by_item_with_key,
     should_set_array_index,
     should_write_indexed_value_to_source,
     should_set_existing_dictionary_entry,

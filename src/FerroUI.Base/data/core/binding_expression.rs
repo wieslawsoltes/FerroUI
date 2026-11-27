@@ -489,6 +489,19 @@ impl BindingExpression {
         }
     }
 
+    fn is_published_value(&self) -> bool {
+        // A handler of the change being published can stop the binding.
+        if !self.base.is_running() {
+            return false;
+        }
+        let value = self.base.get_value();
+        is_unset(&value)
+            || self.base.try_get_target().zip(self.base.target_property()).is_some_and(|(target, property)| {
+                let current = ValueTypes::normalize(target.get_value_untyped(property));
+                ValueTypes::identity_equals(current.as_ref(), value.as_ref())
+            })
+    }
+
     fn write_target_value_to_source(&self) {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         if self.base.is_reload_paused() { return; }
@@ -604,6 +617,13 @@ impl BindingExpression {
     fn on_target_property_changed(&self) {
         debug_assert!(matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource));
         if self.publishing.get() {
+            return;
+        }
+        // A value this binding has just published does not go back to the source: the converter
+        // may not round-trip it. That includes the unset marker, for which the target falls back
+        // to its default value. A value the target changed, by coercion for example, differs from
+        // the published one and is still written.
+        if self.base.is_publishing_value() && self.is_published_value() {
             return;
         }
         let delay = self.delay();

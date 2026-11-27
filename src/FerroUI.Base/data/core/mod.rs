@@ -24,6 +24,7 @@ mod weak_value;
 pub use binding_error::ExpressionError;
 pub use binding_expression::{BindingExpression, BindingExpressionOptions};
 pub use common_property_names::INDEXER_NAME;
+pub(crate) use common_property_names::is_indexer_change;
 pub use clr_property_info::{BoxedPropertyGetter, BoxedPropertySetter, ClrPropertyInfo, FalliblePropertyGetter, Maybe, ModelRef, PropertyGetter, PropertyKind, PropertySetter, Untyped, Value};
 pub use expression_parse_exception::ExpressionParseError;
 #[allow(deprecated)]
