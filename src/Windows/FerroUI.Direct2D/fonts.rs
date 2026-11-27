@@ -30,13 +30,27 @@ impl NativeFont {
         self.handle.0
     }
 }
+/// A native font that reads `data` and keeps a reference to it, with no copy.
+///
+/// # Safety
+/// The result is a font the caller owns, or null.
+unsafe fn shared_native_font(data: &Arc<[u8]>) -> ffi::Ptr {
+    extern "C" fn release(context: *mut std::ffi::c_void) {
+        // SAFETY: `context` is the box made below, and the owner object releases it once.
+        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
+    }
+    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
+    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
+    unsafe { ffi::d2_font_data(data.as_ptr(), data.len(), context, release) }
+}
+
 pub struct Typeface {
     pub font: Arc<NativeFont>,
     weight: FontWeight,
     style: FontStyle,
     stretch: FontStretch,
     simulations: FontSimulations,
-    data: Option<Vec<u8>>,
+    data: Option<Arc<[u8]>>,
 }
 impl Typeface {
     fn new(
@@ -166,10 +180,12 @@ impl FontManager {
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         let mut data = Vec::new();
         stream.read_to_end(&mut data).ok()?;
+        // The one long-lived copy of the bytes: DirectWrite reads this buffer.
+        let data: Arc<[u8]> = data.into();
         let tags: Vec<_> = variations.iter().map(|(t, _)| t.value()).collect();
         let values: Vec<_> = variations.iter().map(|(_, v)| *v).collect();
         unsafe {
-            let raw = ffi::d2_font_data(data.as_ptr(), data.len());
+            let raw = shared_native_font(&data);
             if raw.is_null() {
                 return None;
             }
