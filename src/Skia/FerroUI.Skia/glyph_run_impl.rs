@@ -190,25 +190,28 @@ impl GlyphRunImpl {
     /// Returns `None` for an empty run.
     pub fn get_text_blob(&self, text_options: TextOptions, render_options: RenderOptions) -> Option<TextBlob> {
         let text_options = Self::resolve_text_options(text_options, render_options);
-        self.text_blob_cache.lock().unwrap().get_or_add(text_options, |text_options| {
-            if self.glyph_indices.is_empty() {
-                return None;
-            }
+        self.text_blob_cache.lock().unwrap().get_or_add(text_options, |text_options| self.make_text_blob(*text_options))
+    }
 
-            let font = create_font(&self.font, *text_options);
+    /// A new text blob of the run's glyphs with resolved text options; `None` for an empty run.
+    fn make_text_blob(&self, text_options: TextOptions) -> Option<TextBlob> {
+        if self.glyph_indices.is_empty() {
+            return None;
+        }
 
-            let mut builder = SkTextBlobBuilderCache::get();
+        let font = create_font(&self.font, text_options);
 
-            let (glyphs, positions) = builder.alloc_run_pos(&font, self.glyph_indices.len(), None);
-            positions.copy_from_slice(&self.glyph_positions);
-            glyphs.copy_from_slice(&self.glyph_indices);
+        let mut builder = SkTextBlobBuilderCache::get();
 
-            let text_blob = builder.make();
+        let (glyphs, positions) = builder.alloc_run_pos(&font, self.glyph_indices.len(), None);
+        positions.copy_from_slice(&self.glyph_positions);
+        glyphs.copy_from_slice(&self.glyph_indices);
 
-            SkTextBlobBuilderCache::return_item(builder);
+        let text_blob = builder.make();
 
-            text_blob
-        })
+        SkTextBlobBuilderCache::return_item(builder);
+
+        text_blob
     }
 
     /// The text options a blob of the run is made with: an unspecified rendering mode follows
@@ -240,17 +243,28 @@ impl GlyphRunImpl {
         );
         let text_options = Self::resolve_text_options(text_options, render_options);
         let origin = skia_safe::Point::new(origin.x as f32, origin.y as f32);
-        let cached = self.text_blob_cache.lock().unwrap().try_get(&text_options);
-        if cached.is_none() && !self.drawn.swap(true, std::sync::atomic::Ordering::Relaxed) {
-            ferroui_base::diagnostics::perf_counters::add(
-                ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphRunsFirstDrawn,
-                1,
-            );
-            let font = create_font(&self.font, text_options);
-            canvas.draw_glyphs_at(&self.glyph_indices, &self.glyph_positions[..], origin, &font, paint);
-            return;
-        }
-        if let Some(text_blob) = self.get_text_blob(text_options, render_options) {
+        // One lock for the draw (the cached blob was looked up and then asked for again, two locks a draw):
+        // the blob that is cached, or the one made and cached now, or none on the first draw. A lock-free slot
+        // for the first blob was considered and left out: a slot that std can clear from `&self` needs a lock
+        // as well, and one that cannot be cleared keeps a blob alive after `dispose` until the run drops.
+        let text_blob = {
+            let mut cache = self.text_blob_cache.lock().unwrap();
+            match cache.try_get(&text_options) {
+                Some(cached) => cached,
+                None if !self.drawn.swap(true, std::sync::atomic::Ordering::Relaxed) => {
+                    drop(cache);
+                    ferroui_base::diagnostics::perf_counters::add(
+                        ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphRunsFirstDrawn,
+                        1,
+                    );
+                    let font = create_font(&self.font, text_options);
+                    canvas.draw_glyphs_at(&self.glyph_indices, &self.glyph_positions[..], origin, &font, paint);
+                    return;
+                }
+                None => cache.get_or_add(text_options, |text_options| self.make_text_blob(*text_options)),
+            }
+        };
+        if let Some(text_blob) = text_blob {
             canvas.draw_text_blob(text_blob, origin, paint);
         }
     }

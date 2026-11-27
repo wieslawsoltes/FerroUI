@@ -12,7 +12,7 @@
 use super::built_in_introspection_handler::{self, IntrospectionData};
 use super::built_in_properties_handler;
 use super::interface::{
-    CallResult, DBusError, DBusInterface, ERROR_UNKNOWN_INTERFACE, ERROR_UNKNOWN_OBJECT,
+    CallResult, DBusError, DBusInterface, MethodReply, ERROR_UNKNOWN_INTERFACE, ERROR_UNKNOWN_OBJECT,
 };
 use crate::signal_watch::watch_stream;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -105,7 +105,7 @@ impl ObjectTable {
     /// Answers a method call (`DispatchMethodCallAsync`). `None` for a
     /// call the reference does not answer: one without a path or an
     /// interface.
-    pub(crate) fn dispatch_method_call(&self, message: &zbus::Message) -> Option<CallResult> {
+    pub(crate) fn dispatch_method_call(&self, message: &zbus::Message) -> Option<MethodReply> {
         let header = message.header();
         let path = header.path()?.as_str().to_string();
         let interface = header.interface()?.as_str().to_string();
@@ -114,16 +114,16 @@ impl ObjectTable {
         let has_path = self.has_path(&path);
 
         if has_path && interface == INTERFACE_PROPERTIES {
-            return Some(built_in_properties_handler::handle(self, &path, &member, &body));
+            return Some(built_in_properties_handler::handle(self, &path, &member, &body).into());
         }
 
         if has_path && interface == INTERFACE_INTROSPECTABLE {
             let data = self.resolve_introspection_data(&path);
-            return Some(built_in_introspection_handler::handle(&path, &member, &data));
+            return Some(built_in_introspection_handler::handle(&path, &member, &data).into());
         }
 
         if let Some(handler) = self.handler(&path, &interface) {
-            return Some(handler.call(&member, &body));
+            return Some(handler.dispatch(&member, &body));
         }
 
         if interface == INTERFACE_INTROSPECTABLE && member == "Introspect" {
@@ -131,11 +131,11 @@ impl ObjectTable {
             // (`HandleVirtualIntrospectionAsync`).
             let data = self.resolve_introspection_data(&path);
             if !data.child_segments.is_empty() {
-                return Some(built_in_introspection_handler::handle(&path, &member, &data));
+                return Some(built_in_introspection_handler::handle(&path, &member, &data).into());
             }
         }
 
-        Some(Err(Self::missing_handler(&path, &interface, has_path)))
+        Some(MethodReply::Ready(Err(Self::missing_handler(&path, &interface, has_path))))
     }
 
     /// `ReplyMissingHandler`.
@@ -206,7 +206,23 @@ impl AtSpiConnection {
     }
 
     fn on_method_call(&self, message: &zbus::Message) {
-        let Some(result) = self.objects.dispatch_method_call(message) else { return };
+        match self.objects.dispatch_method_call(message) {
+            Some(MethodReply::Ready(result)) => self.reply_to_call(message, result),
+            Some(MethodReply::Deferred(future)) => {
+                let connection = self.weak_self.clone();
+                let request = message.clone();
+                drop(Dispatcher::ui_thread().start_local(async move {
+                    let result = future.await;
+                    if let Some(connection) = connection.upgrade() {
+                        connection.reply_to_call(&request, result);
+                    }
+                }));
+            }
+            None => {}
+        }
+    }
+
+    fn reply_to_call(&self, message: &zbus::Message, result: CallResult) {
         let header = message.header();
         if header.primary().flags().contains(zbus::message::Flags::NO_REPLY_EXPECTED) {
             return;

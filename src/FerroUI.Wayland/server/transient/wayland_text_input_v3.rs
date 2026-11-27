@@ -103,6 +103,7 @@ pub struct TextInputSurfaceSnapshot {
     /// The cursor rectangle as it is sent to the compositor (`set_cursor_rectangle`).
     pub cursor_rectangle: Option<(i32, i32, i32, i32)>,
     pub content_type: Option<(ContentHint, ContentPurpose)>,
+    /// The surrounding window prepared for the compositor.
     pub surrounding_text: Option<String>,
 }
 
@@ -239,8 +240,6 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
         }
         ps.last_sent_enabled = false;
         ps.surrounding_text = None;
-        ps.surrounding_cursor_char = 0;
-        ps.surrounding_anchor_char = 0;
         ps.cursor_rect = None;
         ps.options = None;
         ps.has_client = false;
@@ -301,26 +300,23 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
         let Some(ps) = per_surfaces.get_mut(&s) else {
             return;
         };
-        ps.surrounding_text = Some(text);
-        ps.surrounding_cursor_char = cursor_char;
-        ps.surrounding_anchor_char = anchor_char;
+        ps.surrounding_text = surrounding_window(&text, cursor_char, anchor_char)
+            .map(|(text, cursor, anchor)| SurroundingText { text: text.to_owned(), cursor, anchor });
         if !ps.last_sent_enabled || !ps.supports_surrounding_text {
             return;
         }
-        if !ps.declared.surrounding_text {
+        if ps.declared.surrounding_text != ps.surrounding_text.is_some() {
             ps.needs_reenable = true;
             return;
         }
-        let text = ps.surrounding_text.as_deref().unwrap_or_default();
-
-        // Compositors enforce a 4000-byte cap per spec; truncate around cursor.
-        let (clamped_text, cursor_byte, anchor_byte) = clamp_surrounding_for_wayland(text, cursor_char, anchor_char);
-
+        let Some(surrounding) = &ps.surrounding_text else {
+            return;
+        };
         for name in &ps.entered_seats {
             let Some(seat) = seats.get_mut(name) else {
                 continue;
             };
-            seat.proxy.set_surrounding_text(clamped_text, cursor_byte, anchor_byte);
+            seat.proxy.set_surrounding_text(&surrounding.text, surrounding.cursor, surrounding.anchor);
             seat.proxy.set_text_change_cause(ChangeCause::Other);
             seat.commit();
         }
@@ -382,7 +378,7 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
                 last_sent_enabled: ps.last_sent_enabled,
                 cursor_rectangle: ps.cursor_rect.map(|rect| translate_cursor_rect(surfaces, ps.surface, rect)),
                 content_type: ps.options,
-                surrounding_text: ps.surrounding_text.clone(),
+                surrounding_text: ps.surrounding_text.as_ref().map(|surrounding| surrounding.text.clone()),
             })
             .collect();
         snapshots.sort_by_key(|snapshot| snapshot.surface);
@@ -439,10 +435,8 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
             let (x, y, w, h) = translate_cursor_rect(surfaces, s, rect);
             seat.proxy.set_cursor_rectangle(x, y, w, h);
         }
-        if let (true, Some(text)) = (ps.supports_surrounding_text, &ps.surrounding_text) {
-            let (clamped_text, cursor_byte, anchor_byte) =
-                clamp_surrounding_for_wayland(text, ps.surrounding_cursor_char, ps.surrounding_anchor_char);
-            seat.proxy.set_surrounding_text(clamped_text, cursor_byte, anchor_byte);
+        if let (true, Some(surrounding)) = (ps.supports_surrounding_text, &ps.surrounding_text) {
+            seat.proxy.set_surrounding_text(&surrounding.text, surrounding.cursor, surrounding.anchor);
             seat.proxy.set_text_change_cause(ChangeCause::Other);
         }
     }
@@ -600,8 +594,10 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
         let has_commit = commit_text.is_some();
 
         let (mut delete_before_chars, mut delete_after_chars) = (0, 0);
-        if has_delete && ps.supports_surrounding_text {
-            (delete_before_chars, delete_after_chars) = convert_delete_to_chars(ps, pending_delete_before, pending_delete_after);
+        if has_delete && ps.declared.surrounding_text {
+            (delete_before_chars, delete_after_chars) = ps.surrounding_text.as_ref()
+                .and_then(|surrounding| surrounding.deletion(pending_delete_before, pending_delete_after))
+                .unwrap_or_default();
         }
 
         // Compute new preedit (null = clear).
@@ -643,24 +639,24 @@ impl<M: ITextInputManagerV3, S: IWaylandTextInputV3Events> WaylandTextInputV3<M,
     }
 }
 
-fn convert_delete_to_chars<S>(ps: &PerSurface<S>, before_bytes: u32, after_bytes: u32) -> (i32, i32) {
-    // No surrounding-text snapshot means we can't safely convert the
-    // protocol's UTF-8 byte counts to UTF-16 char counts (passing the
-    // bytes through would be wrong for any non-ASCII text). The IME
-    // shouldn't issue delete_surrounding_text without us first sending
-    // set_surrounding_text, so just drop.
-    let Some(surrounding_text) = &ps.surrounding_text else {
-        return (0, 0);
-    };
-    let cursor_char = ps.surrounding_cursor_char;
-    // `-(int)beforeBytes` and `(int)afterBytes` of the reference wrap for a count beyond the
-    // range of an int; such a count is clamped to the range here, which gives the clamped
-    // result the conversion would give for every count a text can have.
-    let before = i32::try_from(before_bytes).unwrap_or(i32::MAX);
-    let after = i32::try_from(after_bytes).unwrap_or(i32::MAX);
-    let before_start_char = wayland_text_utils::char_index_from_utf8_offset(surrounding_text, -before, cursor_char);
-    let after_end_char = wayland_text_utils::char_index_from_utf8_offset(surrounding_text, after, cursor_char);
-    (cursor_char - before_start_char, after_end_char - cursor_char)
+struct SurroundingText {
+    text: String,
+    cursor: i32,
+    anchor: i32,
+}
+
+impl SurroundingText {
+    fn deletion(&self, before_bytes: u32, after_bytes: u32) -> Option<(i32, i32)> {
+        // The lengths extend the editor's selection on either side. Reject
+        // a request past the published window or inside a code point.
+        let low = self.cursor.min(self.anchor) as usize;
+        let high = self.cursor.max(self.anchor) as usize;
+        let start = low.checked_sub(before_bytes as usize)?;
+        let end = high.checked_add(after_bytes as usize)?;
+        let before = self.text.get(start..low)?.encode_utf16().count() as i32;
+        let after = self.text.get(high..end)?.encode_utf16().count() as i32;
+        Some((before, after))
+    }
 }
 
 /// The cursor rectangle of the client as `set_cursor_rectangle` takes it.
@@ -677,34 +673,56 @@ pub fn translate_cursor_rect(surfaces: &dyn ITextInputSurfaces, s: WSurfaceId, l
     (x, y, w, h)
 }
 
-/// The surrounding text as `set_surrounding_text` takes it: at most 4000 bytes around the
-/// cursor, and the cursor and the anchor as byte indices into them.
+/// Up to 4000 bytes of surrounding text, with directed UTF-8 selection offsets.
+/// An unrepresentable selection yields an empty window.
 pub fn clamp_surrounding_for_wayland(text: &str, cursor_char: i32, anchor_char: i32) -> (&str, i32, i32) {
-    const MAX_BYTES: i32 = 4000;
-    let total_bytes = text.len();
-    if total_bytes <= MAX_BYTES as usize {
-        return (
-            text,
-            wayland_text_utils::utf8_byte_index_from_char_index(text, cursor_char),
-            wayland_text_utils::utf8_byte_index_from_char_index(text, anchor_char),
-        );
+    surrounding_window(text, cursor_char, anchor_char).unwrap_or_default()
+}
+
+fn surrounding_window(text: &str, cursor: i32, anchor: i32) -> Option<(&str, i32, i32)> {
+    const MAX_BYTES: usize = 4000;
+    let (cursor, anchor) = (usize::try_from(cursor).ok()?, usize::try_from(anchor).ok()?);
+    if cursor.abs_diff(anchor) > MAX_BYTES {
+        return None;
     }
-
-    // Trim around cursor: keep ~half of MaxBytes on each side. The protocol
-    // accepts text that doesn't extend to start/end as a partial window.
-    let half = MAX_BYTES / 2;
-    let length = wayland_text_utils::utf16_length(text);
-    let cursor_clamped = cursor_char.clamp(0, length);
-    let start_char = wayland_text_utils::char_index_from_utf8_offset(text, -half, cursor_clamped);
-    let end_char = wayland_text_utils::char_index_from_utf8_offset(text, half, cursor_clamped);
-    let trimmed = wayland_text_utils::utf16_substring(text, start_char, end_char);
-    let trimmed_length = wayland_text_utils::utf16_length(trimmed);
-
-    let cursor_byte =
-        wayland_text_utils::utf8_byte_index_from_char_index(trimmed, (cursor_char - start_char).clamp(0, trimmed_length));
-    let anchor_byte =
-        wayland_text_utils::utf8_byte_index_from_char_index(trimmed, (anchor_char - start_char).clamp(0, trimmed_length));
-    (trimmed, cursor_byte, anchor_byte)
+    let mut position = 0;
+    let (mut cursor_byte, mut anchor_byte) = (None, None);
+    for (byte, character) in text.char_indices().chain(std::iter::once((text.len(), '\0'))) {
+        if position == cursor {
+            cursor_byte = Some(byte);
+        }
+        if position == anchor {
+            anchor_byte = Some(byte);
+        }
+        if position >= cursor.max(anchor) {
+            break;
+        }
+        position += character.len_utf16();
+    }
+    let (cursor, anchor) = (cursor_byte?, anchor_byte?);
+    let (low, high) = (cursor.min(anchor), cursor.max(anchor));
+    let context = MAX_BYTES.checked_sub(high - low)?;
+    let mut start = low.saturating_sub(context / 2).min(text.len().saturating_sub(MAX_BYTES));
+    let mut end = (start + MAX_BYTES).min(text.len());
+    while !text.is_char_boundary(start) {
+        start += 1;
+    }
+    while !text.is_char_boundary(end) {
+        end -= 1;
+    }
+    debug_assert!(start <= low && high <= end);
+    // The Wayland wire type is a C string. End the context at a NUL and
+    // withdraw it if that would split the actual selection.
+    if text[low..high].contains('\0') {
+        return None;
+    }
+    if let Some(nul) = text[start..low].rfind('\0') {
+        start += nul + 1;
+    }
+    if let Some(nul) = text[high..end].find('\0') {
+        end = high + nul;
+    }
+    Some((&text[start..end], (cursor - start) as i32, (anchor - start) as i32))
 }
 
 // ----- inner state types -----
@@ -746,9 +764,7 @@ struct PerSurface<S> {
     last_sent_enabled: bool,
     cursor_rect: Option<Rect>,
     options: Option<(ContentHint, ContentPurpose)>,
-    surrounding_text: Option<String>,
-    surrounding_cursor_char: i32,
-    surrounding_anchor_char: i32,
+    surrounding_text: Option<SurroundingText>,
 }
 
 impl<S> PerSurface<S> {
@@ -767,8 +783,6 @@ impl<S> PerSurface<S> {
             cursor_rect: None,
             options: None,
             surrounding_text: None,
-            surrounding_cursor_char: 0,
-            surrounding_anchor_char: 0,
         }
     }
 }
@@ -1453,24 +1467,103 @@ mod tests {
     }
 
     #[test]
-    fn surrounding_text_beyond_the_limit_is_cut_around_the_cursor() {
-        // 3000 characters of two bytes: 6000 bytes, the cursor in the middle.
+    fn surrounding_text_beyond_the_limit_keeps_the_whole_directed_selection() {
         let text: String = "\u{439}".repeat(3000);
-        let (trimmed, cursor, anchor) = clamp_surrounding_for_wayland(&text, 1500, 1400);
-        assert_eq!(trimmed.len(), 4000);
-        assert_eq!(cursor, 2000);
-        assert_eq!(anchor, 1800);
-
-        // The cursor near the start: what is before it is kept whole.
-        let (trimmed, cursor, anchor) = clamp_surrounding_for_wayland(&text, 10, 2990);
-        assert_eq!(trimmed.len(), 20 + 2000);
-        assert_eq!(cursor, 20);
-        // An anchor outside the window is clamped to its end.
-        assert_eq!(anchor, 2020);
+        for (cursor, anchor) in [(900, 2500), (2500, 900)] {
+            let mut fixture = Fixture::active();
+            fixture.text_input.set_surrounding_text(fixture.surface, text.clone(), cursor, anchor);
+            let (cursor_byte, anchor_byte) = if cursor < anchor { (400, 3600) } else { (3600, 400) };
+            assert_eq!(fixture.take(), vec![
+                Request::SurroundingText("\u{439}".repeat(2000), cursor_byte, anchor_byte),
+                Request::ChangeCause(ChangeCause::Other),
+                Request::Commit,
+            ]);
+        }
 
         // A text within the limit is sent whole.
         let (whole, cursor, anchor) = clamp_surrounding_for_wayland("\u{4f60}\u{597d}", 1, 2);
         assert_eq!((whole, cursor, anchor), ("\u{4f60}\u{597d}", 3, 6));
+        // Cropping can land in the middle of a UTF-8 code point on each side.
+        let astral = "🌐".repeat(1100);
+        let (window, cursor, anchor) = clamp_surrounding_for_wayland(&astral, 1001, 1000);
+        assert_eq!((window, cursor, anchor), ("", 0, 0));
+        let (window, cursor, anchor) = clamp_surrounding_for_wayland(&astral, 1002, 1000);
+        assert_eq!((window.len(), cursor, anchor), (3996, 2000, 1996));
+    }
+
+    #[test]
+    fn a_selection_larger_than_the_window_withdraws_surrounding_text_until_it_fits() {
+        let mut fixture = Fixture::active();
+        let surface = fixture.surface;
+        let text = "🌐".repeat(1001);
+        fixture.text_input.set_surrounding_text(surface, text.clone(), 0, 2002);
+        fixture.flush();
+        assert_eq!(fixture.take(), vec![
+            Request::Disable, Request::Commit, Request::Enable,
+            Request::ContentType(ContentHint::NONE, ContentPurpose::Normal),
+            Request::CursorRectangle(0, 0, 1, 1), Request::Commit,
+        ]);
+        // The IME can keep committing text while contextual deletion is unavailable.
+        fixture.text_input.on_delete_surrounding_text(SEAT, 0, 4);
+        fixture.text_input.on_commit_string(SEAT, Some("z".to_owned()));
+        fixture.done();
+        assert_eq!(fixture.updates(), vec![(TOKEN, 0, 0, Some("z".to_owned()), None, -1, -1)]);
+
+        fixture.text_input.set_surrounding_text(surface, text, 0, 2000);
+        fixture.flush();
+        assert_eq!(fixture.take(), vec![
+            Request::Disable, Request::Commit, Request::Enable,
+            Request::ContentType(ContentHint::NONE, ContentPurpose::Normal),
+            Request::CursorRectangle(0, 0, 1, 1),
+            Request::SurroundingText("🌐".repeat(1000), 0, 4000),
+            Request::ChangeCause(ChangeCause::Other), Request::Commit,
+        ]);
+        fixture.text_input.on_delete_surrounding_text(SEAT, 0, 4);
+        fixture.done();
+        assert_eq!(fixture.updates(), vec![(TOKEN, 0, 0, None, None, -1, -1)]);
+
+        fixture.text_input.set_surrounding_text(surface, "🌐text".to_owned(), 2, 2);
+        fixture.take();
+        fixture.text_input.on_delete_surrounding_text(SEAT, 4, 1);
+        fixture.done();
+        assert_eq!(fixture.updates(), vec![(TOKEN, 2, 1, None, None, -1, -1)]);
+    }
+
+    #[test]
+    fn surrounding_text_never_places_a_nul_in_the_wayland_string() {
+        let text = "before\0after";
+        assert_eq!(surrounding_window(text, 6, 6), Some(("before", 6, 6)));
+        assert_eq!(surrounding_window(text, 7, 7), Some(("after", 0, 0)));
+        assert_eq!(surrounding_window(text, 3, 10), None);
+    }
+
+    #[test]
+    fn deletion_counts_bytes_from_both_ends_of_a_directed_selection() {
+        let mut fixture = Fixture::active();
+        for (cursor, anchor) in [(3, 2), (2, 3)] {
+            fixture.text_input.set_surrounding_text(fixture.surface, "🌐x界".to_owned(), cursor, anchor);
+            fixture.take();
+            fixture.text_input.on_delete_surrounding_text(SEAT, 4, 3);
+            fixture.done();
+            assert_eq!(fixture.updates(), vec![(TOKEN, 2, 1, None, None, -1, -1)]);
+        }
+    }
+
+    #[test]
+    fn deletion_outside_the_sent_window_or_inside_a_code_point_is_dropped() {
+        let mut fixture = Fixture::active();
+        fixture.text_input.set_surrounding_text(fixture.surface, "🌐".repeat(1500), 1500, 1500);
+        fixture.take();
+        fixture.done();
+        fixture.updates();
+        for (before, after) in [(2004, 0), (0, 2004), (1, 0), (4, 2), (0, u32::MAX)] {
+            fixture.text_input.on_delete_surrounding_text(SEAT, before, after);
+            fixture.done();
+            assert!(fixture.updates().is_empty());
+        }
+        fixture.text_input.on_delete_surrounding_text(SEAT, 4, 4);
+        fixture.done();
+        assert_eq!(fixture.updates(), vec![(TOKEN, 2, 2, None, None, -1, -1)]);
     }
 
     #[test]
