@@ -78,6 +78,10 @@ and UTF-16 input; 32 calls per sample reduce timer overhead. Font matching, font
 glyph-run construction are outside these warmed measurements. No system fallback fonts enter
 the fixed-font cases. Input/font files and glyph counts are recorded for review.
 
+`shadows` draws boxes whose shadow has a closed form. `shadows-small` draws boxes too small for
+their blur, which need a filter route, and `shadows-animated` draws the same boxes at a scale that
+changes in every frame, so a renderer that keeps a picture per transform makes a new one each time.
+
 Light hinting and grayscale antialiasing are requested through the common API. Native Core Text
 appearance remains the text-quality reference; an adapter is not made faster by disabling its
 hinting or forcing Skia-identical rasterization. A speed comparison alone is not quality parity.
