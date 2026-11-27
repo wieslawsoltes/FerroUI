@@ -3,7 +3,9 @@
 //! platform's drawing of the materials and the window dragging are not tested here. The pages
 //! open windows from a window of the mock windowing platform, as the gallery's main window; a
 //! page in a single view (the root of an embeddable top level, as the browser, iOS and Android
-//! host the gallery) opens none and says so.
+//! host the gallery) opens none and says so. The TitleBar page has ToggleSwitches, whose template
+//! only the WinUI theme gives once the page is laid out in a top level: its hosted tests use the
+//! WinUI theme.
 
 use crate::window_samples::{self, BackdropType, BackdropWindow, NO_WINDOWS};
 use crate::{examples, tests::start};
@@ -231,9 +233,10 @@ fn title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_opt
     assert!(!bar.is_back_button_visible());
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content() {
-    let _application = start();
+    let _application = crate::tests::start_winui();
     let root = page("TitleBar");
     let _host = host(&root);
     click(&root, "ShowTitleBarDragRegionsWindow");
@@ -273,9 +276,10 @@ fn title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content
     close_all();
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back() {
-    let _application = start();
+    let _application = crate::tests::start_winui();
     let root = page("TitleBar");
     let _host = host(&root);
     click(&root, "ShowTitleBarWindow");
@@ -303,41 +307,52 @@ fn title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back
     close_all();
 }
 
+const SYSTEM_BACKDROPS_BUTTONS: [&str; 3] =
+    ["ShowBuiltInBackdropWindow", "ShowMicaControllerWindow", "ShowDesktopAcrylicControllerWindow"];
+const TITLE_BAR_BUTTONS: [&str; 2] = ["ShowTitleBarDragRegionsWindow", "ShowTitleBarWindow"];
+
+/// Clicks every button of `buttons` on `root`, which is not in a window: the page shows
+/// `NO_WINDOWS` and no window is opened.
+fn assert_reports_no_windows(id: &str, root: &Ref<Control>, buttons: &[&str]) {
+    assert!(window_samples::owner_window(root).is_none(), "{id}");
+    assert_eq!(error_text(root), None, "{id}");
+    for button in buttons {
+        click(root, button);
+        assert_eq!(error_text(root).as_deref(), Some(NO_WINDOWS), "{id}: {button}");
+        assert!(window_samples::opened_windows().is_empty(), "{id}: {button}");
+    }
+}
+
 #[test]
 fn show_window_buttons_report_a_single_view_platform_instead_of_opening_a_window() {
     let _application = start();
-    for (id, buttons) in [
-        (
-            "SystemBackdrops",
-            &["ShowBuiltInBackdropWindow", "ShowMicaControllerWindow", "ShowDesktopAcrylicControllerWindow"][..],
-        ),
-        ("TitleBar", &["ShowTitleBarDragRegionsWindow", "ShowTitleBarWindow"][..]),
-    ] {
-        // In the single view of an embeddable top level, and in no top level at all.
-        let root = page(id);
-        let view = single_view(&root);
-        assert!(window_samples::owner_window(&root).is_none(), "{id}");
-        for root in [root, page(id)] {
-            assert_eq!(error_text(&root), None, "{id}");
-            for button in buttons {
-                click(&root, button);
-                assert_eq!(error_text(&root).as_deref(), Some(NO_WINDOWS), "{id}: {button}");
-                assert!(window_samples::opened_windows().is_empty(), "{id}: {button}");
-            }
-        }
-        drop(view);
-    }
+    // In the single view of an embeddable top level.
+    let root = page("SystemBackdrops");
+    let _view = single_view(&root);
+    assert_reports_no_windows("SystemBackdrops", &root, &SYSTEM_BACKDROPS_BUTTONS);
+    // In no top level at all.
+    assert_reports_no_windows("SystemBackdrops", &page("SystemBackdrops"), &SYSTEM_BACKDROPS_BUTTONS);
+    assert_reports_no_windows("TitleBar", &page("TitleBar"), &TITLE_BAR_BUTTONS);
+}
+
+#[cfg(feature = "theme")]
+#[test]
+fn title_bar_buttons_report_a_single_view_platform_instead_of_opening_a_window() {
+    let _application = crate::tests::start_winui();
+    let root = page("TitleBar");
+    let _view = single_view(&root);
+    assert_reports_no_windows("TitleBar", &root, &TITLE_BAR_BUTTONS);
 }
 
 #[test]
 fn show_window_buttons_clear_the_single_view_message_once_the_page_is_in_a_window() {
     let _application = start();
-    let root = page("TitleBar");
-    click(&root, "ShowTitleBarWindow");
+    let root = page("SystemBackdrops");
+    click(&root, "ShowBuiltInBackdropWindow");
     assert_eq!(error_text(&root).as_deref(), Some(NO_WINDOWS));
     let host = host(&root);
     assert!(window_samples::owner_window(&root).is_some_and(|owner| owner == host));
-    click(&root, "ShowTitleBarWindow");
+    click(&root, "ShowBuiltInBackdropWindow");
     assert_eq!(error_text(&root), None);
     assert_eq!(window_samples::opened_windows().len(), 1);
     close_all();
