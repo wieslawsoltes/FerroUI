@@ -46,6 +46,7 @@
                     xmlns:internal="using:FerroUI.Dialogs.Internal"
                     xmlns:converters="clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
                     x:ClassModifier="internal">
+  <internal:ManagedStorageFallback x:Key="ManagedStorageFallback" />
   <Design.PreviewWith>
     <Border Padding="20" Width="800" Height="500">
       <dialogs:ManagedFileChooser />
