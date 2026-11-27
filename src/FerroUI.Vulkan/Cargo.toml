@@ -17,6 +17,12 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ash.workspace = true
+# The 3D scenes of the Skia backend on Ganesh Vulkan (feature `scene3d`, #608 D9).
+ferroui-render3d = { workspace = true, features = ["spirv"], optional = true }
+
+[features]
+# The Vulkan executor of 3D scenes (`scene3d`, #608 D9), which `ferroui-skia/media3d` turns on.
+scene3d = ["dep:ferroui-render3d"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

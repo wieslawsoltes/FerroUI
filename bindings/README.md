@@ -11,11 +11,21 @@ same facts and a new language is one backend:
    language: the full bindings (`bindings/<language>/full/`) and the **selection** of each
    application from its manifest (`ferroui.json`: the classes it uses, with their bases, and
    the layers). Osprey is the first (`scripts/generate_osprey_bindings.py`, `bindings/osprey/`,
-   docs/osprey.md).
+   docs/osprey.md); C++ is the second (`scripts/generate_cpp_bindings.py`, `bindings/cpp/`, a
+   header-only library with RAII handles and typed accessors, `samples/CApi/cpp/`); Go is the
+   third (`scripts/generate_go_bindings.py`, `bindings/go/`, a cgo package with the UI thread
+   locked, `samples/CApi/go/`); Dart is the fourth (`scripts/generate_dart_bindings.py`,
+   `bindings/dart/`, extension types over `dart:ffi`, `samples/CApi/dart/`); C# is the fifth
+   (`scripts/generate_csharp_bindings.py`, `bindings/csharp/`, value-type wrappers with
+   constrained extension methods, `samples/CApi/csharp/`).
 
 ```sh
 python3 scripts/generate_api_model.py          # the model and the ID table of the library
 python3 scripts/generate_osprey_bindings.py    # the Osprey bindings: full, and each sample's selection
+python3 scripts/generate_cpp_bindings.py       # the C++ bindings: full, and each sample's selection
+python3 scripts/generate_go_bindings.py        # the Go bindings: full, and each sample's selection
+python3 scripts/generate_dart_bindings.py      # the Dart bindings: full, and each sample's selection
+python3 scripts/generate_csharp_bindings.py    # the C# bindings: full, and each sample's selection
 python3 scripts/test_generate_bindings.py      # the tests of both
 ```
 
@@ -80,9 +90,11 @@ them dispatches tags.
    in the generated file.
 3. Name with `words` and an override file of the language; escape its reserved words.
 4. Call the ABI with the IDs of the model as constants and check the fingerprint at start.
-5. Generate a selection from a manifest (`{"layers": [...], "classes": [...]}`): an
-   application builds against what it uses, not the whole model, and the names of a selection
-   are the names of the full bindings.
+5. Generate a selection from a manifest (`{"layers": [...], "classes": [...]}`, optionally with
+   the `properties` and `events` it uses): an application builds against what it uses, not the
+   whole model, and the names of a selection are the names of the full bindings. Teach
+   `scripts/capi/collect_manifest.py` the spelling of the language, so that a manifest can be
+   collected from its sources.
 6. Add the `--check` to the step "Generated API model and bindings are up to date" of
    `.github/workflows/ci.yml`, tests to `scripts/test_generate_bindings.py`, samples, and a
    benchmark of the same operations as `src/FerroUI.CApi/benches/call_overhead.rs`.
