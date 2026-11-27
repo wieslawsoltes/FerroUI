@@ -266,6 +266,7 @@ impl PartialEq for Handler {
 ferroui_base::ferro_markup_type!(class Handler{this:Rc<Handler>,handles:[Rc<Handler>],methods:[fn Invoke(Option<ferroui_base::BoxedValue>,EventArgs)=>|h:&Rc<Handler>,sender,args|(h.0)(sender,args)]});
 fn handler(f: impl Fn(Option<ferroui_base::BoxedValue>, EventArgs) + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<Handler>();
+    ValueTypes::register_erased_value::<Handler>();
     MarkupDelegate::for_method(
         Some(Rc::new(Handler(Box::new(f)))),
         Handler::MARKUP,

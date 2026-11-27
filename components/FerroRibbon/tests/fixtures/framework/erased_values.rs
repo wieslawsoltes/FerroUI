@@ -15,6 +15,7 @@ impl PartialEq for Model {
 #[test]
 fn independent_registered_reference_recovers_same_nonclone_object_and_metadata_cast() {
     ValueTypes::register_reference::<Model>();
+    ValueTypes::register_erased_value::<Model>();
     let model = Rc::new(Model {
         value: Cell::new(5),
     });

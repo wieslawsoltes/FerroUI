@@ -316,6 +316,7 @@ pub struct RibbonApplicationMenuItemEventArgs {
 impl RibbonApplicationMenuItemEventArgs {
     pub fn new(item: Ref<RibbonApplicationMenuItem>, parameter: Option<BoxedValue>) -> Rc<Self> {
         ferroui_base::data::core::ValueTypes::register_reference::<Self>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<Self>();
         Rc::new(Self { item, parameter })
     }
     pub fn item(&self) -> Ref<RibbonApplicationMenuItem> {

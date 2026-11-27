@@ -386,6 +386,7 @@ ferroui_base::ferro_markup_type!(class Action{this:Rc<Action>,handles:[Rc<Action
 fn action_item(text: Option<String>, f: impl Fn() + 'static) -> Ref<MenuFlyoutItem> {
     use ferroui_base::{data::core::ValueTypes, metadata::MarkupTyped};
     ValueTypes::register_reference::<Action>();
+    ValueTypes::register_erased_value::<Action>();
     let h = MarkupDelegate::for_method(
         Some(Rc::new(Action(Box::new(f)))),
         Action::MARKUP,

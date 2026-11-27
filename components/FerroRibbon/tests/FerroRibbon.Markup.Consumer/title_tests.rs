@@ -25,6 +25,7 @@ fn independent_title_compiled_runtime_binding_retemplate_identity_and_cancellati
         ferroui_base::TypeInfo::register_all(&[ConsumerTitle::TYPE, TitleView::TYPE]);
         MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+        ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(
@@ -138,6 +139,7 @@ fn independent_compiled_runtime_title_consumes_public_native_window_attachment()
     ferroui_base::TypeInfo::register_all(&[ConsumerTitle::TYPE, TitleView::TYPE]);
     MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
     ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+    ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
     crate::compiled_markup::register();
     for runtime in [false, true] {
         let value = if runtime {

@@ -436,6 +436,7 @@ impl PartialEq for ContextHandler {
 ferroui_base::ferro_markup_type!(class ContextHandler{this:Rc<ContextHandler>,handles:[Rc<ContextHandler>],methods:[fn Invoke(Option<BoxedValue>,Option<String>)=>|t:&Rc<ContextHandler>,_,v|(t.0)(v)]});
 fn context_handler(f: impl Fn(Option<String>) + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<ContextHandler>();
+    ValueTypes::register_erased_value::<ContextHandler>();
     MarkupDelegate::for_method(
         Some(Rc::new(ContextHandler(Box::new(f)))),
         ContextHandler::MARKUP,
@@ -735,6 +736,7 @@ fn menu_header_keyboard_wrap_opening_sender_hover_switch_and_click_toggle() {
         bar.items().add(Some(file.clone()));
         bar.items().add(Some(edit.clone()));
         ValueTypes::register_reference::<OpeningHandler>();
+        ValueTypes::register_erased_value::<OpeningHandler>();
         let count = Rc::new(Cell::new(0));
         let n = count.clone();
         let weak_file = file.downgrade();

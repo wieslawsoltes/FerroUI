@@ -112,10 +112,14 @@ pub(crate) fn register() {
     ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSearchStringEnumerable>();
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSearchStringEnumerable>>();
     ValueTypes::register_reference::<RibbonSearchEntry>();
+    ValueTypes::register_erased_value::<RibbonSearchEntry>();
     ValueTypes::register_reference::<RibbonSearchResult>();
+    ValueTypes::register_erased_value::<RibbonSearchResult>();
     ValueTypes::register_reference::<RibbonSearchEngine>();
+    ValueTypes::register_erased_value::<RibbonSearchEngine>();
     // The control library supplies reference views; Core does not depend on native metadata.
     ValueTypes::register_reference::<ferroribbon_core::commands::RibbonCommandDescriptor>();
+    ValueTypes::register_erased_value::<ferroribbon_core::commands::RibbonCommandDescriptor>();
     ModelTypes::register_notifying_collection::<RibbonAdditionalSearchEntries>();
     ValueTypes::register_cast::<RibbonAdditionalSearchEntries, RibbonSearchEntryEnumerable>(|v| {
         RibbonItemsSource::from_collection(v.clone())

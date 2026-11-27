@@ -44,5 +44,6 @@ ferroui_base::ferro_markup_type!(class RibbonScreenTipModelMetadata as "RibbonSc
 
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonScreenTipModel>();
+    ValueTypes::register_erased_value::<RibbonScreenTipModel>();
     MarkupType::register_all(&[RibbonScreenTipModelMetadata::MARKUP]);
 }

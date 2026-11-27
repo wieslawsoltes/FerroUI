@@ -40,6 +40,7 @@ impl PartialEq for ItemHandler {
 ferroui_base::ferro_markup_type!(class ItemHandler{this:Rc<ItemHandler>,handles:[Rc<ItemHandler>],methods:[fn Invoke(Option<BoxedValue>,Ref<RibbonBackstageItem>)=>|h:&Rc<ItemHandler>,_,i|(h.0)(i)]});
 fn on_item(b: &RibbonBackstage, f: impl Fn(Ref<RibbonBackstageItem>) + 'static) {
     ValueTypes::register_reference::<ItemHandler>();
+    ValueTypes::register_erased_value::<ItemHandler>();
     b.add_item_invoked(Some(MarkupDelegate::for_method(
         Some(Rc::new(ItemHandler(Box::new(f)))),
         ItemHandler::MARKUP,
@@ -55,6 +56,7 @@ impl PartialEq for CloseHandler {
 ferroui_base::ferro_markup_type!(class CloseHandler{this:Rc<CloseHandler>,handles:[Rc<CloseHandler>],methods:[fn Invoke(Option<BoxedValue>,ferroui_base::utilities::EventArgs)=>|h:&Rc<CloseHandler>,_,_|(h.0)()]});
 fn close_delegate(f: impl Fn() + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<CloseHandler>();
+    ValueTypes::register_erased_value::<CloseHandler>();
     MarkupDelegate::for_method(
         Some(Rc::new(CloseHandler(Box::new(f)))),
         CloseHandler::MARKUP,

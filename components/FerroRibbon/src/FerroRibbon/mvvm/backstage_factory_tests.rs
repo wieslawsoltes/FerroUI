@@ -167,6 +167,7 @@ fn original_factory_backstage_duplicate_ids_and_suspension() {
 fn original_factory_backstage_payload_identity_and_content_template_assignment_order() {
     crate::group_tests::run(|| {
         ValueTypes::register_reference::<Payload>();
+        ValueTypes::register_erased_value::<Payload>();
         ValueTypes::register_display::<Payload>();
         let f = RibbonElementFactory::new();
         let scope = RibbonModelBindings::new();
@@ -378,6 +379,7 @@ fn generated_backstage_command_receives_core_only_model_parameter() {
 fn original_template_selector_default_overloads_dispatch_independently_and_guard_container() {
     crate::group_tests::run(|| {
         ValueTypes::register_reference::<Payload>();
+        ValueTypes::register_erased_value::<Payload>();
         ValueTypes::register_display::<Payload>();
         let plain = DataTemplateSelector::new();
         let derived = Selector::new();

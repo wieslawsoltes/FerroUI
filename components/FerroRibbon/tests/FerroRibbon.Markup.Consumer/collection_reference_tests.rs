@@ -140,6 +140,7 @@ impl RibbonReadOnlyListImpl<Option<Rc<RibbonIconLayer>>> for UnregisteredList {
 fn registered_custom_view_dispatches_false_self_equals_and_unregistered_view_stays_usable() {
     crate::tests::run(|| {
         ValueTypes::register_reference::<RegisteredList>();
+        ValueTypes::register_erased_value::<RegisteredList>();
         ValueTypes::register_cast::<Rc<RegisteredList>, NativeIconLayers>(|v| {
             v.clone() as NativeIconLayers
         });

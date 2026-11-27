@@ -70,6 +70,7 @@ fn prepare() -> Cleanup {
     RibbonTheme::reset_test_cache();
     RibbonTheme::reset_test_changed();
     ValueTypes::register_reference::<Sink>();
+    ValueTypes::register_erased_value::<Sink>();
     TRACE.with_borrow_mut(Vec::clear);
     Cleanup
 }

@@ -113,6 +113,7 @@ fn independent_combo_compiled_runtime_content_binding_font_defaults_and_copy_ove
         use ferroui_base::metadata::{MarkupType, MarkupTyped};
         MarkupType::register_all(&[crate::text_input_consumer::InputViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::text_input_consumer::InputViewModel>();
+        ValueTypes::register_erased_value::<crate::text_input_consumer::InputViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

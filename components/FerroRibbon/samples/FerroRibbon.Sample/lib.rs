@@ -67,6 +67,7 @@ pub fn register_types() {
     ferroui_base::TypeInfo::register_all(&[pages::WordPage::TYPE]);
     MarkupType::register_all(&[word_view_model::WordViewModel::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_reference::<word_view_model::WordViewModel>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<word_view_model::WordViewModel>();
     ferroui_base::TypeInfo::register_namespaces(&[
         (
             "ferroribbon_sample::pages::powerpoint_page",
@@ -85,6 +86,9 @@ pub fn register_types() {
     ferroui_base::data::core::ValueTypes::register_reference::<
         office_view_models::PowerPointViewModel,
     >();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<
+        office_view_models::PowerPointViewModel,
+    >();
     ferroui_base::data::core::ValueTypes::register_reference::<office_view_models::ToolsViewModel>(
     );
     ferroui_base::TypeInfo::register_namespaces(&[(
@@ -94,6 +98,7 @@ pub fn register_types() {
     ferroui_base::TypeInfo::register_all(&[pages::ExcelPage::TYPE]);
     MarkupType::register_all(&[excel_view_model::ExcelViewModel::MARKUP]);
     ferroui_base::data::core::ValueTypes::register_reference::<excel_view_model::ExcelViewModel>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<excel_view_model::ExcelViewModel>();
     ferroui_themes_fluent::register_types();
     ferroui_themes_simple::register_types();
     ferroui_base::metadata::MarkupAssembly::register(&ASSEMBLY);
@@ -106,8 +111,13 @@ pub fn register_types() {
         settings_view_model::SettingsViewModel::MARKUP,
     ]);
     ferroui_base::data::core::ValueTypes::register_reference::<SampleViewModel>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<SampleViewModel>();
     ferroui_base::data::core::ValueTypes::register_reference::<cad::cad_view_model::CadViewModel>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<cad::cad_view_model::CadViewModel>();
     ferroui_base::data::core::ValueTypes::register_reference::<
+        settings_view_model::SettingsViewModel,
+    >();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<
         settings_view_model::SettingsViewModel,
     >();
     compiled_markup::register();

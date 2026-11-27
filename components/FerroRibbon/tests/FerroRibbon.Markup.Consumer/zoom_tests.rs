@@ -37,6 +37,7 @@ fn independent_zoom_compiled_runtime_two_way_commands_events_templates_and_subcl
         ferroui_base::TypeInfo::register_all(&[ConsumerZoom::TYPE, ZoomView::TYPE]);
         MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+        ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

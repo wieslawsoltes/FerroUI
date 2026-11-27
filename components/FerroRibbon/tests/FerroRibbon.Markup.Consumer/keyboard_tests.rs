@@ -93,6 +93,7 @@ fn external_compiled_and_runtime_keytip_metadata_and_command_once() {
             let info = <Ribbon as StaticType>::TYPE.markup().unwrap();
             let root = Some(Control::boxed(r.clone()));
             ValueTypes::register_reference::<Mode>();
+            ValueTypes::register_erased_value::<Mode>();
             let trace = Rc::new(RefCell::new(Vec::new()));
             let handler = MarkupDelegate::for_method(
                 Some(Rc::new(Mode(trace.clone()))),

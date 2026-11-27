@@ -459,6 +459,7 @@ fn bridge_preserves_live_identity_payloads_events_disposal_and_failures() {
         struct Payload(i32);
         let object = Rc::new(Payload(7));
         ValueTypes::register_reference::<Payload>();
+        ValueTypes::register_erased_value::<Payload>();
         let handle: BoxedValue = Rc::new(object.clone());
         let parameter = command_parameter(Some(&handle)).unwrap();
         assert!(std::ptr::eq(

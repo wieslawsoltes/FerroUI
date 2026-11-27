@@ -100,6 +100,7 @@ impl Ribbon {
         if let Some(new) = new {
             let handler = handler.unwrap_or_else(|| {
                 ValueTypes::register_reference::<CloseHandler>();
+                ValueTypes::register_erased_value::<CloseHandler>();
                 let h = MarkupDelegate::for_method(
                     Some(Rc::new(CloseHandler(self.to_ref().downgrade()))),
                     CloseHandler::MARKUP,

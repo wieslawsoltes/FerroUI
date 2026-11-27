@@ -28,6 +28,7 @@ fn independent_factory_backstage_compiled_runtime_selector_binding_identity_comm
         TypeInfo::register_all(&[ConsumerBackstageFactory::TYPE]);
         MarkupType::register_all(&[crate::text_input_consumer::InputViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::text_input_consumer::InputViewModel>();
+        ValueTypes::register_erased_value::<crate::text_input_consumer::InputViewModel>();
         let probe = ConsumerTemplateSelector::new();
         let boxed = Rc::new(probe.clone()) as ferroui_base::BoxedValue;
         let raw = probe.clone() as ferroui_base::BoxedValue;

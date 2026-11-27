@@ -130,17 +130,21 @@ ferroui_base::ferro_markup_type!(class RibbonIconLayerListMetadata as "List`1" {
 
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonIcon>();
+    ValueTypes::register_erased_value::<RibbonIcon>();
     ValueTypes::register_reference::<RibbonIconLayer>();
+    ValueTypes::register_erased_value::<RibbonIconLayer>();
     ferroui_base::data::core::ValueTypes::register_nullable::<NativeIconLayerArray>();
     // The ribbon recovers its values from the Core model as the same allocation.
     ferroui_base::data::core::ValueTypes::register_erased_value::<NativeIconLayerArray>();
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<NativeIconLayerArray>>();
     ValueTypes::register_reference::<NativeIconLayerListItems>();
+    ValueTypes::register_erased_value::<NativeIconLayerListItems>();
     ferroui_base::data::core::ValueTypes::register_nullable::<NativeIconLayerList>();
     // The ribbon recovers its values from the Core model as the same allocation.
     ferroui_base::data::core::ValueTypes::register_erased_value::<NativeIconLayerList>();
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<NativeIconLayerList>>();
     ValueTypes::register_reference::<NativeIconLayerFixedItems>();
+    ValueTypes::register_erased_value::<NativeIconLayerFixedItems>();
     ValueTypes::register_reference_view_if::<NativeIconLayers>(|v| {
         let object = v.clone() as Rc<dyn std::any::Any>;
         ValueTypes::is_reference(object.as_ref().type_id()).then_some(object)

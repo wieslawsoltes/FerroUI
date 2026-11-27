@@ -43,6 +43,7 @@ ferroui_base::ferro_markup_type!(class RibbonSearchQueryEventArgsMetadata as "Ri
 
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonSearchQueryEventArgs>();
+    ValueTypes::register_erased_value::<RibbonSearchQueryEventArgs>();
     MarkupType::register_all(&[
         RibbonSearchQueryEventArgsMetadata::MARKUP,
         super::RibbonCommandPalette::MARKUP,

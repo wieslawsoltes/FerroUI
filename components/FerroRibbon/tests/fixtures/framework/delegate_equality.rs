@@ -28,6 +28,7 @@ ferro_markup_type!(class Listener {
 #[test]
 fn separately_created_method_delegates_compare_by_target_identity_and_method() {
     ValueTypes::register_reference::<Listener>();
+    ValueTypes::register_erased_value::<Listener>();
     let target: BoxedValue = Rc::new(Listener);
     let other: BoxedValue = Rc::new(Listener);
     let method = Listener::MARKUP.find_methods("First").next().unwrap();

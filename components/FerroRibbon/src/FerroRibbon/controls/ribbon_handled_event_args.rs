@@ -7,6 +7,7 @@ pub struct RibbonHandledEventArgs {
 impl RibbonHandledEventArgs {
     pub fn new() -> Rc<Self> {
         ferroui_base::data::core::ValueTypes::register_reference::<Self>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<Self>();
         Rc::new(Self::default())
     }
     pub fn handled(&self) -> bool {

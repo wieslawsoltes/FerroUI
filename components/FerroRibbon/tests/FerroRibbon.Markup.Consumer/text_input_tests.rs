@@ -52,6 +52,7 @@ fn independent_text_input_compiled_runtime_bindings_events_enums_and_subclass() 
         use ferroui_base::metadata::{MarkupType, MarkupTyped};
         MarkupType::register_all(&[crate::text_input_consumer::InputViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::text_input_consumer::InputViewModel>();
+        ValueTypes::register_erased_value::<crate::text_input_consumer::InputViewModel>();
         for runtime in [false, true] {
             let v = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

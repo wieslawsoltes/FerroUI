@@ -60,6 +60,7 @@ fn serialize(value: Option<Rc<RibbonState>>, indented: bool) -> Result<String, S
 }
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonState>();
+    ValueTypes::register_erased_value::<RibbonState>();
     // Explicit concrete aliases are facts required by the selected XAML scanner.
     ferroui_base::data::core::ValueTypes::register_nullable::<RibbonStateStrings>();
     // The ribbon recovers its values from the Core model as the same allocation.
@@ -78,15 +79,25 @@ pub(crate) fn register() {
     ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonStateFloatingGroups>();
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonStateFloatingGroups>>();
     ValueTypes::register_reference::<RibbonCustomization>();
+    ValueTypes::register_erased_value::<RibbonCustomization>();
     ValueTypes::register_reference::<RibbonCustomTab>();
+    ValueTypes::register_erased_value::<RibbonCustomTab>();
     ValueTypes::register_reference::<RibbonCustomGroup>();
+    ValueTypes::register_erased_value::<RibbonCustomGroup>();
     ValueTypes::register_reference::<RibbonFloatingGroupState>();
+    ValueTypes::register_erased_value::<RibbonFloatingGroupState>();
     ValueTypes::register_reference::<RibbonItems<Option<RibbonString>>>();
+    ValueTypes::register_erased_value::<RibbonItems<Option<RibbonString>>>();
     ValueTypes::register_reference::<RibbonItems<Option<Rc<RibbonCustomGroup>>>>();
+    ValueTypes::register_erased_value::<RibbonItems<Option<Rc<RibbonCustomGroup>>>>();
     ValueTypes::register_reference::<RibbonItems<Option<Rc<RibbonCustomTab>>>>();
+    ValueTypes::register_erased_value::<RibbonItems<Option<Rc<RibbonCustomTab>>>>();
     ValueTypes::register_reference::<RibbonItems<Option<Rc<RibbonFloatingGroupState>>>>();
+    ValueTypes::register_erased_value::<RibbonItems<Option<Rc<RibbonFloatingGroupState>>>>();
     ValueTypes::register_reference::<RibbonStateEntries<Option<RibbonString>>>();
+    ValueTypes::register_erased_value::<RibbonStateEntries<Option<RibbonString>>>();
     ValueTypes::register_reference::<RibbonStateEntries<Option<RibbonStateStrings>>>();
+    ValueTypes::register_erased_value::<RibbonStateEntries<Option<RibbonStateStrings>>>();
     MarkupType::register_all(&[
         RibbonStateMetadata::MARKUP,
         RibbonCustomizationMetadata::MARKUP,

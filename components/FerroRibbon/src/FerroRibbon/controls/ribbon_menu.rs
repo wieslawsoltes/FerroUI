@@ -28,6 +28,7 @@ impl PartialEq for RustAction {
 ferroui_base::ferro_markup_type!(class RustAction{this:Rc<RustAction>,handles:[Rc<RustAction>],methods:[fn Invoke()=>|this:&Rc<RustAction>|(this.0)()]});
 pub(crate) fn action_delegate(f: impl Fn() + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<RustAction>();
+    ValueTypes::register_erased_value::<RustAction>();
     MarkupDelegate::for_method(
         Some(Rc::new(RustAction(Box::new(f)))),
         RustAction::MARKUP,
@@ -46,6 +47,7 @@ pub(crate) fn click_delegate(
     f: impl Fn(Option<BoxedValue>, ferroui_base::interactivity::RoutedEventArgs) + 'static,
 ) -> MarkupDelegate {
     ValueTypes::register_reference::<RustClick>();
+    ValueTypes::register_erased_value::<RustClick>();
     MarkupDelegate::for_method(
         Some(Rc::new(RustClick(Box::new(f)))),
         RustClick::MARKUP,

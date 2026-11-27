@@ -81,6 +81,7 @@ static ROW_MARKUP: MarkupType = {
 };
 fn register() {
     ValueTypes::register_reference::<Row>();
+    ValueTypes::register_erased_value::<Row>();
     ValueTypes::register_nullable::<Rc<dyn RowView>>();
     ValueTypes::register_cast::<Rc<Row>, Rc<dyn RowView>>(|v| v.clone());
     ValueTypes::register_boxed_cast::<Row, Rc<dyn RowView>>(|v| {

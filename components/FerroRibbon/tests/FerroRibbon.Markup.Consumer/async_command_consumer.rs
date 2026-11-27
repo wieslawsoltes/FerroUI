@@ -43,6 +43,7 @@ mod tests {
         crate::tests::run(|| {
             let _theme = crate::tests::NativeThemeScope::new();
             ValueTypes::register_reference::<AsyncCommandViewModel>();
+            ValueTypes::register_erased_value::<AsyncCommandViewModel>();
             MarkupType::register_all(&[AsyncCommandViewModel::MARKUP]);
             for runtime in [false, true] {
                 let value = if runtime {

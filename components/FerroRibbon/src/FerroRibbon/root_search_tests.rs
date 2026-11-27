@@ -91,6 +91,7 @@ static try fn Fail()=>||Err::<(),_>("typed-failed")
 ]});
 fn action(count: Rc<Cell<i32>>) -> BoxedValue {
     ValueTypes::register_reference::<Action>();
+    ValueTypes::register_erased_value::<Action>();
     Rc::new(
         MarkupDelegate::for_action_method(
             Some(Rc::new(Action(count))),
@@ -378,6 +379,7 @@ impl PartialEq for BackHandler {
 ferroui_base::ferro_markup_type!(class BackHandler{handles:[Rc<BackHandler>],this:Rc<BackHandler>,methods:[fn Invoke(Option<BoxedValue>,Ref<RibbonBackstageItem>)=>|v:&Rc<BackHandler>,_,_|(v.0)()]});
 fn backstage_handler(f: impl Fn() + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<BackHandler>();
+    ValueTypes::register_erased_value::<BackHandler>();
     MarkupDelegate::for_method(
         Some(Rc::new(BackHandler(Box::new(f)))),
         BackHandler::MARKUP,
@@ -727,6 +729,7 @@ fn source_nominal_delegate_target_matrix_rejects_non_actions_before_any_invocati
         static CUSTOM: MarkupDelegateType = MarkupDelegateType::new("CustomVoid", &[], None);
         let (r, _, _) = make();
         ValueTypes::register_reference::<Action>();
+        ValueTypes::register_erased_value::<Action>();
         let mut rows = Vec::new();
         for (kind, type_, method) in [
             ("action", &SYSTEM_ACTION_DELEGATE, "Invoke"),
@@ -780,6 +783,7 @@ fn source_nominal_delegate_equality_removal_and_failure_order_fixture() {
         };
         static CUSTOM: MarkupDelegateType = MarkupDelegateType::new("CustomVoid", &[], None);
         ValueTypes::register_reference::<Action>();
+        ValueTypes::register_erased_value::<Action>();
         let expected = case("delegate_nominal");
         let target: BoxedValue = Rc::new(Action(Rc::new(Cell::new(0))));
         let method = &Action::MARKUP.methods[0];

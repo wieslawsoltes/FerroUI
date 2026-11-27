@@ -32,6 +32,7 @@ mod tests {
         crate::tests::run(|| {
             let _theme = crate::tests::NativeThemeScope::new();
             ValueTypes::register_reference::<DialogFutureViewModel>();
+            ValueTypes::register_erased_value::<DialogFutureViewModel>();
             MarkupType::register_all(&[DialogFutureViewModel::MARKUP]);
             for runtime in [false, true] {
                 for primary in [false, true] {

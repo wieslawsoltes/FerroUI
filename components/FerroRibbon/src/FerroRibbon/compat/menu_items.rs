@@ -74,6 +74,7 @@ impl MenuFlyoutItem {
     }
     pub fn add_click_action(&self, f: impl Fn(&MenuFlyoutItem, &RoutedEventArgs) + 'static) {
         ferroui_base::data::core::ValueTypes::register_reference::<ClickAction>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<ClickAction>();
         self.add_click(Some(MarkupDelegate::for_method(
             Some(Rc::new(ClickAction(Box::new(f)))),
             ClickAction::MARKUP,

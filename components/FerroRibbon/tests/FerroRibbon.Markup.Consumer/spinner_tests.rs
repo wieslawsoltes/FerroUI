@@ -18,6 +18,7 @@ fn independent_spinner_compiled_runtime_two_way_binding_commands_and_subclass() 
         use ferroui_base::metadata::{MarkupType, MarkupTyped};
         MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+        ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

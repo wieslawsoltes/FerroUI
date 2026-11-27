@@ -195,6 +195,7 @@ impl PartialEq for ModeAction {
 ferroui_base::ferro_markup_type!(class ModeAction{this:Rc<ModeAction>,handles:[Rc<ModeAction>],methods:[fn Invoke(Option<BoxedValue>,bool)=>|h:&Rc<ModeAction>,_,v|(h.0)(v)]});
 fn mode_action(f: impl Fn(bool) + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<ModeAction>();
+    ValueTypes::register_erased_value::<ModeAction>();
     MarkupDelegate::for_method(
         Some(Rc::new(ModeAction(Box::new(f)))),
         ModeAction::MARKUP,
@@ -896,6 +897,7 @@ fn source_split_menu_contextual_prefix_and_search_request_precedence() {
         assert!(!tab.header_element().unwrap().is_enabled());
         assert!(!send(&r, Key::Q, false, KeyModifiers::ALT, false).handled());
         ValueTypes::register_reference::<SearchAction>();
+        ValueTypes::register_erased_value::<SearchAction>();
         let calls = Rc::new(Cell::new(0));
         let n = calls.clone();
         let h = MarkupDelegate::for_method(

@@ -26,6 +26,7 @@ impl BaseView for Model {
 }
 fn register() {
     ValueTypes::register_reference::<Model>();
+    ValueTypes::register_erased_value::<Model>();
     ValueTypes::register_nullable::<Rc<dyn BaseView>>();
     ValueTypes::register_cast::<Rc<Model>, Rc<dyn BaseView>>(|v| v.clone());
 }

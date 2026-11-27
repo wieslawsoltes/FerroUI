@@ -131,6 +131,7 @@ fn register_values() {
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonColor>>();
     ValueTypes::register_display::<RibbonColor>();
     ValueTypes::register_reference::<RibbonThemePalette>();
+    ValueTypes::register_erased_value::<RibbonThemePalette>();
 }
 /// Closed read-only slice specialization. Its identity remains the Core Rc slice.
 #[doc(hidden)]

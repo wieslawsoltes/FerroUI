@@ -251,6 +251,7 @@ pub(crate) fn invocation(
 ) -> ferroui_base::metadata::MarkupDelegate {
     use ferroui_base::metadata::MarkupTyped;
     ValueTypes::register_reference::<ItemHandler>();
+    ValueTypes::register_erased_value::<ItemHandler>();
     ferroui_base::metadata::MarkupDelegate::for_method(
         Some(Rc::new(ItemHandler(Box::new(f)))),
         ItemHandler::MARKUP,

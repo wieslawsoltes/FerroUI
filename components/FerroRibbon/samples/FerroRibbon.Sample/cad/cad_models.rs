@@ -294,9 +294,13 @@ pub fn register_types() {
         CadLineweight::MARKUP,
     ]);
     ValueTypes::register_reference::<CadLayer>();
+    ValueTypes::register_erased_value::<CadLayer>();
     ValueTypes::register_reference::<CadColorOption>();
+    ValueTypes::register_erased_value::<CadColorOption>();
     ValueTypes::register_reference::<CadLinetype>();
+    ValueTypes::register_erased_value::<CadLinetype>();
     ValueTypes::register_reference::<CadLineweight>();
+    ValueTypes::register_erased_value::<CadLineweight>();
     ValueTypes::register_display::<CadLayer>();
     ValueTypes::register_display::<CadColorOption>();
     ValueTypes::register_display::<CadLinetype>();

@@ -458,6 +458,7 @@ impl FerroObjectImpl for RibbonSplitButton {
         Self::parent_constructed(this);
         this.set_size(RibbonItemSize::Large);
         ferroui_base::data::core::ValueTypes::register_reference::<ChoiceHandler>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<ChoiceHandler>();
         let handler = Rc::new(ChoiceHandler(this.to_ref().downgrade()));
         this.choice_handler.replace(Some(MarkupDelegate::for_method(
             Some(handler),

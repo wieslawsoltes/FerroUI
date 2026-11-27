@@ -229,6 +229,7 @@ fn handler(
 ) -> ferroui_base::metadata::MarkupDelegate {
     use ferroui_base::metadata::MarkupTyped;
     ValueTypes::register_reference::<Handler>();
+    ValueTypes::register_erased_value::<Handler>();
     ferroui_base::metadata::MarkupDelegate::for_method(
         Some(Rc::new(Handler(Box::new(action)))),
         Handler::MARKUP,

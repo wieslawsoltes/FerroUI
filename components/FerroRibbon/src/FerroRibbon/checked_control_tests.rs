@@ -198,6 +198,7 @@ fn checked_handler(
 ) -> ferroui_base::metadata::MarkupDelegate {
     use ferroui_base::metadata::MarkupTyped;
     ValueTypes::register_reference::<CheckedHandler>();
+    ValueTypes::register_erased_value::<CheckedHandler>();
     ferroui_base::metadata::MarkupDelegate::for_method(
         Some(Rc::new(CheckedHandler(Box::new(f)))),
         CheckedHandler::MARKUP,

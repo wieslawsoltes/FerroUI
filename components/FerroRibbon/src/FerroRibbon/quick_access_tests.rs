@@ -532,6 +532,7 @@ ferroui_base::ferro_markup_type!(class Signal{this:Rc<Signal>,handles:[Rc<Signal
 fn signal(f: impl Fn() + 'static) -> MarkupDelegate {
     use ferroui_base::metadata::MarkupTyped;
     ValueTypes::register_reference::<Signal>();
+    ValueTypes::register_erased_value::<Signal>();
     MarkupDelegate::for_method(
         Some(Rc::new(Signal(Box::new(f)))),
         Signal::MARKUP,

@@ -62,6 +62,7 @@ impl PartialEq for CommandViewModel {
 impl CommandViewModel {
     pub fn new() -> Rc<Self> {
         ferroui_base::data::core::ValueTypes::register_reference::<Self>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<Self>();
         let executed = Rc::new(Cell::new(0));
         let runs = executed.clone();
         Rc::new(Self {

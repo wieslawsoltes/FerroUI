@@ -25,6 +25,7 @@ fn independent_status_compiled_runtime_collections_owner_forwarding_and_subclass
         ferroui_base::TypeInfo::register_all(&[ConsumerStatus::TYPE, StatusView::TYPE]);
         MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+        ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

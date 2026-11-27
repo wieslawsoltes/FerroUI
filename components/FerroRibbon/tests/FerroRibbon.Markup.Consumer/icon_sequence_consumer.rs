@@ -48,6 +48,7 @@ ferroui_base::ferro_markup_type!(class IconSequenceConsumer as "IconSequenceCons
 });
 pub fn register() {
     ValueTypes::register_reference::<IconSequenceConsumer>();
+    ValueTypes::register_erased_value::<IconSequenceConsumer>();
     ModelTypes::register::<IconSequenceConsumer>(|b| b.notify_property_changed());
     MarkupType::register_all(&[IconSequenceConsumer::MARKUP]);
 }

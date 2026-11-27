@@ -20,6 +20,7 @@ fn independent_backstage_compiled_runtime_bindings_collection_templates_and_subc
         TypeInfo::register_all(&[ConsumerBackstage::TYPE, ConsumerBackstageItem::TYPE]);
         MarkupType::register_all(&[crate::text_input_consumer::InputViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::text_input_consumer::InputViewModel>();
+        ValueTypes::register_erased_value::<crate::text_input_consumer::InputViewModel>();
         for runtime in [false, true] {
             let value = if runtime {
                 ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

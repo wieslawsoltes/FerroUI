@@ -16,6 +16,7 @@ impl PartialEq for StateAction {
 ferroui_base::ferro_markup_type!(class StateAction{this:Rc<StateAction>,handles:[Rc<StateAction>],methods:[fn Invoke(Option<BoxedValue>,ferroui_base::utilities::EventArgs)=>|h:&Rc<StateAction>,_,_|(h.0)()]});
 fn state_event(f: impl Fn() + 'static) -> MarkupDelegate {
     ferroui_base::data::core::ValueTypes::register_reference::<StateAction>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<StateAction>();
     MarkupDelegate::for_method(
         Some(Rc::new(StateAction(Box::new(f)))),
         StateAction::MARKUP,

@@ -130,6 +130,7 @@ fn converter(
     f: impl Fn(Option<ferroui_base::BoxedValue>) -> Option<ferroui_base::BoxedValue> + 'static,
 ) -> MarkupDelegate {
     ValueTypes::register_reference::<Converter>();
+    ValueTypes::register_erased_value::<Converter>();
     MarkupDelegate::for_method(
         Some(Rc::new(Converter(Box::new(f)))),
         Converter::MARKUP,
@@ -144,6 +145,7 @@ impl PartialEq for Action {
 ferroui_base::ferro_markup_type!(class Action{this:Rc<Action>,handles:[Rc<Action>],methods:[fn Invoke()=>|this:&Rc<Action>|(this.0)()]});
 fn action(f: impl Fn() + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<Action>();
+    ValueTypes::register_erased_value::<Action>();
     MarkupDelegate::for_method(
         Some(Rc::new(Action(Box::new(f)))),
         Action::MARKUP,

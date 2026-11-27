@@ -21,5 +21,6 @@ ferroui_base::ferro_markup_type!(class RibbonModelBindingsMetadata as "RibbonMod
 });
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonModelBindings>();
+    ValueTypes::register_erased_value::<RibbonModelBindings>();
     MarkupType::register_all(&[RibbonModelBindingsMetadata::MARKUP]);
 }

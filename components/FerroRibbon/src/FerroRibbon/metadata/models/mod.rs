@@ -46,6 +46,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonBackstageItemModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonBackstageItemModel>();
     plain::<ferroribbon_core::model::RibbonBackstageItemModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonBackstageItemModel>,
@@ -60,6 +61,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonBackstageModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonBackstageModel>();
     plain::<ferroribbon_core::model::RibbonBackstageModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonBackstageModel>,
@@ -70,6 +72,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonButtonGroupModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonButtonGroupModel>();
     plain::<ferroribbon_core::model::RibbonButtonGroupModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonButtonGroupModel>,
@@ -88,6 +91,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonButtonModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonButtonModel>();
     plain::<ferroribbon_core::model::RibbonButtonModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonButtonModel>,
@@ -106,6 +110,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonCheckBoxModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonCheckBoxModel>();
     plain::<ferroribbon_core::model::RibbonCheckBoxModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonCheckBoxModel>,
@@ -124,6 +129,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonColorPickerModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonColorPickerModel>();
     plain::<ferroribbon_core::model::RibbonColorPickerModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonColorPickerModel>,
@@ -142,6 +148,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonComboBoxModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonComboBoxModel>();
     plain::<ferroribbon_core::model::RibbonComboBoxModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonComboBoxModel>,
@@ -160,6 +167,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonContextualGroupModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonContextualGroupModel>();
     plain::<ferroribbon_core::model::RibbonContextualGroupModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonContextualGroupModel>,
@@ -174,6 +182,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonCustomItemModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonCustomItemModel>();
     plain::<ferroribbon_core::model::RibbonCustomItemModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonCustomItemModel>,
@@ -192,6 +201,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonDropDownButtonModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonDropDownButtonModel>();
     plain::<ferroribbon_core::model::RibbonDropDownButtonModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonDropDownButtonModel>,
@@ -210,6 +220,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonGalleryItemModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonGalleryItemModel>();
     plain::<ferroribbon_core::model::RibbonGalleryItemModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonGalleryItemModel>,
@@ -224,6 +235,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonGalleryModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonGalleryModel>();
     plain::<ferroribbon_core::model::RibbonGalleryModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonGalleryModel>,
@@ -242,6 +254,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonGridPickerModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonGridPickerModel>();
     plain::<ferroribbon_core::model::RibbonGridPickerModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonGridPickerModel>,
@@ -257,6 +270,7 @@ pub(crate) fn register() {
     >(|v| v.clone());
     ferroribbon_core::model::register_ribbon_group_model::<ferroribbon_core::model::RibbonGroupModel>().expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonGroupModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonGroupModel>();
     plain::<ferroribbon_core::model::RibbonGroupModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonGroupModel>,
@@ -268,6 +282,7 @@ pub(crate) fn register() {
     >(|v| v.clone());
     ferroribbon_core::model::register_ribbon_label_model::<ferroribbon_core::model::RibbonLabelModel>().expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonLabelModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonLabelModel>();
     plain::<ferroribbon_core::model::RibbonLabelModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonLabelModel>,
@@ -286,6 +301,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonMenuItemModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonMenuItemModel>();
     plain::<ferroribbon_core::model::RibbonMenuItemModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonMenuItemModel>,
@@ -298,6 +314,7 @@ pub(crate) fn register() {
     ferroribbon_core::model::register_ribbon_model::<ferroribbon_core::model::RibbonModel>()
         .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonModel>();
     plain::<ferroribbon_core::model::RibbonModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonModel>,
@@ -306,6 +323,7 @@ pub(crate) fn register() {
     ferroribbon_core::model::register_ribbon_row_model::<ferroribbon_core::model::RibbonRowModel>()
         .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonRowModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonRowModel>();
     plain::<ferroribbon_core::model::RibbonRowModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonRowModel>,
@@ -328,6 +346,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSegmentModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSegmentModel>();
     plain::<ferroribbon_core::model::RibbonSegmentModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSegmentModel>,
@@ -342,6 +361,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSegmentedModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSegmentedModel>();
     plain::<ferroribbon_core::model::RibbonSegmentedModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSegmentedModel>,
@@ -360,6 +380,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSeparatorModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSeparatorModel>();
     plain::<ferroribbon_core::model::RibbonSeparatorModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSeparatorModel>,
@@ -378,6 +399,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSliderModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSliderModel>();
     plain::<ferroribbon_core::model::RibbonSliderModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSliderModel>,
@@ -396,6 +418,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSpinnerModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSpinnerModel>();
     plain::<ferroribbon_core::model::RibbonSpinnerModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSpinnerModel>,
@@ -414,6 +437,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonSplitButtonModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonSplitButtonModel>();
     plain::<ferroribbon_core::model::RibbonSplitButtonModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonSplitButtonModel>,
@@ -434,6 +458,7 @@ pub(crate) fn register() {
     ferroribbon_core::model::register_ribbon_tab_model::<ferroribbon_core::model::RibbonTabModel>()
         .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonTabModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonTabModel>();
     plain::<ferroribbon_core::model::RibbonTabModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonTabModel>,
@@ -448,6 +473,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonTextBoxModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonTextBoxModel>();
     plain::<ferroribbon_core::model::RibbonTextBoxModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonTextBoxModel>,
@@ -466,6 +492,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonToggleButtonModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonToggleButtonModel>();
     plain::<ferroribbon_core::model::RibbonToggleButtonModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonToggleButtonModel>,
@@ -488,6 +515,7 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonMenuHeaderModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonMenuHeaderModel>();
     plain::<ferroribbon_core::model::RibbonMenuHeaderModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonMenuHeaderModel>,
@@ -498,12 +526,14 @@ pub(crate) fn register() {
     >()
     .expect("built-in model hierarchy");
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonMenuSeparatorModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonMenuSeparatorModel>();
     plain::<ferroribbon_core::model::RibbonMenuSeparatorModel>();
     ValueTypes::register_cast::<
         Rc<ferroribbon_core::model::RibbonMenuSeparatorModel>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
     >(|v| v.clone());
     ValueTypes::register_reference::<ferroribbon_core::model::RibbonScreenTipModel>();
+    ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonScreenTipModel>();
     plain::<ferroribbon_core::model::RibbonScreenTipModel>();
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>,
@@ -897,8 +927,10 @@ pub(crate) fn register() {
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
     >(|v| v.clone());
     ValueTypes::register_reference::<RibbonIcon>();
+    ValueTypes::register_erased_value::<RibbonIcon>();
     plain::<RibbonScreenTipModel>();
     ValueTypes::register_reference::<RibbonCommandCatalog>();
+    ValueTypes::register_erased_value::<RibbonCommandCatalog>();
     ModelTypes::register_notifying_collection::<ModelColors>();
     ModelTypes::register_notifying_collection::<ModelSwatches>();
     ModelTypes::register_notifying_collection::<ModelSegments>();

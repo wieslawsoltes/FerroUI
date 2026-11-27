@@ -570,6 +570,7 @@ fn selection_handler(
     f: impl Fn(Rc<crate::controls::RibbonTabChangedEventArgs>) + 'static,
 ) -> MarkupDelegate {
     ValueTypes::register_reference::<SelectionHandler>();
+    ValueTypes::register_erased_value::<SelectionHandler>();
     MarkupDelegate::for_method(
         Some(Rc::new(SelectionHandler(Box::new(f)))),
         SelectionHandler::MARKUP,

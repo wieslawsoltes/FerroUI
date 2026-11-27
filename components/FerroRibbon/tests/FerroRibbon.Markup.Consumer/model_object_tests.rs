@@ -167,6 +167,7 @@ fn native_object_fields_dispatch_source_virtual_equality_across_model_classes_an
     crate::tests::run(|| {
         register_ribbon_button_model::<EqualButton>().unwrap();
         ValueTypes::register_reference::<EqualButton>();
+        ValueTypes::register_erased_value::<EqualButton>();
         ValueTypes::register_cast::<Rc<EqualButton>, Rc<dyn RibbonNodeModelImpl>>(|v| v.clone());
         let first = owner(EqualButton::new("same"));
         let same = owner(EqualButton::new("same"));

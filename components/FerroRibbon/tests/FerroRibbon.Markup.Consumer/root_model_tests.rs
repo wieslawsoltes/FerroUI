@@ -17,6 +17,7 @@ fn independent_root_model_compiled_runtime_factory_replacement_lifecycle_and_lin
     crate::tests::run(|| {
         let _theme = crate::tests::NativeThemeScope::new();
         ValueTypes::register_reference::<RootModelViewModel>();
+        ValueTypes::register_erased_value::<RootModelViewModel>();
         MarkupType::register_all(&[RootModelViewModel::MARKUP]);
         for runtime in [false, true] {
             let value = if runtime {
@@ -170,6 +171,7 @@ fn independent_factory_context_parent_ownership_before_and_after_model_assignmen
     crate::tests::run(|| {
         let _theme = crate::tests::NativeThemeScope::new();
         ValueTypes::register_reference::<RootModelViewModel>();
+        ValueTypes::register_erased_value::<RootModelViewModel>();
         MarkupType::register_all(&[RootModelViewModel::MARKUP]);
         for runtime in [false, true] {
             for assign_model in [false, true] {

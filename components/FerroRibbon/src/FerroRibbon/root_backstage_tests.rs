@@ -54,6 +54,7 @@ impl PartialEq for Handler {
 ferroui_base::ferro_markup_type!(class Handler{this:Rc<Handler>,handles:[Rc<Handler>],methods:[fn Invoke(Option<BoxedValue>,EventArgs)=>|h:&Rc<Handler>,_,_|(h.0)()]});
 fn handler(f: impl Fn() + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<Handler>();
+    ValueTypes::register_erased_value::<Handler>();
     MarkupDelegate::for_method(
         Some(Rc::new(Handler(Box::new(f)))),
         Handler::MARKUP,
@@ -69,6 +70,7 @@ impl PartialEq for ClickHandler {
 ferroui_base::ferro_markup_type!(class ClickHandler{this:Rc<ClickHandler>,handles:[Rc<ClickHandler>],methods:[fn Invoke(Option<BoxedValue>,Rc<RibbonHandledEventArgs>)=>|h:&Rc<ClickHandler>,_,a|(h.0)(a)]});
 fn click(f: impl Fn(Rc<RibbonHandledEventArgs>) + 'static) -> MarkupDelegate {
     ValueTypes::register_reference::<ClickHandler>();
+    ValueTypes::register_erased_value::<ClickHandler>();
     MarkupDelegate::for_method(
         Some(Rc::new(ClickHandler(Box::new(f)))),
         ClickHandler::MARKUP,

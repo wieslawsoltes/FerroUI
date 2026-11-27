@@ -156,4 +156,5 @@ fn register_values() {
     ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSizeDefinition>>();
     ValueTypes::register_display::<RibbonSizeDefinition>();
     ValueTypes::register_reference::<RibbonKeyTipResult>();
+    ValueTypes::register_erased_value::<RibbonKeyTipResult>();
 }

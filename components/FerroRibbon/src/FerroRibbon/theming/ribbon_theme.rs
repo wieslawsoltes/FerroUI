@@ -198,6 +198,7 @@ impl RibbonTheme {
         handler: impl Fn(Option<&ferroui_base::FerroObject>, &EventArgs) + 'static,
     ) -> Rc<dyn IDisposable> {
         ValueTypes::register_reference::<ChangedCallback>();
+        ValueTypes::register_erased_value::<ChangedCallback>();
         let callback = Rc::new(ChangedCallback(Box::new(handler)));
         let weak = Rc::downgrade(&callback);
         Self::add_changed(Some(changed_callback_delegate(callback)));

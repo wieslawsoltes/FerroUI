@@ -63,6 +63,7 @@ impl DataTemplateSelectorImpl for ConsumerTemplateSelector {
 ferroui_base::ferro_markup_type!(class ConsumerTemplateSelector{namespace:"FerroRibbon.Consumer",this:Rc<ConsumerTemplateSelector>,handles:[ConsumerTemplateSelector,Rc<ConsumerTemplateSelector>,Option<Rc<ConsumerTemplateSelector>>],base:Rc<dyn DataTemplateSelectorImpl>,constructors:[()=>ConsumerTemplateSelector::new],properties:[Template:Option<Rc<dyn IDataTemplate>>{get:|s:&Rc<ConsumerTemplateSelector>|s.template(),set:|s:&Rc<ConsumerTemplateSelector>,t|s.set_template(t)},Calls:i32{get:|s:&Rc<ConsumerTemplateSelector>|s.calls()}]});
 pub fn register() {
     ValueTypes::register_reference::<ConsumerTemplateSelector>();
+    ValueTypes::register_erased_value::<ConsumerTemplateSelector>();
     ValueTypes::register_cast::<Rc<ConsumerTemplateSelector>, Rc<dyn DataTemplateSelectorImpl>>(
         |v| v.clone(),
     );

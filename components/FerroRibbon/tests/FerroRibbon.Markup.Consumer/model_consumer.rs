@@ -80,6 +80,7 @@ pub fn register() {
     ferroribbon_core::model::register_ribbon_button_model::<ConsumerButtonModel>().unwrap();
     ferroribbon::metadata::models::register_model_notifications::<ConsumerButtonModel>();
     ValueTypes::register_reference::<ConsumerButtonModel>();
+    ValueTypes::register_erased_value::<ConsumerButtonModel>();
     ValueTypes::register_cast::<Rc<ConsumerButtonModel>, Rc<dyn RibbonButtonModelImpl>>(|v| {
         v.clone()
     });

@@ -24,6 +24,7 @@ fn independent_slider_compiled_runtime_two_way_commands_template_and_subclass() 
         use ferroui_base::metadata::{MarkupType, MarkupTyped};
         MarkupType::register_all(&[crate::spinner_consumer::NumberViewModel::MARKUP]);
         ValueTypes::register_reference::<crate::spinner_consumer::NumberViewModel>();
+        ValueTypes::register_erased_value::<crate::spinner_consumer::NumberViewModel>();
         for (name, expected) in [
             (
                 "RibbonInputSlider",

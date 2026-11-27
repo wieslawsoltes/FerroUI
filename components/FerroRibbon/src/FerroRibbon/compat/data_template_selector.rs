@@ -59,6 +59,7 @@ ferroui_base::ferro_markup_type!(class DataTemplateSelector{
 });
 pub(crate) fn register() {
     ValueTypes::register_reference::<DataTemplateSelector>();
+    ValueTypes::register_erased_value::<DataTemplateSelector>();
     ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn DataTemplateSelectorImpl>>();
     // The ribbon recovers its values from the Core model as the same allocation.
     ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn DataTemplateSelectorImpl>>();
