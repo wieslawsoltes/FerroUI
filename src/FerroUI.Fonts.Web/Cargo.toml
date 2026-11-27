@@ -20,11 +20,18 @@ path = "lib.rs"
 woff2 = ["dep:brotli-decompressor"]
 
 [dependencies]
+ferroui-base.workspace = true
+# The text controls, whose layouts are redone when a font arrives.
+ferroui-controls.workspace = true
 ferroui-fonts-web-core.workspace = true
+url.workspace = true
 brotli-decompressor = { workspace = true, optional = true }
 
 [dev-dependencies]
 ferroui-fonts-web-core = { workspace = true, features = ["testing"] }
+# A real backend for the tests. A path and no version: a development dependency without a version
+# is left out of the published package (docs/release.md, "Dependency order").
+ferroui-vello = { path = "../Vello/FerroUI.Vello" }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
