@@ -15,7 +15,9 @@ use std::fmt;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
-type InstanceDataMap = HashMap<TypeId, Rc<dyn Any>>;
+/// The object-owned data slots of an object (`FerroObject::instance_data`), kept in the part of
+/// its value store that is allocated on first use, so an object without data pays nothing.
+pub(crate) type InstanceDataMap = HashMap<TypeId, Rc<dyn Any>>;
 
 type PropertyChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
 type SuppressedLocalValueHandler = dyn Fn(&FerroObject, &'static FerroProperty);
@@ -40,8 +42,6 @@ pub struct FerroObject {
     this: OnceCell<Weak<dyn Any>>,
     vtable: Cell<Option<&'static FerroObjectVTable>>,
     values: ValueStore,
-    /// Eight bytes per object: most objects never hold instance data.
-    instance_data: OptionCell<Box<InstanceDataMap>>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.67): read by upgrading and
     // written whole, so a cell without a borrow flag.
     inheritance_parent: OptionCell<WeakRef<FerroObject>>,
@@ -270,7 +270,6 @@ impl FerroObject {
             this: OnceCell::new(),
             vtable: Cell::new(None),
             values: ValueStore::new(),
-            instance_data: OptionCell::new(),
             inheritance_parent: OptionCell::new(),
             inheritance_children: RefCell::new(std::collections::VecDeque::new()),
             property_changed: HandlerList::new(),
@@ -283,7 +282,8 @@ impl FerroObject {
     /// each independent library slot. The original Rc allocation is retained.
     pub fn instance_data<T: Any>(&self) -> Option<Rc<T>> {
         self.verify_access();
-        self.instance_data
+        self.values
+            .instance_data()?
             .with(|map| map?.get(&TypeId::of::<T>()).cloned())?
             .downcast::<T>()
             .ok()
@@ -298,8 +298,16 @@ impl FerroObject {
     /// not strongly retain the owner through a cycle. Use WeakRef for back-links.
     pub fn set_instance_data<T: Any>(&self, value: Option<Rc<T>>) -> Option<Rc<T>> {
         self.verify_access();
+        // Removing a slot of an object that never held one allocates nothing.
+        let slot = match value {
+            Some(_) => self.values.instance_data_or_create(),
+            None => match self.values.instance_data() {
+                Some(slot) => slot,
+                None => return None,
+            },
+        };
         // Taken and put back with no user code in between: the old value drops after this.
-        let mut storage = self.instance_data.take();
+        let mut storage = slot.take();
         let previous = match value {
             Some(value) => storage
                 .get_or_insert_with(|| Box::new(HashMap::new()))
@@ -312,8 +320,14 @@ impl FerroObject {
                 previous
             }
         };
-        self.instance_data.set(storage);
+        slot.set(storage);
         previous.and_then(|value| value.downcast::<T>().ok())
+    }
+
+    /// Whether the rare part of the value store was allocated (for the tests of the slots).
+    #[cfg(test)]
+    pub(crate) fn values_have_rare_part(&self) -> bool {
+        self.values.instance_data().is_some()
     }
 
     /// Returns the [`Dispatcher`] that this object is associated with: the

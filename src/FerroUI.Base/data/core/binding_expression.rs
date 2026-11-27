@@ -117,6 +117,11 @@ pub struct BindingExpression {
     publishing: Cell<bool>,
     writing_change_value_to_source: Cell<bool>,
     publishing_change_value_target: Cell<bool>,
+    /// Whether the target property writes the value of its change notification back to the
+    /// source (`binding_writeback_uses_change_value` of its metadata): resolved once when the
+    /// expression starts, for a two-way or one-way-to-source binding without a delay that writes
+    /// on property changes, so publishing a value reads no metadata.
+    change_value_writeback: Cell<bool>,
 }
 
 impl BindingExpression {
@@ -190,6 +195,7 @@ impl BindingExpression {
             publishing: Cell::new(false),
             writing_change_value_to_source: Cell::new(false),
             publishing_change_value_target: Cell::new(false),
+            change_value_writeback: Cell::new(false),
         });
 
         let mut leaf_accessor = None;
@@ -636,7 +642,7 @@ impl BindingExpression {
         }
         let delay = self.delay();
         let Some(uncommon) = self.uncommon.as_ref().filter(|_| !delay.is_zero()) else {
-            if e.property().get_metadata_for(e.sender()).binding_writeback_uses_change_value() == Some(true) {
+            if self.change_value_writeback.get() {
                 if self.writing_change_value_to_source.get() || self.publishing_change_value_target.get() {
                     return;
                 }
@@ -677,11 +683,26 @@ impl BindingExpression {
     }
 
     fn uses_change_value_writeback(&self) -> bool {
-        self.delay().is_zero()
+        self.change_value_writeback.get()
+    }
+
+    /// Reads, once per start, whether the target property writes back the value of its change
+    /// notification ([`change_value_writeback`](Self::change_value_writeback)). A one-way binding
+    /// never writes back, so it reads nothing.
+    fn resolve_change_value_writeback(&self) {
+        let writes_back = matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource)
+            && self.delay().is_zero()
             && self.update_source_trigger() == UpdateSourceTrigger::PropertyChanged
             && self.base.target_property().zip(self.base.try_get_target()).is_some_and(|(property, target)| {
                 property.get_metadata_for(&target).binding_writeback_uses_change_value() == Some(true)
-            })
+            });
+        self.change_value_writeback.set(writes_back);
+    }
+
+    /// Whether the expression resolved that its target writes back change values (for the tests).
+    #[cfg(test)]
+    pub(crate) fn writes_back_change_values(&self) -> bool {
+        self.change_value_writeback.get()
     }
 }
 
@@ -793,6 +814,7 @@ impl UntypedBindingExpression for BindingExpression {
     }
 
     fn start_core(&self) {
+        self.resolve_change_value_writeback();
         let source = self.source.as_ref().and_then(WeakValue::upgrade);
         let Some(source) = source else {
             self.on_node_error(-1, "Binding Source is null.");

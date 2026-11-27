@@ -436,3 +436,24 @@ fn instance_data_preserves_slots_identity_and_reentrant_old_value_drops() {
     owner.set_instance_data::<i32>(None);
     assert_eq!(drops.get(), 1);
 }
+
+/// The object-owned data slots live in the rare part of the value store, not in every object: an
+/// object is as large as before the slots existed. The size is that of a build without the
+/// development features, which add fields to the layers.
+#[test]
+#[cfg(all(target_pointer_width = "64", not(feature = "hot-reload"), not(feature = "tagged-weak-references")))]
+fn instance_data_adds_nothing_to_an_object() {
+    assert_eq!(std::mem::size_of::<FerroObject>(), FERRO_OBJECT_SIZE, "size_of::<FerroObject>()");
+    let owner = FerroObject::new();
+    // Asking for, or removing, a slot of an object that never held one allocates nothing.
+    assert!(owner.instance_data::<u8>().is_none());
+    assert!(owner.set_instance_data::<u8>(None).is_none());
+    assert!(!owner.values_have_rare_part());
+    owner.set_instance_data(Some(Rc::new(3_u8)));
+    assert_eq!(*owner.instance_data::<u8>().unwrap(), 3);
+    assert!(owner.values_have_rare_part());
+}
+
+/// The bytes of a `FerroObject` on a 64-bit target, as on main before the slots.
+#[cfg(all(target_pointer_width = "64", not(feature = "hot-reload"), not(feature = "tagged-weak-references")))]
+const FERRO_OBJECT_SIZE: usize = 248;
