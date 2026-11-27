@@ -7,7 +7,7 @@ use crate::media::text_formatting::{
     DrawableTextRun, ITextDrawingSink, ShapedBuffer, SplitResult, TabAlignment, TabLeader, TextMetrics,
     TextRunProperties,
 };
-use crate::media::GlyphRun;
+use crate::media::{GlyphRun, IBrush, TextDecorationCollection};
 use crate::utilities::ReadOnlyMemory;
 use crate::{Matrix, Point, Size};
 
@@ -80,6 +80,21 @@ impl ShapedTextRun {
         } else if self.tab_presence.get() == Some(false) {
             result.set_tab_presence(false);
         }
+        result
+    }
+
+    /// The run with another foreground and other decorations, which do not change the shaping:
+    /// the glyphs are shared, and the new run has an owner count and a buffer of its own.
+    pub(super) fn restyled(
+        &self,
+        foreground: Option<&Rc<dyn IBrush>>,
+        decorations: Option<&TextDecorationCollection>,
+    ) -> Self {
+        let properties = self.properties.with_style(foreground, decorations);
+        let mut result = Self::new(self.shaped_buffer.shared_view(), properties);
+        result.tab_leader = self.tab_leader;
+        result.tab_alignment = self.tab_alignment;
+        result.tab_presence.set(self.tab_presence.get());
         result
     }
 
