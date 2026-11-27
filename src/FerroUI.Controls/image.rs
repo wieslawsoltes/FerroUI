@@ -354,7 +354,8 @@ impl Image {
 
     fn watch_source_load(&self, source: Option<&Rc<dyn IImage>>) {
         drop(self.source_load.take());
-        let Some(source) = source else { return };
+        // An image that reports no load (a bitmap) costs no lease and no handler.
+        let Some(source) = source.filter(|source| source.reports_load()) else { return };
         let lease = Rc::new(());
         self.source_load.replace(Some(ImageLoadWatch { lease: lease.clone(), subscription: None, pending: None }));
         let active = Rc::downgrade(&lease);
@@ -402,7 +403,9 @@ impl Image {
     }
 
     fn select_variant(&self) -> bool {
-        let Some(source) = self.source() else { return false };
+        // An image without variants (a bitmap) builds no context: no locator lookup, no walk to
+        // the top level.
+        let Some(source) = self.source().filter(|source| source.has_variants()) else { return false };
         let current = self.scale_variant.borrow().as_ref().map(|variant| variant.id);
         let platform_colors = FerroLocator::current()
             .get_service::<dyn IPlatformSettings>()
