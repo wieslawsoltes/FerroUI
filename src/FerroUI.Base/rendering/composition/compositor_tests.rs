@@ -610,6 +610,45 @@ fn visuals_removed_while_rendering_stopped_are_not_kept_by_renderer() {
     services.assert_hit_test(105.0, 55.0, None, &[]);
 }
 
+/// The update pass that empties the sets can be held back (rendering stopped, a batch in
+/// flight). A visual that left the tree is released by its owner all the same, also while
+/// the other entries of the set keep its stale entry from being compacted away.
+#[test]
+fn a_removed_visual_is_released_before_the_next_update_pass() {
+    let services = CompositorCanvas::new();
+    let others: Vec<_> = (0..8_i32).map(|i| TestBorder::filled(f64::from(i) * 30.0, 0.0, 20.0, 10.0)).collect();
+    for other in &others {
+        services.canvas.add(other);
+    }
+    services.run_jobs();
+
+    services.renderer.stop();
+    let child = TestBorder::filled(0.0, 0.0, 20.0, 10.0);
+    let removed = TestBorder::new();
+    removed.set_bounds(Rect::new(100.0, 50.0, 20.0, 10.0));
+    removed.add(&child);
+    services.canvas.add(&removed);
+    for other in &others {
+        other.set_background(Some(Brushes::green()));
+    }
+    services.run_jobs();
+    assert!(services.renderer.has_pending_update_for_unit_tests(&removed));
+    assert!(services.renderer.has_pending_update_for_unit_tests(&child));
+
+    let (weak_removed, weak_child) = (removed.downgrade(), child.downgrade());
+    services.canvas.remove(&removed);
+    drop(child);
+    drop(removed);
+    assert!(weak_removed.upgrade().is_none(), "the sets keep a visual that left the tree");
+    assert!(weak_child.upgrade().is_none(), "the sets keep a child of a visual that left the tree");
+
+    // What stays in the sets is still drawn by the pass that follows.
+    assert!(services.renderer.has_pending_update_for_unit_tests(&others[0]));
+    services.renderer.start();
+    services.run_jobs();
+    assert!(!services.renderer.has_pending_update_for_unit_tests(&others[0]));
+}
+
 // --- CompositionChildVisualTests --------------------------------------------------
 
 /// Clears its child visual when it leaves the tree, the usual counterpart to

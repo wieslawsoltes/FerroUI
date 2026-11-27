@@ -103,6 +103,9 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
 | `ContentDialog` | WinUI's ContentDialog: its template is ported from WinUI's ContentDialog.xaml into the WinUI theme and its derived themes | G2c of #418 |
+| `TabView` | WinUI's TabView: its template is ported from WinUI's TabView.xaml into the WinUI theme and its derived themes (macOS 26, Material) | #418 |
+| `TabViewItem` | WinUI's TabViewItem: its template is ported from WinUI's TabView.xaml into the WinUI theme and its derived themes (macOS 26, Material) | #418 |
+| `TabViewListView` | WinUI's TabViewListView: its template is ported from WinUI's TabView.xaml into the WinUI theme and its derived themes (macOS 26, Material) | #418 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
@@ -507,6 +510,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ToolTip | 3 of 3 | ported | `status_samples.rs` (no code-behind upstream) | `status_samples_tests.rs` |
 | Viewbox | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs`, `x_bind_tests.rs` |
 | WrapPanel | 1 ported, 1 partial: no ItemsStretch (and no Padding: the host Border's) | partial | `layout_samples.rs` | `layout_samples_tests.rs` |
+| TabView | 7 ported, 3 pending: no TabItemsSource example, no BitmapIconSource, no windowing (tear-out) | partial | `tab_view_samples.rs` | `tab_view_samples_tests.rs`, `src/Markup/FerroUI.Markup.Xaml.WinUI/compiled_tests.rs` |
 
 ### 10.8 WinUI API and Gallery scanner (W10b)
 

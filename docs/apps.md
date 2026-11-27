@@ -123,6 +123,31 @@ cargo --config FerroUI/.cargo/compiler-cache.toml build --locked   # sccache as 
 cargo --config FerroUI/.cargo/build-tools.toml build --locked      # optimised source scanner
 ```
 
+### The export trie of an executable
+
+On macOS and iOS, outside the dev profile, `ferroui_build::Build` links the binary targets of the
+package with `-Wl,-no_exported_symbols` (#1049). A `cdylib` or `staticlib` keeps its exports.
+
+- An application without `Build` gets the same with a one-line `build.rs` and `ferroui-build` in
+  its `[build-dependencies]`:
+
+  ```rust
+  fn main() {
+      ferroui_build::strip_executable_exports();
+  }
+  ```
+
+- An application whose plug-ins resolve names from the executable (`-bundle_loader`, a flat
+  namespace, `dlsym(RTLD_DEFAULT, ..)` on its own names) keeps the trie:
+
+  ```toml
+  [package.metadata.ferroui]
+  executable-exports = true
+  ```
+
+Without the trie, `dladdr` finds no name in the executable, so a crash report of a `dist` build is
+symbolicated with its dSYM.
+
 ### The Graphite Metal ownership fix
 
 On macOS FerroUI draws with Skia's Graphite on Metal, and the Skia that `skia-bindings` 0.153.3

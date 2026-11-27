@@ -459,7 +459,9 @@ document with its build or populate path, whether it is public and whether the l
 answers it, and every embedded asset with its size and whether it is registered.
 
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
-name, the first time the control looks for its theme. Release builds do not check.
+name, the first time the control looks for its theme. Release builds do not check. A debug
+build of a declarative application also keeps the controls of its inspector (Shift+F12), which
+its sources do not name (#954).
 
 **How a build applies its runs.** The function of a document that merges units calls
 `rt::apply_theme_unit(active_theme_units(), unit, run, ..)` where the entries of a run were:
