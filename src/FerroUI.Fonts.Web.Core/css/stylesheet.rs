@@ -55,6 +55,30 @@ impl FontFaceDescriptors {
         }
     }
 
+    /// Sets one descriptor from its CSS text, for a face declared from code or markup. Unlike a
+    /// rule of a style sheet, an unknown name or an invalid value is an error.
+    pub fn set_descriptor(&mut self, name: &str, value: &str) -> Result<(), CssParseError> {
+        match name.to_ascii_lowercase().as_str() {
+            "font-family" => self.family = parse_family_name(value)?,
+            "src" => self.sources = parse_src(value)?,
+            "font-style" => self.style = parse_font_style(value)?,
+            "font-weight" => self.weight = parse_font_weight(value)?,
+            "font-width" | "font-stretch" => self.width = parse_font_width(value)?,
+            "unicode-range" => self.unicode_range = parse_unicode_range(value)?,
+            "font-display" => self.display = parse_font_display(value)?,
+            "font-feature-settings" => self.feature_settings = parse_feature_settings(value)?,
+            "font-variation-settings" => self.variation_settings = parse_variation_settings(value)?,
+            "font-named-instance" => self.named_instance = parse_named_instance(value)?,
+            "font-language-override" => self.language_override = parse_language_override(value)?,
+            "ascent-override" => self.ascent_override = parse_metric_override(value)?,
+            "descent-override" => self.descent_override = parse_metric_override(value)?,
+            "line-gap-override" => self.line_gap_override = parse_metric_override(value)?,
+            "size-adjust" => self.size_adjust = parse_size_adjust(value)?,
+            _ => return Err(CssParseError::InvalidValue("unknown descriptor")),
+        }
+        Ok(())
+    }
+
     /// Applies one declaration. An unknown descriptor is ignored, and an invalid value leaves
     /// the descriptor as it was. Both are what CSS does with a declaration it cannot use.
     fn apply(&mut self, name: &str, value: &str) {
