@@ -1045,6 +1045,9 @@ impl ValueStore {
         }
     }
 
+    // Inlined into the activation of a style instance, the path of every class or pseudo-class
+    // change (pinned: thin LTO stopped inlining it after unrelated changes of the store).
+    #[inline]
     pub fn on_frame_activation_changed(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) {
         match frame.base().entry_count() {
             0 => {}
