@@ -595,4 +595,43 @@ mod tests {
             assert!(!engine.telemetry.backend_label.is_empty(), "{kind:?}: missing telemetry");
         }
     }
+
+    #[test]
+    fn laser_gravity_orbits_remain_stable_and_bounded() {
+        let mut engine = SandboxEngine::new();
+        engine.load_scene(SceneKind::LaserGravity);
+
+        let star_center = Vec2::new(16.0 * 0.54, 10.0 * 0.5);
+        let initial_radii: Vec<(ferroui_physics::BodyHandle, f32)> = engine
+            .world
+            .bodies()
+            .filter(|b| b.is_dynamic())
+            .map(|b| (b.handle, (b.position - star_center).length()))
+            .collect();
+        assert_eq!(initial_radii.len(), 5, "expected 5 orbital bodies");
+
+        // Simulate 5 full seconds (300 frames) and verify every planet holds a stable orbit
+        for _ in 0..300 {
+            engine.step(1.0 / 60.0);
+        }
+
+        for (handle, r0) in initial_radii {
+            let body = engine.world.body(handle).expect("orbital body must exist");
+            let r_now = (body.position - star_center).length();
+            assert!(
+                (r_now - r0).abs() < 0.35,
+                "planet drifted out of stable Keplerian orbit: r0={r0:.2}, r_now={r_now:.2}"
+            );
+            assert!(
+                body.position.x > 0.5 && body.position.x < 15.5 && body.position.y > 0.5 && body.position.y < 9.5,
+                "planet escaped arena bounds: {:?}",
+                body.position
+            );
+        }
+        assert!(
+            !engine.laser_segments.is_empty() && engine.laser_segments.len() <= 6,
+            "laser should trace clean bounded segments, got {}",
+            engine.laser_segments.len()
+        );
+    }
 }

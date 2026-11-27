@@ -564,3 +564,37 @@ fn ferroui_visual_physics_host_and_spring_driver_update_render_transforms() {
     let shake_mat = vis2.render_transform().unwrap().value();
     assert!(shake_mat.m31.abs() > 1.0, "expected horizontal shake offset, m31={}", shake_mat.m31);
 }
+
+#[test]
+fn newtonian_gravity_conserves_circular_orbit_across_substeps() {
+    let mut world = PhysicsWorld::new(Vec2::ZERO);
+    world.config = SolverConfig::high_precision(); // 8 substeps/frame
+    let center = Vec2::new(8.0, 5.0);
+    let mu = 48.0_f32;
+    world.add_force_field(ForceField::NewtonianGravity {
+        center,
+        mu,
+        min_radius: 0.5,
+        max_radius: 100.0,
+    });
+    let r0 = 2.0_f32;
+    let v0 = (mu / r0).sqrt();
+    let planet = world.add_body(
+        BodyBuilder::dynamic(Shape2D::circle(0.2))
+            .position(center + Vec2::new(r0, 0.0))
+            .linear_velocity(Vec2::new(0.0, v0))
+            .linear_damping(0.0)
+            .angular_damping(0.0)
+            .can_sleep(false),
+    );
+    // Simulate 5 full seconds (multiple complete revolutions)
+    for _ in 0..300 {
+        world.step(1.0 / 60.0);
+    }
+    let pos = world.body(planet).unwrap().position;
+    let r_now = (pos - center).length();
+    assert!(
+        (r_now - r0).abs() < 0.05,
+        "circular orbit radius should be conserved across substeps: r0={r0}, r_now={r_now}"
+    );
+}

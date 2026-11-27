@@ -453,20 +453,27 @@ impl PhysicsWorld {
             if !body.is_dynamic() || body.is_sleeping {
                 continue;
             }
-            // Apply spatial force fields
+            // Apply spatial force fields for THIS substep only (do not accumulate across substeps!)
+            let user_force = body.force;
+            let user_torque = body.torque;
             for field in &self.force_fields {
                 field.apply_to_body(body, gravity);
             }
+            let total_force = body.force;
+            let total_torque = body.torque;
+            body.force = user_force;
+            body.torque = user_torque;
+
             // Angular velocity update
             if !body.fixed_rotation {
                 let ang_damp = 1.0 / (1.0 + body.angular_damping * dt);
-                body.angular_velocity = (body.angular_velocity + body.torque * body.inv_inertia * dt) * ang_damp;
+                body.angular_velocity = (body.angular_velocity + total_torque * body.inv_inertia * dt) * ang_damp;
             }
             self.soa_indices.push(idx);
             self.soa_vx.push(body.linear_velocity.x);
             self.soa_vy.push(body.linear_velocity.y);
-            self.soa_fx.push(body.force.x);
-            self.soa_fy.push(body.force.y);
+            self.soa_fx.push(total_force.x);
+            self.soa_fy.push(total_force.y);
             self.soa_inv_mass.push(body.inv_mass);
             self.soa_gravity_scale.push(body.gravity_scale);
             self.soa_damping.push(body.linear_damping);

@@ -961,64 +961,61 @@ impl SandboxEngine {
         self.world.config = SolverConfig::high_precision();
         self.add_arena_walls();
 
-        let center = Vec2::new(WORLD_WIDTH * 0.52, WORLD_HEIGHT * 0.5);
-        let mu = 52.0_f32;
+        let center = Vec2::new(WORLD_WIDTH * 0.54, WORLD_HEIGHT * 0.5);
+        let mu = 48.0_f32;
+        // Infinite arena-wide Newtonian gravity so planets & comets NEVER escape gravity cutoff!
         self.world.add_force_field(ForceField::NewtonianGravity {
             center,
             mu,
-            min_radius: 1.0,
-            max_radius: 4.75,
+            min_radius: 0.9,
+            max_radius: 50.0,
         });
 
-        // Glowing central star
+        // Luminous central star
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::circle(0.68))
+            BodyBuilder::static_body(Shape2D::circle(0.62))
                 .position(center)
                 .restitution(0.95)
                 .user_data(0xFFFBBF24),
         );
 
-        // Planets & reflective crystal satellites on exact Keplerian circular & elliptical orbits!
+        // Five well-spaced, collision-free Keplerian planets & orbital mirrors (min radial gap 0.80m!)
         let specs: &[(f32, f32, f32, u8, u32)] = &[
             // (orbit_radius, start_angle, ecc_scale, shape_kind, color)
-            (1.65, 0.2, 1.0, 0, 0xFF38BDF8),
-            (2.25, 2.1, 1.0, 1, 0xFFA78BFA),
-            (2.85, 4.0, 0.96, 2, 0xFF34D399),
-            (3.40, 0.9, 1.02, 0, 0xFFF472B6),
-            (3.95, 3.3, 0.98, 1, 0xFFFB923C),
-            (4.40, 5.2, 1.0, 2, 0xFF2DD4BF),
-            (2.55, 5.5, 1.06, 0, 0xFFFDE047),
-            (3.70, 1.8, 0.93, 1, 0xFF818CF8),
+            (1.45, 0.3, 1.00, 0, 0xFF38BDF8),  // Inner cyan planet
+            (2.25, 2.0, 1.00, 1, 0xFFA78BFA),  // Violet crystal hexagon
+            (3.05, 3.8, 1.00, 2, 0xFF34D399),  // Emerald orbital mirror relay
+            (3.85, 5.2, 1.02, 0, 0xFFF472B6),  // Rose outer planet (gentle ellipse)
+            (4.55, 1.1, 0.99, 2, 0xFFFB923C),  // Amber outer reflector
         ];
 
         for &(r, ang, ecc, kind, color) in specs {
             let pos = center + Vec2::new(ang.cos() * r, ang.sin() * r);
             let tangent = Vec2::new(-ang.sin(), ang.cos());
-            // Exact circular orbital speed v = sqrt(mu / r)
             let v_orbit = (mu / r).sqrt() * ecc;
             let shape = match kind {
-                0 => Shape2D::circle(0.28),
-                1 => Shape2D::regular_polygon(6, 0.34),
-                _ => Shape2D::rect(0.76, 0.20),
+                0 => Shape2D::circle(0.27),
+                1 => Shape2D::regular_polygon(6, 0.30),
+                _ => Shape2D::rect(0.72, 0.18),
             };
             let h = self.world.add_body(
                 BodyBuilder::dynamic(shape)
                     .position(pos)
                     .angle(ang)
                     .linear_velocity(tangent * v_orbit)
-                    .angular_velocity(1.1)
+                    .angular_velocity(0.9)
                     .linear_damping(0.0)
                     .angular_damping(0.0)
                     .restitution(0.95)
                     .can_sleep(false)
                     .user_data(color as u64),
             );
-            let mut trail = VecDeque::with_capacity(56);
+            let mut trail = VecDeque::with_capacity(72);
             trail.push_back(pos);
-            self.orbit_trails.push((h, trail, color as u32));
+            self.orbit_trails.push((h, trail, color));
         }
 
-        self.laser_origin = Vec2::new(0.45, WORLD_HEIGHT * 0.5);
+        self.laser_origin = Vec2::new(0.55, WORLD_HEIGHT * 0.5);
     }
 
     pub fn step(&mut self, raw_dt: f32) {
@@ -1088,8 +1085,8 @@ impl SandboxEngine {
             // Update Keplerian orbital trails
             for (h, trail, _) in &mut self.orbit_trails {
                 if let Some(b) = self.world.body(*h) {
-                    if trail.back().map_or(true, |p| p.distance_squared(b.position) > 0.015) {
-                        if trail.len() >= 56 {
+                    if trail.back().map_or(true, |p| p.distance_squared(b.position) > 0.012) {
+                        if trail.len() >= 72 {
                             trail.pop_front();
                         }
                         trail.push_back(b.position);
@@ -1234,7 +1231,12 @@ impl SandboxEngine {
         for _bounce in 0..6 {
             let ray = Ray2::new(origin, dir);
             if let Some(hit) = self.world.raycast(ray, 22.0, CollisionFilter::ALL) {
-                self.laser_segments.push((origin, hit.point, Some(hit.normal)));
+                let is_wall = self.world.body(hit.body).is_some_and(|b| b.user_data == ARENA_WALL_TAG);
+                self.laser_segments.push((origin, hit.point, if is_wall { None } else { Some(hit.normal) }));
+                // Outer arena walls absorb the beam so it only reflects dramatically off planets, star & mirrors!
+                if is_wall {
+                    break;
+                }
                 dir = (dir - hit.normal * (2.0 * dir.dot(hit.normal))).normalize_or_zero();
                 origin = hit.point + hit.normal * 0.03;
             } else {
@@ -1524,10 +1526,10 @@ impl SandboxEngine {
             .friction(0.45)
             .user_data(color);
         if self.scene == SceneKind::LaserGravity {
-            let center = Vec2::new(WORLD_WIDTH * 0.52, WORLD_HEIGHT * 0.5);
-            let r = (pos - center).length().max(1.2);
+            let center = Vec2::new(WORLD_WIDTH * 0.54, WORLD_HEIGHT * 0.5);
+            let r = (pos - center).length().max(1.1);
             let tangent = (pos - center).perp().normalize_or_zero();
-            let v_orbit = (52.0 / r).sqrt();
+            let v_orbit = (48.0 / r).sqrt();
             builder = builder
                 .linear_velocity(tangent * v_orbit)
                 .linear_damping(0.0)
@@ -1536,7 +1538,7 @@ impl SandboxEngine {
         }
         let h = self.world.add_body(builder);
         if self.scene == SceneKind::LaserGravity {
-            let mut trail = VecDeque::with_capacity(56);
+            let mut trail = VecDeque::with_capacity(72);
             trail.push_back(pos);
             self.orbit_trails.push((h, trail, color as u32));
         }

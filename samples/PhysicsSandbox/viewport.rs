@@ -144,6 +144,8 @@ impl ViewClass for PhysicsViewport {
 
 impl InputElementImpl for PhysicsViewport {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
+        let input: Ref<ferroui_base::input::InputElement> = this.to_ref().upcast();
+        e.pointer().capture(Some(&input));
         let pt = e.get_position(Some(this));
         let world_pos = this.screen_to_world(pt);
         let right = e.properties().is_right_button_pressed;
@@ -158,7 +160,8 @@ impl InputElementImpl for PhysicsViewport {
         this.invalidate_visual();
     }
 
-    fn on_pointer_released(this: &Self, _e: &PointerReleasedEventArgs) {
+    fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
+        e.pointer().capture(None);
         this.engine.borrow().borrow_mut().on_pointer_released();
         this.invalidate_visual();
     }
@@ -326,9 +329,7 @@ impl PhysicsViewport {
         // 1. Force fields (gravity well rings & animated water buoyancy zones)
         for field in sim.world.force_fields() {
             match *field {
-                ForceField::Vortex { center, radius, .. }
-                | ForceField::Radial { center, radius, .. }
-                | ForceField::NewtonianGravity { center, max_radius: radius, .. } => {
+                ForceField::Vortex { center, radius, .. } | ForceField::Radial { center, radius, .. } => {
                     let c = to_screen(center);
                     for ring in [0.35_f64, 0.62, 0.85, 1.0] {
                         dc.draw_ellipse_at(
@@ -338,6 +339,15 @@ impl PhysicsViewport {
                             radius as f64 * ring * scale,
                             radius as f64 * ring * scale,
                         );
+                    }
+                }
+                ForceField::NewtonianGravity { center, .. } => {
+                    let c = to_screen(center);
+                    // Crisp Keplerian orbital reference rings matching the 5 planetary orbits + soft solar corona
+                    let corona: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0x28FBBF24));
+                    dc.draw_ellipse_at(Some(&corona), None, c, 1.05 * scale, 1.05 * scale);
+                    for r in [1.45_f64, 2.25, 3.05, 3.85, 4.55] {
+                        dc.draw_ellipse_at(None, Some(&self.palette.major_grid_pen), c, r * scale, r * scale);
                     }
                 }
                 ForceField::Buoyancy { region, .. } => {
