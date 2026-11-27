@@ -18,7 +18,9 @@
 use std::rc::Rc;
 
 use crate::media::fonts::OpenTypeTag;
-use crate::media::{FontFamily, FontVariation, FontVariationSettings, GlyphTypeface};
+use crate::media::{
+    FontFamily, FontVariation, FontVariationAxis, FontVariationInstance, FontVariationSettings, GlyphTypeface,
+};
 
 /// The optical size axis.
 const OPSZ: OpenTypeTag = OpenTypeTag::from_chars('o', 'p', 's', 'z');
@@ -93,6 +95,28 @@ impl GlyphTypeface {
             let fvar = self.platform_typeface().try_get_table(FVAR)?;
             optical_size_axis(fvar.span())
         })
+    }
+
+    /// The axes of the variation space of the font (`fvar`), as the backend reports them; empty
+    /// for a font that is not variable and on a backend that makes no instances.
+    pub fn variation_axes(&self) -> Vec<FontVariationAxis> {
+        self.platform_typeface().variation_design().axes
+    }
+
+    /// The named instances of the font (`fvar`), as the backend reports them.
+    pub fn named_instances(&self) -> Vec<FontVariationInstance> {
+        self.platform_typeface().variation_design().named_instances
+    }
+
+    /// The typeface of the same font at another position of its variation space: the axes of
+    /// `settings` take their values (clamped to the axes by the backend), the others keep the
+    /// values of this typeface. `None` where the backend makes no instance.
+    pub fn with_variation(&self, settings: &FontVariationSettings) -> Option<Rc<GlyphTypeface>> {
+        if settings.is_empty() {
+            return None;
+        }
+        let platform_typeface = self.platform_typeface().with_variation_settings(settings)?;
+        GlyphTypeface::new(platform_typeface, self.font_simulations()).ok()
     }
 
     /// The typeface at the optical size of a text of `em_size` (in points: device-independent

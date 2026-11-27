@@ -320,6 +320,7 @@ mod font_source_identifier;
 mod font_stretch;
 mod font_style;
 mod font_typography;
+mod font_variation_axis;
 mod font_variation_settings;
 mod font_weight;
 mod glyph_bounds;
@@ -372,6 +373,7 @@ pub use font_typography::{
     FontCapitals, FontEastAsianLanguage, FontEastAsianWidths, FontFraction, FontNumeralAlignment, FontNumeralStyle,
     FontVariants,
 };
+pub use font_variation_axis::{FontVariationAxis, FontVariationDesign, FontVariationInstance};
 pub use font_variation_settings::{FontVariation, FontVariationSettings};
 pub use font_weight::FontWeight;
 pub(crate) use glyph_bounds::GlyphBounds;
