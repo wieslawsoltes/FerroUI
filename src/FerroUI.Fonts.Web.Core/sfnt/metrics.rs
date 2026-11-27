@@ -42,6 +42,10 @@ pub fn has_metric_overrides(face: &FontFaceDescriptors) -> bool {
         || face.descent_override != MetricOverride::Normal
         || face.line_gap_override != MetricOverride::Normal
         || face.size_adjust != 1.0
+        || face.superscript_position_override != MetricOverride::Normal
+        || face.subscript_position_override != MetricOverride::Normal
+        || face.superscript_size_override != MetricOverride::Normal
+        || face.subscript_size_override != MetricOverride::Normal
 }
 
 /// Applies the metric descriptors of a face to a decoded font in canonical layout.
@@ -84,6 +88,24 @@ pub fn apply_metric_overrides(font: &mut [u8], face: &FontFaceDescriptors) -> Re
             }
             if let Some(value) = line_gap {
                 write_i16(font, os2 + 72, value);
+            }
+        }
+        if length >= 26 {
+            // The value for horizontal text: the size on both axes of the glyph, the position
+            // along the block axis. `OS/2` measures a subscript offset downward.
+            if let Some(value) = override_value(face.subscript_size_override, units_per_em) {
+                write_i16(font, os2 + 10, value);
+                write_i16(font, os2 + 12, value);
+            }
+            if let Some(value) = override_value(face.subscript_position_override, units_per_em) {
+                write_i16(font, os2 + 16, value);
+            }
+            if let Some(value) = override_value(face.superscript_size_override, units_per_em) {
+                write_i16(font, os2 + 18, value);
+                write_i16(font, os2 + 20, value);
+            }
+            if let Some(value) = override_value(face.superscript_position_override, units_per_em) {
+                write_i16(font, os2 + 24, value);
             }
         }
     }
@@ -144,6 +166,25 @@ mod tests {
             (ascent, -descent, gap)
         );
         assert_eq!((field(&data, b"OS/2", 74), field(&data, b"OS/2", 76)), (ascent, descent));
+    }
+
+    #[test]
+    fn script_overrides_reach_the_os2_table() {
+        let mut data = font();
+        let em = field(&data, b"head", 18) as f64;
+        apply_metric_overrides(
+            &mut data,
+            &face(
+                "superscript-size-override: 60%; superscript-position-override: 40%;
+                 subscript-size-override: 50%; subscript-position-override: 25%",
+            ),
+        )
+        .unwrap();
+        let at = |fraction: f64| (em * fraction).round() as i16;
+        assert_eq!((field(&data, b"OS/2", 18), field(&data, b"OS/2", 20)), (at(0.6), at(0.6)));
+        assert_eq!(field(&data, b"OS/2", 24), at(0.4));
+        assert_eq!((field(&data, b"OS/2", 10), field(&data, b"OS/2", 12)), (at(0.5), at(0.5)));
+        assert_eq!(field(&data, b"OS/2", 16), at(0.25));
     }
 
     #[test]

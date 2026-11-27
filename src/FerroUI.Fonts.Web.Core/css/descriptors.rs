@@ -379,6 +379,55 @@ pub fn parse_metric_override(value: &str) -> Result<MetricOverride, CssParseErro
     }
 }
 
+/// Parses one of the superscript and subscript overrides of CSS Fonts 5:
+/// `[ normal | from-font | <percentage> ]{1,2}`. The first value is for horizontal text and the
+/// second for upright text in vertical modes. `normal` and `from-font` both leave the metric of
+/// the font. A size may not be negative; a position may.
+pub fn parse_script_override(value: &str, allow_negative: bool) -> Result<MetricOverride, CssParseError> {
+    const INVALID: CssParseError = CssParseError::InvalidValue("superscript or subscript override");
+    let item = |token: &Token<'_>| -> Result<Option<f32>, CssParseError> {
+        if is_keyword(token, "normal") || is_keyword(token, "from-font") {
+            return Ok(None);
+        }
+        match token {
+            Token::Percentage(value) if value.is_finite() && (allow_negative || *value >= 0.0) => {
+                Ok(Some((*value / 100.0) as f32))
+            }
+            _ => Err(INVALID),
+        }
+    };
+    let tokens = tokens(value);
+    let (first, second) = match tokens.as_slice() {
+        [first] => (item(first)?, None),
+        [first, second] => (item(first)?, item(second)?),
+        _ => return Err(INVALID),
+    };
+    Ok(first.map_or(MetricOverride::Normal, |first| MetricOverride::Value { first, second }))
+}
+
+/// Parses the `font-size` descriptor of CSS Fonts 5; `None` is `auto`, which matches any size. A
+/// reversed range is put in order.
+pub fn parse_font_size_range(value: &str) -> Result<Option<(f32, f32)>, CssParseError> {
+    const INVALID: CssParseError = CssParseError::InvalidValue("font-size");
+    let number = |token: &Token<'_>| match token {
+        Token::Number { value, .. } if value.is_finite() && *value >= 0.0 => Ok(*value as f32),
+        _ => Err(INVALID),
+    };
+    let tokens = tokens(value);
+    match tokens.as_slice() {
+        [token] if is_keyword(token, "auto") => Ok(None),
+        [size] => {
+            let size = number(size)?;
+            Ok(Some((size, size)))
+        }
+        [first, second] => {
+            let (first, second) = (number(first)?, number(second)?);
+            Ok(Some((first.min(second), first.max(second))))
+        }
+        _ => Err(INVALID),
+    }
+}
+
 /// Parses `size-adjust`, as a fraction (`90%` is `0.9`).
 pub fn parse_size_adjust(value: &str) -> Result<f32, CssParseError> {
     let tokens = tokens(value);

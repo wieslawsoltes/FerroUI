@@ -32,6 +32,12 @@ pub struct FontFaceDescriptors {
     pub line_gap_override: MetricOverride,
     /// A fraction: `1.0` is `100%`.
     pub size_adjust: f32,
+    /// The `font-size` descriptor of Level 5; `None` is `auto`.
+    pub size_range: Option<(f32, f32)>,
+    pub superscript_position_override: MetricOverride,
+    pub subscript_position_override: MetricOverride,
+    pub superscript_size_override: MetricOverride,
+    pub subscript_size_override: MetricOverride,
 }
 
 impl FontFaceDescriptors {
@@ -53,6 +59,11 @@ impl FontFaceDescriptors {
             descent_override: MetricOverride::Normal,
             line_gap_override: MetricOverride::Normal,
             size_adjust: 1.0,
+            size_range: None,
+            superscript_position_override: MetricOverride::Normal,
+            subscript_position_override: MetricOverride::Normal,
+            superscript_size_override: MetricOverride::Normal,
+            subscript_size_override: MetricOverride::Normal,
         }
     }
 
@@ -75,6 +86,11 @@ impl FontFaceDescriptors {
             "descent-override" => self.descent_override = parse_metric_override(value)?,
             "line-gap-override" => self.line_gap_override = parse_metric_override(value)?,
             "size-adjust" => self.size_adjust = parse_size_adjust(value)?,
+            "font-size" => self.size_range = parse_font_size_range(value)?,
+            "superscript-position-override" => self.superscript_position_override = parse_script_override(value, true)?,
+            "subscript-position-override" => self.subscript_position_override = parse_script_override(value, true)?,
+            "superscript-size-override" => self.superscript_size_override = parse_script_override(value, false)?,
+            "subscript-size-override" => self.subscript_size_override = parse_script_override(value, false)?,
             _ => return Err(CssParseError::InvalidValue("unknown descriptor")),
         }
         Ok(())
@@ -97,6 +113,17 @@ impl FontFaceDescriptors {
             "descent-override" => set(&mut self.descent_override, parse_metric_override(value)),
             "line-gap-override" => set(&mut self.line_gap_override, parse_metric_override(value)),
             "size-adjust" => set(&mut self.size_adjust, parse_size_adjust(value)),
+            "font-size" => set(&mut self.size_range, parse_font_size_range(value)),
+            "superscript-position-override" => {
+                set(&mut self.superscript_position_override, parse_script_override(value, true))
+            }
+            "subscript-position-override" => {
+                set(&mut self.subscript_position_override, parse_script_override(value, true))
+            }
+            "superscript-size-override" => {
+                set(&mut self.superscript_size_override, parse_script_override(value, false))
+            }
+            "subscript-size-override" => set(&mut self.subscript_size_override, parse_script_override(value, false)),
             _ => {}
         }
     }

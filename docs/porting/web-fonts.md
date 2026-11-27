@@ -94,7 +94,7 @@ core (phases B and C). Section 12 lists what is deliberately left out.
 | `font-language-override` | Parsed and passed to the shaper; at risk in the standard | B |
 | `ascent-override`, `descent-override`, `line-gap-override` | Full | B |
 | `size-adjust` | Full | B |
-| Level 5 `font-size` range | Parsed; used for matching optical faces | C |
+| Level 5 `font-size` range | Parsed and **not applied**: the lookup of the font manager has no size. A face limited to a size is used only when the family has no face for any size, and then the range nearest 16 px. Size-aware lookup is #1292 (0.7.0) | C |
 | Level 5 superscript and subscript overrides | Parsed; used where synthesis exists | C |
 
 ### 3.2 `format()` and `tech()`

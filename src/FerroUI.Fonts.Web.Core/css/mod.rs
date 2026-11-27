@@ -14,10 +14,10 @@ mod unicode_range;
 mod tests;
 
 pub use descriptors::{
-    parse_family_name, parse_feature_settings, parse_font_display, parse_font_style, parse_font_weight,
-    parse_font_width, parse_language_override, parse_metric_override, parse_named_instance, parse_size_adjust,
-    parse_variation_settings, FontDisplay, FontFeatureSetting, FontStyleDescriptor, FontVariationSetting,
-    FontWeightRange, FontWidthRange, MetricOverride,
+    parse_family_name, parse_feature_settings, parse_font_display, parse_font_size_range, parse_font_style,
+    parse_font_weight, parse_font_width, parse_language_override, parse_metric_override, parse_named_instance,
+    parse_script_override, parse_size_adjust, parse_variation_settings, FontDisplay, FontFeatureSetting,
+    FontStyleDescriptor, FontVariationSetting, FontWeightRange, FontWidthRange, MetricOverride,
 };
 pub use palette::{parse_base_palette, parse_override_colors, BasePalette, FontPaletteValues, PaletteColor};
 pub use source::{parse_src, FontFormat, FontSource, FontTech, FontTechs};
