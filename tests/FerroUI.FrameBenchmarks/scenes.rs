@@ -90,6 +90,13 @@ pub const SCENES: &[Scene] = &[
                  drawings not recorded or sent again (sections 9.10, 9.13, 9.14)",
     },
     Scene {
+        name: "wall+clock",
+        build: wall_clock,
+        pointer: false,
+        guards: "the still wall with only its clock changing, a small element in the top rows: a frame \
+                 that changes one band of a pipelined layer draws that band only (#1361)",
+    },
+    Scene {
         name: "wall+pointer",
         build: wall,
         pointer: true,
@@ -552,6 +559,16 @@ fn tile_of(
 }
 
 fn wall() -> Ref<Control> {
+    wall_with(true)
+}
+
+/// The still wall with its clock and without the cursor: the only change of a frame is a few
+/// rows at the top.
+fn wall_clock() -> Ref<Control> {
+    wall_with(false)
+}
+
+fn wall_with(cursor_moves: bool) -> Ref<Control> {
     let white = brush(0xFFFFFFFF);
     let blue = brush(0xFF1E40AF);
     let red = brush(0xFFDC2626);
@@ -568,11 +585,15 @@ fn wall() -> Ref<Control> {
     let shift = TranslateTransform::new();
     cursor.set_render_transform(Some((&shift).into()));
     canvas.children().add(&clock);
-    canvas.children().add(&cursor);
+    if cursor_moves {
+        canvas.children().add(&cursor);
+    }
     let update = move |frame: i32| {
         clock.set_text(Some(&format!("frame {frame:06}")));
-        shift.set_x(200.0 + 400.0 * wave(frame, 300));
-        shift.set_y(100.0 + 300.0 * wave(frame, 220));
+        if cursor_moves {
+            shift.set_x(200.0 + 400.0 * wave(frame, 300));
+            shift.set_y(100.0 + 300.0 * wave(frame, 220));
+        }
     };
     update(0);
     Clock::follow(update);

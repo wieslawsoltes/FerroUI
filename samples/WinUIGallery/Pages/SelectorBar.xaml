@@ -1,0 +1,47 @@
+<!-- Ported from the three pinned SelectorBar examples of WinUI Gallery (14061eea) and the code
+     behind of SelectorBarPage.xaml.cs (selector_bar_samples.rs); see ../NOTICE.md. The icons are
+     property elements (FerroUI has no conversion of a symbol name to an icon). The third example's
+     ItemsView is an ItemsControl with a horizontal panel, its items the source's coloured tiles. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="SelectorBarExample1" Spacing="8">
+    <TextBlock Text="A basic SelectorBar" FontSize="18" />
+    <SelectorBar x:Name="SelectorBar1">
+      <SelectorBarItem x:Name="SelectorBarItemRecent" Text="Recent">
+        <SelectorBarItem.Icon><SymbolIcon Symbol="Clock" /></SelectorBarItem.Icon>
+      </SelectorBarItem>
+      <SelectorBarItem x:Name="SelectorBarItemShared" Text="Shared">
+        <SelectorBarItem.Icon><SymbolIcon Symbol="Share" /></SelectorBarItem.Icon>
+      </SelectorBarItem>
+      <SelectorBarItem x:Name="SelectorBarItemFavorites" Text="Favorites">
+        <SelectorBarItem.Icon><SymbolIcon Symbol="Favorite" /></SelectorBarItem.Icon>
+      </SelectorBarItem>
+    </SelectorBar>
+  </StackPanel>
+
+  <StackPanel x:Name="SelectorBarExample2" Spacing="8">
+    <TextBlock Text="A SelectorBar that navigates a Frame with slide transitions" FontSize="18" />
+    <SelectorBar x:Name="SelectorBar2">
+      <SelectorBarItem x:Name="SelectorBarItemPage1" Text="Page1" />
+      <SelectorBarItem x:Name="SelectorBarItemPage2" Text="Page2" />
+      <SelectorBarItem x:Name="SelectorBarItemPage3" Text="Page3" />
+      <SelectorBarItem x:Name="SelectorBarItemPage4" Text="Page4" />
+      <SelectorBarItem x:Name="SelectorBarItemPage5" Text="Page5" />
+    </SelectorBar>
+    <Frame x:Name="SelectorContentFrame" IsNavigationStackEnabled="False" />
+  </StackPanel>
+
+  <StackPanel x:Name="SelectorBarExample3" Spacing="8">
+    <TextBlock Text="A SelectorBar that displays different collections" FontSize="18" />
+    <SelectorBar x:Name="SelectorBar3">
+      <SelectorBarItem x:Name="SelectorBarItemPink" Text="Pink" />
+      <SelectorBarItem x:Name="SelectorBarItemPlum" Text="Plum" />
+      <SelectorBarItem x:Name="SelectorBarItemPowderBlue" Text="PowderBlue" />
+    </SelectorBar>
+    <ItemsControl x:Name="ItemsView3">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+    </ItemsControl>
+  </StackPanel>
+</StackPanel>

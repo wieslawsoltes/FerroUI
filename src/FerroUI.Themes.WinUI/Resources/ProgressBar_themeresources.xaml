@@ -18,6 +18,8 @@
       <StaticResource x:Key="ProgressBarBorderBrush" ResourceKey="ControlStrokeColorDefaultBrush" />
       <StaticResource x:Key="ProgressBarPausedForegroundColor" ResourceKey="SystemFillColorCaution" />
       <StaticResource x:Key="ProgressBarErrorForegroundColor" ResourceKey="SystemFillColorCritical" />
+      <SolidColorBrush x:Key="ProgressBarPausedForegroundBrush" Color="{StaticResource SystemFillColorCaution}" />
+      <SolidColorBrush x:Key="ProgressBarErrorForegroundBrush" Color="{StaticResource SystemFillColorCritical}" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Light">
       <Thickness x:Key="ProgressBarBorderThemeThickness">0</Thickness>
@@ -26,6 +28,8 @@
       <StaticResource x:Key="ProgressBarBorderBrush" ResourceKey="ControlStrokeColorDefaultBrush" />
       <StaticResource x:Key="ProgressBarPausedForegroundColor" ResourceKey="SystemFillColorCaution" />
       <StaticResource x:Key="ProgressBarErrorForegroundColor" ResourceKey="SystemFillColorCritical" />
+      <SolidColorBrush x:Key="ProgressBarPausedForegroundBrush" Color="{StaticResource SystemFillColorCaution}" />
+      <SolidColorBrush x:Key="ProgressBarErrorForegroundBrush" Color="{StaticResource SystemFillColorCritical}" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="{x:Static winui:WinUITheme.HighContrast}">
       <Thickness x:Key="ProgressBarBorderThemeThickness">1</Thickness>
@@ -34,6 +38,8 @@
       <StaticResource x:Key="ProgressBarBorderBrush" ResourceKey="SystemColorWindowTextColor" />
       <StaticResource x:Key="ProgressBarPausedForegroundColor" ResourceKey="SystemColorWindowTextColor" />
       <StaticResource x:Key="ProgressBarErrorForegroundColor" ResourceKey="SystemColorHotlightColor" />
+      <SolidColorBrush x:Key="ProgressBarPausedForegroundBrush" Color="{StaticResource SystemColorWindowTextColor}" />
+      <SolidColorBrush x:Key="ProgressBarErrorForegroundBrush" Color="{StaticResource SystemColorHotlightColor}" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
   <x:Double x:Key="ProgressBarMinHeight">3</x:Double>
