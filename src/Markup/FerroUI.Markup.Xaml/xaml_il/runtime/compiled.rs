@@ -151,43 +151,61 @@ pub fn at(type_name: &'static str, message: impl Display, line: i32, position: i
     )
 }
 
-/// Whether `uri` names the document at `root` followed by `name`.
-/// Asset paths use the same unescaping as the asset loader before applying
-/// the generated loader's ordinal, case-insensitive comparison.
+fn fold_case(character: char) -> char {
+    let mut upper = character.to_uppercase();
+    match (upper.next(), upper.next()) {
+        (Some(single), None) => single,
+        // A mapping to several characters (`ß` -> `SS`) is not a simple mapping.
+        _ => character,
+    }
+}
+
+fn equals_ignore_case(mut actual: impl Iterator<Item = char>, mut expected: impl Iterator<Item = char>) -> bool {
+    loop {
+        match (actual.next(), expected.next()) {
+            (None, None) => return true,
+            (Some(a), Some(b)) if a == b || fold_case(a) == fold_case(b) => {}
+            _ => return false,
+        }
+    }
+}
+
+/// Whether `uri` is the URI `root` followed by `name`, compared as upstream's
+/// generated loader compares a requested URI with the URI of a document:
+/// `string.Equals(uri, documentUri, StringComparison.OrdinalIgnoreCase)`, an
+/// ordinal comparison of the characters after their simple (one character to
+/// one character) upper-case mapping, for every script, not only ASCII.
+/// The comparison of the documents whose URIs a request may spell escaped is
+/// [`uri_equals_escaped`], which the generated loader names for them.
 pub fn uri_equals(uri: &str, root: &str, name: &str) -> bool {
+    equals_ignore_case(uri.chars(), root.chars().chain(name.chars()))
+}
+
+/// Whether the URI of a document, `root` followed by `name`, may be requested escaped: it has a
+/// character that a URI escapes, or an escape. The generated loader compares a request with such a
+/// document by [`uri_equals_escaped`], and with any other by [`uri_equals`].
+pub fn uri_needs_unescaping(uri: &str) -> bool {
+    uri.chars().any(|c| !c.is_ascii() || c.is_ascii_control() || " %\"<>`{}#?^|\\".contains(c))
+}
+
+/// [`uri_equals`] for a document whose URI may be requested escaped (`uri_needs_unescaping`):
+/// asset paths use the same unescaping as the asset loader before the ordinal, case-insensitive
+/// comparison.
+pub fn uri_equals_escaped(uri: &str, root: &str, name: &str) -> bool {
     use url::Position::{AfterPath, BeforePath};
 
-    fn fold(character: char) -> char {
-        let mut upper = character.to_uppercase();
-        match (upper.next(), upper.next()) {
-            (Some(single), None) => single,
-            // A mapping to several characters (`ß` -> `SS`) is not a simple mapping.
-            _ => character,
-        }
-    }
-    fn equals(mut actual: impl Iterator<Item = char>, mut expected: impl Iterator<Item = char>) -> bool {
-        loop {
-            match (actual.next(), expected.next()) {
-                (None, None) => return true,
-                (Some(a), Some(b)) if a == b || fold(a) == fold(b) => {}
-                _ => return false,
-            }
-        }
-    }
-
-    let direct = || equals(uri.chars(), root.chars().chain(name.chars()));
     if !(uri.contains('%') || root.contains('%') || name.contains('%')) {
-        return direct();
+        return uri_equals(uri, root, name);
     }
     match (url::Url::parse(uri), url::Url::parse(&format!("{root}{name}"))) {
         (Ok(actual), Ok(expected)) if UriExtensions::is_asset(&actual) && UriExtensions::is_asset(&expected) => {
             let actual_path = UriExtensions::get_unescape_absolute_path(&actual);
             let expected_path = UriExtensions::get_unescape_absolute_path(&expected);
-            equals(actual[..BeforePath].chars(), expected[..BeforePath].chars())
-                && equals(actual_path.chars(), expected_path.chars())
-                && equals(actual[AfterPath..].chars(), expected[AfterPath..].chars())
+            equals_ignore_case(actual[..BeforePath].chars(), expected[..BeforePath].chars())
+                && equals_ignore_case(actual_path.chars(), expected_path.chars())
+                && equals_ignore_case(actual[AfterPath..].chars(), expected[AfterPath..].chars())
         }
-        _ => direct(),
+        _ => uri_equals(uri, root, name),
     }
 }
 
@@ -2351,7 +2369,7 @@ pub fn add_event_handler(
 
 #[cfg(test)]
 mod tests {
-    use super::uri_equals;
+    use super::{uri_equals, uri_equals_escaped, uri_needs_unescaping};
 
     /// Generated x:Static calls return typed BoxedValue handles. Conversion to
     /// an object property must keep the object, rather than box its handle.
@@ -2537,11 +2555,15 @@ mod tests {
     #[test]
     fn compiled_asset_paths_compare_decoded_spellings_once() {
         let root = "ferres://App/";
-        assert!(uri_equals("ferres://app/Caf%C3%89%20menu.xaml", root, "Café menu.xaml"));
-        assert!(uri_equals("ferres://app/Caf%C3%89.xaml", root, "Caf%C3%A9.xaml"));
-        assert!(uri_equals("ferres://app/Name%2520.xaml", root, "Name%2520.xaml"));
-        assert!(!uri_equals("ferres://app/Name%2520.xaml", root, "Name%20.xaml"));
-        assert!(!uri_equals("ferres://app/Name%3Fpart.xaml", root, "Name?part.xaml"));
+        assert!(uri_equals_escaped("ferres://app/Caf%C3%89%20menu.xaml", root, "Café menu.xaml"));
+        assert!(uri_equals_escaped("ferres://app/Caf%C3%89.xaml", root, "Caf%C3%A9.xaml"));
+        assert!(uri_equals_escaped("ferres://app/Name%2520.xaml", root, "Name%2520.xaml"));
+        assert!(!uri_equals_escaped("ferres://app/Name%2520.xaml", root, "Name%20.xaml"));
+        assert!(!uri_equals_escaped("ferres://app/Name%3Fpart.xaml", root, "Name?part.xaml"));
+        // The documents whose URIs need it, and only they, take this comparison.
+        assert!(uri_needs_unescaping("ferres://App/Café menu.xaml"));
+        assert!(uri_needs_unescaping("ferres://App/Name%2520.xaml"));
+        assert!(!uri_needs_unescaping("ferres://ferroui.themes.simple/SimpleTheme.xaml"));
     }
 }
 

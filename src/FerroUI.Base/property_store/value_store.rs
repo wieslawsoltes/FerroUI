@@ -1464,14 +1464,14 @@ impl ValueStore {
             }
 
             if let Some(current) = &current {
-                current.end_reevaluation(owner);
+                current.finish_reevaluation(owner);
 
                 if current.can_remove() {
                     if current.base_priority() == BindingPriority::Unset {
                         self.remove_effective_value(owner, property);
                         current.dispose_and_raise_unset(owner);
                     } else {
-                        current.remove_animation_and_raise(owner);
+                        current.remove_animation(owner);
                     }
                 }
 
@@ -1553,7 +1553,7 @@ impl ValueStore {
             values.extend(self.effective_values.borrow().iter().map(|(_, v)| v.clone()));
             for value in values.iter().rev() {
                 let property = value.property();
-                value.end_reevaluation(owner);
+                value.finish_reevaluation(owner);
                 if value.can_remove() {
                     self.remove_effective_value(owner, property);
                     value.dispose_and_raise_unset(owner);
