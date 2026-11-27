@@ -12,9 +12,9 @@ ferroui_base::theme_keys! {
         PrimaryButtonBorderMultiplier, Refresh, RightCornerRadiusFilterConverter, SecondaryButtonBorderMultiplier,
         SelectableTextBlockContextFlyout, SeparatorBorderMultiplier, SimpleHorizontalScrollBarContextFlyout, SimpleTextBoxContextFlyout,
         SimpleVerticalScrollBarContextFlyout, SplitViewPaneAnimationCloseDuration, SplitViewPaneAnimationEasing, SplitViewPaneAnimationOpenDuration,
-        StringFormatConverter, TableViewColumnHeaderResizerTemplate, TextBoxClearButtonData, TextCaretHandleDrawing,
-        TextCaretHandlePath, TextSelectionHandleDrawing, TextSelectionHandlePath, ToggleSwitchPostContentMargin,
-        ToggleSwitchPreContentMargin, TopCornerRadiusFilterConverter,
+        StringFormatConverter, SymbolThemeFontFamily, TableViewColumnHeaderResizerTemplate, TextBoxClearButtonData,
+        TextCaretHandleDrawing, TextCaretHandlePath, TextSelectionHandleDrawing, TextSelectionHandlePath,
+        ToggleSwitchPostContentMargin, ToggleSwitchPreContentMargin, TopCornerRadiusFilterConverter,
     ;
     ::ferroui_base::CornerRadius =>
         TabbedPageTabItemHeaderCornerRadius, TabbedPageTabItemHeaderIndicatorCornerRadius, TabbedPageTabStripCornerRadius,
