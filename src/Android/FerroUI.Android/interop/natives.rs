@@ -129,6 +129,7 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
             FERRO_INPUT_CONNECTION,
             NATIVE_CLICK_LISTENER,
             crate::platform::storage::android_storage_item::STORAGE_HELPER,
+            crate::platform::android_app_notification_manager::NOTIFICATION_HELPER,
             PLATFORM_HELPER,
             CONFIGURATION_CHANGED_RECEIVER,
         ]);

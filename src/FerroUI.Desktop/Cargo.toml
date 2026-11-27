@@ -43,6 +43,9 @@ ferroui-direct2d = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 ferroui-x11.workspace = true
+# The notification server of the desktop (`use_platform_app_notifications`, #1276); the X11
+# platform depends on the crate already.
+ferroui-freedesktop.workspace = true
 
 [dev-dependencies]
 # The example opens a window before the compositing renderer exists and

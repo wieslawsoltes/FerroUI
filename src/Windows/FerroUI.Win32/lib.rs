@@ -61,6 +61,8 @@ mod window_impl_app_wnd_proc;
 mod window_impl_custom_caption_proc;
 
 #[cfg(windows)]
+mod app_notification_manager;
+#[cfg(windows)]
 mod clipboard_impl;
 #[cfg(windows)]
 mod data_transfer_to_ole_data_object_wrapper;
@@ -101,6 +103,8 @@ pub use win32_top_level_scene_info::Win32TopLevelSceneInfo;
 pub use win32_type_extensions::Win32TypeExtensions;
 pub use swap_chain_top_level_impl::SwapChainTopLevelImpl;
 
+#[cfg(windows)]
+pub use app_notification_manager::Win32AppNotificationManager;
 #[cfg(windows)]
 pub use clipboard_impl::ClipboardImpl;
 #[cfg(windows)]

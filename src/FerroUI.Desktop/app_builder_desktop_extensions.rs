@@ -18,6 +18,15 @@ pub trait AppBuilderDesktopExtensions {
     /// Panics on an operating system whose windowing backend is not
     /// supported yet (everything but macOS, Windows and Linux).
     fn use_platform_detect(&self) -> AppBuilder;
+
+    /// Registers the notification service of the operating system once the platform services
+    /// are set up, so that `AppNotificationManager` shows the application's notifications in the
+    /// notification center of the system (#1276): the UserNotifications framework on macOS (an
+    /// application in a bundle), the toast notifications on Windows 10 and later (an application
+    /// with an application user model id) and the notification server of the desktop over D-Bus
+    /// on Linux. Without this call, or where the service cannot serve the application,
+    /// `AppNotificationManager::is_supported()` is `false`.
+    fn use_platform_app_notifications(&self) -> AppBuilder;
 }
 
 impl AppBuilderDesktopExtensions for AppBuilder {
@@ -69,7 +78,29 @@ impl AppBuilderDesktopExtensions for AppBuilder {
         #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
         self.clone()
     }
+
+    fn use_platform_app_notifications(&self) -> AppBuilder {
+        self.after_platform_services_setup(|_| register_app_notifications())
+    }
 }
+
+#[cfg(target_os = "macos")]
+fn register_app_notifications() {
+    ferroui_native::MacOSAppNotificationManager::register();
+}
+
+#[cfg(windows)]
+fn register_app_notifications() {
+    ferroui_win32::Win32AppNotificationManager::register();
+}
+
+#[cfg(target_os = "linux")]
+fn register_app_notifications() {
+    ferroui_freedesktop::DBusAppNotificationManager::register();
+}
+
+#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
+fn register_app_notifications() {}
 
 #[cfg(target_os = "macos")]
 fn load_ferro_native(builder: &AppBuilder) {

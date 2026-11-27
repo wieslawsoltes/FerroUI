@@ -119,6 +119,12 @@ mod imp {
         /// registered with the builder or the default ones, the HarfBuzz
         /// text shaper and the Skia renderer.
         fn use_android(&self) -> AppBuilder;
+
+        /// Registers the notification manager of the system as the notification service of the
+        /// application once the platform services are set up, so that `AppNotificationManager`
+        /// posts the application's notifications (#1276). Without this call
+        /// `AppNotificationManager::is_supported()` is `false`.
+        fn use_platform_app_notifications(&self) -> AppBuilder;
     }
 
     impl AndroidApplicationExtensions for AppBuilder {
@@ -127,6 +133,10 @@ mod imp {
                 .use_windowing_subsystem(AndroidPlatform::initialize, "Android")
                 .use_harfbuzz()
                 .use_skia()
+        }
+
+        fn use_platform_app_notifications(&self) -> AppBuilder {
+            self.after_platform_services_setup(|_| crate::platform::AndroidAppNotificationManager::register())
         }
     }
 

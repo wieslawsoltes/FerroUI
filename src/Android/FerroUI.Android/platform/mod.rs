@@ -2,6 +2,8 @@
 //! reference).
 
 pub(crate) mod android_activatable_lifetime;
+#[cfg(target_os = "android")]
+pub(crate) mod android_app_notification_manager;
 pub(crate) mod android_data_format_helper;
 pub(crate) mod android_insets_manager;
 #[cfg(target_os = "android")]
@@ -26,6 +28,8 @@ pub(crate) mod storage;
 pub(crate) mod vulkan;
 
 pub use android_activatable_lifetime::AndroidActivatableLifetime;
+#[cfg(target_os = "android")]
+pub use android_app_notification_manager::AndroidAppNotificationManager;
 pub use android_insets_manager::AndroidInsetsManager;
 #[cfg(target_os = "android")]
 pub use android_native_control_host_impl::AndroidNativeControlHostImpl;

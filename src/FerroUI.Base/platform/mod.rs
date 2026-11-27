@@ -175,6 +175,10 @@ pub use i_text_shaper_impl::ITextShaperImpl;
 #[cfg(all(unix, not(target_os = "emscripten")))]
 pub mod native_library;
 
+// --- notifications of the operating system (#1276) ---
+
+pub mod notifications;
+
 // --- storage contracts ---
 
 pub mod storage;

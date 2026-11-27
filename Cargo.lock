@@ -1582,6 +1582,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-vello",
+ "js-sys",
  "url",
  "wasm-bindgen",
 ]
@@ -1973,6 +1974,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-direct2d",
+ "ferroui-freedesktop",
  "ferroui-harfbuzz",
  "ferroui-native",
  "ferroui-quartz",
@@ -2697,6 +2699,7 @@ dependencies = [
 name = "ferroui-native"
 version = "0.6.0-preview.1"
 dependencies = [
+ "block2",
  "cc",
  "ferroui-base",
  "ferroui-controls",
@@ -2706,6 +2709,8 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "microcom-codegen",
+ "objc2",
+ "objc2-foundation",
  "url",
 ]
 
