@@ -69,11 +69,49 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Root" ClipToBounds="{TemplateBinding ClipToBounds}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
-          <ScrollViewer x:Name="PART_ScrollViewer" Theme="{StaticResource TableViewScrollViewerStyle}" VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}" HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}" IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}" IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}" IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}" AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}" BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
-            <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}"/>
-          </ScrollViewer>
+          <Panel>
+            <ScrollViewer x:Name="PART_ScrollViewer" Theme="{StaticResource TableViewScrollViewerStyle}" VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}" HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}" IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}" IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}" IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}" AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}" BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+              <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}"/>
+            </ScrollViewer>
+            <!-- EmptyTemplate (WinUI): shown while the table has no rows (:empty). -->
+            <ContentPresenter x:Name="PART_EmptyStatePresenter"
+                              ContentTemplate="{TemplateBinding EmptyTemplate}"
+                              IsVisible="False" />
+          </Panel>
         </Border>
       </ControlTemplate>
     </Setter>
+
+    <!-- GridLinesVisibility (WinUI): the lines the table leaves out. -->
+    <Style Selector="^:nohorizontalgridlines">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="BorderThickness" Value="0" />
+      </Style>
+    </Style>
+    <Style Selector="^:noverticalgridlines">
+    </Style>
+    <!-- Density (WinUI): the compact and comfortable sizes of the resources. -->
+    <Style Selector="^:compact">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+      </Style>
+      <Style Selector="^ TableViewCell">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+        <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingCompact}" />
+      </Style>
+    </Style>
+    <Style Selector="^:comfortable">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+      </Style>
+      <Style Selector="^ TableViewCell">
+        <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+        <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingComfortable}" />
+      </Style>
+    </Style>
+    <!-- EmptyTemplate (WinUI). -->
+    <Style Selector="^:empty /template/ ContentPresenter#PART_EmptyStatePresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
   </ControlTheme>
 </ResourceDictionary>

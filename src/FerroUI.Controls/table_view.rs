@@ -4,22 +4,65 @@ use crate::presenters::TableViewColumnHeadersPresenter;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::IDataTemplate;
 use crate::{
-    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn, TableViewRow,
+    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn,
+    TableViewColumnHeader, TableViewRow,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetBehavior};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
+    ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_properties, instantiate, BoxedValue,
+    DirectProperty,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement,
     StyledElementImpl, StyledElementImplExt, StyledProperty, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// Which grid lines a [`TableView`] draws (WinUI's `TableViewGridLinesVisibility`).
+///
+/// The value removes lines the theme draws: the WinUI theme and its derived themes draw both,
+/// the Fluent and Simple themes draw none (the upstream look), so there it changes nothing.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum TableViewGridLinesVisibility {
+    /// The horizontal lines between the rows and the vertical lines between the columns (the
+    /// default).
+    #[default]
+    All = 0,
+    /// Only the lines between the rows.
+    Horizontal = 1,
+    /// Only the lines between the columns.
+    Vertical = 2,
+    /// No grid lines.
+    None = 3,
+}
+
+/// The sizes of the rows, the cells and the headers of a [`TableView`] (WinUI's
+/// `TableViewDensity`, with the three sizes of the WinUI resources: `TableViewRowMinHeight`,
+/// `TableViewRowMinHeightCompact` and `TableViewRowMinHeightComfortable`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum TableViewDensity {
+    /// The sizes of the theme (the default).
+    #[default]
+    Standard = 0,
+    /// Lower rows and less padding.
+    Compact = 1,
+    /// Higher rows and more padding.
+    Comfortable = 2,
+}
+
+ferro_markup_enum!(TableViewGridLinesVisibility { All, Horizontal, Vertical, None }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(TableViewDensity { Standard, Compact, Comfortable }, { namespace: "FerroUI.Controls" });
+
 /// A read-only tabular control that presents items in configurable columns.
+///
+/// The WinUI additions (`docs/porting/winui-controls.md`, section 10.11) are opt-in: with their
+/// defaults the table behaves as upstream.
 #[repr(C)]
 pub struct TableView {
     base: ListBox,
@@ -46,11 +89,28 @@ impl FerroObjectImpl for TableView {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Self::can_user_resize_columns_property().as_property() {
+        let property = change.property();
+        if property == Self::can_user_resize_columns_property().as_property() {
             let columns = this.columns.borrow().clone();
             if let Some(columns) = columns {
                 for column in columns.snapshot().iter() {
                     column.update_can_user_effectively_resize();
+                }
+            }
+        } else if property == Self::grid_lines_visibility_property().as_property() {
+            this.update_grid_lines_pseudo_classes();
+            this.update_headers_presentation();
+        } else if property == Self::density_property().as_property() {
+            let density = this.density();
+            this.pseudo_classes().set(":compact", density == TableViewDensity::Compact);
+            this.pseudo_classes().set(":comfortable", density == TableViewDensity::Comfortable);
+            this.update_headers_presentation();
+        } else if property == Self::row_background_property().as_property()
+            || property == Self::alternating_row_background_property().as_property()
+        {
+            for row in this.get_realized_containers() {
+                if let Some(table_view_row) = row.downcast_ref::<TableViewRow>() {
+                    this.apply_row_background(table_view_row, this.index_from_container(&row));
                 }
             }
         }
@@ -89,6 +149,15 @@ impl ItemsControlImpl for TableView {
         if let Some(row) = container.downcast_ref::<TableViewRow>() {
             row.set_columns(Some(this.columns()));
             row.rebuild_cells();
+            this.apply_row_background(row, index);
+        }
+    }
+
+    fn container_index_changed_override(this: &Self, container: &Ref<Control>, old_index: i32, new_index: i32) {
+        Self::parent_container_index_changed_override(this, container, old_index, new_index);
+
+        if let Some(row) = container.downcast_ref::<TableViewRow>() {
+            this.apply_row_background(row, new_index);
         }
     }
 
@@ -121,6 +190,31 @@ ferro_properties! {
         /// Defines the `CanUserResizeColumns` property.
         pub fn can_user_resize_columns_property() -> StyledProperty<bool> {
             FerroProperty::register::<TableView, _>("CanUserResizeColumns", true)
+        }
+
+        /// Defines the `GridLinesVisibility` property (WinUI).
+        pub fn grid_lines_visibility_property() -> StyledProperty<TableViewGridLinesVisibility> {
+            FerroProperty::register::<TableView, _>("GridLinesVisibility", TableViewGridLinesVisibility::All)
+        }
+
+        /// Defines the `Density` property (WinUI).
+        pub fn density_property() -> StyledProperty<TableViewDensity> {
+            FerroProperty::register::<TableView, _>("Density", TableViewDensity::Standard)
+        }
+
+        /// Defines the `RowBackground` property (WinUI).
+        pub fn row_background_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
+            FerroProperty::register::<TableView, _>("RowBackground", None)
+        }
+
+        /// Defines the `AlternatingRowBackground` property (WinUI).
+        pub fn alternating_row_background_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
+            FerroProperty::register::<TableView, _>("AlternatingRowBackground", None)
+        }
+
+        /// Defines the `EmptyTemplate` property (WinUI).
+        pub fn empty_template_property() -> StyledProperty<Option<Rc<dyn IDataTemplate>>> {
+            FerroProperty::register::<TableView, _>("EmptyTemplate", None)
         }
     }
 }
@@ -211,6 +305,87 @@ impl TableView {
 
     pub fn set_can_user_resize_columns(&self, value: bool) {
         self.set_value(Self::can_user_resize_columns_property(), value)
+    }
+
+    /// Gets or sets which grid lines the table draws (WinUI's `GridLinesVisibility`). The default
+    /// is [`All`](TableViewGridLinesVisibility::All): the lines of the theme. The other values
+    /// set the pseudo-classes `:nohorizontalgridlines` and `:noverticalgridlines`, which the
+    /// themes that draw grid lines honour.
+    pub fn grid_lines_visibility(&self) -> TableViewGridLinesVisibility {
+        self.get_value(Self::grid_lines_visibility_property())
+    }
+
+    pub fn set_grid_lines_visibility(&self, value: TableViewGridLinesVisibility) {
+        self.set_value(Self::grid_lines_visibility_property(), value)
+    }
+
+    /// Gets or sets the sizes of the rows, the cells and the headers (WinUI's `Density`). The
+    /// default is [`Standard`](TableViewDensity::Standard): the sizes of the theme. The other
+    /// values set the pseudo-classes `:compact` and `:comfortable`.
+    pub fn density(&self) -> TableViewDensity {
+        self.get_value(Self::density_property())
+    }
+
+    pub fn set_density(&self, value: TableViewDensity) {
+        self.set_value(Self::density_property(), value)
+    }
+
+    /// Gets or sets the background of the rows (WinUI's `RowBackground`). `None`, the default,
+    /// leaves the background of the rows to their theme.
+    pub fn row_background(&self) -> Option<Rc<dyn IBrush>> {
+        self.get_value(Self::row_background_property())
+    }
+
+    pub fn set_row_background(&self, value: Option<Rc<dyn IBrush>>) {
+        self.set_value(Self::row_background_property(), value)
+    }
+
+    /// Gets or sets the background of every second row, the rows at odd indexes (WinUI's
+    /// `AlternatingRowBackground`). `None`, the default, gives them the background of the
+    /// others.
+    pub fn alternating_row_background(&self) -> Option<Rc<dyn IBrush>> {
+        self.get_value(Self::alternating_row_background_property())
+    }
+
+    pub fn set_alternating_row_background(&self, value: Option<Rc<dyn IBrush>>) {
+        self.set_value(Self::alternating_row_background_property(), value)
+    }
+
+    /// Gets or sets the template of what the table shows while it has no rows (WinUI's
+    /// `EmptyTemplate`). The themes present it in `PART_EmptyStatePresenter` while the table is
+    /// `:empty`; `None`, the default, shows nothing.
+    pub fn empty_template(&self) -> Option<Rc<dyn IDataTemplate>> {
+        self.get_value(Self::empty_template_property())
+    }
+
+    pub fn set_empty_template(&self, value: Option<Rc<dyn IDataTemplate>>) {
+        self.set_value(Self::empty_template_property(), value)
+    }
+
+    fn update_grid_lines_pseudo_classes(&self) {
+        let visibility = self.grid_lines_visibility();
+        let horizontal = matches!(visibility, TableViewGridLinesVisibility::All | TableViewGridLinesVisibility::Horizontal);
+        let vertical = matches!(visibility, TableViewGridLinesVisibility::All | TableViewGridLinesVisibility::Vertical);
+        self.pseudo_classes().set(":nohorizontalgridlines", !horizontal);
+        self.pseudo_classes().set(":noverticalgridlines", !vertical);
+    }
+
+    /// Gives the headers the pseudo-classes of the presentation options.
+    fn update_headers_presentation(&self) {
+        let Some(headers_presenter) = self.headers_presenter() else { return };
+        for child in headers_presenter.children().snapshot().iter() {
+            if let Some(header) = child.downcast_ref::<TableViewColumnHeader>() {
+                header.update_presentation_pseudo_classes(Some(self));
+            }
+        }
+    }
+
+    /// Sets the background of a row from [`row_background`](Self::row_background) and
+    /// [`alternating_row_background`](Self::alternating_row_background), or clears the one the
+    /// table set when neither applies; a background the table did not set is left alone.
+    fn apply_row_background(&self, row: &TableViewRow, index: i32) {
+        let alternating = if index >= 0 && index % 2 == 1 { self.alternating_row_background() } else { None };
+        row.set_table_background(alternating.or_else(|| self.row_background()));
     }
 
     pub(crate) fn headers_presenter(&self) -> Option<Ref<TableViewColumnHeadersPresenter>> {

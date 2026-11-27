@@ -396,6 +396,12 @@ CONTROLS = {
             "fn Show() => |window: &Ref<WindowBase>| window.show()",
         ],
     },
+    'TableView': {
+        # The WinUI additions (docs/porting/winui-controls.md, section 10.11).
+        'attributes': [
+            "PseudoClasses(\":nohorizontalgridlines\", \":noverticalgridlines\", \":compact\", \":comfortable\")",
+        ],
+    },
     'TextBlock': {
         # FerroUI additions (docs/porting/DEVIATIONS.md, Text block): attached properties that
         # a text block also exposes as properties of its own, as `LineHeight` and the other

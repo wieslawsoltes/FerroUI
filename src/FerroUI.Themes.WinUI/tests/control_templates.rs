@@ -1241,3 +1241,87 @@ fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
     assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
     window.close();
 }
+
+/// The presentation options of FerroUI's TableView (docs/porting/winui-controls.md, section
+/// 10.11) in the WinUI theme: the grid lines of the rows, the cells and the headers, which
+/// `GridLinesVisibility` leaves out; the sizes of the densities (`TableViewRowMinHeight*`,
+/// `TableViewCellPadding*`); and `PART_EmptyStatePresenter`, which shows `EmptyTemplate` while
+/// the table has no rows.
+#[test]
+fn the_table_view_presentation_options_come_from_the_theme() {
+    use ferroui_base::{BoxedValue, Thickness};
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::templates::FuncDataTemplate;
+    use ferroui_controls::{
+        ItemsSource, TableView, TableViewCell, TableViewColumn, TableViewColumnHeader, TableViewDensity,
+        TableViewGridLinesVisibility, TableViewRow, TextBlock,
+    };
+
+    let _app = start_themed_application();
+    let table = TableView::new();
+    table.set_width(300.0);
+    table.set_height(200.0);
+    table.columns().add(TableViewColumn::new());
+    table.columns().add(TableViewColumn::new());
+    table.set_items_source(Some(ItemsSource::from_strs(["a", "b"])));
+    table.set_empty_template(Some(FuncDataTemplate::new(
+        |_| true,
+        |_, _| {
+            let text = TextBlock::new();
+            text.set_text(Some("No items"));
+            Some(text.upcast())
+        },
+        false,
+    )));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&table)));
+    window.show();
+    window.update_layout();
+
+    let descendants = |table: &TableView| table.get_visual_descendants().collect::<Vec<_>>();
+    let rows = || descendants(&table).into_iter().filter_map(|v| v.cast::<TableViewRow>()).collect::<Vec<_>>();
+    let first_cell = || descendants(&table).into_iter().find_map(|v| v.cast::<TableViewCell>()).expect("a cell");
+    let first_header =
+        || descendants(&table).into_iter().find_map(|v| v.cast::<TableViewColumnHeader>()).expect("a header");
+    let empty_state = || {
+        table
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some("PART_EmptyStatePresenter"))
+            .and_then(|element| element.cast::<ContentPresenter>())
+            .expect("the part PART_EmptyStatePresenter")
+    };
+
+    // All, the default: a line under each row and at the trailing edge of each cell and header.
+    assert_eq!(2, rows().len());
+    assert_eq!(Thickness::new(0.0, 0.0, 0.0, 1.0), rows()[0].border_thickness());
+    assert_eq!(Thickness::new(0.0, 0.0, 1.0, 0.0), first_cell().border_thickness());
+    assert_eq!(Thickness::new(0.0, 0.0, 1.0, 0.0), first_header().border_thickness());
+    // Standard: TableViewRowMinHeight.
+    assert_eq!(40.0, rows()[0].min_height());
+    assert!(!empty_state().is_visible());
+
+    table.set_grid_lines_visibility(TableViewGridLinesVisibility::Horizontal);
+    window.update_layout();
+    assert_eq!(Thickness::new(0.0, 0.0, 0.0, 1.0), rows()[0].border_thickness());
+    assert_eq!(Thickness::uniform(0.0), first_cell().border_thickness());
+    assert_eq!(Thickness::uniform(0.0), first_header().border_thickness());
+
+    table.set_grid_lines_visibility(TableViewGridLinesVisibility::None);
+    window.update_layout();
+    assert_eq!(Thickness::uniform(0.0), rows()[0].border_thickness());
+
+    table.set_density(TableViewDensity::Compact);
+    window.update_layout();
+    // TableViewRowMinHeightCompact and TableViewCellPaddingCompact.
+    assert_eq!(30.0, rows()[0].min_height());
+    assert_eq!(30.0, first_cell().min_height());
+    assert_eq!(Thickness::new(8.0, 2.0, 8.0, 2.0), first_cell().padding());
+    assert_eq!(30.0, first_header().min_height());
+
+    table.set_items_source(Some(ItemsSource::from_items(std::iter::empty::<Option<BoxedValue>>())));
+    window.update_layout();
+    assert!(empty_state().is_visible());
+    assert!(empty_state().get_visual_descendants().any(|v| v.cast::<TextBlock>().is_some()));
+    window.close();
+}

@@ -93,24 +93,46 @@
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}">
-          <ScrollViewer Name="PART_ScrollViewer"
-                        Theme="{StaticResource TableViewScrollViewerTheme}"
-                        VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
-                        HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
-                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
-                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
-                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
-                        IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
-                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
-                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
-                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
-            <ItemsPresenter Name="PART_ItemsPresenter"
-                            ItemsPanel="{TemplateBinding ItemsPanel}"
-                            Margin="{TemplateBinding Padding}" />
-          </ScrollViewer>
+          <Panel>
+            <ScrollViewer Name="PART_ScrollViewer"
+                          Theme="{StaticResource TableViewScrollViewerTheme}"
+                          VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                          HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                          IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                          IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
+                          IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                          AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                          BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+              <ItemsPresenter Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}"
+                              Margin="{TemplateBinding Padding}" />
+            </ScrollViewer>
+            <!-- EmptyTemplate (WinUI): shown while the table has no rows (:empty). -->
+            <ContentPresenter Name="PART_EmptyStatePresenter"
+                              ContentTemplate="{TemplateBinding EmptyTemplate}"
+                              IsVisible="False" />
+          </Panel>
         </Border>
       </ControlTemplate>
     </Setter>
+
+    <!-- Density (WinUI): the theme draws no grid lines, so GridLinesVisibility changes nothing. -->
+    <Style Selector="^:compact">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="Padding" Value="6,4,6,6" />
+      </Style>
+    </Style>
+    <Style Selector="^:comfortable">
+      <Style Selector="^ TableViewRow">
+        <Setter Property="Padding" Value="6,13,6,16" />
+      </Style>
+    </Style>
+    <!-- EmptyTemplate (WinUI). -->
+    <Style Selector="^:empty /template/ ContentPresenter#PART_EmptyStatePresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
   </ControlTheme>
 
 </ResourceDictionary>

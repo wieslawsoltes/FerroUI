@@ -1,6 +1,6 @@
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt, Thumb};
 use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
-use crate::{ContentControl, ContentControlImpl, ControlImpl, GridLength, GridUnitType, TableViewColumn};
+use crate::{ContentControl, ContentControlImpl, ControlImpl, GridLength, GridUnitType, TableView, TableViewColumn};
 use ferroui_base::input::{InputElementImpl, VectorEventArgs};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
@@ -26,7 +26,10 @@ ferro_class!(TableViewColumnHeader: ContentControl);
 ferro_class_info!(TableViewColumnHeader {
     new: TableViewColumnHeader::new,
     markup: {
-        attributes: [TemplatePart("PART_Resizer", type(Ref<Thumb>))],
+        attributes: [
+            TemplatePart("PART_Resizer", type(Ref<Thumb>)),
+            PseudoClasses(":noverticalgridlines", ":compact", ":comfortable"),
+        ],
     },
 });
 ferro_impl_classes!(
@@ -156,6 +159,21 @@ impl TableViewColumnHeader {
         match column.header() {
             Some(header) => self.set_value(ContentControl::content_property(), Some(header)),
             None => self.clear_value(ContentControl::content_property()),
+        }
+
+        self.update_presentation_pseudo_classes(column.table_view().as_deref());
+    }
+
+    /// The pseudo-classes of the presentation options of the table (WinUI's
+    /// `GridLinesVisibility` and `Density`): the header is in the template of the scroll viewer
+    /// of the table, out of reach of the styles of the table, so the table gives it its own
+    /// `:noverticalgridlines`, `:compact` and `:comfortable`.
+    pub(crate) fn update_presentation_pseudo_classes(&self, table_view: Option<&TableView>) {
+        let classes = table_view.map(|table_view| table_view.classes());
+        let has = |name: &str| classes.as_ref().is_some_and(|classes| classes.contains(name));
+        let pseudo_classes = self.pseudo_classes();
+        for name in [":noverticalgridlines", ":compact", ":comfortable"] {
+            pseudo_classes.set(name, has(name));
         }
     }
 

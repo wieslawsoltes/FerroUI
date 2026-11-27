@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 2794213326097157368;
+pub(crate) const API_FINGERPRINT: i64 = 6207598451971747717;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 517] = [
@@ -529,7 +529,7 @@ pub(crate) static TYPE_NAMES: [&str; 517] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1082] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -555,6 +555,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "AllowFocusOnInteraction",
     "AllowSpin",
     "AllowTapRangeSelection",
+    "AlternatingRowBackground",
     "AlwaysShowHeader",
     "AlwaysUseFallback",
     "Amplitude",
@@ -741,6 +742,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "DeferThumbDrag",
     "DefinitionBase.SharedSizeGroup",
     "Delay",
+    "Density",
     "Depth",
     "Description",
     "Design.DataContext",
@@ -794,6 +796,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "EffectiveBarHeight",
     "EllipseDiameter",
     "EllipseOffset",
+    "EmptyTemplate",
     "EnableClearType",
     "EnableDependentAnimation",
     "EndPoint",
@@ -860,6 +863,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "Grid.IsSharedSizeScope",
     "Grid.Row",
     "Grid.RowSpan",
+    "GridLinesVisibility",
     "GroupHeaderPlacement",
     "GroupName",
     "GroupPadding",
@@ -1266,6 +1270,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "RightIndent",
     "RightItems",
     "RotationAngle",
+    "RowBackground",
     "RowSpacing",
     "Rows",
     "SafeAreaPadding",

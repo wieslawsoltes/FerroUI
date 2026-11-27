@@ -912,7 +912,7 @@ mod table_view_cell;
 mod table_view_column;
 mod table_view_column_header;
 mod table_view_row;
-pub use table_view::TableView;
+pub use table_view::{TableView, TableViewDensity, TableViewGridLinesVisibility};
 pub use table_view_cell::TableViewCell;
 pub use table_view_column::TableViewColumn;
 pub use table_view_column_header::TableViewColumnHeader;
@@ -928,6 +928,8 @@ pub use visual_state::{
 mod table_view_column_header_tests;
 #[cfg(test)]
 mod table_view_tests;
+#[cfg(test)]
+mod table_view_winui_tests;
 
 // --- textselection ---
 
