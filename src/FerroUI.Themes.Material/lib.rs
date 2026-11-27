@@ -10,6 +10,8 @@
 //! application.styles().add(MaterialTheme::new().as_style());
 //! ```
 
+/// The typed resource keys of the theme (`scripts/generate_theme_keys.py`).
+pub mod keys;
 mod color_scheme;
 /// The packed installer of the compatibility resources (#856): used by `color_scheme.rs` when
 /// the generator writes it packed (`PACKED_INSTALLER` of `scripts/material-theme/generate.py`).

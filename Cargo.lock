@@ -529,6 +529,7 @@ dependencies = [
  "ferroui-media-camera-android",
  "ferroui-media-video",
  "ferroui-media-video-android",
+ "ferroui-skia",
 ]
 
 [[package]]
@@ -545,6 +546,8 @@ dependencies = [
  "ferroui-media-camera",
  "ferroui-media-camera-browser",
  "ferroui-media-video-browser",
+ "ferroui-render3d",
+ "ferroui-skia",
  "wasm-bindgen",
 ]
 
@@ -598,6 +601,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-ios",
  "ferroui-quartz",
+ "ferroui-skia",
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
@@ -2143,6 +2147,8 @@ dependencies = [
  "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-win32",
+ "ferroui-x11",
  "url",
 ]
 
