@@ -609,9 +609,7 @@ impl IVelloSceneSink for VelloHybridSceneSink {
         self.scene.set_paint_transform(Affine::IDENTITY);
         self.scene.set_transform(transform);
         self.scene.set_fill_rule(Fill::NonZero);
-        // The factor of the CPU sink: what the renderers call the standard
-        // deviation is the square root of two times the Gaussian's.
-        let std_dev = std_deviation * std::f64::consts::SQRT_2;
+        let std_dev = crate::scene::vello_cpu_scene_sink::closed_form_std_dev(std_deviation);
         self.scene.fill_blurred_rounded_rect(&rect, radius as f32, std_dev as f32, invert);
     }
 }
