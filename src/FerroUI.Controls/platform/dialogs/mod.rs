@@ -2,10 +2,12 @@
 
 mod i_mounted_volume_info_provider;
 mod i_storage_provider_factory;
+mod managed_storage_fallback;
 mod mounted_drive_info;
 
 pub use i_mounted_volume_info_provider::IMountedVolumeInfoProvider;
 pub use i_storage_provider_factory::IStorageProviderFactory;
+pub use managed_storage_fallback::{managed_storage_fallback, MANAGED_STORAGE_FALLBACK_KEY};
 pub use mounted_drive_info::MountedVolumeInfo;
 
 #[cfg(test)]
