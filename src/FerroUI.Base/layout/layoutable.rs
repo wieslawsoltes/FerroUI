@@ -697,6 +697,9 @@ impl Layoutable {
         }
     }
 
+    // Inlined into its one caller, the layout manager's viewport pass (pinned: thin LTO stopped
+    // inlining it after unrelated changes of the property store).
+    #[inline]
     pub(crate) fn raise_effective_viewport_changed(&self, e: &EffectiveViewportChangedEventArgs) {
         if !self.effective_viewport_changed.is_empty() {
             for (_, handler) in self.effective_viewport_changed.snapshot().iter() {
