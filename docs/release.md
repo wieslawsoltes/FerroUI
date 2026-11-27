@@ -78,6 +78,7 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 `ferroui-controls-flip-view` (`src/FerroUI.Controls.FlipView`, Controls and themes; the port of WinUI's `FlipView` on `Carousel` with its WinUI control theme) joined with #418. It compiles its theme document in its build script (`links = "ferroui_controls_flip_view_xaml"`) and is not part of the facade.
 `ferroui-controls-icons` (`src/FerroUI.Controls.Icons`, Controls and themes; `BitmapIcon` and `ImageIcon` of WinUI) joined with #418. It exports its type model in its build script (`links = "ferroui_controls_icons_xaml"`), has no theme documents and is not part of the facade.
 `ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
+`ferroui-controls-items-view` (`src/FerroUI.Controls.ItemsView`, Controls and themes; the port of `ItemsView` and `ItemContainer` of WinUI with their control themes) joined with #418 for `0.6.0`. It is an optional part of the framework: an application that does not depend on it links none of it.
 `ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
 `ferroui-controls-password-box` (`src/FerroUI.Controls.PasswordBox`, Controls and themes; WinUI's `PasswordBox` on `TextBox`) joined with #418. It exports its type model in its build script (`links = "ferroui_controls_password_box_xaml"`), has no theme documents and is not part of the facade.
 `ferroui-controls-split-menu` (`src/FerroUI.Controls.SplitMenu`, Controls and themes; WinUI's `SplitMenuFlyoutItem` on `MenuItem`) joined with #418. It exports its type model in its build script (`links = "ferroui_controls_split_menu_xaml"`), has no theme documents and is not part of the facade.
@@ -381,6 +382,7 @@ Before the release:
 The release:
 
 - [ ] Run the release workflow with `dry_run` off, or push the tag `v<version>` for the commit.
+- [ ] Check that the GitHub release has the patched Skia binding, `skia-bindings-<binding version>-ferroui-<version>.tar.gz` and its `.sha256` (#622; the release workflow uploads them with `scripts/release/skia_bindings_archive.py`, and `docs/apps.md` says how an application uses them).
 - [ ] Check that crates.io lists every crate of section 1.1 at the version (the last lines of the job say how many were published and how many skipped).
 
 After the release:
@@ -388,7 +390,7 @@ After the release:
 - [ ] At the first release only: remove the note between the `release-note` markers of the README ("Upcoming"), and the sentence of its status paragraph that says nothing has been published.
 - [ ] Set the date of the entry in `CHANGELOG.md` and point its link at the tag.
 - [ ] Look at the docs.rs badges of the README table after an hour (section 7) and note the failures for the next preview.
-- [ ] After a release that starts a minor version: set the baseline of the API gate to it (`BASELINE_VERSION` and `BASELINE_COMMIT` of `scripts/api-gate/semver_checks.py`, section 3.1).
+- [ ] After a release that starts a minor version: set the baseline of the API gate to it with `python3 scripts/api-gate/set_baseline.py <version>`, which rewrites `BASELINE_VERSION`, `BASELINE_COMMIT` and their comment in `scripts/api-gate/semver_checks.py` (section 3.1). `set_baseline.py --check` says whether the baseline is the commit of its tag.
 - [ ] Set the next version (`scripts/release/set-version.sh 0.1.0-preview.<N+1>` after a preview, the first preview of the next minor version, such as `0.2.0-preview.1`, after a release), so that `main` never carries a version that is on crates.io with other contents.
 
 ## 10. A preview that turns out broken

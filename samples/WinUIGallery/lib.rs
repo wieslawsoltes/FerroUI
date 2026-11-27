@@ -25,10 +25,12 @@ mod custom_controls;
 mod date_samples;
 pub mod examples;
 mod feedback_samples;
+mod tab_view_samples;
 mod frame_sample;
 pub mod gallery;
 mod ink_samples;
 mod input_samples;
+mod items_view_samples;
 mod layout_samples;
 mod list_samples;
 mod materials_samples;
@@ -39,6 +41,8 @@ pub mod playback_samples;
 #[path = "../media_desktop.rs"]
 mod desktop_media;
 pub mod navigation;
+mod color_samples;
+mod color_sections;
 mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
@@ -47,6 +51,7 @@ mod shape_samples;
 mod sizing_sample;
 mod split_view_samples;
 mod content_dialog_samples;
+mod scratch_pad_samples;
 mod selector_bar_samples;
 mod status_samples;
 mod swipe_control_samples;
@@ -76,6 +81,12 @@ mod custom_controls_tests;
 #[cfg(test)]
 mod feedback_samples_tests;
 
+// The Color page is tested on the WinUI theme, which the `theme` feature brings.
+#[cfg(all(test, feature = "theme"))]
+mod color_samples_tests;
+#[cfg(test)]
+mod tab_view_samples_tests;
+
 #[cfg(test)]
 mod navigation_view_samples_tests;
 
@@ -88,6 +99,9 @@ mod connected_animation_samples_tests;
 #[cfg(test)]
 mod media_samples_tests;
 
+// The containers of the examples need the control themes of the WinUI theme.
+#[cfg(all(test, feature = "theme"))]
+mod items_view_samples_tests;
 #[cfg(test)]
 mod materials_samples_tests;
 
@@ -120,6 +134,8 @@ mod text_input_samples_tests;
 
 #[cfg(test)]
 mod content_dialog_samples_tests;
+#[cfg(test)]
+mod scratch_pad_samples_tests;
 #[cfg(test)]
 mod selector_bar_samples_tests;
 #[cfg(test)]

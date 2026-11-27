@@ -445,3 +445,37 @@ fn combo_box_examples_color_font_and_size_their_outputs() {
     sizes.set_selected_index(6);
     assert_eq!(size_output.font_size(), 16.0);
 }
+
+#[test]
+fn combo_box_font_size_submit_accepts_and_reverts_as_the_source() {
+    use crate::button_samples::accepts_font_size;
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs};
+    use ferroui_controls::ComboBox;
+
+    assert_eq!(accepts_font_size("72"), Some(72.0));
+    assert_eq!(accepts_font_size("50"), Some(50.0));
+    assert_eq!(accepts_font_size("8"), Some(8.0), "a size of the list");
+    assert_eq!(accepts_font_size("7"), None);
+    assert_eq!(accepts_font_size("100"), None);
+    assert_eq!(accepts_font_size("big"), None);
+
+    let _application = start();
+    let root = page("ComboBox");
+    let sizes = root.get_control::<ComboBox>("Combo3");
+    let output = root.get_control::<TextBlock>("Control3Output");
+    let enter = || {
+        let mut args = KeyEventArgs::new();
+        args.set_routed_event(Some(InputElement::key_down_event()));
+        args.key = Key::Enter;
+        sizes.raise_event(&args);
+    };
+
+    sizes.set_text(Some("50".to_string()));
+    enter();
+    assert_eq!(output.font_size(), 50.0, "a custom size applies");
+
+    sizes.set_text(Some("500".to_string()));
+    enter();
+    assert_eq!(sizes.text().as_deref(), Some("50"), "an invalid size reverts to the last valid one");
+}
+

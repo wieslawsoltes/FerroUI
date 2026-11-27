@@ -17,6 +17,11 @@
       "reason": "Reveal styles other than ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle (ListViewItemRevealStyle, AppBarButtonRevealStyle, ...): deprecated in WinUI 3, and their controls have themes of their own (see the Reveal brushes); the default styles they duplicate are ported. The three button styles are ported by hand in Controls/RevealStyles.xaml (docs/porting/winui-materials.md)."
     },
     {
+      "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+      "key": "NavigationViewOverflowButtonNoLabelStyleWhenPaneOnTop",
+      "reason": "The style of OverflowButtonNoLabel (OverflowLabelGroup), chosen by OverflowLabelMode NoLabel, which FerroUI's NavigationView does not have: the overflow button is always NavigationViewOverflowButtonStyleWhenPaneOnTop (Controls/NavigationView.xaml), from which the NoLabel style differs only in the vertical alignment of the button."
+    },
+    {
       "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
       "key": "re:MUX_NavigationViewItemPresenterStyle.*WithRevealFocus",
       "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus); the template of NavigationViewItem (Controls/NavigationView.xaml) is drawn after the presenter styles without Reveal focus."

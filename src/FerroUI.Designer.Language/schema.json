@@ -17873,6 +17873,26 @@
         ],
         "attached": false
       },
+      "ShowPaused": {
+        "name": "ShowPaused",
+        "type_name": "bool",
+        "documentation": "ProgressBar.ShowPaused: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ShowError": {
+        "name": "ShowError",
+        "type_name": "bool",
+        "documentation": "ProgressBar.ShowError: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "ProgressTextFormat": {
         "name": "ProgressTextFormat",
         "type_name": "String",
@@ -24103,6 +24123,33 @@
     ]
   },
   {
+    "name": "SystemBackdropElement",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SystemBackdropElement",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "SystemBackdrop": {
+        "name": "SystemBackdrop",
+        "type_name": "Option<Ref<SystemBackdrop>>",
+        "documentation": "SystemBackdropElement.SystemBackdrop: Option<Ref<SystemBackdrop>>",
+        "values": [],
+        "attached": false
+      },
+      "CornerRadius": {
+        "name": "CornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "SystemBackdropElement.CornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SystemBackdropHostBrush",
     "namespace": "https://github.com/ferroui",
     "documentation": "SystemBackdropHostBrush",
@@ -24250,6 +24297,293 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Primitives",
       "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TabView",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "TabWidthMode": {
+        "name": "TabWidthMode",
+        "type_name": "TabViewWidthMode",
+        "documentation": "TabView.TabWidthMode: TabViewWidthMode",
+        "values": [
+          "Equal",
+          "SizeToContent",
+          "Compact"
+        ],
+        "attached": false
+      },
+      "CloseButtonOverlayMode": {
+        "name": "CloseButtonOverlayMode",
+        "type_name": "TabViewCloseButtonOverlayMode",
+        "documentation": "TabView.CloseButtonOverlayMode: TabViewCloseButtonOverlayMode",
+        "values": [
+          "Auto",
+          "OnPointerOver",
+          "Always"
+        ],
+        "attached": false
+      },
+      "TabStripHeader": {
+        "name": "TabStripHeader",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabView.TabStripHeader: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "TabStripHeaderTemplate": {
+        "name": "TabStripHeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TabView.TabStripHeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "TabStripFooter": {
+        "name": "TabStripFooter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabView.TabStripFooter: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "TabStripFooterTemplate": {
+        "name": "TabStripFooterTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TabView.TabStripFooterTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "IsAddTabButtonVisible": {
+        "name": "IsAddTabButtonVisible",
+        "type_name": "bool",
+        "documentation": "TabView.IsAddTabButtonVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AddTabButtonCommand": {
+        "name": "AddTabButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "TabView.AddTabButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "AddTabButtonCommandParameter": {
+        "name": "AddTabButtonCommandParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabView.AddTabButtonCommandParameter: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "TabItemsSource": {
+        "name": "TabItemsSource",
+        "type_name": "Option<ItemsSource>",
+        "documentation": "TabView.TabItemsSource: Option<ItemsSource>",
+        "values": [],
+        "attached": false
+      },
+      "TabItemTemplate": {
+        "name": "TabItemTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TabView.TabItemTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "CanDragTabs": {
+        "name": "CanDragTabs",
+        "type_name": "bool",
+        "documentation": "TabView.CanDragTabs: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanReorderTabs": {
+        "name": "CanReorderTabs",
+        "type_name": "bool",
+        "documentation": "TabView.CanReorderTabs: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AllowDropTabs": {
+        "name": "AllowDropTabs",
+        "type_name": "bool",
+        "documentation": "TabView.AllowDropTabs: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanTearOutTabs": {
+        "name": "CanTearOutTabs",
+        "type_name": "bool",
+        "documentation": "TabView.CanTearOutTabs: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "SelectedIndex": {
+        "name": "SelectedIndex",
+        "type_name": "i32",
+        "documentation": "TabView.SelectedIndex: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectedItem": {
+        "name": "SelectedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabView.SelectedItem: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::TabViewAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TabViewItem",
+    "base": "ListViewItem",
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabViewItem.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TabViewItem.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "TabViewItem.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      },
+      "IsClosable": {
+        "name": "IsClosable",
+        "type_name": "bool",
+        "documentation": "TabViewItem.IsClosable: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::TabViewItemAutomationPeer",
+    "base": "ListViewItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TabViewItemTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "IconElement": {
+        "name": "IconElement",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "TabViewItemTemplateSettings.IconElement: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      },
+      "TabGeometry": {
+        "name": "TabGeometry",
+        "type_name": "Option<Ref<Geometry>>",
+        "documentation": "TabViewItemTemplateSettings.TabGeometry: Option<Ref<Geometry>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewListView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TabViewListView",
+    "base": "ListView",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TabViewTabCloseRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TabViewTabCloseRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Item": {
+        "name": "Item",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabViewTabCloseRequestedEventArgs.Item: Option<BoxedValue>",
+        "values": []
+      },
+      "Tab": {
+        "name": "Tab",
+        "type_name": "Ref<TabViewItem>",
+        "documentation": "TabViewTabCloseRequestedEventArgs.Tab: Ref<TabViewItem>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -30629,6 +30963,16 @@
           "Justify",
           "Stretch",
           "StretchAll"
+        ],
+        "attached": false
+      },
+      "ItemsStretch": {
+        "name": "ItemsStretch",
+        "type_name": "WrapPanelItemsStretch",
+        "documentation": "WrapPanel.ItemsStretch: WrapPanelItemsStretch",
+        "values": [
+          "None",
+          "Last"
         ],
         "attached": false
       },
