@@ -59,6 +59,7 @@ mod info_bar_page;
 mod grid_view_page;
 mod list_view_page;
 mod pivot_page;
+mod tab_view_page;
 mod navigation_view_page;
 mod auto_suggest_box_page;
 mod rich_edit_box_page;
@@ -229,6 +230,7 @@ pub use info_bar_page::InfoBarPage;
 pub use grid_view_page::GridViewPage;
 pub use list_view_page::ListViewPage;
 pub use pivot_page::PivotPage;
+pub use tab_view_page::TabViewPage;
 pub use progress_ring_page::ProgressRingPage;
 pub use interaction_3d_page::{Cube3D, Interaction3DPage, CUBE_COLOURS, CUBE_NAMES, SELECTED_COLOUR};
 pub use transforms_3d_page::{Transforms3DPage, Transforms3DScene, SPIN_AXES};
@@ -349,6 +351,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ListViewPage::TYPE,
     GridViewPage::TYPE,
     PivotPage::TYPE,
+    TabViewPage::TYPE,
     ProgressRingPage::TYPE,
     Interaction3DPage::TYPE,
     Transforms3DPage::TYPE,
@@ -467,6 +470,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ListViewPage::XAML_CLASS,
     &GridViewPage::XAML_CLASS,
     &PivotPage::XAML_CLASS,
+    &TabViewPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
     &Interaction3DPage::XAML_CLASS,
     &Transforms3DPage::XAML_CLASS,
