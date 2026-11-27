@@ -1,0 +1,79 @@
+<!-- Ported from the two pinned BadgeNotificationManager examples of WinUI Gallery (14061eea) and
+     the handlers of BadgeNotificationManagerPage.xaml.cs (notification_samples.rs); see
+     ../NOTICE.md. FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or
+     the home screen: the badge the handlers set is shown by the InfoBadge on the preview of the
+     app's icon beside each example's buttons (the gallery icon of the TitleBar page), and the
+     InfoBar says so where the source asks for a packaged app. The glyphs of BadgeNotificationGlyph
+     are Segoe Fluent Icons glyphs of the same meaning, which need the platform's symbol font. The
+     ComboBox lists the source's enumeration (its x:Bind to the page's list is the items,
+     SelectedItem the index); its Header is composed. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <InfoBar x:Name="BadgeServiceInfoBar" Margin="0,10,0,0" IsOpen="True" IsClosable="False" Severity="Warning"
+           Title="The badge is shown on the preview of the app's icon."
+           Message="FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or the home screen: the examples set the badge of the icon on this page." />
+
+  <StackPanel x:Name="BadgeNotificationExample1" Spacing="8">
+    <TextBlock Text="Setting badge notifications with count" FontSize="18" />
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="24">
+      <Grid x:Name="BadgeCountPreview" Width="56" Height="56" VerticalAlignment="Top"
+            AutomationProperties.Name="App icon">
+        <Border Width="48" Height="48" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+          <Path Width="24" Height="24" Stretch="Uniform" Fill="{DynamicResource TextFillColorPrimaryBrush}"
+                Data="M2,2 L14,2 L14,14 L2,14 Z M5,5 L5,11 L11,11 L11,5 Z" />
+        </Border>
+        <InfoBadge x:Name="BadgeCountInfoBadge" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   IsVisible="False" />
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <Button x:Name="SetBadgeCountButton" Content="Set badge as count" Width="160" />
+        <Button x:Name="ClearBadgeCountButton" Content="Clear badge" Width="160" />
+      </StackPanel>
+      <NumberBox Grid.Column="2" x:Name="BadgeCountBox" Header="Badge count" Value="5" Minimum="1"
+                 SpinButtonPlacementMode="Inline" SmallChange="1" LargeChange="10" Width="160"
+                 VerticalAlignment="Top" AutomationProperties.Name="Badge count" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="BadgeNotificationExample2" Spacing="8">
+    <TextBlock Text="Setting badge notifications with Glyph" FontSize="18" />
+    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="24">
+      <Grid x:Name="BadgeGlyphPreview" Width="56" Height="56" VerticalAlignment="Top"
+            AutomationProperties.Name="App icon">
+        <Border Width="48" Height="48" CornerRadius="8" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+          <Path Width="24" Height="24" Stretch="Uniform" Fill="{DynamicResource TextFillColorPrimaryBrush}"
+                Data="M2,2 L14,2 L14,14 L2,14 Z M5,5 L5,11 L11,11 L11,5 Z" />
+        </Border>
+        <InfoBadge x:Name="BadgeGlyphInfoBadge" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   IsVisible="False" />
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <Button x:Name="SetBadgeGlyphButton" Content="Set badge glyph" Width="160" />
+        <Button x:Name="ClearBadgeGlyphButton" Content="Clear badge" Width="160" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Spacing="4">
+        <TextBlock Text="BadgeNotificationGlyph" />
+        <ComboBox x:Name="BadgeNotificationGlyphsCombo" Width="160" SelectedIndex="1"
+                  AutomationProperties.Name="BadgeNotificationGlyph">
+          <x:String>None</x:String>
+          <x:String>Activity</x:String>
+          <x:String>Alarm</x:String>
+          <x:String>Alert</x:String>
+          <x:String>Attention</x:String>
+          <x:String>Available</x:String>
+          <x:String>Away</x:String>
+          <x:String>Busy</x:String>
+          <x:String>Error</x:String>
+          <x:String>NewMessage</x:String>
+          <x:String>Paused</x:String>
+          <x:String>Playing</x:String>
+          <x:String>Unavailable</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

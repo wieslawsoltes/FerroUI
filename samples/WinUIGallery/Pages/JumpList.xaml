@@ -1,0 +1,41 @@
+<!-- Ported from the two pinned JumpList examples of WinUI Gallery (14061eea) and the handlers of
+     JumpListPage.xaml.cs (notification_samples.rs); see ../NOTICE.md. The jump list of the app is
+     its dock menu (NativeDock.Menu of the application), which FerroUI shows on macOS: a saved list
+     becomes the menu, the items of a group below a disabled header with the group's name, the
+     tasks (an empty GroupName) at the bottom after a separator, the description the item's tool
+     tip. The app is running when its dock menu is used, so an item's arguments are reported by
+     the page instead of a new launch. Other platforms have no jump list FerroUI sets: the InfoBar
+     says so (JumpList.IsSupported is false there). The intro text describes the dock menu where
+     the source describes its recent and favourite items, which the gallery does not keep. Style is
+     Theme. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <InfoBar x:Name="JumpListSupportInfoBar" Margin="0,10,0,0" IsOpen="True" IsClosable="False"
+           Severity="Warning" />
+
+  <TextBlock Margin="0,12,0,0" TextWrapping="Wrap"
+             Text="On macOS, WinUI Gallery shows the jump list of this page in its dock menu while it runs; the menu is empty again when the app restarts." />
+
+  <StackPanel x:Name="JumpListExample1" Spacing="8">
+    <TextBlock Text="Adding tasks to the jump list" FontSize="18" />
+    <StackPanel Spacing="8">
+      <TextBlock TextWrapping="Wrap"
+                 Text="Tasks are items with an empty GroupName. They appear in the built-in 'Tasks' section at the bottom of the jump list. Use tasks for common app-wide actions that are always relevant, such as composing a new message or opening settings. Each task launches the app with a specific argument string that your app can handle on startup." />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="AddTasksButton" Content="Add sample tasks" Theme="{DynamicResource AccentButtonStyle}" />
+        <Button x:Name="ClearTasksButton" Content="Clear all items" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="JumpListExample2" Spacing="8">
+    <TextBlock Text="Adding items to a custom group" FontSize="18" />
+    <StackPanel Spacing="8">
+      <TextBlock TextWrapping="Wrap"
+                 Text="Custom groups let you organize jump list items into named sections. Set the GroupName property to a non-empty string and all items sharing the same GroupName will appear together under that heading. This is useful for grouping related items like recent projects, pinned documents, or user-defined categories." />
+      <Button x:Name="AddCustomGroupButton" Content="Add custom group items" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock x:Name="JumpListStatus" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+</StackPanel>

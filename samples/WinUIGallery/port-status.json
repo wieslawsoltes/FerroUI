@@ -2333,6 +2333,249 @@
         }
       ]
     },
+    "AppNotification": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AppNotification.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/notification_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "app_notification_builder_lays_out_the_source_notifications"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "app_notification_page_keeps_the_source_options_and_says_where_it_shows"
+        }
+      ],
+      "notes": "All five source examples with the handlers of AppNotificationPage.xaml.cs in Rust (notification_samples.rs): ShowNotificationButton_Click, ShowInformationalNotificationWithLogoButton_Click with the selected AppNotificationSoundEvent, ShowVisualNotificationWithHeroImageButton_Click, ShowNotificationWithControlsButton_Click and ShowNotificationWithProgressBarButton_Click build their notifications with the source's AppNotificationBuilder calls (a builder of the sample). FerroUI has no service for the notifications of the operating system, so AppNotificationManager.Default.Show is the window's WindowNotificationManager, which shows each notification as a card in the bottom right corner of the window (NotificationCard, the InfoBar of the WinUI theme); the first InfoBar says so where the source speaks of Do Not Disturb and the notification center. The texts are the card's title and body, the app logo override a circle of the PersonPicture image, the hero image above the texts with the attribution text below them, the time stamp the short time of DateTime.Now, the ComboBox, the TextBox and the Submit button real controls of the card (the button's arguments action=submit_survey are its command parameter; a click closes the card, the source's app handles no activation), and the progress bar its title, value, value text and status. A card plays no sound: it names its sound event. A card with inputs stays until it is closed or submitted, the others close after five seconds. The sound event ComboBox lists the source's six events (SelectedItem is the index); its Header is composed.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/AppNotification/AppNotificationBasicNotification.txt",
+          "source_sha256": "2d024a38923540e860d5074fd241aa1334c20c9d4250ad1f17b8a8d678f958ab",
+          "status": "ported",
+          "notes": "The two texts of the source as the title and the body of a card of the window's notification manager.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppNotification/AppNotificationInformationalNotificationLogoCustom.txt",
+          "source_sha256": "7adeb18da484f12745db60c9d5825e6ebc3e9a52d4e661374c2d655a16b9fa2b",
+          "status": "ported",
+          "notes": "The texts, the PersonPicture image as a circular logo (AppNotificationImageCrop.Circle), the short time of DateTime.Now as the time stamp and the selected sound event, which the card names (it plays no sound).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_builder_lays_out_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppNotification/AppNotificationVisualNotificationHeroImage.txt",
+          "source_sha256": "b269894b6910dce02c64cc7b0b34c182ad30324ab69ab07a7f402d1f8fa93c4a",
+          "status": "ported",
+          "notes": "The source's LandscapeImage5.jpg as the hero image above the texts and the attribution text below them.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_builder_lays_out_the_source_notifications"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppNotification/NotificationAppnotificationControls.txt",
+          "source_sha256": "37deb5bf8797028d368d26b5721a27316d561fb0bcd0c73e592876a60743ae81",
+          "status": "ported",
+          "notes": "The satisfaction ComboBox with its five items and Neutral selected, the comment TextBox with its placeholder and the Submit button with the arguments action=submit_survey; the card stays until it is closed or submitted, and Submit closes it.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_builder_lays_out_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppNotification/AppNotificationNotificationProgressbar.txt",
+          "source_sha256": "257f3e436e854c674367b72bd348011d8f4db5e527a49c4449bb516dd455fa36",
+          "status": "ported",
+          "notes": "The progress bar of the card with the title Demo Progress, the value 0.6, the value text 60% and the status In progress....",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_builder_lays_out_the_source_notifications"
+            }
+          ]
+        }
+      ]
+    },
+    "BadgeNotificationManager": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/BadgeNotificationManager.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/notification_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "badge_buttons_set_the_count_and_clear_it_on_the_preview"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "badge_buttons_set_the_glyph_and_the_selection_follows_once_set"
+        }
+      ],
+      "notes": "Both source examples with the handlers of BadgeNotificationManagerPage.xaml.cs in Rust (notification_samples.rs): SetBadgeCountButton_Click, SetBadgeGlyphButton_Click, ClearBadgeButton_Click (both Clear badge buttons), BadgeCountBox_ValueChanged and BadgeNotificationGlyphsCombo_SelectionChanged with the source's isBadgeSetted, over the badge of the app that the gallery keeps (BadgeNotificationManager.Current, kept when the page opens again). FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or the home screen: the badge is shown by an InfoBadge on a preview of the app's icon beside each example's buttons (a count is its value, a glyph a Segoe Fluent Icons glyph of the same meaning, the glyph None and a count of 0 no badge), and the InfoBar says so where the source asks for a packaged app. The system's badge is not set, which keeps the page partial. The NumberBox keeps the source's Header, Value 5, Minimum 1, inline spin buttons and changes; the glyph ComboBox lists the thirteen BadgeNotificationGlyph members (SelectedItem is the index, Activity selected); its Header is composed. The glyphs need the platform's symbol font.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerSettingBadgeNotificationsCount.txt",
+          "source_sha256": "ea0d1f461a996b42dc749d3427d9e2e0932dec0210e2957df859e3aecced0543",
+          "status": "partial",
+          "notes": "SetBadgeAsCount with the NumberBox's value and ClearBadge on the preview's InfoBadge; the value changes the badge once it is set. The system's badge is not set.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "badge_buttons_set_the_count_and_clear_it_on_the_preview"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerSettingBadgeNotificationsGlyph.txt",
+          "source_sha256": "4571ddf647129ba9e5fdc7c707be2a744fa329752b35806817a3cbd2bedfb5ae",
+          "status": "partial",
+          "notes": "SetBadgeAsGlyph with the selected BadgeNotificationGlyph (a Segoe Fluent Icons glyph of the same meaning; None shows no badge) and ClearBadge on the preview's InfoBadge; the selection changes the badge once it is set. The system's badge is not set.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "badge_buttons_set_the_glyph_and_the_selection_follows_once_set"
+            }
+          ]
+        }
+      ]
+    },
+    "JumpList": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/JumpList.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/notification_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "jump_list_tasks_become_the_dock_menu_and_clear_empties_it"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "jump_list_groups_come_before_the_tasks_under_their_header"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "jump_list_item_reports_its_arguments_when_invoked"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "jump_list_page_says_where_the_jump_list_is_shown"
+        }
+      ],
+      "notes": "Both source examples with the handlers of JumpListPage.xaml.cs in Rust (notification_samples.rs): AddTasksButton_Click, ClearTasksButton_Click and AddCustomGroupButton_Click load the app's jump list, change its items (JumpListItem.CreateWithArguments with the source's arguments, names, descriptions and group) and save it. The saved list is the dock menu of the app (NativeDock.Menu of the application), which FerroUI shows on macOS: the items of a group below a disabled header with the group's name, the tasks after a separator at the bottom, each description the item's tool tip; an item chosen in the dock menu reports its arguments on the page, since the app is running. The source's logo is not in the gallery's assets: the items have no image. Other platforms have no jump list that FerroUI sets (JumpList.IsSupported is false there): the InfoBar says so where the source asks for a packaged app, which keeps the page partial. The intro text describes the dock menu, which lives while the app runs, where the source describes its recent and favourite items.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/JumpList/AddingTasksJumpList.txt",
+          "source_sha256": "9468ba024bcea2b3e821bd2fbff5ebbc95a1ca50b4db31f5e41f6c482fdc4984",
+          "status": "partial",
+          "notes": "The two tasks /compose (New Message) and /search (Search) with their descriptions saved as items of the app's dock menu, and Clear all items; shown on macOS only.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "jump_list_tasks_become_the_dock_menu_and_clear_empties_it"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "jump_list_item_reports_its_arguments_when_invoked"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/JumpList/JumpListAddingItemsCustomGroup.txt",
+          "source_sha256": "4633e38920454b15d9e3675de66b3d9c008a05717dbe985b7fe79c19dccf155d",
+          "status": "partial",
+          "notes": "The two items of the Projects group below a disabled header with the group's name, above the tasks after a separator; shown on macOS only.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "jump_list_groups_come_before_the_tasks_under_their_header"
+            }
+          ]
+        }
+      ]
+    },
     "NavigationView": {
       "status": "partial",
       "implementation": [

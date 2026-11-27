@@ -1,0 +1,65 @@
+<!-- Ported from the five pinned AppNotification examples of WinUI Gallery (14061eea) and the
+     handlers of AppNotificationPage.xaml.cs (notification_samples.rs); see ../NOTICE.md. FerroUI
+     has no service for the notifications of the operating system: each AppNotificationBuilder of
+     the source builds the content of a card that the window's WindowNotificationManager shows in
+     the bottom right corner of the window, and the first InfoBar says so where the source speaks
+     of Do Not Disturb and the notification center. The sound events of the ComboBox are the
+     source's list (its x:Bind to the page's list is the items, SelectedItem the index); a card
+     plays no sound and names its sound event. The ComboBox's Header is composed. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Spacing="8" Margin="0,16,0,0">
+    <InfoBar x:Name="NotificationHostInfoBar" IsOpen="True" Severity="Informational" IsIconVisible="True"
+             IsClosable="False">
+      <RichTextBlock Margin="0,12,12,12" IsTextSelectionEnabled="False">
+        <Paragraph><Run Text="These notifications are shown in this window by its notification manager: they appear in the corner of the window whether or not " /><Run Text="Do Not Disturb" FontWeight="SemiBold" /><Run Text=" mode is enabled in system settings, and they are not added to the notification center of the system." /></Paragraph>
+      </RichTextBlock>
+    </InfoBar>
+    <InfoBar IsOpen="True" Severity="Warning" Title="App notifications should not be noisy"
+             Message="App notifications are designed to convey timely and relevant information without disrupting the user experience. Excessive use of sound, prolonged durations, or overly attention-seeking visuals can lead to user fatigue and diminish the overall effectiveness of notifications."
+             IsIconVisible="True" IsClosable="False" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppNotificationExample1" Spacing="8">
+    <TextBlock Text="Basic notification" FontSize="18" />
+    <Button x:Name="ShowNotificationButton" Content="Show notification" HorizontalAlignment="Left" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppNotificationExample2" Spacing="8">
+    <TextBlock Text="Informational notification with logo and custom audio" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <Button x:Name="ShowInformationalNotificationWithLogoButton" VerticalAlignment="Top"
+              Content="Show informational notification with logo and custom audio" HorizontalAlignment="Left" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="AppNotificationSoundEvent" />
+        <ComboBox x:Name="AppNotificationSoundEventsCombo" Width="180" SelectedIndex="0"
+                  AutomationProperties.Name="AppNotificationSoundEvent">
+          <x:String>Default</x:String>
+          <x:String>IM</x:String>
+          <x:String>Reminder</x:String>
+          <x:String>SMS</x:String>
+          <x:String>Alarm</x:String>
+          <x:String>Call</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppNotificationExample3" Spacing="8">
+    <TextBlock Text="Visual notification with hero image and attribution" FontSize="18" />
+    <Button x:Name="ShowVisualNotificationWithHeroImageButton" HorizontalAlignment="Left"
+            Content="Show visual notification with hero image and attribution" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppNotificationExample4" Spacing="8">
+    <TextBlock Text="Notification with AppNotification controls" FontSize="18" />
+    <Button x:Name="ShowNotificationWithControlsButton" HorizontalAlignment="Left"
+            Content="Show notification with AppNotification controls" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppNotificationExample5" Spacing="8">
+    <TextBlock Text="Notification with ProgressBar" FontSize="18" />
+    <Button x:Name="ShowNotificationWithProgressBarButton" HorizontalAlignment="Left"
+            Content="Show notification with progress bar" />
+  </StackPanel>
+</StackPanel>

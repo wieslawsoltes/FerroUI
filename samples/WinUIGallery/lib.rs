@@ -44,6 +44,7 @@ pub mod navigation;
 mod color_samples;
 mod color_sections;
 mod navigation_view_samples;
+mod notification_samples;
 mod platform_samples;
 mod repeater_samples;
 mod scroll_samples;
@@ -148,6 +149,9 @@ mod menu_samples_tests;
 
 #[cfg(test)]
 mod date_samples_tests;
+
+#[cfg(test)]
+mod notification_samples_tests;
 
 #[cfg(test)]
 mod list_samples_tests;

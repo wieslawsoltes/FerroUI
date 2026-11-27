@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 31 |
-| partial | 16 |
-| ported | 79 |
+| pending | 28 |
+| partial | 18 |
+| ported | 80 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -72,11 +72,11 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AppBarButton | Menus & toolbars | ported | 6 |
 | AppBarSeparator | Menus & toolbars | ported | 1 |
 | AppBarToggleButton | Menus & toolbars | ported | 4 |
-| AppNotification | Shell | pending | 5 |
+| AppNotification | Shell | ported | 5 |
 | AppWindow | Windowing | pending | 7 |
 | AppWindowTitleBar | Windowing | pending | 3 |
 | AutoSuggestBox | Text | ported | 2 |
-| BadgeNotificationManager | Shell | pending | 2 |
+| BadgeNotificationManager | Shell | partial | 2 |
 | Binding | Fundamentals | ported | 7 |
 | Border | Layout | ported | 1 |
 | BreadcrumbBar | Navigation | pending | 2 |
@@ -118,7 +118,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | InkCanvas | Media | ported | 3 |
 | ItemsRepeater | Collections | ported | 6 |
 | ItemsView | Collections | ported | 3 |
-| JumpList | Shell | pending | 2 |
+| JumpList | Shell | partial | 2 |
 | LayoutPanel | Layout | ported | 1 |
 | Line | Styles | ported | 4 |
 | ListView | Collections | partial | 10 |
