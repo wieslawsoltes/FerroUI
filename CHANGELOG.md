@@ -4,6 +4,18 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.6.0] - Unreleased
+
+The sixth release. No 0.5.x release came before it: the work of the 0.5.1 milestone is released here with that of 0.6.0 (owner decision, 2026-11-19), 324 merged pull requests since `v0.5.0` at the time of writing. Breaking changes of the public API were allowed again; the section "Migration" names each one and what to use instead. It adds, among the entries below:
+- web fonts on every platform and backend: `@font-face`, the CSS Font Loading API, WOFF and WOFF2, with faces loaded on demand and decoded off the UI thread (#1205);
+- 3D (`Viewport3D` and the Media3D model) drawn on the GPU in every backend (Skia Graphite on Metal, Ganesh on OpenGL and Vulkan, Vello), with 3D hit testing, interactive 3D elements, and video and visual brushes as materials (#608, steps D5 to D11; [docs/porting/media3d.md](docs/porting/media3d.md));
+- the universal C ABI with generated C++, Go, Dart and C# bindings, controls written in other languages, signals shared through memory, and a library made for one application (#636, #974; the C library is not published to crates.io);
+- WinUI controls and their WinUI Gallery pages: `TabView`, the overflow of the top pane of `NavigationView`, `ItemsView` and `ItemContainer`, `SystemBackdropElement`, `FlipView`, `TeachingTip`, `PasswordBox`, `BitmapIcon` and `ImageIcon`, the modes of `PipsPager`, `ShowPaused` and `ShowError` of `ProgressBar`, and `ItemsStretch` of `WrapPanel`;
+- the end of the idiomatic Rust work under the .NET-named control API (#423; [docs/idiomatic-rust.md](docs/idiomatic-rust.md));
+- smaller executables at their roots with no slower start-up, and faster first frames (section "Performance and size").
+
+9 crates join, so 134 are published: `ferroui-controls-flip-view`, `ferroui-controls-icons`, `ferroui-controls-items-view`, `ferroui-controls-password-box`, `ferroui-controls-split-menu`, `ferroui-controls-teaching-tip`, `ferroui-fonts-web`, `ferroui-fonts-web-core` and `ferroui-ident-macros`.
+
 ### Added
 
 - **High contrast** (#560, `ferroui-base`, `ferroui-controls`, `ferroui-themes-winui`, `ferroui-native`): `SystemColors` and `PlatformColorValues::system_colors`; a theme's high contrast variant (`ThemeVariant::set_high_contrast_variant`), which the application and the top levels select while the platform asks for high contrast; the WinUI theme follows the system's high contrast (`UseSystemHighContrast`, on by default) with the system colours of `Accents/SystemColors`; `DefaultPlatformSettings::set_color_values` simulates the setting. On macOS, "Increase contrast" is reported as high contrast, with the system colours under the effective appearance.
@@ -197,6 +209,154 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - **Text in a variable font is shaped and drawn at the optical size of its size** (#859, `ferroui-base`, `ferroui-skia`, `ferroui-vello`, [docs/porting/skia-native-text.md](docs/porting/skia-native-text.md), section 3): a font with an optical size axis (the system font of macOS, Segoe UI Variable) was used at one instance for every size, so large text was set wider than Core Text sets it. The run properties now take the instance at the size of the text, rounded to a whole point and clamped to the axis, one glyph typeface per instance that the texts of that size share; a family that names an optical size (`Display`, `Text`, `Small` and the like) keeps it, and a font without the axis is unchanged. A line of 68 characters in the macOS system font is 736.172 wide at 24 points and 1452.422 at 48 points, against 736.198 and 1452.422 from Core Text (before: 813.410 and 1641.164); up to 17 points it is unchanged. New: `GlyphTypeface::at_optical_size`, `IPlatformTypeface::with_variation_settings` (a provided method, `None` by default).
 
 - **The camera preview on iOS is upright in every interface orientation** (`ferroui-media-camera-apple`): the preview showed the buffers in the orientation of the sensor, a quarter turn off in a portrait interface, and did not follow the interface when the device turned. Each frame now carries the rotation the presenter applies on the GPU, from the interface orientation and the mounting of the selected camera (on iOS 17 and later, the rotation coordinator of AVFoundation, read per frame); before iOS 17 the connection rotates the buffers, and a turn during a recording waits for its end. macOS is unchanged.
+
+### Migration
+
+#### Errors are values, not panics (#971)
+
+- `IAnimator::apply` and `Animator::apply` return `Result<Option<Rc<dyn IDisposable>>, AnimationError>`.
+- `XamlIlRuntimeHelpers::deferred_transformation_factory_v1`, `_v2` and `_v3` return
+  `Result<Rc<DeferredContent>, XamlLoadError>`.
+- Removed; use the `try_` form, which returns the error: `deferred_transformation_factory_for`,
+  `StyleInclude::loaded`, `ResourceInclude::loaded`, `RelativeSourceExtension::provide_value`,
+  `OnFormFactorExtension::should_provide_option` (and that of `OnFormFactorExtensionOf<T>`),
+  `PropertyInfoAccessorFactory::create_ferro_property_accessor`, and the hidden `xaml_error_scope::throw`.
+- Behaviour: a failing `MarkupDelegate::invoke`, a failing XAML runtime member outside a load, and an
+  animation that an animator rejects in `Animation::apply` are errors on the dispatcher, fatal unless a
+  handler handles them. A run-time load returns the errors of its deferred content as `Err`.
+
+#### Property values implement `StyledValue` (#989)
+
+- The value type of a styled or attached property implements `StyledValue`. The types of the framework,
+  `Option`, handles, the standard types and enumerations declared with `ferro_markup_enum!` have it. A type
+  of an application declares `ferroui_base::styled_value!(Type);` (or `styled_enum!(Type { .. })`).
+- `FerroProperty::register*`, `StyledPropertyOptions`, `FerroObject::get_value`, `set_value`,
+  `set_value_with_priority`, `set_current_value`, `get_base_value`, `with_value`, `bind`, `bind_value`,
+  `Animator::Value` and `Transition<T>` require `T: StyledValue`. `FerroObject::try_set_value_typed` keeps
+  `T: PropertyValue`.
+- `IValueEntry::try_get_value` of a styled property fills an `Option` of the storage type (`T::Storage`).
+
+#### Converters are constructed, not written as unit structs (#1008)
+
+`BorderGapMaskConverter`, `EnumToBoolConverter`, `MenuScrollingVisibilityConverter`,
+`PlatformKeyGestureConverter`, `StringFormatConverter` and `TreeViewItemIndentConverter` of
+`ferroui_controls::converters` are `#[non_exhaustive]`.
+
+| Before | After |
+|---|---|
+| `BorderGapMaskConverter` | `BorderGapMaskConverter::new()` or `::default()` |
+| `EnumToBoolConverter` | `EnumToBoolConverter::new()` or `::default()` |
+| `PlatformKeyGestureConverter` | `PlatformKeyGestureConverter::new()` or `::default()` |
+| `StringFormatConverter` | `StringFormatConverter::new()` or `::default()` |
+| `MenuScrollingVisibilityConverter` | `MenuScrollingVisibilityConverter::instance()` or `::default()` |
+| `TreeViewItemIndentConverter` | `TreeViewItemIndentConverter::instance()` or `::default()` |
+
+A pattern on one of them outside the crate is written `BorderGapMaskConverter { .. }`. Markup is unchanged.
+
+#### Control themes and templates (#1112)
+
+An element of a template no longer receives the setters of its templated parent's control theme. A theme
+that relied on this sets the element with a nested style, `^ /template/ TypeName`. Themes whose target is a
+base class of an element in their own template can look different.
+
+#### Platforms and build
+
+- `ferroui-freedesktop` exposes the types of zbus 6 (#1030): `DBusHelper`, `DBusCallError::DBus`,
+  `with_connection`, `new_top_level` and the input method wrappers. `DBusHelper::with_object_server` takes
+  and returns `zbus::connection::Builder` without a `Result`. Depend on `zbus = "6"`; use `zbus::block_on`
+  in place of `zbus::blocking`.
+- Executables on macOS and iOS have no export trie (#1083). An application whose plug-ins resolve names
+  from its executable sets `executable-exports = true`.
+
+#### Generated-code runtime and metadata models
+
+- `rt::method_delegate` takes a plain function and no longer accepts a closure that captures (#1091); the
+  XAML emitter never writes one.
+- `MarkupReferencesModel` has a new public field, `classes` (#1003), and `TypeModel` a new public field,
+  `not_created_on` (#1011): build them with `..Default::default()` or `TypeModel::new`.
+
+#### Public structs and enums with new members
+
+- `Scene3DChange` has a new variant, `Output` (#1114): an exhaustive `match` needs an arm.
+- `ferroui_livecharts::GeoMarker` has two new public fields (#1127) and `HitRegion` the field
+  `label_parts` (#1138): struct literals need `..Default::default()` or `..`.
+
+#### C ABI and bindings
+
+The C ABI (`ferroui-capi`) and the generated bindings are not published to crates.io; these are changes against the previews.
+
+- The type and property IDs of the C ABI are assigned in sorted order, so a new class or property moves the
+  IDs after it and changes the API fingerprint (#1130, #1131, #1174, #1180): C clients are rebuilt against
+  the new header.
+- `ferroui-capi` built with `--no-default-features` leaves out the tables of types (#979); code that looks
+  classes up by name without the desktop platform builds with `--no-default-features --features type-tables`.
+- Bindings generated from this release call `ferro_selection_fingerprint()` in their start check (#981) and
+  need a library that exports it.
+- Osprey bindings: getters return plain values (#969), and the `Attr` union has a new variant `AttrBind`
+  (#972), which a `match` over `Attr` handles.
+
+### Performance and size
+
+Numbers as the pull requests report them (macOS on Apple silicon unless stated; sizes are stripped files).
+
+#### Binary size
+
+- Hello world (`samples/HelloWorld`, release) went from 20,529,288 bytes to 17,758,584 bytes through the
+  roots work of #612: class initialisation reached only through the class's own use (#1006, -579,464 bytes,
+  -2.8 %), interface casts of page transitions and converters registered by construction (#1008,
+  -1,385,976 bytes, -6.9 %), setter targets from `Setter.Value` (#1014, -102,640 bytes), state mappers
+  (#1016, -563,520 bytes, -3.1 %) and the tool tip service (#1017, -139,104 bytes).
+- The property store stack (#989, #1010, #1013, #1015): hello world -362 kB (-1.95 %), the WinUI Gallery
+  -1.08 MB (-1.89 %), the control catalog -1.40 MB (-1.85 %) at #1015.
+- Compiled markup shared helpers (#963): the code statements of the four themes -10.4 %; the control catalog
+  in `dist` 63.37 MB to 61.80 MB (-2.5 %).
+- Executables without an export trie (#1083): `hello-world` `dist` -64,432 bytes (-0.46 %).
+- A style written as text no longer keeps every control (#790): a declarative application 30.53 MB to
+  23.05 MB (-7.5 MB).
+- C ABI (#979, #981): a statically linked `hello_world.c` from 36.97 MB to 20.12 MB; a library made for one
+  application adds 0.04 MB to its program instead of 19.83 MB.
+- Rejected after measurement and recorded: every crate at `opt-level = "z"` (-50 % size, +29 % start-up,
+  #877); identical code folding beyond the defaults (#1001, docs/binary-size.md 5.6).
+
+#### Start-up and frames
+
+- Pipelines compiled on a thread pool and asked for from a record when the platform starts (#784, #789): the
+  first paint of a sampled first start from 814 ms to 259 ms, then to 137 ms. Shader libraries made ahead
+  for Metal ship with the crate (#794), so a first start on macOS does not wait for the shader compiler.
+- Packed row tables of deferred theme resources (#878): start-up of `hello_window` 217 to 186 ms,
+  `themed_window` Simple 288 to 250 ms, Fluent 346 to 304 ms, the control catalog 636 to 614 ms (median of 9).
+- An inherited value is raised only where something can hear it (#863): `Propagation.theme_variant` -49.8 %,
+  `font_family` and `font_weight` -10.6 %, `switch_theme_variant` -9.7 %.
+- Size limits of an element made in measure and arrange (#751): panel measure and arrange of 1,000 children
+  -6.7 to -10.5 %.
+- A panel removes a lost child at its index (#781): 4,000 children 21.9 to 4.95 ms.
+- Graphite on the GPU (#1388 to #1391): frame boundaries and periodic cleanup, pipelined bands submitted at
+  the next frame start, unchanged bands skipped, and band workers that spin then park.
+- The C ABI frames cost what changed (#969): one changed text block of a 100-element frame 21.6 µs to
+  3.18 µs; a bound slot store (#972) 3.05 µs to 52.5 ns.
+
+### Still landing
+
+<!-- release-0.6.0-pending: the entries of the pull requests below are added when they land, and this section is removed before the release. -->
+
+- Declarative typed forms.
+- Skia per-draw work.
+- Vulkan.
+- The code editor.
+- The ribbon.
+- WebGL2 effects of the Vello backend and the media frames on the GPU (#575).
+- Binary size (#306).
+- The 3D pages of the ControlCatalog drawn in the browser, on Android and on iOS (#1486).
+
+<!-- /release-0.6.0-pending -->
+
+### Known limitations
+
+- **Vello stays optional.** Skia is the default backend; Vello is experimental ([docs/porting/vello-backend.md](docs/porting/vello-backend.md)).
+- **The native renderers are experimental.** `ferroui-quartz` and `ferroui-direct2d` are opt-in backends ([docs/porting/quartz-prototype.md](docs/porting/quartz-prototype.md), [docs/porting/windows-native-renderer.md](docs/porting/windows-native-renderer.md)).
+- **Portable media is an initial implementation**; the verification of each platform and the outstanding native work are recorded in [docs/media/README.md](docs/media/README.md).
+- **3D** is at the steps of #608 that [docs/porting/media3d.md](docs/porting/media3d.md) records as done; the later steps (Vello hybrid-webgl 3D, the ProGPU mapping, browser WebGPU) are not in this release.
+- **The C ABI is not published.** `ferroui-capi` and the generated bindings are built from the repository ([docs/c-abi.md](docs/c-abi.md)).
 
 ## [0.5.0] - 2026-11-14
 
@@ -1136,6 +1296,7 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
 [Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.5.0...main
+[0.6.0]: https://github.com/wieslawsoltes/FerroUI/compare/v0.5.0...main
 [0.5.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0
 [0.4.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0-preview.1
