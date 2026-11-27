@@ -2237,7 +2237,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 }
 
-/// 3D scenes: the CPU reference drawn as an image (`scene3d.rs`, #608).
+/// 3D scenes: on Graphite drawn by the Metal executor, elsewhere the CPU reference drawn as an image
+/// (`scene3d.rs`, #608).
 #[cfg(feature = "media3d")]
 impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
     fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
@@ -2249,7 +2250,9 @@ impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextIm
         let antialiased = self.render_options.edge_mode != EdgeMode::Aliased;
         let opacity = self.current_opacity;
         let gr_context = self.gr_context.clone();
-        crate::scene3d::draw_scene_3d(self.canvas.get(), gr_context.as_deref(), device, opacity, antialiased, frame)
+        let gpu = self.gpu.clone();
+        let canvas = self.canvas.get();
+        crate::scene3d::draw_scene_3d(canvas, gr_context.as_ref(), gpu.as_ref(), device, opacity, antialiased, frame)
     }
 }
 
