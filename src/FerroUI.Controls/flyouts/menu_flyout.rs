@@ -1,8 +1,8 @@
 use super::{
     Flyout, FlyoutBaseImpl, MenuFlyoutPresenter, PopupFlyoutBase, PopupFlyoutBaseImpl, PopupFlyoutBaseImplExt,
 };
-use crate::item_collection::ItemCollection;
-use crate::items_source::{IItemsList, ItemsChangedHandler, ItemsSource};
+use crate::item_collection::{ItemCollection, ItemCollectionList};
+use crate::items_source::ItemsSource;
 use crate::templates::IDataTemplate;
 use crate::{Control, ItemsControl, ItemsSourceView};
 use ferroui_base::controls::Classes;
@@ -12,7 +12,6 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable, Ref, StyledElement, StyledProperty,
 };
-use std::any::Any;
 use std::cell::OnceCell;
 use std::rc::Rc;
 
@@ -75,40 +74,6 @@ impl PopupFlyoutBaseImpl for MenuFlyout {
         }
 
         Self::parent_on_opening(this, args);
-    }
-}
-
-/// The items of a menu flyout as an untyped, notifying list: what the items
-/// collection is to an items control that uses it as its items source.
-struct ItemCollectionList(Rc<ItemsSourceView>);
-
-impl IItemsList for ItemCollectionList {
-    fn count(&self) -> usize {
-        self.0.count()
-    }
-
-    fn get_at(&self, index: usize) -> Option<BoxedValue> {
-        self.0.get_at(index)
-    }
-
-    fn index_of(&self, item: &Option<BoxedValue>) -> i32 {
-        self.0.index_of(item)
-    }
-
-    fn is_notifying(&self) -> bool {
-        true
-    }
-
-    fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
-        Some(self.0.add_collection_changed(handler))
-    }
-
-    fn remove_collection_changed(&self, token: u64) {
-        self.0.remove_collection_changed(token);
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 

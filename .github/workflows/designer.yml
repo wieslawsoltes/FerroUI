@@ -14,8 +14,6 @@ on:
       - 'src/FerroUI.Designer*/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/designer.yml'
   schedule:
     - cron: '5 4 * * *'

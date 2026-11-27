@@ -198,8 +198,11 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
             .frame_context_id()
             .ok_or(FrameError::MissingSynchronization)?;
         frame.counters().gpu_import();
-        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(
-            image, frame, id,
+        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::with_metal_texture(
+            image,
+            frame,
+            id,
+            self.texture.handle(),
         )))
     }
 
