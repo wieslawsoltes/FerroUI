@@ -219,6 +219,20 @@ impl EffectiveValueState {
         }
     }
 
+    /// Whether a coerced write watches its local input for a watcher of suppressed local writes.
+    #[inline(never)]
+    fn watches_local_input(
+        owner: &FerroObject,
+        priority: BindingPriority,
+        is_overridden_current_value: bool,
+        is_coerced_default_value: bool,
+    ) -> bool {
+        priority == BindingPriority::LocalValue
+            && !is_overridden_current_value
+            && !is_coerced_default_value
+            && owner.has_suppressed_local_value_handlers()
+    }
+
     /// The end of a reevaluation of a property that opted out of coercion on reevaluation.
     #[cold]
     #[inline(never)]
@@ -507,11 +521,34 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         (uncommon.uncoerced_value.replace(default.clone()), uncommon.uncoerced_base_value.replace(default))
     }
 
-    /// The uncoerced base value, the input of a value under an animation that ended.
+    /// The input and the output of a coerced write that the untyped store asked something else of
+    /// (`EntryCoercion`): the uncoerced base value after an animation, or the output that explicit
+    /// coercion reuses or skips.
     #[cold]
     #[inline(never)]
-    fn uncoerced_base(&self) -> T {
-        self.uncommon.as_ref().expect("a coerced write has the uncommon fields").uncoerced_base_value.borrow().clone()
+    fn pending_input(&self, value: T, priority: BindingPriority, pending: EntryCoercion) -> (T, Option<T>) {
+        if pending == EntryCoercion::RestoreBase {
+            let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+            return (uncommon.uncoerced_base_value.borrow().clone(), None);
+        }
+        let output = match self.metadata.explicit_coercion() {
+            Some(explicit) => (explicit.output)(self, &value, priority, pending),
+            None => None,
+        };
+        (value, output)
+    }
+
+    /// Whether a local write requests another input than the local input (a watcher of
+    /// suppressed local writes is told of it).
+    #[cold]
+    #[inline(never)]
+    fn local_input_changed(&self, requested: &T) -> bool {
+        if self.state.base_priority.get() != BindingPriority::LocalValue {
+            return true;
+        }
+        let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+        // Compared in place: a comparison does not write the input it reads.
+        !(uncommon.operations.equals)(&uncommon.uncoerced_base_value.borrow(), requested)
     }
 
     /// The output of a write of explicit coercion whose coercion is reused or skipped, `None` to
@@ -616,14 +653,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         // What the untyped store asked of this write instead of a coercion of its input.
         let (value, output) = match self.state.pending_coercion.replace(EntryCoercion::Recompute) {
             EntryCoercion::Recompute | EntryCoercion::Reset => (value, None),
-            EntryCoercion::RestoreBase => (self.uncoerced_base(), None),
-            coercion => {
-                let output = match self.metadata.explicit_coercion() {
-                    Some(explicit) => (explicit.output)(self, &value, priority, coercion),
-                    None => None,
-                };
-                (value, output)
-            }
+            pending => self.pending_input(value, priority, pending),
         };
         // The coerced default: its inputs are the default while it is written; the previous ones
         // are dropped after it.
@@ -631,10 +661,8 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         let old_value = self.value();
         let mut value_changed = false;
         let mut base_value_changed = false;
-        let watch_local = priority == BindingPriority::LocalValue
-            && !is_overridden_current_value
-            && !is_coerced_default_value
-            && owner.has_suppressed_local_value_handlers();
+        let watch_local =
+            EffectiveValueState::watches_local_input(owner, priority, is_overridden_current_value, is_coerced_default_value);
 
         self.state.is_overriden_current_value.set(is_overridden_current_value);
         self.state.is_coerced_default_value.set(is_coerced_default_value);
@@ -662,13 +690,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         };
         let local_changed = watch_local
             && sets_base(&self.state)
-            && uncoerced.as_ref().is_some_and(|(uncommon, requested)| {
-                if self.state.base_priority.get() != BindingPriority::LocalValue {
-                    return true;
-                }
-                // Compared in place: a comparison does not write the input it reads.
-                !(operations.equals)(&uncommon.uncoerced_base_value.borrow(), requested)
-            });
+            && uncoerced.as_ref().is_some_and(|(_, requested)| self.local_input_changed(requested));
 
         if priority <= self.state.priority.get() {
             value_changed = !(operations.equals)(&*self.value.borrow(), &v);
