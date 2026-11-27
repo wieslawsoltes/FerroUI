@@ -5,10 +5,10 @@
 use crate::drawing_context_impl::{CanvasSource, CreateInfo};
 use crate::helpers::drawing_context_helper::wrap_skia_surface;
 use crate::skia_sharp_extensions::to_sk_matrix44;
-use crate::{DrawingContextImpl, ISkiaApiLeaseFeature};
+use crate::{DrawingContextImpl, ISkiaApiLeaseFeature, SkiaOptions};
 use ferroui_base::media::{BoxShadows, Brushes, IBrush};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Matrix, Rect, RoundedRect, Vector};
+use ferroui_base::{FerroLocator, Matrix, Rect, RoundedRect, Vector};
 use skia_safe::{surfaces, Color, Picture, PictureRecorder, Surface};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -150,6 +150,17 @@ fn the_canvas_follows_the_transform_at_once_when_the_api_can_be_leased() {
     context.dispose();
 }
 
+/// Runs `test` with opacity applied through save layers, as a context reads the option when it is
+/// created: the pop of an opacity then restores the canvas, as the pops of the clips and the layer
+/// do. (Without them an opacity only scales the paints, nothing is saved, and the transform after
+/// its pop is the last one set.)
+fn with_opacity_layers<R>(test: impl FnOnce() -> R) -> R {
+    let _scope = FerroLocator::enter_scope();
+    FerroLocator::current_mutable()
+        .bind_to_self(Rc::new(SkiaOptions { use_opacity_save_layer: true, ..SkiaOptions::default() }));
+    test()
+}
+
 /// What a context pushes and pops between the reads of the tests below: a clip, an opacity, a layer and a
 /// rounded clip, each with a transform of its own inside. The transform after each pop is read back lazily
 /// (`ContextTransform::Restored`) and has to be the transform before the push.
@@ -182,35 +193,41 @@ fn push_pop_sequence(context: &mut DrawingContextImpl) {
 
 #[test]
 fn the_transform_after_a_restore_is_read_when_asked_for_and_is_the_one_before_the_push() {
-    let mut surface = white_surface();
-    let mut context = wrap_skia_surface(&surface, Vector::new(96.0, 96.0));
-    push_pop_sequence(&mut context);
-    // The value read lazily is the one the canvas has (the eager value read at the restore before).
-    assert_eq!(to_sk_matrix44(context.transform()), surface.canvas().local_to_device());
-    context.dispose();
+    with_opacity_layers(|| {
+        let mut surface = white_surface();
+        let mut context = wrap_skia_surface(&surface, Vector::new(96.0, 96.0));
+        push_pop_sequence(&mut context);
+        // The value read lazily is the one the canvas has (the eager value read at the restore before).
+        assert_eq!(to_sk_matrix44(context.transform()), surface.canvas().local_to_device());
+        context.dispose();
+    });
 }
 
 #[test]
 fn the_transform_after_a_restore_of_a_recording_is_read_from_its_canvas() {
-    record(push_pop_sequence);
+    with_opacity_layers(|| {
+        record(push_pop_sequence);
+    });
 }
 
 #[test]
 fn the_transform_after_a_restore_of_a_scaled_context_is_without_the_post_transform() {
-    let mut surface = white_surface();
-    let mut context = DrawingContextImpl::new(
-        CreateInfo {
-            surface: Some(surface.clone()),
-            dpi: Vector::new(192.0, 192.0),
-            scale_drawing_to_dpi: true,
-            disable_subpixel_text_rendering: true,
-            ..CreateInfo::default()
-        },
-        Vec::new(),
-    );
-    push_pop_sequence(&mut context);
-    // The canvas has the transform and the post transform (the scale from 96 to 192 DPI).
-    let device = Matrix::create_translation(10.0, 20.0) * Matrix::create_scale(2.0, 2.0);
-    assert_eq!(to_sk_matrix44(device), surface.canvas().local_to_device());
-    context.dispose();
+    with_opacity_layers(|| {
+        let mut surface = white_surface();
+        let mut context = DrawingContextImpl::new(
+            CreateInfo {
+                surface: Some(surface.clone()),
+                dpi: Vector::new(192.0, 192.0),
+                scale_drawing_to_dpi: true,
+                disable_subpixel_text_rendering: true,
+                ..CreateInfo::default()
+            },
+            Vec::new(),
+        );
+        push_pop_sequence(&mut context);
+        // The canvas has the transform and the post transform (the scale from 96 to 192 DPI).
+        let device = Matrix::create_translation(10.0, 20.0) * Matrix::create_scale(2.0, 2.0);
+        assert_eq!(to_sk_matrix44(device), surface.canvas().local_to_device());
+        context.dispose();
+    });
 }
