@@ -61,3 +61,15 @@ a released `skia-bindings` can take the place of this copy.
 Measured failures, attribution and native reruns are recorded in
 `docs/media/MACOS-VERIFICATION.md` in the repository. Retest the resize/reset
 soak before removing this patch or changing the pinned Skia revision.
+
+## Graphite Vulkan backend textures
+
+`src/graphite.cpp` has one more C function, under `SK_VULKAN` only:
+`C_BackendTextures_MakeVulkan` wraps `skgpu::graphite::BackendTextures::MakeVulkan`, so that
+FerroUI can draw with Graphite on a `VkImage` that `ferroui-vulkan` owns (a window image, a layer
+image; #1365). skia-safe 0.153.3 has no constructor of a Graphite backend texture for Vulkan. The
+function is compiled only into a source build of the binding with the features `graphite` and
+`vulkan` (no published binary archive has that feature set), and `ferroui-skia` calls it only with
+its feature `graphite-vulkan`, which is off by default: every other build is unchanged. Whether
+patched bindings ship in the published crates follows the owner's decision on #622.
+

@@ -29,6 +29,8 @@
 #ifdef SK_VULKAN
 #include "include/gpu/vk/VulkanBackendContext.h"
 #include "include/gpu/graphite/vk/VulkanGraphiteContext.h"
+#include "include/gpu/graphite/vk/VulkanGraphiteTypes.h"
+#include <cstring>
 #endif
 
 // Forward declaration to avoid including Recording.h which exposes std::unordered_set
@@ -430,5 +432,35 @@ extern "C" SkContext* C_SkContexts_MakeGraphiteVulkan(
     const SkContextOptions* options) {
     return SkContexts::MakeGraphite(
         *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
+}
+
+// FerroUI patch (FERROUI-PATCH.md, "Graphite Vulkan backend textures"): a VkImage the application
+// owns as a Graphite backend texture, single-sampled and without mipmaps, with no memory of Skia's.
+// The handle is passed as its 64 bits, which VkImage is on every target.
+extern "C" void C_BackendTextures_MakeVulkan(
+    skgpu::graphite::BackendTexture* uninitialized,
+    int width,
+    int height,
+    uint32_t format,
+    uint32_t imageTiling,
+    uint32_t imageUsageFlags,
+    uint32_t imageLayout,
+    uint32_t queueFamilyIndex,
+    uint64_t image) {
+    skgpu::graphite::VulkanTextureInfo info;
+    info.fFormat = static_cast<VkFormat>(format);
+    info.fImageTiling = static_cast<VkImageTiling>(imageTiling);
+    info.fImageUsageFlags = imageUsageFlags;
+    VkImage handle;
+    static_assert(sizeof(handle) == sizeof(image), "a VkImage is 64 bits");
+    std::memcpy(&handle, &image, sizeof(handle));
+    new(uninitialized) skgpu::graphite::BackendTexture(
+        skgpu::graphite::BackendTextures::MakeVulkan(
+            SkISize::Make(width, height),
+            info,
+            static_cast<VkImageLayout>(imageLayout),
+            queueFamilyIndex,
+            handle,
+            skgpu::VulkanAlloc()));
 }
 #endif
