@@ -356,6 +356,19 @@ check("three pages are reached through the drawer and show their content", async
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
+check("FerroEdit loads its TextMate scanner and switches languages", async (page) => {
+    await navigate(page, "Text");
+    await navigate(page, "FerroEdit");
+    const status = (language) => (e) => inContent(e) && e.name === "Status"
+        && e.text?.startsWith(`${language}  |`);
+    await page.element("the Rust editor status", status("Rust"));
+    for (const language of ["C#", "JavaScript", "HTML", "Rust"]) {
+        await page.clickElement(await page.find(language, inContent));
+        await page.element(`the ${language} editor status`, status(language));
+    }
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+});
+
 check("Visual States opens and applies setters from both state groups", async (page) => {
     await navigate(page, "Layout");
     await navigate(page, "Visual States");
@@ -685,6 +698,36 @@ check("opening a page downloads its files and its images are drawn", async (page
     console.log(`      ${fetched.join(", ")} fetched on navigation; the image at ${region.x},${region.y} shows ${colours} colours`);
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 }, { query: "&PrefetchAssets=false" });
+
+// The Skia backend draws a scene of a Viewport3D on WebGL2 with the GL executor of ferroui-opengl
+// (docs/porting/media3d.md, section 3.20): counted as drawn on the GPU, never by the CPU reference,
+// and the lit, shaded models give the region of the viewport many colours (an empty one has those of
+// the background). The counters are those of the thread that renders: a module with threads is kept
+// on the thread of the page. Vello in the browser has no 3D executor yet (its WebGL2 one is on the
+// branch vello/webgl2-scene3d), so the check is the Skia module's.
+if (!vello) check("the Viewport3D page draws its scene on the GPU", async (page) => {
+    await visit(page, { section: "3D", name: "Viewport3D" }, FIRST_SIZE.height);
+    const state = await page.until("the page has its Viewport3D",
+        (s) => s.elements.some((e) => e.type === "Viewport3D" && e.x >= DRAWER_EDGE && e.width > 100 && e.height > 100));
+    const viewport = state.elements.find((e) => e.type === "Viewport3D" && e.x >= DRAWER_EDGE);
+    const region = {
+        x: Math.ceil(viewport.x), y: Math.ceil(viewport.y), width: Math.floor(viewport.width) - 1,
+        height: Math.min(Math.floor(viewport.height) - 1, FIRST_SIZE.height - Math.ceil(viewport.y) - 1),
+    };
+    let colours = 0; let scenes = {};
+    for (const end = Date.now() + FRAME_TIMEOUT; Date.now() < end; await sleep(250)) {
+        await page.drawn();
+        scenes = pairs(await page.evaluate("controlCatalog.catalogScene3D()"));
+        colours = distinctColours(await page.screenshot(undefined, { x: 0, y: 0, ...FIRST_SIZE }), region);
+        if (Number(scenes.gpu) > 0 && colours >= 32) { break; }
+    }
+    assert(Number(scenes.gpu) > 0, `no scene was drawn on the GPU: ${JSON.stringify(scenes)}`);
+    assert(Number(scenes.cpu) === 0, `scenes were drawn by the CPU reference: ${JSON.stringify(scenes)}`);
+    assert(Number(scenes.not_drawn) === 0, `scenes were not drawn: ${JSON.stringify(scenes)}`);
+    assert(colours >= 32, `the Viewport3D at ${JSON.stringify(region)} shows ${colours} colours`);
+    console.log(`      ${scenes.gpu} scenes drawn on the GPU; the Viewport3D at ${region.x},${region.y} shows ${colours} colours`);
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+}, { size: FIRST_SIZE, query: threaded ? `&${ONE_THREAD}` : "" });
 
 check("the CJK sample of the TextBox page finds its font and draws its glyphs", async (page) => {
     await navigate(page, "Text");

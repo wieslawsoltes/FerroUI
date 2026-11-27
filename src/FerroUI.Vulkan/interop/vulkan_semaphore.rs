@@ -37,37 +37,3 @@ impl VulkanSemaphore {
         }
     }
 }
-
-/// The two semaphores of a presentation: the image of the swap chain is
-/// available, and the commands that fill it are finished.
-pub(crate) struct VulkanSemaphorePair {
-    image_available_semaphore: VulkanSemaphore,
-    render_finished_semaphore: VulkanSemaphore,
-}
-
-impl VulkanSemaphorePair {
-    pub fn new(context: Rc<dyn IVulkanPlatformGraphicsContext>) -> Result<Self, VulkanError> {
-        let image_available_semaphore = VulkanSemaphore::new(context.clone())?;
-        let render_finished_semaphore = match VulkanSemaphore::new(context) {
-            Ok(semaphore) => semaphore,
-            Err(error) => {
-                image_available_semaphore.dispose();
-                return Err(error);
-            }
-        };
-        Ok(Self { image_available_semaphore, render_finished_semaphore })
-    }
-
-    pub fn image_available_semaphore(&self) -> &VulkanSemaphore {
-        &self.image_available_semaphore
-    }
-
-    pub fn render_finished_semaphore(&self) -> &VulkanSemaphore {
-        &self.render_finished_semaphore
-    }
-
-    pub fn dispose(&self) {
-        self.image_available_semaphore.dispose();
-        self.render_finished_semaphore.dispose();
-    }
-}
