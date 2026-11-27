@@ -14,7 +14,8 @@ pub use sanitize::{sanitize, SanitizeOptions, Sanitizer};
 
 use crate::{FontDecodeError, WebFontLimits};
 
-pub(crate) type Tag = [u8; 4];
+/// An OpenType tag.
+pub type Tag = [u8; 4];
 
 pub(crate) const TRUETYPE: u32 = 0x0001_0000;
 pub(crate) const APPLE_TRUE: u32 = u32::from_be_bytes(*b"true");
