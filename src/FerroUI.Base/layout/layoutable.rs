@@ -476,6 +476,10 @@ impl LayoutableImpl for Layoutable {
     fn on_measure_invalidated(_this: &Self) {}
 }
 
+/// Whether any element has had a value of `UseWinUiMeasureRounding`: until then every element
+/// has the default, and the layout reads no property for it.
+static WINUI_MEASURE_ROUNDING_SET: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 crate::ferro_properties! { impl Layoutable {
     ferro_property!(
         /// Defines the `DesiredSize` property.
@@ -601,6 +605,13 @@ impl Layoutable {
 
     fn static_constructor() {
         PropertyChangeHandler::Layoutable.reacts_to(&[Visual::is_visible_property().as_property()]);
+        // The first value of the WinUI rounding option anywhere turns on its reads.
+        Self::use_winui_measure_rounding_property()
+            .changed()
+            .add_class_handler::<Layoutable>(|_, _| {
+                WINUI_MEASURE_ROUNDING_SET.store(true, std::sync::atomic::Ordering::Relaxed);
+            })
+            .detach();
         Self::affects_measure::<Layoutable>(&[
             Self::width_property().as_property(),
             Self::height_property().as_property(),
@@ -897,11 +908,12 @@ impl Layoutable {
 
     /// Whether to use WinUI's physical-pixel rounding rules during layout.
     /// This inherited option applies when layout rounding is enabled.
-    // Read for every element and every child in every layout pass: inlined, it is one load and a
-    // test until an element sets the option (no store holds it, and the answer is the default).
+    // Read for every element and three times for every bordered child in every layout pass:
+    // inlined, it is the load of one flag until an element of the process sets the option (the
+    // accessor of the property and its count of holders cost more than that, per read).
     #[inline]
     pub fn use_winui_measure_rounding(&self) -> bool {
-        if Self::use_winui_measure_rounding_property().as_property().holders() == 0 {
+        if !WINUI_MEASURE_ROUNDING_SET.load(std::sync::atomic::Ordering::Relaxed) {
             return false;
         }
         self.use_winui_measure_rounding_held()
