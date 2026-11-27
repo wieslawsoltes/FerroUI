@@ -9,7 +9,6 @@ use crate::{
     Nullable, ObjectType, PropertyValue, Ref, StaticType, StyledProperty, Subclassable, TypeIdentity, TypeInfo, Upcast, WeakRef,
 };
 use std::any::{Any, TypeId};
-use std::collections::HashMap;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
@@ -17,7 +16,9 @@ use std::sync::Arc;
 
 /// The object-owned data slots of an object (`FerroObject::instance_data`), kept in the part of
 /// its value store that is allocated on first use, so an object without data pays nothing.
-pub(crate) type InstanceDataMap = HashMap<TypeId, Rc<dyn Any>>;
+/// A few slots at most (one per library that keeps data on an object), so a list searched in
+/// order: no map, and no instance of the generic code of a map in every application.
+pub(crate) type InstanceDataMap = Vec<(TypeId, Rc<dyn Any>)>;
 
 type PropertyChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
 type SuppressedLocalValueHandler = dyn Fn(&FerroObject, &'static FerroProperty);
@@ -284,7 +285,7 @@ impl FerroObject {
         self.verify_access();
         self.values
             .instance_data()?
-            .with(|map| map?.get(&TypeId::of::<T>()).cloned())?
+            .with(|slots| slots?.iter().find(|(id, _)| *id == TypeId::of::<T>()).map(|(_, value)| value.clone()))?
             .downcast::<T>()
             .ok()
     }
@@ -308,13 +309,24 @@ impl FerroObject {
         };
         // Taken and put back with no user code in between: the old value drops after this.
         let mut storage = slot.take();
+        let id = TypeId::of::<T>();
         let previous = match value {
-            Some(value) => storage
-                .get_or_insert_with(|| Box::new(HashMap::new()))
-                .insert(TypeId::of::<T>(), value),
+            Some(value) => {
+                let slots = storage.get_or_insert_with(|| Box::new(Vec::new()));
+                match slots.iter_mut().find(|(slot, _)| *slot == id) {
+                    Some((_, existing)) => Some(std::mem::replace(existing, value)),
+                    None => {
+                        slots.push((id, value));
+                        None
+                    }
+                }
+            }
             None => {
-                let previous = storage.as_mut().and_then(|map| map.remove(&TypeId::of::<T>()));
-                if storage.as_ref().is_some_and(|map| map.is_empty()) {
+                let previous = storage.as_mut().and_then(|slots| {
+                    let index = slots.iter().position(|(slot, _)| *slot == id)?;
+                    Some(slots.remove(index).1)
+                });
+                if storage.as_ref().is_some_and(|slots| slots.is_empty()) {
                     storage = None;
                 }
                 previous
