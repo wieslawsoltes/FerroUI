@@ -1,0 +1,156 @@
+<!-- Ported from the pinned Iconography page of WinUI Gallery (14061eea) and the code behind of
+     IconographyPage.xaml.cs (iconography_samples.rs); see ../NOTICE.md. The icons are the
+     source's IconsData.json (icons_data.rs). The control themes of ItemsView and ItemContainer are
+     in their own crate and are included here, as an application that uses them includes them.
+     The source's page fills the window and suppresses the scrolling of its host: here it has a
+     height of its own in the gallery's scrolling page. x:Bind of the item template is {Binding}
+     over the markup type IconData, and the side panel's x:Bind of SelectedItem is {Binding} of
+     its DataContext, the selected icon. The source's WrapLayout of the tags is FlowLayout (its
+     LineSpacing and MinItemSpacing are WrapLayout's VerticalSpacing and HorizontalSpacing).
+     SampleCodePresenter is a selectable text in a monospaced font, without syntax colours;
+     SampleThemeListener is left out (the page follows the theme), the Grid of GalleryTileGridStyle
+     is a Border with the card brushes, the Grids with a background and corners are Borders,
+     ThemeResource is DynamicResource, a Visibility is IsVisible, x:Load is IsVisible set by the
+     code behind, and TabFocusNavigation is KeyboardNavigation.TabNavigation. The announcement of
+     a search is a polite live region next to the search box. The glyphs need the platform's
+     symbol font (SymbolThemeFontFamily, Segoe Fluent Icons on Windows). -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Height="640" RowDefinitions="Auto,*" RowSpacing="8">
+  <Grid.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ItemsView/Themes/WinUI/WinUI.xaml" />
+    <Style Selector="Border.CodeValuePresenter">
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.CodeValuePresenter > SelectableTextBlock">
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="FontFamily" Value="Consolas" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.PanelLabel">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+  </Grid.Styles>
+  <Grid.Resources>
+    <DataTemplate x:Key="IconTemplate">
+      <ItemContainer Width="96" Height="96" CornerRadius="4"
+                     AutomationProperties.Name="{Binding Name}" ToolTip.Tip="{Binding Name}">
+        <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
+          <Grid>
+            <!-- Icon -->
+            <Viewbox Width="28" Height="28" Margin="0,0,0,16">
+              <FontIcon x:Name="IconGlyph" Glyph="{Binding Character}" />
+            </Viewbox>
+            <!-- Icon name/descriptor -->
+            <TextBlock x:Name="IconName" Margin="8,0,8,8" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       Theme="{DynamicResource CaptionTextBlockStyle}" Text="{Binding Name}"
+                       TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+          </Grid>
+        </Border>
+      </ItemContainer>
+    </DataTemplate>
+    <DataTemplate x:Key="TagTemplate">
+      <ItemContainer HorizontalAlignment="Left" CornerRadius="12" AutomationProperties.Name="{Binding}">
+        <Border MinHeight="24" Padding="8,2" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="12">
+          <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="{Binding}"
+                     TextTrimming="CharacterEllipsis" />
+        </Border>
+      </ItemContainer>
+    </DataTemplate>
+  </Grid.Resources>
+
+  <StackPanel Orientation="Horizontal" Spacing="12">
+    <AutoSuggestBox x:Name="IconsAutoSuggestBox" MinWidth="304" MaxWidth="320" Margin="0,16,0,0"
+                    HorizontalAlignment="Left" PlaceholderText="Search icons by name, code, or tags"
+                    AutomationProperties.Name="Search icons by name, code, or tags">
+      <AutoSuggestBox.QueryIcon><SymbolIcon Symbol="Find" /></AutoSuggestBox.QueryIcon>
+    </AutoSuggestBox>
+    <TextBlock x:Name="IconsFoundText" Margin="0,16,0,0" VerticalAlignment="Center"
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontSize="12"
+               AutomationProperties.LiveSetting="Polite" />
+  </StackPanel>
+
+  <Border Grid.Row="1" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+          BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+    <Grid ColumnDefinitions="*,334">
+      <ItemsView x:Name="IconsItemsView" MinWidth="100" Padding="16" ItemTemplate="{StaticResource IconTemplate}"
+                 KeyboardNavigation.TabNavigation="Once" AutomationProperties.Name="Icons">
+        <ItemsView.Layout>
+          <UniformGridLayout MinColumnSpacing="8" MinRowSpacing="8" Orientation="Horizontal" />
+        </ItemsView.Layout>
+      </ItemsView>
+
+      <Border x:Name="SidePanel" Grid.Column="1" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+              BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="1,0,0,0"
+              CornerRadius="0,8,8,0" IsVisible="False">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+          <StackPanel Margin="16,16,8,16" Spacing="2">
+            <Grid Margin="0,0,0,24" HorizontalAlignment="Stretch" ColumnDefinitions="Auto,*">
+              <Border Margin="0,0,8,0" Padding="8" HorizontalAlignment="Left"
+                      Background="{DynamicResource ControlFillColorDefaultBrush}"
+                      BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1"
+                      CornerRadius="4">
+                <FontIcon x:Name="SelectedIconGlyph" FontSize="48" Glyph="{Binding Character}" />
+              </Border>
+              <StackPanel x:Name="FluentOnlyNote" Grid.Column="1" Margin="0,4,0,0" VerticalAlignment="Top"
+                          Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsSegoeFluentOnly}"
+                          ToolTip.Tip="This icon is only available in Segoe Fluent Icons (the default icon font on Windows 11). On Windows 10, Segoe MDL2 Assets is used by default, so the icon may not appear unless Segoe Fluent Icons is installed.">
+                <FontIcon VerticalAlignment="Center" FontSize="12"
+                          Foreground="{DynamicResource SystemFillColorCautionBrush}" Glyph="&#xE7BA;" />
+                <TextBlock VerticalAlignment="Center" FontSize="12"
+                           Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                           Text="Only supported in Segoe Fluent Icons" TextWrapping="Wrap" />
+              </StackPanel>
+            </Grid>
+            <TextBlock Classes="PanelLabel" Text="Icon name" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="IconNamePresenter" Text="{Binding Name}" />
+            </Border>
+            <TextBlock Classes="PanelLabel" Text="Text glyph" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="TextGlyphPresenter" Text="{Binding TextGlyph}" />
+            </Border>
+            <TextBlock Classes="PanelLabel" Text="Code glyph" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="CodeGlyphPresenter" Text="{Binding CodeGlyph}" />
+            </Border>
+            <TextBlock Classes="PanelLabel" Text="FontIcon XAML" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="XAMLCodePresenterFont" />
+            </Border>
+            <TextBlock Classes="PanelLabel" Text="FontIcon C#" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="CSharpCodePresenterFont" />
+            </Border>
+            <TextBlock x:Name="SymbolXamlLabel" Classes="PanelLabel" Text="SymbolIcon XAML" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="XAMLCodePresenterSymbol" />
+            </Border>
+            <TextBlock x:Name="SymbolCSharpLabel" Classes="PanelLabel" Text="SymbolIcon C#" />
+            <Border Classes="CodeValuePresenter">
+              <SelectableTextBlock x:Name="CSharpCodePresenterSymbol" />
+            </Border>
+            <TextBlock x:Name="TagsLabel" Classes="PanelLabel" Margin="0,4,0,0" Text="Tags" />
+            <ItemsView x:Name="TagsItemsView" Margin="0,8,0,4" IsItemInvokedEnabled="True" SelectionMode="None"
+                       ItemTemplate="{StaticResource TagTemplate}"
+                       AutomationProperties.LabeledBy="{Binding ElementName=TagsLabel}">
+              <ItemsView.Layout>
+                <FlowLayout LineSpacing="4" MinItemSpacing="4" />
+              </ItemsView.Layout>
+            </ItemsView>
+            <TextBlock x:Name="NoTagsTextBlock" Margin="0,4,0,0" Text="No tags available." IsVisible="False" />
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </Border>
+</Grid>

@@ -16,6 +16,8 @@ path, SHA-256 hash, size and native resource registration. The source URI spelli
 original `Checkbox.png` and `AnnotatedScrollBar.png` files, preserving Windows
 path resolution on case-sensitive hosts. `cat_data.rs` preserves the original
 97 cat names from `AutoSuggestBoxPage.xaml.cs`; its source hash is recorded inline.
+`icons_data.rs` preserves the 1574 icons of `Samples/Iconography/IconsData.json` (their
+codes, names, tags and the Segoe Fluent Icons only flag); its source hash is recorded inline.
 
 ## Microsoft WinUI Gallery
 
