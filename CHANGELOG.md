@@ -355,7 +355,7 @@ Numbers as the pull requests report them (macOS on Apple silicon unless stated; 
 - **Vello stays optional.** Skia is the default backend; Vello is experimental ([docs/porting/vello-backend.md](docs/porting/vello-backend.md)).
 - **The native renderers are experimental.** `ferroui-quartz` and `ferroui-direct2d` are opt-in backends ([docs/porting/quartz-prototype.md](docs/porting/quartz-prototype.md), [docs/porting/windows-native-renderer.md](docs/porting/windows-native-renderer.md)).
 - **Portable media is an initial implementation**; the verification of each platform and the outstanding native work are recorded in [docs/media/README.md](docs/media/README.md).
-- **3D** is at the steps of #608 that [docs/porting/media3d.md](docs/porting/media3d.md) records as done; the later steps (Vello hybrid-webgl 3D, the ProGPU mapping, browser WebGPU) are not in this release.
+- **3D** is at the steps of #608 that [docs/porting/media3d.md](docs/porting/media3d.md) records as done; the ProGPU mapping and browser WebGPU are not in this release. Vello hybrid-webgl 3D is in it only if the WebGL2 stack of the Vello backend lands before the release ("Still landing"); this line is settled with that section.
 - **The C ABI is not published.** `ferroui-capi` and the generated bindings are built from the repository ([docs/c-abi.md](docs/c-abi.md)).
 
 ## [0.5.0] - 2026-11-14
