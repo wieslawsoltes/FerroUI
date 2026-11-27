@@ -959,6 +959,14 @@ theme's templates construct root theirs.
   `TypeSystem::Model`) gets no roots from code.
 - The edges are per file, not per function: a class whose file constructs another class for a
   feature the application does not use still keeps that class's theme.
+- The managed file chooser is reached through the storage provider of a window, which no name in
+  the application shows, so the build roots it from the uses of the provider
+  (`managed_file_chooser_roots`, #612; `docs/xaml-themes.md`, the list of roots). The classes of
+  the libraries that open a picker are listed there; another library whose own code calls
+  `storage_provider()` states `Build::theme_roots(&["ManagedFileChooser"])`. The unit also holds
+  the factory of the managed storage provider (`ManagedStorageFallback`), which is how X11 and
+  Wayland reach the chooser: without the unit the chooser is not linked, and a picker call
+  reports that no provider is available instead of opening a window with no template.
 
 ### 11.6 Measurements
 
