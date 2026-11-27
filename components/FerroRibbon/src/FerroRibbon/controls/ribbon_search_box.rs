@@ -132,19 +132,19 @@ impl RibbonSearchBox {
         self.popup.borrow().as_ref().is_some_and(|p| p.is_open())
     }
     pub fn add_query_submitting(&self, value: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.query_submitting.borrow().as_ref(), value.as_ref());
+        let next = crate::compat::delegates::add_handler(self.query_submitting.borrow().as_ref(), value.as_ref());
         self.query_submitting.replace(next);
     }
     pub fn remove_query_submitting(&self, value: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.query_submitting.borrow().as_ref(), value.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.query_submitting.borrow().as_ref(), value.as_ref());
         self.query_submitting.replace(next);
     }
     pub fn add_result_executed(&self, value: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.result_executed.borrow().as_ref(), value.as_ref());
+        let next = crate::compat::delegates::add_handler(self.result_executed.borrow().as_ref(), value.as_ref());
         self.result_executed.replace(next);
     }
     pub fn remove_result_executed(&self, value: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.result_executed.borrow().as_ref(), value.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.result_executed.borrow().as_ref(), value.as_ref());
         self.result_executed.replace(next);
     }
     /// Installs a typed Rust handler. Dispose its native token to detach early.

@@ -95,10 +95,22 @@ ferroui_base::ferro_markup_type!(class RibbonSearchEngineMetadata as "RibbonSear
  static fn ScoreEntry(Option<Rc<RibbonSearchEntry>>,Option<RibbonSearchStrings>)->f64 =>|e:Option<Rc<RibbonSearchEntry>>,terms:Option<RibbonSearchStrings>|RibbonSearchEngine::score_entry(e.as_deref(),terms.as_ref()),static try fn Normalize(Option<String>)->String =>|q:Option<String>|RibbonSearchEngine::normalize(q.map(RibbonString::from).as_ref()).to_utf8().map_err(|e|e.to_string())]
 });
 pub(crate) fn register() {
-    ValueTypes::register_nullable::<RibbonSearchStrings>();
-    ValueTypes::register_nullable::<RibbonSearchEntries>();
-    ValueTypes::register_nullable::<RibbonSearchEntryEnumerable>();
-    ValueTypes::register_nullable::<RibbonSearchStringEnumerable>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSearchStrings>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSearchStrings>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSearchStrings>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSearchEntries>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSearchEntries>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSearchEntries>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSearchEntryEnumerable>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSearchEntryEnumerable>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSearchEntryEnumerable>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSearchStringEnumerable>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSearchStringEnumerable>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSearchStringEnumerable>>();
     ValueTypes::register_reference::<RibbonSearchEntry>();
     ValueTypes::register_reference::<RibbonSearchResult>();
     ValueTypes::register_reference::<RibbonSearchEngine>();

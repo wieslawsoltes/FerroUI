@@ -125,11 +125,11 @@ impl RibbonSegmentedControl {
         }
     }
     pub fn add_selection_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.selection_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.selection_changed.borrow().as_ref(), h.as_ref());
         self.selection_changed.replace(next);
     }
     pub fn remove_selection_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.selection_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.selection_changed.borrow().as_ref(), h.as_ref());
         self.selection_changed.replace(next);
     }
     fn build(&self) {

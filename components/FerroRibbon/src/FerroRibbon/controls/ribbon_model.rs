@@ -8,7 +8,6 @@ use crate::{
 };
 use ferroribbon_core::collections::RibbonItems;
 use ferroribbon_core::{collections::RibbonList, model::*};
-use ferroui_base::data::core::ValueTypes;
 use ferroui_base::threading::{DispatcherOperationStatus, DispatcherPriority};
 use std::collections::HashMap;
 
@@ -148,7 +147,10 @@ fn node_matches(element: &Control, model: &dyn RibbonNodeModelImpl) -> bool {
 }
 impl Ribbon {
     pub(super) fn initialize_model() {
-        ValueTypes::register_nullable::<Rc<dyn RibbonModelImpl>>();
+        ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn RibbonModelImpl>>();
+        // The ribbon recovers its values from the Core model as the same allocation.
+        ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn RibbonModelImpl>>();
+        ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn RibbonModelImpl>>>();
         Self::model_property()
             .changed()
             .add_class_handler::<Self>(|this, e| {

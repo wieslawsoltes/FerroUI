@@ -61,6 +61,9 @@ impl MarkupTyped for RibbonItemContentPartMetadata {
 }
 pub(crate) fn register() {
     MarkupType::register_all(&[RibbonItemContentPartMetadata::MARKUP]);
-    ValueTypes::register_nullable::<RibbonItemContentPart>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonItemContentPart>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonItemContentPart>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonItemContentPart>>();
     ValueTypes::register_display::<RibbonItemContentPart>();
 }

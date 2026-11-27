@@ -178,7 +178,7 @@ impl RibbonTheme {
     /// strongly retain their targets until removed, matching the source static event.
     pub fn add_changed(handler: Option<MarkupDelegate>) {
         let old = CHANGED.with_borrow_mut(|event| {
-            let next = MarkupDelegate::combine(event.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::add_handler(event.as_ref(), handler.as_ref());
             std::mem::replace(event, next)
         });
         drop(old);
@@ -187,7 +187,7 @@ impl RibbonTheme {
     /// spanning additions. Delegate target equality never calls target.Equals.
     pub fn remove_changed(handler: Option<MarkupDelegate>) {
         let old = CHANGED.with_borrow_mut(|event| {
-            let next = MarkupDelegate::remove(event.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::remove_handler(event.as_ref(), handler.as_ref());
             std::mem::replace(event, next)
         });
         drop(old);

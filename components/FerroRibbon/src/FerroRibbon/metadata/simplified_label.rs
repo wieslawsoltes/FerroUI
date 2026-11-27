@@ -1,5 +1,5 @@
 use crate::controls::RibbonSimplifiedLabel;
-use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{MarkupEnumMember, MarkupType, MarkupTypeKind, MarkupTyped};
 use std::rc::Rc;
 
@@ -61,5 +61,8 @@ impl MarkupTyped for RibbonSimplifiedLabelMetadata {
 }
 pub(crate) fn register() {
     MarkupType::register_all(&[RibbonSimplifiedLabelMetadata::MARKUP]);
-    ValueTypes::register_nullable::<RibbonSimplifiedLabel>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSimplifiedLabel>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSimplifiedLabel>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSimplifiedLabel>>();
 }

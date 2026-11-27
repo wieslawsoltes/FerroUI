@@ -162,25 +162,25 @@ impl Ribbon {
         let old = self.keyboard.mode_changed.borrow().clone();
         self.keyboard
             .mode_changed
-            .replace(MarkupDelegate::combine(old.as_ref(), h.as_ref()));
+            .replace(crate::compat::delegates::add_handler(old.as_ref(), h.as_ref()));
     }
     pub fn remove_key_tip_mode_changed(&self, h: Option<MarkupDelegate>) {
         let old = self.keyboard.mode_changed.borrow().clone();
         self.keyboard
             .mode_changed
-            .replace(MarkupDelegate::remove(old.as_ref(), h.as_ref()));
+            .replace(crate::compat::delegates::remove_handler(old.as_ref(), h.as_ref()));
     }
     pub fn add_search_requested(&self, h: Option<MarkupDelegate>) {
         let old = self.keyboard.search_requested.borrow().clone();
         self.keyboard
             .search_requested
-            .replace(MarkupDelegate::combine(old.as_ref(), h.as_ref()));
+            .replace(crate::compat::delegates::add_handler(old.as_ref(), h.as_ref()));
     }
     pub fn remove_search_requested(&self, h: Option<MarkupDelegate>) {
         let old = self.keyboard.search_requested.borrow().clone();
         self.keyboard
             .search_requested
-            .replace(MarkupDelegate::remove(old.as_ref(), h.as_ref()));
+            .replace(crate::compat::delegates::remove_handler(old.as_ref(), h.as_ref()));
     }
     fn raise_key_tip_mode_changed(&self, value: bool) {
         let h = self.keyboard.mode_changed.borrow().clone();

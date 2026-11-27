@@ -272,6 +272,10 @@ impl IImage for QualifiedImageSource {
         self.resolve_for_context(&context, current)
     }
 
+    fn has_variants(&self) -> bool {
+        true
+    }
+
     fn resolve_for_context(
         &self,
         context: &ImageVariantContext,

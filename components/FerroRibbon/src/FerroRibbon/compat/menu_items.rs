@@ -65,11 +65,11 @@ impl MenuFlyoutItem {
         self.set_value(Self::keyboard_accelerator_text_override_property(), v);
     }
     pub fn add_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.clicks.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.clicks.borrow().as_ref(), h.as_ref());
         self.clicks.replace(next);
     }
     pub fn remove_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.clicks.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.clicks.borrow().as_ref(), h.as_ref());
         self.clicks.replace(next);
     }
     pub fn add_click_action(&self, f: impl Fn(&MenuFlyoutItem, &RoutedEventArgs) + 'static) {

@@ -6,11 +6,11 @@ use std::{cell::RefCell, rc::Rc};
 pub(super) struct CheckedEvents([RefCell<Option<MarkupDelegate>>; 3]);
 impl CheckedEvents {
     pub fn add(&self, index: usize, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.0[index].borrow().as_ref(), handler.as_ref());
+        let next = crate::compat::delegates::add_handler(self.0[index].borrow().as_ref(), handler.as_ref());
         self.0[index].replace(next);
     }
     pub fn remove(&self, index: usize, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.0[index].borrow().as_ref(), handler.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.0[index].borrow().as_ref(), handler.as_ref());
         self.0[index].replace(next);
     }
     pub fn raise(&self, owner: &Control, state: Option<bool>, before: impl FnOnce()) {

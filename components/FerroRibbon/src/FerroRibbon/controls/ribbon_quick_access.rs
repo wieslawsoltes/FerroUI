@@ -116,11 +116,11 @@ impl Ribbon {
         self.raise_quick_access_changed();
     }
     pub fn add_quick_access_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.quick_access.changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.quick_access.changed.borrow().as_ref(), h.as_ref());
         self.quick_access.changed.replace(next);
     }
     pub fn remove_quick_access_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.quick_access.changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.quick_access.changed.borrow().as_ref(), h.as_ref());
         self.quick_access.changed.replace(next);
     }
     fn raise_quick_access_changed(&self) {

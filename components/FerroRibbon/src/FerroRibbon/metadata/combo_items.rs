@@ -59,7 +59,10 @@ pub struct RibbonFontSizesMetadata;
 ferroui_base::ferro_markup_type!(class RibbonFontSizesMetadata as "IReadOnlyList`1"{namespace:"System.Collections.Generic",this:ferroribbon_core::collections::RibbonReadOnlyList<f64>,handles:[ferroribbon_core::collections::RibbonReadOnlyList<f64>],generic:"IReadOnlyList`1" [f64],properties:[Count:i32{get:|v:&ferroribbon_core::collections::RibbonReadOnlyList<f64>|v.count()}],indexers:[(i32)->f64{get:|v:&ferroribbon_core::collections::RibbonReadOnlyList<f64>,i|{index(i);v.get(i)}}]});
 pub(crate) fn register() {
     use ferroui_base::data::core::ValueTypes;
-    ValueTypes::register_nullable::<RibbonObjectEnumerable>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonObjectEnumerable>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonObjectEnumerable>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonObjectEnumerable>>();
     ValueTypes::register_cast::<RibbonObjectItems, RibbonObjectEnumerable>(|v| {
         let v = v.clone();
         RibbonObjectEnumerable::new(move || {

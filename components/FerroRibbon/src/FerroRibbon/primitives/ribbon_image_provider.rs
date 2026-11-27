@@ -220,6 +220,10 @@ impl IImage for RibbonUriImage {
         self.image.as_affects_render()
     }
 
+    fn reports_load(&self) -> bool {
+        true
+    }
+
     fn subscribe_load(&self, handler: ImageLoadHandler) -> Option<Subscription> {
         self.completion.subscribe(move |result| {
             let result = result

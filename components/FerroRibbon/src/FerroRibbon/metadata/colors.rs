@@ -30,7 +30,10 @@ ferroui_base::ferro_markup_type!(class RibbonColorSwatchMetadata as "RibbonColor
 });
 pub(crate) fn register() {
     ValueTypes::register_reference::<ferroribbon_core::theming::RibbonColorSwatch>();
-    ValueTypes::register_nullable::<Rc<ferroribbon_core::theming::RibbonColorSwatch>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<ferroribbon_core::theming::RibbonColorSwatch>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<ferroribbon_core::theming::RibbonColorSwatch>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<ferroribbon_core::theming::RibbonColorSwatch>>>();
     ValueTypes::register_reference::<RibbonColorNames>();
     MarkupType::register_all(&[
         RibbonColorSwatchMetadata::MARKUP,

@@ -22,6 +22,6 @@ Linux and in the browser. `samples/FerroRibbon.Browser/wwwroot/Inter/NOTICE.md` 
 Inter font of the browser sample.
 
 Icons named by `http(s)` URIs use reqwest (MIT OR Apache-2.0) and Tokio (MIT) when the
-`http-images` feature is enabled. SVG icons use resvg (Apache-2.0 OR MIT). The async
+`http-images` feature is enabled. SVG icons are parsed by usvg (Apache-2.0 OR MIT). The async
 command boundary uses futures-rs (MIT OR Apache-2.0). The license texts of direct
 third-party dependencies are in `docs/licenses`.

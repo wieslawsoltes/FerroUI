@@ -297,19 +297,19 @@ impl RibbonBackstage {
         self.parts.borrow().back.clone()
     }
     pub fn add_close_requested(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.close_requested.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.close_requested.borrow().as_ref(), h.as_ref());
         self.close_requested.replace(next);
     }
     pub fn remove_close_requested(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.close_requested.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.close_requested.borrow().as_ref(), h.as_ref());
         self.close_requested.replace(next);
     }
     pub fn add_item_invoked(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.item_invoked.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.item_invoked.borrow().as_ref(), h.as_ref());
         self.item_invoked.replace(next);
     }
     pub fn remove_item_invoked(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.item_invoked.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.item_invoked.borrow().as_ref(), h.as_ref());
         self.item_invoked.replace(next);
     }
     fn raise_close_requested(&self) {

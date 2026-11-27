@@ -220,11 +220,11 @@ impl RibbonToolBar {
         Rc::new(ToolBarOwner(self.to_ref()))
     }
     pub fn add_item_invoked(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::combine(self.item_invoked.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::add_handler(self.item_invoked.borrow().as_ref(), h.as_ref());
         self.item_invoked.replace(v);
     }
     pub fn remove_item_invoked(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::remove(self.item_invoked.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::remove_handler(self.item_invoked.borrow().as_ref(), h.as_ref());
         self.item_invoked.replace(v);
     }
     pub fn on_item_invoked(
@@ -721,11 +721,11 @@ impl RibbonContextualToolBar {
         o.set_value(Self::context_property(), v)
     }
     pub fn add_context_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.context_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.context_changed.borrow().as_ref(), h.as_ref());
         self.context_changed.replace(next);
     }
     pub fn remove_context_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.context_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.context_changed.borrow().as_ref(), h.as_ref());
         self.context_changed.replace(next);
     }
     fn sync(&self) {
@@ -853,11 +853,11 @@ impl RibbonMenuBarItem {
         self.set_value(Self::header_property(), v)
     }
     pub fn add_opening(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::combine(self.opening.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::add_handler(self.opening.borrow().as_ref(), h.as_ref());
         self.opening.replace(v);
     }
     pub fn remove_opening(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::remove(self.opening.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::remove_handler(self.opening.borrow().as_ref(), h.as_ref());
         self.opening.replace(v);
     }
     fn menu(&self) -> Ref<MenuFlyout> {

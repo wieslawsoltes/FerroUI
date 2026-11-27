@@ -22,6 +22,9 @@ pub(crate) fn register() {
         RibbonQuickAccessCandidates,
     >();
     ferroui_base::data::core::ValueTypes::register_nullable::<RibbonQuickAccessItemIds>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonQuickAccessItemIds>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonQuickAccessItemIds>>();
     MarkupType::register_all(&[
         RibbonQuickAccessCandidatesMetadata::MARKUP,
         RibbonQuickAccessItemIdsMetadata::MARKUP,

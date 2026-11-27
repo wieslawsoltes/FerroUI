@@ -129,11 +129,11 @@ macro_rules! prop {
 macro_rules! event {
     ($add:ident,$remove:ident,$field:ident) => {
         pub fn $add(&self, h: Option<MarkupDelegate>) {
-            let n = MarkupDelegate::combine(self.$field.borrow().as_ref(), h.as_ref());
+            let n = crate::compat::delegates::add_handler(self.$field.borrow().as_ref(), h.as_ref());
             self.$field.replace(n);
         }
         pub fn $remove(&self, h: Option<MarkupDelegate>) {
-            let n = MarkupDelegate::remove(self.$field.borrow().as_ref(), h.as_ref());
+            let n = crate::compat::delegates::remove_handler(self.$field.borrow().as_ref(), h.as_ref());
             self.$field.replace(n);
         }
     };

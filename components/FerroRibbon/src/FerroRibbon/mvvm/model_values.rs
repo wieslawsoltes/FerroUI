@@ -126,7 +126,8 @@ pub(super) fn box_command_parameter(value: RibbonObject) -> BoxedValue {
 }
 
 /// Recover the existing native view first. Core-created payloads can opt into
-/// the framework's public erased boxer; unknown types return an explicit error.
+/// the framework's public erased boxer (the ribbon registers those of the plain values, objects
+/// and controls, `register_model_value_boxers`); unknown types return an explicit error.
 pub fn to_native(value: Option<RibbonObject>) -> Result<Option<BoxedValue>, RibbonModelValueError> {
     value
         .map(|value| {
@@ -151,3 +152,22 @@ impl std::fmt::Display for RibbonModelValueError {
     }
 }
 impl std::error::Error for RibbonModelValueError {}
+
+/// The erased boxers of the plain values and the object handles the ribbon exchanges with its
+/// Core model: the primitives, text and objects of the class hierarchy, with their nullable forms.
+pub fn register_model_value_boxers() {
+    macro_rules! boxers {
+        ($($type_:ty),* $(,)?) => {
+            $(
+                ValueTypes::register_erased_value::<$type_>();
+                ValueTypes::register_erased_value::<Option<$type_>>();
+            )*
+        };
+    }
+    boxers!(
+        bool, i8, u8, i16, u16, i32, u32, i64, u64, isize, usize, f32, f64, char, String,
+        ferroui_base::Ref<ferroui_base::FerroObject>,
+        // The content of backstage items and galleries.
+        ferroui_base::Ref<ferroui_controls::Control>,
+    );
+}

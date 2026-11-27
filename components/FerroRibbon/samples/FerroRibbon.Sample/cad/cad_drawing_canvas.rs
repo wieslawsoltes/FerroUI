@@ -220,12 +220,12 @@ impl CadDrawingCanvas {
     }
     pub fn add_cursor_moved(&self, handler: Option<MarkupDelegate>) {
         let result =
-            MarkupDelegate::combine(self.cursor_changed.borrow().as_ref(), handler.as_ref());
+            ferroribbon::compat::delegates::add_handler(self.cursor_changed.borrow().as_ref(), handler.as_ref());
         self.cursor_changed.replace(result);
     }
     pub fn remove_cursor_moved(&self, handler: Option<MarkupDelegate>) {
         let result =
-            MarkupDelegate::remove(self.cursor_changed.borrow().as_ref(), handler.as_ref());
+            ferroribbon::compat::delegates::remove_handler(self.cursor_changed.borrow().as_ref(), handler.as_ref());
         self.cursor_changed.replace(result);
     }
     fn moved(&self, p: Point) {

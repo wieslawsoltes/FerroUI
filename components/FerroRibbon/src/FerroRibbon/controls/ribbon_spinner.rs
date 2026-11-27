@@ -144,19 +144,19 @@ impl RibbonSpinner {
         self.set_value(Self::is_scrub_enabled_property(), v)
     }
     pub fn add_value_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.value_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.value_changed.borrow().as_ref(), h.as_ref());
         self.value_changed.replace(next);
     }
     pub fn remove_value_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.value_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.value_changed.borrow().as_ref(), h.as_ref());
         self.value_changed.replace(next);
     }
     pub fn add_value_committed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.value_committed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.value_committed.borrow().as_ref(), h.as_ref());
         self.value_committed.replace(next);
     }
     pub fn remove_value_committed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.value_committed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.value_committed.borrow().as_ref(), h.as_ref());
         self.value_committed.replace(next);
     }
     fn raise(&self, slot: &RefCell<Option<MarkupDelegate>>, args: Rc<RibbonValueChangedEventArgs>) {

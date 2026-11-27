@@ -120,7 +120,7 @@ impl RibbonGroup {
     pub fn add_dialog_launcher_click(&self, handler: Option<MarkupDelegate>) {
         let old = {
             let mut event = self.dialog_launcher_click.borrow_mut();
-            let next = MarkupDelegate::combine(event.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::add_handler(event.as_ref(), handler.as_ref());
             std::mem::replace(&mut *event, next)
         };
         drop(old);
@@ -128,7 +128,7 @@ impl RibbonGroup {
     pub fn remove_dialog_launcher_click(&self, handler: Option<MarkupDelegate>) {
         let old = {
             let mut event = self.dialog_launcher_click.borrow_mut();
-            let next = MarkupDelegate::remove(event.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::remove_handler(event.as_ref(), handler.as_ref());
             std::mem::replace(&mut *event, next)
         };
         drop(old);

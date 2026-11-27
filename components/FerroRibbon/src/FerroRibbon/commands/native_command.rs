@@ -124,8 +124,14 @@ pub fn source_core_command(native: &Rc<dyn NativeCommand>) -> Option<Rc<dyn Core
 pub(crate) fn register_conversions() {
     // Native Button.Command is nullable. Do not rely on a different library
     // control's property metadata having registered that value form first.
-    ValueTypes::register_nullable::<Rc<dyn NativeCommand>>();
-    ValueTypes::register_nullable::<Rc<dyn CoreCommand>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn NativeCommand>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn NativeCommand>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn NativeCommand>>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn CoreCommand>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn CoreCommand>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn CoreCommand>>>();
     ValueTypes::register_conversion::<Rc<dyn CoreCommand>, Option<Rc<dyn NativeCommand>>>(
         |source| Some(Some(adapt_core_command(source.clone()))),
     );

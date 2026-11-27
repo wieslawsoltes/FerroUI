@@ -1064,25 +1064,25 @@ impl Ribbon {
         }
     }
     pub fn add_selected_tab_changed(&self, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(
+        let next = crate::compat::delegates::add_handler(
             self.selected_tab_changed.borrow().as_ref(),
             handler.as_ref(),
         );
         self.selected_tab_changed.replace(next);
     }
     pub fn remove_selected_tab_changed(&self, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(
+        let next = crate::compat::delegates::remove_handler(
             self.selected_tab_changed.borrow().as_ref(),
             handler.as_ref(),
         );
         self.selected_tab_changed.replace(next);
     }
     pub fn add_item_invoked(&self, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.item_invoked.borrow().as_ref(), handler.as_ref());
+        let next = crate::compat::delegates::add_handler(self.item_invoked.borrow().as_ref(), handler.as_ref());
         self.item_invoked.replace(next);
     }
     pub fn remove_item_invoked(&self, handler: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.item_invoked.borrow().as_ref(), handler.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.item_invoked.borrow().as_ref(), handler.as_ref());
         self.item_invoked.replace(next);
     }
 }
@@ -1326,12 +1326,12 @@ impl Ribbon {
     }
     pub fn add_group_floating_changed(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::combine(self.group_floating_changed.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::add_handler(self.group_floating_changed.borrow().as_ref(), h.as_ref());
         self.group_floating_changed.replace(next);
     }
     pub fn remove_group_floating_changed(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::remove(self.group_floating_changed.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::remove_handler(self.group_floating_changed.borrow().as_ref(), h.as_ref());
         self.group_floating_changed.replace(next);
     }
     pub fn suspend_popups(&self) {
@@ -1419,11 +1419,11 @@ impl Ribbon {
         }
     }
     pub fn add_state_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.state_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.state_changed.borrow().as_ref(), h.as_ref());
         self.state_changed.replace(next);
     }
     pub fn remove_state_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.state_changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.state_changed.borrow().as_ref(), h.as_ref());
         self.state_changed.replace(next);
     }
     pub fn raise_state_changed(&self) {

@@ -61,10 +61,22 @@ fn serialize(value: Option<Rc<RibbonState>>, indented: bool) -> Result<String, S
 pub(crate) fn register() {
     ValueTypes::register_reference::<RibbonState>();
     // Explicit concrete aliases are facts required by the selected XAML scanner.
-    ValueTypes::register_nullable::<RibbonStateStrings>();
-    ValueTypes::register_nullable::<RibbonStateGroups>();
-    ValueTypes::register_nullable::<RibbonStateTabs>();
-    ValueTypes::register_nullable::<RibbonStateFloatingGroups>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonStateStrings>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonStateStrings>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonStateStrings>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonStateGroups>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonStateGroups>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonStateGroups>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonStateTabs>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonStateTabs>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonStateTabs>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonStateFloatingGroups>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonStateFloatingGroups>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonStateFloatingGroups>>();
     ValueTypes::register_reference::<RibbonCustomization>();
     ValueTypes::register_reference::<RibbonCustomTab>();
     ValueTypes::register_reference::<RibbonCustomGroup>();

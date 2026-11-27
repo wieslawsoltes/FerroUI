@@ -254,11 +254,11 @@ impl RibbonGroup {
         }
     }
     pub fn add_floating_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.floating.changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.floating.changed.borrow().as_ref(), h.as_ref());
         self.floating.changed.replace(next);
     }
     pub fn remove_floating_changed(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.floating.changed.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.floating.changed.borrow().as_ref(), h.as_ref());
         self.floating.changed.replace(next);
     }
     #[cfg(test)]

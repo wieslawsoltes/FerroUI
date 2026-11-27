@@ -766,7 +766,7 @@ fn untyped_void_callbacks_are_not_assumed_to_be_source_actions_and_multicast_kee
         assert_eq!(count.get(), 0);
         let a = action(count.clone());
         let a = cast::<MarkupDelegate>(&a).unwrap();
-        let list = MarkupDelegate::combine(Some(&a), Some(&a)).unwrap();
+        let list = crate::compat::delegates::add_handler(Some(&a), Some(&a)).unwrap();
         assert!(r.execute_search_entry(Some(entry("multi", Some(Rc::new(list))))));
         assert_eq!(count.get(), 2);
     });
@@ -797,32 +797,24 @@ fn source_nominal_delegate_equality_removal_and_failure_order_fixture() {
         );
         assert_eq!(a == custom, expected["customEqual"].as_bool().unwrap());
         for (field, combine) in [("mismatchCombine", true), ("mismatchRemove", false)] {
-            let error = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                if combine {
-                    MarkupDelegate::combine(Some(&a), Some(&custom))
-                } else {
-                    MarkupDelegate::remove(Some(&a), Some(&custom))
-                }
-            }))
+            // The ArgumentException of the source is the error of combine and remove.
+            let error = if combine {
+                MarkupDelegate::combine(Some(&a), Some(&custom))
+            } else {
+                MarkupDelegate::remove(Some(&a), Some(&custom))
+            }
             .expect_err("nominal type mismatch");
-            let message = error
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| error.downcast_ref::<&str>().copied())
-                .unwrap_or("");
-            assert!(
-                message.starts_with(expected[field].as_str().unwrap()),
-                "{message}"
-            );
+            assert_eq!(expected[field].as_str().unwrap(), "ArgumentException");
+            assert!(error.to_string().contains("same nominal type"), "{error}");
         }
         assert_eq!(
-            MarkupDelegate::combine(None, Some(&custom))
+            crate::compat::delegates::add_handler(None, Some(&custom))
                 .unwrap()
                 .ptr_eq(&custom),
             expected["nullCombineSame"].as_bool().unwrap()
         );
         assert_eq!(
-            MarkupDelegate::remove(None, Some(&custom)).is_none(),
+            crate::compat::delegates::remove_handler(None, Some(&custom)).is_none(),
             expected["nullRemove"].as_bool().unwrap()
         );
         let trace = Rc::new(std::cell::RefCell::new(Vec::new()));
@@ -832,9 +824,9 @@ fn source_nominal_delegate_equality_removal_and_failure_order_fixture() {
         };
         let first = make("a");
         let second = make("b");
-        let pair = MarkupDelegate::combine(Some(&first), Some(&second)).unwrap();
-        let twice = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap();
-        let removed = MarkupDelegate::remove(Some(&twice), Some(&pair)).unwrap();
+        let pair = crate::compat::delegates::add_handler(Some(&first), Some(&second)).unwrap();
+        let twice = crate::compat::delegates::add_handler(Some(&pair), Some(&pair)).unwrap();
+        let removed = crate::compat::delegates::remove_handler(Some(&twice), Some(&pair)).unwrap();
         removed.try_invoke(&[]).unwrap();
         assert_eq!(removed == pair, expected["removedEqual"].as_bool().unwrap());
         assert_eq!(
@@ -855,8 +847,8 @@ fn source_nominal_delegate_equality_removal_and_failure_order_fixture() {
             Action::MARKUP.find_methods("Fail").next().unwrap(),
         )
         .unwrap();
-        let prefix = MarkupDelegate::combine(Some(&before), Some(&fail)).unwrap();
-        let all = MarkupDelegate::combine(Some(&prefix), Some(&after)).unwrap();
+        let prefix = crate::compat::delegates::add_handler(Some(&before), Some(&fail)).unwrap();
+        let all = crate::compat::delegates::add_handler(Some(&prefix), Some(&after)).unwrap();
         assert!(all.is_of_type(&SYSTEM_ACTION_DELEGATE));
         // Source CLR InvalidOperationException is represented as Failed here;
         // this proves error propagation/order, not CLR exception type identity.

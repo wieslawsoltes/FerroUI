@@ -508,8 +508,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>>(
-    );
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -517,11 +519,17 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonBackstageModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonBackstageModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonBackstageModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonBackstageModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonBackstageModelImpl>>>();
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -533,7 +541,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -545,7 +556,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonCheckBoxModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -557,7 +571,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonColorPickerModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -569,7 +586,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonComboBoxModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -581,8 +601,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>>(
-    );
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonContextualGroupModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -590,7 +612,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonCustomItemModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -602,8 +627,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>>(
-    );
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -615,7 +642,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonGalleryItemModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -623,7 +653,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonGalleryModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -635,7 +668,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonGridPickerModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -647,7 +683,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonGroupModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -655,7 +694,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -663,7 +705,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonLabelModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -675,7 +720,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonMenuItemModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -683,15 +731,24 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonModelImpl>>(|v| {
         v.clone()
     });
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonModelImpl>>>();
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>>>();
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonRowModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonButtonGroupModelImpl>,
@@ -707,7 +764,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSegmentModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -715,7 +775,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSegmentedModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -727,7 +790,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSeparatorModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -739,7 +805,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSliderModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -751,7 +820,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSpinnerModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -763,7 +835,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonSplitButtonModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonDropDownButtonModelImpl>,
@@ -779,7 +854,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonTabModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
@@ -787,7 +865,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>>(
         |v| v.clone(),
     );
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonTextBoxModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonItemModelImpl>,
@@ -799,7 +880,10 @@ pub(crate) fn register() {
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>>>();
     ValueTypes::register_cast::<
         Rc<dyn ferroribbon_core::model::RibbonToggleButtonModelImpl>,
         Rc<dyn ferroribbon_core::model::RibbonButtonModelImpl>,

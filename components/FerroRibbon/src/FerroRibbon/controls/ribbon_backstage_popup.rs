@@ -263,33 +263,33 @@ impl Ribbon {
     }
     pub fn add_backstage_opened(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::combine(self.backstage_state.opened.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::add_handler(self.backstage_state.opened.borrow().as_ref(), h.as_ref());
         self.backstage_state.opened.replace(next);
     }
     pub fn remove_backstage_opened(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::remove(self.backstage_state.opened.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::remove_handler(self.backstage_state.opened.borrow().as_ref(), h.as_ref());
         self.backstage_state.opened.replace(next);
     }
     pub fn add_backstage_closed(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::combine(self.backstage_state.closed.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::add_handler(self.backstage_state.closed.borrow().as_ref(), h.as_ref());
         self.backstage_state.closed.replace(next);
     }
     pub fn remove_backstage_closed(&self, h: Option<MarkupDelegate>) {
         let next =
-            MarkupDelegate::remove(self.backstage_state.closed.borrow().as_ref(), h.as_ref());
+            crate::compat::delegates::remove_handler(self.backstage_state.closed.borrow().as_ref(), h.as_ref());
         self.backstage_state.closed.replace(next);
     }
     pub fn add_application_button_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(
+        let next = crate::compat::delegates::add_handler(
             self.backstage_state.application_click.borrow().as_ref(),
             h.as_ref(),
         );
         self.backstage_state.application_click.replace(next);
     }
     pub fn remove_application_button_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(
+        let next = crate::compat::delegates::remove_handler(
             self.backstage_state.application_click.borrow().as_ref(),
             h.as_ref(),
         );

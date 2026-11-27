@@ -433,21 +433,36 @@ impl RibbonItemHelper {
     }
 }
 pub(crate) fn register_contract_values() {
-    ValueTypes::register_nullable::<Rc<dyn super::IRibbonCheckable>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn super::IRibbonCheckable>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn super::IRibbonCheckable>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn super::IRibbonCheckable>>>();
     ValueTypes::register_interface_object::<Rc<dyn super::IRibbonCheckable>>(|value| {
         Some(value.as_object())
     });
-    ValueTypes::register_nullable::<Rc<dyn super::IRibbonItemOwner>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn super::IRibbonItemOwner>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn super::IRibbonItemOwner>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn super::IRibbonItemOwner>>>();
     ValueTypes::register_interface_object::<Rc<dyn super::IRibbonItemOwner>>(|value| {
         Some(value.as_object())
     });
-    ValueTypes::register_nullable::<Rc<dyn IRibbonItem>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn IRibbonItem>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn IRibbonItem>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn IRibbonItem>>>();
     ValueTypes::register_interface_object::<Rc<dyn IRibbonItem>>(|value| Some(value.as_object()));
-    ValueTypes::register_nullable::<Rc<dyn IRibbonItemInternal>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn IRibbonItemInternal>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn IRibbonItemInternal>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn IRibbonItemInternal>>>();
     ValueTypes::register_interface_object::<Rc<dyn IRibbonCommandSource>>(|value| {
         Some(value.as_object())
     });
-    ValueTypes::register_nullable::<Rc<dyn IRibbonLayoutHost>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn IRibbonLayoutHost>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn IRibbonLayoutHost>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn IRibbonLayoutHost>>>();
     ValueTypes::register_interface_object::<Rc<dyn IRibbonLayoutHost>>(|value| {
         Some(value.as_object())
     });

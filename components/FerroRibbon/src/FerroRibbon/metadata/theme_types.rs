@@ -125,7 +125,10 @@ pub(crate) fn register() {
     ValueTypes::register_global(register_values);
 }
 fn register_values() {
-    ValueTypes::register_nullable::<RibbonColor>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonColor>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonColor>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonColor>>();
     ValueTypes::register_display::<RibbonColor>();
     ValueTypes::register_reference::<RibbonThemePalette>();
 }

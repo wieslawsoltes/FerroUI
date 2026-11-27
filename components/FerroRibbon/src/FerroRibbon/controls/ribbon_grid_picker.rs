@@ -126,11 +126,11 @@ impl RibbonGridPicker {
         self.hover.get()
     }
     pub fn add_size_picked(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.picked.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.picked.borrow().as_ref(), h.as_ref());
         self.picked.replace(next);
     }
     pub fn remove_size_picked(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.picked.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.picked.borrow().as_ref(), h.as_ref());
         self.picked.replace(next);
     }
     fn build(&self) {

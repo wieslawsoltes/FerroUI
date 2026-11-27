@@ -33,6 +33,7 @@ mod ribbon_input_slider;
 pub use ribbon_input_slider::RibbonInputSlider;
 
 pub mod data_template_selector;
+pub mod delegates;
 pub(crate) use data_template_selector::register as register_template_selector;
 pub use data_template_selector::{
     DataTemplateSelector, DataTemplateSelectorExt, DataTemplateSelectorImpl,

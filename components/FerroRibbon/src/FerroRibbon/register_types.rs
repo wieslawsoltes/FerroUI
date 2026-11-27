@@ -196,6 +196,7 @@ pub fn register_types() {
         crate::controls::RibbonItemInvokedEventArgs::MARKUP,
         crate::controls::RibbonHandledEventArgs::MARKUP,
     ]);
+    ferroui_base::data::core::ValueTypes::register_global(crate::mvvm::model_values::register_model_value_boxers);
     ferroui_base::data::core::ValueTypes::register_global(register_group_item_mask);
     crate::metadata::simplified_label::register();
     crate::metadata::toolbar_overflow::register();
@@ -210,6 +211,13 @@ pub fn register_types() {
     ferroui_base::data::core::ValueTypes::register_nullable::<
         std::sync::Arc<crate::primitives::RibbonMetrics>,
     >();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<
+        std::sync::Arc<crate::primitives::RibbonMetrics>,
+    >();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<
+        std::sync::Arc<crate::primitives::RibbonMetrics>,
+    >>();
     MarkupType::register_all(&[
         <crate::primitives::RibbonPopupPlacement as MarkupTyped>::MARKUP,
         <crate::metadata::template_values::RibbonTemplateValues as MarkupTyped>::MARKUP,
@@ -319,7 +327,10 @@ pub fn register_types() {
 fn register_scroll_contract() {
     use ferroui_base::data::core::ValueTypes;
     use std::rc::Rc;
-    ValueTypes::register_nullable::<Rc<dyn IRibbonScrollContent>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn IRibbonScrollContent>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn IRibbonScrollContent>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn IRibbonScrollContent>>>();
     ValueTypes::register_interface_object::<Rc<dyn IRibbonScrollContent>>(|value| {
         Some(value.as_object())
     });
@@ -329,4 +340,11 @@ fn register_group_item_mask() {
     ferroui_base::data::core::ValueTypes::register_nullable::<
         ferroribbon_core::collections::RibbonReadOnlyList<bool>,
     >();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<
+        ferroribbon_core::collections::RibbonReadOnlyList<bool>,
+    >();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<
+        ferroribbon_core::collections::RibbonReadOnlyList<bool>,
+    >>();
 }

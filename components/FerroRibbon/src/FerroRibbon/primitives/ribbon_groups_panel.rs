@@ -229,7 +229,7 @@ impl RibbonGroupsPanel {
     pub fn add_overflow_changed(&self, handler: Option<MarkupDelegate>) {
         let old = {
             let mut current = self.overflow_changed.borrow_mut();
-            let next = MarkupDelegate::combine(current.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::add_handler(current.as_ref(), handler.as_ref());
             std::mem::replace(&mut *current, next)
         };
         drop(old);
@@ -237,7 +237,7 @@ impl RibbonGroupsPanel {
     pub fn remove_overflow_changed(&self, handler: Option<MarkupDelegate>) {
         let old = {
             let mut current = self.overflow_changed.borrow_mut();
-            let next = MarkupDelegate::remove(current.as_ref(), handler.as_ref());
+            let next = crate::compat::delegates::remove_handler(current.as_ref(), handler.as_ref());
             std::mem::replace(&mut *current, next)
         };
         drop(old);

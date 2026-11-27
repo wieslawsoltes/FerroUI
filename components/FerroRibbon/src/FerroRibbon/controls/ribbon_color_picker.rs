@@ -97,19 +97,19 @@ impl RibbonColorPicker {
     proxy!(show_more_colors, set_show_more_colors, bool);
     proxy!(automatic_color, set_automatic_color, Color);
     pub fn add_color_selected(&self, h: Option<MarkupDelegate>) {
-        let n = MarkupDelegate::combine(self.selected.borrow().as_ref(), h.as_ref());
+        let n = crate::compat::delegates::add_handler(self.selected.borrow().as_ref(), h.as_ref());
         self.selected.replace(n);
     }
     pub fn remove_color_selected(&self, h: Option<MarkupDelegate>) {
-        let n = MarkupDelegate::remove(self.selected.borrow().as_ref(), h.as_ref());
+        let n = crate::compat::delegates::remove_handler(self.selected.borrow().as_ref(), h.as_ref());
         self.selected.replace(n);
     }
     pub fn add_color_preview(&self, h: Option<MarkupDelegate>) {
-        let n = MarkupDelegate::combine(self.preview.borrow().as_ref(), h.as_ref());
+        let n = crate::compat::delegates::add_handler(self.preview.borrow().as_ref(), h.as_ref());
         self.preview.replace(n);
     }
     pub fn remove_color_preview(&self, h: Option<MarkupDelegate>) {
-        let n = MarkupDelegate::remove(self.preview.borrow().as_ref(), h.as_ref());
+        let n = crate::compat::delegates::remove_handler(self.preview.borrow().as_ref(), h.as_ref());
         self.preview.replace(n);
     }
     fn selected_event(&self, color: Option<Color>) {

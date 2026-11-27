@@ -55,11 +55,11 @@ impl RibbonTextBox {
         self.set_value(Self::text_property(), v)
     }
     pub fn add_submitted(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.submitted.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.submitted.borrow().as_ref(), h.as_ref());
         self.submitted.replace(next);
     }
     pub fn remove_submitted(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.submitted.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.submitted.borrow().as_ref(), h.as_ref());
         self.submitted.replace(next);
     }
     fn raise_submitted(&self, text: Option<String>) {

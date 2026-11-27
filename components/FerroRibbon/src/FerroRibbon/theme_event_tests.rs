@@ -123,13 +123,13 @@ fn source_changed_null_duplicates_method_identity_and_subsequence_removal() {
             RibbonTheme::remove_changed(Some(other.clone()))
         });
         RibbonTheme::reset_test_changed();
-        let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
+        let pair = crate::compat::delegates::add_handler(Some(&a), Some(&b)).unwrap();
         step("two-pairs", &|| {
             RibbonTheme::add_changed(Some(pair.clone()));
             RibbonTheme::add_changed(Some(pair.clone()));
         });
         step("remove-last-pair", &|| {
-            RibbonTheme::remove_changed(MarkupDelegate::combine(Some(&same), Some(&b)))
+            RibbonTheme::remove_changed(crate::compat::delegates::add_handler(Some(&same), Some(&b)))
         });
         step("remove-whole-pair", &|| {
             RibbonTheme::remove_changed(Some(pair.clone()))

@@ -102,19 +102,19 @@ impl RibbonSlider {
         self.set_value(Self::step_frequency_property(), v);
     }
     pub fn add_value_changed(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::combine(self.changed.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::add_handler(self.changed.borrow().as_ref(), h.as_ref());
         self.changed.replace(v);
     }
     pub fn remove_value_changed(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::remove(self.changed.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::remove_handler(self.changed.borrow().as_ref(), h.as_ref());
         self.changed.replace(v);
     }
     pub fn add_value_committed(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::combine(self.committed.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::add_handler(self.committed.borrow().as_ref(), h.as_ref());
         self.committed.replace(v);
     }
     pub fn remove_value_committed(&self, h: Option<MarkupDelegate>) {
-        let v = MarkupDelegate::remove(self.committed.borrow().as_ref(), h.as_ref());
+        let v = crate::compat::delegates::remove_handler(self.committed.borrow().as_ref(), h.as_ref());
         self.committed.replace(v);
     }
     fn raise(&self, slot: &RefCell<Option<MarkupDelegate>>, v: f64) {

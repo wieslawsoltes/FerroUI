@@ -349,19 +349,19 @@ impl RibbonGallery {
         }
     }
     pub fn add_item_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.item_click.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.item_click.borrow().as_ref(), h.as_ref());
         self.item_click.replace(next);
     }
     pub fn remove_item_click(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.item_click.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.item_click.borrow().as_ref(), h.as_ref());
         self.item_click.replace(next);
     }
     pub fn add_item_preview(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::combine(self.item_preview.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::add_handler(self.item_preview.borrow().as_ref(), h.as_ref());
         self.item_preview.replace(next);
     }
     pub fn remove_item_preview(&self, h: Option<MarkupDelegate>) {
-        let next = MarkupDelegate::remove(self.item_preview.borrow().as_ref(), h.as_ref());
+        let next = crate::compat::delegates::remove_handler(self.item_preview.borrow().as_ref(), h.as_ref());
         self.item_preview.replace(next);
     }
     fn own_items(&self) -> Vec<Option<BoxedValue>> {

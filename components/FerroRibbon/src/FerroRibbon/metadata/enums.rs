@@ -1154,42 +1154,99 @@ pub fn register() {
         RibbonIconKindMetadata::MARKUP,
         VisibilityMetadata::MARKUP,
     ]);
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonItemSize>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonItemSize>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonItemSize>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonItemSize>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonItemSize>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonGroupState>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonGroupState>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonGroupState>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonGroupState>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonGroupState>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonDisplayMode>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonDisplayMode>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonDisplayMode>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonDisplayMode>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonDisplayMode>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonVisibilityMode>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonVisibilityMode>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonVisibilityMode>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonVisibilityMode>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonVisibilityMode>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonMinimizeBehavior>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonMinimizeBehavior>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonMinimizeBehavior>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonMinimizeBehavior>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonMinimizeBehavior>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonQuickAccessPosition>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonQuickAccessPosition>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonQuickAccessPosition>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonQuickAccessPosition>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonQuickAccessPosition>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonDensity>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonDensity>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonDensity>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonDensity>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonDensity>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonSimplifiedVisibility>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonSimplifiedVisibility>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonSimplifiedVisibility>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonSimplifiedVisibility>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonSimplifiedVisibility>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonGroupItemsLayout>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonGroupItemsLayout>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonGroupItemsLayout>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonGroupItemsLayout>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonGroupItemsLayout>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonContextualActivation>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonContextualActivation>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonContextualActivation>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonContextualActivation>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonContextualActivation>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonMergeAction>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonMergeAction>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonMergeAction>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonMergeAction>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonMergeAction>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonBackstagePlacement>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonBackstagePlacement>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonBackstagePlacement>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonBackstagePlacement>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonBackstagePlacement>();
-    ValueTypes::register_nullable::<ferroribbon_core::RibbonToolBarOrientation>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::RibbonToolBarOrientation>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::RibbonToolBarOrientation>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::RibbonToolBarOrientation>>();
     ValueTypes::register_display::<ferroribbon_core::RibbonToolBarOrientation>();
-    ValueTypes::register_nullable::<ferroribbon_core::theming::RibbonChromeStyle>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::theming::RibbonChromeStyle>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::theming::RibbonChromeStyle>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::theming::RibbonChromeStyle>>();
     ValueTypes::register_display::<ferroribbon_core::theming::RibbonChromeStyle>();
-    ValueTypes::register_nullable::<ferroribbon_core::theming::RibbonThemeStyle>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::theming::RibbonThemeStyle>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::theming::RibbonThemeStyle>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::theming::RibbonThemeStyle>>();
     ValueTypes::register_display::<ferroribbon_core::theming::RibbonThemeStyle>();
-    ValueTypes::register_nullable::<ferroribbon_core::layout::RibbonReductionStrategy>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::layout::RibbonReductionStrategy>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::layout::RibbonReductionStrategy>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::layout::RibbonReductionStrategy>>();
     ValueTypes::register_display::<ferroribbon_core::layout::RibbonReductionStrategy>();
-    ValueTypes::register_nullable::<ferroribbon::controls::RibbonPanelPresentation>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon::controls::RibbonPanelPresentation>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon::controls::RibbonPanelPresentation>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon::controls::RibbonPanelPresentation>>();
     ValueTypes::register_display::<ferroribbon::controls::RibbonPanelPresentation>();
-    ValueTypes::register_nullable::<ferroribbon_core::model::RibbonIconKind>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon_core::model::RibbonIconKind>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon_core::model::RibbonIconKind>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon_core::model::RibbonIconKind>>();
     ValueTypes::register_display::<ferroribbon_core::model::RibbonIconKind>();
-    ValueTypes::register_nullable::<ferroribbon::compat::Visibility>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<ferroribbon::compat::Visibility>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<ferroribbon::compat::Visibility>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<ferroribbon::compat::Visibility>>();
     ValueTypes::register_display::<ferroribbon::compat::Visibility>();
 }

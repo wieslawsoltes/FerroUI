@@ -116,7 +116,7 @@ pub(crate) fn capture_integer_with_format(
         .flatten()
     {
         ('-', digits)
-    } else if matches!(negative, "‒" | "⁻" | "₋" | "−" | "➖" | "﹣" | "－")
+    } else if matches!(negative, "‒" | "⁻" | "₋" | "−" | "\u{2796}" | "﹣" | "－")
         && let Some(digits) = value.strip_prefix('-')
     {
         ('-', digits)

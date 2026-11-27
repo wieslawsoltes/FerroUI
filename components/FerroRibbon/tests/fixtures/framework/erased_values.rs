@@ -30,6 +30,9 @@ fn independent_registered_reference_recovers_same_nonclone_object_and_metadata_c
 }
 #[test]
 fn independent_native_object_and_scalar_recovery_preserves_identity_and_weak_lifetime() {
+    // Objects and text opt in to erased recovery: the framework installs no boxer for them.
+    ValueTypes::register_erased_value::<ferroui_base::Ref<FerroObject>>();
+    ValueTypes::register_erased_value::<String>();
     let object = FerroObject::new();
     let erased: Rc<dyn Any> = Rc::new(object.clone());
     let boxed = ValueTypes::box_erased(erased.clone()).unwrap();

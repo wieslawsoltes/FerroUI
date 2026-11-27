@@ -140,11 +140,20 @@ pub(crate) fn register() {
     ValueTypes::register_global(register_values);
 }
 fn register_values() {
-    ValueTypes::register_nullable::<Rc<dyn IRibbonItemEditable>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<Rc<dyn IRibbonItemEditable>>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Rc<dyn IRibbonItemEditable>>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<Rc<dyn IRibbonItemEditable>>>();
     ValueTypes::register_interface_object::<Rc<dyn IRibbonItemEditable>>(|v| Some(v.as_object()));
     ValueTypes::register_cast::<Rc<dyn IRibbonItemEditable>, Rc<dyn IRibbonItem>>(|v| v.clone());
-    ValueTypes::register_nullable::<RibbonItemLayout>();
-    ValueTypes::register_nullable::<RibbonSizeDefinition>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonItemLayout>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonItemLayout>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonItemLayout>>();
+    ferroui_base::data::core::ValueTypes::register_nullable::<RibbonSizeDefinition>();
+    // The ribbon recovers its values from the Core model as the same allocation.
+    ferroui_base::data::core::ValueTypes::register_erased_value::<RibbonSizeDefinition>();
+    ferroui_base::data::core::ValueTypes::register_erased_value::<Option<RibbonSizeDefinition>>();
     ValueTypes::register_display::<RibbonSizeDefinition>();
     ValueTypes::register_reference::<RibbonKeyTipResult>();
 }
