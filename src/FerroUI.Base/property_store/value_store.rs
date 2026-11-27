@@ -82,12 +82,16 @@ crate::ferro_thread_local! {
         const { RefCell::new(Vec::new()) };
 }
 
-/// The local value bindings of a store (`ValueStore::local_bindings`).
+/// The rare part of a store (`ValueStore::local_bindings`), allocated on first use: its local
+/// value bindings and the object-owned data slots of its owner.
 #[derive(Default)]
 struct LocalBindings {
     bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
     /// The local value bindings that are binding expressions.
     expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
+    /// The object-owned data of the owner (`FerroObject::instance_data`): few objects hold any,
+    /// so it lives here and not in every object.
+    instance_data: OptionCell<Box<crate::ferro_object::InstanceDataMap>>,
 }
 
 /// Stores the styled property values of a [`FerroObject`] and resolves the
@@ -206,6 +210,16 @@ impl ValueStore {
     /// The local value bindings, made when the first one is set.
     fn local_bindings(&self) -> &LocalBindings {
         self.local_bindings.get_or_init(Default::default)
+    }
+
+    /// The object-owned data slots of the owner, when the rare part of the store exists.
+    pub(crate) fn instance_data(&self) -> Option<&OptionCell<Box<crate::ferro_object::InstanceDataMap>>> {
+        self.local_bindings.get().map(|local| &local.instance_data)
+    }
+
+    /// The object-owned data slots of the owner, allocating the rare part of the store.
+    pub(crate) fn instance_data_or_create(&self) -> &OptionCell<Box<crate::ferro_object::InstanceDataMap>> {
+        &self.local_bindings().instance_data
     }
 
     /// Whether the store keeps the lists of its local value bindings.

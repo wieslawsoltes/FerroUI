@@ -413,41 +413,43 @@ impl MarkupDelegate {
         Rc::ptr_eq(&self.call, &other.call)
     }
 
-    /// Concatenates invocation lists of handlers of the same event. Null is the
-    /// identity. Explicitly typed callbacks must have the same nominal type.
-    /// Mixing typed and untyped values is rejected. Two legacy untyped values
-    /// retain their previous behavior; their nominal CLR identity is unknown.
-    pub fn combine(a: Option<&Self>, b: Option<&Self>) -> Option<Self> {
+    /// Concatenates invocation lists of handlers of the same event (`Delegate.Combine`). Null is
+    /// the identity. Explicitly typed callbacks must have the same nominal type: mixing two
+    /// nominal types, or a typed and an untyped value, is an error and combines nothing. Two
+    /// legacy untyped values retain their previous behavior; their nominal CLR identity is
+    /// unknown.
+    pub fn combine(a: Option<&Self>, b: Option<&Self>) -> Result<Option<Self>, MarkupInvokeError> {
         match (a, b) {
-            (None, b) => b.cloned(),
-            (a, None) => a.cloned(),
+            (None, b) => Ok(b.cloned()),
+            (a, None) => Ok(a.cloned()),
             (Some(a), Some(b)) => {
-                Self::assert_compatible(a, b);
+                Self::check_compatible(a, b)?;
                 let mut list = a.invocation_list();
                 list.extend(b.invocation_list());
-                Self::from_invocations(list)
+                Ok(Self::from_invocations(list))
             }
         }
     }
 
     /// Removes the last contiguous equal invocation list, including one spanning
-    /// separate additions. A missing/null value leaves the original allocation.
-    pub fn remove(source: Option<&Self>, value: Option<&Self>) -> Option<Self> {
-        let source = source?;
+    /// separate additions (`Delegate.Remove`). A missing/null value leaves the original
+    /// allocation. Delegates of different nominal types are an error and remove nothing.
+    pub fn remove(source: Option<&Self>, value: Option<&Self>) -> Result<Option<Self>, MarkupInvokeError> {
+        let Some(source) = source else { return Ok(None) };
         let Some(value) = value else {
-            return Some(source.clone());
+            return Ok(Some(source.clone()));
         };
-        Self::assert_compatible(source, value);
+        Self::check_compatible(source, value)?;
         let mut list = source.invocation_list();
         let remove = value.invocation_list();
         let Some(start) = list
             .windows(remove.len())
             .rposition(|window| window == remove)
         else {
-            return Some(source.clone());
+            return Ok(Some(source.clone()));
         };
         list.drain(start..start + remove.len());
-        Self::from_invocations(list)
+        Ok(Self::from_invocations(list))
     }
 
     fn same_nominal_type(&self, other: &Self) -> bool {
@@ -458,11 +460,14 @@ impl MarkupDelegate {
         }
     }
 
-    fn assert_compatible(a: &Self, b: &Self) {
-        assert!(
-            a.same_nominal_type(b),
-            "ArgumentException: delegates must have the same nominal type"
-        );
+    /// The `ArgumentException` of `Delegate.Combine` and `Delegate.Remove` as a value: under
+    /// `panic = "abort"` a mismatch must not end the process.
+    fn check_compatible(a: &Self, b: &Self) -> Result<(), MarkupInvokeError> {
+        if a.same_nominal_type(b) {
+            Ok(())
+        } else {
+            Err(MarkupInvokeError::Failed("delegates must have the same nominal type".into()))
+        }
     }
 
     /// Ordered single-cast handlers, preserving the targets/callbacks themselves.

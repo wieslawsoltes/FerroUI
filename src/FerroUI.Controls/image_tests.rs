@@ -68,6 +68,10 @@ impl IImage for PendingImage {
         self
     }
 
+    fn reports_load(&self) -> bool {
+        true
+    }
+
     fn subscribe_load(&self, handler: ImageLoadHandler) -> Option<Subscription> {
         if self.completed.get() {
             return None;
@@ -148,6 +152,10 @@ impl IImage for TwoScaleSource {
         self
     }
 
+    fn has_variants(&self) -> bool {
+        true
+    }
+
     fn resolve_for_scaling(&self, scaling: f64, current: Option<usize>) -> Option<ImageScaleVariant> {
         let id = usize::from(scaling > 1.);
         (current != Some(id)).then(|| ImageScaleVariant {
@@ -226,6 +234,10 @@ impl IImage for AppearanceSource {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn has_variants(&self) -> bool {
+        true
     }
 
     fn resolve_for_context(
@@ -481,4 +493,42 @@ fn drawing_image_viewbox_and_empty_drawing_update_measure() {
     source.set_drawing(None);
     update_layout();
     assert_eq!(target.desired_size(), Size::default());
+}
+
+/// A plain image (no variants, no load to report) asks for neither: the `Image` control builds no
+/// variant context and keeps no load watch for it.
+#[test]
+fn a_plain_image_asks_for_no_variant_and_no_load() {
+    struct CountingImage {
+        variant_queries: std::cell::Cell<u32>,
+        load_queries: std::cell::Cell<u32>,
+    }
+    impl IImage for CountingImage {
+        fn size(&self) -> Size {
+            Size::new(4., 2.)
+        }
+        fn draw(&self, _: &mut ferroui_base::media::DrawingContext<'_>, _: Rect, _: Rect) {}
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+        fn resolve_for_context(
+            &self,
+            _: &ferroui_base::media::ImageVariantContext,
+            _: Option<usize>,
+        ) -> Option<ImageScaleVariant> {
+            self.variant_queries.set(self.variant_queries.get() + 1);
+            None
+        }
+        fn subscribe_load(&self, _: ImageLoadHandler) -> Option<Subscription> {
+            self.load_queries.set(self.load_queries.get() + 1);
+            None
+        }
+    }
+    let source = Rc::new(CountingImage { variant_queries: Default::default(), load_queries: Default::default() });
+    let image = Image::new();
+    image.set_source(Some(source.clone()));
+    image.measure(Size::new(100., 100.));
+    assert_eq!(source.variant_queries.get(), 0, "no variant context for a plain image");
+    assert_eq!(source.load_queries.get(), 0, "no load watch for a plain image");
+    assert_eq!(image.desired_size(), Size::new(100., 50.), "the uniform stretch of the plain image");
 }

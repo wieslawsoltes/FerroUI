@@ -279,10 +279,13 @@ impl FontManager {
 
                     if let Some(glyph_typeface) = self.try_get_glyph_typeface_by_key_and_name(typeface, &key, family_name)
                     {
-                        // A successful system lookup may return a face whose family name
-                        // differs from the requested alias, including variable-font instances.
-                        let source = collection_key(Self::absolute_source(&key));
-                        if Self::is_system_font_source(&source) || glyph_typeface.family_name().contains(family_name) {
+                        // The face of the family, or of a system alias of it (a name the backend
+                        // resolves to another family). A face the backend substituted for a name
+                        // it does not know is neither, and the next family is tried.
+                        if glyph_typeface.family_name().contains(family_name)
+                            || (Self::is_system_font_source(&collection_key(Self::absolute_source(&key)))
+                                && self.platform_impl.is_family_alias(family_name, glyph_typeface.family_name()))
+                        {
                             return Some(glyph_typeface);
                         }
                     }

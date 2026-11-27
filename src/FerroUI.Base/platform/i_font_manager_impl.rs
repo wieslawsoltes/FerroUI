@@ -39,6 +39,15 @@ pub trait IFontManagerImpl: 'static {
         None
     }
 
+    /// Whether `family_name` is a name the backend resolves to faces of `face_family_name` without
+    /// either being installed under the other: an alias of the system, such as the private names
+    /// of the system UI font. A composite family takes such a face for the alias; a face the
+    /// backend substituted for a name it does not know is not one, so the composite family goes
+    /// on to its next family. No alias by default.
+    fn is_family_alias(&self, _family_name: &str, _face_family_name: &str) -> bool {
+        false
+    }
+
     /// Tries to get a glyph typeface for specified parameters.
     fn try_create_glyph_typeface(
         &self,

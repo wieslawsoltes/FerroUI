@@ -1070,6 +1070,22 @@ fn composite_family_keeps_a_system_alias_ahead_of_its_fallback() {
     assert_eq!(Typeface::from_name("Missing Family, Inter").glyph_typeface().family_name(), "Inter");
 }
 
+/// A backend that substitutes a face for an unknown family (as Core Text does) does not stop a
+/// composite family at an uninstalled entry: the substitute is not taken for the name, and the next
+/// family is. A declared alias is still taken.
+#[test]
+fn composite_family_skips_a_substituted_face_and_keeps_an_alias() {
+    let backend = TestFontManagerImpl::new("Noto Mono");
+    backend.add_font(test_fonts::noto_mono().build());
+    backend.add_font(test_fonts::inter_regular().build());
+    backend.add_alias("Noto Mono Small", "Noto Mono");
+    backend.set_substitute(Some("Noto Mono"));
+    let _scope = TestFontScope::with_font_manager(backend);
+
+    assert_eq!(Typeface::from_name("Missing Family, Inter").glyph_typeface().family_name(), "Inter");
+    assert_eq!(Typeface::from_name("Noto Mono Small, Inter").glyph_typeface().family_name(), "Noto Mono");
+}
+
 #[test]
 fn try_get_glyph_typeface_should_cache_matched_glyph_typeface_under_requested_family_name() {
     let font_manager_impl = TestFontManagerImpl::new("Noto Mono");
