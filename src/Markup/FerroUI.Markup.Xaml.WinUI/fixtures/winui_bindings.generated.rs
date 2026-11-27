@@ -382,6 +382,98 @@ fn build_navigation_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `tab_view.xaml`.
+static BUILD_TAB_VIEW_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/tab_view.xaml"), namespaces: XML_NAMESPACES_1 };
+
+/// Generated from `tab_view.xaml`.
+pub fn build_tab_view_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::TabView>, ::ferroui_markup_xaml::XamlLoadError> {
+    // tab_view.xaml(1,2) TabView
+    let tab_view_0 = ::ferroui_controls::TabView::new();
+    let context = rt::populate_context(service_provider, &BUILD_TAB_VIEW_XAML_DOCUMENT, rt::to_value(tab_view_0.clone()));
+    let name_scope = context.name_scope_field();
+    tab_view_0.begin_init();
+    // tab_view.xaml(3,10) Name
+    rt::name_element(name_scope.as_ref(), &tab_view_0, &tab_view_0, "Tabs", 3, 10)?;
+    // tab_view.xaml(1,2) TabWidthMode
+    tab_view_0.set_value(::ferroui_controls::TabView::tab_width_mode_property(), ::ferroui_controls::TabViewWidthMode::SizeToContent);
+    // tab_view.xaml(1,2) CloseButtonOverlayMode
+    tab_view_0.set_value(::ferroui_controls::TabView::close_button_overlay_mode_property(), ::ferroui_controls::TabViewCloseButtonOverlayMode::OnPointerOver);
+    // tab_view.xaml(1,2) IsAddTabButtonVisible
+    tab_view_0.set_value(::ferroui_controls::TabView::is_add_tab_button_visible_property(), ::core::clone::Clone::clone(&false));
+    // tab_view.xaml(1,2) SelectedIndex
+    tab_view_0.set_value(::ferroui_controls::TabView::selected_index_property(), 1_i32);
+    // tab_view.xaml(6,6) TabStripHeader
+    // tab_view.xaml(6,6) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    tab_view_0.set_value(::ferroui_controls::TabView::tab_strip_header_property(), rt::to_object(::core::clone::Clone::clone(&text_block_0)));
+    // tab_view.xaml(6,16) Name
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "StripHeader", 6, 16)?;
+    // tab_view.xaml(6,37) Text
+    text_block_0.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("Documents")));
+    rt::end_init(&text_block_0, 6, 6)?;
+    // tab_view.xaml(8,4) TabItems
+    let tab_items_collection_0 = tab_view_0.get_direct_value(::ferroui_controls::TabView::tab_items_property());
+    // tab_view.xaml(8,4) TabViewItem
+    let tab_view_item_0 = ::ferroui_controls::TabViewItem::new();
+    tab_view_item_0.begin_init();
+    ::ferroui_controls::ItemCollection::__markup_Add_0(&tab_items_collection_0, rt::to_object(::core::clone::Clone::clone(&tab_view_item_0)));
+    // tab_view.xaml(8,16) Name
+    rt::name_element(name_scope.as_ref(), &tab_view_item_0, &tab_view_item_0, "First", 8, 16)?;
+    // tab_view.xaml(8,31) Header
+    tab_view_item_0.set_value(::ferroui_controls::TabViewItem::header_property(), rt::string_object("Notes"));
+    // tab_view.xaml(10,8) IconSource
+    // tab_view.xaml(10,8) SymbolIconSource
+    let symbol_icon_source_0 = ::ferroui_controls::SymbolIconSource::new();
+    // tab_view.xaml(10,8) Symbol
+    symbol_icon_source_0.set_value(::ferroui_controls::SymbolIconSource::symbol_property(), ::ferroui_controls::Symbol::Document);
+    tab_view_item_0.set_value(::ferroui_controls::TabViewItem::icon_source_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&symbol_icon_source_0).upcast::<::ferroui_controls::IconSource>()));
+    // tab_view.xaml(12,6) Content
+    // tab_view.xaml(12,6) TextBlock
+    let text_block_1 = ::ferroui_controls::TextBlock::new();
+    text_block_1.begin_init();
+    tab_view_item_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_1)));
+    // tab_view.xaml(12,16) Text
+    text_block_1.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("The notes")));
+    rt::end_init(&text_block_1, 12, 6)?;
+    rt::end_init(&tab_view_item_0, 8, 4)?;
+    // tab_view.xaml(14,4) TabItems
+    let tab_items_collection_1 = tab_view_0.get_direct_value(::ferroui_controls::TabView::tab_items_property());
+    // tab_view.xaml(14,4) TabViewItem
+    let tab_view_item_1 = ::ferroui_controls::TabViewItem::new();
+    tab_view_item_1.begin_init();
+    ::ferroui_controls::ItemCollection::__markup_Add_0(&tab_items_collection_1, rt::to_object(::core::clone::Clone::clone(&tab_view_item_1)));
+    // tab_view.xaml(14,16) Name
+    rt::name_element(name_scope.as_ref(), &tab_view_item_1, &tab_view_item_1, "Second", 14, 16)?;
+    // tab_view.xaml(14,32) Header
+    tab_view_item_1.set_value(::ferroui_controls::TabViewItem::header_property(), rt::string_object("Drafts"));
+    // tab_view.xaml(14,4) IsClosable
+    tab_view_item_1.set_value(::ferroui_controls::TabViewItem::is_closable_property(), ::core::clone::Clone::clone(&false));
+    // tab_view.xaml(15,6) Content
+    // tab_view.xaml(15,6) TextBlock
+    let text_block_2 = ::ferroui_controls::TextBlock::new();
+    text_block_2.begin_init();
+    tab_view_item_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_block_2)));
+    // tab_view.xaml(15,16) Name
+    rt::name_element(name_scope.as_ref(), &text_block_2, &text_block_2, "DraftsContent", 15, 16)?;
+    // tab_view.xaml(15,39) Text
+    text_block_2.set_value(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("The drafts")));
+    rt::end_init(&text_block_2, 15, 6)?;
+    rt::end_init(&tab_view_item_1, 14, 4)?;
+    rt::end_init(&tab_view_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&tab_view_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(tab_view_0)
+}
+
+fn build_tab_view_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_tab_view_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The base URI and the XML namespaces of `native_controls.xaml`.
 static BUILD_NATIVE_CONTROLS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.WinUI.BindingFixture/native_controls.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -800,6 +892,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("root.xaml", build_root_xaml_untyped as BuildDocument),
     ("template.xaml", build_template_xaml_untyped as BuildDocument),
     ("navigation.xaml", build_navigation_xaml_untyped as BuildDocument),
+    ("tab_view.xaml", build_tab_view_xaml_untyped as BuildDocument),
     ("native_controls.xaml", build_native_controls_xaml_untyped as BuildDocument),
 ];
 

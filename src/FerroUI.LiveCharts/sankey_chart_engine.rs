@@ -981,6 +981,7 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
                     b.value,
                     b.node,
                 ),
+                label_parts: Default::default(),
             });
             let Some((text, _)) = self.label(node) else {
                 continue;
@@ -1118,6 +1119,7 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
                     b.value,
                     b.node,
                 ),
+                label_parts: Default::default(),
             });
             let Some((text, _)) = self.label(node) else {
                 continue;
