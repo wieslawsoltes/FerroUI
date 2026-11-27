@@ -11,6 +11,15 @@ use std::io::Read;
 use std::rc::Rc;
 use std::sync::Arc;
 
+/// Whether the render interface of the application can render with OpenGL
+/// ([`IPlatformRenderInterface::supports_open_gl`]); `true` before one is registered.
+pub fn render_interface_supports_open_gl() -> bool {
+    use crate::{FerroLocator, LocatorExtensions};
+    FerroLocator::current()
+        .get_service::<dyn IPlatformRenderInterface>()
+        .is_none_or(|render_interface| render_interface.supports_open_gl())
+}
+
 /// Defines the main platform-specific interface for the rendering subsystem.
 ///
 /// This is the contract a rendering backend implements; it is registered in
@@ -161,6 +170,13 @@ pub trait IPlatformRenderInterface: 'static {
     /// Whether the backend supports individual corner radii on rounded
     /// rectangles.
     fn supports_individual_round_rects(&self) -> bool;
+
+    /// Whether the backend can render with an OpenGL graphics context. A platform
+    /// asks before it takes an OpenGL rendering mode (#567): a backend built
+    /// without OpenGL could only fail on the render thread.
+    fn supports_open_gl(&self) -> bool {
+        true
+    }
 
     /// Whether drawing contexts created by this backend support isolated
     /// compositing layers for all drawing primitives. Recording contexts use
