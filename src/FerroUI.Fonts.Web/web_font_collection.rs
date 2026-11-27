@@ -18,7 +18,7 @@ use ferroui_fonts_web_core::loading::{
     FontFaceSetError, FontFaceSetEvent, FontFaceSetLoadStatus, FontFaceSetState, FontFaceView,
 };
 use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
-use ferroui_fonts_web_core::sfnt::{make_invisible_font, SanitizeOptions};
+use ferroui_fonts_web_core::sfnt::{apply_metric_overrides, make_invisible_font, SanitizeOptions};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -342,7 +342,9 @@ impl Shared {
         let now = (this.clock)();
         let mut changed = false;
         for (id, result) in finished {
-            let typeface = result.ok().and_then(|font| {
+            let typeface = result.ok().and_then(|mut font| {
+                // A font that cannot take the overrides is used as it is.
+                let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
                 let mut stream = FontDataStream::new(font);
                 let typeface =
                     this.platform.try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)?;
@@ -963,6 +965,27 @@ mod tests {
         }
         assert!(slices > 16, "{slices} slices");
         assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
+    }
+
+    #[test]
+    fn metric_descriptors_reach_the_glyph_typeface() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: Plain; src: url(a.ttf) }
+             @font-face { font-family: Set; src: url(a.ttf); ascent-override: 50%; line-gap-override: 0% }
+             @font-face { font-family: Big; src: url(a.ttf); size-adjust: 200% }",
+        );
+        for family in ["Plain", "Set", "Big"] {
+            harness.lookup(family);
+        }
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        let plain = harness.lookup("Plain").unwrap().metrics();
+        let set = harness.lookup("Set").unwrap().metrics();
+        assert_eq!(set.ascent.abs(), (plain.design_em_height as f64 * 0.5).round() as i32);
+        assert_eq!(set.line_gap, 0);
+        assert_eq!(set.descent, plain.descent, "what is not overridden stays");
+        let big = harness.lookup("Big").unwrap().metrics();
+        assert_eq!(big.design_em_height, plain.design_em_height / 2, "outlines and metrics scale together");
     }
 
     #[test]

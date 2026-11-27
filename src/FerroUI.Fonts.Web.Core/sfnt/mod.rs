@@ -2,12 +2,14 @@
 
 mod deep;
 mod glyf;
+mod metrics;
 mod sanitize;
 mod tables;
 
 #[cfg(test)]
 mod tests;
 
+pub use metrics::{apply_metric_overrides, has_metric_overrides};
 pub use sanitize::{sanitize, SanitizeOptions, Sanitizer};
 
 use crate::{FontDecodeError, WebFontLimits};
