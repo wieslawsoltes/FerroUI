@@ -323,6 +323,12 @@ mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
 // WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
+// WinUI's TabView (the WinUI Gallery port, #418).
+mod tab_view;
+pub use tab_view::{
+    TabView, TabViewCloseButtonOverlayMode, TabViewItem, TabViewItemTemplateSettings, TabViewListView,
+    TabViewTabCloseRequestedEventArgs, TabViewWidthMode,
+};
 mod list_view;
 pub use list_view::{
     ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GridView, GridViewItem, GridViewItemTemplateSettings,
