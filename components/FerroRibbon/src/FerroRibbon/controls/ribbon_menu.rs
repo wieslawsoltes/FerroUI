@@ -168,6 +168,14 @@ impl RibbonItemHelper {
                 .map_err(|error| RibbonMenuError(format!("{error}")))?;
             if let Some(value) = converted {
                 if let Some(o) = ValueTypes::as_object(&*value) {
+                    // A converter's image and bitmap icons are shown by the ribbon's own
+                    // elements, as the icons of a menu item are (below).
+                    if let Some(image) = o.cast::<ImageIcon>() {
+                        return Ok(Some(RibbonImageElement::with_source(image.source())));
+                    }
+                    if let Some(bitmap) = o.cast::<BitmapIcon>() {
+                        return Ok(Some(RibbonBitmapElement::for_icon(&bitmap)));
+                    }
                     return o.cast::<IconElement>().map(Some).ok_or(RibbonMenuError(
                         "MenuIconConverter returned a non-icon".into(),
                     ));
