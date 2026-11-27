@@ -128,12 +128,7 @@ impl PlainTextLayoutRequest<'_> {
     /// stops are collections a layout is made of and that can change after it: such a layout
     /// stays with its owner.
     fn is_shareable(&self) -> bool {
-        let run_properties = self.paragraph_properties.default_text_run_properties();
-        self.text.len() <= MAX_TEXT_LENGTH
-            && run_properties.text_decorations().is_none()
-            && run_properties.font_features().is_none()
-            && self.paragraph_properties.text_decorations().is_none()
-            && self.paragraph_properties.tab_stops().is_none()
+        self.text.len() <= MAX_TEXT_LENGTH && is_plain_paragraph(self.paragraph_properties)
     }
 
     fn hash(&self) -> u64 {
@@ -146,9 +141,19 @@ impl PlainTextLayoutRequest<'_> {
     }
 }
 
+/// Whether the properties have no collection that can change after a layout is made of them:
+/// text decorations, font features and tab stops.
+pub(super) fn is_plain_paragraph(properties: &dyn TextParagraphProperties) -> bool {
+    let run_properties = properties.default_text_run_properties();
+    run_properties.text_decorations().is_none()
+        && run_properties.font_features().is_none()
+        && properties.text_decorations().is_none()
+        && properties.tab_stops().is_none()
+}
+
 /// The values of paragraph properties a layout depends on.
 #[derive(Clone, Copy, PartialEq, Eq)]
-struct ParagraphKey {
+pub(super) struct ParagraphKey {
     flow_direction: FlowDirection,
     text_alignment: TextAlignment,
     text_wrapping: TextWrapping,
@@ -166,7 +171,7 @@ struct ParagraphKey {
 }
 
 impl ParagraphKey {
-    fn new(properties: &dyn TextParagraphProperties) -> Self {
+    pub(super) fn new(properties: &dyn TextParagraphProperties) -> Self {
         Self {
             flow_direction: properties.flow_direction(),
             text_alignment: properties.text_alignment(),
@@ -225,7 +230,7 @@ impl Key {
 /// way, now and after any change to an object they refer to: the runs of a layout draw with
 /// the brush object they were made with, so a brush that can change is the same brush as
 /// itself only ([`same_brush`]).
-fn same_run_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperties>) -> bool {
+pub(super) fn same_run_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperties>) -> bool {
     if Rc::ptr_eq(a, b) {
         return true;
     }

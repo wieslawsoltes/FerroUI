@@ -47,6 +47,7 @@ mod text_bounds;
 mod text_characters;
 mod text_collapsing_properties;
 mod text_ellipsis_helper;
+mod prepared_paragraph;
 mod text_end_of_line;
 mod text_end_of_paragraph;
 mod text_formatter;
@@ -77,6 +78,8 @@ mod text_trailing_word_ellipsis;
 mod unshaped_text_run;
 mod wrapping_text_line_break;
 
+#[cfg(test)]
+mod prepared_paragraph_tests;
 #[cfg(test)]
 mod shaped_buffer_tests;
 #[cfg(test)]
@@ -137,6 +140,8 @@ pub use split_result::SplitResult;
 pub use text_bounds::TextBounds;
 pub use text_characters::TextCharacters;
 pub use text_collapsing_properties::TextCollapsingProperties;
+pub use prepared_paragraph::{PreparedLine, PreparedParagraph};
+pub(crate) use prepared_paragraph::PreparedParagraphs;
 pub use text_end_of_line::TextEndOfLine;
 pub use text_end_of_paragraph::TextEndOfParagraph;
 pub use text_formatter::TextFormatter;
