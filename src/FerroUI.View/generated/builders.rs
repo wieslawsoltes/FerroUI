@@ -9235,6 +9235,8 @@ pub trait SystemBackdropElementProps: ElementBuilder {
     }
 
     /// Sets [`SystemBackdropElement::corner_radius_property`](ferroui_controls::SystemBackdropElement::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::SystemBackdropElement>::corner_radius_property(), value)
     }
@@ -9420,6 +9422,8 @@ pub trait TabViewItemTemplateSettingsProps: ElementBuilder {
     }
 
     /// Sets [`TabViewItemTemplateSettings::tab_geometry_property`](ferroui_controls::TabViewItemTemplateSettings::tab_geometry_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn tab_geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::TabViewItemTemplateSettings>::tab_geometry_property(), value)
     }
