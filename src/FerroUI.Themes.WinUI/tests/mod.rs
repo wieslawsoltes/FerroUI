@@ -7,6 +7,7 @@ mod high_contrast_tests;
 mod load_time;
 mod public_api_tests;
 mod resource_dictionary_tests;
+mod runtime_template_tests;
 pub(crate) mod support;
 mod split_view_pane_tests;
 mod tab_control_layout_tests;

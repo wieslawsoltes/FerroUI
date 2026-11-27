@@ -230,6 +230,7 @@ ferro_markup_enum!(
     },
     { namespace: "FerroUI.Controls" }
 );
+ferro_markup_enum!(WrapPanelItemsStretch { None, Last }, { namespace: "FerroUI.Controls" });
 
 // FerroUI.Controls.Chrome
 ferro_markup_enum!(flags TitleBarDecorations {
@@ -402,6 +403,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <PipsPagerWrapMode as MarkupTyped>::MARKUP,
     <ContentDialogButton as MarkupTyped>::MARKUP,
     <WrapPanelItemsAlignment as MarkupTyped>::MARKUP,
+    <WrapPanelItemsStretch as MarkupTyped>::MARKUP,
     <TitleBarDecorations as MarkupTyped>::MARKUP,
     <Corners as MarkupTyped>::MARKUP,
     <NotificationPosition as MarkupTyped>::MARKUP,
@@ -483,6 +485,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<PipsPagerWrapMode>();
     ValueTypes::register_used::<ContentDialogButton>();
     ValueTypes::register_used::<WrapPanelItemsAlignment>();
+    ValueTypes::register_used::<WrapPanelItemsStretch>();
     ValueTypes::register_used::<TitleBarDecorations>();
     ValueTypes::register_used::<Corners>();
     ValueTypes::register_used::<NotificationPosition>();
@@ -868,6 +871,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for PipsPagerWrapMode {
 impl ferroui_base::data::core::ValueTypeRegistration for WrapPanelItemsAlignment {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<WrapPanelItemsAlignment>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WrapPanelItemsStretch {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WrapPanelItemsStretch>();
     }
 }
 

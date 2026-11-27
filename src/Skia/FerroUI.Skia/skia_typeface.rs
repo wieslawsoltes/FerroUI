@@ -2,8 +2,8 @@ use crate::glyph_bounds_cache::GlyphBoundsCache;
 use crate::skia_sharp_extensions::slant_to_font_style;
 use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{
-    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight, IFontMemory,
-    IPlatformTypeface,
+    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationAxis, FontVariationDesign,
+    FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
 use skia_safe::font_arguments::{VariationPosition, variation_position::Coordinate};
@@ -117,6 +117,26 @@ impl IPlatformTypeface for SkiaTypeface {
                     .map(|coordinate| FontVariation::new(OpenTypeTag::new(*coordinate.axis), coordinate.value as f64)),
             ),
             _ => FontVariationSettings::empty(),
+        }
+    }
+
+    /// The axes Skia reports (`SkTypeface::getVariationDesignParameters`). Skia reads neither the
+    /// names of the axes nor the named instances: those are empty here.
+    fn variation_design(&self) -> FontVariationDesign {
+        let axes = self.sk_typeface.variation_design_parameters().unwrap_or_default();
+        FontVariationDesign {
+            axes: axes
+                .iter()
+                .map(|axis| FontVariationAxis {
+                    tag: OpenTypeTag::new(*axis.tag),
+                    name: None,
+                    min_value: axis.min as f64,
+                    default_value: axis.def as f64,
+                    max_value: axis.max as f64,
+                    is_hidden: axis.is_hidden(),
+                })
+                .collect(),
+            named_instances: Vec::new(),
         }
     }
 

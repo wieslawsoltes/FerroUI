@@ -28,6 +28,9 @@ ferroui-ios = { workspace = true, default-features = false }
 ferroui-quartz = { workspace = true, optional = true }
 control-catalog = { path = "../ControlCatalog" }
 
+[build-dependencies]
+ferroui-build = { workspace = true }
+
 # The native control demo (`embed_sample_ios.rs`) makes a button of UIKit: the crates the platform
 # calls UIKit through, in the versions the platform pins (src/iOS/FerroUI.iOS/NOTICE.md).
 [target.'cfg(target_os = "ios")'.dependencies]

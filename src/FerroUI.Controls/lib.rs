@@ -114,7 +114,9 @@ pub use window_resized_event_args::{WindowResizeReason, WindowResizedEventArgs};
 pub use window_startup_location::WindowStartupLocation;
 pub use window_state::WindowState;
 pub use window_transparency_level::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
-pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment};
+mod system_backdrop_element;
+pub use system_backdrop_element::SystemBackdropElement;
+pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment, WrapPanelItemsStretch};
 
 mod button;
 mod button_spinner;
@@ -321,6 +323,12 @@ mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
 // WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
+// WinUI's TabView (the WinUI Gallery port, #418).
+mod tab_view;
+pub use tab_view::{
+    TabView, TabViewCloseButtonOverlayMode, TabViewItem, TabViewItemTemplateSettings, TabViewListView,
+    TabViewTabCloseRequestedEventArgs, TabViewWidthMode,
+};
 mod list_view;
 pub use list_view::{
     ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GridView, GridViewItem, GridViewItemTemplateSettings,
@@ -393,6 +401,7 @@ pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable
 mod navigation_view;
 mod navigation_view_events;
 mod navigation_view_item;
+mod navigation_view_top_overflow;
 pub use navigation_view::NavigationView;
 pub use navigation_view_events::{
     NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,
@@ -690,7 +699,7 @@ mod virtualizing_panel;
 mod virtualizing_stack_panel;
 
 pub use assigned_binding::{AssignedBinding};
-pub use combo_box::{ComboBox};
+pub use combo_box::{ComboBox, ComboBoxTextSubmittedEventArgs};
 pub use combo_box_item::{ComboBoxItem};
 pub use container_clearing_event_args::{ContainerClearingEventArgs};
 pub use container_index_changed_event_args::{ContainerIndexChangedEventArgs};

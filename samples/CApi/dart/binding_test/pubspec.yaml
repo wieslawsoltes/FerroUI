@@ -1,0 +1,8 @@
+name: ferroui_binding_test
+publish_to: none
+
+environment:
+  sdk: ^3.3.0
+
+dependencies:
+  ffi: ^2.1.0

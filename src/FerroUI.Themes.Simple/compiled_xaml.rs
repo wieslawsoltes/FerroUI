@@ -125,7 +125,7 @@ fn populate_simpletheme_xaml_unit_0(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(7,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_SIMPLETHEME_XAML_ROWS_0)?;
     // SimpleTheme.xaml(24,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_1, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_1)?;
     // SimpleTheme.xaml(41,8) Content (resource)
@@ -143,7 +143,7 @@ fn populate_simpletheme_xaml_unit_1(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(53,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_SIMPLETHEME_XAML_ROWS_4)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_SIMPLETHEME_XAML_ROWS_4)?;
     // SimpleTheme.xaml(70,8) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_2, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_5)?;
     // SimpleTheme.xaml(87,8) Content (resource)
@@ -163,7 +163,7 @@ fn populate_simpletheme_xaml_unit_2(
     // SimpleTheme.xaml(98,53) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ContentControlThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_simpletheme_xaml_deferred_44, 98, 53)?;
     // SimpleTheme.xaml(99,35) Content (resource)
-    rt::add_color_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_8)?;
+    rt::add_packed_color_resources(&resource_dictionary_0, &POPULATE_SIMPLETHEME_XAML_ROWS_8)?;
     // SimpleTheme.xaml(107,4) Content (resource)
     rt::add_packed_static_brushes(&resource_dictionary_0, &context, &POPULATE_SIMPLETHEME_XAML_DOCUMENT, &POPULATE_SIMPLETHEME_XAML_ROWS_9)?;
     // SimpleTheme.xaml(115,4) Content (resource)
@@ -187,7 +187,7 @@ fn populate_simpletheme_xaml_unit_2(
     // SimpleTheme.xaml(147,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 147, 43)?, rt::string_object("ThemeBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 147, 43)?;
     // SimpleTheme.xaml(148,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_12)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_SIMPLETHEME_XAML_ROWS_12)?;
     ::core::result::Result::Ok(())
 }
 
@@ -198,54 +198,61 @@ fn populate_simpletheme_xaml_unit_3(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // SimpleTheme.xaml(5,52) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_SIMPLETHEME_XAML_ROWS_13)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_SIMPLETHEME_XAML_ROWS_13)?;
     ::core::result::Result::Ok(())
 }
 
-/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "ThemeBackgroundColor", value: 4294967295_u32, line: 7, position: 43 },
-    rt::ValueRow { key: "ThemeBorderLowColor", value: 4289374890_u32, line: 8, position: 42 },
-    rt::ValueRow { key: "ThemeBorderMidColor", value: 4287137928_u32, line: 9, position: 42 },
-    rt::ValueRow { key: "ThemeBorderHighColor", value: 4281545523_u32, line: 10, position: 43 },
-    rt::ValueRow { key: "ThemeControlLowColor", value: 4287007129_u32, line: 11, position: 43 },
-    rt::ValueRow { key: "ThemeControlMidColor", value: 4294309365_u32, line: 12, position: 43 },
-    rt::ValueRow { key: "ThemeControlMidHighColor", value: 4290954185_u32, line: 13, position: 47 },
-    rt::ValueRow { key: "ThemeControlHighColor", value: 4285032552_u32, line: 14, position: 44 },
-    rt::ValueRow { key: "ThemeControlVeryHighColor", value: 4284177243_u32, line: 15, position: 48 },
-    rt::ValueRow { key: "ThemeControlHighlightLowColor", value: 4293980400_u32, line: 16, position: 52 },
-    rt::ValueRow { key: "ThemeControlHighlightMidColor", value: 4291875024_u32, line: 17, position: 52 },
-    rt::ValueRow { key: "ThemeControlHighlightHighColor", value: 4286611584_u32, line: 18, position: 53 },
-    rt::ValueRow { key: "ThemeForegroundColor", value: 4278190080_u32, line: 19, position: 43 },
-    rt::ValueRow { key: "HighlightColor", value: 4278742942_u32, line: 20, position: 37 },
-    rt::ValueRow { key: "HighlightColor2", value: 4278804613_u32, line: 21, position: 38 },
-    rt::ValueRow { key: "HyperlinkVisitedColor", value: 4285013416_u32, line: 22, position: 44 },
-];
-
 /// The keys and targets of the packed tables of the unit 1 of `SimpleTheme.xaml`, each once (#855).
-const POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS: &str = "ThemeBackgroundBrushThemeBackgroundColorThemeBorderLowBrushThemeBorderLowColorThemeBorderMidBrushThemeBorderMidColorThemeBorderHighBrushThemeBorderHighColorThemeControlLowBrushThemeControlLowColorThemeControlMidBrushThemeControlMidColorThemeControlMidHighBrushThemeControlMidHighColorThemeControlHighBrushThemeControlHighColorThemeControlVeryHighBrushThemeControlVeryHighColorThemeControlHighlightLowBrushThemeControlHighlightLowColorThemeControlHighlightMidBrushThemeControlHighlightMidColorThemeControlHighlightHighBrushThemeControlHighlightHighColorThemeForegroundBrushThemeForegroundColorHighlightBrushHighlightColorHighlightBrush2HighlightColor2HyperlinkVisitedBrushHyperlinkVisitedColorRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushHighlightForegroundBrushHighlightForegroundColorThemeForegroundLowBrushThemeForegroundLowColorThemeAccentBrush2ThemeAccentColor2ThemeAccentBrush3ThemeAccentColor3ThemeAccentBrush4ThemeAccentColor4ErrorBrushErrorColorErrorLowBrushErrorLowColorNotificationCardForegroundBrushThemeControlTransparentBrush";
+const POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS: &str = "ThemeBackgroundColorThemeBorderLowColorThemeBorderMidColorThemeBorderHighColorThemeControlLowColorThemeControlMidColorThemeControlMidHighColorThemeControlHighColorThemeControlVeryHighColorThemeControlHighlightLowColorThemeControlHighlightMidColorThemeControlHighlightHighColorThemeForegroundColorHighlightColorHighlightColor2HyperlinkVisitedColorThemeBackgroundBrushThemeBorderLowBrushThemeBorderMidBrushThemeBorderHighBrushThemeControlLowBrushThemeControlMidBrushThemeControlMidHighBrushThemeControlHighBrushThemeControlVeryHighBrushThemeControlHighlightLowBrushThemeControlHighlightMidBrushThemeControlHighlightHighBrushThemeForegroundBrushHighlightBrushHighlightBrush2HyperlinkVisitedBrushRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushThemeAccentColorThemeAccentColor2ThemeAccentColor3ThemeAccentColor4ThemeForegroundLowColorHighlightForegroundColorErrorColorErrorLowColorHighlightForegroundBrushThemeForegroundLowBrushThemeAccentBrush2ThemeAccentBrush3ThemeAccentBrush4ErrorBrushErrorLowBrushNotificationCardForegroundBrushThemeControlTransparentBrushThemeDisabledOpacityFontSizeSmallFontSizeNormalFontSizeLargeScrollBarThicknessScrollBarThumbThicknessIconElementThemeHeightIconElementThemeWidthTextControlPlaceholderOpacity";
+
+/// The numbers of the packed tables of the unit 1 of `SimpleTheme.xaml`, each once (#855).
+static POPULATE_SIMPLETHEME_XAML_UNIT_1_NUMBERS: [f64; 7] = [0.5_f64, 10.0_f64, 12.0_f64, 16.0_f64, 18.0_f64, 8.0_f64, 20.0_f64];
+
+/// The colours of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 20, 7, 43, 65535, 65535,
+        20, 19, 8, 42, 43690, 65450,
+        39, 19, 9, 42, 34952, 65416,
+        58, 20, 10, 43, 13107, 65331,
+        78, 20, 11, 43, 35225, 65414,
+        98, 20, 12, 43, 62965, 65525,
+        118, 24, 13, 47, 50121, 65474,
+        142, 21, 14, 44, 26728, 65384,
+        163, 25, 15, 48, 23387, 65371,
+        188, 29, 16, 52, 61680, 65520,
+        217, 29, 17, 52, 53456, 65488,
+        246, 30, 18, 53, 32896, 65408,
+        276, 20, 19, 43, 0, 65280,
+        296, 14, 20, 37, 28574, 65288,
+        310, 15, 21, 38, 24709, 65289,
+        325, 21, 22, 44, 7592, 65384,
+    ],
+};
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 20, 20, 20, 1, 24, 8, 24, 53,
-        40, 19, 59, 19, 1, 25, 8, 25, 52,
-        78, 19, 97, 19, 1, 26, 8, 26, 52,
-        116, 20, 136, 20, 1, 27, 8, 27, 53,
-        156, 20, 176, 20, 1, 28, 8, 28, 53,
-        196, 20, 216, 20, 1, 29, 8, 29, 53,
-        236, 24, 260, 24, 1, 30, 8, 30, 57,
-        284, 21, 305, 21, 1, 31, 8, 31, 54,
-        326, 25, 351, 25, 1, 32, 8, 32, 58,
-        376, 29, 405, 29, 1, 33, 8, 33, 62,
-        434, 29, 463, 29, 1, 34, 8, 34, 62,
-        492, 30, 522, 30, 1, 35, 8, 35, 63,
-        552, 20, 572, 20, 1, 36, 8, 36, 53,
-        592, 14, 606, 14, 1, 37, 8, 37, 47,
-        620, 15, 635, 15, 1, 38, 8, 38, 48,
-        650, 21, 671, 21, 1, 39, 8, 39, 54,
+        346, 20, 0, 20, 1, 24, 8, 24, 53,
+        366, 19, 20, 19, 1, 25, 8, 25, 52,
+        385, 19, 39, 19, 1, 26, 8, 26, 52,
+        404, 20, 58, 20, 1, 27, 8, 27, 53,
+        424, 20, 78, 20, 1, 28, 8, 28, 53,
+        444, 20, 98, 20, 1, 29, 8, 29, 53,
+        464, 24, 118, 24, 1, 30, 8, 30, 57,
+        488, 21, 142, 21, 1, 31, 8, 31, 54,
+        509, 25, 163, 25, 1, 32, 8, 32, 58,
+        534, 29, 188, 29, 1, 33, 8, 33, 62,
+        563, 29, 217, 29, 1, 34, 8, 34, 62,
+        592, 30, 246, 30, 1, 35, 8, 35, 63,
+        622, 20, 276, 20, 1, 36, 8, 36, 53,
+        642, 14, 296, 14, 1, 37, 8, 37, 47,
+        656, 15, 310, 15, 1, 38, 8, 38, 48,
+        671, 21, 325, 21, 1, 39, 8, 39, 54,
     ],
 };
 
@@ -267,51 +274,55 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        816, 23, 0, 20, 1, 49, 8, 49, 8,
+        816, 23, 346, 20, 1, 49, 8, 49, 8,
     ],
 };
 
-/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_4: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "ThemeBackgroundColor", value: 4280821800_u32, line: 53, position: 43 },
-    rt::ValueRow { key: "ThemeBorderLowColor", value: 4283453520_u32, line: 54, position: 42 },
-    rt::ValueRow { key: "ThemeBorderMidColor", value: 4286611584_u32, line: 55, position: 42 },
-    rt::ValueRow { key: "ThemeBorderHighColor", value: 4288716960_u32, line: 56, position: 43 },
-    rt::ValueRow { key: "ThemeControlLowColor", value: 4280821800_u32, line: 57, position: 43 },
-    rt::ValueRow { key: "ThemeControlMidColor", value: 4283453520_u32, line: 58, position: 43 },
-    rt::ValueRow { key: "ThemeControlMidHighColor", value: 4285032552_u32, line: 59, position: 47 },
-    rt::ValueRow { key: "ThemeControlHighColor", value: 4286611584_u32, line: 60, position: 44 },
-    rt::ValueRow { key: "ThemeControlVeryHighColor", value: 4293913583_u32, line: 61, position: 48 },
-    rt::ValueRow { key: "ThemeControlHighlightLowColor", value: 4289243304_u32, line: 62, position: 52 },
-    rt::ValueRow { key: "ThemeControlHighlightMidColor", value: 4286743170_u32, line: 63, position: 52 },
-    rt::ValueRow { key: "ThemeControlHighlightHighColor", value: 4283453520_u32, line: 64, position: 53 },
-    rt::ValueRow { key: "ThemeForegroundColor", value: 4292796126_u32, line: 65, position: 43 },
-    rt::ValueRow { key: "HighlightColor", value: 4279344858_u32, line: 66, position: 37 },
-    rt::ValueRow { key: "HighlightColor2", value: 4278804613_u32, line: 67, position: 38 },
-    rt::ValueRow { key: "HyperlinkVisitedColor", value: 4291136249_u32, line: 68, position: 44 },
-];
+/// The colours of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_4: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 20, 53, 43, 10280, 65320,
+        20, 19, 54, 42, 20560, 65360,
+        39, 19, 55, 42, 32896, 65408,
+        58, 20, 56, 43, 41120, 65440,
+        78, 20, 57, 43, 10280, 65320,
+        98, 20, 58, 43, 20560, 65360,
+        118, 24, 59, 47, 26728, 65384,
+        142, 21, 60, 44, 32896, 65408,
+        163, 25, 61, 48, 60399, 65519,
+        188, 29, 62, 52, 43176, 65448,
+        217, 29, 63, 52, 33410, 65410,
+        246, 30, 64, 53, 20560, 65360,
+        276, 20, 65, 43, 57054, 65502,
+        296, 14, 66, 37, 40666, 65297,
+        310, 15, 67, 38, 24709, 65289,
+        325, 21, 68, 44, 35577, 65477,
+    ],
+};
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 20, 20, 20, 1, 70, 8, 70, 53,
-        40, 19, 59, 19, 1, 71, 8, 71, 52,
-        78, 19, 97, 19, 1, 72, 8, 72, 52,
-        116, 20, 136, 20, 1, 73, 8, 73, 53,
-        156, 20, 176, 20, 1, 74, 8, 74, 53,
-        196, 20, 216, 20, 1, 75, 8, 75, 53,
-        236, 24, 260, 24, 1, 76, 8, 76, 57,
-        284, 21, 305, 21, 1, 77, 8, 77, 54,
-        326, 25, 351, 25, 1, 78, 8, 78, 58,
-        376, 29, 405, 29, 1, 79, 8, 79, 62,
-        434, 29, 463, 29, 1, 80, 8, 80, 62,
-        492, 30, 522, 30, 1, 81, 8, 81, 63,
-        552, 20, 572, 20, 1, 82, 8, 82, 53,
-        592, 14, 606, 14, 1, 83, 8, 83, 47,
-        620, 15, 635, 15, 1, 84, 8, 84, 48,
-        650, 21, 671, 21, 1, 85, 8, 85, 54,
+        346, 20, 0, 20, 1, 70, 8, 70, 53,
+        366, 19, 20, 19, 1, 71, 8, 71, 52,
+        385, 19, 39, 19, 1, 72, 8, 72, 52,
+        404, 20, 58, 20, 1, 73, 8, 73, 53,
+        424, 20, 78, 20, 1, 74, 8, 74, 53,
+        444, 20, 98, 20, 1, 75, 8, 75, 53,
+        464, 24, 118, 24, 1, 76, 8, 76, 57,
+        488, 21, 142, 21, 1, 77, 8, 77, 54,
+        509, 25, 163, 25, 1, 78, 8, 78, 58,
+        534, 29, 188, 29, 1, 79, 8, 79, 62,
+        563, 29, 217, 29, 1, 80, 8, 80, 62,
+        592, 30, 246, 30, 1, 81, 8, 81, 63,
+        622, 20, 276, 20, 1, 82, 8, 82, 53,
+        642, 14, 296, 14, 1, 83, 8, 83, 47,
+        656, 15, 310, 15, 1, 84, 8, 84, 48,
+        671, 21, 325, 21, 1, 85, 8, 85, 54,
     ],
 };
 
@@ -333,35 +344,39 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        816, 23, 0, 20, 1, 95, 8, 95, 8,
+        816, 23, 346, 20, 1, 95, 8, 95, 8,
     ],
 };
 
-/// The colours of a run of `SimpleTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_8: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "ThemeAccentColor", value: 3423706842_u32, line: 99, position: 35 },
-    rt::ValueRow { key: "ThemeAccentColor2", value: 2568068826_u32, line: 100, position: 36 },
-    rt::ValueRow { key: "ThemeAccentColor3", value: 1712430810_u32, line: 101, position: 36 },
-    rt::ValueRow { key: "ThemeAccentColor4", value: 856792794_u32, line: 102, position: 36 },
-    rt::ValueRow { key: "ThemeForegroundLowColor", value: 4286611584_u32, line: 103, position: 42 },
-    rt::ValueRow { key: "HighlightForegroundColor", value: 4294967295_u32, line: 104, position: 43 },
-    rt::ValueRow { key: "ErrorColor", value: 4294901760_u32, line: 105, position: 29 },
-    rt::ValueRow { key: "ErrorLowColor", value: 285147136_u32, line: 106, position: 32 },
-];
+/// The colours of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_8: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        839, 16, 99, 35, 40666, 52241,
+        855, 17, 100, 36, 40666, 39185,
+        872, 17, 101, 36, 40666, 26129,
+        889, 17, 102, 36, 40666, 13073,
+        906, 23, 103, 42, 32896, 65408,
+        929, 24, 104, 43, 65535, 65535,
+        953, 10, 105, 29, 0, 65535,
+        963, 13, 106, 32, 0, 4351,
+    ],
+};
 
 /// The brushes whose colour is a static resource of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_SIMPLETHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        839, 24, 863, 24, 1, 107, 4, 107, 53,
-        887, 23, 910, 23, 1, 108, 4, 108, 52,
-        933, 17, 950, 17, 1, 109, 4, 109, 46,
-        967, 17, 984, 17, 1, 110, 4, 110, 46,
-        1001, 17, 1018, 17, 1, 111, 4, 111, 46,
-        933, 16, 950, 16, 1, 112, 4, 112, 45,
-        1035, 10, 1045, 10, 1, 113, 4, 113, 39,
-        1055, 13, 1068, 13, 1, 114, 4, 114, 42,
+        976, 24, 929, 24, 1, 107, 4, 107, 53,
+        1000, 23, 906, 23, 1, 108, 4, 108, 52,
+        1023, 17, 855, 17, 1, 109, 4, 109, 46,
+        1040, 17, 872, 17, 1, 110, 4, 110, 46,
+        1057, 17, 889, 17, 1, 111, 4, 111, 46,
+        1023, 16, 839, 16, 1, 112, 4, 112, 45,
+        1074, 10, 953, 10, 1, 113, 4, 113, 39,
+        1084, 13, 963, 13, 1, 114, 4, 114, 42,
     ],
 };
 
@@ -370,7 +385,7 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        1081, 31, 65535, 65535, 1, 119, 4,
+        1097, 31, 65535, 65535, 1, 119, 4,
     ],
 };
 
@@ -379,60 +394,68 @@ static POPULATE_SIMPLETHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_SIMPLETHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        1112, 28, 65535, 255, 1, 138, 4,
+        1128, 28, 65535, 255, 1, 138, 4,
     ],
 };
 
-/// The numbers of a run of `SimpleTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_12: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ThemeDisabledOpacity", value: 0.5_f64, line: 148, position: 44 },
-    rt::ValueRow { key: "FontSizeSmall", value: 10.0_f64, line: 150, position: 37 },
-    rt::ValueRow { key: "FontSizeNormal", value: 12.0_f64, line: 151, position: 38 },
-    rt::ValueRow { key: "FontSizeLarge", value: 16.0_f64, line: 152, position: 37 },
-    rt::ValueRow { key: "ScrollBarThickness", value: 18.0_f64, line: 154, position: 42 },
-    rt::ValueRow { key: "ScrollBarThumbThickness", value: 8.0_f64, line: 155, position: 47 },
-    rt::ValueRow { key: "IconElementThemeHeight", value: 20.0_f64, line: 157, position: 46 },
-    rt::ValueRow { key: "IconElementThemeWidth", value: 20.0_f64, line: 158, position: 45 },
-    rt::ValueRow { key: "TextControlPlaceholderOpacity", value: 0.5_f64, line: 160, position: 53 },
-];
+/// The numbers of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_12: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_SIMPLETHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_SIMPLETHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        1156, 20, 148, 44, 0,
+        1176, 13, 150, 37, 1,
+        1189, 14, 151, 38, 2,
+        1203, 13, 152, 37, 3,
+        1216, 18, 154, 42, 4,
+        1234, 23, 155, 47, 5,
+        1257, 22, 157, 46, 6,
+        1279, 21, 158, 45, 6,
+        1300, 29, 160, 53, 0,
+    ],
+};
 
-/// The texts of a run of `SimpleTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_SIMPLETHEME_XAML_ROWS_13: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringCalendarWeekNumberHeader", value: "\u{a0}", line: 5, position: 52 },
-    rt::ValueRow { key: "StringDatePickerDayText", value: "day", line: 7, position: 45 },
-    rt::ValueRow { key: "StringDatePickerMonthText", value: "month", line: 8, position: 47 },
-    rt::ValueRow { key: "StringDatePickerYearText", value: "year", line: 9, position: 46 },
-    rt::ValueRow { key: "StringTimePickerHourText", value: "hour", line: 11, position: 46 },
-    rt::ValueRow { key: "StringTimePickerMinuteText", value: "minute", line: 12, position: 48 },
-    rt::ValueRow { key: "StringTimePickerSecondText", value: "second", line: 13, position: 48 },
-    rt::ValueRow { key: "StringTextFlyoutCutText", value: "Cut", line: 15, position: 45 },
-    rt::ValueRow { key: "StringTextFlyoutCopyText", value: "Copy", line: 16, position: 46 },
-    rt::ValueRow { key: "StringTextFlyoutPasteText", value: "Paste", line: 17, position: 47 },
-    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 19, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 20, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 21, position: 52 },
-    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 22, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 23, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 24, position: 64 },
-    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 25, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 26, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 27, position: 82 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 28, position: 72 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 29, position: 71 },
-    rt::ValueRow { key: "StringScrollBarScrollHere", value: "Scroll Here", line: 30, position: 47 },
-    rt::ValueRow { key: "StringScrollBarTop", value: "Top", line: 31, position: 40 },
-    rt::ValueRow { key: "StringScrollBarBottom", value: "Bottom", line: 32, position: 43 },
-    rt::ValueRow { key: "StringScrollBarPageUp", value: "Page Up", line: 33, position: 43 },
-    rt::ValueRow { key: "StringScrollBarPageDown", value: "Page Down", line: 34, position: 45 },
-    rt::ValueRow { key: "StringScrollBarScrollUp", value: "Scroll Up", line: 35, position: 45 },
-    rt::ValueRow { key: "StringScrollBarScrollDown", value: "Scroll Down", line: 36, position: 47 },
-    rt::ValueRow { key: "StringScrollBarLeftEdge", value: "Left Edge", line: 37, position: 45 },
-    rt::ValueRow { key: "StringScrollBarRightEdge", value: "Right Edge", line: 38, position: 46 },
-    rt::ValueRow { key: "StringScrollBarPageLeft", value: "Page Left", line: 39, position: 45 },
-    rt::ValueRow { key: "StringScrollBarPageRight", value: "Page Right", line: 40, position: 46 },
-    rt::ValueRow { key: "StringScrollBarScrollLeft", value: "Scroll Left", line: 41, position: 47 },
-    rt::ValueRow { key: "StringScrollBarScrollRight", value: "Scroll Right", line: 42, position: 48 },
-];
+/// The texts of a run of `SimpleTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_SIMPLETHEME_XAML_ROWS_13: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "StringCalendarWeekNumberHeader\u{a0}StringDatePickerDayTextdayStringDatePickerMonthTextmonthStringDatePickerYearTextyearStringTimePickerHourTexthourStringTimePickerMinuteTextminuteStringTimePickerSecondTextsecondStringTextFlyoutCutTextStringTextFlyoutCopyTextStringTextFlyoutPasteTextStringManagedFileChooserFileNamePlaceholderFile nameStringManagedFileChooserShowHiddenFilesTextShow hidden filesStringManagedFileChooserOkTextOKStringManagedFileChooserCancelTextStringManagedFileChooserNameColumnStringManagedFileChooserDateModifiedColumnDate ModifiedStringManagedFileChooserTypeColumnStringManagedFileChooserSizeColumnStringManagedFileChooserOverwritePromptFileAlreadyExistsText{0} already exists. Do you want to replace it?StringManagedFileChooserOverwritePromptConfirmTextYesStringManagedFileChooserOverwritePromptCancelTextNoStringScrollBarScrollHereScroll HereStringScrollBarTopStringScrollBarBottomStringScrollBarPageUpPage UpStringScrollBarPageDownPage DownStringScrollBarScrollUpScroll UpStringScrollBarScrollDownScroll DownStringScrollBarLeftEdgeLeft EdgeStringScrollBarRightEdgeRight EdgeStringScrollBarPageLeftPage LeftStringScrollBarPageRightPage RightStringScrollBarScrollLeftScroll LeftStringScrollBarScrollRightScroll Right",
+    numbers: &[],
+    records: &[
+        0, 30, 5, 52, 30, 2,
+        32, 23, 7, 45, 55, 3,
+        58, 25, 8, 47, 83, 5,
+        88, 24, 9, 46, 112, 4,
+        116, 24, 11, 46, 140, 4,
+        144, 26, 12, 48, 170, 6,
+        176, 26, 13, 48, 202, 6,
+        208, 23, 15, 45, 224, 3,
+        231, 24, 16, 46, 247, 4,
+        255, 25, 17, 47, 271, 5,
+        280, 43, 19, 65, 323, 9,
+        332, 43, 20, 65, 375, 17,
+        392, 30, 21, 52, 422, 2,
+        424, 34, 22, 56, 448, 6,
+        458, 34, 23, 56, 308, 4,
+        492, 42, 24, 64, 534, 13,
+        547, 34, 25, 56, 571, 4,
+        581, 34, 26, 56, 605, 4,
+        615, 60, 27, 82, 675, 46,
+        721, 50, 28, 72, 771, 3,
+        774, 49, 29, 71, 823, 2,
+        825, 25, 30, 47, 850, 11,
+        861, 18, 31, 40, 876, 3,
+        879, 21, 32, 43, 894, 6,
+        900, 21, 33, 43, 921, 7,
+        928, 23, 34, 45, 951, 9,
+        960, 23, 35, 45, 983, 9,
+        992, 25, 36, 47, 1017, 11,
+        1028, 23, 37, 45, 1051, 9,
+        1060, 24, 38, 46, 1084, 10,
+        1094, 23, 39, 45, 1117, 9,
+        1126, 24, 40, 46, 1150, 10,
+        1160, 25, 41, 47, 1185, 11,
+        1196, 26, 42, 48, 1222, 12,
+    ],
+};
 
 /// Builds the deferred content at `SimpleTheme.xaml(98,53)` (a template or a deferred resource).
 fn populate_simpletheme_xaml_deferred_44(
@@ -1463,7 +1486,7 @@ fn build_controls_simplecontrols_xaml_unit_52(
     // Controls/SimpleControls.xaml(37,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 47)?, rt::string_object("ToggleSwitchThemeMinWidth"), rt::to_object(0.0_f64)), 37, 47)?;
     // Controls/SimpleControls.xaml(38,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0)?;
     // Controls/SimpleControls.xaml(41,4) Content (resource)
     let deferred_58 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_125, 41, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_58) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 41, 4)?;
@@ -1664,7 +1687,7 @@ fn build_controls_simplecontrols_xaml_unit_64(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(24,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3)?;
     // Controls/SimpleControls.xaml(29,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleDateTimePickerItem", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_188, 29, 4)?;
     // Controls/SimpleControls.xaml(53,4) Content (resource)
@@ -1684,9 +1707,9 @@ fn build_controls_simplecontrols_xaml_unit_65(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(33,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4)?;
     // Controls/SimpleControls.xaml(38,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5)?;
     // Controls/SimpleControls.xaml(42,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 42, 48)?;
     // Controls/SimpleControls.xaml(44,4) Content (resource)
@@ -1712,9 +1735,9 @@ fn build_controls_simplecontrols_xaml_unit_66(
     // Controls/SimpleControls.xaml(35,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 35, 53)?;
     // Controls/SimpleControls.xaml(36,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7)?;
     // Controls/SimpleControls.xaml(40,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8)?;
     // Controls/SimpleControls.xaml(43,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SimpleTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_201, 43, 4)?;
     // Controls/SimpleControls.xaml(79,4) Content (resource)
@@ -1779,7 +1802,7 @@ fn build_controls_simplecontrols_xaml_unit_69(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/SimpleControls.xaml(14,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10)?;
     // Controls/SimpleControls.xaml(18,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 18, 54)?, rt::string_object("SplitButtonBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 18, 54)?;
     // Controls/SimpleControls.xaml(20,4) Content (resource)
@@ -1928,7 +1951,7 @@ fn build_controls_simplecontrols_xaml_unit_75(
     // Controls/SimpleControls.xaml(38,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 61)?, rt::string_object("TabbedPageTabItemHeaderCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 38, 61)?;
     // Controls/SimpleControls.xaml(39,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19)?;
     // Controls/SimpleControls.xaml(43,53) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20)?;
     // Controls/SimpleControls.xaml(48,4) Content (resource)
@@ -1940,7 +1963,7 @@ fn build_controls_simplecontrols_xaml_unit_75(
     // Controls/SimpleControls.xaml(51,4) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22)?;
     // Controls/SimpleControls.xaml(52,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23)?;
     // Controls/SimpleControls.xaml(56,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_simplecontrols_xaml_deferred_272, 56, 4)?;
     // Controls/SimpleControls.xaml(102,4) Content (resource)
@@ -2015,11 +2038,15 @@ fn build_controls_simplecontrols_xaml_unit_79(
     ::core::result::Result::Ok(())
 }
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 38, position: 52 },
-    rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 39, position: 61 },
-];
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "ToggleSwitchOnStrokeThicknessToggleSwitchOuterBorderStrokeThickness",
+    numbers: &[0.0_f64, 1.0_f64],
+    records: &[
+        0, 29, 38, 52, 0, 0, 0, 0,
+        29, 38, 39, 61, 1, 1, 1, 1,
+    ],
+};
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
@@ -2037,29 +2064,47 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_2: rt::PackedRows = rt::PackedRow
     ],
 };
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 24, position: 58 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 25, position: 52 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderPadding", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 26, position: 50 },
-];
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_3: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "DateTimeFlyoutButtonBorderThicknessDateTimeFlyoutBorderThicknessDateTimeFlyoutBorderPadding",
+    numbers: &[0.0_f64, 1.0_f64],
+    records: &[
+        0, 35, 24, 58, 0, 0, 0, 0,
+        35, 29, 25, 52, 1, 1, 1, 1,
+        64, 27, 26, 50, 1, 1, 1, 1,
+    ],
+};
 
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 33, position: 62 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 34, position: 57 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 35, position: 74 },
-    rt::ValueRow { key: "DatePickerThemeMinWidth", value: 296.0_f64, line: 36, position: 45 },
-    rt::ValueRow { key: "DatePickerThemeMaxWidth", value: 456.0_f64, line: 37, position: 45 },
-];
+/// The keys and targets of the packed tables of the unit 60 of `Controls/SimpleControls.xaml`, each once (#855).
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_STRINGS: &str = "DatePickerFlyoutPresenterHighlightHeightDatePickerFlyoutPresenterItemHeightDatePickerFlyoutPresenterAcceptDismissHostGridHeightDatePickerThemeMinWidthDatePickerThemeMaxWidthDatePickerFlyoutPresenterItemPaddingDatePickerFlyoutPresenterMonthPaddingDatePickerHostPaddingDatePickerHostMonthPadding";
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 38, position: 59 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 39, position: 60 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 49 },
-];
+/// The numbers of the packed tables of the unit 60 of `Controls/SimpleControls.xaml`, each once (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_NUMBERS: [f64; 8] = [40.0_f64, 41.0_f64, 296.0_f64, 456.0_f64, 0.0_f64, 3.0_f64, 6.0_f64, 9.0_f64];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_4: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_NUMBERS,
+    records: &[
+        0, 40, 33, 62, 0,
+        40, 35, 34, 57, 0,
+        75, 52, 35, 74, 1,
+        127, 23, 36, 45, 2,
+        150, 23, 37, 45, 3,
+    ],
+};
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_5: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_60_NUMBERS,
+    records: &[
+        173, 36, 38, 59, 4, 5, 4, 6,
+        209, 37, 39, 60, 7, 5, 4, 6,
+        246, 21, 40, 44, 4, 5, 4, 6,
+        267, 26, 41, 49, 7, 5, 4, 6,
+    ],
+};
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
@@ -2067,19 +2112,33 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 34, position: 48 },
 ];
 
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 36, position: 62 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 37, position: 74 },
-    rt::ValueRow { key: "TimePickerThemeMinWidth", value: 242.0_f64, line: 38, position: 45 },
-    rt::ValueRow { key: "TimePickerThemeMaxWidth", value: 456.0_f64, line: 39, position: 45 },
-];
+/// The keys and targets of the packed tables of the unit 61 of `Controls/SimpleControls.xaml`, each once (#855).
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_STRINGS: &str = "TimePickerFlyoutPresenterHighlightHeightTimePickerFlyoutPresenterAcceptDismissHostGridHeightTimePickerThemeMinWidthTimePickerThemeMaxWidthTimePickerFlyoutPresenterItemPaddingTimePickerHostPadding";
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 40, position: 59 },
-    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 41, position: 44 },
-];
+/// The numbers of the packed tables of the unit 61 of `Controls/SimpleControls.xaml`, each once (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_NUMBERS: [f64; 7] = [40.0_f64, 41.0_f64, 242.0_f64, 456.0_f64, 0.0_f64, 3.0_f64, 6.0_f64];
+
+/// The numbers of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_7: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_NUMBERS,
+    records: &[
+        0, 40, 36, 62, 0,
+        40, 52, 37, 74, 1,
+        92, 23, 38, 45, 2,
+        115, 23, 39, 45, 3,
+    ],
+};
+
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_8: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_61_NUMBERS,
+    records: &[
+        138, 36, 40, 59, 4, 5, 4, 6,
+        174, 21, 41, 44, 4, 5, 4, 6,
+    ],
+};
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
@@ -2087,13 +2146,17 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 20, position: 53 },
 ];
 
-/// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "SplitButtonPrimaryButtonSize", value: 24.0_f64, line: 14, position: 50 },
-    rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 24.0_f64, line: 15, position: 52 },
-    rt::ValueRow { key: "SplitButtonSeparatorWidth", value: 1.0_f64, line: 16, position: 47 },
-    rt::ValueRow { key: "SplitButtonMinHeight", value: 24.0_f64, line: 17, position: 42 },
-];
+/// The numbers of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_10: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SplitButtonPrimaryButtonSizeSplitButtonSecondaryButtonSizeSplitButtonSeparatorWidthSplitButtonMinHeight",
+    numbers: &[24.0_f64, 1.0_f64],
+    records: &[
+        0, 28, 14, 50, 0,
+        28, 30, 15, 52, 0,
+        58, 25, 16, 47, 1,
+        83, 20, 17, 42, 0,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
@@ -2106,7 +2169,10 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_11: rt::PackedRows = rt::PackedRo
 };
 
 /// The keys and targets of the packed tables of the unit 73 of `Controls/SimpleControls.xaml`, each once (#855).
-const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColorTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrush";
+const BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverThemeControlMidColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedThemeControlHighlightMidColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedThemeForegroundMidColorTabbedPageTabItemHeaderForegroundSelectedThemeAccentColorTabbedPageTabItemHeaderForegroundDisabledThemeDisabledColorTabbedPageTabItemHeaderPaddingTabbedPageTabItemHeaderMarginTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrushTabbedPageTabStripMarginTabbedPageTabStripPadding";
+
+/// The numbers of the packed tables of the unit 73 of `Controls/SimpleControls.xaml`, each once (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_NUMBERS: [f64; 3] = [12.0_f64, 8.0_f64, 0.0_f64];
 
 /// The brushes with a literal colour of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
@@ -2173,11 +2239,15 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_18: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabbedPageTabItemHeaderPipeThickness", value: 2.0_f64, line: 32, position: 58 },
 ];
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabItemHeaderPadding", value: [12.0_f64, 8.0_f64, 12.0_f64, 8.0_f64], line: 39, position: 53 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 52 },
-];
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_19: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_NUMBERS,
+    records: &[
+        560, 30, 39, 53, 0, 1, 0, 1,
+        590, 29, 40, 52, 2, 2, 2, 2,
+    ],
+};
 
 /// The numbers of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_20: &[rt::ValueRow<f64>] = &[
@@ -2191,7 +2261,7 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRo
     strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS,
     namespaces: &[],
     records: &[
-        560, 28, 65535, 255, 0, 48, 4,
+        619, 28, 65535, 255, 0, 48, 4,
     ],
 };
 
@@ -2200,15 +2270,19 @@ static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_22: rt::PackedRows = rt::PackedRo
     strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS,
     namespaces: &[],
     records: &[
-        588, 29, 65535, 255, 0, 51, 4,
+        647, 29, 65535, 255, 0, 51, 4,
     ],
 };
 
-/// The thicknesses of a run of `Controls/SimpleControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabStripMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 52, position: 47 },
-    rt::ValueRow { key: "TabbedPageTabStripPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 48 },
-];
+/// The thicknesses of a run of `Controls/SimpleControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_SIMPLECONTROLS_XAML_ROWS_23: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_STRINGS,
+    numbers: &BUILD_CONTROLS_SIMPLECONTROLS_XAML_UNIT_73_NUMBERS,
+    records: &[
+        676, 24, 52, 47, 2, 2, 2, 2,
+        700, 25, 53, 48, 2, 2, 2, 2,
+    ],
+};
 
 /// A property definition of the tables of `Controls/SimpleControls.xaml` (#568).
 fn build_controls_simplecontrols_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
@@ -10535,7 +10609,7 @@ fn build_controls_simplecontrols_xaml_deferred_208_value_17(
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
     let relative_source_extension_0 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_21 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 371, 32)?;
+    let provided_21 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 371, 32)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 371, 32)?, rt::cast(::core::clone::Clone::clone(&provided_21), 371, 32)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 371, 32)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -10591,7 +10665,7 @@ fn build_controls_simplecontrols_xaml_deferred_208_value_19(
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
     let relative_source_extension_1 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_25 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 381, 32)?;
+    let provided_25 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 381, 32)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 381, 32)?, rt::cast(::core::clone::Clone::clone(&provided_25), 381, 32)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 381, 32)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -10767,7 +10841,7 @@ fn build_controls_simplecontrols_xaml_deferred_208_value_25(
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
     let relative_source_extension_2 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_35 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 414, 33)?;
+    let provided_35 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 414, 33)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 414, 33)?, rt::cast(::core::clone::Clone::clone(&provided_35), 414, 33)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 414, 33)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -10823,7 +10897,7 @@ fn build_controls_simplecontrols_xaml_deferred_208_value_27(
     let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_3.clone()));
     let relative_source_extension_3 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_39 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_3, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 424, 33)?;
+    let provided_39 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_3, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 424, 33)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 424, 33)?, rt::cast(::core::clone::Clone::clone(&provided_39), 424, 33)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 424, 33)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -14291,7 +14365,7 @@ fn build_controls_simplecontrols_xaml_deferred_28(
     // Controls/SimpleControls.xaml(34,102) Converter
     let value_1 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNull();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 34, 102)?, rt::cast(::core::clone::Clone::clone(&value_1), 34, 102)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_10 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_10) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -14307,7 +14381,7 @@ fn build_controls_simplecontrols_xaml_deferred_28(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 35, 28)?, rt::cast(path_1.clone(), 35, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_11 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_11) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -20749,7 +20823,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 113, 28)?, rt::cast(path_0.clone(), 113, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_10 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_10) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -20767,7 +20841,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 116, 28)?, rt::cast(path_1.clone(), 116, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_11 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_11) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -20895,7 +20969,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     // Controls/SimpleControls.xaml(147,88) Converter
     let value_5 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 147, 88)?, rt::cast(::core::clone::Clone::clone(&value_5), 147, 88)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_25 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_25) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -20913,7 +20987,7 @@ fn build_controls_simplecontrols_xaml_deferred_145(
     // Controls/SimpleControls.xaml(148,98) Converter
     let value_6 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_3), 148, 98)?, rt::cast(::core::clone::Clone::clone(&value_6), 148, 98)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_26 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_3, ::core::clone::Clone::clone(&provided_26) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -21192,7 +21266,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
     context.push_parent(rt::to_value(multi_binding_0.clone()));
     // Controls/SimpleControls.xaml(37,29) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BorderGapMaskConverter"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 29)?;
+    let provided_6 = rt::provide_value_invoked(&context, rt::multi_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 37, 29)?;
     ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::exact(rt::cast_checked(provided_6, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IMultiValueConverter", 37, 29)?, "FerroUI.Data.MultiBinding.set_Converter", 0, 37, 29)?);
     // Controls/SimpleControls.xaml(38,29) ConverterParameter
     ::ferroui_base::data::MultiBinding::__markup_set_ConverterParameter(&multi_binding_0, rt::string_object("6"));
@@ -21208,7 +21282,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 40, 26)?, rt::cast(path_0.clone(), 40, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_7 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_7) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -21224,7 +21298,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 42, 26)?, rt::cast(path_1.clone(), 42, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_8 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_8) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -21240,7 +21314,7 @@ fn build_controls_simplecontrols_xaml_deferred_150(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 44, 26)?, rt::cast(path_2.clone(), 44, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_9 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_9) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22404,7 +22478,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 57, 26)?, rt::cast(path_1.clone(), 57, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_1) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22420,7 +22494,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 59, 26)?, rt::cast(path_2.clone(), 59, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_2 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_2) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22436,7 +22510,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_3), 61, 26)?, rt::cast(path_3.clone(), 61, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_3 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_3) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22452,7 +22526,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_4), 63, 26)?, rt::cast(path_4.clone(), 63, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_4 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_4, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_3, ::core::clone::Clone::clone(&provided_4) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22512,7 +22586,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_6), 76, 26)?, rt::cast(path_7.clone(), 76, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_6 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_6, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_4, ::core::clone::Clone::clone(&provided_6) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22528,7 +22602,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_7), 78, 26)?, rt::cast(path_8.clone(), 78, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_7 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_7, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_5, ::core::clone::Clone::clone(&provided_7) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22544,7 +22618,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_8), 80, 26)?, rt::cast(path_9.clone(), 80, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_8 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_8, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_6, ::core::clone::Clone::clone(&provided_8) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22560,7 +22634,7 @@ fn build_controls_simplecontrols_xaml_deferred_161(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_9), 82, 26)?, rt::cast(path_10.clone(), 82, 26)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_9 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_9, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_7, ::core::clone::Clone::clone(&provided_9) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22721,7 +22795,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 49, 28)?, rt::cast(path_0.clone(), 49, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_4 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_4) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -22730,7 +22804,7 @@ fn build_controls_simplecontrols_xaml_deferred_165(
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_0();
     // Controls/SimpleControls.xaml(50,36) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_set_ResourceKey(&dynamic_resource_extension_0, rt::string_object("TreeViewItemIndent"));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::multi_binding_bindings_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_5) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
     context.pop_parent();
     rt::bind(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), multi_binding_0, 48, 18)?;
@@ -23243,7 +23317,7 @@ fn build_controls_simplecontrols_xaml_deferred_168(
     context.push_parent(rt::to_value(multi_binding_0.clone()));
     // Controls/SimpleControls.xaml(45,31) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("StringFormatConverter"));
-    let provided_10 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 31)?;
+    let provided_10 = rt::provide_value_invoked(&context, rt::multi_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 45, 31)?;
     ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::exact(rt::cast_checked(provided_10, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IMultiValueConverter", 45, 31)?, "FerroUI.Data.MultiBinding.set_Converter", 0, 45, 31)?);
     // Controls/SimpleControls.xaml(46,20) Bindings
     let bindings_collection_0 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
@@ -23263,7 +23337,7 @@ fn build_controls_simplecontrols_xaml_deferred_168(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_3), 47, 28)?, rt::cast(path_3.clone(), 47, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_12 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_12) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -23695,7 +23769,7 @@ fn build_controls_simplecontrols_xaml_deferred_176(
     context.push_parent(rt::to_value(template_binding_8.clone()));
     // Controls/SimpleControls.xaml(58,24) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("KeyGestureConverter"));
-    let provided_8 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 58, 24)?;
+    let provided_8 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 58, 24)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_8, rt::exact(rt::cast_checked(provided_8, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 58, 24)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 58, 24)?);
     context.pop_parent();
     let provided_9 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_8);
@@ -27895,7 +27969,7 @@ fn build_controls_simplecontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(compiled_binding_extension_0.clone()));
     // Controls/SimpleControls.xaml(135,37) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Icons"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::CompiledBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 135, 37)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 135, 37)?;
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 135, 37)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 135, 37)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 135, 37)?);
     context.pop_parent();
     context.set_target_property(rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()));
@@ -28039,7 +28113,7 @@ fn build_controls_simplecontrols_xaml_deferred_219(
     context.push_parent(rt::to_value(compiled_binding_extension_0.clone()));
     // Controls/SimpleControls.xaml(218,39) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Icons"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::CompiledBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 218, 39)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 218, 39)?;
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 218, 39)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 218, 39)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 218, 39)?);
     context.pop_parent();
     context.set_target_property(rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()));
@@ -28188,7 +28262,7 @@ fn build_controls_simplecontrols_xaml_deferred_221(
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_0();
     // Controls/SimpleControls.xaml(263,36) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_set_ResourceKey(&dynamic_resource_extension_0, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"));
-    let provided_5 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_5 = rt::provide_value(&context, rt::multi_binding_bindings_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_5) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
     // Controls/SimpleControls.xaml(264,20) Bindings
     let bindings_collection_1 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
@@ -28201,7 +28275,7 @@ fn build_controls_simplecontrols_xaml_deferred_221(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 264, 28)?, rt::cast(path_0.clone(), 264, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_6 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_6) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -28504,7 +28578,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/SimpleControls.xaml(144,19) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PrimaryButtonBorderMultiplier"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 144, 19)?;
+    let provided_4 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 144, 19)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_4, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 144, 19)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 144, 19)?);
     context.pop_parent();
     let provided_5 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -28538,7 +28612,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
     context.push_parent(rt::to_value(template_binding_8.clone()));
     // Controls/SimpleControls.xaml(150,19) Converter
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LeftCornerRadiusFilterConverter"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 19)?;
+    let provided_11 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 150, 19)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_8, rt::exact(rt::cast_checked(provided_11, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 150, 19)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 150, 19)?);
     context.pop_parent();
     let provided_12 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_8);
@@ -28582,7 +28656,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
     context.push_parent(rt::to_value(template_binding_15.clone()));
     // Controls/SimpleControls.xaml(166,19) Converter
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SeparatorBorderMultiplier"));
-    let provided_20 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 166, 19)?;
+    let provided_20 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 166, 19)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_15, rt::exact(rt::cast_checked(provided_20, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 166, 19)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 166, 19)?);
     context.pop_parent();
     let provided_21 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_15);
@@ -28615,7 +28689,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
     context.push_parent(rt::to_value(template_binding_20.clone()));
     // Controls/SimpleControls.xaml(176,19) Converter
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SecondaryButtonBorderMultiplier"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 19)?;
+    let provided_28 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 176, 19)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_20, rt::exact(rt::cast_checked(provided_28, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 176, 19)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 176, 19)?);
     context.pop_parent();
     let provided_29 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_20);
@@ -28625,7 +28699,7 @@ fn build_controls_simplecontrols_xaml_deferred_232(
     context.push_parent(rt::to_value(template_binding_21.clone()));
     // Controls/SimpleControls.xaml(177,19) Converter
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_30 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 19)?;
+    let provided_30 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 19)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_21, rt::exact(rt::cast_checked(provided_30, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 177, 19)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 177, 19)?);
     context.pop_parent();
     let provided_31 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_21);
