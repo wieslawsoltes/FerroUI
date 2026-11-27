@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 31 |
+| pending | 29 |
 | partial | 16 |
-| ported | 79 |
+| ported | 81 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -96,7 +96,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | CompactSizing | Styles | ported | 1 |
 | ConnectedAnimation | Motion | ported | 4 |
 | ContentDialog | Dialogs & flyouts | ported | 2 |
-| ContentIsland | System | pending | 0 |
+| ContentIsland | System | ported | 0 |
 | CustomUserControls | Fundamentals | ported | 3 |
 | CustomXamlConditionals | Fundamentals | pending | 3 |
 | DatePicker | Date & time | ported | 2 |
@@ -184,7 +184,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | WebView2 | Media | pending | 1 |
 | Windowing | Windowing | pending | 2 |
 | WrapPanel | Layout | ported | 2 |
-| XamlCompInterop | Motion | pending | 5 |
+| XamlCompInterop | Motion | ported | 5 |
 | XamlResources | Fundamentals | ported | 4 |
 | XamlStyles | Fundamentals | ported | 2 |
 | XamlUICommand | Menus & toolbars | pending | 1 |

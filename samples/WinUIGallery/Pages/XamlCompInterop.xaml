@@ -1,0 +1,121 @@
+<!-- Ported from the five pinned XamlCompInterop examples of WinUI Gallery (14061eea) and the
+     handlers of XamlCompInteropPage.xaml.cs (composition_interop_samples.rs); see ../NOTICE.md.
+     The animations run on the composition visual of each element
+     (ElementCompositionPreview.GetElementVisual), whose Scale and Translation are the element's.
+     The elements the handlers use are named. ThemeResource is DynamicResource, Style is Theme;
+     Slider has no Header (a text) and no StepFrequency (TickFrequency with
+     IsSnapToTickEnabled). The text margin of the last example is set by the handler of its
+     slider (the source's doubleToThicknessConverter); the font size keeps the source's OneWay
+     x:Bind. The popup is shown in the overlay layer of the window, as WinUI's popup in its
+     XAML root, at the top left corner of its parent grid moved by its margin of 5. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <TextBlock x:Name="CompositionStatus" IsVisible="False" TextWrapping="Wrap"
+             AutomationProperties.LiveSetting="Polite" />
+
+  <StackPanel x:Name="NaturalMotionExample" Spacing="8">
+    <TextBlock Text="Use a natural motion composition animation on a UIElement" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel VerticalAlignment="Stretch">
+        <TextBlock Margin="0,0,0,12" Theme="{DynamicResource BodyTextBlockStyle}"
+                   Text="Hover over the button to animate its scale." />
+        <Button x:Name="NaturalMotionButton" Width="100" Height="50" Content="Item" />
+      </StackPanel>
+      <StackPanel Grid.Column="1">
+        <RadioButtons x:Name="DampingStackPanel" Header="Damping Ratio">
+          <RadioButton Content="0.2" />
+          <RadioButton Content="0.4" />
+          <RadioButton Content="0.6" IsChecked="True" />
+          <RadioButton Content="0.8" />
+        </RadioButtons>
+        <TextBlock Margin="0,8,0,0" Text="Period (in ms)" />
+        <Slider x:Name="PeriodSlider" AutomationProperties.Name="Period (in ms)"
+                Maximum="200" Minimum="25" IsSnapToTickEnabled="True" TickFrequency="25"
+                Value="50" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ExpressionSample" Spacing="8">
+    <TextBlock Text="ExpressionAnimation on an Ellipse element" FontSize="18" />
+    <StackPanel Height="200">
+      <TextBlock Theme="{DynamicResource BodyTextBlockStyle}"
+                 Text="Hover over the square to animate its scale. Notice that the ellipse also animates." />
+      <TextBlock Margin="0,0,0,12"
+                 Text="The scale of the circle is inversely related to the scale of the square." />
+      <Grid VerticalAlignment="Top" ColumnDefinitions="*,*">
+        <Rectangle x:Name="rectangle" Width="50" Height="50">
+          <Rectangle.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemAccentColor}" />
+          </Rectangle.Fill>
+        </Rectangle>
+        <Ellipse x:Name="ellipse" Grid.Column="1" Width="50" Height="50" Margin="55,0">
+          <Ellipse.Fill>
+            <SolidColorBrush Color="{DynamicResource SystemAccentColor}" />
+          </Ellipse.Fill>
+        </Ellipse>
+      </Grid>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="StackedButtonsExample" Spacing="8">
+    <TextBlock Text="Driving several related animations together using ExpressionAnimation" FontSize="18" />
+    <StackPanel Margin="0,0,0,50">
+      <TextBlock Theme="{DynamicResource BodyTextBlockStyle}"
+                 Text="Hover over any button to animate its scale. Notice that the other buttons move out of the way." />
+      <TextBlock Margin="0,0,0,12"
+                 Text="Each button animates as a function of the previous button's scale and translation." />
+      <Button x:Name="ExpressionButton1" Width="100" Height="50" Margin="5" Content="Item 1" />
+      <Button x:Name="ExpressionButton2" Width="100" Height="50" Margin="5" Content="Item 2" />
+      <Button x:Name="ExpressionButton3" Width="100" Height="50" Margin="5" Content="Item 3" />
+      <Button x:Name="ExpressionButton4" Width="100" Height="50" Margin="5" Content="Item 4" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="ActualSizeExample" Spacing="8">
+    <TextBlock Text="Reference ActualSize in ExpressionAnimations to make novel layouts based on size" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Grid x:Name="LayoutPanel" Width="200" Height="200" Margin="12" HorizontalAlignment="Left" />
+      <StackPanel Grid.Column="1">
+        <TextBlock Text="Change radius" />
+        <Slider x:Name="RadiusSlider" MinWidth="150" AutomationProperties.Name="Change radius"
+                Maximum="400" Minimum="200" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ActualOffsetExample" Spacing="8">
+    <TextBlock Text="Reference ActualOffset and ActualSize in ExpressionAnimations to position elements relative to each other" FontSize="18" TextWrapping="Wrap" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel>
+        <TextBlock Theme="{DynamicResource BodyTextBlockStyle}" TextWrapping="Wrap"
+                   Text="This sample positions a popup relative to a block of text that has variable layout size based on font size. Use the sliders to move and resize the text." />
+        <Grid Margin="0,12,0,0" HorizontalAlignment="Left">
+          <TextBlock x:Name="PopupTarget" Width="300" TextWrapping="Wrap"
+                     FontSize="{x:Bind FontSizeSlider.Value, Mode=OneWay}"
+                     Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
+          <!-- Notice that the popup is a sibling to the target, not an ancestor. -->
+          <Popup x:Name="Popup" ShouldUseOverlayLayer="True"
+                 Placement="AnchorAndGravity" PlacementAnchor="TopLeft" PlacementGravity="BottomRight"
+                 HorizontalOffset="5" VerticalOffset="5">
+            <Border MinWidth="50" MinHeight="50" MaxWidth="200" BorderThickness="2"
+                    Background="{DynamicResource FlyoutBackgroundThemeBrush}"
+                    BorderBrush="{DynamicResource SystemControlForegroundChromeGrayBrush}">
+              <TextBlock Margin="6" VerticalAlignment="Center" TextWrapping="Wrap"
+                         Theme="{DynamicResource CaptionTextBlockStyle}"
+                         Text="I am always right aligned center to the target." />
+            </Border>
+          </Popup>
+        </Grid>
+      </StackPanel>
+      <StackPanel Grid.Column="1" MinWidth="150">
+        <TextBlock Text="Change font size" />
+        <Slider x:Name="FontSizeSlider" AutomationProperties.Name="Change font size"
+                Maximum="24" Minimum="12" />
+        <TextBlock Text="Change text margin" />
+        <Slider x:Name="MarginSlider" AutomationProperties.Name="Change text margin"
+                Maximum="100" Minimum="0" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>

@@ -4577,6 +4577,180 @@
           "notes": "Replace file? without a default button, and the result text of each button."
         }
       ]
+    },
+    "XamlCompInterop": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/XamlCompInterop.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/composition_interop_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_spring_scales_the_hovered_button_with_the_options"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_ellipse_scale_is_the_inverse_of_the_hovered_rectangle"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_stacked_buttons_follow_the_button_above"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_buttons_lie_on_a_circle_of_the_panel_size"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_popup_stays_right_of_the_text_as_it_moves_and_grows"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_expressions_are_the_source_expressions_over_size_and_offset"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "xaml_comp_interop_reports_a_window_without_a_compositor"
+        }
+      ],
+      "notes": "All five source examples with the handlers of XamlCompInteropPage.xaml.cs in Rust (composition_interop_samples.rs), over FerroUI's composition layer: the spring (SpringVector3NaturalMotionAnimation) of the scale with element_PointerEntered and element_PointerExited, its damping ratio from the selected option and its period from the slider; the expression that keeps the ellipse's scale the inverse of the rectangle's; the expression that moves each stacked button by the scale and the translation of the button above; the eight buttons on a circle whose radius follows the size of the panel and RadiusSlider_ValueChanged; and the popup kept right of the text, centred on it, whose size follows the font size (the source's OneWay x:Bind) and the margin of the slider. UIElement.StartAnimation is the animation started with its Target on the element's composition visual (ElementCompositionPreview.GetElementVisual), and an element given to SetExpressionReferenceParameter is that visual: the expressions read the visual's Size and Offset, which the renderer writes from the element's layout, where the source reads ActualSize and ActualOffset. The popup is shown in the window's overlay layer at its parent's top left corner moved by its margin (AnchorAndGravity with offsets of 5), as WinUI's popup in its XAML root. The margin converter of the source is the slider's handler; Slider has no Header (a text) and no StepFrequency (TickFrequency with IsSnapToTickEnabled). Hovering needs a mouse, pen or touchpad pointer: a touch does not raise PointerEntered.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropNaturalMotionCompositionAnimation.txt",
+          "source_sha256": "dc6af5378f91a5846c7a550e27970256147818029769f417c8cc93dd6b0d4351",
+          "status": "ported",
+          "notes": "CreateSpringVector3Animation with the Target Scale, created on NaturalMotionExample_Loaded; element_PointerEntered (1.5) and element_PointerExited (1) start it on the composition visual of the element, with the damping ratio of the selected option and the period of the slider.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_spring_scales_the_hovered_button_with_the_options"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_reports_a_window_without_a_compositor"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropExpressionanimationEllipseElement.txt",
+          "source_sha256": "ef342c864cf5a5b8f43f0bef0c59b1df329ecd73d3de781a01bb5b82170a2711",
+          "status": "ported",
+          "notes": "The expression Vector3(1/scaleElement.Scale.X, 1/scaleElement.Scale.Y, 1) on the ellipse's Scale, with the rectangle's composition visual as scaleElement; the rectangle scales with the hover handlers.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_ellipse_scale_is_the_inverse_of_the_hovered_rectangle"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropDrivingSeveralRelatedAnimations.txt",
+          "source_sha256": "58ac538f13d843b3ec5c850f5e787125ee67d0a66fb17e14900fc4bd5354d3a4",
+          "status": "ported",
+          "notes": "One expression animation of Translation.Y started on the second, third and fourth button with the button above as above and its index; its parameters are copied when it starts, as in the source.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_stacked_buttons_follow_the_button_above"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropReferenceActualsizeExpressionanimationsMake.txt",
+          "source_sha256": "464d8cc06cae1c0d5c33cf9bd4b44f41990aab861e741cb5125132a5eab0c9c6",
+          "status": "ported",
+          "notes": "The eight buttons of ActualSizeExample_Loaded (added once; a page loaded again restarts their animations) on the circle of the source's expression, which reads the panel visual's Size for ActualSize; RadiusSlider_ValueChanged sets the panel's width and height.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_buttons_lie_on_a_circle_of_the_panel_size"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_expressions_are_the_source_expressions_over_size_and_offset"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropReferenceActualoffsetActualsizeExpressionanimations.txt",
+          "source_sha256": "92aad9d0bf9031be05668fd057b8d19ddb85853fc43d4e0dac473f10c04278e1",
+          "status": "ported",
+          "notes": "The expression of ActualOffsetExample_Loaded over the target visual's Offset and Size on the Translation of the popup's content, in the window's overlay layer at the grid's top left corner moved by the popup's margin; the font size keeps the source's OneWay x:Bind and the margin is the slider's handler (the source's doubleToThicknessConverter).",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_popup_stays_right_of_the_text_as_it_moves_and_grows"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "xaml_comp_interop_expressions_are_the_source_expressions_over_size_and_offset"
+            }
+          ]
+        }
+      ]
+    },
+    "ContentIsland": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ContentIsland.xaml",
+        "samples/WinUIGallery/examples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+          "name": "content_island_page_keeps_the_cards_and_says_why_it_has_no_island"
+        }
+      ],
+      "notes": "The source page's example is not applicable: ContentIsland, ChildSiteLink and the SceneNode model the source loads into each card are Windows App SDK APIs that host the content of another framework or process, which FerroUI does not have. The page keeps the source's text, its Load model button (disabled), the six cards of its WrapPanel and a visible diagnostic; content of a FerroUI composition tree is hosted in an element with ElementCompositionPreview.SetElementChildVisual.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ContentIsland/BasicContentIslandContent.txt",
+          "source_sha256": "7e59bfd55b19d54bb45a73ed77d4903bf9e3b3d7408646e2a501ba99ef293c03",
+          "status": "not-applicable",
+          "reason": "ContentIsland, ChildSiteLink and the SceneNode model of HelmetScenario are Windows App SDK APIs (Microsoft.UI.Content) that host the content of another framework or process; FerroUI has no content islands.",
+          "notes": "The page keeps the source's text, its Load model button (disabled), the six cards of the WrapPanel and a visible diagnostic.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/composition_interop_samples_tests.rs",
+              "name": "content_island_page_keeps_the_cards_and_says_why_it_has_no_island"
+            }
+          ]
+        }
+      ]
     }
   }
 }
