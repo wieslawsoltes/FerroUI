@@ -5,6 +5,7 @@
 
 pub mod axis;
 pub mod cartesian_chart_engine;
+pub mod default_tooltip;
 pub mod easing;
 pub mod easing_functions;
 pub mod geo;
@@ -59,13 +60,14 @@ pub use polar_chart_engine::{
     PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, PolarToolTipLabelFormatters,
     COTANGENT_ANGLE, TANGENT_ANGLE,
 };
+pub use default_tooltip::DefaultTooltip;
 pub use sankey_chart_engine::{
     SankeyChartEngine, SankeyLabelPosition, SankeyLayoutKind, SankeyLink, SankeyNode,
     SankeyOptions, SankeySeries, SankeySeriesOptions,
 };
 pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
-    PathCommand, PointId, Primitive, Scene, TextAnchor,
+    PathCommand, PointId, Primitive, Scene, TextAnchor, TooltipLabelParts,
 };
 pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
 pub use tooltips::{

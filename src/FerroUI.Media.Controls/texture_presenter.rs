@@ -6,6 +6,8 @@ use ferroui_base::{
     layout::LayoutableImpl,
     media::{RectangleGeometry, Stretch},
     rendering::composition::{frames::*, *},
+    rendering::scene3d::{register_frame_provider, IScene3DFrameProvider, Scene3DFrameSlot},
+    reactive::{Disposable, Subscription},
     threading::Dispatcher,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix,
     Rect, Ref, Size, StyledElementImpl, StyledProperty, Vector, Visual, VisualImpl, VisualImplExt,
@@ -30,9 +32,38 @@ pub trait TextureFrameImporter {
         frame: &FrameLease,
     ) -> Result<ImportedTextureFrame, MediaError>;
 }
+/// The frames of a presenter for a 3D material whose `VisualBrush` paints with it (#608, step
+/// D7). The slot is filled only once something asks for it.
+struct PresenterFrames {
+    owner: RefCell<Option<ferroui_base::WeakRef<TexturePresenter>>>,
+    slot: Arc<Scene3DFrameSlot>,
+    followed: Cell<bool>,
+    changed: MediaEvent<()>,
+}
+impl IScene3DFrameProvider for PresenterFrames {
+    fn frame_slot(&self) -> Arc<Scene3DFrameSlot> {
+        if !self.followed.replace(true) {
+            // Asked while a scene is drawn: the frame shown now is imported after that.
+            let owner = self.owner.borrow().clone();
+            Dispatcher::ui_thread().spawn_local(async move {
+                if let Some(view) = owner.and_then(|weak| weak.upgrade()) {
+                    view.publish_to_slot();
+                }
+            });
+        }
+        self.slot.clone()
+    }
+    fn subscribe_frames(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let subscription = RefCell::new(Some(self.changed.subscribe(move |_| handler())));
+        Subscription::new(Disposable::create(move || {
+            subscription.borrow_mut().take();
+        }))
+    }
+}
 #[repr(C)]
 pub struct TexturePresenter {
     base: Control,
+    frames: Rc<PresenterFrames>,
     source: RefCell<Option<Arc<FrameMailbox>>>,
     importer: RefCell<Option<Rc<dyn TextureFrameImporter>>>,
     interop: RefCell<Option<Rc<dyn ICompositionGpuInterop>>>,
@@ -58,6 +89,9 @@ impl FerroObjectImpl for TexturePresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_clip_to_bounds(true);
+        *this.frames.owner.borrow_mut() = Some(this.to_ref().downgrade());
+        let provider: Rc<dyn IScene3DFrameProvider> = this.frames.clone();
+        register_frame_provider(&this.to_ref().upcast::<Visual>(), &provider);
     }
     fn on_property_changed(this: &Self, args: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, args);
@@ -85,6 +119,12 @@ impl TexturePresenter {
     pub fn construct() -> Self {
         Self {
             base: Control::construct(),
+            frames: Rc::new(PresenterFrames {
+                owner: RefCell::new(None),
+                slot: Scene3DFrameSlot::new(),
+                followed: Cell::new(false),
+                changed: MediaEvent::default(),
+            }),
             source: RefCell::new(None),
             importer: RefCell::new(None),
             interop: RefCell::new(None),
@@ -202,6 +242,9 @@ impl TexturePresenter {
             visual.dispose();
         }
         if let Some(surface) = self.surface.borrow_mut().take() {
+            if self.frames.followed.get() {
+                surface.clear_frame_slot_async(self.frames.slot.clone());
+            }
             surface.dispose();
         }
         self.cleared.emit(&());
@@ -221,6 +264,9 @@ impl TexturePresenter {
             if had_frame {
                 if let Some(surface) = self.surface.borrow().clone() {
                     surface.clear_async();
+                    if self.frames.followed.get() {
+                        surface.clear_frame_slot_async(self.frames.slot.clone());
+                    }
                 }
                 // A frame that was submitted and never presented is not cleared.
                 if self.shown.replace(false) {
@@ -257,8 +303,15 @@ impl TexturePresenter {
         };
         let metadata = frame.metadata().clone();
         let validity = frame.clone();
+        // A 3D material follows this presenter: the same frame in its slot, acquired once.
+        let for_slot = self.frames.followed.get().then(|| (frame.clone(), imported.producer_ready.clone()));
         let task =
             surface.update_shared_frame_async(&*imported.image, frame, imported.producer_ready);
+        if let Some((frame, ready)) = for_slot {
+            let filled = surface.update_frame_slot_async(&*imported.image, frame, ready, self.frames.slot.clone());
+            let frames = self.frames.clone();
+            filled.on_completed(move || frames.changed.emit(&()));
+        }
         // Import, update and disposal are ordered render-thread jobs. Retire the
         // temporary import in that same batch; the acquired bitmap/GPU read
         // owns its lease independently. Waiting for the UI completion callback
@@ -300,6 +353,28 @@ impl TexturePresenter {
                 view.present_latest();
             }
         });
+    }
+    /// Puts the frame shown now into the slot, for a 3D material that has just asked for it.
+    fn publish_to_slot(&self) {
+        let frame = self.source.borrow().as_ref().and_then(|source| source.latest());
+        let interop = self.interop.borrow().clone();
+        let surface = self.surface.borrow().clone();
+        let importer = self.importer.borrow().clone();
+        let (Some(frame), Some(interop), Some(surface), Some(importer)) = (frame, interop, surface, importer) else {
+            return;
+        };
+        if interop.is_lost() {
+            return;
+        }
+        // A failure here is reported by the presentation of the same frame.
+        let Ok(imported) = importer.import(&*interop, &frame) else {
+            return;
+        };
+        let filled =
+            surface.update_frame_slot_async(&*imported.image, frame, imported.producer_ready, self.frames.slot.clone());
+        imported.image.dispose_async();
+        let frames = self.frames.clone();
+        filled.on_completed(move || frames.changed.emit(&()));
     }
     fn layout_frame(&self) {
         let Some(visual) = self.visual.borrow().clone() else {
@@ -505,6 +580,52 @@ mod tests {
             }],
             retained_bytes: 320000,
         }
+    }
+    /// #608 D7: a presenter puts its frames into the slot once a 3D material has asked for it,
+    /// and tells the material of each.
+    #[test]
+    fn a_followed_presenter_fills_its_slot_and_reports_each_frame() {
+        use ferroui_base::rendering::scene3d::find_frame_provider;
+        let services = CompositorTestServices::start(TestServices::styled_window());
+        let compositor = services.compositor();
+        let interop = CompositionInterop::new(compositor, Rc::new(Feature));
+        let view = TexturePresenter::new();
+        let source = Arc::new(FrameMailbox::new(1, 1));
+        let budget = FrameBudget::new(Default::default());
+        let importer = Rc::new(Importer(Cell::new(0)));
+        view.set_frame_source(Some(source.clone()), Some(importer.clone()));
+        *view.interop.borrow_mut() = Some(interop);
+        *view.surface.borrow_mut() = Some(compositor.create_drawing_surface());
+
+        // Not followed: no slot job.
+        source.publish(budget.lease(metadata(), ()).unwrap()).unwrap();
+        view.present_latest();
+        services.run_jobs();
+        assert!(view.frames.slot.current().is_none());
+
+        let visual: Ref<Visual> = view.clone().upcast();
+        let provider = find_frame_provider(&visual).expect("the presenter gives its frames");
+        let heard = Rc::new(Cell::new(0));
+        let count = heard.clone();
+        let _guard = provider.subscribe_frames(Rc::new(move || count.set(count.get() + 1)));
+        let slot = provider.frame_slot();
+        // The frame shown now is put into the slot once the UI thread runs again.
+        view.publish_to_slot();
+        services.run_jobs();
+        assert_eq!(1, slot.current().expect("the frame shown").1.identity.sequence);
+        assert!(heard.get() >= 1);
+
+        let mut next = metadata();
+        next.identity.sequence = 2;
+        source.publish(budget.lease(next, ()).unwrap()).unwrap();
+        view.present_latest();
+        services.run_jobs();
+        services.run_jobs();
+        assert_eq!(2, slot.current().expect("the next frame").1.identity.sequence);
+
+        view.set_frame_source(None, None);
+        services.run_jobs();
+        assert!(slot.current().is_none(), "the frame is given back with the source");
     }
     #[test]
     fn crop_to_fill_preserves_content_beyond_the_viewport_and_maps_true_corners() {
