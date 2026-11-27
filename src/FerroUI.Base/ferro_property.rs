@@ -60,7 +60,7 @@ impl<T: PartialEq + 'static> AnyValue for T {
         // call of the shared check below cost more than the comparison itself. The test is a
         // constant of each copy, so every other type keeps the small shared form (#566).
         if is_common_value_type::<T>() {
-            return other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| value_equals(self, other));
+            return eq_of_common_type(self, other);
         }
         data_of_type(other, TypeId::of::<T>()).is_some_and(|other| {
             // SAFETY: `data_of_type` returned the data of a value whose type is `T`, which `other`
@@ -72,6 +72,14 @@ impl<T: PartialEq + 'static> AnyValue for T {
     fn any_value_type_name(&self) -> &'static str {
         std::any::type_name::<T>()
     }
+}
+
+/// The boxed comparison of a common scalar type ([`is_common_value_type`]): its type check
+/// inline, out of line itself, so that it is one copy for each of these types and not one at
+/// every comparison of them.
+#[inline(never)]
+fn eq_of_common_type<T: PartialEq + 'static>(value: &T, other: &dyn AnyValue) -> bool {
+    other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| value_equals(value, other))
 }
 
 /// Whether `T` is one of the scalar value types whose boxed comparison keeps its type check
