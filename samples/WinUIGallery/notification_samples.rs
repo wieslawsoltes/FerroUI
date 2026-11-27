@@ -2,16 +2,23 @@
 //! handlers of `AppNotificationPage.xaml.cs`, `BadgeNotificationManagerPage.xaml.cs` and
 //! `JumpListPage.xaml.cs`) over the services FerroUI has for them.
 //!
-//! FerroUI has no service for the notifications of the operating system, for the badge of the
-//! app's icon or for the jump lists of Windows. An `AppNotificationBuilder` of the source builds
-//! the content of a card that the window's `WindowNotificationManager` shows; the badge of
+//! The notifications are those of `AppNotificationManager` (#1276): the notification center of
+//! the system shows them when the app registered the platform's notification service
+//! (`use_platform_app_notifications`) and the service can serve the app; otherwise a card of the
+//! window's `WindowNotificationManager` shows what the notification would. FerroUI has no
+//! service for the badge of the app's icon or for the jump lists of Windows yet: the badge of
 //! `BadgeNotificationManager.Current` is shown by an `InfoBadge` on a preview of the app's icon;
 //! and the jump list of the app is its dock menu (`NativeDock.Menu` of the application), which
 //! the macOS platform shows. Everything the pages draw is ordinary controls, drawn by each
-//! backend's GPU renderer; nothing is sent to the system's notification center.
+//! backend's GPU renderer.
 
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{FontFamily, FontWeight, IBrush, ImageBrush, Stretch, TextWrapping};
+use ferroui_base::platform::notifications::{
+    AppNotification, AppNotificationBuilder, AppNotificationButton, AppNotificationComboBox,
+    AppNotificationImageCrop, AppNotificationManager, AppNotificationProgressBar,
+    AppNotificationSoundEvent,
+};
 use ferroui_base::utilities::{CultureInfo, DateTime};
 use ferroui_base::{BoxedValue, Ref, WeakRef};
 use ferroui_controls::automation::AutomationProperties;
@@ -40,301 +47,153 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
 
 /// The source's `appNotificationSoundEvents`: the members of `AppNotificationSoundEvent` the
 /// ComboBox lists, `Default` selected.
-pub(crate) const SOUND_EVENTS: [&str; 6] = ["Default", "IM", "Reminder", "SMS", "Alarm", "Call"];
+pub(crate) const SOUND_EVENTS: [AppNotificationSoundEvent; 6] = [
+    AppNotificationSoundEvent::Default,
+    AppNotificationSoundEvent::IM,
+    AppNotificationSoundEvent::Reminder,
+    AppNotificationSoundEvent::SMS,
+    AppNotificationSoundEvent::Alarm,
+    AppNotificationSoundEvent::Call,
+];
 
-/// The crop of an image of a notification (`AppNotificationImageCrop`).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub(crate) enum AppNotificationImageCrop {
-    #[default]
-    Default,
-    Circle,
-}
-
-/// An `AppNotificationComboBox`: an input of the notification with its items (id and content)
-/// and the id of the selected item.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct AppNotificationComboBox {
-    pub id: &'static str,
-    pub items: Vec<(&'static str, &'static str)>,
-    pub selected_item: Option<&'static str>,
-}
-
-impl AppNotificationComboBox {
-    pub(crate) fn new(id: &'static str) -> Self {
-        Self {
-            id,
-            items: Vec::new(),
-            selected_item: None,
-        }
-    }
-
-    pub(crate) fn add_item(mut self, id: &'static str, content: &'static str) -> Self {
-        self.items.push((id, content));
-        self
-    }
-
-    pub(crate) fn set_selected_item(mut self, id: &'static str) -> Self {
-        self.selected_item = Some(id);
-        self
-    }
-}
-
-/// An `AppNotificationButton`: its content and its arguments (`AddArgument`), which the button
-/// of the card carries as its command parameter (`key=value;key=value`, the arguments string of
-/// a Windows notification).
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct AppNotificationButton {
-    pub content: &'static str,
-    pub arguments: Vec<(&'static str, &'static str)>,
-}
-
-impl AppNotificationButton {
-    pub(crate) fn new(content: &'static str) -> Self {
-        Self {
-            content,
-            arguments: Vec::new(),
-        }
-    }
-
-    pub(crate) fn add_argument(mut self, key: &'static str, value: &'static str) -> Self {
-        self.arguments.push((key, value));
-        self
-    }
-
-    pub(crate) fn argument_string(&self) -> String {
-        self.arguments
-            .iter()
-            .map(|(key, value)| format!("{key}={value}"))
-            .collect::<Vec<_>>()
-            .join(";")
-    }
-}
-
-/// An `AppNotificationProgressBar`: its title, its value from 0 to 1, the text shown for the value
-/// and its status.
-#[derive(Clone, Debug, Default, PartialEq)]
-pub(crate) struct AppNotificationProgressBar {
-    pub title: &'static str,
-    pub value: f64,
-    pub value_string_override: &'static str,
-    pub status: &'static str,
-}
-
-/// The source's `AppNotificationBuilder`: what a notification shows, built into the content of a
-/// card of the window's notification manager.
-#[derive(Clone, Debug, Default)]
-pub(crate) struct AppNotificationBuilder {
-    pub texts: Vec<&'static str>,
-    pub app_logo: Option<(&'static str, AppNotificationImageCrop)>,
-    pub audio_event: Option<&'static str>,
-    pub time_stamp: Option<DateTime>,
-    pub hero_image: Option<&'static str>,
-    pub attribution_text: Option<&'static str>,
-    pub combo_boxes: Vec<AppNotificationComboBox>,
-    pub text_boxes: Vec<(&'static str, &'static str, &'static str)>,
-    pub buttons: Vec<AppNotificationButton>,
-    pub progress_bar: Option<AppNotificationProgressBar>,
-}
-
-impl AppNotificationBuilder {
-    pub(crate) fn new() -> Self {
-        Self::default()
-    }
-
-    pub(crate) fn add_text(mut self, text: &'static str) -> Self {
-        self.texts.push(text);
-        self
-    }
-
-    pub(crate) fn set_app_logo_override(
-        mut self,
-        uri: &'static str,
-        crop: AppNotificationImageCrop,
-    ) -> Self {
-        self.app_logo = Some((uri, crop));
-        self
-    }
-
-    pub(crate) fn set_audio_event(mut self, event: &'static str) -> Self {
-        self.audio_event = Some(event);
-        self
-    }
-
-    pub(crate) fn set_time_stamp(mut self, time: DateTime) -> Self {
-        self.time_stamp = Some(time);
-        self
-    }
-
-    pub(crate) fn set_hero_image(mut self, uri: &'static str) -> Self {
-        self.hero_image = Some(uri);
-        self
-    }
-
-    pub(crate) fn set_attribution_text(mut self, text: &'static str) -> Self {
-        self.attribution_text = Some(text);
-        self
-    }
-
-    pub(crate) fn add_combo_box(mut self, combo_box: AppNotificationComboBox) -> Self {
-        self.combo_boxes.push(combo_box);
-        self
-    }
-
-    pub(crate) fn add_text_box(
-        mut self,
-        id: &'static str,
-        placeholder: &'static str,
-        title: &'static str,
-    ) -> Self {
-        self.text_boxes.push((id, placeholder, title));
-        self
-    }
-
-    pub(crate) fn add_button(mut self, button: AppNotificationButton) -> Self {
-        self.buttons.push(button);
-        self
-    }
-
-    pub(crate) fn add_progress_bar(mut self, progress_bar: AppNotificationProgressBar) -> Self {
-        self.progress_bar = Some(progress_bar);
-        self
-    }
-
-    /// `BuildNotification`: the content of the card. A notification with inputs stays until it
-    /// is closed or a button is clicked, as a Windows notification with inputs waits for them; the
-    /// others close after the manager's time.
-    pub(crate) fn build_notification(self) -> AppNotification {
-        let content = StackPanel::new();
-        content.set_spacing(8.0);
-        content.set_name(Some("NotificationContent".into()));
-
-        if let Some(uri) = self.hero_image {
-            let hero = Image::new();
-            hero.set_name(Some("NotificationHeroImage".into()));
-            hero.set_height(150.0);
-            hero.set_stretch(Stretch::UniformToFill);
-            if let Ok(bitmap) = crate::assets::load_bitmap(uri) {
-                hero.set_source(Some(Rc::new(bitmap)));
-            }
-            content.children().add(hero);
-        }
-
-        let header = Grid::new();
-        header.set_column_definitions(
-            ColumnDefinitions::parse("Auto,*").expect("the columns of the header"),
-        );
-        header.set_column_spacing(12.0);
-        let texts = StackPanel::new();
-        texts.set_spacing(2.0);
-        if let Some((uri, crop)) = self.app_logo {
-            let logo = app_logo(uri, crop);
-            logo.set_vertical_alignment(VerticalAlignment::Top);
-            header.children().add(logo);
-            Grid::set_column(&texts, 1);
-        } else {
-            Grid::set_column_span(&texts, 2);
-        }
-        for (index, text) in self.texts.iter().enumerate() {
-            let block = text_block(
-                text,
-                if index == 0 {
-                    "NotificationTitle"
-                } else {
-                    "NotificationText"
-                },
-            );
-            if index == 0 {
-                block.set_font_weight(FontWeight::SemiBold);
-            }
-            texts.children().add(block);
-        }
-        if let Some(attribution) = self.attribution_text {
-            let block = caption(attribution, "NotificationAttribution");
-            texts.children().add(block);
-        }
-        if let Some(time) = self.time_stamp {
-            let block = caption(
-                &time.to_string_format("t", &CultureInfo::current_formatting()),
-                "NotificationTimeStamp",
-            );
-            texts.children().add(block);
-        }
-        if let Some(event) = self.audio_event {
-            texts.children().add(caption(
-                &format!("Sound: {event}"),
-                "NotificationSoundEvent",
-            ));
-        }
-        header.children().add(texts);
-        content.children().add(header);
-
-        for input in &self.combo_boxes {
-            let combo = ComboBox::new();
-            combo.set_name(Some(input.id.into()));
-            combo.set_horizontal_alignment(HorizontalAlignment::Stretch);
-            for (_, item) in &input.items {
-                combo
-                    .items()
-                    .add(Some(Rc::new(item.to_string()) as BoxedValue));
-            }
-            if let Some(selected) = input.selected_item {
-                if let Some(index) = input.items.iter().position(|(id, _)| *id == selected) {
-                    combo.set_selected_index(index as i32);
-                }
-            }
-            content.children().add(combo);
-        }
-        for (id, placeholder, text) in &self.text_boxes {
-            let text_box = TextBox::new();
-            text_box.set_name(Some(id.to_string()));
-            text_box.set_placeholder_text(Some(placeholder));
-            text_box.set_text(Some(*text));
-            content.children().add(text_box);
-        }
-
-        if let Some(progress) = &self.progress_bar {
-            content.children().add(progress_bar(progress));
-        }
-
-        let keep_open = !self.combo_boxes.is_empty() || !self.text_boxes.is_empty();
-        if !self.buttons.is_empty() {
-            let row = Grid::new();
-            let columns = vec!["*"; self.buttons.len()].join(",");
-            row.set_column_definitions(
-                ColumnDefinitions::parse(&columns).expect("the columns of the buttons"),
-            );
-            row.set_column_spacing(8.0);
-            let weak_content = content.downgrade();
-            for (index, source) in self.buttons.iter().enumerate() {
-                let button = Button::new();
-                button.set_name(Some(format!("NotificationButton{index}")));
-                button.set_content(Some(Rc::new(source.content.to_string()) as BoxedValue));
-                button.set_horizontal_alignment(HorizontalAlignment::Stretch);
-                button.set_command_parameter(Some(Rc::new(source.argument_string()) as BoxedValue));
-                Grid::set_column(&button, index as i32);
-                let weak_content = weak_content.clone();
-                button.click(move |_, _| {
-                    // A click on a button of a Windows notification dismisses it and activates the
-                    // app with the button's arguments, which the source's app does not handle.
-                    if let Some(card) = weak_content.upgrade().and_then(|content| {
-                        content.find_ancestor_of_type::<NotificationCard>(false)
-                    }) {
-                        card.close();
-                    }
-                });
-                row.children().add(button);
-            }
-            content.children().add(row);
-        }
-
-        AppNotification { content, keep_open }
-    }
-}
-
-/// A built notification: the content of its card, and whether it stays until it is closed.
-pub(crate) struct AppNotification {
+/// The card of a notification in the window: its content, and whether it stays until it is
+/// closed.
+pub(crate) struct NotificationCardContent {
     pub content: Ref<StackPanel>,
     pub keep_open: bool,
+}
+
+/// The content of the card that shows `notification` in the window, where the platform has no
+/// notification service. A notification with inputs stays until it is closed or a button is
+/// clicked, as a Windows notification with inputs waits for them; the others close after the
+/// manager's time.
+pub(crate) fn card_content(notification: &AppNotification) -> NotificationCardContent {
+    let content = StackPanel::new();
+    content.set_spacing(8.0);
+    content.set_name(Some("NotificationContent".into()));
+
+    if let Some(uri) = notification.hero_image() {
+        let hero = Image::new();
+        hero.set_name(Some("NotificationHeroImage".into()));
+        hero.set_height(150.0);
+        hero.set_stretch(Stretch::UniformToFill);
+        if let Ok(bitmap) = crate::assets::load_bitmap(uri) {
+            hero.set_source(Some(Rc::new(bitmap)));
+        }
+        content.children().add(hero);
+    }
+
+    let header = Grid::new();
+    header.set_column_definitions(
+        ColumnDefinitions::parse("Auto,*").expect("the columns of the header"),
+    );
+    header.set_column_spacing(12.0);
+    let texts = StackPanel::new();
+    texts.set_spacing(2.0);
+    if let Some((uri, crop)) = notification.app_logo_override() {
+        let logo = app_logo(uri, crop);
+        logo.set_vertical_alignment(VerticalAlignment::Top);
+        header.children().add(logo);
+        Grid::set_column(&texts, 1);
+    } else {
+        Grid::set_column_span(&texts, 2);
+    }
+    for (index, text) in notification.texts().iter().enumerate() {
+        let block = text_block(
+            text,
+            if index == 0 {
+                "NotificationTitle"
+            } else {
+                "NotificationText"
+            },
+        );
+        if index == 0 {
+            block.set_font_weight(FontWeight::SemiBold);
+        }
+        texts.children().add(block);
+    }
+    if let Some(attribution) = notification.attribution_text() {
+        let block = caption(attribution, "NotificationAttribution");
+        texts.children().add(block);
+    }
+    if let Some(time) = notification.time_stamp() {
+        let block = caption(
+            &time.to_string_format("t", &CultureInfo::current_formatting()),
+            "NotificationTimeStamp",
+        );
+        texts.children().add(block);
+    }
+    if let Some(event) = notification.audio_event() {
+        texts.children().add(caption(
+            &format!("Sound: {}", event.name()),
+            "NotificationSoundEvent",
+        ));
+    }
+    header.children().add(texts);
+    content.children().add(header);
+
+    for input in notification.combo_boxes() {
+        let combo = ComboBox::new();
+        combo.set_name(Some(input.id().into()));
+        combo.set_horizontal_alignment(HorizontalAlignment::Stretch);
+        for (_, item) in input.items() {
+            combo
+                .items()
+                .add(Some(Rc::new(item.to_string()) as BoxedValue));
+        }
+        if let Some(selected) = input.selected_item() {
+            if let Some(index) = input.items().iter().position(|(id, _)| id == selected) {
+                combo.set_selected_index(index as i32);
+            }
+        }
+        content.children().add(combo);
+    }
+    for input in notification.text_boxes() {
+        let text_box = TextBox::new();
+        text_box.set_name(Some(input.id().to_string()));
+        text_box.set_placeholder_text(Some(input.placeholder_text()));
+        text_box.set_text(Some(input.title()));
+        content.children().add(text_box);
+    }
+
+    if let Some(progress) = notification.progress_bar() {
+        content.children().add(progress_bar(progress));
+    }
+
+    if !notification.buttons().is_empty() {
+        let row = Grid::new();
+        let columns = vec!["*"; notification.buttons().len()].join(",");
+        row.set_column_definitions(
+            ColumnDefinitions::parse(&columns).expect("the columns of the buttons"),
+        );
+        row.set_column_spacing(8.0);
+        let weak_content = content.downgrade();
+        for (index, source) in notification.buttons().iter().enumerate() {
+            let button = Button::new();
+            button.set_name(Some(format!("NotificationButton{index}")));
+            button.set_content(Some(Rc::new(source.content().to_string()) as BoxedValue));
+            button.set_horizontal_alignment(HorizontalAlignment::Stretch);
+            button.set_command_parameter(Some(Rc::new(source.argument_string()) as BoxedValue));
+            Grid::set_column(&button, index as i32);
+            let weak_content = weak_content.clone();
+            button.click(move |_, _| {
+                // A click on a button of a Windows notification dismisses it and activates the
+                // app with the button's arguments, which the source's app does not handle.
+                if let Some(card) = weak_content.upgrade().and_then(|content| {
+                    content.find_ancestor_of_type::<NotificationCard>(false)
+                }) {
+                    card.close();
+                }
+            });
+            row.children().add(button);
+        }
+        content.children().add(row);
+    }
+
+    NotificationCardContent {
+        content,
+        keep_open: notification.has_inputs(),
+    }
 }
 
 fn text_block(text: &str, name: &str) -> Ref<TextBlock> {
@@ -388,22 +247,28 @@ fn app_logo(uri: &str, crop: AppNotificationImageCrop) -> Ref<Control> {
 fn progress_bar(progress: &AppNotificationProgressBar) -> Ref<Control> {
     let panel = StackPanel::new();
     panel.set_spacing(4.0);
-    panel
-        .children()
-        .add(text_block(progress.title, "NotificationProgressTitle"));
+    if let Some(title) = progress.title() {
+        panel
+            .children()
+            .add(text_block(title, "NotificationProgressTitle"));
+    }
     let bar = ProgressBar::new();
     bar.set_name(Some("NotificationProgressBar".into()));
     bar.set_minimum(0.0);
     bar.set_maximum(1.0);
-    bar.set_range_value(progress.value);
+    bar.set_range_value(progress.value());
     panel.children().add(bar);
     let row = Grid::new();
     row.set_column_definitions(
         ColumnDefinitions::parse("*,Auto").expect("the columns of the status"),
     );
     row.children()
-        .add(caption(progress.status, "NotificationProgressStatus"));
-    let value = caption(progress.value_string_override, "NotificationProgressValue");
+        .add(caption(progress.status(), "NotificationProgressStatus"));
+    let percent = format!("{}%", (progress.value() * 100.0).round());
+    let value = caption(
+        progress.value_string_override().unwrap_or(&percent),
+        "NotificationProgressValue",
+    );
     Grid::set_column(&value, 1);
     row.children().add(value);
     panel.children().add(row);
@@ -440,14 +305,50 @@ pub(crate) fn notification_manager(root: &Control) -> Option<Ref<WindowNotificat
     })
 }
 
-/// `AppNotificationManager.Default.Show(notification)`: the card in the window of `root`.
-pub(crate) fn show(root: &Control, notification: AppNotification) {
+ferroui_base::ferro_thread_local! {
+    /// Whether the page registered the app with the notification service
+    /// (`AppNotificationManager.Default.Register`, which the source's app calls at start).
+    static REGISTERED: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Where the page's notifications are shown.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum NotificationHost {
+    /// The notification center of the system, through `AppNotificationManager`.
+    System,
+    /// Cards of the window's notification manager.
+    Window,
+}
+
+/// The notification center of the system when the app registered a notification service that
+/// can show its notifications, the window otherwise.
+pub(crate) fn notification_host() -> NotificationHost {
+    if AppNotificationManager::is_supported() {
+        NotificationHost::System
+    } else {
+        NotificationHost::Window
+    }
+}
+
+/// `AppNotificationManager.Default.Show(notification)`: the notification center of the system,
+/// or the card in the window of `root`.
+pub(crate) fn show(root: &Control, mut notification: AppNotification) {
+    if notification_host() == NotificationHost::System {
+        let manager = AppNotificationManager::default();
+        if !REGISTERED.with(|registered| registered.replace(true)) {
+            manager.register();
+        }
+        if manager.show(&mut notification).is_ok() {
+            return;
+        }
+    }
     let Some(manager) = notification_manager(root) else {
         return;
     };
-    let expiration = notification.keep_open.then_some(Duration::ZERO);
+    let card = card_content(&notification);
+    let expiration = card.keep_open.then_some(Duration::ZERO);
     manager.show_with(
-        Control::boxed(notification.content),
+        Control::boxed(card.content),
         NotificationType::Information,
         expiration,
         None,
@@ -465,7 +366,7 @@ pub(crate) fn basic_notification() -> AppNotification {
 }
 
 /// `ShowInformationalNotificationWithLogoButton_Click` with the selected sound event.
-pub(crate) fn informational_notification(sound_event: &'static str) -> AppNotification {
+pub(crate) fn informational_notification(sound_event: AppNotificationSoundEvent) -> AppNotification {
     AppNotificationBuilder::new()
         .add_text("Control Highlight: PersonPicture")
         .add_text("Use the PersonPicture control to display user avatars with initials or images.")
@@ -512,12 +413,13 @@ pub(crate) fn progress_notification() -> AppNotification {
     AppNotificationBuilder::new()
         .add_text("Progress Bar Example")
         .add_text("This is a sample notification showing how to use a progress bar.")
-        .add_progress_bar(AppNotificationProgressBar {
-            title: "Demo Progress",
-            value: 0.6,
-            value_string_override: "60%",
-            status: "In progress...",
-        })
+        .add_progress_bar(
+            AppNotificationProgressBar::new()
+                .set_title("Demo Progress")
+                .set_value(0.6)
+                .set_value_string_override("60%")
+                .set_status("In progress..."),
+        )
         .build_notification()
 }
 
@@ -532,6 +434,12 @@ fn wire_app_notification(root: &Ref<Control>) {
             .unwrap_or(SOUND_EVENTS[0])
     };
     let selected_sound_event = Rc::new(selected_sound_event);
+    // The InfoBar of where the notifications are shown.
+    let system = notification_host() == NotificationHost::System;
+    root.get_control::<InfoBar>("NotificationCenterInfoBar")
+        .set_is_open(system);
+    root.get_control::<InfoBar>("NotificationHostInfoBar")
+        .set_is_open(!system);
     let buttons: [(&str, Rc<dyn Fn() -> AppNotification>); 5] = [
         ("ShowNotificationButton", Rc::new(basic_notification)),
         ("ShowInformationalNotificationWithLogoButton", {
@@ -958,6 +866,7 @@ pub(crate) fn add_custom_group(items: &mut Vec<JumpListItem>) {
 /// Clears the app's jump list and its dock menu (for the tests).
 #[cfg(test)]
 pub(crate) fn reset() {
+    REGISTERED.with(|registered| registered.set(false));
     JUMP_LIST.with(|list| list.borrow_mut().clear());
     clear_badge();
     MANAGERS.with(|managers| managers.borrow_mut().clear());

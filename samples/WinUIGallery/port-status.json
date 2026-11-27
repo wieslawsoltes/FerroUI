@@ -2347,7 +2347,7 @@
         },
         {
           "path": "samples/WinUIGallery/notification_samples_tests.rs",
-          "name": "app_notification_builder_lays_out_the_source_notifications"
+          "name": "app_notification_cards_lay_out_the_source_notifications"
         },
         {
           "path": "samples/WinUIGallery/notification_samples_tests.rs",
@@ -2356,15 +2356,23 @@
         {
           "path": "samples/WinUIGallery/notification_samples_tests.rs",
           "name": "app_notification_page_keeps_the_source_options_and_says_where_it_shows"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "app_notification_handlers_build_the_source_notifications"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "app_notification_buttons_show_through_the_notification_service_when_there_is_one"
         }
       ],
-      "notes": "All five source examples with the handlers of AppNotificationPage.xaml.cs in Rust (notification_samples.rs): ShowNotificationButton_Click, ShowInformationalNotificationWithLogoButton_Click with the selected AppNotificationSoundEvent, ShowVisualNotificationWithHeroImageButton_Click, ShowNotificationWithControlsButton_Click and ShowNotificationWithProgressBarButton_Click build their notifications with the source's AppNotificationBuilder calls (a builder of the sample). FerroUI has no service for the notifications of the operating system, so AppNotificationManager.Default.Show is the window's WindowNotificationManager, which shows each notification as a card in the bottom right corner of the window (NotificationCard, the InfoBar of the WinUI theme); the first InfoBar says so where the source speaks of Do Not Disturb and the notification center. The texts are the card's title and body, the app logo override a circle of the PersonPicture image, the hero image above the texts with the attribution text below them, the time stamp the short time of DateTime.Now, the ComboBox, the TextBox and the Submit button real controls of the card (the button's arguments action=submit_survey are its command parameter; a click closes the card, the source's app handles no activation), and the progress bar its title, value, value text and status. A card plays no sound: it names its sound event. A card with inputs stays until it is closed or submitted, the others close after five seconds. The sound event ComboBox lists the source's six events (SelectedItem is the index); its Header is composed.",
+      "notes": "All five source examples with the handlers of AppNotificationPage.xaml.cs in Rust (notification_samples.rs): ShowNotificationButton_Click, ShowInformationalNotificationWithLogoButton_Click with the selected AppNotificationSoundEvent, ShowVisualNotificationWithHeroImageButton_Click, ShowNotificationWithControlsButton_Click and ShowNotificationWithProgressBarButton_Click build their notifications with the source's AppNotificationBuilder calls (FerroUI's AppNotificationBuilder of ferroui_base::platform::notifications, #1276), and AppNotificationManager.Default.Show is FerroUI's AppNotificationManager: the gallery registers the notification service of its platform (use_platform_app_notifications), and where that service can serve the app (macOS in an application bundle, Windows with an application user model id, Linux with a notification server; the app registers once, as the source's app does at start) the notification center of the system shows the notification, with what each platform shows of it (docs/porting/winui-controls.md, section G3). Elsewhere the window's WindowNotificationManager shows each notification as a card in the bottom right corner of the window (NotificationCard, the InfoBar of the WinUI theme), and the second InfoBar says so where the first speaks of Do Not Disturb and the notification center. In a card the texts are the title and body, the app logo override a circle of the PersonPicture image, the hero image above the texts with the attribution text below them, the time stamp the short time of DateTime.Now, the ComboBox, the TextBox and the Submit button real controls (the button's arguments action=submit_survey are its command parameter; a click closes the card, the source's app handles no activation), and the progress bar its title, value, value text and status. A card plays no sound: it names its sound event. A card with inputs stays until it is closed or submitted, the others close after five seconds. The sound event ComboBox lists the source's six events (SelectedItem is the index); its Header is composed.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/AppNotification/AppNotificationBasicNotification.txt",
           "source_sha256": "2d024a38923540e860d5074fd241aa1334c20c9d4250ad1f17b8a8d678f958ab",
           "status": "ported",
-          "notes": "The two texts of the source as the title and the body of a card of the window's notification manager.",
+          "notes": "The two texts of the source as the title and the body of the notification (or of a card of the window's notification manager).",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2373,6 +2381,14 @@
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
               "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_handlers_build_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_through_the_notification_service_when_there_is_one"
             }
           ]
         },
@@ -2380,7 +2396,7 @@
           "source": "WinUIGallery/Samples/AppNotification/AppNotificationInformationalNotificationLogoCustom.txt",
           "source_sha256": "7adeb18da484f12745db60c9d5825e6ebc3e9a52d4e661374c2d655a16b9fa2b",
           "status": "ported",
-          "notes": "The texts, the PersonPicture image as a circular logo (AppNotificationImageCrop.Circle), the short time of DateTime.Now as the time stamp and the selected sound event, which the card names (it plays no sound).",
+          "notes": "The texts, the PersonPicture image as a circular logo (AppNotificationImageCrop.Circle), the short time of DateTime.Now as the time stamp and the selected sound event; a card names its sound event (it plays no sound), and the notification center shows the logo where it can load the image.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2388,11 +2404,19 @@
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
-              "name": "app_notification_builder_lays_out_the_source_notifications"
+              "name": "app_notification_cards_lay_out_the_source_notifications"
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
               "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_handlers_build_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_through_the_notification_service_when_there_is_one"
             }
           ]
         },
@@ -2400,7 +2424,7 @@
           "source": "WinUIGallery/Samples/AppNotification/AppNotificationVisualNotificationHeroImage.txt",
           "source_sha256": "b269894b6910dce02c64cc7b0b34c182ad30324ab69ab07a7f402d1f8fa93c4a",
           "status": "ported",
-          "notes": "The source's LandscapeImage5.jpg as the hero image above the texts and the attribution text below them.",
+          "notes": "The source's LandscapeImage5.jpg as the hero image above the texts and the attribution text below them (the notification center shows the image where it can load it).",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2408,7 +2432,11 @@
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
-              "name": "app_notification_builder_lays_out_the_source_notifications"
+              "name": "app_notification_cards_lay_out_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_handlers_build_the_source_notifications"
             }
           ]
         },
@@ -2416,7 +2444,7 @@
           "source": "WinUIGallery/Samples/AppNotification/NotificationAppnotificationControls.txt",
           "source_sha256": "37deb5bf8797028d368d26b5721a27316d561fb0bcd0c73e592876a60743ae81",
           "status": "ported",
-          "notes": "The satisfaction ComboBox with its five items and Neutral selected, the comment TextBox with its placeholder and the Submit button with the arguments action=submit_survey; the card stays until it is closed or submitted, and Submit closes it.",
+          "notes": "The satisfaction ComboBox with its five items and Neutral selected, the comment TextBox with its placeholder and the Submit button with the arguments action=submit_survey; the notification stays until it is closed or submitted, and Submit closes it.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2424,11 +2452,19 @@
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
-              "name": "app_notification_builder_lays_out_the_source_notifications"
+              "name": "app_notification_cards_lay_out_the_source_notifications"
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
               "name": "app_notification_buttons_show_the_source_notifications_in_the_window"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_handlers_build_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_buttons_show_through_the_notification_service_when_there_is_one"
             }
           ]
         },
@@ -2436,7 +2472,7 @@
           "source": "WinUIGallery/Samples/AppNotification/AppNotificationNotificationProgressbar.txt",
           "source_sha256": "257f3e436e854c674367b72bd348011d8f4db5e527a49c4449bb516dd455fa36",
           "status": "ported",
-          "notes": "The progress bar of the card with the title Demo Progress, the value 0.6, the value text 60% and the status In progress....",
+          "notes": "The progress bar with the title Demo Progress, the value 0.6, the value text 60% and the status In progress....",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2444,7 +2480,11 @@
             },
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
-              "name": "app_notification_builder_lays_out_the_source_notifications"
+              "name": "app_notification_cards_lay_out_the_source_notifications"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "app_notification_handlers_build_the_source_notifications"
             }
           ]
         }

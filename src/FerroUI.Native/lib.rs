@@ -98,6 +98,8 @@ mod predicate_callback;
 #[cfg(target_os = "macos")]
 mod screen_impl;
 #[cfg(target_os = "macos")]
+mod app_notification_manager;
+#[cfg(target_os = "macos")]
 mod storage_item;
 
 #[cfg(target_os = "macos")]
@@ -119,6 +121,7 @@ pub use ferro_native_platform_extensions::{FerroNativePlatformOptions, FerroNati
 
 #[cfg(target_os = "macos")]
 pub use self::{
+    app_notification_manager::MacOSAppNotificationManager,
     clipboard_impl::ClipboardImpl,
     cursor::{CursorFactory, FerroNativeCursor},
     dispatcher_impl::DispatcherImpl,

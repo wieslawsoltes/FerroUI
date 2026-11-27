@@ -136,6 +136,12 @@ mod uikit {
         /// Uses the iOS platform with the application delegate whose
         /// activations the activatable lifetime of the application reports.
         fn use_ios_with_delegate(&self, app_delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder;
+
+        /// Registers `UNUserNotificationCenter` as the notification service of the application
+        /// once the platform services are set up, so that `AppNotificationManager` shows the
+        /// notifications in the notification center (#1276). Without this call
+        /// `AppNotificationManager::is_supported()` is `false`.
+        fn use_platform_app_notifications(&self) -> AppBuilder;
     }
 
     fn use_ios(builder: &AppBuilder, app_delegate: Option<Rc<dyn IFerroAppDelegate>>) -> AppBuilder {
@@ -161,6 +167,10 @@ mod uikit {
 
         fn use_ios_with_delegate(&self, app_delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder {
             use_ios(self, Some(app_delegate))
+        }
+
+        fn use_platform_app_notifications(&self) -> AppBuilder {
+            self.after_platform_services_setup(|_| crate::IosAppNotificationManager::register())
         }
     }
 

@@ -221,6 +221,12 @@ pub trait BrowserAppBuilder {
     /// windowing subsystem, the enabled renderer and HarfBuzz for text
     /// shaping.
     fn use_browser(&self) -> AppBuilder;
+
+    /// Registers the Notification API of the page as the notification service of the
+    /// application once the platform services are set up, so that `AppNotificationManager`
+    /// shows the application's notifications (#1276). Without this call
+    /// `AppNotificationManager::is_supported()` is `false`.
+    fn use_platform_app_notifications(&self) -> AppBuilder;
 }
 
 fn pre_setup_browser(builder: &AppBuilder, options: Option<BrowserPlatformOptions>) -> AppBuilder {
@@ -325,6 +331,10 @@ impl BrowserAppBuilder for AppBuilder {
             BrowserRenderer::Skia => use_skia_renderer(&builder),
             BrowserRenderer::Vello => use_vello_renderer(&builder),
         }
+    }
+
+    fn use_platform_app_notifications(&self) -> AppBuilder {
+        self.after_platform_services_setup(|_| crate::BrowserAppNotificationManager::register())
     }
 }
 

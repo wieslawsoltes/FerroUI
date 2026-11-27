@@ -935,3 +935,109 @@ interface IApiInformationStatics : IInspectable
     int IsApiContractPresentByMajor(HSTRING contractName, UINT16 majorVersion, boolean* result);
     int IsApiContractPresentByMajorAndMinor(HSTRING contractName, UINT16 majorVersion, UINT16 minorVersion, boolean* result);
 }
+
+// The notifications of the operating system (#1276, `app_notification_manager.rs`): the
+// interfaces of Windows.UI.Notifications and Windows.Data.Xml.Dom the toast notifications use.
+// The parameters the backend does not pass are opaque pointers; the identifier of the handler of
+// `Activated` is the one of `TypedEventHandler<ToastNotification, Object>`.
+
+// objidl.h: an object that may be called on any thread without marshaling. The handler of
+// `Activated` answers to it: the system calls it on a thread of its own.
+[uuid(94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90)]
+interface IAgileObject : IUnknown
+{
+}
+
+// The default interface of Windows.Data.Xml.Dom.XmlDocument, passed to the toast factory only.
+[uuid(F7F3A506-1E87-42D6-BCFB-B8C809FA5494)]
+interface IXmlDocument : IInspectable
+{
+}
+
+[uuid(6CD0E74E-EE65-4489-9EBF-CA43E87BA637)]
+interface IXmlDocumentIO : IInspectable
+{
+    HRESULT LoadXml([in] HSTRING xml);
+    HRESULT LoadXmlWithSettings([in] HSTRING xml, [in] void* loadSettings);
+    HRESULT SaveToFileAsync([in] void* file, [out, retval] void** asyncInfo);
+}
+
+[uuid(E3BF92F3-C197-436F-8265-0625824F8DAC)]
+interface IToastActivatedEventArgs : IInspectable
+{
+    HRESULT GetArguments([out, retval] HSTRING* value);
+}
+
+[uuid(997E2675-059E-4E60-8B06-1760917C8B80)]
+interface IToastNotification : IInspectable
+{
+    HRESULT GetContent([out, retval] void** value);
+    HRESULT SetExpirationTime([in] void* value);
+    HRESULT GetExpirationTime([out, retval] void** value);
+    HRESULT AddDismissed([in] void* handler, [out, retval] INT64* token);
+    HRESULT RemoveDismissed([in] INT64 token);
+    HRESULT AddActivated([in] IToastActivatedHandler* handler, [out, retval] INT64* token);
+    HRESULT RemoveActivated([in] INT64 token);
+    HRESULT AddFailed([in] void* handler, [out, retval] INT64* token);
+    HRESULT RemoveFailed([in] INT64 token);
+}
+
+[uuid(AB54DE2D-97D9-5528-B6AD-105AFE156530)]
+interface IToastActivatedHandler : IUnknown
+{
+    HRESULT Invoke([in] IToastNotification* sender, [in] IInspectable* args);
+}
+
+[uuid(9DFB9FD1-143A-490E-90BF-B9FBA7132DE7)]
+interface IToastNotification2 : IInspectable
+{
+    HRESULT SetTag([in] HSTRING value);
+    HRESULT GetTag([out, retval] HSTRING* value);
+    HRESULT SetGroup([in] HSTRING value);
+    HRESULT GetGroup([out, retval] HSTRING* value);
+    HRESULT SetSuppressPopup([in] BYTE value);
+    HRESULT GetSuppressPopup([out, retval] BYTE* value);
+}
+
+[uuid(04124B20-82C6-4229-B109-FD9ED4662B53)]
+interface IToastNotificationFactory : IInspectable
+{
+    HRESULT CreateToastNotification([in] IXmlDocument* content, [out, retval] IToastNotification** value);
+}
+
+[uuid(75927B93-03F3-41EC-91D3-6E5BAC1B38E7)]
+interface IToastNotifier : IInspectable
+{
+    HRESULT Show([in] IToastNotification* notification);
+    HRESULT Hide([in] IToastNotification* notification);
+    HRESULT GetSetting([out, retval] INT32* value);
+    HRESULT AddToSchedule([in] void* scheduledToast);
+    HRESULT RemoveFromSchedule([in] void* scheduledToast);
+    HRESULT GetScheduledToastNotifications([out, retval] void** value);
+}
+
+[uuid(5CADDC63-01D3-4C97-986F-0533483FEE14)]
+interface IToastNotificationHistory : IInspectable
+{
+    HRESULT RemoveGroup([in] HSTRING group);
+    HRESULT RemoveGroupWithId([in] HSTRING group, [in] HSTRING applicationId);
+    HRESULT RemoveGroupedTagWithId([in] HSTRING tag, [in] HSTRING group, [in] HSTRING applicationId);
+    HRESULT RemoveGroupedTag([in] HSTRING tag, [in] HSTRING group);
+    HRESULT Remove([in] HSTRING tag);
+    HRESULT Clear();
+    HRESULT ClearWithId([in] HSTRING applicationId);
+}
+
+[uuid(50AC103F-D235-4598-BBEF-98FE4D1A3AD4)]
+interface IToastNotificationManagerStatics : IInspectable
+{
+    HRESULT CreateToastNotifier([out, retval] IToastNotifier** value);
+    HRESULT CreateToastNotifierWithId([in] HSTRING applicationId, [out, retval] IToastNotifier** value);
+    HRESULT GetTemplateContent([in] INT32 type, [out, retval] void** value);
+}
+
+[uuid(7AB93C52-0E48-4750-BA9D-1A4113981847)]
+interface IToastNotificationManagerStatics2 : IInspectable
+{
+    HRESULT GetHistory([out, retval] IToastNotificationHistory** value);
+}

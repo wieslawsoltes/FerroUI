@@ -94,6 +94,11 @@ impl FerroActivity {
         Self::from_handle(handle)
     }
 
+    /// The activity of the system.
+    pub(crate) fn java(&self) -> &JavaObject {
+        &self.java
+    }
+
     /// The activity whose activity of the system is `java`.
     pub(crate) fn from_java(java: &dyn JavaRef) -> Option<Rc<FerroActivity>> {
         ACTIVITIES.with(|activities| {

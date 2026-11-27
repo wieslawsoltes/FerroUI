@@ -1,18 +1,25 @@
 <!-- Ported from the five pinned AppNotification examples of WinUI Gallery (14061eea) and the
-     handlers of AppNotificationPage.xaml.cs (notification_samples.rs); see ../NOTICE.md. FerroUI
-     has no service for the notifications of the operating system: each AppNotificationBuilder of
-     the source builds the content of a card that the window's WindowNotificationManager shows in
-     the bottom right corner of the window, and the first InfoBar says so where the source speaks
-     of Do Not Disturb and the notification center. The sound events of the ComboBox are the
-     source's list (its x:Bind to the page's list is the items, SelectedItem the index); a card
-     plays no sound and names its sound event. The ComboBox's Header is composed. -->
+     handlers of AppNotificationPage.xaml.cs (notification_samples.rs); see ../NOTICE.md. Each
+     handler builds its notification with AppNotificationBuilder and shows it with
+     AppNotificationManager: the notification center of the system shows it where the gallery's
+     notification service can serve the app (the first InfoBar says so), and elsewhere a
+     card of the window's WindowNotificationManager shows it in the bottom right corner of the
+     window (the second InfoBar says so). The sound events of the ComboBox are the source's list
+     (its x:Bind to the page's list is the items, SelectedItem the index); a card plays no sound
+     and names its sound event. The ComboBox's Header is composed. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel Spacing="8" Margin="0,16,0,0">
+    <InfoBar x:Name="NotificationCenterInfoBar" IsOpen="False" Severity="Informational" IsIconVisible="True"
+             IsClosable="False">
+      <RichTextBlock Margin="0,12,12,12" IsTextSelectionEnabled="False">
+        <Paragraph><Run Text="These notifications are shown by the notification center of the system: they do not appear while " /><Run Text="Do Not Disturb" FontWeight="SemiBold" /><Run Text=" mode is enabled in system settings, and the system may ask whether the app may show notifications." /></Paragraph>
+      </RichTextBlock>
+    </InfoBar>
     <InfoBar x:Name="NotificationHostInfoBar" IsOpen="True" Severity="Informational" IsIconVisible="True"
              IsClosable="False">
       <RichTextBlock Margin="0,12,12,12" IsTextSelectionEnabled="False">
-        <Paragraph><Run Text="These notifications are shown in this window by its notification manager: they appear in the corner of the window whether or not " /><Run Text="Do Not Disturb" FontWeight="SemiBold" /><Run Text=" mode is enabled in system settings, and they are not added to the notification center of the system." /></Paragraph>
+        <Paragraph><Run Text="These notifications are shown in this window by its notification manager: the app has no notification service of the system here, so they appear in the corner of the window whether or not " /><Run Text="Do Not Disturb" FontWeight="SemiBold" /><Run Text=" mode is enabled in system settings, and they are not added to the notification center of the system." /></Paragraph>
       </RichTextBlock>
     </InfoBar>
     <InfoBar IsOpen="True" Severity="Warning" Title="App notifications should not be noisy"

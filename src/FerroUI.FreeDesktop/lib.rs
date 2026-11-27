@@ -3,7 +3,8 @@
 //! The services of a FreeDesktop session that the Linux platforms of
 //! FerroUI share: the input methods that are reached over D-Bus (IBus,
 //! Fcitx), the platform settings of the settings portal, the mounted
-//! volumes, the file chooser portal, the menu exporter, the tray icon, and
+//! volumes, the file chooser portal, the menu exporter, the tray icon, the notifications
+//! (`org.freedesktop.Notifications`, #1276), and
 //! accessibility over AT-SPI (`at_spi`, `docs/porting/atspi.md`). `docs/porting/x11-platform.md` has the design (section 3 for
 //! D-Bus) and the stages.
 //!
@@ -19,6 +20,8 @@ pub mod event;
 
 #[cfg(unix)]
 pub mod at_spi;
+#[cfg(unix)]
+pub mod dbus_app_notification_manager;
 #[cfg(unix)]
 pub mod dbus_call_queue;
 #[cfg(unix)]
@@ -48,6 +51,8 @@ pub mod signal_watch;
 #[cfg(unix)]
 pub mod ui_thread_object;
 
+#[cfg(unix)]
+pub use dbus_app_notification_manager::DBusAppNotificationManager;
 #[cfg(unix)]
 pub use dbus_call_queue::{DBusCallError, DBusCallQueue, DBusResult};
 #[cfg(unix)]

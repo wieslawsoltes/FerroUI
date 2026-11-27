@@ -1,12 +1,19 @@
 //! The AppNotification, BadgeNotificationManager and JumpList pages: the notifications the
-//! source builds, shown by the window's notification manager; the badge of the app on the
-//! previews of its icon; and the jump list as the dock menu of the application. Nothing here
-//! reaches the notification center, the badge or the dock of the system.
+//! source builds, shown through a test double of the notification service or by the window's
+//! notification manager; the badge of the app on the previews of its icon; and the jump list as
+//! the dock menu of the application. Nothing here reaches the notification center, the badge or
+//! the dock of the system.
 
 use crate::notification_samples::{
-    self, badge_count, badge_description, current_badge, dock_menu, invoked_text, load_current,
-    saved_text, support_info, Badge, JumpListItem, BADGE_GLYPHS, DEFAULT_GLYPH, SOUND_EVENTS,
+    self, badge_count, badge_description, card_content as notification_card, current_badge,
+    dock_menu, invoked_text, load_current, notification_host, saved_text, support_info, Badge,
+    JumpListItem, NotificationHost, BADGE_GLYPHS, DEFAULT_GLYPH, SOUND_EVENTS,
 };
+use ferroui_base::platform::notifications::{
+    register_app_notification_manager_impl, AppNotification, AppNotificationError,
+    AppNotificationImageCrop, AppNotificationSoundEvent, IAppNotificationManagerImpl,
+};
+use ferroui_base::FerroLocator;
 use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::{BoxedValue, ObjectType, Ref};
@@ -57,10 +64,64 @@ fn string(value: Option<BoxedValue>) -> Option<String> {
 }
 
 #[test]
-fn app_notification_builder_lays_out_the_source_notifications() {
+fn app_notification_handlers_build_the_source_notifications() {
+    let basic = notification_samples::basic_notification();
+    assert_eq!(
+        basic.texts(),
+        [
+            "Welcome to WinUI Gallery",
+            "Explore interactive samples and discover the power of modern Windows UI."
+        ]
+    );
+    assert!(!basic.has_inputs());
+
+    let informational =
+        notification_samples::informational_notification(AppNotificationSoundEvent::SMS);
+    assert_eq!(informational.title(), "Control Highlight: PersonPicture");
+    assert_eq!(
+        informational.app_logo_override(),
+        Some((
+            "ferres://WinUIGallery/Assets/ControlImages/PersonPicture.png",
+            AppNotificationImageCrop::Circle
+        ))
+    );
+    assert_eq!(informational.audio_event(), Some(AppNotificationSoundEvent::SMS));
+    assert!(informational.time_stamp().is_some());
+
+    let visual = notification_samples::visual_notification();
+    assert_eq!(
+        visual.hero_image(),
+        Some("ferres://WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg")
+    );
+    assert_eq!(visual.attribution_text(), Some("WinUI gallery assets"));
+
+    let controls = notification_samples::controls_notification();
+    assert!(controls.has_inputs());
+    let satisfaction = &controls.combo_boxes()[0];
+    assert_eq!(satisfaction.id(), "satisfaction");
+    assert_eq!(satisfaction.items().len(), 5);
+    assert_eq!(satisfaction.selected_item(), Some("3"));
+    assert_eq!(controls.text_boxes()[0].id(), "comment");
+    assert_eq!(controls.buttons()[0].content(), "Submit");
+    assert_eq!(controls.buttons()[0].argument_string(), "action=submit_survey");
+
+    let progress = notification_samples::progress_notification();
+    let bar = progress.progress_bar().expect("the progress bar");
+    assert_eq!(
+        (bar.title(), bar.value(), bar.value_string_override(), bar.status()),
+        (Some("Demo Progress"), 0.6, Some("60%"), "In progress...")
+    );
+    assert_eq!(
+        SOUND_EVENTS.map(AppNotificationSoundEvent::name),
+        ["Default", "IM", "Reminder", "SMS", "Alarm", "Call"]
+    );
+}
+
+#[test]
+fn app_notification_cards_lay_out_the_source_notifications() {
     let _application = start();
 
-    let basic = notification_samples::basic_notification();
+    let basic = notification_card(&notification_samples::basic_notification());
     assert!(!basic.keep_open);
     assert_eq!(
         text(&basic.content, "NotificationTitle"),
@@ -71,7 +132,9 @@ fn app_notification_builder_lays_out_the_source_notifications() {
         ["Explore interactive samples and discover the power of modern Windows UI."]
     );
 
-    let informational = notification_samples::informational_notification("Reminder");
+    let informational = notification_card(&notification_samples::informational_notification(
+        AppNotificationSoundEvent::Reminder,
+    ));
     assert_eq!(
         text(&informational.content, "NotificationTitle"),
         "Control Highlight: PersonPicture"
@@ -88,7 +151,7 @@ fn app_notification_builder_lays_out_the_source_notifications() {
     );
     assert!(!text(&informational.content, "NotificationTimeStamp").is_empty());
 
-    let visual = notification_samples::visual_notification();
+    let visual = notification_card(&notification_samples::visual_notification());
     assert_eq!(
         named::<Image>(&visual.content, "NotificationHeroImage").height(),
         150.0
@@ -102,7 +165,7 @@ fn app_notification_builder_lays_out_the_source_notifications() {
         "Harbor Scene with Boats"
     );
 
-    let controls = notification_samples::controls_notification();
+    let controls = notification_card(&notification_samples::controls_notification());
     assert!(
         controls.keep_open,
         "a notification with inputs waits for them"
@@ -127,7 +190,7 @@ fn app_notification_builder_lays_out_the_source_notifications() {
         Some("action=submit_survey")
     );
 
-    let progress = notification_samples::progress_notification();
+    let progress = notification_card(&notification_samples::progress_notification());
     assert!(!progress.keep_open);
     let bar = named::<ProgressBar>(&progress.content, "NotificationProgressBar");
     assert_eq!((bar.value(), bar.maximum()), (0.6, 1.0));
@@ -149,7 +212,10 @@ fn app_notification_page_keeps_the_source_options_and_says_where_it_shows() {
     let sound_events = root.get_control::<ComboBox>("AppNotificationSoundEventsCombo");
     assert_eq!(sound_events.item_count(), SOUND_EVENTS.len() as i32);
     assert_eq!(sound_events.selected_index(), 0);
-    root.get_control::<InfoBar>("NotificationHostInfoBar");
+    // Without a notification service the cards of the window show the notifications.
+    assert_eq!(notification_host(), NotificationHost::Window);
+    assert!(root.get_control::<InfoBar>("NotificationHostInfoBar").is_open());
+    assert!(!root.get_control::<InfoBar>("NotificationCenterInfoBar").is_open());
     // A page that is not in a window has no notification manager: the buttons show nothing.
     click(&root, "ShowNotificationButton");
     assert!(notification_samples::notification_manager(&root).is_none());
@@ -252,6 +318,70 @@ fn app_notification_buttons_show_the_source_notifications_in_the_window() {
         .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
     assert!(survey.is_closing(), "Submit dismisses the notification");
     window.close();
+}
+
+/// A notification service that records what the page shows, in place of the system's.
+#[derive(Default)]
+struct RecordingNotifications {
+    registered: std::cell::Cell<u32>,
+    shown: std::cell::RefCell<Vec<AppNotification>>,
+}
+
+impl IAppNotificationManagerImpl for RecordingNotifications {
+    fn is_supported(&self) -> bool {
+        true
+    }
+
+    fn register(&self) {
+        self.registered.set(self.registered.get() + 1);
+    }
+
+    fn show(&self, notification: &AppNotification) -> Result<(), AppNotificationError> {
+        self.shown.borrow_mut().push(notification.clone());
+        Ok(())
+    }
+
+    fn remove_by_id(&self, _: u32) {}
+    fn remove_by_tag(&self, _: &str, _: Option<&str>) {}
+    fn remove_by_group(&self, _: &str) {}
+    fn remove_all(&self) {}
+}
+
+#[test]
+fn app_notification_buttons_show_through_the_notification_service_when_there_is_one() {
+    let _application = start_with_clock();
+    notification_samples::reset();
+    let scope = FerroLocator::enter_scope();
+    let service = std::rc::Rc::new(RecordingNotifications::default());
+    register_app_notification_manager_impl(service.clone());
+    assert_eq!(notification_host(), NotificationHost::System);
+
+    let root = page("AppNotification");
+    assert!(root.get_control::<InfoBar>("NotificationCenterInfoBar").is_open());
+    assert!(!root.get_control::<InfoBar>("NotificationHostInfoBar").is_open());
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+
+    click(&root, "ShowNotificationButton");
+    root.get_control::<ComboBox>("AppNotificationSoundEventsCombo")
+        .set_selected_index(4);
+    click(&root, "ShowInformationalNotificationWithLogoButton");
+    click(&root, "ShowNotificationWithControlsButton");
+    assert_eq!(service.registered.get(), 1, "the app registers once");
+    let shown = service.shown.borrow();
+    assert_eq!(
+        shown.iter().map(AppNotification::title).collect::<Vec<_>>(),
+        ["Welcome to WinUI Gallery", "Control Highlight: PersonPicture", "Survey"]
+    );
+    assert_eq!(shown[1].audio_event(), Some(AppNotificationSoundEvent::Alarm));
+    assert!(shown.iter().all(|notification| notification.id() != 0));
+    // Nothing is shown in the window.
+    assert!(cards(&window).is_empty());
+    drop(shown);
+    window.close();
+    scope.dispose();
 }
 
 #[test]
