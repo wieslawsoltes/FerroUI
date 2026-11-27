@@ -217,6 +217,19 @@ impl Drop for Font {
     }
 }
 
+/// A language as HarfBuzz interns it: one value per language for the life of the process.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Language(sys::hb_language_t);
+
+impl Language {
+    /// The language of a BCP 47 language tag.
+    pub fn from_tag(tag: &str) -> Self {
+        // SAFETY: the tag is passed with its length; HarfBuzz interns the language and does not
+        // keep the pointer.
+        Self(unsafe { sys::hb_language_from_string(tag.as_ptr() as *const c_char, tag.len() as i32) })
+    }
+}
+
 /// A HarfBuzz buffer: the text going into the shaper and the glyphs coming
 /// out of it.
 pub struct Buffer {
@@ -287,14 +300,10 @@ impl Buffer {
         unsafe { sys::hb_buffer_set_direction(self.raw, direction) };
     }
 
-    /// Sets the language from a BCP 47 language tag.
-    pub fn set_language(&mut self, language: &str) {
-        // SAFETY: the tag is passed with its length; HarfBuzz interns the
-        // language and does not keep the pointer.
-        unsafe {
-            let language = sys::hb_language_from_string(language.as_ptr() as *const c_char, language.len() as i32);
-            sys::hb_buffer_set_language(self.raw, language);
-        }
+    /// Sets the language of the text, one HarfBuzz has already interned.
+    pub fn set_language(&mut self, language: Language) {
+        // SAFETY: the buffer is valid, and a language lives as long as the process.
+        unsafe { sys::hb_buffer_set_language(self.raw, language.0) }
     }
 
     /// The items of the buffer: codepoints before shaping, glyphs after.
