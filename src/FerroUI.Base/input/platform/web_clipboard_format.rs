@@ -2,7 +2,6 @@
 
 use crate::input::DataFormat;
 use std::fmt::Write;
-use std::rc::Rc;
 
 /// The prefix that the ClipboardItem API adds to custom MIME types.
 pub const WEB_PREFIX: &str = "web ";
