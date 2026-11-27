@@ -497,6 +497,23 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         self.base_value.set(None);
     }
 
+    /// The uncoerced inputs become the default, which a coerced default is written from; the
+    /// previous inputs, dropped by the caller after the write.
+    #[cold]
+    #[inline(never)]
+    fn replace_inputs_with_default(&self) -> (T, T) {
+        let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+        let default = self.metadata.default_value().clone();
+        (uncommon.uncoerced_value.replace(default.clone()), uncommon.uncoerced_base_value.replace(default))
+    }
+
+    /// The uncoerced base value, the input of a value under an animation that ended.
+    #[cold]
+    #[inline(never)]
+    fn uncoerced_base(&self) -> T {
+        self.uncommon.as_ref().expect("a coerced write has the uncommon fields").uncoerced_base_value.borrow().clone()
+    }
+
     /// The output of a write of explicit coercion whose coercion is reused or skipped, `None` to
     /// coerce the input (`ExplicitFns::output`).
     fn explicit_output(&self, value: &T, priority: BindingPriority, coercion: EntryCoercion) -> Option<T> {
@@ -599,7 +616,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         // What the untyped store asked of this write instead of a coercion of its input.
         let (value, output) = match self.state.pending_coercion.replace(EntryCoercion::Recompute) {
             EntryCoercion::Recompute | EntryCoercion::Reset => (value, None),
-            EntryCoercion::RestoreBase => (uncommon_fields.uncoerced_base_value.borrow().clone(), None),
+            EntryCoercion::RestoreBase => (self.uncoerced_base(), None),
             coercion => {
                 let output = match self.metadata.explicit_coercion() {
                     Some(explicit) => (explicit.output)(self, &value, priority, coercion),
@@ -610,13 +627,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         };
         // The coerced default: its inputs are the default while it is written; the previous ones
         // are dropped after it.
-        let previous_inputs = is_coerced_default_value.then(|| {
-            let default = self.metadata.default_value().clone();
-            (
-                uncommon_fields.uncoerced_value.replace(default.clone()),
-                uncommon_fields.uncoerced_base_value.replace(default),
-            )
-        });
+        let previous_inputs = is_coerced_default_value.then(|| self.replace_inputs_with_default());
         let old_value = self.value();
         let mut value_changed = false;
         let mut base_value_changed = false;
