@@ -34239,7 +34239,7 @@ fn build_controls_macoscontrols_xaml_deferred_300_value_3(
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
     let relative_source_extension_0 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_3 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 228, 32)?;
+    let provided_3 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 228, 32)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 228, 32)?, rt::cast(::core::clone::Clone::clone(&provided_3), 228, 32)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 228, 32)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -34254,7 +34254,7 @@ fn build_controls_macoscontrols_xaml_deferred_300_value_4(
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
     let relative_source_extension_1 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_5 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 232, 32)?;
+    let provided_5 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 232, 32)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 232, 32)?, rt::cast(::core::clone::Clone::clone(&provided_5), 232, 32)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 232, 32)?, ::std::string::String::from("TemplateSettings.ClosedPaneWidth"));
     context.pop_parent();
@@ -34269,7 +34269,7 @@ fn build_controls_macoscontrols_xaml_deferred_300_value_5(
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
     let relative_source_extension_2 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_7 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 236, 33)?;
+    let provided_7 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 236, 33)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 236, 33)?, rt::cast(::core::clone::Clone::clone(&provided_7), 236, 33)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 236, 33)?, ::std::string::String::from("OpenPaneLength"));
     context.pop_parent();
@@ -34284,7 +34284,7 @@ fn build_controls_macoscontrols_xaml_deferred_300_value_6(
     let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_3.clone()));
     let relative_source_extension_3 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_9 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_3, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 240, 33)?;
+    let provided_9 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_3, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 240, 33)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 240, 33)?, rt::cast(::core::clone::Clone::clone(&provided_9), 240, 33)?);
     ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 240, 33)?, ::std::string::String::from("TemplateSettings.ClosedPaneHeight"));
     context.pop_parent();
@@ -41590,7 +41590,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_7(
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_0.clone()));
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopCornerRadiusFilterConverter"));
-    let provided_3 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 329, 41)?;
+    let provided_3 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 329, 41)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_0, rt::exact(rt::cast_checked(provided_3, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 329, 41)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 329, 41)?);
     context.pop_parent();
     let provided_4 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
@@ -41614,7 +41614,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_10(
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_1.clone()));
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LeftCornerRadiusFilterConverter"));
-    let provided_6 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 341, 41)?;
+    let provided_6 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 341, 41)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_6, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 341, 41)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 341, 41)?);
     context.pop_parent();
     let provided_7 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -41638,7 +41638,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_13(
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_2.clone()));
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 353, 41)?;
+    let provided_9 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 353, 41)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_9, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 353, 41)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 353, 41)?);
     context.pop_parent();
     let provided_10 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -41652,7 +41652,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_14(
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_3.clone()));
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopCornerRadiusFilterConverter"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 360, 39)?;
+    let provided_11 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_6, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 360, 39)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_3, rt::exact(rt::cast_checked(provided_11, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 360, 39)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 360, 39)?);
     context.pop_parent();
     let provided_12 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
@@ -41666,7 +41666,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_15(
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_4.clone()));
     let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomCornerRadiusFilterConverter"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 363, 39)?;
+    let provided_13 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_7, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 363, 39)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_4, rt::exact(rt::cast_checked(provided_13, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 363, 39)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 363, 39)?);
     context.pop_parent();
     let provided_14 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
@@ -41680,7 +41680,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_16(
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_5.clone()));
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_15 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 366, 39)?;
+    let provided_15 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_8, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 366, 39)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_5, rt::exact(rt::cast_checked(provided_15, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 366, 39)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 366, 39)?);
     context.pop_parent();
     let provided_16 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
@@ -41694,7 +41694,7 @@ fn build_controls_macoscontrols_xaml_deferred_413_value_17(
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()));
     context.push_parent(rt::to_value(template_binding_6.clone()));
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LeftCornerRadiusFilterConverter"));
-    let provided_17 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 369, 39)?;
+    let provided_17 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 369, 39)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_6, rt::exact(rt::cast_checked(provided_17, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 369, 39)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 369, 39)?);
     context.pop_parent();
     let provided_18 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
@@ -56256,7 +56256,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(template_binding_4.clone()));
     // Controls/MacOSControls.xaml(66,26) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 26)?;
+    let provided_11 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 66, 26)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_4, rt::exact(rt::cast_checked(provided_11, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 66, 26)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 66, 26)?);
     context.pop_parent();
     let provided_12 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
@@ -56266,7 +56266,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(template_binding_5.clone()));
     // Controls/MacOSControls.xaml(67,26) Converter
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 26)?;
+    let provided_13 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 67, 26)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_5, rt::exact(rt::cast_checked(provided_13, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 67, 26)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 67, 26)?);
     context.pop_parent();
     let provided_14 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
@@ -57169,7 +57169,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(template_binding_1.clone()));
     // Controls/MacOSControls.xaml(149,81) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarTrackCornerRadiusConverter"));
-    let provided_1 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 81)?;
+    let provided_1 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 149, 81)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_1, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 149, 81)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 149, 81)?);
     context.pop_parent();
     let provided_2 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -57532,7 +57532,7 @@ fn build_controls_macoscontrols_xaml_deferred_148(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/MacOSControls.xaml(198,86) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ScrollBarTrackCornerRadiusConverter"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 198, 86)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 198, 86)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_2, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 198, 86)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 198, 86)?);
     context.pop_parent();
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -59040,7 +59040,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     // Controls/MacOSControls.xaml(304,80) Converter
     let value_4 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 304, 80)?, rt::cast(::core::clone::Clone::clone(&value_4), 304, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_45 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_45) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -59058,7 +59058,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     // Controls/MacOSControls.xaml(305,90) Converter
     let value_5 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 305, 90)?, rt::cast(::core::clone::Clone::clone(&value_5), 305, 90)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_46 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_46) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -59772,7 +59772,7 @@ fn build_controls_macoscontrols_xaml_deferred_171(
     context.push_parent(rt::to_value(multi_binding_0.clone()));
     // Controls/MacOSControls.xaml(52,31) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ProgressBarTextFormatConverter"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 52, 31)?;
+    let provided_16 = rt::provide_value_invoked(&context, rt::multi_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 52, 31)?;
     ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::exact(rt::cast_checked(provided_16, rt::markup_handle(<dyn ::ferroui_base::data::converters::IMultiValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IMultiValueConverter", 52, 31)?, "FerroUI.Data.MultiBinding.set_Converter", 0, 52, 31)?);
     // Controls/MacOSControls.xaml(53,20) Bindings
     let bindings_collection_0 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
@@ -59792,7 +59792,7 @@ fn build_controls_macoscontrols_xaml_deferred_171(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 54, 28)?, rt::cast(path_0.clone(), 54, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_18 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_18) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -61543,7 +61543,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     // Controls/MacOSControls.xaml(61,84) Converter
     let value_2 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 61, 84)?, rt::cast(::core::clone::Clone::clone(&value_2), 61, 84)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_13 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_13) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -61561,7 +61561,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     // Controls/MacOSControls.xaml(62,94) Converter
     let value_3 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 62, 94)?, rt::cast(::core::clone::Clone::clone(&value_3), 62, 94)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_14 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_14) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -67800,7 +67800,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
     let dynamic_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_0();
     // Controls/MacOSControls.xaml(478,40) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_set_ResourceKey(&dynamic_resource_extension_9, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"));
-    let provided_17 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
+    let provided_17 = rt::provide_value(&context, rt::multi_binding_bindings_property(), &dynamic_resource_extension_9, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_17) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
     // Controls/MacOSControls.xaml(479,24) Bindings
     let bindings_collection_1 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
@@ -67813,7 +67813,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 479, 32)?, rt::cast(path_0.clone(), 479, 32)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_18 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_18) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68384,7 +68384,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 144, 78)?, rt::cast(path_0.clone(), 144, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_6 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_6) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68400,7 +68400,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 145, 78)?, rt::cast(path_1.clone(), 145, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_7 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_7) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68416,7 +68416,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 146, 78)?, rt::cast(path_2.clone(), 146, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_8 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_8) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68432,7 +68432,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_3), 147, 78)?, rt::cast(path_3.clone(), 147, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_9 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_3, ::core::clone::Clone::clone(&provided_9) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68486,7 +68486,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_5), 153, 80)?, rt::cast(path_5.clone(), 153, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_12 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_5, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_4, ::core::clone::Clone::clone(&provided_12) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68502,7 +68502,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_6), 154, 80)?, rt::cast(path_6.clone(), 154, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_13 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_6, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_5, ::core::clone::Clone::clone(&provided_13) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68518,7 +68518,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_7), 155, 80)?, rt::cast(path_7.clone(), 155, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_14 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_7, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_6, ::core::clone::Clone::clone(&provided_14) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68534,7 +68534,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_8), 156, 80)?, rt::cast(path_8.clone(), 156, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_15 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_8, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_7, ::core::clone::Clone::clone(&provided_15) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68670,7 +68670,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_15), 170, 78)?, rt::cast(path_16.clone(), 170, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_26 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_15, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_8, ::core::clone::Clone::clone(&provided_26) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68686,7 +68686,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_16), 171, 78)?, rt::cast(path_17.clone(), 171, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_27 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_16, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_9, ::core::clone::Clone::clone(&provided_27) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68702,7 +68702,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_17), 172, 78)?, rt::cast(path_18.clone(), 172, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_28 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_17, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_10, ::core::clone::Clone::clone(&provided_28) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68718,7 +68718,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_18), 173, 78)?, rt::cast(path_19.clone(), 173, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_29 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_18, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_11, ::core::clone::Clone::clone(&provided_29) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68772,7 +68772,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_20), 179, 80)?, rt::cast(path_21.clone(), 179, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_32 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_20, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_12, ::core::clone::Clone::clone(&provided_32) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68788,7 +68788,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_21), 180, 80)?, rt::cast(path_22.clone(), 180, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_33 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_21, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_13, ::core::clone::Clone::clone(&provided_33) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68804,7 +68804,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_22), 181, 80)?, rt::cast(path_23.clone(), 181, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_34 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_22, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_14, ::core::clone::Clone::clone(&provided_34) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -68820,7 +68820,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_23), 182, 80)?, rt::cast(path_24.clone(), 182, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_35 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_23, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_15, ::core::clone::Clone::clone(&provided_35) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -71718,7 +71718,7 @@ fn build_controls_macoscontrols_xaml_deferred_332(
     context.push_parent(rt::to_value(template_binding_1.clone()));
     // Controls/MacOSControls.xaml(381,20) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 381, 20)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 381, 20)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_2, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 381, 20)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 381, 20)?);
     context.pop_parent();
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -74142,7 +74142,7 @@ fn build_controls_macoscontrols_xaml_deferred_372(
     context.push_parent(rt::to_value(template_binding_16.clone()));
     // Controls/MacOSControls.xaml(177,21) Converter
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LeftCornerRadiusFilterConverter"));
-    let provided_25 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 21)?;
+    let provided_25 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 177, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_16, rt::exact(rt::cast_checked(provided_25, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 177, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 177, 21)?);
     context.pop_parent();
     let provided_26 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_16);
@@ -74176,7 +74176,7 @@ fn build_controls_macoscontrols_xaml_deferred_372(
     context.push_parent(rt::to_value(template_binding_17.clone()));
     // Controls/MacOSControls.xaml(182,21) Converter
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_28 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 182, 21)?;
+    let provided_28 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 182, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_17, rt::exact(rt::cast_checked(provided_28, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 182, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 182, 21)?);
     context.pop_parent();
     let provided_29 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_17);
@@ -74359,7 +74359,7 @@ fn build_controls_macoscontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(template_binding_0.clone()));
     // Controls/MacOSControls.xaml(420,21) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("LeftCornerRadiusFilterConverter"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 420, 21)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 420, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_0, rt::exact(rt::cast_checked(provided_2, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 420, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 420, 21)?);
     context.pop_parent();
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_0);
@@ -74390,7 +74390,7 @@ fn build_controls_macoscontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(template_binding_1.clone()));
     // Controls/MacOSControls.xaml(424,21) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_5 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 424, 21)?;
+    let provided_5 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 424, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_5, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 424, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 424, 21)?);
     context.pop_parent();
     let provided_6 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -74812,7 +74812,7 @@ fn build_controls_macoscontrols_xaml_deferred_382(
     // Controls/MacOSControls.xaml(75,93) Converter
     let value_2 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 75, 93)?, rt::cast(::core::clone::Clone::clone(&value_2), 75, 93)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_12 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_12) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -74830,7 +74830,7 @@ fn build_controls_macoscontrols_xaml_deferred_382(
     // Controls/MacOSControls.xaml(76,96) Converter
     let value_3 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 76, 96)?, rt::cast(::core::clone::Clone::clone(&value_3), 76, 96)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_13 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_13) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -74848,7 +74848,7 @@ fn build_controls_macoscontrols_xaml_deferred_382(
     // Controls/MacOSControls.xaml(77,95) Converter
     let value_4 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 77, 95)?, rt::cast(::core::clone::Clone::clone(&value_4), 77, 95)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_14 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_14) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -75075,7 +75075,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(template_binding_1.clone()));
     // Controls/MacOSControls.xaml(74,22) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 22)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 74, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_2, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 74, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 74, 22)?);
     context.pop_parent();
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -75085,7 +75085,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/MacOSControls.xaml(75,22) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 22)?;
+    let provided_4 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 75, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_4, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 75, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 75, 22)?);
     context.pop_parent();
     let provided_5 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -75139,7 +75139,7 @@ fn build_controls_macoscontrols_xaml_deferred_389(
     context.push_parent(rt::to_value(template_binding_1.clone()));
     // Controls/MacOSControls.xaml(90,22) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 22)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 90, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_1, rt::exact(rt::cast_checked(provided_2, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 90, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 90, 22)?);
     context.pop_parent();
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_1);
@@ -75149,7 +75149,7 @@ fn build_controls_macoscontrols_xaml_deferred_389(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/MacOSControls.xaml(91,22) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 91, 22)?;
+    let provided_4 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 91, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_4, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 91, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 91, 22)?);
     context.pop_parent();
     let provided_5 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -75357,7 +75357,7 @@ fn build_controls_macoscontrols_xaml_deferred_394(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/MacOSControls.xaml(153,30) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 30)?;
+    let provided_7 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 153, 30)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_7, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 153, 30)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 153, 30)?);
     context.pop_parent();
     let provided_8 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -75367,7 +75367,7 @@ fn build_controls_macoscontrols_xaml_deferred_394(
     context.push_parent(rt::to_value(template_binding_3.clone()));
     // Controls/MacOSControls.xaml(154,30) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 154, 30)?;
+    let provided_9 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 154, 30)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_3, rt::exact(rt::cast_checked(provided_9, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 154, 30)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 154, 30)?);
     context.pop_parent();
     let provided_10 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
@@ -75679,7 +75679,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     context.push_parent(rt::to_value(template_binding_2.clone()));
     // Controls/MacOSControls.xaml(250,30) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 250, 30)?;
+    let provided_7 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 250, 30)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_2, rt::exact(rt::cast_checked(provided_7, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 250, 30)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 250, 30)?);
     context.pop_parent();
     let provided_8 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
@@ -75689,7 +75689,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     context.push_parent(rt::to_value(template_binding_3.clone()));
     // Controls/MacOSControls.xaml(251,30) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_9 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 251, 30)?;
+    let provided_9 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 251, 30)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_3, rt::exact(rt::cast_checked(provided_9, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 251, 30)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 251, 30)?);
     context.pop_parent();
     let provided_10 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
@@ -76143,7 +76143,7 @@ fn build_controls_macoscontrols_xaml_deferred_401(
     // Controls/MacOSControls.xaml(165,78) Converter
     let value_4 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 165, 78)?, rt::cast(::core::clone::Clone::clone(&value_4), 165, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_41 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_41) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -76161,7 +76161,7 @@ fn build_controls_macoscontrols_xaml_deferred_401(
     // Controls/MacOSControls.xaml(166,88) Converter
     let value_5 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 166, 88)?, rt::cast(::core::clone::Clone::clone(&value_5), 166, 88)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_42 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_42) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -77104,7 +77104,7 @@ fn build_controls_macoscontrols_xaml_deferred_414(
     context.push_parent(rt::to_value(template_binding_12.clone()));
     // Controls/MacOSControls.xaml(302,21) Converter
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomCornerRadiusFilterConverter"));
-    let provided_16 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 302, 21)?;
+    let provided_16 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 302, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_12, rt::exact(rt::cast_checked(provided_16, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 302, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 302, 21)?);
     context.pop_parent();
     let provided_17 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_12);
@@ -78191,7 +78191,7 @@ fn build_controls_macoscontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(template_binding_10.clone()));
     // Controls/MacOSControls.xaml(50,127) Converter
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuItemKeyGestureConverter"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 127)?;
+    let provided_13 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 50, 127)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_10, rt::exact(rt::cast_checked(provided_13, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 50, 127)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 50, 127)?);
     context.pop_parent();
     let provided_14 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_10);
@@ -79462,7 +79462,7 @@ fn build_controls_macoscontrols_xaml_deferred_476(
     // Controls/MacOSControls.xaml(93,78) Converter
     let value_2 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 93, 78)?, rt::cast(::core::clone::Clone::clone(&value_2), 93, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_35 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_35) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -79480,7 +79480,7 @@ fn build_controls_macoscontrols_xaml_deferred_476(
     // Controls/MacOSControls.xaml(94,88) Converter
     let value_3 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 94, 88)?, rt::cast(::core::clone::Clone::clone(&value_3), 94, 88)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_36 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_36) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -79670,7 +79670,7 @@ fn build_controls_macoscontrols_xaml_deferred_479(
     // Controls/MacOSControls.xaml(211,102) Converter
     let value_3 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNull();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 211, 102)?, rt::cast(::core::clone::Clone::clone(&value_3), 211, 102)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_20 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_20) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -79686,7 +79686,7 @@ fn build_controls_macoscontrols_xaml_deferred_479(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 212, 28)?, rt::cast(path_1.clone(), 212, 28)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_21 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_21) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -80150,7 +80150,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     context.push_parent(rt::to_value(template_binding_5.clone()));
     // Controls/MacOSControls.xaml(68,123) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TreeViewItemIndentationConverter"));
-    let provided_7 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 68, 123)?;
+    let provided_7 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 68, 123)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_5, rt::exact(rt::cast_checked(provided_7, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 68, 123)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 68, 123)?);
     context.pop_parent();
     let provided_8 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_5);
@@ -80630,7 +80630,7 @@ fn build_controls_macoscontrols_xaml_deferred_494(
     // Controls/MacOSControls.xaml(161,80) Converter
     let value_4 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 161, 80)?, rt::cast(::core::clone::Clone::clone(&value_4), 161, 80)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_39 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_39) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -80648,7 +80648,7 @@ fn build_controls_macoscontrols_xaml_deferred_494(
     // Controls/MacOSControls.xaml(162,90) Converter
     let value_5 = ::ferroui_base::data::converters::StringConverters::__markup_field_IsNullOrEmpty();
     ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 162, 90)?, rt::cast(::core::clone::Clone::clone(&value_5), 162, 90)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_40 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_40) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -84164,7 +84164,7 @@ fn build_controls_macoscontrols_xaml_deferred_549(
     context.push_parent(rt::to_value(template_binding_6.clone()));
     // Controls/MacOSControls.xaml(351,24) Converter
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("RightCornerRadiusFilterConverter"));
-    let provided_44 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 351, 24)?;
+    let provided_44 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 351, 24)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_6, rt::exact(rt::cast_checked(provided_44, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 351, 24)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 351, 24)?);
     context.pop_parent();
     let provided_45 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_6);
@@ -86793,7 +86793,7 @@ fn build_controls_macoscontrols_xaml_deferred_589(
     context.push_parent(rt::to_value(template_binding_9.clone()));
     // Controls/MacOSControls.xaml(327,22) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopLeftCornerRadiusDoubleValueConverter"));
-    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 327, 22)?;
+    let provided_11 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 327, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_9, rt::exact(rt::cast_checked(provided_11, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 327, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 327, 22)?);
     context.pop_parent();
     let provided_12 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_9);
@@ -86803,7 +86803,7 @@ fn build_controls_macoscontrols_xaml_deferred_589(
     context.push_parent(rt::to_value(template_binding_10.clone()));
     // Controls/MacOSControls.xaml(328,22) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BottomRightCornerRadiusDoubleValueConverter"));
-    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 328, 22)?;
+    let provided_13 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 328, 22)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_10, rt::exact(rt::cast_checked(provided_13, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 328, 22)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 328, 22)?);
     context.pop_parent();
     let provided_14 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_10);
@@ -87164,7 +87164,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 100, 78)?, rt::cast(path_0.clone(), 100, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_6 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_6) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87180,7 +87180,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_1), 101, 78)?, rt::cast(path_1.clone(), 101, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_7 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_1, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_7) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87196,7 +87196,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_2), 102, 78)?, rt::cast(path_2.clone(), 102, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_8 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_2, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_8) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87212,7 +87212,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_3), 103, 78)?, rt::cast(path_3.clone(), 103, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_9 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_3, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_3, ::core::clone::Clone::clone(&provided_9) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87372,7 +87372,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_10), 137, 78)?, rt::cast(path_11.clone(), 137, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_21 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_10, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_4, ::core::clone::Clone::clone(&provided_21) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87388,7 +87388,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_11), 138, 78)?, rt::cast(path_12.clone(), 138, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_22 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_11, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_5, ::core::clone::Clone::clone(&provided_22) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87404,7 +87404,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_12), 139, 78)?, rt::cast(path_13.clone(), 139, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_23 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_12, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_6, ::core::clone::Clone::clone(&provided_23) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -87420,7 +87420,7 @@ fn build_controls_macoscontrols_xaml_deferred_597(
         builder.build()
     };
     ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_13), 140, 78)?, rt::cast(path_14.clone(), 140, 78)?);
-    context.set_target_property(rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)));
+    context.set_target_property(rt::multi_binding_bindings_property());
     let provided_24 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_13, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_7, ::core::clone::Clone::clone(&provided_24) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
@@ -88140,7 +88140,7 @@ fn build_controls_macoscontrols_xaml_deferred_604(
     context.push_parent(rt::to_value(template_binding_4.clone()));
     // Controls/MacOSControls.xaml(357,21) Converter
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TopCornerRadiusFilterConverter"));
-    let provided_12 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::TemplateBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Converter", false, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 357, 21)?;
+    let provided_12 = rt::provide_value_invoked(&context, rt::template_binding_converter_property(), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 357, 21)?;
     ::ferroui_base::data::TemplateBinding::__markup_set_Converter(&template_binding_4, rt::exact(rt::cast_checked(provided_12, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 357, 21)?, "FerroUI.Data.TemplateBinding.set_Converter", 0, 357, 21)?);
     context.pop_parent();
     let provided_13 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_4);
