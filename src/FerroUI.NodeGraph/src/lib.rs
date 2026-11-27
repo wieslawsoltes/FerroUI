@@ -32,6 +32,10 @@ pub mod physics_nodes;
 pub mod canvas;
 #[cfg(feature = "ferroui")]
 pub mod editor_view;
+#[cfg(feature = "ferroui")]
+pub mod node_visual;
+#[cfg(feature = "ferroui")]
+pub mod widgets;
 
 #[cfg(test)]
 mod tests;
@@ -45,8 +49,9 @@ pub mod prelude {
     pub use crate::serialization::{graph_from_json, graph_to_json};
     pub use crate::stdlib::{eval_math_expression, register_standard_nodes};
     pub use crate::types::{
-        DataMatching, GroupId, NodeCategory, NodeId, NodeKind, NodeState, ParamAccess, ParamModifier,
-        ParamWidget, PortDirection, PortSpec, PortType, WireDataKind, WireDisplay, WireId,
+        AlignMode, DataMatching, GraphCurveKind, GroupId, NodeCategory, NodeId, NodeKind,
+        NodeState, ParamAccess, ParamModifier, ParamWidget, PortDirection, PortSpec, PortType,
+        WireDataKind, WireDisplay, WireId,
     };
 
     #[cfg(feature = "physics")]
@@ -57,7 +62,11 @@ pub mod prelude {
     };
 
     #[cfg(feature = "ferroui")]
-    pub use crate::canvas::NodeGraphCanvas;
+    pub use crate::canvas::{ActiveWireDrag, VisualGraphState, WireBackdropLayer};
     #[cfg(feature = "ferroui")]
     pub use crate::editor_view::node_graph_editor;
+    #[cfg(feature = "ferroui")]
+    pub use crate::node_visual::build_node_visual;
+    #[cfg(feature = "ferroui")]
+    pub use crate::widgets::{GraphMapperControl, MdSliderControl};
 }

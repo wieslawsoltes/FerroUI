@@ -384,6 +384,75 @@ impl DataTree {
         out
     }
 
+    /// Grasshopper **Shift Paths**: strips leading (`offset > 0`) or trailing (`offset < 0`) path indices.
+    pub fn shift_paths(&self, offset: isize) -> Self {
+        let mut out = Self::new();
+        for (path, items) in &self.branches {
+            let shifted = path.shift(offset);
+            out.branches.entry(shifted).or_default().extend(items.iter().cloned());
+        }
+        out
+    }
+
+    /// Grasshopper **Path Mapper**: remaps branch paths & item indices using lexical masks such as
+    /// `"{A;B}(i)" -> "{B;A}"`, `"{A;B}" -> "{0}"`, `"{A}(i)" -> "{A;i}"`, or `"{A;B}" -> "{A}"`.
+    pub fn map_paths(&self, source_mask: &str, target_mask: &str) -> Result<Self, String> {
+        let (src_vars, src_item_var) = parse_path_mask(source_mask)?;
+        let tgt_tokens = parse_target_mask(target_mask)?;
+        let mut out = Self::new();
+
+        for (path, items) in &self.branches {
+            for (item_idx, val) in items.iter().enumerate() {
+                let mut new_segs: SmallVec<[u32; 4]> = SmallVec::new();
+                for tok in &tgt_tokens {
+                    let seg = match tok {
+                        TargetToken::Literal(n) => *n,
+                        TargetToken::Var(name) => {
+                            if src_item_var.as_deref() == Some(name.as_str()) || name == "i" {
+                                item_idx as u32
+                            } else if let Some(pos) = src_vars.iter().position(|v| v == name) {
+                                path.0.get(pos).copied().unwrap_or(0)
+                            } else {
+                                0
+                            }
+                        }
+                    };
+                    new_segs.push(seg);
+                }
+                let new_path = if new_segs.is_empty() {
+                    DataPath::root()
+                } else {
+                    DataPath(new_segs)
+                };
+                out.push(new_path, val.clone());
+            }
+        }
+        Ok(out)
+    }
+
+    /// Formats Grasshopper **Param Viewer** topology summary (`{0;0} (N = 6)` per branch).
+    pub fn format_param_viewer(&self, max_branches: usize) -> String {
+        if self.branches.is_empty() {
+            return "Empty tree (0 branches)".into();
+        }
+        let mut lines = Vec::new();
+        lines.push(format!(
+            "Data: {} branch{}, {} item{}",
+            self.branches.len(),
+            if self.branches.len() == 1 { "" } else { "es" },
+            self.item_count(),
+            if self.item_count() == 1 { "" } else { "s" }
+        ));
+        for (idx, (p, items)) in self.branches.iter().enumerate() {
+            if idx >= max_branches {
+                lines.push(format!("… +{} more branches", self.branches.len() - idx));
+                break;
+            }
+            lines.push(format!("{p}  (N = {})", items.len()));
+        }
+        lines.join("\n")
+    }
+
     /// Merges another `DataTree` into `self` preserving matching branch paths.
     pub fn merge_from(&mut self, other: &DataTree) {
         for (path, items) in &other.branches {
@@ -552,4 +621,46 @@ pub fn lace_item_inputs(
     }
 
     Ok(outputs)
+}
+
+enum TargetToken {
+    Literal(u32),
+    Var(String),
+}
+
+fn parse_path_mask(mask: &str) -> Result<(Vec<String>, Option<String>), String> {
+    let trimmed = mask.trim();
+    let (brace_part, item_part) = if let Some(idx) = trimmed.find('(') {
+        (&trimmed[..idx], Some(trimmed[idx..].trim()))
+    } else {
+        (trimmed, None)
+    };
+    let inner = brace_part.trim().trim_start_matches('{').trim_end_matches('}');
+    let vars: Vec<String> = inner
+        .split(';')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let item_var = item_part.map(|p| p.trim_start_matches('(').trim_end_matches(')').trim().to_string());
+    Ok((vars, item_var))
+}
+
+fn parse_target_mask(mask: &str) -> Result<Vec<TargetToken>, String> {
+    let inner = mask.trim().trim_start_matches('{').trim_end_matches('}');
+    if inner.is_empty() {
+        return Ok(vec![TargetToken::Literal(0)]);
+    }
+    let mut out = Vec::new();
+    for seg in inner.split(';') {
+        let s = seg.trim();
+        if s.is_empty() {
+            continue;
+        }
+        if let Ok(n) = s.parse::<u32>() {
+            out.push(TargetToken::Literal(n));
+        } else {
+            out.push(TargetToken::Var(s.to_string()));
+        }
+    }
+    Ok(out)
 }

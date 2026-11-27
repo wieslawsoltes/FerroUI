@@ -693,6 +693,7 @@ pub fn register_physics_nodes(r: &mut NodeRegistry) {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PhysicsGraphTemplate {
+    AttractorGraphMapper,
     PyramidPendulum,
     KeplerianSolarSystem,
     SuspensionBridgeRain,
@@ -700,7 +701,8 @@ pub enum PhysicsGraphTemplate {
 }
 
 impl PhysicsGraphTemplate {
-    pub const ALL: [Self; 4] = [
+    pub const ALL: [Self; 5] = [
+        Self::AttractorGraphMapper,
         Self::PyramidPendulum,
         Self::KeplerianSolarSystem,
         Self::SuspensionBridgeRain,
@@ -709,6 +711,7 @@ impl PhysicsGraphTemplate {
 
     pub fn label(self) -> &'static str {
         match self {
+            Self::AttractorGraphMapper => "🎨 Attractor & GraphMapper",
             Self::PyramidPendulum => "🧱 Pyramid & Pendulum",
             Self::KeplerianSolarSystem => "🪐 Keplerian Solar System",
             Self::SuspensionBridgeRain => "🌉 Bridge & Rain",
@@ -718,12 +721,89 @@ impl PhysicsGraphTemplate {
 
     pub fn build(self, reg: &NodeRegistry) -> NodeGraph {
         match self {
+            Self::AttractorGraphMapper => build_attractor_graph_mapper(reg),
             Self::PyramidPendulum => build_pyramid_pendulum_graph(reg),
             Self::KeplerianSolarSystem => build_solar_system_graph(reg),
             Self::SuspensionBridgeRain => build_bridge_rain_graph(reg),
             Self::ClothJellyWindTunnel => build_cloth_jelly_graph(reg),
         }
     }
+}
+
+/// Showcases Grasshopper's most iconic real FerroUI visual widgets wired live to `ferroui-physics`:
+/// 2D `MdSlider` Attractor Pad -> `PointAttractor` -> interactive `GraphMapper` curve -> `ColorHsv` +
+/// parametric `Circle` sizes + `ParamViewer` DataTree inspector!
+fn build_attractor_graph_mapper(reg: &NodeRegistry) -> NodeGraph {
+    let mut g = NodeGraph::new("Grasshopper Attractor & GraphMapper Field");
+
+    let md = g.add_node(reg, "params.md_slider", 24.0, 28.0).unwrap();
+    let s_cols = g.add_node(reg, "params.int_slider", 24.0, 224.0).unwrap();
+    g.configure_slider(s_cols, "Grid Cols", 8.0, 4.0, 12.0, 1.0, true);
+    let s_rows = g.add_node(reg, "params.int_slider", 24.0, 314.0).unwrap();
+    g.configure_slider(s_rows, "Grid Rows", 4.0, 2.0, 7.0, 1.0, true);
+    let s_rad = g.add_node(reg, "params.slider", 24.0, 404.0).unwrap();
+    g.configure_slider(s_rad, "Attractor Range", 7.2, 2.5, 13.0, 0.2, false);
+
+    // Map MD Slider [0..1]x[0..1] into arena [2..14] x [1.5..8.5]
+    let map_x = g.add_node(reg, "math.lerp", 260.0, 24.0).unwrap();
+    g.set_input_default(map_x, 0, Value::Float(2.0));
+    g.set_input_default(map_x, 1, Value::Float(14.0));
+    let map_y = g.add_node(reg, "math.lerp", 260.0, 114.0).unwrap();
+    g.set_input_default(map_y, 0, Value::Float(1.5));
+    g.set_input_default(map_y, 1, Value::Float(8.5));
+    let attr_pt = g.add_node(reg, "vector.point2d", 470.0, 56.0).unwrap();
+
+    let grid = g.add_node(reg, "geom.rect_grid", 260.0, 230.0).unwrap();
+    g.set_input_default(grid, 0, Value::Vec2([8.0, 7.4]));
+    g.set_input_default(grid, 1, Value::Float(1.25));
+    g.set_input_default(grid, 2, Value::Float(-1.15));
+    g.set_input_default(grid, 5, Value::Bool(false));
+
+    let attr = g.add_node(reg, "geom.attractor", 470.0, 200.0).unwrap();
+    let gmap = g.add_node(reg, "params.graph_mapper", 690.0, 120.0).unwrap();
+    let pview = g.add_node(reg, "params.param_viewer", 470.0, 355.0).unwrap();
+
+    let rad_map = g.add_node(reg, "math.lerp", 950.0, 96.0).unwrap();
+    g.set_input_default(rad_map, 0, Value::Float(0.18));
+    g.set_input_default(rad_map, 1, Value::Float(0.56));
+    let shape = g.add_node(reg, "physics.shape_circle", 1160.0, 96.0).unwrap();
+    let hsv = g.add_node(reg, "geom.color_hsv", 950.0, 224.0).unwrap();
+
+    let bodies = g.add_node(reg, "physics.rigid_body", 1160.0, 210.0).unwrap();
+    g.set_input_default(bodies, 3, Value::Float(0.72));
+    let wcfg = g.add_node(reg, "physics.world_config", 950.0, 360.0).unwrap();
+    g.set_input_default(wcfg, 0, Value::Float(2.5));
+    let scene_out = g.add_node(reg, "physics.scene_output", 1400.0, 210.0).unwrap();
+
+    let _ = g.connect(md, 1, map_x, 2, false);
+    let _ = g.connect(md, 2, map_y, 2, false);
+    let _ = g.connect(map_x, 0, attr_pt, 0, false);
+    let _ = g.connect(map_y, 0, attr_pt, 1, false);
+
+    let _ = g.connect(s_cols, 0, grid, 3, false);
+    let _ = g.connect(s_rows, 0, grid, 4, false);
+
+    let _ = g.connect(grid, 0, attr, 0, false);
+    let _ = g.connect(attr_pt, 0, attr, 1, false);
+    let _ = g.connect(s_rad, 0, attr, 2, false);
+    let _ = g.connect(grid, 0, pview, 0, false);
+
+    let _ = g.connect(attr, 0, gmap, 0, false);
+    let _ = g.connect(gmap, 0, rad_map, 2, false);
+    let _ = g.connect(rad_map, 0, shape, 0, false);
+    let _ = g.connect(gmap, 0, hsv, 0, false);
+
+    let _ = g.connect(grid, 0, bodies, 0, false);
+    let _ = g.connect(shape, 0, bodies, 1, false);
+    let _ = g.connect(hsv, 0, bodies, 5, false);
+
+    let _ = g.connect(wcfg, 0, scene_out, 0, false);
+    let _ = g.connect(bodies, 0, scene_out, 1, false);
+
+    g.create_group("2D Attractor & Grid Controls", 0x2210B981, vec![md, s_cols, s_rows, s_rad]);
+    g.create_group("Grasshopper Attractor + GraphMapper", 0x2238BDF8, vec![map_x, map_y, attr_pt, grid, attr, gmap, pview]);
+    g.create_group("Parametric Physics Output", 0x22A78BFA, vec![rad_map, shape, hsv, bodies, wcfg, scene_out]);
+    g
 }
 
 fn build_pyramid_pendulum_graph(reg: &NodeRegistry) -> NodeGraph {

@@ -4,7 +4,8 @@
 use crate::data_tree::{DataTree, Value};
 use crate::node::NodeRegistry;
 use crate::types::{
-    DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier, ParamWidget, WireDisplay, WireId,
+    AlignMode, DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier, ParamWidget,
+    WireDisplay, WireId,
 };
 use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -96,6 +97,7 @@ pub struct NodeGraph {
     pub fancy_wires: bool,
     pub show_profiler: bool,
     pub snap_to_grid: bool,
+    pub solution_locked: bool,
     pub generation: u64,
     next_node_id: u32,
     next_wire_id: u32,
@@ -124,6 +126,7 @@ impl NodeGraph {
             fancy_wires: true,
             show_profiler: true,
             snap_to_grid: false,
+            solution_locked: false,
             generation: 0,
             next_node_id: 1,
             next_wire_id: 1,
@@ -200,17 +203,23 @@ impl NodeGraph {
         let in_n = comp.inputs().len();
         let out_n = comp.outputs().len();
         match comp.kind() {
-            NodeKind::NumberSlider => [210.0, 44.0],
-            NodeKind::BoolToggle => [136.0, 40.0],
-            NodeKind::Panel => [210.0, 120.0],
-            NodeKind::ColorSwatch => [132.0, 44.0],
-            NodeKind::ExpressionBox => [216.0, 82.0],
+            NodeKind::NumberSlider => [226.0, 56.0],
+            NodeKind::BoolToggle => [152.0, 44.0],
+            NodeKind::MomentaryButton => [146.0, 44.0],
+            NodeKind::Panel => [224.0, 128.0],
+            NodeKind::ParamViewer => [216.0, 118.0],
+            NodeKind::ColorSwatch => [156.0, 48.0],
+            NodeKind::ExpressionBox => [236.0, 88.0],
+            NodeKind::GraphMapper => [210.0, 168.0],
+            NodeKind::MdSlider => [174.0, 162.0],
+            NodeKind::ValueList => [196.0, 66.0],
+            NodeKind::PathMapper => [220.0, 74.0],
             NodeKind::Relay => [56.0, 28.0],
-            NodeKind::Scribble => [200.0, 36.0],
+            NodeKind::Scribble => [210.0, 42.0],
             NodeKind::Component => {
                 let rows = in_n.max(out_n).max(1) as f64;
-                let h = (rows * 22.0 + 20.0).max(46.0);
-                let name_w = (comp.nickname().len() as f64 * 7.8 + 78.0).clamp(132.0, 210.0);
+                let h = (rows * 24.0 + 26.0).max(52.0);
+                let name_w = (comp.nickname().len() as f64 * 8.2 + 96.0).clamp(150.0, 232.0);
                 [name_w, h]
             }
         }
@@ -586,6 +595,136 @@ impl NodeGraph {
             }
             self.mark_dirty(id);
         }
+    }
+
+    /// Inserts a Grasshopper **Relay** node inline on an existing wire (double-click wire!).
+    pub fn insert_relay_on_wire(
+        &mut self,
+        wire_id: WireId,
+        x: f64,
+        y: f64,
+        registry: &NodeRegistry,
+    ) -> Option<NodeId> {
+        let orig = self.wires.get(&wire_id).cloned()?;
+        self.push_undo_checkpoint();
+        let relay = self.add_node(registry, "params.relay", x - 28.0, y - 14.0)?;
+        self.disconnect_wire(wire_id);
+        let _ = self.connect(orig.from_node, orig.from_port, relay, 0, true);
+        let _ = self.connect(relay, 0, orig.to_node, orig.to_port, true);
+        self.selected_nodes.clear();
+        self.selected_nodes.insert(relay);
+        Some(relay)
+    }
+
+    /// Grasshopper **Rewire** (`Ctrl+Shift`-drag): moves all incoming wires from `(old_node, old_port)`
+    /// onto `(new_node, new_port)` cleanly.
+    pub fn rewire_input(
+        &mut self,
+        old_node: NodeId,
+        old_port: usize,
+        new_node: NodeId,
+        new_port: usize,
+    ) -> usize {
+        let sources: Vec<(WireId, NodeId, usize)> = self
+            .wires
+            .values()
+            .filter(|w| w.to_node == old_node && w.to_port == old_port)
+            .map(|w| (w.id, w.from_node, w.from_port))
+            .collect();
+        if sources.is_empty() {
+            return 0;
+        }
+        self.push_undo_checkpoint();
+        let mut moved = 0;
+        for (wid, fn_id, fp) in sources {
+            if self.connect(fn_id, fp, new_node, new_port, true).is_ok() {
+                self.disconnect_wire(wid);
+                moved += 1;
+            }
+        }
+        moved
+    }
+
+    /// Sets Grasshopper wire display style (`Default`, `Faint`, `Hidden`) on all incoming wires of `node`.
+    pub fn set_node_wire_display(&mut self, node: NodeId, display: WireDisplay) {
+        self.push_undo_checkpoint();
+        for w in self.wires.values_mut() {
+            if w.to_node == node {
+                w.display = display;
+            }
+        }
+        self.generation += 1;
+    }
+
+    /// Aligns or evenly distributes all currently selected nodes (Grasshopper multi-select align!).
+    pub fn align_selection(&mut self, mode: AlignMode) -> bool {
+        if self.selected_nodes.len() < 2 {
+            return false;
+        }
+        self.push_undo_checkpoint();
+        let mut ids: Vec<NodeId> = self.selected_nodes.iter().copied().collect();
+        match mode {
+            AlignMode::Left => {
+                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0])).fold(f64::INFINITY, f64::min);
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = target; }
+                }
+            }
+            AlignMode::Right => {
+                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0])).fold(f64::NEG_INFINITY, f64::max);
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = target - n.size[0]; }
+                }
+            }
+            AlignMode::Top => {
+                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1])).fold(f64::INFINITY, f64::min);
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = target; }
+                }
+            }
+            AlignMode::Bottom => {
+                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1])).fold(f64::NEG_INFINITY, f64::max);
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = target - n.size[1]; }
+                }
+            }
+            AlignMode::CenterHorizontal => {
+                let sum: f64 = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0] * 0.5)).sum();
+                let mid = sum / ids.len() as f64;
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = mid - n.size[0] * 0.5; }
+                }
+            }
+            AlignMode::CenterVertical => {
+                let sum: f64 = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1] * 0.5)).sum();
+                let mid = sum / ids.len() as f64;
+                for id in ids {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = mid - n.size[1] * 0.5; }
+                }
+            }
+            AlignMode::DistributeHorizontal => {
+                if ids.len() < 3 { return false; }
+                ids.sort_by(|a, b| self.nodes[a].position[0].total_cmp(&self.nodes[b].position[0]));
+                let x0 = self.nodes[&ids[0]].position[0];
+                let x1 = self.nodes[&ids[ids.len() - 1]].position[0];
+                let step = (x1 - x0) / (ids.len() - 1) as f64;
+                for (i, id) in ids.into_iter().enumerate() {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = x0 + step * i as f64; }
+                }
+            }
+            AlignMode::DistributeVertical => {
+                if ids.len() < 3 { return false; }
+                ids.sort_by(|a, b| self.nodes[a].position[1].total_cmp(&self.nodes[b].position[1]));
+                let y0 = self.nodes[&ids[0]].position[1];
+                let y1 = self.nodes[&ids[ids.len() - 1]].position[1];
+                let step = (y1 - y0) / (ids.len() - 1) as f64;
+                for (i, id) in ids.into_iter().enumerate() {
+                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = y0 + step * i as f64; }
+                }
+            }
+        }
+        self.generation += 1;
+        true
     }
 
     /// Sugiyama-style layered topological auto-layout arranging nodes cleanly left-to-right.

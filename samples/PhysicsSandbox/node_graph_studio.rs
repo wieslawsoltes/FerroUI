@@ -19,7 +19,7 @@ use std::rc::Rc;
 /// Builds the full split-screen Grasshopper Parametric Physics Studio tab.
 pub fn node_graph_physics_studio() -> Element {
     let registry = Rc::new(NodeRegistry::with_standard_library());
-    let active_template = signal(PhysicsGraphTemplate::PyramidPendulum);
+    let active_template = signal(PhysicsGraphTemplate::AttractorGraphMapper);
     let live_rebuild = signal(true);
     let preview_paused = signal(false);
     let summary_text = signal(String::from("Compiled Grasshopper scene live!"));
@@ -27,7 +27,7 @@ pub fn node_graph_physics_studio() -> Element {
 
     // Shared graph & live preview physics engine
     let initial_graph = {
-        let mut g = PhysicsGraphTemplate::PyramidPendulum.build(&registry);
+        let mut g = PhysicsGraphTemplate::AttractorGraphMapper.build(&registry);
         let _ = evaluate_graph(&mut g, &registry, 0.0);
         g
     };

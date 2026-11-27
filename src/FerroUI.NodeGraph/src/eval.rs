@@ -69,6 +69,10 @@ pub fn topological_order(graph: &NodeGraph) -> Result<Vec<NodeId>, Vec<NodeId>> 
 pub fn evaluate_graph(graph: &mut NodeGraph, registry: &NodeRegistry, time_secs: f64) -> EvalReport {
     let start = Instant::now();
     let mut report = EvalReport { total_nodes: graph.nodes.len(), ..Default::default() };
+    if graph.solution_locked {
+        report.total_us = start.elapsed().as_micros() as u64;
+        return report;
+    }
 
     let order = match topological_order(graph) {
         Ok(o) => o,

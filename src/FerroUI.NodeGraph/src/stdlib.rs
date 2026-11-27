@@ -7,7 +7,7 @@
 
 use crate::data_tree::{DataPath, DataTree, Value};
 use crate::node::{EvalContext, FnComponent, NodeRegistry};
-use crate::types::{NodeCategory, NodeKind, ParamAccess, ParamWidget, PortSpec, PortType};
+use crate::types::{GraphCurveKind, NodeCategory, NodeKind, ParamAccess, ParamWidget, PortSpec, PortType};
 
 fn reg(
     registry: &mut NodeRegistry,
@@ -228,6 +228,135 @@ fn register_params(r: &mut NodeRegistry) {
             })
         },
     );
+
+    // Iconic Rhino Grasshopper interactive special params!
+    reg(
+        r,
+        "params.button",
+        "Button",
+        "Btn",
+        NodeCategory::Params,
+        "Momentary press trigger button outputting True while pressed.",
+        NodeKind::MomentaryButton,
+        ParamWidget::Button { pressed: false },
+        vec![],
+        vec![PortSpec::new("B", "State", PortType::Bool, Value::Bool(false))],
+        |ctx| {
+            let pressed = matches!(ctx.widget, ParamWidget::Button { pressed: true });
+            ctx.set_output_single(0, Value::Bool(pressed));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "params.graph_mapper",
+        "Graph Mapper",
+        "Graph",
+        NodeCategory::Params,
+        "Remaps normalized numbers [0..1] through an interactive Bezier/Sine/Parabola/Gaussian curve!",
+        NodeKind::GraphMapper,
+        ParamWidget::GraphMapper { curve: GraphCurveKind::Bezier, p1: [0.25, 0.80], p2: [0.75, 0.20] },
+        vec![PortSpec::new("x", "Input [0..1]", PortType::Float, Value::Float(0.5))],
+        vec![PortSpec::new("y", "Mapped", PortType::Float, Value::Float(0.5))],
+        |ctx| {
+            let (curve, p1, p2) = match ctx.widget {
+                ParamWidget::GraphMapper { curve, p1, p2 } => (*curve, *p1, *p2),
+                _ => (GraphCurveKind::Bezier, [0.25, 0.75], [0.75, 0.25]),
+            };
+            ctx.map_items(|args| {
+                let x = args[0].as_float().unwrap_or(0.5);
+                Ok(vec![Value::Float(curve.evaluate(x, p1, p2))])
+            })
+        },
+    );
+
+    reg(
+        r,
+        "params.md_slider",
+        "MD Slider",
+        "MD",
+        NodeCategory::Params,
+        "Interactive 2D Multi-Dimensional XY joystick slider outputting Vec2(X, Y) in [0..1] × [0..1].",
+        NodeKind::MdSlider,
+        ParamWidget::MdSlider { x: 0.5, y: 0.5 },
+        vec![],
+        vec![
+            PortSpec::new("Pt", "XY Point", PortType::Vec2, Value::Vec2([0.5, 0.5])),
+            PortSpec::new("X", "X", PortType::Float, Value::Float(0.5)),
+            PortSpec::new("Y", "Y", PortType::Float, Value::Float(0.5)),
+        ],
+        |ctx| {
+            let (x, y) = match ctx.widget {
+                ParamWidget::MdSlider { x, y } => (*x, *y),
+                _ => (0.5, 0.5),
+            };
+            ctx.set_output_single(0, Value::Vec2([x, y]));
+            ctx.set_output_single(1, Value::Float(x));
+            ctx.set_output_single(2, Value::Float(y));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "params.value_list",
+        "Value List",
+        "List",
+        NodeCategory::Params,
+        "Named Grasshopper Value List preset selector (outputs selected numeric value & label).",
+        NodeKind::ValueList,
+        ParamWidget::ValueList {
+            options: vec![
+                ("Low".into(), 3.0),
+                ("Med".into(), 6.0),
+                ("High".into(), 10.0),
+            ],
+            selected: 1,
+        },
+        vec![],
+        vec![
+            PortSpec::new("V", "Value", PortType::Float, Value::Float(6.0)),
+            PortSpec::new("N", "Label", PortType::String, Value::String("Med".into())),
+        ],
+        |ctx| {
+            let (label, val) = match ctx.widget {
+                ParamWidget::ValueList { options, selected } => options
+                    .get(*selected)
+                    .or_else(|| options.first())
+                    .cloned()
+                    .unwrap_or_else(|| ("Default".into(), 0.0)),
+                _ => ("Default".into(), 0.0),
+            };
+            ctx.set_output_single(0, Value::Float(val));
+            ctx.set_output_single(1, Value::String(label));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "params.param_viewer",
+        "Param Viewer",
+        "Viewer",
+        NodeCategory::Params,
+        "Displays live DataTree branch topology ({0;0}, {0;1} ...) and item counts.",
+        NodeKind::ParamViewer,
+        ParamWidget::None,
+        vec![PortSpec::new("D", "Data", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        vec![
+            PortSpec::new("P", "Paths", PortType::String, Value::Null).with_access(ParamAccess::List),
+            PortSpec::new("L", "Lengths", PortType::Int, Value::Int(0)).with_access(ParamAccess::List),
+        ],
+        |ctx| {
+            let tree = ctx.input(0);
+            let paths: Vec<Value> = tree.branches().keys().map(|p| Value::String(p.to_string())).collect();
+            let lens: Vec<Value> = tree.branches().values().map(|v| Value::Int(v.len() as i64)).collect();
+            ctx.set_output(0, DataTree::from_list(paths));
+            ctx.set_output(1, DataTree::from_list(lens));
+            Ok(())
+        },
+    );
 }
 
 fn register_math(r: &mut NodeRegistry) {
@@ -404,6 +533,76 @@ fn register_math(r: &mut NodeRegistry) {
                 let val = eval_math_expression(&expr_str, x, y, z, t)?;
                 Ok(vec![Value::Float(val)])
             })
+        },
+    );
+
+    reg(
+        r,
+        "math.bounds",
+        "Bounds",
+        "Bnd",
+        NodeCategory::Math,
+        "Computes the numeric [min .. max] Domain enclosing a list of numbers.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![PortSpec::new("N", "Numbers", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List)],
+        vec![PortSpec::new("I", "Domain", PortType::Domain, Value::Domain(0.0, 1.0))],
+        |ctx| {
+            let vals: Vec<f64> = ctx.input(0).all_items().iter().filter_map(Value::as_float).collect();
+            if vals.is_empty() {
+                ctx.set_output_single(0, Value::Domain(0.0, 0.0));
+            } else {
+                let lo = vals.iter().copied().fold(f64::INFINITY, f64::min);
+                let hi = vals.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+                ctx.set_output_single(0, Value::Domain(lo, hi));
+            }
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "math.mass_addition",
+        "Mass Addition",
+        "MA",
+        NodeCategory::Math,
+        "Computes the total sum R and running partial sums Pr of a list.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![PortSpec::new("I", "Numbers", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List)],
+        vec![
+            PortSpec::new("R", "Total", PortType::Float, Value::Float(0.0)),
+            PortSpec::new("Pr", "Partial", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List),
+        ],
+        |ctx| {
+            let mut sum = 0.0;
+            let mut partials = Vec::new();
+            for v in ctx.input(0).all_items() {
+                sum += v.as_float().unwrap_or(0.0);
+                partials.push(Value::Float(sum));
+            }
+            ctx.set_output_single(0, Value::Float(sum));
+            ctx.set_output(1, DataTree::from_list(partials));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "math.average",
+        "Average",
+        "Avr",
+        NodeCategory::Math,
+        "Computes the arithmetic mean of a list of numbers.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![PortSpec::new("I", "Numbers", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List)],
+        vec![PortSpec::new("AM", "Mean", PortType::Float, Value::Float(0.0))],
+        |ctx| {
+            let vals: Vec<f64> = ctx.input(0).all_items().iter().filter_map(Value::as_float).collect();
+            let mean = if vals.is_empty() { 0.0 } else { vals.iter().sum::<f64>() / vals.len() as f64 };
+            ctx.set_output_single(0, Value::Float(mean));
+            Ok(())
         },
     );
 }
@@ -787,6 +986,192 @@ fn register_sets(r: &mut NodeRegistry) {
             Ok(())
         },
     );
+
+    reg(
+        r,
+        "sets.path_mapper",
+        "Path Mapper",
+        "PMap",
+        NodeCategory::Sets,
+        "Lexical Grasshopper DataTree remapper (e.g. {A;B}(i) -> {B;A} or {A;B} -> {0}).",
+        NodeKind::PathMapper,
+        ParamWidget::PathMapper { source_mask: "{A;B}(i)".into(), target_mask: "{B;A}".into() },
+        vec![PortSpec::new("T", "Tree", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        vec![PortSpec::new("T", "Mapped", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        |ctx| {
+            let (src, tgt) = match ctx.widget {
+                ParamWidget::PathMapper { source_mask, target_mask } => (source_mask.as_str(), target_mask.as_str()),
+                _ => ("{A;B}", "{A}"),
+            };
+            let mapped = ctx.input(0).map_paths(src, tgt)?;
+            ctx.set_output(0, mapped);
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.shift_paths",
+        "Shift Paths",
+        "PShift",
+        NodeCategory::Sets,
+        "Shifts DataTree branch addresses by integer offset (-1 drops trailing index).",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("D", "Data", PortType::Any, Value::Null).with_access(ParamAccess::Tree),
+            PortSpec::new("O", "Offset", PortType::Int, Value::Int(-1)),
+        ],
+        vec![PortSpec::new("D", "Shifted", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        |ctx| {
+            let off = ctx.input(1).first_item().and_then(Value::as_int).unwrap_or(-1) as isize;
+            ctx.set_output(0, ctx.input(0).shift_paths(off));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.entwine",
+        "Entwine",
+        "Entwine",
+        NodeCategory::Sets,
+        "Flattens each input stream into its own clean branch {0}, {1}, {2}.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("0", "Branch 0", PortType::Any, Value::Null).with_access(ParamAccess::Tree),
+            PortSpec::new("1", "Branch 1", PortType::Any, Value::Null).with_access(ParamAccess::Tree),
+            PortSpec::new("2", "Branch 2", PortType::Any, Value::Null).with_access(ParamAccess::Tree),
+        ],
+        vec![PortSpec::new("R", "Tree", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        |ctx| {
+            let mut out = DataTree::new();
+            for i in 0..3 {
+                let items = ctx.input(i).all_items();
+                if !items.is_empty() {
+                    out.insert_branch(DataPath::from_slice(&[i as u32]), items);
+                }
+            }
+            ctx.set_output(0, out);
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.dispatch",
+        "Dispatch",
+        "Dispatch",
+        NodeCategory::Sets,
+        "Splits a list into two streams (A = True items, B = False items) using a boolean pattern.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("L", "List", PortType::Any, Value::Null).with_access(ParamAccess::List),
+            PortSpec::new("P", "Pattern", PortType::Bool, Value::Bool(true)).with_access(ParamAccess::List),
+        ],
+        vec![
+            PortSpec::new("A", "True List", PortType::Any, Value::Null).with_access(ParamAccess::List),
+            PortSpec::new("B", "False List", PortType::Any, Value::Null).with_access(ParamAccess::List),
+        ],
+        |ctx| {
+            let pat: Vec<bool> = ctx.input(1).all_items().into_iter().map(|v| v.as_bool().unwrap_or(true)).collect();
+            let mut a = Vec::new();
+            let mut b = Vec::new();
+            for (i, item) in ctx.input(0).all_items().into_iter().enumerate() {
+                let take_a = if pat.is_empty() { i % 2 == 0 } else { pat[i % pat.len()] };
+                if take_a { a.push(item); } else { b.push(item); }
+            }
+            ctx.set_output(0, DataTree::from_list(a));
+            ctx.set_output(1, DataTree::from_list(b));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.partition",
+        "Partition List",
+        "Part",
+        NodeCategory::Sets,
+        "Chunks a flat list into DataTree branches of size S.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("L", "List", PortType::Any, Value::Null).with_access(ParamAccess::List),
+            PortSpec::new("S", "Size", PortType::Int, Value::Int(3)),
+        ],
+        vec![PortSpec::new("C", "Chunks", PortType::Any, Value::Null).with_access(ParamAccess::Tree)],
+        |ctx| {
+            let items = ctx.input(0).all_items();
+            let sz = ctx.input(1).first_item().and_then(Value::as_int).unwrap_or(3).max(1) as usize;
+            let mut out = DataTree::new();
+            for (b, chunk) in items.chunks(sz).enumerate() {
+                out.insert_branch(DataPath::from_slice(&[b as u32]), chunk.to_vec());
+            }
+            ctx.set_output(0, out);
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.sort_list",
+        "Sort List",
+        "Sort",
+        NodeCategory::Sets,
+        "Sorts numeric Keys ascending and synchronously reorders parallel Values.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("K", "Keys", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List),
+            PortSpec::new("A", "Values", PortType::Any, Value::Null).with_access(ParamAccess::List),
+        ],
+        vec![
+            PortSpec::new("K", "Sorted K", PortType::Float, Value::Float(0.0)).with_access(ParamAccess::List),
+            PortSpec::new("A", "Sorted A", PortType::Any, Value::Null).with_access(ParamAccess::List),
+        ],
+        |ctx| {
+            let keys: Vec<f64> = ctx.input(0).all_items().iter().map(|v| v.as_float().unwrap_or(0.0)).collect();
+            let vals = ctx.input(1).all_items();
+            let mut indices: Vec<usize> = (0..keys.len()).collect();
+            indices.sort_by(|&i, &j| keys[i].total_cmp(&keys[j]));
+            let sk: Vec<Value> = indices.iter().map(|&i| Value::Float(keys[i])).collect();
+            let sv: Vec<Value> = indices.iter().filter_map(|&i| vals.get(i).cloned()).collect();
+            ctx.set_output(0, DataTree::from_list(sk));
+            ctx.set_output(1, DataTree::from_list(sv));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "sets.weave",
+        "Weave",
+        "Weave",
+        NodeCategory::Sets,
+        "Interleaves two input streams (0 and 1) according to an alternating pattern.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("0", "Stream 0", PortType::Any, Value::Null).with_access(ParamAccess::List),
+            PortSpec::new("1", "Stream 1", PortType::Any, Value::Null).with_access(ParamAccess::List),
+        ],
+        vec![PortSpec::new("W", "Weaved", PortType::Any, Value::Null).with_access(ParamAccess::List)],
+        |ctx| {
+            let a = ctx.input(0).all_items();
+            let b = ctx.input(1).all_items();
+            let n = a.len().max(b.len());
+            let mut out = Vec::with_capacity(a.len() + b.len());
+            for i in 0..n {
+                if let Some(va) = a.get(i) { out.push(va.clone()); }
+                if let Some(vb) = b.get(i) { out.push(vb.clone()); }
+            }
+            ctx.set_output(0, DataTree::from_list(out));
+            Ok(())
+        },
+    );
 }
 
 fn register_vectors_geometry(r: &mut NodeRegistry) {
@@ -1083,6 +1468,108 @@ fn register_vectors_geometry(r: &mut NodeRegistry) {
                 let v = args[2].as_float().unwrap_or(0.95).clamp(0.0, 1.0);
                 Ok(vec![Value::Color(hsv_to_argb(h, s, v))])
             })
+        },
+    );
+
+    reg(
+        r,
+        "geom.attractor",
+        "Point Attractor",
+        "Attr",
+        NodeCategory::Geometry,
+        "Classic Grasshopper Attractor Field: maps distance from Point Pt to Attractor A into [0..1] falloff.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("P", "Sample Pts", PortType::Vec2, Value::Vec2([0.0, 0.0])),
+            PortSpec::new("A", "Attractor", PortType::Vec2, Value::Vec2([8.0, 5.0])),
+            PortSpec::new("R", "Radius", PortType::Float, Value::Float(6.0)),
+        ],
+        vec![
+            PortSpec::new("W", "Weight [0..1]", PortType::Float, Value::Float(0.0)),
+            PortSpec::new("D", "Distance", PortType::Float, Value::Float(0.0)),
+        ],
+        |ctx| {
+            ctx.map_items(|args| {
+                let p = args[0].as_vec2().unwrap_or([0.0, 0.0]);
+                let a = args[1].as_vec2().unwrap_or([8.0, 5.0]);
+                let rad = args[2].as_float().unwrap_or(6.0).max(0.01);
+                let d = ((p[0] - a[0]).powi(2) + (p[1] - a[1]).powi(2)).sqrt();
+                let w = (1.0 - d / rad).clamp(0.0, 1.0);
+                Ok(vec![Value::Float(w), Value::Float(d)])
+            })
+        },
+    );
+
+    reg(
+        r,
+        "geom.sine_wave",
+        "Sine Wave Points",
+        "Wave",
+        NodeCategory::Geometry,
+        "Generates N points along a parametric sine wave (Center, Width, Amplitude, Frequency).",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("C", "Center", PortType::Vec2, Value::Vec2([8.0, 5.0])),
+            PortSpec::new("W", "Span W", PortType::Float, Value::Float(10.0)),
+            PortSpec::new("A", "Amplitude", PortType::Float, Value::Float(1.6)),
+            PortSpec::new("F", "Cycles", PortType::Float, Value::Float(1.5)),
+            PortSpec::new("N", "Count", PortType::Int, Value::Int(12)),
+        ],
+        vec![PortSpec::new("P", "Points", PortType::Vec2, Value::Vec2([0.0, 0.0])).with_access(ParamAccess::List)],
+        |ctx| {
+            let c = ctx.input(0).first_item().and_then(Value::as_vec2).unwrap_or([8.0, 5.0]);
+            let span = ctx.input(1).first_item().and_then(Value::as_float).unwrap_or(10.0);
+            let amp = ctx.input(2).first_item().and_then(Value::as_float).unwrap_or(1.6);
+            let freq = ctx.input(3).first_item().and_then(Value::as_float).unwrap_or(1.5);
+            let n = ctx.input(4).first_item().and_then(Value::as_int).unwrap_or(12).clamp(2, 256) as usize;
+            let pts = (0..n)
+                .map(|i| {
+                    let u = i as f64 / (n - 1) as f64;
+                    let x = c[0] + (u - 0.5) * span;
+                    let y = c[1] + (u * std::f64::consts::TAU * freq).sin() * amp;
+                    Value::Vec2([x, y])
+                })
+                .collect();
+            ctx.set_output(0, DataTree::from_list(pts));
+            Ok(())
+        },
+    );
+
+    reg(
+        r,
+        "geom.spiral",
+        "Spiral Points",
+        "Spiral",
+        NodeCategory::Geometry,
+        "Generates N points along an Archimedean spiral from R0 to R1 over Turns T.",
+        NodeKind::Component,
+        ParamWidget::None,
+        vec![
+            PortSpec::new("C", "Center", PortType::Vec2, Value::Vec2([8.0, 5.0])),
+            PortSpec::new("R0", "Start R", PortType::Float, Value::Float(0.6)),
+            PortSpec::new("R1", "End R", PortType::Float, Value::Float(3.8)),
+            PortSpec::new("T", "Turns", PortType::Float, Value::Float(2.0)),
+            PortSpec::new("N", "Count", PortType::Int, Value::Int(18)),
+        ],
+        vec![PortSpec::new("P", "Points", PortType::Vec2, Value::Vec2([0.0, 0.0])).with_access(ParamAccess::List)],
+        |ctx| {
+            let c = ctx.input(0).first_item().and_then(Value::as_vec2).unwrap_or([8.0, 5.0]);
+            let r0 = ctx.input(1).first_item().and_then(Value::as_float).unwrap_or(0.6);
+            let r1 = ctx.input(2).first_item().and_then(Value::as_float).unwrap_or(3.8);
+            let turns = ctx.input(3).first_item().and_then(Value::as_float).unwrap_or(2.0);
+            let n = ctx.input(4).first_item().and_then(Value::as_int).unwrap_or(18).clamp(2, 256) as usize;
+            let pts = (0..n)
+                .map(|i| {
+                    let u = i as f64 / (n - 1) as f64;
+                    let r = r0 + (r1 - r0) * u;
+                    let ang = u * turns * std::f64::consts::TAU;
+                    Value::Vec2([c[0] + ang.cos() * r, c[1] + ang.sin() * r])
+                })
+                .collect();
+            ctx.set_output(0, DataTree::from_list(pts));
+            Ok(())
         },
     );
 }

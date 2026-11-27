@@ -261,16 +261,95 @@ pub enum NodeKind {
     NumberSlider,
     /// Inline clickable True/False toggle pill.
     BoolToggle,
+    /// Inline momentary press button (`True` while clicked / pulse).
+    MomentaryButton,
     /// Yellow/slate live multiline DataTree inspection panel.
     Panel,
+    /// Grasshopper Param Viewer showing live `{0;1}` tree branch topology.
+    ParamViewer,
     /// Inline clickable color preview swatch.
     ColorSwatch,
-    /// Inline momentary trigger / expression input.
+    /// Inline editable math formula box.
     ExpressionBox,
+    /// Interactive Grasshopper Graph Mapper curve shaper (`Bezier`/`Sine`/`Parabola`/`Gaussian`).
+    GraphMapper,
+    /// Interactive 2D XY Multi-Dimensional Slider pad (`[0..1] × [0..1]`).
+    MdSlider,
+    /// Named option selector (Grasshopper `Value List`).
+    ValueList,
+    /// Editable Grasshopper `Path Mapper` lexical mask node (`{A;B} -> {B;A}`).
+    PathMapper,
     /// Compact inline wire reroute dot (`Relay`).
     Relay,
     /// Frameless typography annotation (`Scribble`).
     Scribble,
+}
+
+/// Curve archetype used by Grasshopper's [`NodeKind::GraphMapper`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
+pub enum GraphCurveKind {
+    #[default]
+    Bezier,
+    Sine,
+    Parabola,
+    Gaussian,
+    Linear,
+}
+
+impl GraphCurveKind {
+    pub const ALL: [Self; 5] = [Self::Bezier, Self::Sine, Self::Parabola, Self::Gaussian, Self::Linear];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Bezier => "Bezier",
+            Self::Sine => "Sine",
+            Self::Parabola => "Parabola",
+            Self::Gaussian => "Gaussian",
+            Self::Linear => "Linear",
+        }
+    }
+
+    pub fn next(self) -> Self {
+        match self {
+            Self::Bezier => Self::Sine,
+            Self::Sine => Self::Parabola,
+            Self::Parabola => Self::Gaussian,
+            Self::Gaussian => Self::Linear,
+            Self::Linear => Self::Bezier,
+        }
+    }
+
+    /// Evaluates the curve at normalized `x ∈ [0, 1]` using control handles `p1` and `p2`.
+    pub fn evaluate(self, x: f64, p1: [f64; 2], p2: [f64; 2]) -> f64 {
+        let t = x.clamp(0.0, 1.0);
+        match self {
+            Self::Linear => p1[1] + (p2[1] - p1[1]) * t,
+            Self::Bezier => {
+                // Cubic Bezier y(t) with endpoints (0, 0), p1, p2, (1, 1)
+                let u = 1.0 - t;
+                3.0 * u * u * t * p1[1] + 3.0 * u * t * t * p2[1] + t * t * t
+            }
+            Self::Sine => {
+                let freq = (0.5 + p2[0] * 3.0).max(0.25);
+                let amp = p1[1].clamp(0.05, 1.0);
+                let phase = p1[0] * std::f64::consts::TAU;
+                (0.5 + 0.5 * amp * (t * std::f64::consts::TAU * freq + phase).sin()).clamp(0.0, 1.0)
+            }
+            Self::Parabola => {
+                let cx = p1[0].clamp(0.05, 0.95);
+                let cy = p1[1].clamp(0.0, 1.0);
+                let spread = (p2[1] * 2.0 - 1.0) * 3.5;
+                (cy + spread * (t - cx) * (t - cx)).clamp(0.0, 1.0)
+            }
+            Self::Gaussian => {
+                let mu = p1[0].clamp(0.05, 0.95);
+                let sigma = (p2[0] * 0.45).max(0.06);
+                let peak = p1[1].clamp(0.1, 1.0);
+                let z = (t - mu) / sigma;
+                (peak * (-0.5 * z * z).exp()).clamp(0.0, 1.0)
+            }
+        }
+    }
 }
 
 /// Persistent editable widget state stored on a [`crate::NodeInstance`].
@@ -287,12 +366,45 @@ pub enum ParamWidget {
     Toggle {
         value: bool,
     },
+    Button {
+        pressed: bool,
+    },
     Color {
         argb: u32,
     },
     Text {
         text: String,
     },
+    GraphMapper {
+        curve: GraphCurveKind,
+        p1: [f64; 2],
+        p2: [f64; 2],
+    },
+    MdSlider {
+        x: f64,
+        y: f64,
+    },
+    ValueList {
+        options: Vec<(String, f64)>,
+        selected: usize,
+    },
+    PathMapper {
+        source_mask: String,
+        target_mask: String,
+    },
+}
+
+/// Multi-node canvas alignment & distribution operations (Grasshopper Align widget).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AlignMode {
+    Left,
+    Right,
+    Top,
+    Bottom,
+    CenterHorizontal,
+    CenterVertical,
+    DistributeHorizontal,
+    DistributeVertical,
 }
 
 impl Default for ParamWidget {

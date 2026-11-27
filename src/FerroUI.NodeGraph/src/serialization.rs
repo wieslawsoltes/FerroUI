@@ -5,7 +5,7 @@
 
 use crate::graph::NodeGraph;
 use crate::node::NodeRegistry;
-use crate::types::{NodeId, ParamModifier, ParamWidget};
+use crate::types::{GraphCurveKind, NodeId, ParamModifier, ParamWidget};
 use rustc_hash::FxHashMap;
 use std::fmt::Write as _;
 
@@ -35,8 +35,25 @@ pub fn graph_to_json(graph: &NodeGraph) -> String {
                 "{{\"kind\":\"slider\",\"value\":{value:.6},\"min\":{min:.6},\"max\":{max:.6},\"step\":{step:.6},\"integer\":{integer}}}"
             ),
             ParamWidget::Toggle { value } => format!("{{\"kind\":\"toggle\",\"value\":{value}}}"),
+            ParamWidget::Button { pressed } => format!("{{\"kind\":\"button\",\"pressed\":{pressed}}}"),
             ParamWidget::Color { argb } => format!("{{\"kind\":\"color\",\"argb\":{argb}}}"),
             ParamWidget::Text { text } => format!("{{\"kind\":\"text\",\"text\":\"{}\"}}", esc(text)),
+            ParamWidget::GraphMapper { curve, p1, p2 } => format!(
+                "{{\"kind\":\"graph_mapper\",\"curve\":\"{}\",\"p1\":[{:.4},{:.4}],\"p2\":[{:.4},{:.4}]}}",
+                curve.label(), p1[0], p1[1], p2[0], p2[1]
+            ),
+            ParamWidget::MdSlider { x, y } => format!("{{\"kind\":\"md_slider\",\"x\":{x:.4},\"y\":{y:.4}}}"),
+            ParamWidget::ValueList { options, selected } => {
+                let opts: Vec<String> = options
+                    .iter()
+                    .map(|(k, v)| format!("[\"{}\",{v:.4}]", esc(k)))
+                    .collect();
+                format!("{{\"kind\":\"value_list\",\"selected\":{selected},\"options\":[{}]}}", opts.join(","))
+            }
+            ParamWidget::PathMapper { source_mask, target_mask } => format!(
+                "{{\"kind\":\"path_mapper\",\"src\":\"{}\",\"tgt\":\"{}\"}}",
+                esc(source_mask), esc(target_mask)
+            ),
         };
         let mods: Vec<String> = n
             .input_modifiers
@@ -150,6 +167,11 @@ pub fn graph_from_json(json: &str, registry: &NodeRegistry) -> Result<NodeGraph,
                                 value: wobj.get("value").and_then(JVal::as_bool).unwrap_or(false),
                             };
                         }
+                        Some("button") => {
+                            inst.widget = ParamWidget::Button {
+                                pressed: wobj.get("pressed").and_then(JVal::as_bool).unwrap_or(false),
+                            };
+                        }
                         Some("color") => {
                             inst.widget = ParamWidget::Color {
                                 argb: wobj.get("argb").and_then(JVal::as_f64).unwrap_or(0xFF38BDF8_u32 as f64) as u32,
@@ -158,6 +180,59 @@ pub fn graph_from_json(json: &str, registry: &NodeRegistry) -> Result<NodeGraph,
                         Some("text") => {
                             inst.widget = ParamWidget::Text {
                                 text: wobj.get("text").and_then(JVal::as_str).unwrap_or("").to_string(),
+                            };
+                        }
+                        Some("graph_mapper") => {
+                            let curve = match wobj.get("curve").and_then(JVal::as_str) {
+                                Some("Sine") => GraphCurveKind::Sine,
+                                Some("Parabola") => GraphCurveKind::Parabola,
+                                Some("Gaussian") => GraphCurveKind::Gaussian,
+                                Some("Linear") => GraphCurveKind::Linear,
+                                _ => GraphCurveKind::Bezier,
+                            };
+                            let p1a = wobj.get("p1").and_then(JVal::as_arr);
+                            let p2a = wobj.get("p2").and_then(JVal::as_arr);
+                            inst.widget = ParamWidget::GraphMapper {
+                                curve,
+                                p1: [
+                                    p1a.and_then(|a| a.first()).and_then(JVal::as_f64).unwrap_or(0.25),
+                                    p1a.and_then(|a| a.get(1)).and_then(JVal::as_f64).unwrap_or(0.75),
+                                ],
+                                p2: [
+                                    p2a.and_then(|a| a.first()).and_then(JVal::as_f64).unwrap_or(0.75),
+                                    p2a.and_then(|a| a.get(1)).and_then(JVal::as_f64).unwrap_or(0.25),
+                                ],
+                            };
+                        }
+                        Some("md_slider") => {
+                            inst.widget = ParamWidget::MdSlider {
+                                x: wobj.get("x").and_then(JVal::as_f64).unwrap_or(0.5),
+                                y: wobj.get("y").and_then(JVal::as_f64).unwrap_or(0.5),
+                            };
+                        }
+                        Some("value_list") => {
+                            let selected = wobj.get("selected").and_then(JVal::as_f64).unwrap_or(0.0) as usize;
+                            let options: Vec<(String, f64)> = wobj
+                                .get("options")
+                                .and_then(JVal::as_arr)
+                                .map(|arr| {
+                                    arr.iter()
+                                        .filter_map(|e| e.as_arr())
+                                        .map(|pair| {
+                                            (
+                                                pair.first().and_then(JVal::as_str).unwrap_or("Opt").to_string(),
+                                                pair.get(1).and_then(JVal::as_f64).unwrap_or(0.0),
+                                            )
+                                        })
+                                        .collect()
+                                })
+                                .unwrap_or_default();
+                            inst.widget = ParamWidget::ValueList { options, selected };
+                        }
+                        Some("path_mapper") => {
+                            inst.widget = ParamWidget::PathMapper {
+                                source_mask: wobj.get("src").and_then(JVal::as_str).unwrap_or("{A;B}").to_string(),
+                                target_mask: wobj.get("tgt").and_then(JVal::as_str).unwrap_or("{B;A}").to_string(),
                             };
                         }
                         _ => {}

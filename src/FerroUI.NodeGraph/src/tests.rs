@@ -162,9 +162,53 @@ fn cluster_component_encapsulates_reusable_subgraph() {
     assert_eq!(outer.nodes[&cnode].output_tree(0).unwrap().first_item().unwrap().as_float(), Some(15.0));
 }
 
+#[test]
+fn grasshopper_path_mapper_graph_mapper_md_slider_align_relay_and_solution_lock() {
+    let reg = NodeRegistry::with_standard_library();
+
+    // 1. PathMapper lexical remapping {A;B}(i) -> {B;A}
+    let mut tree = DataTree::new();
+    tree.insert_branch(DataPath::from_slice(&[0, 1]), vec![Value::Int(10), Value::Int(20)]);
+    tree.insert_branch(DataPath::from_slice(&[2, 3]), vec![Value::Int(30)]);
+    let mapped = tree.map_paths("{A;B}(i)", "{B;A}").unwrap();
+    assert!(mapped.branches().contains_key(&DataPath::from_slice(&[1, 0])));
+    assert!(mapped.branches().contains_key(&DataPath::from_slice(&[3, 2])));
+
+    // 2. GraphMapper evaluates all 5 curve types in [0, 1]
+    for kind in GraphCurveKind::ALL {
+        let y = kind.evaluate(0.5, [0.25, 0.8], [0.75, 0.2]);
+        assert!(y.is_finite() && (0.0..=1.0).contains(&y), "curve {kind:?} out of bounds: {y}");
+    }
+
+    // 3. Inline Relay insertion on wire, AlignMode, and Solution Lock
+    let mut g = NodeGraph::new("GH Features");
+    let a = g.add_node(&reg, "params.md_slider", 20.0, 20.0).unwrap();
+    let b = g.add_node(&reg, "params.graph_mapper", 320.0, 120.0).unwrap();
+    let wid = g.connect(a, 1, b, 0, false).unwrap();
+    let relay = g.insert_relay_on_wire(wid, 180.0, 70.0, &reg).expect("relay inserted");
+    assert_eq!(g.wires.len(), 2);
+    assert!(g.nodes.contains_key(&relay));
+
+    // Align selection
+    g.selected_nodes.insert(a);
+    g.selected_nodes.insert(b);
+    assert!(g.align_selection(AlignMode::Top));
+    assert!((g.nodes[&a].position[1] - g.nodes[&b].position[1]).abs() < 1e-6);
+
+    // Solution Lock prevents evaluation until unlocked
+    g.solution_locked = true;
+    g.mark_all_dirty();
+    let locked_rep = evaluate_graph(&mut g, &reg, 0.0);
+    assert_eq!(locked_rep.evaluated_nodes, 0);
+    g.solution_locked = false;
+    let live_rep = evaluate_graph(&mut g, &reg, 0.0);
+    assert!(live_rep.evaluated_nodes >= 3);
+    assert_eq!(live_rep.errors, 0);
+}
+
 #[cfg(feature = "physics")]
 #[test]
-fn all_four_parametric_physics_templates_compile_and_simulate_cleanly() {
+fn all_five_parametric_physics_templates_compile_and_simulate_cleanly() {
     let reg = NodeRegistry::with_standard_library();
     for tpl in PhysicsGraphTemplate::ALL {
         let mut g = tpl.build(&reg);

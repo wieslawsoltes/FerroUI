@@ -1,32 +1,38 @@
 # FerroUI NodeGraph (`ferroui-nodegraph`)
 
 `ferroui-nodegraph` is a standalone, **Rhino Grasshopper-style** parametric visual node programming
-engine and hardware-rendered FerroUI canvas control designed to build **anything** — parametric
+engine built from **real FerroUI UI Visuals**, designed to build **anything** — parametric
 CAD/geometry, live physics simulations, procedural UI, audio/DSP, shaders, or data pipelines.
 
 ## Key Capabilities
 
+- **Built from Real FerroUI UI Visuals (`feature = "ferroui"`)**:
+  - Every node on the canvas is a genuine FerroUI control tree (`Border`, `Slider`, `TextBox`,
+    `Button`, `StackPanel`, `DockPanel`, `GraphMapperControl`, `MdSliderControl`) keyed via
+    `for_each` inside a GPU-transformed `Canvas` (`MatrixTransform` — zero layout passes while
+    panning or zooming!).
+  - `WireBackdropLayer` renders the adaptive infinite Grasshopper grid, colored node groups,
+    **Fancy Bezier Wires** (Empty dashed amber, Item single line, List double line, DataTree
+    dashed double line, Selected emerald glow), marquee selection, live port DataTree tooltips,
+    and an interactive minimap — querying each real port socket's exact screen position via
+    `Visual::translate_point`!
+  - **Floating Rhino Grasshopper Overlays**: Double-click / `Space` **Quick-Search Popup** with
+    fuzzy search, **Multi-Select Align & Distribute Bar**, and right-click / `⋯` **Node Context
+    Menu** (Enable/Disable, Lacing mode, Wire Display `Default`/`Faint`/`Hidden`, Duplicate, Delete).
+  - Double-click any wire to insert an inline **Relay**; `Shift`-drag to connect multiple wires to
+    one input; `Alt`-click or right-click a socket/wire to disconnect; `🔒 Lock Solver` pauses
+    evaluation while making batch edits.
 - **True Grasshopper DataTrees (`DataTree` & `DataPath`)**: hierarchical `{0;1;2}` branches with
-  `Flatten`, `Graft`, `Reverse`, `Simplify`, and `FlipMatrix` plus per-port modifiers (`F/G/R/S`)
-  and automatic `LongestList`, `ShortestList`, and `CrossReference` lacing.
-- **Universal Polymorphic Values (`Value`)**: `Bool`, `Int`, `Float`, `Vec2`, `Vec3`, `Color`,
-  `String`, `Domain`, `Curve`, `Mesh`, and arbitrary `Value::custom::<T>(...)` domain payloads.
-- **Extensible Component Registry & Clusters**: implement `NodeComponent` (or use `FnComponent`)
-  to register custom nodes in seconds; encapsulate any sub-graph into a reusable `ClusterComponent`.
-- **Incremental Topological DAG Evaluator**: Kahn's topological sort, cycle prevention, dirty
-  downstream propagation, multi-wire stream merging (`Shift`-drag), and microsecond per-node
-  profiling.
-- **45+ Built-in Standard Library Nodes**: `Params` (`NumberSlider`, `IntSlider`, `BoolToggle`,
-  `Panel`, `ColorSwatch`, `Domain`, `Relay`, `Scribble`, `Time`), `Math` (including a recursive-descent
-  math `Expression` evaluator), `Logic`, `Sets` (`Series`, `Range`, `Repeat`, `CullPattern`, `Merge`,
-  `Flatten`, `Graft`, `FlipMatrix`, `Random`), and `Vector / Geometry` (`RectGrid`, `CirclePoints`,
-  `LineDivide`, `ColorHsv`).
-- **Interactive FerroUI Canvas (`feature = "ferroui"`)**: `NodeGraphCanvas` control +
-  `node_graph_editor` view featuring smooth pan & cursor-centered zoom, Grasshopper **Fancy Wires**
-  (single Item, double-line List, dashed double-line DataTree), inline draggable sliders & toggles,
-  colored node groups, marquee selection, minimap, hover DataTree tooltips, auto-layout, undo/redo,
-  and zero-dependency JSON save/load.
-- **Parametric Physics Bridge (`feature = "physics"`)**: built-in physics nodes (`Box`, `Circle`,
-  `Polygon`, `RigidBody`, `Wrecking Pendulum`, `Suspension Bridge`, `Newtonian Star`, `Wind/Vortex`,
-  `Jelly SoftBody`, `Tearable Cloth`, `WorldConfig`, `SceneOutput`) + 4 live templates wired
-  directly into `samples/PhysicsSandbox` under the **🧩 Node Graph** tab.
+  **`PathMapper`** (`{A;B}(i) -> {B;A}`), `Flatten`, `Graft`, `Reverse`, `Simplify`, `FlipMatrix`,
+  `ShiftPaths`, `Entwine`, `Weave`, `Dispatch`, `PartitionList`, `SortList`, per-port modifiers
+  (`F/G/R/S`), and automatic `LongestList` / `ShortestList` / `CrossReference` lacing.
+- **65+ Built-in Components & Reusable Clusters**: `Params` (`NumberSlider`, `IntSlider`,
+  `BoolToggle`, `Button`, `GraphMapper`, `MdSlider`, `ValueList`, `ParamViewer`, `Panel`,
+  `ColorSwatch`, `Domain`, `Relay`, `Scribble`, `Time`), `Math` (live editable `Expression`
+  formula boxes, `Bounds`, `MassAddition`, `Average`), `Logic`, `Sets`, `Vector / Geometry`
+  (`RectGrid`, `CirclePoints`, `LineDivide`, `PointAttractor`, `SineWave`, `Spiral`, `ColorHsv`),
+  plus `ClusterComponent` sub-graphs and zero-dependency JSON save/load.
+- **Parametric Physics Bridge (`feature = "physics"`)**: compiles directly into live
+  `ferroui-physics` worlds with 5 templates (**Attractor & GraphMapper**, **Pyramid & Pendulum**,
+  **Keplerian Solar System**, **Bridge & Rain**, **Cloth & Jelly Tunnel**) wired into
+  `samples/PhysicsSandbox` under the **🧩 Node Graph** tab.
