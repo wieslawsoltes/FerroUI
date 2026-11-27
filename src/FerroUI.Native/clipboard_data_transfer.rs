@@ -1,11 +1,13 @@
 use crate::clipboard_data_format_helper::to_data_formats;
 use crate::clipboard_data_transfer_item::ClipboardDataTransferItem;
 use crate::clipboard_read_session::ClipboardReadSession;
-use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, MAP_ENABLED};
+#[cfg(feature = "chromium-clipboard-map")]
+use ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard;
 use ferroui_base::input::platform::{
     ClipboardError, PlatformDataTransfer, PlatformDataTransferImpl, PlatformDataTransferItem,
 };
 use ferroui_base::input::DataFormat;
+#[cfg(feature = "chromium-clipboard-map")]
 use std::cell::OnceCell;
 use std::rc::Rc;
 
@@ -13,7 +15,11 @@ use std::rc::Rc;
 /// clipboard session, which the data transfer owns.
 pub(crate) struct ClipboardDataTransfer {
     session: Rc<ClipboardReadSession>,
+    /// Whether the web custom formats of a browser are read (the clipboard, not a drag), and
+    /// the items, kept so that each reads its map once (the `chromium-clipboard-map` feature).
+    #[cfg(feature = "chromium-clipboard-map")]
     read_web_formats: bool,
+    #[cfg(feature = "chromium-clipboard-map")]
     items: OnceCell<Vec<Rc<PlatformDataTransferItem>>>,
 }
 
@@ -26,10 +32,13 @@ impl ClipboardDataTransfer {
         Self::wrap(session, true)
     }
 
+    #[cfg_attr(not(feature = "chromium-clipboard-map"), allow(unused_variables))]
     fn wrap(session: ClipboardReadSession, read_web_formats: bool) -> Rc<PlatformDataTransfer> {
         PlatformDataTransfer::new(ClipboardDataTransfer {
             session: Rc::new(session),
+            #[cfg(feature = "chromium-clipboard-map")]
             read_web_formats,
+            #[cfg(feature = "chromium-clipboard-map")]
             items: OnceCell::new(),
         })
     }
@@ -38,10 +47,12 @@ impl ClipboardDataTransfer {
 impl PlatformDataTransferImpl for ClipboardDataTransfer {
     fn provide_formats(&self) -> Result<Vec<DataFormat>, ClipboardError> {
         let formats = self.session.get_formats()?;
+        #[cfg_attr(not(feature = "chromium-clipboard-map"), allow(unused_mut))]
         let mut formats = to_data_formats(formats.as_deref(), &|format| {
             self.session.is_text_format(format)
         });
-        if MAP_ENABLED && self.read_web_formats && ChromiumClipboard::MacOs.find_map(&formats).is_some() {
+        #[cfg(feature = "chromium-clipboard-map")]
+        if self.read_web_formats && ChromiumClipboard::MacOs.find_map(&formats).is_some() {
             for item in self.provide_items()? {
                 for format in item.try_formats()?.iter() {
                     if !formats.contains(format) {
@@ -53,6 +64,13 @@ impl PlatformDataTransferImpl for ClipboardDataTransfer {
         Ok(formats)
     }
 
+    #[cfg(not(feature = "chromium-clipboard-map"))]
+    fn provide_items(&self) -> Result<Vec<Rc<PlatformDataTransferItem>>, ClipboardError> {
+        let item_count = self.session.get_item_count()?;
+        Ok((0..item_count).map(|i| ClipboardDataTransferItem::new(self.session.clone(), i, false)).collect())
+    }
+
+    #[cfg(feature = "chromium-clipboard-map")]
     fn provide_items(&self) -> Result<Vec<Rc<PlatformDataTransferItem>>, ClipboardError> {
         if let Some(items) = self.items.get() {
             return Ok(items.clone());
@@ -77,7 +95,7 @@ impl PlatformDataTransferImpl for ClipboardDataTransfer {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "chromium-clipboard-map"))]
 mod tests {
     use super::*;
     use crate::frn_string::{FrnString, FrnStringArray};
