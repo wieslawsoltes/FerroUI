@@ -2982,6 +2982,25 @@ fn ordered_stack(children: &[&Ref<TestControl>], order: &[&Ref<TestControl>]) ->
     result
 }
 
+/// An element that names its children in tab order has no focusable children when those
+/// children are disabled, as an element whose visual children are disabled has none: tab
+/// navigation does not enter it.
+#[test]
+fn disabled_children_in_tab_focus_order_are_not_focusable_children() {
+    let (before, b1, b2, after) = (button("before"), button("b1"), button("b2"), button("after"));
+    let target = ordered_stack(&[&b1, &b2], &[&b2, &b1]);
+    target.set_is_tab_stop(false);
+    let _root = stack_with(KeyboardNavigationMode::Cycle, &[&before, &target, &after]);
+    assert!(FocusHelpers::can_have_focusable_children(Some(&element(&target))));
+    b1.set_is_enabled(false);
+    b2.set_is_enabled(false);
+    assert!(!FocusHelpers::can_have_focusable_children(Some(&element(&target))));
+    assert_eq!(next_of(&before, Next), Some("after"));
+    b1.set_is_enabled(true);
+    assert!(FocusHelpers::can_have_focusable_children(Some(&element(&target))));
+    assert_eq!(next_of(&before, Next), Some("b1"));
+}
+
 #[test]
 fn tab_follows_the_children_in_tab_focus_order() {
     let (before, b1, b2, b3, after) = (button("before"), button("b1"), button("b2"), button("b3"), button("after"));

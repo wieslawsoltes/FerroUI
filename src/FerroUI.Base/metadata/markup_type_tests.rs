@@ -1934,18 +1934,18 @@ fn multicast_removal_uses_last_equal_subsequence_and_preserves_error_order() {
     };
     let a = make("a");
     let b = make("b");
-    let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
-    let two_pairs = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap();
+    let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap().unwrap();
+    let two_pairs = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap().unwrap();
     assert_eq!(two_pairs.invocation_list(), [a.clone(), b.clone(), a.clone(), b.clone()]);
-    let remaining = MarkupDelegate::remove(Some(&two_pairs), Some(&pair)).unwrap();
+    let remaining = MarkupDelegate::remove(Some(&two_pairs), Some(&pair)).unwrap().unwrap();
     assert_eq!(remaining, pair);
-    assert!(MarkupDelegate::remove(Some(&remaining), Some(&pair)).is_none());
-    let cross = MarkupDelegate::combine(Some(&pair), Some(&a)).unwrap();
-    assert_eq!(MarkupDelegate::remove(Some(&cross), Some(&pair)).unwrap(), a);
+    assert!(MarkupDelegate::remove(Some(&remaining), Some(&pair)).unwrap().is_none());
+    let cross = MarkupDelegate::combine(Some(&pair), Some(&a)).unwrap().unwrap();
+    assert_eq!(MarkupDelegate::remove(Some(&cross), Some(&pair)).unwrap().unwrap(), a);
     let fail = MarkupDelegate::for_method(None, DelegateTargetWithValueEquality::MARKUP,
         DelegateTargetWithValueEquality::MARKUP.find_methods("Fail").next().unwrap());
-    let first_fail = MarkupDelegate::combine(Some(&a), Some(&fail)).unwrap();
-    let all = MarkupDelegate::combine(Some(&first_fail), Some(&b)).unwrap();
+    let first_fail = MarkupDelegate::combine(Some(&a), Some(&fail)).unwrap().unwrap();
+    let all = MarkupDelegate::combine(Some(&first_fail), Some(&b)).unwrap().unwrap();
     assert_eq!(all.try_invoke(&[]), Err(MarkupInvokeError::Failed("delegate-failed".into())));
     assert_eq!(*trace.borrow(), ["a"]);
     let _scope = crate::threading::Dispatcher::unit_test_scope();
@@ -1955,11 +1955,11 @@ fn multicast_removal_uses_last_equal_subsequence_and_preserves_error_order() {
     });
     assert!(reported.unwrap_err().contains("delegate-failed"));
     assert_eq!(*trace.borrow(), ["a", "a"]);
-    assert_eq!(MarkupDelegate::combine(None, Some(&a)), Some(a.clone()));
-    assert_eq!(MarkupDelegate::remove(Some(&a), None), Some(a.clone()));
-    assert_eq!(MarkupDelegate::remove(Some(&a), Some(&b)), Some(a));
-    assert!(MarkupDelegate::combine(None, None).is_none());
-    assert!(MarkupDelegate::remove(None, Some(&b)).is_none());
+    assert_eq!(MarkupDelegate::combine(None, Some(&a)).unwrap(), Some(a.clone()));
+    assert_eq!(MarkupDelegate::remove(Some(&a), None).unwrap(), Some(a.clone()));
+    assert_eq!(MarkupDelegate::remove(Some(&a), Some(&b)).unwrap(), Some(a));
+    assert!(MarkupDelegate::combine(None, None).unwrap().is_none());
+    assert!(MarkupDelegate::remove(None, Some(&b)).unwrap().is_none());
 }
 
 #[test]
@@ -1972,14 +1972,14 @@ fn delegate_multicast_keeps_targets_until_removed_and_reports_last_method() {
     let second = markup.find_methods("Second").next().unwrap();
     let a = MarkupDelegate::for_method(Some(target.clone()), markup, first);
     let b = MarkupDelegate::for_method(Some(target.clone()), markup, second);
-    let list = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
+    let list = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap().unwrap();
     assert!(std::ptr::eq(list.method().unwrap(), second));
     assert!(Rc::ptr_eq(&list.target().unwrap(), &target));
     drop(target);
     drop(a);
     drop(b);
     assert!(weak.upgrade().is_some());
-    let removed = MarkupDelegate::remove(Some(&list), Some(&list));
+    let removed = MarkupDelegate::remove(Some(&list), Some(&list)).unwrap();
     assert!(removed.is_none());
     drop(list);
     assert!(weak.upgrade().is_none());

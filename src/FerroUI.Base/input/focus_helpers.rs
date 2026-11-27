@@ -22,9 +22,12 @@ impl FocusHelpers {
         // `GetInputElementChildren`, as upstream; the visual children are read in place when the
         // element does not name its children in tab order.
         if let Some(children) = parent.children_in_tab_focus_order() {
-            return children
-                .iter()
-                .any(|child| Self::is_visible(child) && (child.focusable() || Self::can_have_focusable_children(Some(&**child))));
+            // A disabled child and its subtree hold nothing focusable, as on the visual branch.
+            return children.iter().any(|child| {
+                Self::is_visible(child)
+                    && child.is_effectively_enabled()
+                    && (child.focusable() || Self::can_have_focusable_children(Some(&**child)))
+            });
         }
         let Some(children) = parent.visual_children_snapshot() else { return false };
 
