@@ -7,9 +7,9 @@ to change the algorithms (not to tune the current ones). Part of #644. The measu
 ## 1. The case
 
 The gauntlet (`samples/GauntletBenchmark`) lays out about 5,100 texts a frame and changes the
-content width in every frame, so every wrapped text wraps again. Cranpose and egui draw it at 55
-and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of the
-UI thread there, and making and drawing glyph runs a large part of the render thread.
+content width in every frame, so every wrapped text wraps again. The comparison and egui draw it
+at 55 and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of
+the UI thread there, and making and drawing glyph runs a large part of the render thread.
 
 ## 2. The stages, measured
 
@@ -63,7 +63,7 @@ again at every new width.
 
 ## 3. How the others do it
 
-### Cranpose (`crates/cranpose-text`, `crates/cranpose-ui`)
+### The comparison
 
 Its own engine on HarfRust, `icu_segmenter` and `unicode-bidi`. It wins mostly by not doing the
 work when the width changes.
@@ -148,6 +148,27 @@ changes behavior upstream defines.
    or asked for, not to measure. A public API in `ferroui-base` (`PreparedParagraph`: prepare,
    layout at a width, line ranges, natural width, line count) serves `TextBlock`, `RichTextBlock`,
    `SelectableTextBlock`, `TextPresenter`, `FormattedText` and applications.
+
+   Done:
+   - **Ink when asked for.** A line measures its ink bounds, extent and overhangs at the first
+     read (`TextLineImpl::measure_ink`), and a layout its own from them (`LayoutInk`). The ink
+     needs the platform glyph run of every run, so a layout that is only measured makes none.
+     The values are those of the lines as they were laid out: a layout measures its ink before
+     it trims or justifies a line, whose ink then changes. A line that was disposed no longer
+     measures (its runs are released) and reports no ink.
+   - **Glyph runs across layouts.** The lines now make their platform glyph runs after the
+     layout, so the run cache takes them later: from the lines of the last layout when the next
+     layout starts, and when a layout is let go (`keep_drawn_glyph_runs`).
+   - **`PreparedParagraph`** (public, `ferroui-base`): prepare a text, then `layout`, `lines`,
+     `line_count`, `height` at a width and `natural_width`. It shapes once and keeps the layout
+     for any width inside its hold when the lines do not move with the width. The text formatter
+     makes its lines, so they are the lines of a new `TextLayout` at that width (a sweep test
+     compares them in the three wrapping modes).
+
+   Left, until a measurement asks for it: lines as ranges without line objects. Wrapping already
+   searches the prefix sums of the advances and reads the break table, so what a new width still
+   costs is the split runs and the line objects. The controls keep their own run cache and width
+   hold and do not use `PreparedParagraph`; moving them to it changes no result by itself.
 4. **Cache fixes.** `SelectableTextBlock` passes no run cache (it shapes on every layout);
    `TextBlock` drops its shaped runs on a foreground or decoration change, which do not change
    shaping.
@@ -155,16 +176,36 @@ changes behavior upstream defines.
    Done for the first: a `SelectableTextBlock` gives its layouts the run cache of the text block
    (`TextBlock::text_run_cache`), which a change of the text, of the selection or of the brush of
    the selection invalidates, as every property the shaping is made of does; a layout with the
-   foreground of a selection shapes without the cache, so no kept shaping holds those runs. Left:
-   the second. The shaped runs hold their run properties, and the drawing takes the foreground
-   and the decorations from there (also of the runs a font fallback made, which copy them), so
-   keeping the runs across a foreground or decoration change needs the kept runs given the new
-   properties, a change of the run cache of its own.
+   foreground of a selection shapes without the cache, so no kept shaping holds those runs.
+
+   Done for the second, for a plain text: `TextRunCache::restyle` replaces the cached runs with
+   runs of the new foreground and decorations over the same glyphs. Each new run has a shaped
+   buffer of its own (`ShapedBuffer::shared_view`), because a layout that still holds an old run
+   disposes that buffer when it ends. A run a font fallback made keeps its typeface and scale,
+   and the end of a line or a paragraph is kept as it is, since it draws nothing. The runs of
+   inlines have styles of their own, so a text block with inlines still drops its shaping.
+   The change only marks the cache (`TextRunCache::restyle_later`); the runs are restyled when
+   the next layout takes the cache (`apply_style_change`). A text block that moves to another
+   parent hears its foreground and its font change together: restyling at once made new runs
+   that the font change then dropped (`InheritanceParent.text_moved` of the benchmarks).
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
+
+   Covered for long texts by step 7: the lines of a layout give their platform glyph runs to the
+   lines of the next layout that have the same glyphs, now also when those runs were made after
+   the layout (step 3). A short text keeps no table of its lines: its layouts are shared
+   (section 9.29 of desktop-performance.md), and a run that is laid out but not drawn no longer
+   makes a platform glyph run at all.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties
    and paragraph properties; admission of a changed text on its second use; ageing by layout
-   pass) as a service any control or application uses, as Cranpose's layout cache is.
+   pass) as a service any control or application uses, as the comparison's layout cache is.
+
+   Done as `PreparedParagraph::shared`: one prepared paragraph for a text, its run properties and
+   its paragraph properties, kept by the font manager from the second use of the text. Of the
+   paragraphs nothing else holds, the ones used last stay (512 paragraphs, 1 MB of text), aged by
+   use rather than by layout pass, because the text layer has no hook into the layout pass. A
+   change of the fonts lets all of them go. The font manager stores the set behind `Any`, so an
+   application that never asks for a shared paragraph links none of it.
 
 7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
    message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene

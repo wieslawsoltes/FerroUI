@@ -46,6 +46,7 @@ mod x_bind;
 pub use content::ContentReloadTarget;
 pub use contract::DocumentContract;
 use ferroui_markup_xaml::source_overlay::{with_sources, Sources};
+use ferroui_markup_xaml::xaml_error_scope;
 pub use manifest::ReloadManifest;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -59,6 +60,17 @@ pub enum ReloadError {
     Failed(String),
     RestartRequired(String),
 }
+
+impl std::fmt::Display for ReloadError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Failed(message) => write!(f, "The reload failed: {message}"),
+            Self::RestartRequired(message) => write!(f, "The reload requires a restart: {message}"),
+        }
+    }
+}
+
+impl std::error::Error for ReloadError {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReloadStatus {
     Applied,
@@ -580,9 +592,11 @@ impl ReloadOutcome {
 mod tests;
 
 ferroui_base::ferro_thread_local! {
-    /// The open scopes of [`catch_reload`] on the thread, innermost last: the first
-    /// [`ReloadError`] raised in each ([`raise_reload_error`]).
-    static RELOAD_SCOPES: std::cell::RefCell<Vec<Option<ReloadError>>> = const { std::cell::RefCell::new(Vec::new()) };
+    /// The open scopes of [`catch_reload`] on the thread, innermost last: the depth of the
+    /// error scope of the XAML runtime the step opened, and the first [`ReloadError`] raised in
+    /// it ([`raise_reload_error`]).
+    static RELOAD_SCOPES: std::cell::RefCell<Vec<(usize, Option<ReloadError>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
 }
 
 /// An open scope of [`catch_reload`]; closed when dropped, also when the action panics.
@@ -591,10 +605,12 @@ struct ReloadScope {
 }
 
 impl ReloadScope {
-    fn open() -> Self {
+    /// Opens a scope whose step runs in the error scope of the XAML runtime that is opened
+    /// next, at `xaml_depth` ([`xaml_error_scope::depth`]).
+    fn open(xaml_depth: usize) -> Self {
         let depth = RELOAD_SCOPES.with(|scopes| {
             let mut scopes = scopes.borrow_mut();
-            scopes.push(None);
+            scopes.push((xaml_depth, None));
             scopes.len()
         });
         Self { depth }
@@ -605,7 +621,7 @@ impl ReloadScope {
         let error = RELOAD_SCOPES.with(|scopes| {
             let mut scopes = scopes.borrow_mut();
             if scopes.len() == self.depth {
-                scopes.pop().flatten()
+                scopes.pop().and_then(|(_, error)| error)
             } else {
                 None
             }
@@ -629,12 +645,16 @@ impl Drop for ReloadScope {
 /// Raises `error` in the innermost scope of [`catch_reload`], which returns the first error
 /// raised in it (#567): a resource lookup of a candidate that has no error channel (the
 /// lookup returns a value) records why the reload cannot go on and returns its fallback, and
-/// the reload fails with the error when the action ends. Outside a scope the error is raised
-/// as a panic, as before.
+/// the reload fails with the error when the action ends. An error raised after the XAML
+/// runtime reported one in the step is left out: that error ends the step, as its throw did
+/// when it unwound. Outside a scope (nothing reaches that in correct operation) the error goes
+/// to the dispatcher of the thread ([`Dispatcher::raise_unhandled_exception`]), without a panic.
+///
+/// [`Dispatcher::raise_unhandled_exception`]: ferroui_base::threading::Dispatcher::raise_unhandled_exception
 pub(crate) fn raise_reload_error(error: ReloadError) {
     let unraised = RELOAD_SCOPES.with(|scopes| match scopes.borrow_mut().last_mut() {
-        Some(scope) => {
-            if scope.is_none() {
+        Some((xaml_depth, scope)) => {
+            if scope.is_none() && !xaml_error_scope::has_error_at(*xaml_depth) {
                 *scope = Some(error);
             }
             None
@@ -642,33 +662,59 @@ pub(crate) fn raise_reload_error(error: ReloadError) {
         None => Some(error),
     });
     if let Some(error) = unraised {
-        std::panic::panic_any(error);
+        ferroui_base::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
     }
 }
 
 /// Runs a step of a reload: its error, else the first error raised in it
-/// ([`raise_reload_error`]), else the error of a panic of an adapter, of an application
-/// callback or of the XAML runtime while the candidate is populated.
+/// ([`raise_reload_error`]), else the first error the code of the application raised on the
+/// dispatcher in it ([`Dispatcher::capture_unhandled_exceptions`]: a handler or callback that
+/// returns its error, a markup delegate, an animation an animator rejects), else the first
+/// error the XAML runtime reported in it, else the error of a panic of an adapter or of an
+/// application callback (a bug, which only a build that unwinds survives).
+///
+/// [`Dispatcher::capture_unhandled_exceptions`]: ferroui_base::threading::Dispatcher::capture_unhandled_exceptions
+///
+/// The step runs in an error scope of the XAML runtime
+/// ([`with_xaml_errors`](xaml_error_scope::with_xaml_errors), #567): a deferred resource,
+/// include or template of the candidate that fails reports its error and the population stops at
+/// the next node of the loader, without unwinding. The error is `ReloadError::Failed` with the
+/// message the throw panicked with before.
 fn catch_reload<T>(action: impl FnOnce() -> Result<T, ReloadError>) -> Result<T, ReloadError> {
-    let scope = ReloadScope::open();
+    let scope = ReloadScope::open(xaml_error_scope::depth());
+    let mut outcome = None;
+    let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
     // Boundary (#567): adapters and application callbacks run here, and the contract of
-    // `apply_pending_with` names their panics; a throw of the XAML runtime during population
-    // is a panic too. With `panic = "abort"` these end the process.
-    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(action));
+    // `apply_pending_with` names their panics. Their errors reach the step as values (the
+    // capture of the dispatcher); a panic is a bug, which ends the process with
+    // `panic = "abort"`.
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        dispatcher.capture_unhandled_exceptions(|| {
+            xaml_error_scope::with_xaml_errors(|| {
+                outcome = Some(action());
+                Ok(())
+            })
+        })
+    }));
     if let Some(error) = scope.close() {
         return Err(error);
     }
-    result.unwrap_or_else(|payload| {
-        if let Some(error) = payload.downcast_ref::<ReloadError>() {
-            return Err(error.clone());
+    match result {
+        Ok(Err(message)) => Err(ReloadError::Failed(message)),
+        Ok(Ok(Err(error))) => Err(ReloadError::Failed(error.to_string())),
+        Ok(Ok(Ok(()))) => outcome.expect("the action of a step that returned ran"),
+        Err(payload) => {
+            if let Some(error) = payload.downcast_ref::<ReloadError>() {
+                return Err(error.clone());
+            }
+            let message = payload
+                .downcast_ref::<String>()
+                .cloned()
+                .or_else(|| payload.downcast_ref::<&str>().map(|text| text.to_string()))
+                .unwrap_or_else(|| "Reload callback panicked".into());
+            Err(ReloadError::Failed(message))
         }
-        let message = payload
-            .downcast_ref::<String>()
-            .cloned()
-            .or_else(|| payload.downcast_ref::<&str>().map(|text| text.to_string()))
-            .unwrap_or_else(|| "Reload callback panicked".into());
-        Err(ReloadError::Failed(message))
-    })
+    }
 }
 
 impl Drop for HotReloadSession {

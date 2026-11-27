@@ -114,7 +114,9 @@ pub use window_resized_event_args::{WindowResizeReason, WindowResizedEventArgs};
 pub use window_startup_location::WindowStartupLocation;
 pub use window_state::WindowState;
 pub use window_transparency_level::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
-pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment};
+mod system_backdrop_element;
+pub use system_backdrop_element::SystemBackdropElement;
+pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment, WrapPanelItemsStretch};
 
 mod button;
 mod button_spinner;
@@ -230,7 +232,7 @@ mod user_control;
 pub use user_control::UserControl;
 pub use progress_bar::{ProgressBar, ProgressBarTemplateSettings};
 pub use separator::Separator;
-pub use slider::{Slider, SliderImpl, SliderImplExt, SliderVTable, TickPlacement};
+pub use slider::{Slider, SliderImpl, SliderImplExt, SliderSnapsTo, SliderVTable, TickPlacement};
 mod tick_bar;
 pub use tick_bar::{TickBar, TickBarPlacement, TickList};
 #[cfg(test)]
@@ -320,6 +322,20 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
+// WinUI's TabView (the WinUI Gallery port, #418).
+mod tab_view;
+pub use tab_view::{
+    TabView, TabViewCloseButtonOverlayMode, TabViewItem, TabViewItemTemplateSettings, TabViewListView,
+    TabViewTabCloseRequestedEventArgs, TabViewWidthMode,
+};
+mod list_view;
+pub use list_view::{
+    ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GridView, GridViewItem, GridViewItemTemplateSettings,
+    GroupHeaderPlacement, IncrementalLoadingTrigger, ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsWrapGrid, ItemsUpdatingScrollMode, ListView, ListViewBase,
+    ListViewBaseItem, ListViewItem, ListViewItemTemplateSettings, ListViewReorderMode, ListViewSelectionMode,
+    ScrollIntoViewAlignment,
+};
 // WinUI's Pivot (docs/porting/winui-calculator-gaps.md, section 7.1).
 mod pivot;
 pub use pivot::{
@@ -385,6 +401,7 @@ pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable
 mod navigation_view;
 mod navigation_view_events;
 mod navigation_view_item;
+mod navigation_view_top_overflow;
 pub use navigation_view::NavigationView;
 pub use navigation_view_events::{
     NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,
@@ -662,6 +679,18 @@ mod selection_mode;
 mod selection_indicator_animation;
 mod selection_indicator;
 pub use selection_indicator::SelectionIndicator;
+mod content_dialog;
+pub use content_dialog::{
+    ContentDialog, ContentDialogButton, ContentDialogButtonClickEventArgs, ContentDialogClosedEventArgs,
+    ContentDialogClosingEventArgs, ContentDialogDeferral, ContentDialogError, ContentDialogOperation,
+    ContentDialogResult,
+};
+#[cfg(test)]
+mod content_dialog_tests;
+mod selector_bar;
+pub use selector_bar::{SelectorBar, SelectorBarItem};
+#[cfg(test)]
+mod selector_bar_tests;
 mod tab_control;
 mod tab_item;
 mod tree_view;
@@ -670,7 +699,7 @@ mod virtualizing_panel;
 mod virtualizing_stack_panel;
 
 pub use assigned_binding::{AssignedBinding};
-pub use combo_box::{ComboBox};
+pub use combo_box::{ComboBox, ComboBoxTextSubmittedEventArgs};
 pub use combo_box_item::{ComboBoxItem};
 pub use container_clearing_event_args::{ContainerClearingEventArgs};
 pub use container_index_changed_event_args::{ContainerIndexChangedEventArgs};
@@ -870,7 +899,10 @@ pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, Dra
 
 // --- pipspager ---
 mod pips_pager;
-pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
+pub use pips_pager::{
+    PipsPager, PipsPagerButtonVisibility, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings,
+    PipsPagerWrapMode,
+};
 
 // --- connected-animation ---
 

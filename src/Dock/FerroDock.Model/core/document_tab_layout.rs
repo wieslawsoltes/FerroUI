@@ -14,6 +14,8 @@ pub enum DocumentTabLayout {
     Right = 2,
 }
 
+ferroui_system::styled_enum!(DocumentTabLayout { Top, Left, Right });
+
 impl TryFrom<i32> for DocumentTabLayout {
     type Error = i32;
 

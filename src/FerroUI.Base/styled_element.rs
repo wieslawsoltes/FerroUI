@@ -835,8 +835,15 @@ impl StyledElement {
     ///
     /// You should not usually need to call this method: it is called when an
     /// element is added to or removed from a logical children collection.
+    #[inline]
     pub fn set_parent(&self, parent: impl Into<Nullable<StyledElement>>) {
-        let parent = parent.into().0;
+        self.set_parent_core(parent.into().0);
+    }
+
+    // One body for every argument type of `set_parent`, compiled in this crate. A copy per argument
+    // type, made in the crate that calls it, can lose the inlined thread-local access of
+    // `ResourcesChangedEventArgs::create`, which this path runs for every child added to a parent.
+    fn set_parent_core(&self, parent: Option<Ref<StyledElement>>) {
         let old = self.parent();
         if parent == old {
             return;
@@ -1061,7 +1068,12 @@ impl StyledElement {
             self.apply_control_theme_core(&based_on, type_)?;
         }
 
-        theme.try_attach_checked(self, type_)?;
+        // The setters of a theme are for the control it is applied to. An element of its template
+        // takes the nested styles only: when the target type is a base class of that element,
+        // the setters (a `Template` above all) would replace the element's own theme.
+        if type_ == FrameType::Theme {
+            theme.try_attach_checked(self, type_)?;
+        }
 
         if theme.has_children() {
             match theme.candidates(self) {

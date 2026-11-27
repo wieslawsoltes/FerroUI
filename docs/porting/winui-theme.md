@@ -535,6 +535,8 @@ ports a control updates its state by porting it, not by editing the table.
 | `ItemsControl.xaml` | `{ItemsControl}` | No WinUI style in the merged theme (ItemsControl has a built-in template): an ItemsPresenter of the ItemsPanel. | B1 | ported |
 | `Label.xaml` | `{Label}` | No WinUI control: the implicit style of ContentControl ({ContentControl}, generic.xaml), which Controls/Label.xaml ports. | B1 | ported |
 | `ListBox.xaml` | `{ListBox}` | ListBox: DefaultListBoxStyle (ListBox_themeresources.xaml). | B3 | ported |
+| `GridView.xaml` | `{GridView}`, `{GridViewItem}`, `DefaultGridViewItemStyle` | GridView: {GridView} (generic.xaml), {GridViewItem} and DefaultGridViewItemStyle (GridViewItem_themeresources.xaml; the chrome of ListViewItemPresenter drawn with elements). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-2); the Fluent theme has no document for it. | B3 | ported |
+| `ListView.xaml` | `{ListView}`, `{ListViewItem}` | ListView: {ListView} (generic.xaml) and {ListViewItem} (ListViewItem_themeresources.xaml, based on DefaultListViewItemStyle of ListBoxItem.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document for it. | B3 | ported |
 | `ListBoxItem.xaml` | `{ListBoxItem}` | ListBoxItem: DefaultListBoxItemStyle (ListBox_themeresources.xaml). | B3 | ported |
 | `ManagedFileChooser.xaml` | `{ManagedFileChooser}`, `{ManagedFileChooserOverwritePrompt}` | No WinUI control: built from the ListViewItem (ListViewItem_themeresources.xaml), TextBox, Button and ContentDialog (DefaultContentDialogStyle) styles. | B6 | ported |
 | `Menu.xaml` | `{Menu}` | MenuBar: DefaultMenuBarStyle (MenuBar.xaml); MenuBarItem (MenuBarItem.xaml). | B3 | ported |
@@ -557,7 +559,7 @@ ports a control updates its state by porting it, not by editing the table.
 | `NumberBox.xaml` | `{NumberBox}` | NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
 | `RadioButtons.xaml` | `{RadioButtons}` | RadioButtons: DefaultRadioButtonsStyle and the implicit style (RadioButtons.xaml, RadioButtons_themeresources.xaml), the layout ColumnMajorUniformToLargestGridLayout as the items panel RadioButtonsPanel. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B3 | ported |
 | `RatingControl.xaml` | `{RatingControl}` | RatingControl: {RatingControl} (RatingControl.xaml, RatingControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
-| `MediaTransportControls.xaml` | `{MediaTransportControls}` | MediaTransportControls: {MediaTransportControls} (MediaTransportControls_themeresources.xaml), with standard Button and Slider controls and a menu for additional provider-supported playback actions. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it. | B6 | ported |
+| `MediaTransportControls.xaml` | `{MediaTransportControls}` | MediaTransportControls: {MediaTransportControls}, DefaultMediaTransportControlsStyle, the template styles AppBarButtonStyle, AppBarToggleButtonStyle and FlyoutStyle (MediaTransportControls_themeresources.xaml): the parts, states and values of the source, the commands in three groups of AppBarButtons in place of the CommandBar. A WinUI control in ferroui-media-video-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it. | B6 | ported |
 | `CameraCaptureUI.xaml` | `{CameraCaptureUI}` | No WinUI style (the CameraCaptureUI of Windows is a system dialog): a CameraPreview above the capture actions, drawn with the Button theme. A control of ferroui-media-camera-controls (docs/media/ISSUE-561.md); the Fluent theme has no document for it. | B6 | ported |
 | `PersonPicture.xaml` | `{PersonPicture}` | PersonPicture: {PersonPicture}, DefaultPersonPictureStyle (PersonPicture.xaml, PersonPicture_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it. | B1 | ported |
 | `PagerControl.xaml` | `{PagerControl}` | PagerControl: {PagerControl} (PagerControl.xaml), PagerControlPageNavigationButtonStyle, PagerControlNumberPanelButtonStyle (PagerControl_themeresources.xaml). A WinUI control in ferroui-controls (G2 of #418); the Fluent theme has no document for it. | B2 | ported |
@@ -631,16 +633,19 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `FlipViewItem` | `Carousel` | B5 | the items of a Carousel are its content presenters |
 | `FlyoutPresenter` | `FlyoutPresenter` | B3 |  |
 | `Frame` | `Frame` | B5 | WinUI's Frame in ferroui-controls |
+| `GridView` | `GridView` | B3 |  |
+| `GridViewItem` | `GridViewItem` | B3 |  |
 | `HyperlinkButton` | `HyperlinkButton` | F |  |
 | `InfoBadge` | `InfoBadge` | B1 |  |
 | `InfoBar` | `InfoBar` | B6 | NotificationCard is drawn with the template of InfoBar |
 | `ListBox` | `ListBox` | B3 |  |
 | `ListBoxItem` | `ListBoxItem` | B3 |  |
-| `ListViewItem` | `ListBoxItem` | B3 | the keyed ListViewItem styles; the implicit one has no FerroUI control (no ListView) |
+| `ListView` | `ListView` | B3 |  |
+| `ListViewItem` | `ListViewItem` | B3 | the implicit style; the keyed ListViewItem styles are keyed themes of ListBoxItem, which ListViewItem derives from |
 | `LoopingSelector` | no FerroUI control | B4 | the looping lists of the date and time picker presenters; FerroUI's DateTimePickerPanel is a panel, not templated, so the selectors are part of the DatePickerPresenter and TimePickerPresenter themes |
 | `LoopingSelectorItem` | `ListBoxItem` | B4 | the items of the date and time picker presenters |
 | `MediaPlayerElement` | `MediaPlayerElement` | B6 | a panel of ferroui-media-video-controls that arranges its presenter and its transport controls in code; the WinUI template is waived |
-| `MediaTransportControls` | `MediaTransportControls` | B6 | WinUI's MediaTransportControls in ferroui-media-video-controls, with a reduced template |
+| `MediaTransportControls` | `MediaTransportControls` | B6 | WinUI's MediaTransportControls in ferroui-media-video-controls |
 | `MenuBar` | `Menu` | B3 |  |
 | `MenuBarItem` | `MenuItem` | B3 | the top-level items of a Menu |
 | `MenuFlyoutItem` | `MenuItem` | B3 |  |
@@ -697,7 +702,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridViewHeaderItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

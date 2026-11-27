@@ -243,7 +243,7 @@ pub fn use_parent_control() -> Option<Ref<Control>> {
 /// it is now; the component runs again when it changes. For an inherited
 /// property (`DataContext`, `ActualThemeVariant`, `FlowDirection`) it is the
 /// value the control inherits. `None` at the root of a tree.
-pub fn use_parent_property<T: ferroui_base::PropertyValue>(
+pub fn use_parent_property<T: ferroui_base::StyledValue>(
     property: &'static ferroui_base::StyledProperty<T>,
 ) -> Option<T> {
     let parent = use_parent_control();

@@ -7,7 +7,7 @@ use crate::at_spi::at_spi_server::AtSpiServer;
 use crate::at_spi::dbus::descriptions::EVENT_WINDOW;
 use crate::at_spi::dbus::interface::{DBusInterface, InterfaceDescription};
 use std::rc::Weak;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiEventWindowHandler {
     server: Weak<AtSpiServer>,
@@ -20,11 +20,11 @@ impl AtSpiEventWindowHandler {
     }
 
     pub(crate) fn emit_activate_signal(&self) {
-        self.emit_signal("Activate", event_body("", 0, 0, Value::from("0")));
+        self.emit_signal("Activate", event_body("", 0, 0, Variant::from("0")));
     }
 
     pub(crate) fn emit_deactivate_signal(&self) {
-        self.emit_signal("Deactivate", event_body("", 0, 0, Value::from("0")));
+        self.emit_signal("Deactivate", event_body("", 0, 0, Variant::from("0")));
     }
 
     fn emit_signal(&self, member: &str, body: EventBody<'_>) {

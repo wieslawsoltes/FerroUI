@@ -40,7 +40,6 @@ impl ImmediateRenderDataSceneBrushContent {
 
     /// Runs `f` on the recorded stream; `None` once the content has been
     /// disposed.
-    #[cfg(test)]
     pub(crate) fn with_stream<R>(&self, f: impl FnOnce(&RenderDataStream) -> R) -> Option<R> {
         self.stream.borrow().as_ref().map(f)
     }

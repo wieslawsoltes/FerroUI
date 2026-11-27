@@ -9,11 +9,19 @@ use std::rc::Rc;
 /// Calls a composite format on the passed in values, where the first element
 /// in the list is the format string and the following items are the
 /// arguments.
-#[derive(Default)]
+// Made only through `new` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct StringFormatConverter;
+
+impl Default for StringFormatConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl StringFormatConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self
     }
 }

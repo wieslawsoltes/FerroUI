@@ -1,8 +1,7 @@
-# FerroUI against Cranpose: architecture and the gauntlet benchmark
+# FerroUI in the performance comparison: architecture and the gauntlet benchmark
 
-Cranpose (<https://github.com/samoylenkodmitry/Cranpose>, MIT or Apache-2.0) brings the Jetpack
-Compose model to Rust and publishes a cross-framework benchmark measured from outside every app
-(<https://samoylenkodmitry.github.io/Cranpose/?tab=performance>). This document records what
+The comparison is a public cross-framework benchmark, measured from outside every app, and the
+framework that publishes it. This document records what
 FerroUI can learn from its architecture, how FerroUI does on its benchmark, where FerroUI loses
 time, and the plan to fix it. The work is tracked in #644; the fixes and the deviations from upstream they need are in
 [desktop-performance.md](desktop-performance.md), sections 8 and 9.
@@ -24,7 +23,7 @@ the desktop:
 
 Published results on an Apple M3 Pro, gauntlet tier 16, fps over 10 s from launch (2026-11-08):
 
-| Cranpose | egui | Flutter | iced | Xilem | GPUI | Slint | AppKit | .NET original of FerroUI's API | SwiftUI |
+| The comparison | egui | Flutter | iced | Xilem | GPUI | Slint | AppKit | .NET original of FerroUI's API | SwiftUI |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 55.6 | 53.4 | 15.0 | 12.9 | 11.6 | 11.3 | 10.0 | 7.9 | 7.9 | 2.7 |
 
@@ -45,12 +44,12 @@ Own frame counter, median of the last 8 seconds of a 12-second run, `release` pr
 | Quartz Metal (`ferroui-quartz`) | 1.4 | 0.3 |
 
 FerroUI on Skia does twice the gauntlet frame rate of the .NET original and about Flutter's, a
-third of Cranpose's and egui's (that was before the changes of desktop-performance.md section 9);
+third of the comparison's and egui's (that was before the changes of desktop-performance.md section 9);
 section 2.1 has the benchmark's own harness after them.
 
 ### 2.1 The benchmark's own harness (external counter, 60 Hz)
 
-`benchmarks/compose-vs-cranpose/desktop.py` of the Cranpose repository, on the same machine with
+The comparison's desktop harness (`desktop.py`), on the same machine with
 the display at 60 Hz and a still wallpaper (the harness refuses to measure while anything else
 moves on the display), two rounds, each app launched twice a round (the first launch after its
 saved state was removed). FerroUI at main `18a21d966` (sections 9.12 to 9.15 of
@@ -60,15 +59,15 @@ and what it started; the 99th percentile frame time:
 
 | Scenario | App | fps | CPU a frame | p99 |
 |---|---|---|---:|---:|
-| Gauntlet, tier 16 | Cranpose | 55.6 / 58.4, 55.5 / 58.5 | 18–20 ms | 19–22 ms |
+| Gauntlet, tier 16 | The comparison | 55.6 / 58.4, 55.5 / 58.5 | 18–20 ms | 19–22 ms |
 | | egui | 54.0 / 57.1, 53.7 / 57.2 | 20–23 ms | 33–37 ms |
 | | FerroUI (Skia, Graphite) | 23.3 / 29.4, 23.1 / 29.7 | 63–66 ms | 50–68 ms |
-| Still wall, tier 20 | Cranpose | 21.2 / 25.4, 23.4 / 24.9 | 47–53 ms | 170–188 ms |
+| Still wall, tier 20 | The comparison | 21.2 / 25.4, 23.4 / 24.9 | 47–53 ms | 170–188 ms |
 | | egui | 22.6 / 25.0, 23.9 / 25.3 | 50–52 ms | 50–51 ms |
 | | FerroUI (Skia, Graphite) | 26.6 / 36.7, 27.3 / 37.4 | 27–33 ms | 21–25 ms |
 
 FerroUI leads the still wall in frame rate and in smoothness, and runs the gauntlet at about half
-the frame rate of Cranpose and egui with about three times their CPU time a frame. Its first
+the frame rate of the comparison and egui with about three times their CPU time a frame. Its first
 launch is slower than its second (first frame 2.3 s against 0.6 s on the gauntlet, 5.5 s against
 3.8 s on the wall), which points at work done once a process (pipelines compiled, fonts loaded).
 
@@ -109,11 +108,11 @@ Quartz Metal allocates a texture for every clip and composites a full-surface la
 opacity (issue #640); its frame rate is a twelfth of Skia's on the gauntlet. Vello stops
 presenting frames in two of the four runs: to investigate.
 
-## 4. Cranpose's architecture, and what FerroUI can take from it
+## 4. The comparison's architecture, and what FerroUI can take from it
 
-| Cranpose | What it does | FerroUI today | Take |
+| The comparison | What it does | FerroUI today | Take |
 |---|---|---|---|
-| Phased state reads | a value read in the layout or draw phase invalidates only that phase; `graphics_layer { }` reads per-frame values at the layer stage, so a moving or tilting panel is never recorded again | render transforms and opacity are composition properties: a change does not record the draw list again, as long as nothing invalidates the visual | verify that render-transform and opacity changes never re-record; keep it covered by a test |
+| Phased state reads | a value read in the layout or draw phase invalidates only that phase; a graphics layer reads per-frame values at the layer stage, so a moving or tilting panel is never recorded again | render transforms and opacity are composition properties: a change does not record the draw list again, as long as nothing invalidates the visual | verify that render-transform and opacity changes never re-record; keep it covered by a test |
 | Retained surfaces | a layer cache (96 MiB budget, 4096 entries) of rendered surfaces, flat surfaces packed into atlases, read in place on Metal | Skia renders each visual's draw list every frame; `BitmapCache` exists but is opt-in | an automatic cache for subtrees whose draw lists did not change while only their transform changes (the gauntlet's panels) |
 | Opaque prefix cache | an opaque background drawn before everything else is kept as a texture and composited | none | candidate for Skia and Vello |
 | Mapped uploads | frame uniforms, geometry, run tables and glyph runs written into mapped buffers on Metal: no copy per frame | Skia's own upload path; Vello's buffers per frame | Vello: reuse mapped buffers |
@@ -123,7 +122,7 @@ presenting frames in two of the four runs: to investigate.
 | Shaped-word cache | direct-mapped table over two ring buffers, no allocation per kept word; a word is kept the second time it is shaped (TinyLFU doorkeeper), so a number that changes every frame does not push stable words out; grows when it misses words it lost for room | a cache of shaped runs per text layout | adopt the admission rule and the ring storage for the shaper's cache |
 | Text layout cache per width | a text keeps its layouts at several widths | a `TextBlock` keeps one layout, invalidated by any width change | keep a few layouts per width: the gauntlet's width animation re-lays every text each frame |
 | Hit testing on pointer events only | pointer repasses only for nodes whose pointer input changed | hit test of the whole scene after every frame for pointer-over and tooltips | dirty-region scene invalidation, one hit test per frame, push-based tree maintenance (section 5) |
-| Lazy grid | `LazyVerticalGrid` measures lines of cells | `VirtualizingStackPanel` of rows; `ItemsRepeater` with a uniform grid layout | none needed for the benchmark |
+| Lazy grid | a lazy grid measures lines of cells | `VirtualizingStackPanel` of rows; `ItemsRepeater` with a uniform grid layout | none needed for the benchmark |
 | Evidence rules | a change ships with calls/frame, saved time, pixel checks, ABAB/BABA device runs | `docs/binary-size.md` and the benchmarks crate follow the same idea | add the gauntlet and the wall to the benchmark runs |
 
 ## 5. Plan

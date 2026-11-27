@@ -272,8 +272,9 @@ The theme crate compiles its documents once, as today. The emitter partitions th
 - **Units.** Each control document (`Controls/Button.xaml`: its ControlThemes, text-keyed or
   type-keyed, and its local resources) is a unit. The theme resources are grouped into units by the
   key graph. The ambient content is one unit that is always kept: the global `Style` elements of
-  `WinUIControls.xaml`, the hosts the framework creates (`Window`, `PopupRoot`, `OverlayPopupHost`,
-  `AdornerLayer`, `EmbeddableControlRoot`, `ThemeVariantScope`), `CompactStyles`, and
+  `WinUIControls.xaml`, the hosts the framework creates (`Window`, `AdornerLayer`,
+  `EmbeddableControlRoot`, `ThemeVariantScope`; the hosts of popups since section 25),
+  `CompactStyles`, and
   `SystemAccentColors`. Each unit is one function, or one set of static row tables per variant
   dictionary, that adds its entries to the dictionaries it is given.
 - **Graph in the `.xamlmeta`.** For each unit: the keys and type keys it defines, the keys it
@@ -566,10 +567,11 @@ are step 3 (section 10).
   (the document of the class, `Controls/WinUIControls.xaml` with its global `Style` elements,
   `DensityStyles/Compact.xaml`, which `CompactStyles` includes), the structure of the builds (the
   dictionaries, `SystemAccentColors`, the theme variants, `CompactStyles`), the documents that define
-  the theme of a host the framework creates (`Window`, `PopupRoot`, `OverlayPopupHost`,
-  `AdornerLayer`, `EmbeddableControlRoot`, `ThemeVariantScope`), and the documents with an entry no
-  root can name (an entry without a key, with a key that is neither text nor `{x:Type}`, or one that
-  registers a name in the scope of the document; in WinUI only `Controls/WindowDrawnDecorations.xaml`).
+  the theme of a host the framework creates (`Window`, `AdornerLayer`, `EmbeddableControlRoot`,
+  `ThemeVariantScope`; `PopupRoot` and `OverlayPopupHost` until section 25), and the documents with
+  an entry no root can name (an entry without a key, with a key that is neither text nor
+  `{x:Type}`, or one that registers a name in the scope of the document; in WinUI only
+  `Controls/WindowDrawnDecorations.xaml`, until section 24).
 - **Canonical order** is the order of the documents of the group: the class document, then its
   includes in the order they are met. The ambient unit is first.
 - **Resources are grouped by document.** The unit graph links the units through their keys, and step
@@ -1703,3 +1705,189 @@ explicit option yet to ship the original text of a consumed document (see the is
 - `tests/GeneratedRustFixture/Library`: `Dictionaries/Part.xaml` is merged into `App.xaml` and its
   directory is embedded. Neither its path nor the canary comment of the file is in `ASSETS`, while
   `Dictionaries/Loose.xaml`, which no document consumes, is.
+
+## 23. What the documents of an ordinary class root (#1002)
+
+`samples/HelloWorld` (a window with text) kept the theme of `Button`, and with it
+`Resources/Button_themeresources.xaml`, `Resources/HyperlinkButton_themeresources.xaml` and part of
+`Resources/Deprecated_themeresources.xaml`. `theme_parts_why.txt` gave the reason "the type
+Button, a root of the dependencies". The dependency is `ferroui-dialogs`, reached through
+`ferroui-native` and `ferroui-themes-winui`. Its one document, `AboutFerroDialog.xaml`, is the
+document of an ordinary class (a `Window`). Its `referenced_types` were `Button`, `DrawingGroup`,
+`DrawingImage`, `GeometryDrawing`, `Grid`, `Image`, `Style`, `TextBlock` and `Window`. Section 11.7
+exports what every document of a crate names, and an application roots what all of its
+dependencies export, so the references of the dialog rooted the themes of every application that
+links the crate. Only `samples/ControlCatalog` constructs the dialog.
+
+### 23.1 References by class
+
+A crate now exports the references of the document of an ordinary class (the group of a class
+that is not constructed from selected units, section 14.1) by class. The `.xamlmeta` gets
+`class_references`: for each class, its full markup name (`x:Class`), `referenced_types` and
+`referenced_keys`. The list is written only when a class names something, so the metadata of
+every other crate is unchanged. Both readers read the list as optional.
+
+Unchanged:
+
+- The references of style and resource groups are assembly-wide (`referenced_types`,
+  `referenced_keys`).
+- So are those of a class constructed from selected units (rooted through its unit graph, so in
+  practice none), and of a document whose `x:Class` the build cannot read.
+- The check of #846 (a theme a direct dependency's documents construct) reads both lists
+  (`MarkupReferencesModel::names_type`).
+
+### 23.2 Live classes
+
+An application adds the references of a class to its roots only when the class is live
+(`live_class_references`). A class is live when:
+
+- its local or full name is a name of the application's sources: `AboutFerroDialog::new()`, or
+  the builder `about_ferro_dialog()`, which the scan records in the case of the type; or
+- the types live with the roots include it. These roots are the documents, the sources, the
+  manifest, the build script, the assembly-wide references of the dependencies, and the
+  references of the classes found live so far, each with its base classes and created classes
+  (`TypeGraph::live`).
+
+The search repeats until nothing changes, so a class whose document constructs another class
+makes that class live too. A base class being live does not make its subclass live. The reason in
+`theme_parts_why.txt` names the class: "the type Button, referenced by the document of the live
+class FerroUI.Dialogs.AboutFerroDialog".
+
+### 23.3 Classes their own crate constructs
+
+The build cannot see a class that the code of its own crate constructs: a window a function
+opens, or a view a view locator makes. The type models record no edge from the application to
+that code. A group states it with `XamlGroup::constructed_by_its_crate()`, and the references of
+its class are then exported assembly-wide, as before. The framework's library crates with
+documents of ordinary classes:
+
+| Crate | Classes | Constructed by its own code | Exported |
+|---|---|---|---|
+| `ferroui-dialogs` | `AboutFerroDialog` | no (only `samples/ControlCatalog`, and the builder of `ferroui-view`) | by class |
+| `ferroui-diagnostics` | `MainWindow`, `MainView`, the pages and the views of DevTools | yes: `DevTools` opens `MainWindow`, and its view locator makes the pages | assembly-wide (`constructed_by_its_crate`) |
+| `ferrodock-ferro-diagnostics` | `RootDockDebug` and the debug views | yes: `root_dock_debug_extensions` constructs the inspector, which shows the views | assembly-wide (`constructed_by_its_crate`) |
+| `ferrodock-ferro-themes-fluent`, `-simple`, `-browser` | `DockFluentTheme`, `DockSimpleTheme`, `BrowserTabTheme` | no (applications construct them, by name) | by class |
+
+The theme crates (`ferroui-themes-*`) construct their classes from selected units, and are
+unchanged.
+
+### 23.4 Tests
+
+- `xaml_metadata.rs` (`class_references_round_trip_through_the_text`) and `model.rs`
+  (`class_references_are_read_by_both_readers`): the list is written and read by both formats,
+  and a file without it reads as none.
+- `theme_roots_tests.rs`:
+  - `the_references_of_an_ordinary_class_root_only_where_the_class_is_live`: a class nothing
+    constructs roots nothing. A class is live when the sources name it, by its local or full
+    name; when a live type creates it; or when the document of another live class constructs it.
+  - `a_unit_kept_for_a_live_class_says_which_class`: the reason names the class.
+- `lib.rs` (`the_references_of_an_ordinary_class_root_the_themes_only_where_it_is_live`): a build
+  of an application whose dependency's class is not constructed keeps only the ambient unit. One
+  that constructs it keeps the theme of `Button`, with the reason that names the class.
+
+## 24. Creates edges that hold on some targets (#1002)
+
+`samples/HelloWorld` on macOS kept the theme of `Button`, the caption-button resources of
+`Resources/Generic.xaml`, `Resources/TitleBar_themeresources.xaml`, the caption glyphs of
+`Resources/Glyphs.xaml` and `Controls/PathIcon.xaml`. The reason was the ambient unit:
+`Controls/WindowDrawnDecorations.xaml`, the drawn frame and title bar of a window, was part of it.
+No backend of macOS draws these decorations.
+
+### 24.1 The document of the drawn decorations was ambient
+
+A document is ambient when one of its entries registers a name in the scope of the document
+(`registers_outer_name`). The names inside a framework template are in the scope of the template,
+and the list of templates did not include `WindowDrawnDecorationsTemplate`, whose content has a
+name scope of its own (`WindowDrawnDecorationsTemplate::build`). The `PART_` names of the caption
+buttons therefore made the document opaque. With the template in the list, the document is a unit
+keyed by `WindowDrawnDecorations`, in every theme that has it (WinUI, Fluent, macOS, Material and
+Simple).
+
+### 24.2 The class is live in every application with a window
+
+The type models have the creates edges `TopLevel` to `TopLevelHost` to `WindowDrawnDecorations`
+(and `LayerWrapper` to `WindowDrawnDecorations`). Through them, every application with a window
+makes the new unit live. At run time the class is constructed only by
+`TopLevelHost::update_drawn_decorations`, when the platform window needs managed decorations
+(`IWindowImpl::needs_managed_decorations`):
+
+| Backend | Target | `needs_managed_decorations` |
+|---|---|---|
+| `ferroui-native` | macOS | always `false`: the system draws the decorations |
+| `ferroui-win32` | Windows | while the client area is extended, a setting the application can change at run time |
+| `ferroui-x11` | Linux, BSDs | for managed decorations or `WindowDecorations::BorderOnly` |
+| `ferroui-wayland` | Linux, BSDs | when the compositor asks for client-side decorations, at run time |
+| iOS, Android, browser | | no window backend with decorations |
+
+### 24.3 The condition next to the code that decides it
+
+`TypeModel::not_created_on` states the targets on which no code constructs a class, as `cfg`
+conditions (`target_os = "macos"`, `target_arch = "wasm32"`). The build script of the crate of
+the class states them (`Export::not_created_on`), and the field is written only on such a class.
+
+`ferroui-controls` keeps the table in `chrome/drawn_decorations_targets.rs`: macOS, iOS, Android
+and `wasm32`. Its build script reads the file. The test of the file reads the
+`needs_managed_decorations` of the backends of the repository and checks two things:
+
+- a backend that is always `false` serves only targets of the table, and a backend that can need
+  managed decorations serves none of them;
+- no other crate implements the method.
+
+The application build evaluates the conditions against `CARGO_CFG_TARGET_OS` and
+`CARGO_CFG_TARGET_ARCH` (`BuildTarget::from_env`). `TypeGraph::from_models_for` drops the creates
+edges into a class that is not created on the target. A build without a target, such as a test,
+keeps every edge. Where the application names the class, it is still live.
+
+Windows and Linux keep the unit in every application. A run-time setting the build cannot see
+(the extended client area of Windows, the decoration mode of a Wayland compositor) must not lose
+the theme of the caption buttons. A later option could drop it for Windows when no document or
+source names `ExtendClientAreaToDecorationsHint`, with its own risk note. The designer and the
+previewer build with every unit of the themes (`full-themes`), and are unchanged.
+
+### 24.4 Tests
+
+- `theme_unit_graph_tests.rs`
+  (`names_in_a_template_of_the_drawn_decorations_do_not_make_a_document_ambient`): the document
+  is a unit keyed by `WindowDrawnDecorations` that constructs `Button`, while a name outside a
+  template keeps a document ambient.
+- `export.rs` (`export_writes_the_targets_a_class_is_not_created_on`): the conditions are written
+  on the class, and an unknown class is an error.
+- `theme_roots_tests.rs` (`a_class_not_created_on_the_target_is_not_live_through_its_creates_edges`):
+  the edges into the class hold on Linux, Windows and without a target, and not on macOS and
+  `wasm32`. There the class is live only where it is named.
+- `ferroui-controls` (`chrome::drawn_decorations_targets::tests`): the table is in step with the
+  backends.
+
+## 25. The hosts of popups are units of their own (#994)
+
+The ambient unit of every theme held the theme of `PopupRoot` and of `OverlayPopupHost`
+(`FRAMEWORK_HOSTS`): hosts the framework creates, which no application names. An application
+that never opens a popup kept their control themes, and through them the members of `PopupRoot`
+(a top level) that the themes set: about 243 kB of hello world, by the estimate of its IR.
+
+A popup host is created only when a `Popup` opens: `Popup` calls
+`OverlayPopupHost::create_popup_host`, which makes a `PopupRoot` (a platform popup) or an
+`OverlayPopupHost` (on the overlay layer). A popup is constructed by what shows one: a tool tip,
+a flyout, a context menu, or a template with a `Popup` element.
+
+The change:
+
+- `FRAMEWORK_HOSTS` no longer names the two hosts. Their documents are units keyed by their type.
+- The scan reads a construction only as `X::new` and its kin in the code of a class, not as a
+  factory function of another class. So `ferroui-controls` states the edges from `Popup` to both
+  hosts in `primitives/popup_hosts.rs`, which its build script reads and applies with the new
+  `Export::creates`. The edges are added to `TypeModel::creates`.
+- The test of the file checks three things: `Popup` calls the factory, the factory constructs
+  both hosts, and no other source of the repository creates a host outside tests. (The view models
+  of DevTools have a `PopupRoot` of their own.)
+
+An application keeps the themes of the hosts where a popup is live: a `Popup` it constructs or
+whose class it names, or one a live class creates (`ToolTip`, `ContextMenu`, `PopupFlyoutBase`
+create one).
+
+### 25.1 Tests
+
+- `export.rs` (`export_adds_the_stated_creates_edges`): the stated classes are added once,
+  sorted, and an unknown class is an error.
+- `ferroui-controls` (`primitives::popup_hosts::tests`): the table is in step with the code that
+  creates the hosts.

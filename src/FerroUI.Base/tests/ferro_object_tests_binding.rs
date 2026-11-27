@@ -1069,6 +1069,8 @@ fn boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box() {
     #[derive(PartialEq)]
     struct Snapshot(Cell<i32>);
 
+    crate::styled_value!(Snapshot);
+
     impl Clone for Snapshot {
         fn clone(&self) -> Self {
             Self(Cell::new(self.0.get()))
@@ -1095,6 +1097,8 @@ fn boxed_bindings_snapshot_values_instead_of_retaining_the_incoming_box() {
 fn retained_boxed_source_observer_does_not_keep_a_disposed_bindings_values_alive() {
     #[derive(Clone, PartialEq)]
     struct Payload(Option<Rc<()>>);
+
+    crate::styled_value!(Payload);
 
     for priority in [BindingPriority::LocalValue, BindingPriority::Style] {
         let target = Class1::new();
@@ -1176,6 +1180,8 @@ fn boxed_notification_keeps_snapshots_and_drops_them_after_payload_clone() {
         on_clone: Option<Rc<dyn Fn()>>,
         on_drop: Option<Rc<dyn Fn()>>,
     }
+
+    crate::styled_value!(Payload);
     impl Clone for Payload {
         fn clone(&self) -> Self {
             if let Some(on_clone) = &self.on_clone {
@@ -1274,6 +1280,8 @@ fn boxed_binding_conversion_releases_its_temporary_before_delivery_or_clone_unwi
         panic_on_clone: bool,
         dropped: Rc<Cell<bool>>,
     }
+
+    crate::styled_value!(Output);
     impl Clone for Output {
         fn clone(&self) -> Self {
             assert!(!self.panic_on_clone, "converted value clone failed");

@@ -47,7 +47,7 @@ use crate::lighting::shade_color;
 use crate::uniforms::{transform_point, DrawUniforms, Face, FrameUniforms, LayerKind};
 use clip::{clip_triangle, ClipVertex, Clipped, ATTRIBUTES};
 use ferroui_base::media::IBrush;
-use ferroui_base::rendering::scene3d::{Scene3DMaterialLayer, Scene3DSnapshot};
+use ferroui_base::rendering::scene3d::{Scene3DBrushContent, Scene3DMaterialLayer, Scene3DSnapshot};
 use ferroui_base::{PixelSize, Rect};
 use std::cell::Cell;
 use std::ops::Range;
@@ -78,7 +78,8 @@ ferroui_base::ferro_thread_local! {
 }
 
 /// How many brush textures the CPU reference read on this thread (a gradient's lookup texture
-/// made, the pixels of a bitmap read): once per [`BrushTextureKey`] while a rasterizer keeps it.
+/// made, the pixels of a bitmap read, the content of a visual or drawing brush rendered): once
+/// per [`BrushTextureKey`] while a rasterizer keeps it.
 pub fn brush_textures_read() -> u64 {
     TEXTURES_READ.with(Cell::get)
 }
@@ -194,17 +195,30 @@ struct KeptTexels {
     last_used: u64,
 }
 
+/// What renders the content of a visual or drawing brush of a material into premultiplied RGBA8
+/// texels of the given size in pixels, the bounds of the content ([`Scene3DBrushContent::rect`])
+/// stretched over them: the 2D renderer of the backend that draws the CPU reference (Skia raster,
+/// the CPU mode of Vello). `None` when it cannot. `Send` and `Sync`, as the rasterizer that holds
+/// it is.
+pub type ContentRenderer = Box<dyn FnMut(&Scene3DBrushContent, (u32, u32)) -> Option<BrushTexels> + Send + Sync>;
+
 /// The brush textures of a rasterizer, read once per key.
 #[derive(Default)]
 struct TexelCache {
     entries: Vec<KeptTexels>,
     clock: u64,
+    /// The pixels per unit of the render: the resolution of the contents of visual and drawing
+    /// brushes.
+    scale: f64,
+    /// Asserted unwind safe: a render that panicked leaves no texels of its key in the cache.
+    renderer: Option<std::panic::AssertUnwindSafe<ContentRenderer>>,
 }
 
 impl TexelCache {
     /// A new render: what was not drawn for a while, and the textures of bitmaps that are gone,
     /// go.
-    fn begin(&mut self) {
+    fn begin(&mut self, scale: f64) {
+        self.scale = scale;
         self.clock += 1;
         let clock = self.clock;
         self.entries.retain(|entry| entry.identity.is_alive() && clock - entry.last_used < TEXTURE_LIFETIME);
@@ -213,11 +227,21 @@ impl TexelCache {
     /// The texels of `source`, read on first demand.
     fn get(&mut self, source: &BrushTextureSource) -> Option<Arc<BrushTexels>> {
         let key = source.key();
-        if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key) {
+        // The content of a visual or drawing brush is rendered at the resolution of the render.
+        let size = source.content_pixel_size(self.scale);
+        let fits = |entry: &KeptTexels| {
+            size.is_none_or(|size| entry.texels.as_ref().is_none_or(|texels| (texels.width, texels.height) == size))
+        };
+        if let Some(entry) = self.entries.iter_mut().find(|entry| entry.key == key && fits(entry)) {
             entry.last_used = self.clock;
             return entry.texels.clone();
         }
-        let texels = source.texels().map(Arc::new);
+        self.entries.retain(|entry| entry.key != key);
+        let texels = match (source.content(), size) {
+            (Some(content), Some(size)) => self.renderer.as_mut().and_then(|render| (render.0)(content, size)),
+            _ => source.texels(),
+        };
+        let texels = texels.map(Arc::new);
         TEXTURES_READ.with(|count| count.set(count.get() + 1));
         let identity = source.identity();
         self.entries.push(KeptTexels { key, identity, texels: texels.clone(), last_used: self.clock });
@@ -263,11 +287,19 @@ impl CpuRasterizer {
         CpuRasterizer::default()
     }
 
+    /// Sets what renders the contents of visual and drawing brushes ([`ContentRenderer`]); without
+    /// one, their layers are drawn with their colours and counted. The contents kept so far are
+    /// rendered again.
+    pub fn set_content_renderer(&mut self, renderer: Option<ContentRenderer>) {
+        self.textures.renderer = renderer.map(std::panic::AssertUnwindSafe);
+        self.textures.entries.retain(|entry| !matches!(entry.key, BrushTextureKey::Content { .. }));
+    }
+
     /// Renders `scene` into an image of `size` pixels (each side clamped to 0..[`MAX_SIDE`]).
     /// The projection of the camera covers the whole image. `scale` is the number of pixels per
-    /// unit of the viewport; the rasterizer itself depends only on the size (the offscreen
-    /// renders of visual and drawing brushes take the scale for their resolution), and the
-    /// output cache keys on it. A scene without a camera, or a size without pixels, gives a
+    /// unit of the viewport; the rasterizer itself depends only on the size, the offscreen
+    /// renders of visual and drawing brushes take the scale for their resolution, and the output
+    /// cache keys on it. A scene without a camera, or a size without pixels, gives a
     /// transparent image.
     pub fn render(
         &mut self,
@@ -276,7 +308,6 @@ impl CpuRasterizer {
         scale: f64,
         options: CpuRenderOptions,
     ) -> Scene3DImage {
-        let _ = scale;
         RASTERIZED.with(|count| count.set(count.get() + 1));
         let width = size.width.clamp(0, MAX_SIDE as i32) as u32;
         let height = size.height.clamp(0, MAX_SIDE as i32) as u32;
@@ -295,7 +326,7 @@ impl CpuRasterizer {
             tiles_x: width.div_ceil(TILE),
             tiles_y: height.div_ceil(TILE),
         };
-        self.textures.begin();
+        self.textures.begin(scale);
         self.prepare(scene, &frame, &target);
         self.bin(&target);
         self.draw_tiles(&frame, &target, &mut image.rgba);

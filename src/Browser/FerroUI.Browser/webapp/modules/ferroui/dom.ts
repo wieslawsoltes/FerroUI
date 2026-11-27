@@ -191,12 +191,18 @@ export class FerroDOM {
         if (globalThis.matchMedia !== undefined) {
             const colorSchemeMedia = globalThis.matchMedia("(prefers-color-scheme: dark)");
             const prefersContrastMedia = globalThis.matchMedia("(prefers-contrast: more)");
+            // Not in the original: forced colours (the high contrast of the system the browser
+            // applies) is high contrast too, with the system colours of the page (#560).
+            const forcedColorsMedia = globalThis.matchMedia("(forced-colors: active)");
 
             colorSchemeMedia.addEventListener("change", (args: MediaQueryListEvent) => {
-                FerroExports.DomHelper?.DarkModeChanged(args.matches, prefersContrastMedia.matches);
+                FerroExports.DomHelper?.DarkModeChanged(args.matches, prefersContrastMedia.matches || forcedColorsMedia.matches);
             });
             prefersContrastMedia.addEventListener("change", (args: MediaQueryListEvent) => {
-                FerroExports.DomHelper?.DarkModeChanged(colorSchemeMedia.matches, args.matches);
+                FerroExports.DomHelper?.DarkModeChanged(colorSchemeMedia.matches, args.matches || forcedColorsMedia.matches);
+            });
+            forcedColorsMedia.addEventListener("change", (args: MediaQueryListEvent) => {
+                FerroExports.DomHelper?.DarkModeChanged(colorSchemeMedia.matches, prefersContrastMedia.matches || args.matches);
             });
         }
 
@@ -255,10 +261,42 @@ export class FerroDOM {
 
         const colorSchemeMedia = globalThis.matchMedia("(prefers-color-scheme: dark)");
         const prefersContrastMedia = globalThis.matchMedia("(prefers-contrast: more)");
+        const forcedColorsMedia = globalThis.matchMedia("(forced-colors: active)");
         return [
             colorSchemeMedia.matches ? 1 : 0,
-            prefersContrastMedia.matches ? 1 : 0
+            prefersContrastMedia.matches || forcedColorsMedia.matches ? 1 : 0
         ];
+    }
+
+    // Not in the original (#560): while the browser forces colours, the CSS system colours of the
+    // page as ARGB, in the order Canvas, CanvasText, ButtonFace, ButtonText, Highlight,
+    // HighlightText, LinkText, GrayText (the window, window text, button face, button text,
+    // highlight, highlight text, hyperlink and disabled text colours of the system); none
+    // otherwise, or when a colour cannot be read.
+    public static getSystemColors(globalThis: Window): number[] {
+        if (globalThis.matchMedia === undefined || !globalThis.matchMedia("(forced-colors: active)").matches) return [];
+        const body = globalThis.document.body;
+        if (body === null) return [];
+
+        const probe = globalThis.document.createElement("div");
+        probe.style.display = "none";
+        body.appendChild(probe);
+        const keywords = ["Canvas", "CanvasText", "ButtonFace", "ButtonText", "Highlight", "HighlightText", "LinkText", "GrayText"];
+        const rgba = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/;
+        const colors: number[] = [];
+        for (const keyword of keywords) {
+            probe.style.color = keyword;
+            const match = rgba.exec(globalThis.getComputedStyle(probe).color);
+            if (match === null) {
+                probe.remove();
+                return [];
+            }
+            const channel = (text: string): number => Math.max(0, Math.min(255, Math.round(parseFloat(text))));
+            const alpha = match[4] === undefined ? 255 : Math.max(0, Math.min(255, Math.round(parseFloat(match[4]) * 255)));
+            colors.push(((alpha << 24) | (channel(match[1]) << 16) | (channel(match[2]) << 8) | channel(match[3])) >>> 0);
+        }
+        probe.remove();
+        return colors;
     }
 
     public static getNavigatorLanguage(globalThis: Window): string | null {

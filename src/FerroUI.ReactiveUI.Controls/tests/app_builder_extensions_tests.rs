@@ -78,3 +78,40 @@ fn with_ferro_registers_ferro_services() {
     let invoker = AppLocator::get_service::<dyn IViewThreadInvoker>().expect("a view thread invoker is registered");
     assert!(std::ptr::addr_eq(Rc::as_ptr(&invoker), Rc::as_ptr(&FerroViewThreadInvoker::instance())));
 }
+
+/// The error of a pipeline nothing handles reaches the unhandled-exception events of the
+/// dispatcher as a failing job, without a panic (#567); an application's own handler, set
+/// before `with_ferro`, is kept.
+#[test]
+fn with_ferro_raises_unhandled_pipeline_errors_on_the_dispatcher_without_a_panic() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_reactiveui::UnhandledError;
+    use ferroui_system::ObservableError;
+    use std::cell::RefCell;
+
+    let _app = start();
+    reset_reactive_ui();
+    let builder = RxAppBuilder::create_reactive_ui_builder();
+    let handler = builder.with_ferro().exception_handler().expect("with_ferro sets the handler");
+
+    let dispatcher = Dispatcher::ui_thread();
+    let received = Rc::new(RefCell::new(None::<UnhandledError>));
+    let seen = received.clone();
+    let _subscription = dispatcher.unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.error().and_then(|error| error.downcast_ref::<UnhandledError>()).cloned();
+        args.set_handled(true);
+    });
+    let error: ObservableError = Rc::new(std::io::Error::other("the pipeline broke"));
+    handler.on_next(error);
+    assert!(received.borrow().is_none(), "raised from a job of the dispatcher, not in the pipeline");
+    dispatcher.run_jobs(None);
+    let received = received.take().expect("the dispatcher received the error");
+    assert_eq!(received.inner_exception(), Some("the pipeline broke"));
+
+    reset_reactive_ui();
+    let own: Rc<dyn ferroui_system::IObserver<ObservableError>> = ferroui_reactive::Observer::create(|_| {});
+    let builder = RxAppBuilder::create_reactive_ui_builder();
+    builder.with_exception_handler(own.clone());
+    let kept = builder.with_ferro().exception_handler().unwrap();
+    assert!(Rc::ptr_eq(&kept, &own));
+}

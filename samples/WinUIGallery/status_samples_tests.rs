@@ -6,8 +6,8 @@ use crate::{examples, tests::start};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::Ref;
 use ferroui_controls::{
-    Carousel, ComboBox, Control, ExpandDirection, Expander, NumberBox, PipsPager, ProgressBar,
-    TextBlock,
+    Carousel, ComboBox, Control, ExpandDirection, Expander, NumberBox, PipsPager,
+    PipsPagerButtonVisibility, PipsPagerWrapMode, ProgressBar, RadioButton, TextBlock,
 };
 
 fn page(id: &str) -> Ref<Control> {
@@ -32,6 +32,26 @@ fn progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero() 
     assert_eq!(bar.value(), 40.0);
     number_box.set_numeric_value(10.0);
     assert_eq!(bar.value(), 10.0);
+}
+
+#[test]
+fn progress_state_options_show_the_paused_and_the_error_state() {
+    let _application = start();
+    let root = page("ProgressBar");
+    let bar = root.get_control::<ProgressBar>("ProgressBar1");
+    assert!(!bar.show_paused() && !bar.show_error());
+
+    root.get_control::<RadioButton>("PausedRB").set_is_checked(Some(true));
+    assert!(bar.show_paused() && !bar.show_error());
+    assert!(bar.classes().contains(":paused"));
+
+    root.get_control::<RadioButton>("ErrorRB").set_is_checked(Some(true));
+    assert!(!bar.show_paused() && bar.show_error());
+    assert!(bar.classes().contains(":error") && !bar.classes().contains(":paused"));
+
+    root.get_control::<RadioButton>("RunningRB").set_is_checked(Some(true));
+    assert!(!bar.show_paused() && !bar.show_error());
+    assert!(!bar.classes().contains(":error"));
 }
 
 #[test]
@@ -101,11 +121,61 @@ fn options_pager_announces_the_page_and_follows_the_options() {
     assert_eq!(pager.orientation(), Orientation::Horizontal);
     root.get_control::<ComboBox>("PrevButtonComboBox")
         .set_selected_index(1);
+    assert_eq!(
+        pager.previous_button_visibility(),
+        PipsPagerButtonVisibility::VisibleOnPointerOver
+    );
+    assert!(pager.is_previous_button_visible());
+    root.get_control::<ComboBox>("PrevButtonComboBox")
+        .set_selected_index(2);
     assert!(!pager.is_previous_button_visible());
     root.get_control::<ComboBox>("NextButtonComboBox")
-        .set_selected_index(1);
+        .set_selected_index(2);
     assert!(!pager.is_next_button_visible());
     root.get_control::<ComboBox>("NextButtonComboBox")
         .set_selected_index(0);
     assert!(pager.is_next_button_visible());
+    root.get_control::<ComboBox>("WrapModeComboBox")
+        .set_selected_index(1);
+    assert_eq!(pager.wrap_mode(), PipsPagerWrapMode::Wrap);
+}
+
+#[test]
+fn tool_tip_examples_keep_the_source_tips_offset_and_placement() {
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::{Button, Image, PlacementMode, ToolTip};
+    let _application = start();
+    let root = page("ToolTip");
+    fn tip_text(control: &Control) -> Option<String> {
+        ToolTip::get_tip(control).and_then(|value| value.downcast_ref::<String>().cloned())
+    }
+    // The simple ToolTip of the button.
+    let button = root.get_control::<Button>("SimpleToolTipButton");
+    assert_eq!(tip_text(&button).as_deref(), Some("Simple ToolTip"));
+    // The offset ToolTip of the text: the source's VerticalOffset of -80.
+    let text = root.get_control::<TextBlock>("OffsetToolTipText");
+    assert_eq!(tip_text(&text).as_deref(), Some("Offset information."));
+    assert_eq!(ToolTip::get_vertical_offset(&text), -80.0);
+    // The image's ToolTip is placed to the right of the 400 by 266 image, the source's
+    // PlacementRect, with the source's description.
+    let image = root.get_control::<Image>("textBoxToPlace");
+    // The source's cliff.jpg where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(crate::status_samples::CLIFF).is_ok();
+    assert_eq!(image.source().is_some(), decoded);
+    assert_eq!((image.width(), image.height()), (400.0, 266.0));
+    assert_eq!(ToolTip::get_placement(&image), PlacementMode::Right);
+    let tool_tip = from_markup_value::<Ref<ToolTip>>(&ToolTip::get_tip(&image))
+        .expect("the ToolTip of the image");
+    assert_eq!(
+        tool_tip
+            .content()
+            .and_then(|value| value.downcast_ref::<String>().cloned())
+            .as_deref(),
+        Some("Non-occluding information.")
+    );
+    assert_eq!(
+        AutomationProperties::get_help_text(&tool_tip).as_deref(),
+        Some("Non-occluding tooltip")
+    );
 }

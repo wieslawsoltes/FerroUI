@@ -54,6 +54,30 @@ impl RenderDataStream {
         self.opcodes() == other.opcodes() && self.resources.same_resources(&other.resources)
     }
 
+    /// A stream of the recorded operations `opcodes` over `resources` (in the order of their
+    /// handles), with the nesting `max_depth`: the stream a recording made elsewhere replays as
+    /// (the content of a visual or drawing brush of a 3D material, `Scene3DBrushContent`).
+    pub(crate) fn from_parts(
+        max_depth: i32,
+        resources: impl IntoIterator<Item = RenderDataResource>,
+        opcodes: &[u8],
+    ) -> RenderDataStream {
+        let mut stream = RenderDataStream::default();
+        stream.max_depth = max_depth;
+        for resource in resources {
+            stream.resources.append_deserialized(resource);
+        }
+        if !opcodes.is_empty() {
+            stream.writer.reserve(opcodes.len()).copy_from_slice(opcodes);
+        }
+        stream
+    }
+
+    /// The resources of the stream, in the order of their handles.
+    pub(crate) fn resources(&self) -> impl Iterator<Item = &RenderDataResource> {
+        self.resources.iter()
+    }
+
     /// The recorded operations.
     pub fn opcodes(&self) -> &[u8] {
         self.writer.written()

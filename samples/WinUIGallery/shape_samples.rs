@@ -3,9 +3,8 @@
 //! `GeometryPage.xaml.cs`. The Shape page has no code-behind upstream and keeps its x:Bind.
 //!
 //! WinUI's `X1`, `Y1`, `X2` and `Y2` of a Line are FerroUI's `StartPoint` and `EndPoint`: the four
-//! point sliders set them, for the source's TwoWay x:Bind of each coordinate. FerroUI has no
-//! TeachingTip: the tips of the Geometry page are the Flyouts of their buttons, which the buttons'
-//! clicks open and close as `ShowGeometryButtonClick` toggles `IsOpen`.
+//! point sliders set them, for the source's TwoWay x:Bind of each coordinate. The tips of the Geometry page are
+//! TeachingTips, whose `IsOpen` the button clicks toggle as `ShowGeometryButtonClick` does.
 
 use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::media::IImage;
@@ -14,6 +13,7 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Ref};
 use ferroui_controls::shapes::Line;
 use ferroui_controls::{Button, Control, Image, Slider, TextBlock, TopLevel};
+use ferroui_controls_teaching_tip::TeachingTip;
 use std::rc::Rc;
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -80,8 +80,31 @@ fn wire_geometry(root: &Ref<Control>) {
         }
     })
     .detach();
-    // The copy buttons put the resource's name on the clipboard of the window, and announce it.
-    for (name, text) in COPIED_RESOURCES {
+    wire_teaching_tips(root, "ShowGeometryButton", "ShowGeometryInfoTooltip", 3);
+    wire_copy_buttons(root, &COPIED_RESOURCES);
+}
+
+/// The tip buttons of a design page (`ShowGeometryButtonClick1`, `ShowTypographyButtonClick1`,
+/// ...): each button is the target of its tip, and its click toggles `IsOpen`.
+pub(crate) fn wire_teaching_tips(root: &Ref<Control>, button: &str, tip: &str, count: usize) {
+    for index in 1..=count {
+        let button = root.get_control::<Button>(&format!("{button}{index}"));
+        let tip = root.get_control::<TeachingTip>(&format!("{tip}{index}"));
+        tip.set_target(button.clone());
+        let weak_tip = tip.downgrade();
+        button.click(move |_, _| {
+            if let Some(tip) = weak_tip.upgrade() {
+                tip.set_is_open(!tip.is_open());
+            }
+        });
+    }
+}
+
+/// The gallery's copy buttons of a design page (`CopyButton`): each named button puts its text on
+/// the clipboard of the window and announces it in the page's `CopyOutput`, a polite live region
+/// (the button's `UIHelper.AnnounceActionForAccessibility`).
+pub(crate) fn wire_copy_buttons(root: &Ref<Control>, buttons: &[(&str, &'static str)]) {
+    for &(name, text) in buttons {
         let weak_root = root.downgrade();
         root.get_control::<Button>(name).click(move |_, _| {
             let Some(root) = weak_root.upgrade() else {

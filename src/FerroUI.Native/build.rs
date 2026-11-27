@@ -127,7 +127,11 @@ fn main() {
             // CLANG_ENABLE_MODULES is YES upstream, but Xcode does not enable
             // modules for Objective-C++ sources, so no -fmodules here (with
             // it CoreFoundation's own IUnknown/REFIID clash with com.h).
-            .flag(if arc { "-fobjc-arc" } else { "-fno-objc-arc" });
+            .flag(if arc { "-fobjc-arc" } else { "-fno-objc-arc" })
+            // Nothing outside the link names these symbols, but for `CreateFerroNative`, which
+            // says so itself (patches/0006): they stay out of the export trie (#1049).
+            .flag("-fvisibility=hidden")
+            .flag("-fvisibility-inlines-hidden");
         if arc {
             b.flag("-fobjc-weak");
         }

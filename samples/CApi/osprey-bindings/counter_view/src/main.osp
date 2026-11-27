@@ -1,0 +1,65 @@
+// 7GUIs task 1, Counter, with layer 2 of the generated Osprey bindings of FerroUI
+// (docs/osprey.md): the count is the model, the button sends Increment, and the text box shows
+// what the view says.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program clicks the button twice itself and prints the state.
+
+import ferroui::*
+import ferroviews::*
+
+type Message = Increment
+
+type Model = { count: int }
+
+fn update(message: Message, model: Model) -> Model = match message {
+    Increment => Model { count: model.count + 1 }
+}
+
+fn view(model: Model) -> Element<Message> =
+    window([title("Counter"), width(320.0), height(110.0)], [
+        stackPanel([orientation(OrientationHorizontal), verticalAlignment(VerticalAlignmentTop), spacing(8.0), margin("16")], [
+            textBox([key(1), text(toString(model.count)), isReadOnly(true), width(80.0)]),
+            button([key(2), content("Count"), onClick(Increment)], [])
+        ])
+    ])
+
+effect Store { put: fn(Model) -> Unit }
+
+mut model = Model { count: 0 }
+
+fn keep(next: Model) -> Unit = {
+    handle Store { put value => { model = value } }
+    perform Store.put(next)
+}
+
+// The scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs): two clicks count to 2.
+fn script() -> Unit = {
+    let _ = raiseClickAt(2)
+    let _ = raiseClickAt(2)
+    let shown = textAt(1)
+    print("script: count ${model.count}, the text box shows '${shown}': ${shown == "2" ? "ok" : "FAILED"}")
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let next = match messageAt(view(model), tag) {
+        Success { value } => update(value, model)
+        Error { message } => model
+    }
+    keep(next)
+    report("render", render(view(next)))
+    match tag == 0 && envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script()
+        false => nothing()
+    }
+    0
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

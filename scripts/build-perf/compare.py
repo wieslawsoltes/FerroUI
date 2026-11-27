@@ -174,21 +174,46 @@ def package_name(item: dict) -> str:
     return item.get("package", "").rsplit("#", 1)[-1].split("@", 1)[0]
 
 
-def build_only_packages(source: Path, root: str = BUILD_ONLY_ROOT) -> set[str]:
-    """The names of the packages `root` depends on, directly or not, in the lock file of `source`."""
-    metadata = json.loads(subprocess.check_output(
+def cargo_metadata(source: Path) -> dict:
+    """`cargo metadata` of the workspace at `source`, from its lock file."""
+    return json.loads(subprocess.check_output(
         ["cargo", "metadata", "--format-version", "1", "--locked", "--offline"], cwd=source, text=True))
-    names = {package["id"]: package["name"] for package in metadata["packages"]}
+
+
+def reachable(metadata: dict, roots: list[str], normal_only: bool) -> set[str]:
+    """The ids of the packages the packages named `roots` depend on, directly or not. With
+    `normal_only`, only through normal dependencies: an edge that is a build or dev dependency
+    alone is not followed, so what a build script links is left out."""
     nodes = {node["id"]: node for node in (metadata.get("resolve") or {}).get("nodes", [])}
-    pending = [identifier for identifier, name in names.items() if name == root]
+    names = {package["id"]: package["name"] for package in metadata["packages"]}
+    pending = [identifier for identifier, name in names.items() if name in roots]
     found: set[str] = set()
     while pending:
         identifier = pending.pop()
         for dependency in nodes.get(identifier, {}).get("deps", []):
+            kinds = {kind.get("kind") for kind in dependency.get("dep_kinds", [{"kind": None}])}
+            if normal_only and None not in kinds:
+                continue
             if dependency["pkg"] not in found:
                 found.add(dependency["pkg"])
                 pending.append(dependency["pkg"])
-    return {names[identifier] for identifier in found}
+    return found
+
+
+def build_only_names(metadata: dict, measured: list[str], root: str = BUILD_ONLY_ROOT) -> set[str]:
+    """The names of the packages that `root` depends on, directly or not, and that no normal
+    dependency path of the `measured` packages reaches: what only build scripts link. A crate that
+    a measured package also links (a markup crate both `root` and the application use) is not
+    among them, so a new runtime dependency of it stays a change of the graph."""
+    names = {package["id"]: package["name"] for package in metadata["packages"]}
+    linked = reachable(metadata, measured, normal_only=True) | {
+        identifier for identifier, name in names.items() if name in measured}
+    return {names[identifier] for identifier in reachable(metadata, [root], normal_only=False) - linked}
+
+
+def build_only_packages(source: Path, measured: list[str], root: str = BUILD_ONLY_ROOT) -> set[str]:
+    """[`build_only_names`] of the lock file of `source`."""
+    return build_only_names(cargo_metadata(source), measured, root)
 
 
 def build_only_additions(reference: list[dict], items: list[dict], packages: set[str]) -> list[dict]:
@@ -344,7 +369,7 @@ def main() -> int:
                 (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
         # The units only the candidate builds because the build crate gained a dependency are not a
         # change of the graph of the package (they run in build scripts only); they are reported.
-        packages = build_only_packages(args.candidate)
+        packages = build_only_packages(args.candidate, args.package)
         reference_units = next(row["units"] for row in report["records"] if row["label"] == "baseline")
         build_only: set[str] = set()
         for row in report["records"]:

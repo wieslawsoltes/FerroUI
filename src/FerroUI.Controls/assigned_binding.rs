@@ -7,6 +7,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct AssignedBinding(pub Rc<dyn BindingBase>);
 
+ferroui_base::styled_value!(AssignedBinding);
+
 impl AssignedBinding {
     /// Wraps a binding.
     pub fn new(binding: Rc<dyn BindingBase>) -> Self {

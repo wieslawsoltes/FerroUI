@@ -8,6 +8,7 @@ mod adorner_layer;
 mod light_dismiss_overlay_layer;
 mod overlay_layer;
 mod popup_overlay_layer;
+pub mod popup_hosts;
 mod text_selector_layer;
 mod visual_layer_manager;
 mod i_popup_host;

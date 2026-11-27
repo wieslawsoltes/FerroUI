@@ -101,27 +101,49 @@ impl BorderRenderHelper {
             let bound_rect = Rect::from_size(final_size);
             let inner_rect = bound_rect.deflate_thickness(border_thickness);
 
+            // The geometries the helper has are written again in place where there are some: a
+            // border with unequal corners or thicknesses that is resized made three stream
+            // geometries and a combined geometry for every size (#805).
             if inner_rect.width != 0.0 && inner_rect.height != 0.0 {
-                self.background_geometry_cache =
-                    Some(Self::build_geometry(bound_rect, border_thickness, corner_radius, background_sizing));
+                let kept =
+                    self.background_geometry_cache.as_ref().and_then(|geometry| geometry.cast::<StreamGeometry>());
+                match kept {
+                    Some(geometry) => {
+                        Self::write_geometry(&geometry, bound_rect, border_thickness, corner_radius, background_sizing)
+                    }
+                    None => {
+                        self.background_geometry_cache =
+                            Some(Self::build_geometry(bound_rect, border_thickness, corner_radius, background_sizing))
+                    }
+                }
             } else {
                 self.background_geometry_cache = None;
             }
 
             if bound_rect.width != 0.0 && bound_rect.height != 0.0 {
-                let border_inner_geometry =
-                    Self::build_geometry(bound_rect, border_thickness, corner_radius, BackgroundSizing::InnerBorderEdge);
-                let border_outer_geometry =
-                    Self::build_geometry(bound_rect, border_thickness, corner_radius, BackgroundSizing::OuterBorderEdge);
+                if !self.write_border_geometry(bound_rect, border_thickness, corner_radius) {
+                    let border_inner_geometry = Self::build_geometry(
+                        bound_rect,
+                        border_thickness,
+                        corner_radius,
+                        BackgroundSizing::InnerBorderEdge,
+                    );
+                    let border_outer_geometry = Self::build_geometry(
+                        bound_rect,
+                        border_thickness,
+                        corner_radius,
+                        BackgroundSizing::OuterBorderEdge,
+                    );
 
-                self.border_geometry_cache = Some(
-                    CombinedGeometry::with_mode(
-                        GeometryCombineMode::Exclude,
-                        Some(border_outer_geometry),
-                        Some(border_inner_geometry),
-                    )
-                    .upcast(),
-                );
+                    self.border_geometry_cache = Some(
+                        CombinedGeometry::with_mode(
+                            GeometryCombineMode::Exclude,
+                            Some(border_outer_geometry),
+                            Some(border_inner_geometry),
+                        )
+                        .upcast(),
+                    );
+                }
             } else {
                 self.border_geometry_cache = None;
             }
@@ -134,14 +156,46 @@ impl BorderRenderHelper {
         corner_radius: CornerRadius,
         sizing: BackgroundSizing,
     ) -> Ref<Geometry> {
+        let geometry = StreamGeometry::new();
+        Self::write_geometry(&geometry, bound_rect, border_thickness, corner_radius, sizing);
+        geometry.upcast()
+    }
+
+    /// Writes the rounded rectangle of `sizing` into `geometry`, in place of what it has.
+    fn write_geometry(
+        geometry: &StreamGeometry,
+        bound_rect: Rect,
+        border_thickness: Thickness,
+        corner_radius: CornerRadius,
+        sizing: BackgroundSizing,
+    ) {
         let keypoints =
             GeometryBuilder::calculate_rounded_corners_rectangle_win_ui(bound_rect, border_thickness, corner_radius, sizing);
-        let geometry = StreamGeometry::new();
-        {
-            let mut ctx = geometry.open();
-            GeometryBuilder::draw_rounded_corners_rectangle_keypoints(&mut ctx, &keypoints);
-        }
-        geometry.upcast()
+        let mut ctx = geometry.reopen();
+        GeometryBuilder::draw_rounded_corners_rectangle_keypoints(&mut ctx, &keypoints);
+        drop(ctx);
+    }
+
+    /// Writes the outer and the inner edge of the border into the two stream geometries of the
+    /// combined geometry the helper has, and says whether it could (it has none before the first
+    /// size). The combined geometry follows its two geometries.
+    fn write_border_geometry(
+        &self,
+        bound_rect: Rect,
+        border_thickness: Thickness,
+        corner_radius: CornerRadius,
+    ) -> bool {
+        let cache = self.border_geometry_cache.as_ref();
+        let Some(combined) = cache.and_then(|geometry| geometry.cast::<CombinedGeometry>()) else {
+            return false;
+        };
+        let outer = combined.geometry1().and_then(|geometry| geometry.cast::<StreamGeometry>());
+        let inner = combined.geometry2().and_then(|geometry| geometry.cast::<StreamGeometry>());
+        let (Some(outer), Some(inner)) = (outer, inner) else { return false };
+        let (thickness, radius) = (border_thickness, corner_radius);
+        Self::write_geometry(&outer, bound_rect, thickness, radius, BackgroundSizing::OuterBorderEdge);
+        Self::write_geometry(&inner, bound_rect, thickness, radius, BackgroundSizing::InnerBorderEdge);
+        true
     }
 
     /// Renders the border and its background.
@@ -196,5 +250,51 @@ impl BorderRenderHelper {
 
             context.draw_rounded_rectangle(background, self.cached_pen.as_ref(), rrect, box_shadows);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// #805: a border drawn with geometries (unequal corners on a backend that draws no single
+    /// corner, unequal thicknesses, a sizing other than the centre of the border) that is resized
+    /// writes the geometries it has again; it makes new ones only after a size without them.
+    #[test]
+    fn a_border_drawn_with_geometries_that_is_resized_writes_them_again() {
+        let _scope = crate::test_support::test_scope();
+        let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+        let thickness = Thickness::new(1.0, 2.0, 1.0, 2.0);
+        let radius = CornerRadius::new(2.0, 4.0, 6.0, 1.0);
+        let sizing = BackgroundSizing::CenterBorder;
+        let parts = |helper: &BorderRenderHelper| {
+            let background = helper.background_geometry_cache.clone().expect("a background geometry");
+            let border = helper.border_geometry_cache.clone().expect("a border geometry");
+            let combined = border.cast::<CombinedGeometry>().expect("a combined geometry");
+            let outer = combined.geometry1().expect("the outer edge");
+            let inner = combined.geometry2().expect("the inner edge");
+            [background, border, outer, inner]
+        };
+
+        let mut helper = BorderRenderHelper::new();
+        helper.update(Size::new(40.0, 20.0), thickness, radius, sizing);
+        assert!(helper.use_complex_rendering);
+        let first = parts(&helper);
+        let bounds: Vec<Rect> = first.iter().map(|geometry| geometry.bounds()).collect();
+
+        helper.update(Size::new(60.0, 30.0), thickness, radius, sizing);
+        let second = parts(&helper);
+        for (index, (before, after)) in first.iter().zip(&second).enumerate() {
+            assert!(before.ptr_eq(after), "geometry {index} is kept");
+            assert_ne!(after.bounds(), bounds[index], "geometry {index} has the new size");
+        }
+
+        // A size without geometries lets them go; the next size makes new ones.
+        helper.update(Size::new(0.0, 0.0), thickness, radius, sizing);
+        assert!(helper.background_geometry_cache.is_none() && helper.border_geometry_cache.is_none());
+        helper.update(Size::new(60.0, 30.0), thickness, radius, sizing);
+        let third = parts(&helper);
+        assert!(!third[0].ptr_eq(&second[0]));
+        assert_eq!(third[0].bounds(), second[0].bounds());
     }
 }

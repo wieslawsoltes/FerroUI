@@ -5,7 +5,7 @@
 
 use crate::at_spi::at_spi_constants::NULL_PATH;
 use std::collections::HashMap;
-use zbus::zvariant::{ObjectPath, OwnedObjectPath, OwnedValue, Structure, Value};
+use zbus::{ObjectPath, OwnedObjectPath, OwnedVariant, Structure, Variant};
 
 /// `(so)`: the name of a connection and the path of an object of it.
 pub(crate) type ObjectReferenceWire = (String, OwnedObjectPath);
@@ -23,7 +23,7 @@ pub(crate) type AtSpiRelationEntry = (u32, Vec<ObjectReferenceWire>);
 pub(crate) type AtSpiAttributeSet = HashMap<String, String>;
 
 /// `(iisv)`.
-pub(crate) type AtSpiTextRange = (i32, i32, String, OwnedValue);
+pub(crate) type AtSpiTextRange = (i32, i32, String, OwnedVariant);
 
 /// `(ss)`: the bus name of a listener and the event it registered for.
 pub(crate) type AtSpiEventListener = (String, String);
@@ -72,8 +72,8 @@ impl AtSpiObjectReference {
     }
 
     /// The reference as the value of a variant (`ToDbusStruct`).
-    pub(crate) fn to_dbus_struct(&self) -> Value<'static> {
-        Value::Structure(Structure::from((self.service.clone(), self.object_path())))
+    pub(crate) fn to_dbus_struct(&self) -> Variant<'static> {
+        Variant::Structure(Structure::from((self.service.clone(), self.object_path())))
     }
 }
 

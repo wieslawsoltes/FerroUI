@@ -870,6 +870,78 @@ fn heat_cells_draw_the_svg_geometry_of_the_series() {
     assert!(measure("M0,0 X").is_err());
 }
 
+// LineSeries, ScatterSeries and ColumnSeries of VariableSVGPathGeometry with GeometrySvg: the path
+// is drawn in place of each marker and each bar, fitted to its visual (`Svg.Draw`); the series
+// without it keep their ellipses and rectangles, and other paths of the series (the line) stay.
+#[test]
+fn markers_and_bars_draw_the_svg_geometry_of_the_series() {
+    let svg = "M0,0 L10,0 L10,10 L0,10 Z";
+    let visuals = |kind: SeriesKind, svg: Option<&str>| {
+        let mut series = Series::from_values(kind, [2.0, 5.0, 3.0]);
+        series.geometry_size = 12.0;
+        let mut options = CartesianSeriesOptions::default();
+        options.geometry_svg = svg.map(str::to_owned);
+        let scene = CartesianChartEngine::measure_with_series_options(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[Axis::default()],
+            &CartesianOptions::default(),
+            |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+            &[options],
+        )
+        .unwrap()
+        .scene;
+        let mut found: Vec<_> = scene
+            .primitives
+            .into_iter()
+            .filter(|p| p.id.is_some_and(|id| id.series == 0))
+            .map(|p| (p.id.unwrap().point, p.geometry))
+            .collect();
+        found.sort_by_key(|(point, _)| *point);
+        found
+    };
+    for kind in [SeriesKind::Line, SeriesKind::Scatter, SeriesKind::Column] {
+        let native = visuals(kind, None);
+        let drawn = visuals(kind, Some(svg));
+        assert_eq!(native.len(), drawn.len(), "{kind:?}");
+        let mut replaced = 0;
+        for ((_, before), (_, after)) in native.iter().zip(&drawn) {
+            let rect = match before {
+                Geometry::Ellipse(rect) | Geometry::Rectangle { rect, .. } => *rect,
+                other => {
+                    assert_eq!(other, after, "{kind:?}: other visuals stay");
+                    continue;
+                }
+            };
+            let Geometry::Path(commands) = after else {
+                panic!("{kind:?}: the visual is the SVG path")
+            };
+            let PathCommand::MoveTo(first) = commands[0] else {
+                panic!("the path starts with a move")
+            };
+            assert_close(first.x, rect.x, "left of the visual");
+            assert_close(first.y, rect.y, "top of the visual");
+            replaced += 1;
+        }
+        assert_eq!(replaced, 3, "{kind:?}: a visual for each point");
+    }
+    let mut series = Series::from_values(SeriesKind::Line, [1.0]);
+    series.geometry_size = 12.0;
+    let mut options = CartesianSeriesOptions::default();
+    options.geometry_svg = Some("M0,0 X".into());
+    assert!(CartesianChartEngine::measure_with_series_options(
+        Size::new(400.0, 400.0),
+        &[series],
+        &[],
+        &[],
+        &CartesianOptions::default(),
+        |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+        &[options],
+    )
+    .is_err());
+}
+
 // OhlcSeriesAnimationTests.OhlcSeries_FirstDraw_BarsAppearWithOHLC: the source's three I-bars on
 // a 400 by 400 chart with a Y axis from 0 to 40 start their first draw with the high, the close
 // and the low at the open (every line of a bar at the pixel of its open) and end with the low

@@ -21,7 +21,7 @@ fn content<T: 'static>(build: impl Fn() -> Option<BoxedValue> + 'static) -> Opti
     let root = Border::new();
     let provider = TestServiceProvider::new().with_parents(vec![boxed(root.clone())]).with_root(Some(boxed(root))).sp();
     let builder = DeferredContentBuilder::new(move |_| build());
-    let deferred: BoxedValue = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<T>(builder, &provider);
+    let deferred: BoxedValue = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<T>(builder, &provider).unwrap();
     Some(deferred)
 }
 
@@ -33,7 +33,7 @@ fn named_text_block() -> Option<BoxedValue> {
         sp.get_name_scope().unwrap().register("PART_Text", text.clone().upcast());
         Some(boxed(text))
     });
-    let deferred: BoxedValue = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    let deferred: BoxedValue = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
     Some(deferred)
 }
 

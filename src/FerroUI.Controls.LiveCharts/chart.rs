@@ -2,6 +2,7 @@
 
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
+use crate::tooltip_motion::{TooltipKey, TooltipMotion, TooltipPose, TOOLTIP_ANIMATION_MS};
 use crate::{
     Axes, Axis, ChartKind, ChartLegend, ChartSeries, ChartSeriesCollection, ChartVisualElement,
     ChartVisualElements, GeoMarkers, HeatSeries, LegendPosition, MapInteractionMode,
@@ -31,7 +32,7 @@ use ferroui_livecharts::{
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
     GeographicBounds, HeatLegendSource, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
     PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
-    SankeyOptions, SankeySeriesOptions, Scene, TreemapChartEngine, TreemapOptions,
+    SankeyOptions, SankeySeriesOptions, Scene, TooltipHoverArea, TreemapChartEngine, TreemapOptions,
     TreemapSeriesOptions, ZoomDirection,
 };
 use std::{
@@ -39,6 +40,33 @@ use std::{
     rc::{Rc, Weak},
     time::Duration,
 };
+
+/// The `GeometrySvg` of a line, polar line, stacked area, scatter or bar series
+/// (`VariableSVGPathGeometry`).
+fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
+    use crate::series_classes::*;
+    macro_rules! svg {
+        ($($class:ty),*) => {
+            $(if let Some(series) = model.cast::<$class>() {
+                return series.geometry_svg();
+            })*
+        };
+    }
+    svg!(
+        LineSeries,
+        PolarLineSeries,
+        AreaSeries,
+        StackedAreaSeries,
+        ScatterSeries,
+        ColumnSeries,
+        RowSeries,
+        StackedColumnSeries,
+        StackedRowSeries,
+        RangeColumnSeries,
+        RangeRowSeries
+    );
+    None
+}
 
 /// Immutable event data. Handlers may change collections or remove the chart.
 #[derive(Clone, Debug, PartialEq)]
@@ -56,6 +84,9 @@ struct Measurement {
     polar_origin: Option<(Point, f64)>,
     /// The projector, viewport and lands of a geographic map (its scene is `scene`).
     geo: Option<GeoMapMeasurement>,
+    /// The kind, pivot and geometry size of each series, which place the tooltip of its points
+    /// (`CartesianChartEngine::tooltip_hover_area`).
+    tooltip_series: Vec<ferroui_livecharts::Series>,
 }
 
 /// An animation of the map in progress: the rotation of a globe (`RotateTo`, quadratic in and
@@ -96,6 +127,11 @@ pub struct Chart {
     section_start: Cell<Option<Point>>,
     section_end: Cell<Option<Point>>,
     hover: RefCell<Option<ChartPointerEventArgs>>,
+    /// Counts the changes of `hover`, which the compiled tooltip depends on.
+    hover_revision: Cell<u64>,
+    /// The compiled tooltip and its show and hide animation.
+    tooltip_motion: RefCell<Option<TooltipMotion>>,
+    tooltip_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     hover_changed: HandlerList<dyn Fn(&ChartPointerEventArgs)>,
     data_pointer_down: HandlerList<dyn Fn(&ChartPointerEventArgs)>,
     update_finished: HandlerList<dyn Fn()>,
@@ -270,24 +306,7 @@ impl VisualImpl for Chart {
             );
             NativeScene::compile(&overlay).render(context);
         }
-        let hovered = this.hover.borrow().clone();
-        if let Some(mut hovered) = hovered {
-            // The tooltip of a land is anchored at its centre (`GeoTooltipPoint.LandCenter`).
-            if this.chart_kind() == ChartKind::GeoMap {
-                if let Some(land) = hovered.points.first() {
-                    hovered.position = land.center;
-                }
-            }
-            if this.tooltip_position() != TooltipPosition::Hidden && !hovered.points.is_empty() {
-                let tooltip = crate::decorations::tooltip_scene(
-                    size,
-                    &hovered,
-                    this.tooltip_position(),
-                    this.text_color(),
-                );
-                NativeScene::compile(&tooltip).render(context);
-            }
-        }
+        this.render_tooltip(context, size, &presentation.legend);
         context.pop(clip);
     }
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -305,6 +324,7 @@ impl VisualImpl for Chart {
         this.cancel_pointer_gesture();
         this.clear_source_subscriptions();
         this.hover.borrow_mut().take();
+        this.stop_tooltip_motion();
         this.native_scene.borrow_mut().take();
         Self::parent_on_detached_from_visual_tree(this, e);
     }
@@ -509,6 +529,9 @@ impl Chart {
             section_start: Cell::new(None),
             section_end: Cell::new(None),
             hover: RefCell::new(None),
+            hover_revision: Cell::new(0),
+            tooltip_motion: RefCell::new(None),
+            tooltip_timer: RefCell::new(None),
             hover_changed: HandlerList::new(),
             data_pointer_down: HandlerList::new(),
             update_finished: HandlerList::new(),
@@ -727,7 +750,11 @@ impl Chart {
         let heat_legend = self
             .legend()
             .and_then(|legend| ChartLegend::heat_legend(&legend))
-            .map(|legend| {
+            .map(|mut legend| {
+                // `LegendTextSize` of the chart; none or a negative size is the theme's.
+                if let Some(size) = self.legend_text_size().filter(|size| *size >= 0.0) {
+                    legend.text_size = size;
+                }
                 let source = match self.chart_kind() {
                     ChartKind::Cartesian => HeatLegendSource::of_series(&series),
                     ChartKind::GeoMap => heat_lands
@@ -783,9 +810,13 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = CartesianSeriesOptions::default();
+                        options.x_tool_tip_label_formatter = model.x_tool_tip_label_formatter();
+                        options.y_tool_tip_label_formatter = model.y_tool_tip_label_formatter();
                         if let Some(heat) = model.cast::<HeatSeries>() {
                             options.data_labels_position = Some(heat.data_labels_position());
                             options.geometry_svg = heat.geometry_svg();
+                        } else {
+                            options.geometry_svg = series_geometry_svg(model);
                         }
                         options
                     })
@@ -857,6 +888,8 @@ impl Chart {
                     crate::decorations::text_size,
                     &formatters,
                 )?;
+                let geometry_svg: Vec<_> = models.iter().map(series_geometry_svg).collect();
+                PolarChartEngine::draw_marker_geometries(&mut measured.scene, &geometry_svg)?;
                 if local {
                     let offset = Point::new(viewport.x, viewport.y);
                     measured.scene.translate(offset, size)?;
@@ -882,9 +915,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = SankeySeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::SankeySeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let sankey = model.cast::<crate::SankeySeries>();
+                        options.data_labels_max_width =
+                            sankey.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            sankey.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
@@ -912,9 +947,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = TreemapSeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::TreemapSeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let treemap = model.cast::<crate::TreemapSeries>();
+                        options.data_labels_max_width =
+                            treemap.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            treemap.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
@@ -987,6 +1024,7 @@ impl Chart {
             self.text_color(),
             self.legend_position(),
             heat_legend.as_ref().map(|(legend, source)| (legend, source.as_ref())),
+            self.legend_background_paint(),
         );
         {
             for (series_index, model) in models.iter().enumerate() {
@@ -1044,6 +1082,15 @@ impl Chart {
                 self.start_transition(previous, scene.clone());
             }
         }
+        let tooltip_series = series
+            .iter()
+            .map(|s| {
+                let mut light = ferroui_livecharts::Series::new(s.kind);
+                light.pivot = s.pivot;
+                light.geometry_size = s.geometry_size;
+                light
+            })
+            .collect();
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,
             scene: scene.clone(),
@@ -1051,6 +1098,7 @@ impl Chart {
             y_scales,
             polar_origin,
             geo,
+            tooltip_series,
         });
         self.last_error.borrow_mut().take();
         self.native_scene.borrow_mut().take();
@@ -1060,6 +1108,214 @@ impl Chart {
         Ok(scene)
     }
 
+    /// Draws the tooltip in its pose of this frame. The compiled tooltip is reused until what it
+    /// depends on changes, so a frame of its animation only pushes a transform and an opacity.
+    fn render_tooltip(
+        &self,
+        context: &mut DrawingContext<'_>,
+        size: Size,
+        legend: &[ferroui_livecharts::LegendItem],
+    ) {
+        let now = Dispatcher::ui_thread().now() as f64;
+        self.update_tooltip(size, legend, now);
+        let (frame, matrix, opacity, completed) = {
+            let motion = self.tooltip_motion.borrow();
+            let Some(motion) = motion.as_ref() else {
+                return;
+            };
+            let pose = motion.pose(now);
+            (
+                motion.frame.clone(),
+                pose.matrix(motion.size),
+                pose.opacity,
+                motion.is_completed(now),
+            )
+        };
+        if opacity > 0.0 {
+            let transform = context.push_transform(matrix);
+            let layer = (opacity < 1.0).then(|| context.push_opacity(opacity));
+            frame.render(context);
+            if let Some(layer) = layer {
+                context.pop(layer);
+            }
+            context.pop(transform);
+        }
+        if completed {
+            self.finish_tooltip_motion();
+        }
+    }
+
+    /// Brings the tooltip up to the hover: a found point shows it, compiled at the origin, and
+    /// no point hides it where it is. `TooltipPosition::Hidden` removes it at once.
+    fn update_tooltip(&self, size: Size, legend: &[ferroui_livecharts::LegendItem], now: f64) {
+        let position = self.tooltip_position();
+        let key = TooltipKey {
+            hover: self.hover_revision.get(),
+            measurement: self.measurement.borrow().as_ref().map(|m| m.revision),
+            control: size,
+            text: self.text_color(),
+            position,
+        };
+        if self
+            .tooltip_motion
+            .borrow()
+            .as_ref()
+            .is_some_and(|motion| motion.key == key)
+        {
+            return;
+        }
+        if position == TooltipPosition::Hidden {
+            self.stop_tooltip_motion();
+            return;
+        }
+        let speed = self.animations_speed();
+        let duration = if self.attached.get() && speed.is_finite() && speed > 0.0 {
+            TOOLTIP_ANIMATION_MS
+        } else {
+            0.0
+        };
+        let hovered = self
+            .hover
+            .borrow()
+            .as_ref()
+            .filter(|hovered| !hovered.points.is_empty())
+            .cloned();
+        let Some(hovered) = hovered else {
+            if let Some(motion) = self.tooltip_motion.borrow_mut().as_mut() {
+                motion.key = key;
+                motion.retarget(TooltipPose::hidden(motion.to.origin), now, duration);
+            } else {
+                return;
+            }
+            self.start_tooltip_timer(duration);
+            return;
+        };
+        let layout = crate::decorations::tooltip_layout(&hovered, legend, self.chart_kind());
+        let (origin, placement) = self.default_tooltip_location(&hovered, &layout, size);
+        let tooltip = layout.size(placement, size);
+        let scene = crate::decorations::tooltip_scene(
+            size,
+            &layout,
+            Point::new(0.0, 0.0),
+            placement,
+            self.text_color(),
+        );
+        let frame = Rc::new(NativeScene::compile(&scene));
+        {
+            let mut motion = self.tooltip_motion.borrow_mut();
+            match motion.as_mut() {
+                Some(motion) => motion.show(key, frame, tooltip, origin, now, duration),
+                None => {
+                    *motion = Some(TooltipMotion::appear(
+                        key, frame, tooltip, origin, now, duration,
+                    ));
+                }
+            }
+        }
+        self.start_tooltip_timer(duration);
+    }
+
+    fn start_tooltip_timer(&self, duration: f64) {
+        if duration <= 0.0 {
+            return;
+        }
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.start();
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        let timer = DispatcherTimer::with_callback(
+            Duration::from_millis(16),
+            DispatcherPriority::RENDER,
+            move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_visual();
+                }
+            },
+        );
+        timer.start();
+        *self.tooltip_timer.borrow_mut() = Some(timer);
+    }
+
+    /// The end of a motion: the timer stops, and a tooltip that was hiding is gone.
+    fn finish_tooltip_motion(&self) {
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+        let mut motion = self.tooltip_motion.borrow_mut();
+        if motion.as_ref().is_some_and(TooltipMotion::is_hiding) {
+            *motion = None;
+        }
+    }
+
+    fn stop_tooltip_motion(&self) {
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+        self.tooltip_motion.borrow_mut().take();
+    }
+
+    /// Where the default tooltip goes and the side its wedge is at (`SKDefaultTooltip.Show`). The
+    /// wedge changes the size of the tooltip, so a placement other than the first is measured
+    /// and located again, and keeps its wedge.
+    fn default_tooltip_location(
+        &self,
+        hovered: &ChartPointerEventArgs,
+        layout: &ferroui_livecharts::DefaultTooltip,
+        size: Size,
+    ) -> (Point, ferroui_livecharts::PopUpPlacement) {
+        let first = ferroui_livecharts::PopUpPlacement::Top;
+        let location = self.tooltip_location(hovered, layout.size(first, size), size);
+        if location.placement == first {
+            return (location.origin, first);
+        }
+        let placement = location.placement;
+        let tooltip = layout.size(placement, size);
+        (self.tooltip_location(hovered, tooltip, size).origin, placement)
+    }
+
+    /// The location of the tooltip of the found points (`GetTooltipLocation` over their hover
+    /// areas, `SKDefaultGeoTooltip` about the centre of a land), kept inside the control.
+    fn tooltip_location(
+        &self,
+        hovered: &ChartPointerEventArgs,
+        tooltip: Size,
+        size: Size,
+    ) -> ferroui_livecharts::TooltipLocation {
+        use ferroui_livecharts::tooltips::geo_tooltip_location;
+        let position = match self.tooltip_position() {
+            TooltipPosition::Hidden => ferroui_livecharts::tooltips::TooltipPosition::Hidden,
+            TooltipPosition::Auto => ferroui_livecharts::tooltips::TooltipPosition::Auto,
+            TooltipPosition::Top => ferroui_livecharts::tooltips::TooltipPosition::Top,
+            TooltipPosition::Bottom => ferroui_livecharts::tooltips::TooltipPosition::Bottom,
+            TooltipPosition::Left => ferroui_livecharts::tooltips::TooltipPosition::Left,
+            TooltipPosition::Right => ferroui_livecharts::tooltips::TooltipPosition::Right,
+            TooltipPosition::Center => ferroui_livecharts::tooltips::TooltipPosition::Center,
+        };
+        let kind = self.chart_kind();
+        if kind == ChartKind::GeoMap {
+            let center = hovered.points.first().map_or(hovered.position, |land| land.center);
+            return geo_tooltip_location(center, tooltip, size, position);
+        }
+        let measurement = self.measurement.borrow();
+        let series = measurement.as_ref().map_or(&[][..], |m| &m.tooltip_series[..]);
+        let areas: Vec<_> = hovered
+            .points
+            .iter()
+            .map(|hit| match kind {
+                ChartKind::Pie => PieChartEngine::tooltip_hover_area(hit),
+                ChartKind::Cartesian => match series.get(hit.id.series) {
+                    Some(s) => CartesianChartEngine::tooltip_hover_area(s, hit, position),
+                    None => TooltipHoverArea::of_region(hit),
+                },
+                _ => TooltipHoverArea::of_region(hit),
+            })
+            .collect();
+        ferroui_livecharts::tooltips::tooltip_location(&areas, tooltip, size, position)
+    }
     pub fn find_points(&self, position: Point) -> Vec<HitRegion> {
         let size = self.bounds().size();
         let cached_size = self.measurement.borrow().as_ref().map(|m| m.scene.size);
@@ -1095,6 +1351,7 @@ impl Chart {
         let changed = self.hover.borrow().as_ref() != Some(&next);
         if changed {
             *self.hover.borrow_mut() = Some(next.clone());
+            self.hover_revision.set(self.hover_revision.get().wrapping_add(1));
             self.invalidate_visual();
             for (_, handler) in self.hover_changed.snapshot().iter() {
                 handler(&next);
@@ -1104,6 +1361,7 @@ impl Chart {
     pub fn clear_hover(&self) {
         let old = self.hover.borrow_mut().take();
         if let Some(old) = old {
+            self.hover_revision.set(self.hover_revision.get().wrapping_add(1));
             self.invalidate_visual();
             let event = ChartPointerEventArgs {
                 position: old.position,
@@ -1925,6 +2183,9 @@ impl Drop for Chart {
             timer.stop();
         }
         if let Some(timer) = self.needle_timer.get_mut().take() {
+            timer.stop();
+        }
+        if let Some(timer) = self.tooltip_timer.get_mut().take() {
             timer.stop();
         }
     }

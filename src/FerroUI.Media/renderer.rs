@@ -12,6 +12,8 @@ pub enum RenderSchedule {
     OnInvalidation,
     Continuous,
 }
+
+ferroui_base::styled_enum!(RenderSchedule { OnInvalidation, Continuous });
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RendererViewport {
     pub width: u32,

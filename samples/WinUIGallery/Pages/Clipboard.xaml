@@ -1,16 +1,99 @@
-<!-- Adapted from Samples/Clipboard/{CopyTextClipboard,PasteTextClipboard,OtherClipboardOperations}.txt; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Copy and paste text" FontSize="18"/>
-  <TextBox x:Name="ClipboardText" Text="Copy this text" Width="400" HorizontalAlignment="Left" AutomationProperties.Name="Text to copy"/>
-  <StackPanel Orientation="Horizontal" Spacing="8">
-    <Button x:Name="CopyText" Content="Copy Text to the Clipboard"/>
-    <Button x:Name="PasteText" Content="Paste Text from the Clipboard"/>
+<!-- Ported from the six pinned Clipboard examples of WinUI Gallery (14061eea) and the handlers of
+     ClipboardPage.xaml.cs (platform_samples.rs); see ../NOTICE.md. The clipboard is the
+     window's clipboard service (TopLevel.Clipboard), used asynchronously. The page's
+     VisualStateManager states of the copy confirmation are its visibility, which the handler sets
+     and hides again after two seconds. The ToggleSwitches' Headers are their Content and IsOn is
+     IsChecked; ThemeResource is DynamicResource; the announcements of
+     UIHelper.AnnounceActionForAccessibility are polite live regions. The files of the fourth
+     example come from the window's storage provider. FerroUI's clipboard has no history or
+     roaming (Clipboard.IsHistoryEnabled, IsRoamingEnabled and ClipboardContentOptions are Windows
+     clipboard features): the fifth example copies its text without them and says so. FerroUI's
+     clipboard raises no ContentChanged: the monitor switch says so, and the page is partial. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Copy text to the Clipboard" FontSize="18" />
+    <StackPanel VerticalAlignment="Top">
+      <StackPanel Orientation="Horizontal">
+        <Button x:Name="CopyText" Margin="0,0,0,10" Content="Copy Text to the Clipboard" />
+        <TextBlock x:Name="ConfirmationTextBlock" Padding="20,5,0,0" Text="Text copied to clipboard!"
+                   IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <RichEditBox x:Name="richEditBox" Width="800" Height="100" HorizontalAlignment="Left"
+                   AutomationProperties.Name="editor with custom menu" />
+    </StackPanel>
   </StackPanel>
-  <TextBox x:Name="PastedText" IsReadOnly="True" TextWrapping="Wrap" Width="400" MinHeight="60" HorizontalAlignment="Left" AutomationProperties.Name="Pasted text"/>
-  <TextBlock Text="Other clipboard operations" FontSize="18"/>
-  <StackPanel Orientation="Horizontal" Spacing="8">
-    <Button x:Name="ShowClipboardFormats" Content="Show available formats"/>
-    <Button x:Name="ClearClipboard" Content="Clear the Clipboard"/>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Paste text from the Clipboard" FontSize="18" />
+    <StackPanel VerticalAlignment="Top">
+      <Button x:Name="PasteText" Margin="0,0,0,10" Content="Paste Text from the Clipboard" />
+      <TextBlock x:Name="PasteClipboard1" Padding="5,5,0,0">
+        <Underline>Clipboard:</Underline>
+      </TextBlock>
+      <TextBlock x:Name="PasteClipboard2" Padding="5,5,0,0" Text="Click the button!" TextWrapping="Wrap"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
   </StackPanel>
-  <TextBlock x:Name="ClipboardOutput" Text="Choose an operation." TextWrapping="Wrap"/>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Copy and paste an image" FontSize="18" />
+    <StackPanel VerticalAlignment="Top" Spacing="10">
+      <Image x:Name="SourceImage" Width="200" Height="150" HorizontalAlignment="Left"
+             AutomationProperties.Name="Source image to copy" Stretch="UniformToFill" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="CopyImage" Content="Copy Image to Clipboard" />
+        <Button x:Name="PasteImage" Content="Paste Image from Clipboard" />
+      </StackPanel>
+      <TextBlock x:Name="ImageStatusText" Foreground="{DynamicResource SystemFillColorSuccessBrush}" Text=""
+                 IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+      <Image x:Name="PastedImage" Width="200" Height="150" HorizontalAlignment="Left"
+             AutomationProperties.Name="Pasted image from clipboard" Stretch="UniformToFill" IsVisible="False" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Copy and paste files" FontSize="18" />
+    <StackPanel VerticalAlignment="Top" Spacing="10">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="CopyFiles" Content="Copy Files to Clipboard" />
+        <Button x:Name="PasteFiles" Content="Paste Files from Clipboard" />
+      </StackPanel>
+      <TextBlock x:Name="FilesStatusText" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Clipboard history and roaming options" FontSize="18" />
+    <StackPanel VerticalAlignment="Top" Spacing="10">
+      <TextBox x:Name="HistoryRoamingTextBox" Width="400" HorizontalAlignment="Left"
+               AutomationProperties.Name="Text to copy with options" PlaceholderText="Enter text to copy with options"
+               Text="Text with clipboard options" />
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <ToggleSwitch x:Name="AllowHistoryToggle" Content="Allow in History" IsChecked="True"
+                      AutomationProperties.Name="Allow clipboard content in history" />
+        <ToggleSwitch x:Name="AllowRoamingToggle" Content="Allow Roaming" IsChecked="True"
+                      AutomationProperties.Name="Allow clipboard content to roam" />
+      </StackPanel>
+      <Button x:Name="CopyWithOptions" Content="Copy with Options" />
+      <TextBlock x:Name="HistoryRoamingStatusText" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <TextBlock x:Name="HistoryEnabledText" />
+        <TextBlock x:Name="RoamingEnabledText" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="Other clipboard operations" FontSize="18" />
+    <StackPanel VerticalAlignment="Top" Spacing="10">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button x:Name="ShowClipboardFormats" Content="Show Clipboard Formats" />
+        <Button x:Name="ClearClipboard" Content="Clear Clipboard" />
+      </StackPanel>
+      <ToggleSwitch x:Name="ContentChangedToggle" Content="Monitor ContentChanged"
+                    AutomationProperties.Name="Monitor clipboard content changed event" />
+      <TextBlock x:Name="OtherOperationsStatusText" TextWrapping="Wrap" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

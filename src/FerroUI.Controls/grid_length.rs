@@ -28,6 +28,8 @@ pub struct GridLength {
     value: f64,
 }
 
+ferroui_base::styled_value!(GridLength);
+
 impl GridLength {
     /// A length that indicates that a row or column should auto-size to fit
     /// its content.

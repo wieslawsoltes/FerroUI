@@ -1,6 +1,7 @@
 //! The code behind of the pinned ProgressBar, Expander and PipsPager pages in Rust: the handlers
-//! of `ProgressBarPage.xaml.cs`, `ExpanderPage.xaml.cs` and `PipsPagerPage.xaml.cs`. The handlers
-//! of the InfoBar page are in `control_samples.rs`. The controls own their states; the sample owns
+//! of `ProgressBarPage.xaml.cs`, `ExpanderPage.xaml.cs` and `PipsPagerPage.xaml.cs`, and the image
+//! of the ToolTip page (which has no code-behind upstream). The handlers of the InfoBar page are in
+//! `control_samples.rs`. The controls own their states; the sample owns
 //! only its options.
 
 use ferroui_base::layout::{Orientation, VerticalAlignment};
@@ -11,7 +12,7 @@ use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::{
     Carousel, ComboBox, Control, ExpandDirection, Expander, Image, NumberBox, PipsPager,
-    ProgressBar, TextBlock,
+    PipsPagerButtonVisibility, PipsPagerWrapMode, ProgressBar, TextBlock,
 };
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -19,6 +20,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "ProgressBar" => wire_progress_bar(root),
         "Expander" => wire_expander(root),
         "PipsPager" => wire_pips_pager(root),
+        "ToolTip" => wire_tool_tip(root),
         _ => {}
     }
 }
@@ -81,6 +83,19 @@ fn wire_expander(root: &Ref<Control>) {
             }
         },
     );
+}
+
+/// The source of the ToolTip page's image: `/Assets/SampleMedia/cliff.jpg`.
+pub(crate) const CLIFF: &str = "ferres://WinUIGallery/Assets/SampleMedia/cliff.jpg";
+
+/// The ToolTip page: the source's `Source` of the image whose tooltip is placed beside it (the
+/// markup has no bitmap converter for the gallery's assets, so the sample loads it).
+fn wire_tool_tip(root: &Ref<Control>) {
+    let image = root.get_control::<Image>("textBoxToPlace");
+    image.set_stretch(Stretch::Uniform);
+    if let Ok(bitmap) = crate::assets::load_bitmap(CLIFF) {
+        image.set_source(Some(std::rc::Rc::new(bitmap)));
+    }
 }
 
 /// The source's `Pictures`, the items of the gallery.
@@ -155,11 +170,31 @@ fn wire_pips_pager(root: &Ref<Control>) {
     on_selected_index(
         &root.get_control::<ComboBox>("PrevButtonComboBox"),
         &pager,
-        |pager, index| pager.set_is_previous_button_visible(index == 0),
+        |pager, index| pager.set_previous_button_visibility(pips_button_visibility(index)),
     );
     on_selected_index(
         &root.get_control::<ComboBox>("NextButtonComboBox"),
         &pager,
-        |pager, index| pager.set_is_next_button_visible(index == 0),
+        |pager, index| pager.set_next_button_visibility(pips_button_visibility(index)),
     );
+    on_selected_index(
+        &root.get_control::<ComboBox>("WrapModeComboBox"),
+        &pager,
+        |pager, index| {
+            pager.set_wrap_mode(if index == 1 {
+                PipsPagerWrapMode::Wrap
+            } else {
+                PipsPagerWrapMode::None
+            });
+        },
+    );
+}
+
+/// The item of `PrevButtonComboBox` and `NextButtonComboBox` as a button visibility.
+fn pips_button_visibility(index: i32) -> PipsPagerButtonVisibility {
+    match index {
+        1 => PipsPagerButtonVisibility::VisibleOnPointerOver,
+        2 => PipsPagerButtonVisibility::Collapsed,
+        _ => PipsPagerButtonVisibility::Visible,
+    }
 }

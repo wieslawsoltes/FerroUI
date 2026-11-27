@@ -219,6 +219,11 @@ control_tests! {
     hyperlink_button => "HyperlinkButton";
     list_box => "ListBox";
     list_box_item => "ListBoxItem";
+    list_view => "ListView";
+    list_view_item => "ListViewItem";
+    tab_view => "TabView";
+    tab_view_item => "TabViewItem";
+    tab_view_list_view => "TabViewListView";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
@@ -235,6 +240,8 @@ control_tests! {
     // B1: primitives and simple content
     data_validation_errors => "DataValidationErrors";
     grid_splitter => "GridSplitter";
+    grid_view => "GridView";
+    grid_view_item => "GridViewItem";
     group_box => "GroupBox";
     headered_content_control => "HeaderedContentControl";
     info_badge => "InfoBadge";
@@ -252,6 +259,7 @@ control_tests! {
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
     info_bar => "InfoBar";
+    content_dialog => "ContentDialog";
     rich_edit_box => "RichEditBox";
     number_box => "NumberBox";
     auto_suggest_box => "AutoSuggestBox";

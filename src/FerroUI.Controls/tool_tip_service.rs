@@ -9,6 +9,40 @@ use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::time::Duration;
 
+/// What the service does with tool tips, stated by the static constructor of [`ToolTip`]
+/// ([`tool_tips_in_use`]). A control has a tip only once the tool tip class is initialised on
+/// its thread (the tip is its attached property), so before that the service has nothing to
+/// show or close, and it names nothing of the tool tip: an application that shows no tool tip
+/// does not link the class, its popup and its placement (#612).
+#[derive(Clone, Copy)]
+struct ToolTipFunctions {
+    update: fn(&ToolTipService, &Rc<dyn IInputRoot>, Option<Ref<Visual>>),
+    process: fn(&ToolTipService, &dyn IRawInputEventArgs),
+    subscribe: fn(&ToolTipService),
+}
+
+ferroui_base::ferro_thread_local! {
+    static FUNCTIONS: Cell<Option<ToolTipFunctions>> = const { Cell::new(None) };
+    /// The services of the thread made before the tool tip class was initialised on it: they
+    /// follow the properties of the tool tips from its initialisation on.
+    static WAITING: RefCell<Vec<Weak<ToolTipService>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The tool tip class is initialised on this thread: the services follow its properties.
+/// Called by the static constructor of [`ToolTip`].
+pub(crate) fn tool_tips_in_use() {
+    let functions = ToolTipFunctions {
+        update: ToolTipService::update_tool_tip_control,
+        process: ToolTipService::input_manager_on_process,
+        subscribe: ToolTipService::subscribe_to_tool_tip_properties,
+    };
+    FUNCTIONS.set(Some(functions));
+    let waiting = WAITING.with(|waiting| std::mem::take(&mut *waiting.borrow_mut()));
+    for service in waiting.iter().filter_map(Weak::upgrade) {
+        (functions.subscribe)(&service);
+    }
+}
+
 /// Handles [`ToolTip`] interaction with controls (internal upstream).
 pub struct ToolTipService {
     this: Weak<ToolTipService>,
@@ -46,11 +80,24 @@ impl ToolTipService {
             let weak = weak.clone();
             move |e: Rc<dyn IRawInputEventArgs>| {
                 if let Some(this) = weak.upgrade() {
-                    this.input_manager_on_process(&*e);
+                    if let Some(functions) = FUNCTIONS.get() {
+                        (functions.process)(&this, &*e);
+                    }
                 }
             }
         }))));
-        service.subscriptions.add(ToolTip::service_enabled_property().changed().subscribe({
+        match FUNCTIONS.get() {
+            Some(functions) => (functions.subscribe)(&service),
+            None => WAITING.with(|waiting| waiting.borrow_mut().push(weak)),
+        }
+
+        service
+    }
+
+    /// Follows the changes of `ToolTip.ServiceEnabled` and `ToolTip.Tip`.
+    fn subscribe_to_tool_tip_properties(&self) {
+        let weak = self.this.clone();
+        self.subscriptions.add(ToolTip::service_enabled_property().changed().subscribe({
             let weak = weak.clone();
             move |args| {
                 if let Some(this) = weak.upgrade() {
@@ -58,13 +105,11 @@ impl ToolTipService {
                 }
             }
         }).detach());
-        service.subscriptions.add(ToolTip::tip_property().changed().subscribe(move |e| {
+        self.subscriptions.add(ToolTip::tip_property().changed().subscribe(move |e| {
             if let Some(this) = weak.upgrade() {
                 this.tip_changed(e);
             }
         }).detach());
-
-        service
     }
 
     /// Stops the service: its timer, its pending close and its
@@ -349,6 +394,20 @@ impl ToolTipService {
 
 impl IToolTipService for ToolTipService {
     fn update(&self, root: &Rc<dyn IInputRoot>, candidate_tool_tip_host: Option<Ref<Visual>>) {
+        // Before the tool tip class is initialised no control has a tip: there is nothing to do.
+        if let Some(functions) = FUNCTIONS.get() {
+            (functions.update)(self, root, candidate_tool_tip_host);
+        }
+    }
+
+    fn as_tool_tip_service(&self) -> Option<&ToolTipService> {
+        Some(self)
+    }
+}
+
+impl ToolTipService {
+    /// [`IToolTipService::update`] once the tool tip class is initialised.
+    fn update_tool_tip_control(&self, root: &Rc<dyn IInputRoot>, candidate_tool_tip_host: Option<Ref<Visual>>) {
         let tip_control = self.tip_control();
         let current_tool_tip =
             tip_control.as_ref().and_then(|control| control.get_value(ToolTip::tool_tip_property()));
@@ -397,10 +456,6 @@ impl IToolTipService for ToolTipService {
         self.set_tip_control(new_control.as_ref());
         self.pointer_over_tip.set(false);
         self.pointer_over_owner.set(false);
-    }
-
-    fn as_tool_tip_service(&self) -> Option<&ToolTipService> {
-        Some(self)
     }
 }
 

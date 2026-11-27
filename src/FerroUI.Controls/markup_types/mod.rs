@@ -67,11 +67,13 @@ pub(crate) fn register() {
 /// thread, when the thread next converts an untyped value ([`ValueTypes::register_global`]).
 /// These are:
 /// - the casts and nullable forms that compiled markup performs for the members of markup types
-///   (a converter of a binding, a data template), which register nothing when they are set;
+///   (a data template), which register nothing when they are set; the converters of
+///   [`converters`](crate::converters) register their casts when the first converter of a type
+///   is made instead;
 /// - the registrations of instantiations of the generic types of `ferroui-base` with a type of
 ///   this crate (`RoutedEvent<SpinEventArgs>`, `FerroList<Ref<KeyBinding>>`) and the casts to the
-///   types of `ferroui-base` (a converter to `IValueConverter`, a typed routed event to
-///   `RoutedEvent`): no type of this crate is the type a first use names, and the orphan rule
+///   types of `ferroui-base` (a typed routed event to `RoutedEvent`): no type of this crate is
+///   the type a first use names, and the orphan rule
 ///   leaves a `ValueTypeRegistration` of a type of another crate to that crate.
 ///
 /// Every other type registers when it is first used: with the first property of the type, and
@@ -81,7 +83,6 @@ fn register_value_types() {
     contracts::register_value_types();
     plain::register_value_types();
     classes::register_value_types();
-    converters::register_value_types();
     crate::navigation::register_value_types();
     crate::documents::register_value_types();
     crate::context_menu_event_args::register_value_types();

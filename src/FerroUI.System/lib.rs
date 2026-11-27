@@ -24,6 +24,9 @@
 //!   ([`task::Schedule`]), and the one-shot channel ([`task::oneshot`]); `threading::tasks` runs
 //!   on it.
 //! - [`events`]: the multicast events and the lists of handlers that FerroUI's events are built on.
+//! - [`StyledValue`]: the form a property store keeps a value in, with [`EnumValue`] for the
+//!   members of every enumeration and the macros that state it for a type ([`styled_value!`],
+//!   [`styled_enum!`]).
 //! - [`ferro_thread_local!`]: thread-local variables, `std::thread_local!` on every target with
 //!   thread-local statics and one table per thread on Android ([`mod@ferro_thread_local`]).
 
@@ -35,6 +38,7 @@ mod i_disposable;
 mod subscription;
 mod i_observable;
 mod i_progress;
+mod styled_value;
 pub mod task;
 pub mod threading;
 
@@ -42,6 +46,7 @@ pub use i_disposable::IDisposable;
 pub use subscription::Subscription;
 pub use i_observable::{IObservable, IObserver, ObservableError, SubscribeGuard};
 pub use i_progress::IProgress;
+pub use styled_value::{EnumValue, StyledValue};
 
 #[cfg(test)]
 mod tests;

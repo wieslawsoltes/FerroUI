@@ -2,7 +2,7 @@
 //! properties of a FerroUI object as signals, observers and observables at once.
 
 use ferroui_base::data::{BindingPriority, BindingValue};
-use ferroui_base::{BoxedValue, FerroObject, FerroObjectExtensions, FerroProperty, PropertyValue, Ref, StyledProperty};
+use ferroui_base::{BoxedValue, FerroObject, FerroObjectExtensions, FerroProperty, Ref, StyledProperty, StyledValue};
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::cell::Cell;
 use std::fmt;
@@ -25,11 +25,11 @@ use std::rc::Rc;
 pub trait FerroObjectReactiveExtensions {
     /// A signal of `property` that sets it at [`BindingPriority::LocalValue`]
     /// (`GetSubject<T>(FerroProperty<T>)`).
-    fn get_subject<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<T>>;
+    fn get_subject<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<T>>;
 
     /// A signal of `property` that sets it at `priority`
     /// (`GetSubject<T>(FerroProperty<T>, BindingPriority)`).
-    fn get_subject_with_priority<T: PropertyValue>(
+    fn get_subject_with_priority<T: StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         priority: BindingPriority,
@@ -49,11 +49,11 @@ pub trait FerroObjectReactiveExtensions {
 
     /// A signal of the binding values of `property` that sets it at [`BindingPriority::LocalValue`]
     /// (`GetBindingSubject<T>(FerroProperty<T>)`).
-    fn get_binding_subject<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<BindingValue<T>>>;
+    fn get_binding_subject<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<BindingValue<T>>>;
 
     /// A signal of the binding values of `property` that sets it at `priority`
     /// (`GetBindingSubject<T>(FerroProperty<T>, BindingPriority)`).
-    fn get_binding_subject_with_priority<T: PropertyValue>(
+    fn get_binding_subject_with_priority<T: StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         priority: BindingPriority,
@@ -73,11 +73,11 @@ pub trait FerroObjectReactiveExtensions {
 }
 
 impl FerroObjectReactiveExtensions for FerroObject {
-    fn get_subject<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<T>> {
+    fn get_subject<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<T>> {
         self.get_subject_with_priority(property, BindingPriority::LocalValue)
     }
 
-    fn get_subject_with_priority<T: PropertyValue>(
+    fn get_subject_with_priority<T: StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         priority: BindingPriority,
@@ -109,11 +109,11 @@ impl FerroObjectReactiveExtensions for FerroObject {
         )
     }
 
-    fn get_binding_subject<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<BindingValue<T>>> {
+    fn get_binding_subject<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Rc<FerroPropertySignal<BindingValue<T>>> {
         self.get_binding_subject_with_priority(property, BindingPriority::LocalValue)
     }
 
-    fn get_binding_subject_with_priority<T: PropertyValue>(
+    fn get_binding_subject_with_priority<T: StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         priority: BindingPriority,

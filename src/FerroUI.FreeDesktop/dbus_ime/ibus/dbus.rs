@@ -2,14 +2,14 @@
 //! from `DBusXml/org.freedesktop.IBus.Portal.xml`), with the members the
 //! input method calls and the signals it listens to.
 
-use zbus::zvariant::{OwnedObjectPath, Value};
+use zbus::{OwnedObjectPath, Variant};
 
-#[zbus::proxy(interface = "org.freedesktop.IBus.Portal", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.freedesktop.IBus.Portal", assume_defaults = false)]
 pub trait Portal {
     fn create_input_context(&self, client_name: &str) -> zbus::Result<OwnedObjectPath>;
 }
 
-#[zbus::proxy(interface = "org.freedesktop.IBus.InputContext", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.freedesktop.IBus.InputContext", assume_defaults = false)]
 pub trait InputContext {
     fn process_key_event(&self, keyval: u32, keycode: u32, state: u32) -> zbus::Result<bool>;
 
@@ -30,13 +30,13 @@ pub trait InputContext {
     fn set_content_type(&self, content_type: (u32, u32)) -> zbus::Result<()>;
 
     #[zbus(signal)]
-    fn commit_text(&self, text: Value<'_>) -> zbus::Result<()>;
+    fn commit_text(&self, text: Variant<'_>) -> zbus::Result<()>;
 
     #[zbus(signal)]
     fn forward_key_event(&self, keyval: u32, keycode: u32, state: u32) -> zbus::Result<()>;
 
     #[zbus(signal)]
-    fn update_preedit_text(&self, text: Value<'_>, cursor_pos: u32, visible: bool) -> zbus::Result<()>;
+    fn update_preedit_text(&self, text: Variant<'_>, cursor_pos: u32, visible: bool) -> zbus::Result<()>;
 
     #[zbus(signal)]
     fn show_preedit_text(&self) -> zbus::Result<()>;
@@ -45,7 +45,7 @@ pub trait InputContext {
     fn hide_preedit_text(&self) -> zbus::Result<()>;
 }
 
-#[zbus::proxy(interface = "org.freedesktop.IBus.Service", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.freedesktop.IBus.Service", assume_defaults = false)]
 pub trait Service {
     fn destroy(&self) -> zbus::Result<()>;
 }

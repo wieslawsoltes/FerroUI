@@ -3572,7 +3572,75 @@ fn an_error_raised_in_a_reload_step_is_its_error_without_unwinding() {
     assert_eq!(catch_reload(|| Err::<(), _>(own.clone())), Err(own));
     assert_eq!(catch_reload(|| Ok(2)), Ok(2));
 
+    // Outside a step the error goes to the dispatcher (#567); unhandled, it unwinds with its
+    // message.
     let outside = std::panic::catch_unwind(|| raise_reload_error(ReloadError::Failed("outside".into())));
     let payload = outside.expect_err("raised outside a step");
-    assert_eq!(payload.downcast_ref::<ReloadError>(), Some(&ReloadError::Failed("outside".into())));
+    assert_eq!(payload.downcast_ref::<String>().map(String::as_str), Some("The reload failed: outside"));
+}
+
+/// Not from upstream (#567): an error the XAML runtime reports in a step of a reload (a deferred
+/// resource, include or template of the candidate that fails) is the error of the step, with the
+/// message its throw panicked with, without unwinding. A reload error raised before it wins; one
+/// raised after it is left out, as when the throw ended the step; an error scope opened inside
+/// the step keeps its own error.
+#[test]
+fn an_error_the_xaml_runtime_reports_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_markup_xaml::{xaml_error_scope, XamlLoadError};
+    let report = |message: &str| xaml_error_scope::report(XamlLoadError::with_message(message)).unwrap();
+
+    let went_on = Cell::new(false);
+    let result: Result<u32, ReloadError> = catch_reload(|| {
+        report("Unable to resolve the resource");
+        report("A later consequence");
+        raise_reload_error(ReloadError::RestartRequired("after".into()));
+        went_on.set(true);
+        Err(ReloadError::Failed("own".into()))
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("Unable to resolve the resource".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        raise_reload_error(ReloadError::RestartRequired("before".into()));
+        report("Unable to resolve the resource");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("before".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        let inner: Result<(), XamlLoadError> = xaml_error_scope::with_xaml_errors(|| {
+            report("inner");
+            raise_reload_error(ReloadError::RestartRequired("in an inner scope".into()));
+            Ok(())
+        });
+        assert_eq!(inner.unwrap_err().message(), "inner");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("in an inner scope".into())));
+    assert_eq!(xaml_error_scope::depth(), 0);
+}
+
+#[test]
+fn an_error_the_application_raises_on_the_dispatcher_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_base::threading::Dispatcher;
+    let _scope = Dispatcher::unit_test_scope();
+    let went_on = Cell::new(false);
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        // A handler or callback of the candidate that returns its error (#567).
+        Dispatcher::current_dispatcher().raise_unhandled_exception("the handler of the candidate failed");
+        went_on.set(true);
+        Ok(())
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("the handler of the candidate failed".into())));
+
+    // A `ReloadError` raised outside every step goes to the dispatcher, without a panic.
+    let raised = Rc::new(RefCell::new(None::<ReloadError>));
+    let seen = raised.clone();
+    let _handler = Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.error().and_then(|error| error.downcast_ref::<ReloadError>()).cloned();
+        args.set_handled(true);
+    });
+    raise_reload_error(ReloadError::RestartRequired("outside".into()));
+    assert_eq!(raised.take(), Some(ReloadError::RestartRequired("outside".into())));
 }

@@ -103,6 +103,10 @@ impl ToggleButtonImpl for ToggleButton {
 }
 
 impl ToggleButton {
+    fn static_constructor() {
+        crate::visual_state::state_mappers::register::<ToggleButton>(crate::visual_state::state_mappers::toggle_button);
+    }
+
     /// The pseudoclasses set by the class.
     pub const PSEUDO_CLASSES: PseudoClassesAttribute =
         PseudoClassesAttribute::new(&[PC_CHECKED, PC_UNCHECKED, PC_INDETERMINATE]);

@@ -14,6 +14,10 @@
 //! again, a few nanoseconds for an item, which is little beside what was done
 //! to produce the item.
 //!
+//! A buffer whose holder is registered with the job of its thread
+//! ([`resting`](super::resting), #836) keeps its storage through a burst
+//! instead, and the job takes it much lower once the burst is over.
+//!
 //! Not from upstream, whose pooled buffers are of one fixed size and whose
 //! queues are collected with the heap.
 

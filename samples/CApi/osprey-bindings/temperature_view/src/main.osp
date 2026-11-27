@@ -1,0 +1,105 @@
+// 7GUIs task 2, Temperature Converter, with layer 2 of the generated Osprey bindings of FerroUI
+// (docs/osprey.md): two text boxes that follow each other. Typing into one sends its message;
+// `update` reads the typed text (`eventText()`), converts it when it is a number, and the view
+// writes the other box. The library does not write back what the user typed and does not
+// dispatch what its own commit wrote, so the boxes do not echo.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program types into the boxes itself and prints the state.
+
+import ferroui::*
+import ferroviews::*
+
+type Message = CelsiusChanged | FahrenheitChanged
+
+type Model = { celsius: string, fahrenheit: string }
+
+// A number as the boxes show it: rounded to a whole number, without a fraction.
+fn shown(value: float) -> string = {
+    let text = toString(round(value))
+    match endsWith(text, ".0") {
+        true => match substring(text, 0, length(text) - 2) {
+            Success { value } => value
+            Error { message } => text
+        }
+        false => text
+    }
+}
+
+fn update(message: Message, model: Model) -> Model = match message {
+    CelsiusChanged => {
+        let typed = eventText()
+        match parseFloat(typed) {
+            Success { value } => Model { celsius: typed, fahrenheit: shown(value * 9.0 / 5.0 + 32.0) }
+            Error { message } => Model { celsius: typed, fahrenheit: model.fahrenheit }
+        }
+    }
+    FahrenheitChanged => {
+        let typed = eventText()
+        match parseFloat(typed) {
+            Success { value } => Model { celsius: shown((value - 32.0) * 5.0 / 9.0), fahrenheit: typed }
+            Error { message } => Model { celsius: model.celsius, fahrenheit: typed }
+        }
+    }
+}
+
+fn view(model: Model) -> Element<Message> =
+    window([title("TempConv"), width(420.0), height(110.0)], [
+        stackPanel([orientation(OrientationHorizontal), verticalAlignment(VerticalAlignmentTop), spacing(8.0), margin("16")], [
+            textBox([key(1), text(model.celsius), width(80.0), onTextChanged(CelsiusChanged)]),
+            textBlock([text("Celsius ="), verticalAlignment(VerticalAlignmentCenter)]),
+            textBox([key(2), text(model.fahrenheit), width(80.0), onTextChanged(FahrenheitChanged)]),
+            textBlock([text("Fahrenheit"), verticalAlignment(VerticalAlignmentCenter)])
+        ])
+    ])
+
+effect Store { put: fn(Model) -> Unit }
+
+mut model = Model { celsius: "", fahrenheit: "" }
+
+fn keep(next: Model) -> Unit = {
+    handle Store { put value => { model = value } }
+    perform Store.put(next)
+}
+
+fn expect(what: string, key: int, wanted: string) -> Unit = {
+    let shown = textAt(key)
+    print("script: ${what}: '${shown}': ${shown == wanted ? "ok" : "FAILED"}")
+}
+
+// The scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs).
+fn script() -> Unit = {
+    typeAt(1, "100")
+    expect("Celsius 100 gives Fahrenheit", 2, "212")
+    typeAt(2, "5")
+    expect("Fahrenheit 5 gives Celsius", 1, "-15")
+    typeAt(1, "abc")
+    expect("text that is no number converts nothing, Fahrenheit", 2, "5")
+    typeAt(1, "1.5")
+    expect("the box the user typed into keeps its text, Celsius", 1, "1.5")
+    expect("Celsius 1.5 gives Fahrenheit", 2, "35")
+    print("script: model celsius '${model.celsius}', fahrenheit '${model.fahrenheit}'")
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let next = match messageAt(view(model), tag) {
+        Success { value } => update(value, model)
+        Error { message } => model
+    }
+    keep(next)
+    report("render", render(view(next)))
+    match tag == 0 && envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script()
+        false => nothing()
+    }
+    0
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

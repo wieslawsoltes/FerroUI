@@ -161,8 +161,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            | "LetterSpacing" | "FontFeatures" => {
                 this.invalidate_text_layout();
+            }
+            // What the text is drawn with: the shaped runs stay, with the new style.
+            "TextDecorations" | "Foreground" => {
+                this.invalidate_text_layout_for_style();
             }
             // The text: the shaped runs go, the run and paragraph properties are not made of it.
             "Text" => {
@@ -986,6 +990,10 @@ impl TextBlock {
         self.get_value(Self::font_size_property())
     }
 
+    // A call of its own, as it was: inlined into a caller, the caller kept the text block it had
+    // just made on another place of its stack and copied it over (pinned: the inlining shifted
+    // with unrelated changes of the property store, #986).
+    #[inline(never)]
     pub fn set_font_size(&self, value: f64) {
         self.set_value(Self::font_size_property(), value)
     }
@@ -1332,13 +1340,20 @@ impl TextBlock {
 
     /// The run cache of the layouts of the block, made with the first layout: the shaped runs of
     /// its text are kept between layouts at other widths and dropped when what they were shaped
-    /// from changes (`invalidate_text_layout`).
+    /// from changes (`invalidate_text_layout`). A new foreground or new decorations reach the runs
+    /// here, when a layout takes them (`invalidate_text_layout_for_style`).
     pub(crate) fn text_run_cache(&self) -> Rc<TextRunCache> {
-        self.text_run_cache.get().unwrap_or_else(|| {
-            let text_run_cache = Rc::new(TextRunCache::new());
-            self.text_run_cache.set(Some(text_run_cache.clone()));
-            text_run_cache
-        })
+        match self.text_run_cache.get() {
+            Some(text_run_cache) => {
+                text_run_cache.apply_style_change(|| (self.foreground(), self.text_decorations()));
+                text_run_cache
+            }
+            None => {
+                let text_run_cache = Rc::new(TextRunCache::new());
+                self.text_run_cache.set(Some(text_run_cache.clone()));
+                text_run_cache
+            }
+        }
     }
 
     /// The default run properties of the layouts: the ones kept since a property they are made of
@@ -1401,6 +1416,31 @@ impl TextBlock {
         self.text_runs_embed_controls.set(true);
         if self.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
+        self.dispose_text_layout();
+        self.invalidate_visual();
+        self.invalidate_measure();
+    }
+
+    /// Invalidates the text layout for a new foreground or new decorations, which do not change
+    /// the shaping of a plain text: its shaped runs are kept with the new style (step 4 of
+    /// docs/porting/text-layout-performance.md). The runs of inlines have styles of their own.
+    fn invalidate_text_layout_for_style(&self) {
+        if self.has_complex_content() {
+            self.invalidate_text_layout();
+            return;
+        }
+        self.run_properties.set(None);
+        self.paragraph_properties.set(None);
+        // The runs get the new style when a layout takes them (`text_run_cache`): a change of the
+        // font that comes with this one (a move to another parent) drops them unstyled.
+        if let Some(text_run_cache) = self.text_run_cache.get().as_ref() {
+            text_run_cache.restyle_later();
+        }
+        *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsParagraph);
         }
         self.dispose_text_layout();
         self.invalidate_visual();

@@ -1,12 +1,14 @@
 //! Compare complete original constructor frames, including partial unwind.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::{ObjectType, StyledPropertyOptions, WeakRef};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Weak;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-impl<T: PropertyValue> EffectiveValue<T> {
+impl<T: crate::StyledValue> EffectiveValue<T> {
     // The original constructor body, kept as the owning-frame oracle.
     fn original_new_for_construction(
         owner: &FerroObject,
@@ -138,6 +140,8 @@ struct Tracked {
     trace: Rc<Trace>,
 }
 
+crate::styled_value!(Tracked);
+
 impl Clone for Tracked {
     fn clone(&self) -> Self {
         self.trace.record(Kind::Clone, self.serial, self.number, "");
@@ -238,7 +242,7 @@ fn run(original: bool, inherited: bool, coerce: bool, replace_on_clone: Option<u
         let effective = if original {
             EffectiveValue::original_new_for_construction(&owner, property, inherited.as_ref())
         } else {
-            EffectiveValue::new(&owner, property, inherited.as_ref())
+            EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), inherited.as_ref())
         };
         snapshots.push(Snapshot {
             retains_original_metadata: std::ptr::eq(Rc::as_ptr(&effective.metadata), trace.metadata.borrow().as_ptr()),

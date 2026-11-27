@@ -8,11 +8,19 @@ use std::rc::Rc;
 
 /// Converts a [`KeyGesture`] to a string, formatting it according to the
 /// current platform's style guidelines.
-#[derive(Default)]
+// Made only through `new` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct PlatformKeyGestureConverter;
+
+impl Default for PlatformKeyGestureConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl PlatformKeyGestureConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self
     }
 

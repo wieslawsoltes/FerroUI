@@ -336,6 +336,8 @@ mod borrowed_values {
         clones: Rc<Cell<usize>>,
         text: String,
     }
+
+    crate::styled_value!(Counted);
     impl Clone for Counted {
         fn clone(&self) -> Self {
             self.clones.set(self.clones.get() + 1);

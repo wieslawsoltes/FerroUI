@@ -125,6 +125,12 @@ ferro_properties! { impl Chart {
     pub fn legend_property() -> StyledProperty<Option<Ref<ChartLegend>>> {
         FerroProperty::register::<Chart, _>("Legend", None)
     }
+    pub fn legend_text_size_property() -> StyledProperty<Option<f64>> {
+        FerroProperty::register::<Chart, _>("LegendTextSize", None)
+    }
+    pub fn legend_background_paint_property() -> StyledProperty<Option<Color>> {
+        FerroProperty::register::<Chart, _>("LegendBackgroundPaint", None)
+    }
     pub fn tooltip_formatter_property() -> StyledProperty<Option<GeoTooltipFormatter>> {
         FerroProperty::register::<Chart, _>("TooltipFormatter", None)
     }
@@ -363,6 +369,18 @@ impl Chart {
     }
     pub fn set_legend(&self, value: Option<Ref<ChartLegend>>) {
         self.set_value(Self::legend_property(), value);
+    }
+    pub fn legend_text_size(&self) -> Option<f64> {
+        self.get_value(Self::legend_text_size_property())
+    }
+    pub fn set_legend_text_size(&self, value: Option<f64>) {
+        self.set_value(Self::legend_text_size_property(), value);
+    }
+    pub fn legend_background_paint(&self) -> Option<Color> {
+        self.get_value(Self::legend_background_paint_property())
+    }
+    pub fn set_legend_background_paint(&self, value: Option<Color>) {
+        self.set_value(Self::legend_background_paint_property(), value);
     }
     pub fn tooltip_formatter(&self) -> Option<GeoTooltipFormatter> {
         self.get_value(Self::tooltip_formatter_property())

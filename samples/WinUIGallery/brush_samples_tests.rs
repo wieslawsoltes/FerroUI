@@ -1,14 +1,14 @@
-//! The RadialGradientBrush, IconElement and Spacing pages: the source's examples with their code
-//! behind (`brush_samples.rs`).
+//! The RadialGradientBrush, IconElement, Spacing and Typography pages: the source's examples with
+//! their code behind (`brush_samples.rs`).
 
-use crate::brush_samples::{design_image_uri, is_monochrome, radial_brush};
+use crate::brush_samples::{design_image_uri, radial_brush, TYPE_RAMP};
 use crate::{examples, tests::start};
 use ferroui_base::media::GradientSpreadMethod;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Point, Ref, RelativeUnit};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Border, ComboBox, Control, Image, Slider, TextBlock};
+use ferroui_controls_icons::{BitmapIcon, ImageIcon};
 
 fn near(actual: Point, x: f64, y: f64) -> bool {
     (actual.x - x).abs() < 1e-9 && (actual.y - y).abs() < 1e-9
@@ -51,18 +51,15 @@ fn radial_gradient_brush_sliders_and_boxes_set_the_brush() {
 fn icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color() {
     let _application = start();
     let root = page("IconElement");
-    assert!(!is_monochrome(&root), "the markup's ShowAsMonochrome is False");
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 1.0);
+    let icon = root.get_control::<BitmapIcon>("SlicesIcon");
+    assert!(!icon.show_as_monochrome(), "the markup's ShowAsMonochrome is False");
+    // The test host decodes no images: the icons are there, whatever their bitmaps load to.
+    let _image_icon = root.get_control::<ImageIcon>("ImageExample1Icon");
     let check = root.get_control::<ToggleButton>("MonochromeButton");
     check.set_is_checked(Some(true));
-    assert!(is_monochrome(&root));
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 0.0);
-    assert!(root
-        .get_control::<Rectangle>("SlicesMonochrome")
-        .opacity_mask()
-        .is_some());
+    assert!(icon.show_as_monochrome());
     check.set_is_checked(Some(false));
-    assert!(!is_monochrome(&root));
+    assert!(!icon.show_as_monochrome());
     assert!(root.get_control::<TextBlock>("SvgUnavailable").text().is_some());
 }
 
@@ -84,4 +81,68 @@ fn spacing_page_shows_the_spacing_table_and_the_theme_images() {
     );
     let _ = root.get_control::<Image>("CardsImage");
     let _ = root.get_control::<Image>("DialogImage");
+}
+
+#[test]
+fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{Button, SelectableTextBlock};
+    use ferroui_controls_teaching_tip::TeachingTip;
+    let _application = start();
+    let root = page("Typography");
+    assert!(design_image_uri("Typography", Some(&ThemeVariant::light())).ends_with("Typography.light.png"));
+    assert!(design_image_uri("Typography", None).ends_with("Typography.dark.png"));
+    // The theme's image where the platform decodes it (the test platform may not).
+    let decoded = crate::assets::load_bitmap(&design_image_uri("Typography", None)).is_ok();
+    assert_eq!(root.get_control::<Image>("HeaderImage").source().is_some(), decoded);
+    // The five tips of ShowTypographyButtonClick1 to 5.
+    for (index, title) in ["Caption", "Body", "Body Strong", "Title", "Display"].into_iter().enumerate() {
+        let button = root.get_control::<Button>(&format!("ShowTypographyButton{}", index + 1));
+        let tip = root.get_control::<TeachingTip>(&format!("ShowTypographyInfoTooltip{}", index + 1));
+        assert_eq!(tip.title().as_deref(), Some(title));
+        assert!(tip.target() == Some(button.upcast::<Control>()));
+    }
+    // The nine rows of the type ramp: the example and its resource name.
+    for (example, resource, _, _) in TYPE_RAMP {
+        assert_eq!(
+            root.get_control::<TextBlock>(&format!("{resource}Example")).text().as_deref(),
+            Some(example)
+        );
+        let names = root
+            .get_logical_descendants()
+            .filter_map(|control| control.cast::<SelectableTextBlock>())
+            .filter(|name| name.text().as_deref() == Some(resource))
+            .count();
+        assert_eq!(names, 1, "{resource}");
+    }
+    // Outside a window there is no clipboard: the copy button says so.
+    root.get_control::<Button>("CopyBodyTextBlockStyle")
+        .raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert_eq!(
+        root.get_control::<TextBlock>("CopyOutput").text().as_deref(),
+        Some("This window has no clipboard service.")
+    );
+}
+
+#[cfg(feature = "theme")]
+#[test]
+fn typography_examples_take_the_text_styles_of_the_winui_theme() {
+    use ferroui_controls::Window;
+    let _application = crate::tests::start_winui();
+    let root = page("Typography");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    // Each example's style is the ControlTheme of its resource name, found as a dynamic resource
+    // once the page is in the window: the sizes of the type ramp.
+    for ((_, resource, size, _), expected) in TYPE_RAMP
+        .into_iter()
+        .zip([12.0, 14.0, 14.0, 18.0, 18.0, 20.0, 28.0, 40.0, 68.0])
+    {
+        let example = root.get_control::<TextBlock>(&format!("{resource}Example"));
+        assert!(example.theme().is_some(), "{resource}");
+        assert_eq!(example.font_size(), expected, "{resource} is {size}");
+    }
+    window.close();
 }

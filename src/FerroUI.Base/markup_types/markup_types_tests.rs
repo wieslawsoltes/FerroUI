@@ -1558,6 +1558,23 @@ fn easings_and_page_transitions_are_created_and_configured_through_metadata() {
 }
 
 #[test]
+fn a_page_transition_made_in_code_is_assignable_to_its_contract() {
+    use crate::animation::{CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis};
+
+    // The casts are registered by the construction of the transition, not by the start-up
+    // registration of the crate (#612): a transition made by code converts as one made by markup.
+    let values = [
+        boxed(Rc::new(CrossFade::new())),
+        boxed(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.2), SlideAxis::Vertical))),
+        boxed(Rc::new(Rotate3DTransition::default())),
+        boxed(Rc::new(CompositePageTransition::new())),
+    ];
+    for value in &values {
+        assert!(from_markup_value::<Option<Rc<dyn IPageTransition>>>(value).is_some_and(|t| t.is_some()));
+    }
+}
+
+#[test]
 fn the_converters_of_this_crate_are_declared() {
     use crate::data::converters::{IMultiValueConverter, IValueConverter, StringFormatValueConverter};
 

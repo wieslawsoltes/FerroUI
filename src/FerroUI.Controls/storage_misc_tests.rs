@@ -1116,6 +1116,60 @@ use url::Url;
 
     const LEFT: RawInputModifiers = RawInputModifiers::LEFT_MOUSE_BUTTON;
 
+    fn assert_completed_drag_does_not_intercept_input(cancel_with_escape: bool) {
+        let scene = scene();
+        let mut drag = scene.start(DragDropEffects::MOVE);
+        assert_eq!(None, poll(&mut drag));
+        assert!(scene.pointer(RawPointerEventType::Move, 150.0, 50.0, LEFT));
+        assert_eq!(scene.take_events(), ["enter right payload"]);
+
+        let expected_effect = if cancel_with_escape {
+            assert!(scene.key(Key::Escape, RawInputModifiers::NONE));
+            assert_eq!(scene.take_events(), ["leave right payload"]);
+            DragDropEffects::NONE
+        } else {
+            assert!(scene.pointer(RawPointerEventType::LeftButtonUp, 150.0, 50.0, RawInputModifiers::NONE));
+            assert_eq!(scene.take_events(), ["drop right payload"]);
+            DragDropEffects::MOVE
+        };
+        assert!(scene.window_impl.cursor().is_none());
+        assert_eq!(0, scene.data.disposed.get());
+
+        // Completion wakes the future, but its dispatcher continuation need not run
+        // before the next input. Keep the subscription alive until after this input.
+        let presses = Rc::new(Cell::new(0));
+        scene.window.add_handler(InputElement::pointer_pressed_event(), {
+            let presses = presses.clone();
+            move |_, _: &PointerPressedEventArgs| presses.set(presses.get() + 1)
+        });
+        let handled = [
+            scene.key(Key::Escape, RawInputModifiers::NONE),
+            scene.key(Key::LeftCtrl, RawInputModifiers::CONTROL),
+            scene.pointer(RawPointerEventType::LeftButtonDown, 50.0, 50.0, LEFT),
+            scene.pointer(RawPointerEventType::Move, 60.0, 50.0, LEFT),
+            scene.pointer(RawPointerEventType::LeftButtonUp, 60.0, 50.0, RawInputModifiers::NONE),
+        ];
+        assert_eq!(handled, [false; 5], "a completed drag must not intercept subsequent input");
+        assert_eq!(1, presses.get(), "the next press must reach the ordinary pointer route");
+        assert!(scene.take_events().is_empty(), "a completed drag must not resume drag events");
+        assert!(scene.window_impl.cursor().is_none());
+        assert_eq!(0, scene.data.disposed.get());
+
+        assert_eq!(Some(expected_effect), poll(&mut drag));
+        assert_eq!(1, scene.data.disposed.get());
+        scene.window.close();
+    }
+
+    #[test]
+    fn dropped_drag_does_not_intercept_input_before_future_cleanup() {
+        assert_completed_drag_does_not_intercept_input(false);
+    }
+
+    #[test]
+    fn escaped_drag_does_not_intercept_input_before_future_cleanup() {
+        assert_completed_drag_does_not_intercept_input(true);
+    }
+
     #[test]
     fn drag_over_two_controls_raises_the_drag_events_and_drops() {
         let scene = scene();

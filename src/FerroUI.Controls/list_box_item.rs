@@ -82,6 +82,7 @@ ferroui_base::ferro_properties! { impl ListBoxItem {
 
 impl ListBoxItem {
     pub(crate) fn static_constructor() {
+        crate::visual_state::state_mappers::register::<ListBoxItem>(crate::visual_state::state_mappers::list_box_item);
         register_selectable::<ListBoxItem>();
         SelectableMixin::attach::<ListBoxItem>(Self::is_selected_property());
         PressedMixin::attach::<ListBoxItem>();

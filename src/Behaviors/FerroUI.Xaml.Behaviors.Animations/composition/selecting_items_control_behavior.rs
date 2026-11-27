@@ -46,6 +46,8 @@ ferroui_base::ferro_properties! {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct SelectionAnimationSubscription(u64);
 
+ferroui_base::styled_value!(SelectionAnimationSubscription);
+
 impl SelectingItemsControlBehavior {
     /// Initializes the attached-property change handler.
     fn static_constructor() {

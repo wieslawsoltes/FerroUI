@@ -831,9 +831,8 @@ fn runtime_rejects_semantic_diagnostics_before_instantiating_unknown_controls() 
 }
 
 #[test]
-fn fresh_root_deferred_resource_error_is_returned_and_default_loader_still_throws() {
+fn fresh_root_deferred_resource_error_is_returned_by_the_importer_and_the_default_loader() {
     use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
-    use std::panic::{catch_unwind, AssertUnwindSafe};
     let input = source("<Grid.Resources><ControlTheme x:Key='Example' TargetType='Button' BasedOn='{StaticResource MissingTheme}'/></Grid.Resources><Button Theme='{StaticResource Example}'/>");
     let error = crate::parse_winui(&input, None, &WinUIXamlOptions::default())
         .unwrap_err();
@@ -842,12 +841,9 @@ fn fresh_root_deferred_resource_error_is_returned_and_default_loader_still_throw
         .unwrap()
         .into_xaml()
         .unwrap();
-    assert!(
-        catch_unwind(AssertUnwindSafe(|| FerroRuntimeXamlLoader::parse(
-            &native, None
-        )))
-        .is_err()
-    );
+    // The run-time loader has its own error scope since #567: the error is its `Err`.
+    let error = FerroRuntimeXamlLoader::parse(&native, None).unwrap_err();
+    assert!(error.to_string().contains("MissingTheme"), "{error}");
 }
 
 fn reject_options() -> WinUIXamlOptions {

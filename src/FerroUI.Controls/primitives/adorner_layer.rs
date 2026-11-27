@@ -459,6 +459,8 @@ impl AdornedElementInfo {
 #[derive(Clone)]
 struct AdornedElementInfoHandle(Rc<AdornedElementInfo>);
 
+ferroui_base::styled_value!(AdornedElementInfoHandle);
+
 impl PartialEq for AdornedElementInfoHandle {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
@@ -468,6 +470,8 @@ impl PartialEq for AdornedElementInfoHandle {
 #[derive(Clone)]
 struct SavedAdornerLayer(WeakRef<AdornerLayer>);
 
+ferroui_base::styled_value!(SavedAdornerLayer);
+
 impl PartialEq for SavedAdornerLayer {
     fn eq(&self, other: &Self) -> bool {
         self.0.upgrade() == other.0.upgrade()
@@ -476,6 +480,8 @@ impl PartialEq for SavedAdornerLayer {
 
 #[derive(Clone)]
 struct AttachmentSubscriptions(Rc<[Rc<dyn IDisposable>; 2]>);
+
+ferroui_base::styled_value!(AttachmentSubscriptions);
 
 impl PartialEq for AttachmentSubscriptions {
     fn eq(&self, other: &Self) -> bool {

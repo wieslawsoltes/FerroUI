@@ -5,7 +5,7 @@ use super::at_spi_constants::*;
 use super::dbus::descriptions::APPLICATION;
 use super::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use std::cell::Cell;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct ApplicationNodeApplicationHandler {
     toolkit_name: &'static str,
@@ -55,21 +55,21 @@ impl DBusInterface for ApplicationNodeApplicationHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         Some(match name {
-            "ToolkitName" => Value::from(self.toolkit_name),
-            "Version" => Value::from(self.version.clone()),
-            "ToolkitVersion" => Value::from(self.toolkit_version.clone()),
-            "AtspiVersion" => Value::from(self.atspi_version),
-            "InterfaceVersion" => Value::from(self.interface_version),
-            "Id" => Value::from(self.id.get()),
+            "ToolkitName" => Variant::from(self.toolkit_name),
+            "Version" => Variant::from(self.version.clone()),
+            "ToolkitVersion" => Variant::from(self.toolkit_version.clone()),
+            "AtspiVersion" => Variant::from(self.atspi_version),
+            "InterfaceVersion" => Variant::from(self.interface_version),
+            "Id" => Variant::from(self.id.get()),
             _ => return None,
         })
     }
 
-    fn set_property(&self, name: &str, value: &Value<'_>) -> bool {
+    fn set_property(&self, name: &str, value: &Variant<'_>) -> bool {
         match (name, value) {
-            ("Id", Value::I32(id)) => {
+            ("Id", Variant::I32(id)) => {
                 self.id.set(*id);
                 true
             }

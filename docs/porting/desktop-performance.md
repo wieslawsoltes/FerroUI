@@ -513,8 +513,9 @@ code.
 
 ## 8. The cross-framework gauntlet (2026-11-08)
 
-`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
-benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the
+comparison's benchmark ([performance-comparison.md](performance-comparison.md)): the same screens,
+per-frame work and
 `PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
 beside the other frameworks. `PERF_REPORT=1` prints how often the app's animation-frame
 callback runs (`PERF fps`), for A/B runs of FerroUI builds; a build with the feature `counters`
@@ -551,11 +552,43 @@ python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
 python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
+python3 scripts/perf/gate.py --quick --only frames,framework --frames-filter 'start_of_*' \
+    --framework-filter styling_subsystem::ControlThemeApply   # tier 1: only what the change can move
+python3 scripts/perf/gate.py --batch --base origin/main        # tier 2: a batch of stacks
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
+
+**Which gate a change gets.** A gate run is the build of both sides (up to about 14 minutes) and,
+per round of both sides together, the framework classes (about 12 minutes) and the frame scenes
+(under 2 minutes). Instructions decide for the micro-benchmarks, and they move little between
+rounds, so a part of a stack gets CI and its size run, and the stacks that are ready are gated
+together:
+
+| Tier | For | Run | About |
+|---|---|---|---|
+| 0 | docs, scripts, CI, a change whose runtime code is byte-equal (a build-time decision that only removes unreached code: compare the generated files or the executables) | no gate; the size run | 0 |
+| 1 | a narrow change, a part of a stack | `--quick` (2 rounds, a third only for a metric within the spread of its rounds; 120 frames a scene) with `--frames-filter` (scene names or prefixes ending in `*`; a filter that names no scene stops the gate) and a `--framework-filter` of the classes it can move | 15 to 20 minutes |
+| 2 | the stacks that are ready, merged into one temporary branch; a change of a hot path everywhere (the property store, layout, rendering) | `--batch`: every scene in 3 timed rounds, every class in 1 round | about 25 minutes |
+| 3 | a release | every scene and class in 3 timed rounds (`--profile dist --rounds 3 --max-rounds 4`) with `window` and `tdg`, on every platform (section 8.3) | hours |
+
+Tiers 1 and 2 build with `release`, for short builds and symbols to sample. Tier 3 measures `dist`, the build that ships: fat LTO in one code generation unit can inline differently, so a line can move there that did not move in `release`. Its first run in a target folder builds native Skia there, and a device build keeps `release`.
+
+A regression that a tier 1 gate did not look for is found by the tier 2 gate of its batch before
+the stacks are merged. When a batch fails, the failing lines are measured on each stack alone
+(tier 1, with their scenes and classes as filters) to find the one that adds them.
+
+**The batch gate.** A micro-benchmark line is decided by its instructions. One that takes more is
+measured again alone, up to 3 rounds, so that a benchmark whose count differs from one process to
+the next does not stop the gate; if it still takes more it fails. A time that moved with the same
+instructions is reported as `time alone (does not block)`. Instructions do not see the memory
+caches, a contended lock or the GPU, so the frame scenes stay timed and can fail the gate on time,
+and the tier 3 gate before a release decides on the time of every line. The first round of the
+base's micro-benchmarks is kept under `<scratch>/base-cache`, by commit and compiler, and the next
+batch on the same base does not measure it again (`--no-base-cache` measures it; a base that runs
+the candidate's copy of the benchmarks never reuses it).
 
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
@@ -566,7 +599,7 @@ candidate in the first, candidate then base in the second): what a run leaves be
 of the system and the heat of the machine, is then not always the start of the same side. A metric over its tolerance by less than the
 spread of its own rounds on either side is not decided yet: one disturbed round can move a median
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
-only). The gate then measures another round of that suite, alternately again, until the change is
+only). The gate then measures another round of the scenes and classes of those metrics, alternately again, until the change is
 larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
 the rounds. Two things end a run sooner than its rounds. A line that takes more instructions, or a
 scaling pair over its limit, after the first round takes them in every round: the gate stops there
@@ -625,7 +658,7 @@ What it measures:
   a gate of its own.
 - **The frame benchmarks** (`tests/FerroUI.FrameBenchmarks`, suite `frames`): FerroUI's own
   regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
-  follows the Cranpose benchmark and is synced with it). Each scene does one kind of per-frame work
+  follows the comparison's benchmark and is synced with it). Each scene does one kind of per-frame work
   of a heavy screen, so that a change of that work shows in its own numbers, and each names the
   sections of chapter 9 it guards: `text` (text that changes every frame), `paragraph` (a long
   paragraph one word of which changes every frame), `list` (a scrolling list of shadowed cards),
@@ -1102,7 +1135,8 @@ is 15 % too slow. What a frame of the declarative program does, counted with
    runtime is 17 % of the UI thread, two thirds of it in these runs.
 4. **Geometries that are written again** (#805). Section 9.88 keeps the geometry of the
    shapes whose geometry is a rectangle, an ellipse, a line or a list of points; the stream
-   geometries (arcs, sectors, a border with unequal corners) are still made new.
+   geometries (arcs, sectors, a border with unequal corners) are still made new. Done since:
+   section 9.105.
 5. **The bands of a frame** (#810). The patchwork at tier 20 is limited by drawing: its UI
    thread is busy 29 % of the time, its render thread 50 %, and the two threads that record
    the bands of a frame 87 and 81 %. With the default of the bands changed for the
@@ -1966,7 +2000,7 @@ found again:
 | 16,384 | 53 % |
 
 Upstream makes a layout for every text block and every change. egui keeps its laid-out texts
-(galleys) by their content for the frames that use them, and Cranpose keeps its measured texts
+(galleys) by their content for the frames that use them, and the comparison keeps its measured texts
 the same way. FerroUI keeps the layout itself, the object the formatter makes, so nothing about
 shaping, line breaking or drawing is done another way: a layout that is found is the layout
 that would have been made.
@@ -3751,12 +3785,12 @@ not decide which pass commits. One batch at most is still in flight beside the o
 prepared (the commit itself waits for the acceptance in `MediaContext::commit_compositor`),
 and what observes the effects of a batch still waits for `processed` or `rendered`.
 
-What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and Cranpose in
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and the comparison in
 the same run, first and second launch; the machine was not quiet, so the figures compare
 the columns and are not calibrated; the column after also has the balanced bands of the
 Skia layer):
 
-| Scene | FerroUI before | FerroUI after | Cranpose |
+| Scene | FerroUI before | FerroUI after | The comparison |
 |---|---|---|---|
 | gauntlet, tier 16, frames per second | 21.8 to 22.8 / 27.5 to 29.1 | 37.1 / 47.1 | 55.5 / 58.1 |
 | gauntlet, tier 16, processor time for a frame | 61 to 69 ms | 51.3 to 51.5 ms | 20.4 to 20.5 ms |
@@ -3817,9 +3851,9 @@ entries and every origin carried down is compared with the walk up it replaces
 `move_composition_offsets_below`), under every test of the crate.
 
 What it measures (M3 Pro, 60 Hz, the harness of the benchmark, the two binaries run in
-turn, first and second launch; Cranpose from the run of section 9.46):
+turn, first and second launch; the comparison from the run of section 9.46):
 
-| Gauntlet, tier 16 | Before | After | Cranpose |
+| Gauntlet, tier 16 | Before | After | The comparison |
 |---|---|---|---|
 | frames per second | 39.2 to 40.0 / 48.1 to 48.7 | 42.6 to 42.8 / 53.8 to 54.3 | 55.5 / 58.1 |
 | processor time for a frame | 49.2 to 51.5 / 47.7 to 50.6 ms | 46.9 to 48.4 / 47.0 to 47.3 ms | 20.4 to 20.5 ms |
@@ -4422,7 +4456,7 @@ The harness of the benchmark, ten seconds from the launch, first launch and seco
 a second; the processor time of all threads for a frame; the 99th percentile of the frame
 time), with the other framework of the benchmark from its run on the same machine:
 
-| Scene | Before | After | Cranpose |
+| Scene | Before | After | The comparison |
 | --- | ---: | ---: | ---: |
 | Gauntlet tier 16, frames a second | 44.3, 55.4 | 43.3, 54.8 | 55.3, 58.2 |
 | Gauntlet tier 16, processor ms a frame | 47.2, 46.0 | 47.2, 46.7 | |
@@ -8259,3 +8293,46 @@ gauntlet the rate falls. The hierarchy is built when the picture is recorded, on
 and the bands of these scenes cross most of the commands of the picture, so it culls little of what
 a band replays. Left out (PR 872 closed); the bands keep replaying the whole picture under their
 clip, which Skia's canvas rejects per draw.
+
+### 9.105 A stream geometry written again in place: arcs, sectors, borders (#805)
+
+Section 9.88 keeps the geometry of a shape and gives it what the shape is now, for rectangles,
+ellipses, lines, polylines and polygons. Three places were left, because a stream geometry could
+not be written again: `Arc`, `Sector`, and `Border` when it draws with geometries.
+
+- `StreamGeometry::reopen` opens the geometry to define it again. The figures written on the
+  context replace the ones it has; the object, its transform and what listens to it are kept, and
+  it raises its change once, when the context is disposed. `open` keeps its meaning: it adds
+  figures, as in the source.
+- `Arc` and `Sector` write the stream geometry they have when an angle, the size or the stroke
+  thickness changes (`ShapeImpl::update_defining_geometry`). A change between a full turn and a
+  partial figure makes another geometry, as before.
+- `BorderRenderHelper`: a border drawn with geometries that is resized writes its background
+  geometry and the two stream geometries of its combined border geometry again. After a size with
+  no geometry (an empty rectangle) new ones are made. Unequal corners with one thickness and the
+  default sizing make no geometry on Skia and Vello, so the benchmark's border has unequal
+  thicknesses too.
+
+The local gate (macOS arm64, four rounds), against the commit that adds the three scenes of
+`layout_subsystem::ShapeGeometry`:
+
+| Line | Before | After | Time | Instructions |
+|---|---:|---:|---:|---:|
+| `arc_swept[Shapes=500]` | 455.8 us | 392.7 us | -13.9 % | -14.94 % |
+| `sector_swept[Shapes=500]` | 428.6 us | 363.2 us | -15.3 % | -15.74 % |
+| `border_unequal_resized[Shapes=500]` | 5.325 ms | 5.010 ms | -5.9 % | -6.01 % |
+| The five scenes of section 9.88 | | | -1.4 to +1.4 % | -0.62 to +0.05 % |
+
+Against the `main` of that day, frames and framework suites, 364 metrics: the one line that takes
+more instructions is `ResourceLookup.switch_theme_variant` (+2.89 %). This change does not run it,
+and another pull request showed the same amount against the same base. Resident memory of
+`startup/tiles` varies within each side, and the other lines over their tolerance moved in time
+alone.
+
+An earlier two-round gate reported `frames/recolor` at +3.53 % instructions a frame. It came from
+one disturbed round that presented 223 of its 240 frames, which the gate scales by. Three more
+alternating runs of the same two binaries, each presenting 239 or 240 frames, gave +0.1 % a frame
+and +0.3 % for the show.
+
+The objects made a frame by an animated progress ring and by a resized border, which the ticket
+also names, were not counted. Kept (PR 871).

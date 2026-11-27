@@ -1,5 +1,5 @@
 use crate::animation::animators::{apply_with_visual, Animator, AnimatorBase, DoubleAnimator};
-use crate::animation::{Animatable, Animation, IAnimator, IClock};
+use crate::animation::{Animatable, Animation, AnimationError, IAnimator, IClock};
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::transformation::TransformOperations;
 use crate::media::{
@@ -26,6 +26,12 @@ impl TransformAnimator {
     }
 }
 
+/// The rejection of a target of the transform animator that is not a `Visual`
+/// (`Animation::try_apply_for_preview` reports it, #567).
+pub(crate) fn not_a_visual_message(control: &Animatable) -> String {
+    format!("Unable to cast object of type '{}' to type 'Visual'.", control.get_type())
+}
+
 impl Animator for TransformAnimator {
     type Value = f64;
 
@@ -41,17 +47,15 @@ impl Animator for TransformAnimator {
         obs_match: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>> {
+    ) -> Result<Option<Rc<dyn IDisposable>>, AnimationError> {
         let Some(ctrl) = control.downcast_ref::<Visual>() else {
-            panic!(
-                "Unable to cast object of type '{}' to type 'Visual'.",
-                control.get_type()
-            );
+            return Err(AnimationError(not_a_visual_message(control)));
         };
 
         let Some(property) = this.base.property() else {
-            panic!("Animator has no property specified.");
+            return Err(AnimationError(super::animator::NO_PROPERTY.to_owned()));
         };
+        crate::animation::animation_instance::validate_timing(animation)?;
 
         // Check if the Target Property is Transform derived.
         if Transform::TYPE.is_assignable_from(property.owner_type()) {
@@ -60,7 +64,7 @@ impl Animator for TransformAnimator {
                 .is_some_and(|t| t.as_any().is::<TransformOperations>())
             {
                 // HACK: This animator cannot reasonably animate CSS transforms at the moment.
-                return Some(Disposable::empty());
+                return Ok(Some(Disposable::empty()));
             }
 
             let render_transform: Rc<dyn ITransform> = match ctrl.render_transform() {
@@ -110,7 +114,7 @@ impl Animator for TransformAnimator {
                         .to_ref()
                         .cast()
                         .expect("a transform is an animatable");
-                    return Some(apply_with_visual(
+                    return Ok(Some(apply_with_visual(
                         &double_animator,
                         animation,
                         &target,
@@ -119,7 +123,7 @@ impl Animator for TransformAnimator {
                         on_complete,
                         should_pause_on_invisible,
                         visual_target,
-                    ));
+                    )));
                 }
                 // It's a TransformGroup and try finding the target there.
                 else if let Some(group) = render_transform.downcast_ref::<TransformGroup>() {
@@ -127,7 +131,7 @@ impl Animator for TransformAnimator {
                         for transform in group.children().iter() {
                             if transform.get_type() == property.owner_type() {
                                 let target: Ref<Animatable> = transform.upcast();
-                                return Some(apply_with_visual(
+                                return Ok(Some(apply_with_visual(
                                     &double_animator,
                                     animation,
                                     &target,
@@ -136,7 +140,7 @@ impl Animator for TransformAnimator {
                                     on_complete,
                                     should_pause_on_invisible,
                                     visual_target,
-                                ));
+                                )));
                             }
                         }
                     }
@@ -163,7 +167,7 @@ impl Animator for TransformAnimator {
             );
         }
 
-        None
+        Ok(None)
     }
 
     fn interpolate(&self, _progress: f64, _old_value: &f64, _new_value: &f64) -> f64 {

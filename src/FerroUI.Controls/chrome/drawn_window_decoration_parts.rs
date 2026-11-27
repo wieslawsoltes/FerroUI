@@ -25,3 +25,5 @@ bitflags! {
         const ALL = Self::SHADOW.bits() | Self::BORDER.bits() | Self::TITLE_BAR.bits() | Self::RESIZE_GRIPS.bits();
     }
 }
+
+ferroui_base::styled_value!(DrawnWindowDecorationParts);

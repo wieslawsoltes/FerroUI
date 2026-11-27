@@ -131,11 +131,14 @@ the PE and image measurement script is
 
 ### 4.3 Framework experiments beside the XAML work
 
-Sharing typed binding operations saved 2,020,464 bytes in the native Catalog; in the warm
-propagation probe source-to-target went from 42 to 45 ns and target-to-source from 51 to 57 ns,
-with no allocation in either arm. Sharing registered routed-event adapters saved 98,784 bytes
-with all 1,138 method identities and signatures kept. Both are standalone patches, not part of
-this change:
+An experiment that shared every typed binding operation saved 2,020,464 bytes in the native
+Catalog; in the warm propagation probe source-to-target went from 42 to 45 ns and target-to-source
+from 51 to 57 ns, with no allocation in either arm. On the benchmark gate it took 6.3 % more
+instructions for each value produced, so it did not land in that form. PR #1023 shares only the
+cold operations and keeps value production typed: with the casts of PR #1022, measured together,
+the Catalog is 1.00 MB smaller in `release` and 1.05 MB in `dist`. Sharing registered routed-event
+adapters saved 98,784 bytes with all 1,138 method identities and signatures kept; that remains a
+standalone patch:
 [`typed-binding-size/README.md`](../../scripts/perf/typed-binding-size/README.md),
 [`combined-xaml/README.md`](../../scripts/perf/typed-binding-size/combined-xaml/README.md),
 [`registration-review/README.md`](../../scripts/perf/typed-binding-size/registration-review/README.md).

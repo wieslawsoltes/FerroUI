@@ -31,16 +31,14 @@ impl DBusHelper {
         // Connect synchronously
         //
         // The reference clears the synchronization context around this so
-        // that the wait does not need the UI thread; here the connection is
-        // established by the reactor of the D-Bus library, on its own
-        // thread, and this thread only waits for it.
-        let result = match dbus_address {
-            Some(address) => zbus::blocking::connection::Builder::address(address),
-            None => zbus::blocking::connection::Builder::session(),
-        }
-        .and_then(Self::with_object_server)
-        .and_then(|builder| builder.build())
-        .map(zbus::blocking::Connection::into_inner);
+        // that the wait does not need the UI thread. `block_on` runs the
+        // runtime of the D-Bus library on this thread until the connection
+        // exists; from then on a helper thread of that runtime serves it.
+        let builder = match dbus_address {
+            Some(address) => zbus::connection::Builder::address(address),
+            None => zbus::connection::Builder::session(),
+        };
+        let result = zbus::block_on(Self::with_object_server(builder).build());
 
         match result {
             Ok(conn) => Some(conn),
@@ -67,9 +65,7 @@ impl DBusHelper {
     /// the tests of the input methods: docs/porting/x11-platform.md,
     /// section 13). So every connection of the crate is built with one
     /// object, the standard object manager at the root.
-    pub fn with_object_server(
-        builder: zbus::blocking::connection::Builder<'_>,
-    ) -> zbus::Result<zbus::blocking::connection::Builder<'_>> {
+    pub fn with_object_server(builder: zbus::connection::Builder<'_>) -> zbus::connection::Builder<'_> {
         builder.serve_at("/", zbus::fdo::ObjectManager)
     }
 }

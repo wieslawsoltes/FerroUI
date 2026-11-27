@@ -8,6 +8,7 @@ use std::ops::Deref;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChartPoints(FerroList<Ref<ChartPoint>>);
+ferroui_base::styled_value!(ChartPoints);
 impl ChartPoints {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -42,6 +43,7 @@ ferro_markup_type!(class ChartPoints {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChartSeriesCollection(FerroList<Ref<ChartSeries>>);
+ferroui_base::styled_value!(ChartSeriesCollection);
 impl ChartSeriesCollection {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -76,6 +78,7 @@ ferro_markup_type!(class ChartSeriesCollection {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Axes(FerroList<Ref<Axis>>);
+ferroui_base::styled_value!(Axes);
 impl Axes {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -110,6 +113,7 @@ ferro_markup_type!(class Axes {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SankeyNodes(FerroList<Ref<SankeyNode>>);
+ferroui_base::styled_value!(SankeyNodes);
 impl SankeyNodes {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -144,6 +148,7 @@ ferro_markup_type!(class SankeyNodes {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct SankeyLinks(FerroList<Ref<SankeyLink>>);
+ferroui_base::styled_value!(SankeyLinks);
 impl SankeyLinks {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -178,6 +183,7 @@ ferro_markup_type!(class SankeyLinks {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TreemapNodes(FerroList<Ref<TreemapNode>>);
+ferroui_base::styled_value!(TreemapNodes);
 impl TreemapNodes {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -212,6 +218,7 @@ ferro_markup_type!(class TreemapNodes {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct HeatLands(FerroList<Ref<HeatLand>>);
+ferroui_base::styled_value!(HeatLands);
 impl HeatLands {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -246,6 +253,7 @@ ferro_markup_type!(class HeatLands {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GeoMarkers(FerroList<Ref<GeoMarker>>);
+ferroui_base::styled_value!(GeoMarkers);
 impl GeoMarkers {
     pub fn new() -> Self {
         Self(FerroList::new())
@@ -280,6 +288,7 @@ ferro_markup_type!(class GeoMarkers {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChartVisualElements(FerroList<Ref<ChartVisualElement>>);
+ferroui_base::styled_value!(ChartVisualElements);
 impl ChartVisualElements {
     pub fn new() -> Self {
         Self(FerroList::new())

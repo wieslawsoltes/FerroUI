@@ -283,3 +283,152 @@ fn the_table_lists_every_unit_with_its_runs() {
     );
     assert!(table.ends_with("#[cfg(debug_assertions)]\npub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&[], &[\"Button\"], &[]];\n"), "{table}");
 }
+
+/// #853: the plan is off by default, and the emission of a closure can choose another one.
+#[test]
+fn the_plan_of_the_runs_is_off_by_default() {
+    assert_eq!(DEFAULT_THEME_UNIT_PLAN, ThemeUnitPlan::OFF);
+    assert_eq!(ThemeUnitPlan::current(), DEFAULT_THEME_UNIT_PLAN);
+    let inner = with_theme_unit_plan(ThemeUnitPlan::ON, || {
+        let nested = with_theme_unit_plan(ThemeUnitPlan::OFF.with_regions(true), ThemeUnitPlan::current);
+        (ThemeUnitPlan::current(), nested)
+    });
+    assert_eq!(inner, (ThemeUnitPlan::ON, ThemeUnitPlan::OFF.with_regions(true)));
+    assert!(inner.1.regions() && !inner.1.keys_in_runs());
+    assert_eq!(ThemeUnitPlan::current(), DEFAULT_THEME_UNIT_PLAN);
+}
+
+/// The units of the region tests: the ambient unit and three documents.
+fn four_units() -> UnitEmission {
+    let names = ["ambient", "Controls/Button.xaml", "Resources/Base.xaml", "Controls/List.xaml"];
+    UnitEmission::new(Rc::new(MergedEntryOrigins::default()), HashMap::new(), names.iter().map(|name| name.to_string()).collect())
+}
+
+/// The body of the region tests: runs of three units into one dictionary, then one into
+/// another, a call alone after an ordinary statement.
+fn region_body() -> Vec<String> {
+    let (button, base, list) = (begin(1), begin(2), begin(3));
+    body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        "let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();",
+        &base,
+        "rt::add_double_resources(&resource_dictionary_0, ROWS_0)?;",
+        END_MARKER,
+        "// t.xaml(4,4) Content (resource)",
+        &button,
+        "rt::add_double_resources(&resource_dictionary_0, ROWS_1)?;",
+        END_MARKER,
+        &list,
+        "rt::add_double_resources(&resource_dictionary_0, ROWS_2)?;",
+        END_MARKER,
+        &button,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_3)?;",
+        END_MARKER,
+        &list,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_4)?;",
+        END_MARKER,
+        "let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();",
+        &base,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_5)?;",
+        END_MARKER,
+        "::core::result::Result::Ok(())",
+    ])
+}
+
+/// #853: with regions, consecutive calls of runs into one dictionary are one call of
+/// `rt::apply_theme_region` with the pairs in their order, after the comments between them; a
+/// call alone stays a call of `rt::apply_theme_unit`. The runs are the same functions.
+#[test]
+fn consecutive_runs_into_one_dictionary_are_one_region() {
+    let units = four_units();
+    let plan = ThemeUnitPlan::OFF.with_regions(true);
+    let (written, functions) = with_theme_unit_plan(plan, || extract(region_body(), &units));
+    assert_eq!(written, body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        "let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();",
+        "// t.xaml(4,4) Content (resource)",
+        "rt::apply_theme_region(active_theme_units(), &[(2, 0), (1, 0), (3, 0)], &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_region(active_theme_units(), &[(1, 1), (3, 1)], &context, &resource_dictionary_1)?;",
+        "let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();",
+        "rt::apply_theme_unit(active_theme_units(), 2, 1, &context, &resource_dictionary_1)?;",
+        "::core::result::Result::Ok(())",
+    ]));
+    let units_after = units.runs();
+    // The same runs as without regions.
+    let plain = four_units();
+    let (unchanged, plain_functions) = extract(region_body(), &plain);
+    assert_eq!(functions, plain_functions);
+    assert_eq!(units_after, plain.runs());
+    assert_eq!(unchanged.iter().filter(|line| line.contains("rt::apply_theme_unit(")).count(), 6);
+    assert!(!unchanged.iter().any(|line| line.contains("apply_theme_region")), "{unchanged:?}");
+}
+
+/// #853: a region needs its indices in 16 bits; a unit beyond them keeps its calls.
+#[test]
+fn a_region_with_an_index_beyond_sixteen_bits_keeps_its_calls() {
+    let names: Vec<String> = (0..=70_000).map(|index| format!("unit {index}")).collect();
+    let units = UnitEmission::new(Rc::new(MergedEntryOrigins::default()), HashMap::new(), names);
+    let lines = body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        &begin(1),
+        "rt::add_double_resources(&resource_dictionary_0, ROWS_0)?;",
+        END_MARKER,
+        &begin(70_000),
+        "rt::add_double_resources(&resource_dictionary_0, ROWS_1)?;",
+        END_MARKER,
+    ]);
+    let (written, _) = with_theme_unit_plan(ThemeUnitPlan::ON, || extract(lines, &units));
+    assert_eq!(written, body(&[
+        "let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();",
+        "rt::apply_theme_unit(active_theme_units(), 1, 0, &context, &resource_dictionary_0)?;",
+        "rt::apply_theme_unit(active_theme_units(), 70000, 0, &context, &resource_dictionary_0)?;",
+    ]));
+}
+
+/// #853: with `keys_in_runs`, the emitter writes the key a merged theme dictionary assigns again
+/// between the markers of its unit, and the assignment joins the run of the entries of the unit
+/// that follow it: the runs of the units then follow each other and are one region.
+#[test]
+fn a_key_assigned_again_joins_the_run_of_its_unit() {
+    let (button, base) = (begin(1), begin(2));
+    let set_key = |value: &str| {
+        format!(
+            "<dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(\
+             &rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&{value}), 14, 6)?);"
+        )
+    };
+    let (outside, first, second) = (set_key("value_0"), set_key("value_1"), set_key("value_2"));
+    let lines = body(&[
+        "let resource_dictionary_1 = ::ferroui_base::controls::ResourceDictionary::new();",
+        // The key of the dictionary, outside every unit.
+        "let value_0 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();",
+        &outside,
+        &base,
+        "// Base.xaml(14,6) Key",
+        "let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();",
+        &first,
+        END_MARKER,
+        &base,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_0)?;",
+        END_MARKER,
+        &button,
+        "// Button.xaml(14,6) Key",
+        "let value_2 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();",
+        &second,
+        END_MARKER,
+        &button,
+        "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
+        END_MARKER,
+    ]);
+    let units = units();
+    let (written, functions) = with_theme_unit_plan(ThemeUnitPlan::ON, || extract(lines, &units));
+    let region = "rt::apply_theme_region(active_theme_units(), &[(2, 0), (1, 0)], &context, &resource_dictionary_1)?;";
+    assert_eq!(written[3..], body(&[region]));
+    assert_eq!(functions.len(), 2);
+    let joined = format!(
+        "    let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();\n    {first}\n    \
+         rt::add_double_resources(&resource_dictionary_1, ROWS_0)?;\n"
+    );
+    assert!(functions[0].contains(&joined), "{}", functions[0]);
+    assert!(functions[1].contains(&second), "{}", functions[1]);
+}

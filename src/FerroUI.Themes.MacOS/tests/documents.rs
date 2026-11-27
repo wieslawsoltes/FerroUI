@@ -244,6 +244,7 @@ document_tests! {
     resources_person_picture_themeresources => "/Resources/PersonPicture_themeresources.xaml";
     resources_pager_control_themeresources => "/Resources/PagerControl_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
+    resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
     resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
     resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
@@ -260,6 +261,7 @@ document_tests! {
     controls_split_button => "/Controls/SplitButton.xaml";
     controls_toggle_switch => "/Controls/ToggleSwitch.xaml";
     controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_content_dialog => "/Controls/ContentDialog.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_number_box => "/Controls/NumberBox.xaml";
@@ -275,8 +277,11 @@ document_tests! {
     controls_frame => "/Controls/Frame.xaml";
     controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
+    controls_list_view => "/Controls/ListView.xaml";
+    controls_grid_view => "/Controls/GridView.xaml";
     controls_pivot => "/Controls/Pivot.xaml";
     controls_swipe_control => "/Controls/SwipeControl.xaml";
+    controls_tab_view => "/Controls/TabView.xaml";
 }
 
 #[test]

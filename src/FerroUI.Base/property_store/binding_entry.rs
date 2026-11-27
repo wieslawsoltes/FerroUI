@@ -1,7 +1,7 @@
 use super::{IValueEntry, ValueFrame};
 use crate::data::{BindingError, BindingValue, BindingValueType};
 use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError};
-use crate::{BoxedValue, FerroObject, FerroProperty, PropertyValue, Ref, StyledProperty};
+use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledProperty, StyledValue};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -11,12 +11,12 @@ use std::rc::{Rc, Weak};
 // entry of its own that is not typed (`BoxedBindingEntry`).
 type EntryObserver<T, U> = fn(Weak<BindingEntry<T>>) -> Rc<dyn IObserver<U>>;
 
-pub(crate) enum BindingSource<T: PropertyValue> {
+pub(crate) enum BindingSource<T: StyledValue> {
     Typed(Rc<dyn IObservable<T>>, EntryObserver<T, T>),
     Value(Rc<dyn IObservable<BindingValue<T>>>, EntryObserver<T, BindingValue<T>>),
 }
 
-impl<T: PropertyValue> BindingSource<T> {
+impl<T: StyledValue> BindingSource<T> {
     pub(crate) fn typed(source: Rc<dyn IObservable<T>>) -> Self {
         Self::Typed(source, |entry| Rc::new(TypedObserver(entry)))
     }
@@ -138,7 +138,7 @@ impl Drop for BindingEntryState {
 }
 
 /// A value entry in a value frame whose value is produced by an observable.
-pub(crate) struct BindingEntry<T: PropertyValue> {
+pub(crate) struct BindingEntry<T: StyledValue> {
     // Drop the subscription before any of the objects its callbacks can use.
     state: BindingEntryState,
     this: Weak<BindingEntry<T>>,
@@ -148,7 +148,7 @@ pub(crate) struct BindingEntry<T: PropertyValue> {
     default_value: RefCell<Option<T>>,
 }
 
-impl<T: PropertyValue> BindingEntry<T> {
+impl<T: StyledValue> BindingEntry<T> {
     pub fn new(
         target: &FerroObject,
         frame: Weak<dyn ValueFrame>,
@@ -244,7 +244,7 @@ impl<T: PropertyValue> BindingEntry<T> {
     }
 }
 
-impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
+impl<T: StyledValue> IValueEntry for BindingEntry<T> {
     fn property(&self) -> &'static FerroProperty {
         self.property
     }
@@ -256,9 +256,9 @@ impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
 
     fn try_get_value(&self, out: &mut dyn Any) -> bool {
         self.start_core(false);
-        match (out.downcast_mut::<Option<T>>(), &*self.value.borrow()) {
+        match (out.downcast_mut::<Option<T::Storage>>(), &*self.value.borrow()) {
             (Some(out), Some(value)) => {
-                *out = Some(value.clone());
+                *out = Some(value.clone().into_storage());
                 true
             }
             _ => false,
@@ -279,7 +279,7 @@ impl<T: PropertyValue> IValueEntry for BindingEntry<T> {
     }
 }
 
-impl<T: PropertyValue> IDisposable for BindingEntry<T> {
+impl<T: StyledValue> IDisposable for BindingEntry<T> {
     fn dispose(&self) {
         self.unsubscribe();
         self.binding_completed();
@@ -293,9 +293,9 @@ pub(super) fn invalid_value_error(property: &FerroProperty) -> BindingError {
     BindingError::message(format!("The value is not valid for property '{}'.", property.name()))
 }
 
-struct TypedObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
+struct TypedObserver<T: StyledValue>(Weak<BindingEntry<T>>);
 
-impl<T: PropertyValue> IObserver<T> for TypedObserver<T> {
+impl<T: StyledValue> IObserver<T> for TypedObserver<T> {
     fn on_next(&self, value: T) {
         let Some(entry) = self.0.upgrade() else { return };
         let value = entry.validate(value);
@@ -313,9 +313,9 @@ impl<T: PropertyValue> IObserver<T> for TypedObserver<T> {
     }
 }
 
-struct ValueObserver<T: PropertyValue>(Weak<BindingEntry<T>>);
+struct ValueObserver<T: StyledValue>(Weak<BindingEntry<T>>);
 
-impl<T: PropertyValue> IObserver<BindingValue<T>> for ValueObserver<T> {
+impl<T: StyledValue> IObserver<BindingValue<T>> for ValueObserver<T> {
     fn on_next(&self, value: BindingValue<T>) {
         let Some(entry) = self.0.upgrade() else { return };
         let value = entry.convert_and_validate(value);

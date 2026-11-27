@@ -30,6 +30,10 @@ pub enum DockOperation {
     OuterBottom = 10,
 }
 
+ferroui_system::styled_enum!(DockOperation {
+    None, Fill, Left, Bottom, Right, Top, Window, OuterLeft, OuterTop, OuterRight, OuterBottom
+});
+
 impl DockOperation {
     /// Native declaration text used by UI-owned metadata generation, without a UI dependency.
     #[doc(hidden)]

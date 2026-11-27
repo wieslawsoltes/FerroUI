@@ -123,6 +123,31 @@ cargo --config FerroUI/.cargo/compiler-cache.toml build --locked   # sccache as 
 cargo --config FerroUI/.cargo/build-tools.toml build --locked      # optimised source scanner
 ```
 
+### The export trie of an executable
+
+On macOS and iOS, outside the dev profile, `ferroui_build::Build` links the binary targets of the
+package with `-Wl,-no_exported_symbols` (#1049). A `cdylib` or `staticlib` keeps its exports.
+
+- An application without `Build` gets the same with a one-line `build.rs` and `ferroui-build` in
+  its `[build-dependencies]`:
+
+  ```rust
+  fn main() {
+      ferroui_build::strip_executable_exports();
+  }
+  ```
+
+- An application whose plug-ins resolve names from the executable (`-bundle_loader`, a flat
+  namespace, `dlsym(RTLD_DEFAULT, ..)` on its own names) keeps the trie:
+
+  ```toml
+  [package.metadata.ferroui]
+  executable-exports = true
+  ```
+
+Without the trie, `dladdr` finds no name in the executable, so a crash report of a `dist` build is
+symbolicated with its dSYM.
+
 ### The Graphite Metal ownership fix
 
 On macOS FerroUI draws with Skia's Graphite on Metal, and the Skia that `skia-bindings` 0.153.3
@@ -137,8 +162,10 @@ manifest. Cargo applies a patch only in the workspace that declares it:
   to the application (`FerroUI/external/rust-skia-bindings`). Nothing else is needed.
 - **An application built from the published crates** has to declare the patch itself, until a
   released `skia-bindings` carries the fix. The binding of the FerroUI release the application
-  uses is the one to take: copy `external/rust-skia-bindings` of that release into the application
-  (for example as `third_party/skia-bindings`) and name it in the root manifest:
+  uses is the one to take. Each release has it as a file of its GitHub release,
+  `skia-bindings-0.153.3-ferroui-<version>.tar.gz`, with a `.sha256` file beside it: check the
+  SHA-256, unpack it into `third_party/` (it unpacks as `skia-bindings/`), and name it in the root
+  manifest:
 
   ```toml
   [patch.crates-io]
@@ -287,7 +314,8 @@ GitHub Pages is enabled once, with GitHub Actions as its source:
 gh api -X POST repos/FerroUI/MyApp/pages -f build_type=workflow
 ```
 
-The site is then published at `https://ferroui.github.io/MyApp/` by every push to main.
+The site is then published at `https://ferroui.com/MyApp/` (the custom domain of the
+organization Pages site) by every push to main.
 
 ## 7. Updating FerroUI
 

@@ -1,4 +1,195 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Automatic Tab Order"/><Button Content="First"/><TextBlock Text="(not present)"/><Button Content="Second"/><Button Content="(not present)" IsEnabled="False"/><Button Content="Third"/><TextBlock Text="Manual Tab Order"/><StackPanel Orientation="Horizontal" Spacing="8"><Button Content="Second in tab order" TabIndex="2"/><Button Content="First in tab order" TabIndex="1"/></StackPanel>
+<!-- Ported from the six pinned AccessibilityKeyboard examples of WinUI Gallery (14061eea) and the
+     handlers of AccessibilityKeyboardPage.xaml.cs (accessibility_samples.rs); see ../NOTICE.md.
+     The headings are the theme's SubtitleTextBlockStyle and BodyStrongTextBlockStyle (ThemeResource
+     is DynamicResource) with their heading levels; Bold and Italic are Runs with the weight and the
+     style; WrapWholeWords is WrapWithOverflow. WinUI's ListView is FerroUI's ListBox, and
+     XYFocusKeyboardNavigation Enabled is XYFocus.NavigationModes Enabled. A KeyboardAccelerator is
+     the button's HotKey. WinUI's MenuBar is FerroUI's Menu (Title and Text are Header). FerroUI
+     has no Key Tips: an access key is the underlined letter of the header (the AccessKey letter
+     where the header has it), and AutomationProperties.AccessKey keeps the source's key for
+     assistive technology; Cut (X) and Paste (V) have no such letter. FerroUI does not add the
+     accelerator to a button's tooltip as WinUI does. Those make the page partial. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Accessibility is about building experiences that make your Windows application usable by people of all abilities. For more information about designing accessible apps: " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/accessibility/accessibility-overview"><Run Text="Accessibility overview" /></Hyperlink><Run Text="." /></Paragraph>
+    <Paragraph><Run Text="If your app does not provide good keyboard access, users who are blind or have mobility issues can have difficulty using your app or may not be able to use it at all." /></Paragraph>
+  </RichTextBlock>
+
+  <TextBlock AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}" Text="Tab order" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="To use the keyboard with a control, the control must have focus. The most common way to receive focus is via " /><Run FontWeight="Bold" Text="Tab navigation" /><Run Text=", which cycles through controls that are " /><Run FontWeight="Bold" Text="tab stops" /><Run Text=". The order of these tab stops is called the " /><Run FontWeight="Bold" Text="tab order" /><Run Text="." /></Paragraph>
+    <Paragraph><Run Text="All interactive controls, like buttons, should be tab stops (unless they are in a group that's accessible in some other way), but non-interactive controls, like labels, should not. Try to put initial focus on the most useful or logical element." /></Paragraph>
+    <Paragraph><Run Text="See " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-interactions"><Run Text="Keyboard interactions" /></Hyperlink><Run Text=" and " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/accessibility/keyboard-accessibility"><Run Text="Keyboard accessibility" /></Hyperlink><Run Text="." /></Paragraph>
+  </RichTextBlock>
+
+  <TextBlock AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Automatic tab order" />
+  <TextBlock TextWrapping="WrapWithOverflow"
+             Text="By default, tab order matches the order elements are defined in XAML. This is usually the best order:" />
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Automatic Tab Order" FontSize="18" />
+    <StackPanel x:Name="AutomaticTabOrder" Spacing="4">
+      <Button x:Name="AutomaticFirst" Content="First" />
+      <!-- Non-interactive controls should not be in the tab order. -->
+      <TextBlock Text="(not present)" />
+      <Button x:Name="AutomaticSecond" Content="Second" />
+      <!-- Disabled controls should not be in the tab order. -->
+      <Button x:Name="AutomaticDisabled" Content="(not present)" IsEnabled="False" />
+      <Button x:Name="AutomaticThird" Content="Third" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Manual tab order" />
+  <TextBlock TextWrapping="WrapWithOverflow"
+             Text="When the XAML order doesn't match the &quot;logical&quot; tab order, though, you can specify tab order manually:" />
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Manual Tab Order" FontSize="18" />
+    <Grid x:Name="ManualTabOrder" HorizontalAlignment="Left" ColumnDefinitions="Auto,Auto,Auto"
+          RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+      <TextBlock Grid.Column="1" HorizontalAlignment="Center" Text="Column 1" />
+      <TextBlock Grid.Column="2" HorizontalAlignment="Center" Text="Column 2" />
+      <!-- This example is a bit contrived, since you could fix the tab order by reordering the
+           elements in the XAML, but sometimes that is not easy to do. -->
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Row 1" />
+      <Button x:Name="FirstStop" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" Content="First stop"
+              TabIndex="1" />
+      <Button x:Name="ThirdStop" Grid.Row="1" Grid.Column="2" Content="Third stop" TabIndex="3" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Row 2" />
+      <Button x:Name="SecondStop" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" Content="Second stop"
+              TabIndex="2" />
+      <Button x:Name="NotAStop" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" Content="Not a stop"
+              IsTabStop="False" />
+    </Grid>
+  </StackPanel>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             Text="Arrow keys" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Users expect groups of similar, related controls to be navigable via " /><Run FontWeight="Bold" Text="Arrow keys" /><Run Text=", too. This can be instead of " /><Run FontStyle="Italic" Text="or" /><Run Text=" in addition to tab navigation, depending on the situation." /></Paragraph>
+    <Paragraph><Run Text="Groups of controls that support arrow key navigation typically support Home/End and PgUp/PgDn, too." /></Paragraph>
+  </RichTextBlock>
+  <TextBlock Margin="0,8,0,0" Text="See also:" />
+  <ItemsControl AutomationProperties.Name="Arrow keys references">
+    <HyperlinkButton Content="Keyboard interactions: Navigation"
+                     NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-interactions#navigation" />
+    <HyperlinkButton Content="Keyboard interactions: Home and End keys"
+                     NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-interactions#home-and-end-keys" />
+    <HyperlinkButton Content="Keyboard interactions: Page up and Page down keys"
+                     NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-interactions#page-up-and-page-down-keys" />
+    <HyperlinkButton Content="Keyboard interactions: Control group"
+                     NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-interactions#control-group" />
+  </ItemsControl>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}"
+             Text="Automatically supporting arrow keys" />
+  <TextBlock TextWrapping="WrapWithOverflow"
+             Text="Most controls that group elements support arrow keys (and Home/End and PgUp/PgDn) by default:" />
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Automatic Arrow Keys" FontSize="18" />
+    <StackPanel>
+      <!-- ListViews fully support arrow keys, for example. -->
+      <ListBox x:Name="ColorsList" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Colors">
+        <ListBoxItem>Red</ListBoxItem>
+        <ListBoxItem>Blue</ListBoxItem>
+        <ListBoxItem>Green</ListBoxItem>
+        <ListBoxItem>Yellow</ListBoxItem>
+      </ListBox>
+      <TextBlock Theme="{DynamicResource CaptionTextBlockStyle}"
+                 Text="Tab navigates to the control, arrow keys navigate within the control" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}"
+             Text="Manually supporting arrow keys with XYFocusKeyboardNavigation" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="You can enable arrow key navigation between items manually, too." /></Paragraph>
+    <Paragraph><Run Text="Note that if you're implementing a list of items, users may expect additional affordances like support for Home/End, PgUp/PgDn, and additional accessibility properties like PositionInSet and SizeOfSet. Keyboard navigation can get complicated, but getting it right can make your app a lot easier to use — for everyone." /></Paragraph>
+    <Paragraph><Run Text="See " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/input/focus-navigation"><Run Text="Focus navigation for keyboard, gamepad, remote control, and accessibility tools" /></Hyperlink><Run Text=" and " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/accessibility/keyboard-accessibility"><Run Text="Keyboard accessibility" /></Hyperlink><Run Text="." /></Paragraph>
+  </RichTextBlock>
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Manual Arrow Keys" FontSize="18" />
+    <StackPanel Spacing="4">
+      <Border Padding="8" AutomationProperties.Name="Potatoes?" BorderThickness="1" CornerRadius="4"
+              Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+              BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}">
+        <StackPanel Spacing="8">
+          <TextBlock Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Potatoes?" />
+          <!-- XYFocus.NavigationModes enables arrow keys between the buttons. The buttons are still
+               tabbable by default, Home/End and PgUp/PgDn do not work, and screen readers do not
+               read PositionInSet/SizeOfSet ("1 of 3"): all of that would require custom work. -->
+          <StackPanel x:Name="PotatoButtons" Orientation="Horizontal" Spacing="4" XYFocus.NavigationModes="Enabled">
+            <Button x:Name="BoilButton" Content="Boil 'em" />
+            <Button x:Name="MashButton" Content="Mash 'em" />
+            <Button x:Name="StewButton" Content="Stick 'em in a stew" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <TextBlock Theme="{DynamicResource CaptionTextBlockStyle}" TextWrapping="WrapWithOverflow"
+                 Text="Arrow keys navigate between each button, but tab still navigates between each button, and other buttons like Home/End do not work" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             Text="Keyboard shortcuts" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Keyboard shortcuts are extremely helpful for Narrator users, keyboard users, and power users. Since keyboard shortcuts generally lack the ability to quickly switch between sections of UI like a mouse can, adding a few keyboard shortcuts for common actions can make your app much easier to use." /></Paragraph>
+    <Paragraph><Run Text="WinUI 3 offers 2 types of keyboard shortcuts: " /><Run FontWeight="Bold" Text="Accelerators" /><Run Text=" and " /><Run FontWeight="Bold" Text="Access keys" /><Run Text=". Accelerators invoke specific app commands, while access keys set focus to specific parts of your UI." /></Paragraph>
+  </RichTextBlock>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}"
+             Text="Accelerators" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Accelerators are hotkeys (typically starting with the Ctrl key) that invoke specific app commands." /></Paragraph>
+    <Paragraph><Run Text="It's important to provide an easy way of discovering keyboard accelerators. For example, with tooltips, visible labels, AutomationProperties.AcceleratorKey, accessible descriptions, etc. By default, WinUI adds a tooltip with the hotkey, but consider including the accelerator manually if you use a custom tooltip." /></Paragraph>
+    <Paragraph><Run Text="See " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/input/keyboard-accelerators"><Run Text="Keyboard accelerators" /></Hyperlink><Run Text="." /></Paragraph>
+  </RichTextBlock>
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Accelerators" FontSize="18" />
+    <Grid HorizontalAlignment="Left" ColumnDefinitions="Auto,Auto,Auto,*" RowDefinitions="Auto,Auto,Auto"
+          ColumnSpacing="8" RowSpacing="8">
+      <Rectangle x:Name="ColorRectangle" Grid.ColumnSpan="3" Height="30" Fill="Red" RadiusX="4" RadiusY="4" />
+      <Button x:Name="MakeRedButton" Grid.Row="1" AutomationProperties.AcceleratorKey="Ctrl+R" Content="Red"
+              HotKey="Ctrl+R" />
+      <Button x:Name="MakeBlueButton" Grid.Row="1" Grid.Column="1" AutomationProperties.AcceleratorKey="Ctrl+B"
+              Content="Blue" HotKey="Ctrl+B" />
+      <!-- Chartreuse is an uncommon color, so we explain it in the tooltip. This replaces the
+           auto-generated tooltip, so we manually mention the hotkey in the custom tooltip. -->
+      <Button x:Name="MakeChartreuseButton" Grid.Row="1" Grid.Column="2" AutomationProperties.AcceleratorKey="Ctrl+G"
+              Content="Chartreuse" HotKey="Ctrl+G" ToolTip.Tip="A greenish-yellow (Ctrl+G)" />
+      <TextBlock Grid.Row="2" Grid.ColumnSpan="4" Theme="{DynamicResource CaptionTextBlockStyle}"
+                 Text="Ctrl+R, Ctrl+B, and Ctrl+G trigger Red, Blue, and Chartreuse respectively" />
+    </Grid>
+  </StackPanel>
+
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="3" Theme="{DynamicResource BodyStrongTextBlockStyle}"
+             Text="Access keys" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Access keys are keyboard shortcuts, starting with Alt, that move system focus around your UI." /></Paragraph>
+    <Paragraph><Run Text="When users press the Alt key, WinUI shows " /><Run FontWeight="Bold" Text="Key Tips" /><Run Text=" next to each control with an access key, so users can discover them. WinUI also populates AccessKey UIA property, so screen reader users can learn access keys, too." /></Paragraph>
+    <Paragraph><Run Text="See " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/input/access-keys"><Run Text="Access keys" /></Hyperlink><Run Text="." /></Paragraph>
+  </RichTextBlock>
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="Access Keys" FontSize="18" />
+    <StackPanel>
+      <Menu x:Name="AccessKeyMenu">
+        <MenuItem Header="_File" AutomationProperties.AccessKey="F">
+          <MenuItem Header="_New" AutomationProperties.AccessKey="N" />
+          <MenuItem Header="_Open..." AutomationProperties.AccessKey="O" />
+          <MenuItem Header="_Save" AutomationProperties.AccessKey="S" />
+          <MenuItem Header="_Exit" AutomationProperties.AccessKey="E" />
+        </MenuItem>
+        <MenuItem Header="_Edit" AutomationProperties.AccessKey="E">
+          <MenuItem Header="_Undo" AutomationProperties.AccessKey="U" />
+          <MenuItem Header="Cut" AutomationProperties.AccessKey="X" />
+          <MenuItem Header="_Copy" AutomationProperties.AccessKey="C" />
+          <MenuItem Header="Paste" AutomationProperties.AccessKey="V" />
+        </MenuItem>
+        <MenuItem Header="_Help" AutomationProperties.AccessKey="H">
+          <MenuItem Header="_About" AutomationProperties.AccessKey="A" />
+        </MenuItem>
+      </Menu>
+      <TextBlock Theme="{DynamicResource CaptionTextBlockStyle}"
+                 Text="Press and release Alt to display Key Tips; use Alt+letter to move focus to items" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

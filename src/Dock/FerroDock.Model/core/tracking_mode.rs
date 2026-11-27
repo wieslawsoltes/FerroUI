@@ -14,6 +14,8 @@ pub enum TrackingMode {
     Tab = 2,
 }
 
+ferroui_system::styled_enum!(TrackingMode { Visible, Pinned, Tab });
+
 impl TrackingMode {
     /// Original declaration for native metadata generation without a Domain UI dependency.
     #[doc(hidden)]

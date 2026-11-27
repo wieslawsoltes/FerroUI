@@ -28,6 +28,56 @@ impl fmt::Display for AnimationError {
 
 impl std::error::Error for AnimationError {}
 
+/// The settings of `animation` that a new instance refuses (#567): the error of the first
+/// negative speed ratio, delay, duration or delay between iterations, or of an iteration count
+/// above `i64::MAX`, in the order an instance reads them, with its message.
+pub(crate) fn validate_timing(animation: &Animation) -> Result<(), AnimationError> {
+    check_speed_ratio(animation.speed_ratio())?;
+    check_delay(animation.delay())?;
+    check_duration(animation.duration())?;
+    check_delay_between_iterations(animation.delay_between_iterations())?;
+    let iteration_count = animation.iteration_count();
+    if iteration_count.repeat_type() == IterationType::Many {
+        check_iteration_count(iteration_count.value())?;
+    }
+    Ok(())
+}
+
+fn check_speed_ratio(value: f64) -> Result<(), AnimationError> {
+    if value < 0.0 {
+        return Err(AnimationError("SpeedRatio value cannot be negative.".to_string()));
+    }
+    Ok(())
+}
+
+fn check_delay(value: SignedDuration) -> Result<(), AnimationError> {
+    if value < SignedDuration::ZERO {
+        return Err(AnimationError("Delay value cannot be negative.".to_string()));
+    }
+    Ok(())
+}
+
+fn check_duration(value: SignedDuration) -> Result<(), AnimationError> {
+    if value < SignedDuration::ZERO {
+        return Err(AnimationError("Duration value cannot be negative.".to_string()));
+    }
+    Ok(())
+}
+
+fn check_delay_between_iterations(value: SignedDuration) -> Result<(), AnimationError> {
+    if value < SignedDuration::ZERO {
+        return Err(AnimationError("DelayBetweenIterations value cannot be negative.".to_string()));
+    }
+    Ok(())
+}
+
+fn check_iteration_count(value: u64) -> Result<(), AnimationError> {
+    if value > i64::MAX as u64 {
+        return Err(AnimationError("IterationCount value cannot be larger than long.MaxValue.".to_string()));
+    }
+    Ok(())
+}
+
 /// Handles interpolation and time-related functions for keyframe
 /// animations: one run of one animator of an animation on one control. It
 /// is the observable that is bound to the animated property.
@@ -143,45 +193,21 @@ impl<A: Animator> AnimationInstance<A> {
 
         self.speed_ratio_prev.set(self.speed_ratio.get());
         self.speed_ratio.set(animation.speed_ratio());
-
-        if self.speed_ratio.get() < 0.0 {
-            return Err(AnimationError(
-                "SpeedRatio value cannot be negative.".to_string(),
-            ));
-        }
+        check_speed_ratio(self.speed_ratio.get())?;
 
         self.initial_delay.set(animation.delay());
-
-        if self.initial_delay.get() < SignedDuration::ZERO {
-            return Err(AnimationError(
-                "Delay value cannot be negative.".to_string(),
-            ));
-        }
+        check_delay(self.initial_delay.get())?;
 
         self.duration.set(animation.duration());
-
-        if self.duration.get() < SignedDuration::ZERO {
-            return Err(AnimationError(
-                "Duration value cannot be negative.".to_string(),
-            ));
-        }
+        check_duration(self.duration.get())?;
 
         self.iteration_delay
             .set(animation.delay_between_iterations());
-
-        if self.iteration_delay.get() < SignedDuration::ZERO {
-            return Err(AnimationError(
-                "DelayBetweenIterations value cannot be negative.".to_string(),
-            ));
-        }
+        check_delay_between_iterations(self.iteration_delay.get())?;
 
         let iteration_count = animation.iteration_count();
         if iteration_count.repeat_type() == IterationType::Many {
-            if iteration_count.value() > i64::MAX as u64 {
-                return Err(AnimationError(
-                    "IterationCount value cannot be larger than long.MaxValue.".to_string(),
-                ));
-            }
+            check_iteration_count(iteration_count.value())?;
             self.iteration_count
                 .set(Some(iteration_count.value() as i64));
         } else {

@@ -756,3 +756,110 @@ fn heat_cells_take_their_colours_at_the_first_draw() {
         "the lowest and highest weights take distinct colours"
     );
 }
+
+/// The tooltip goes where the source places it (`GetTooltipLocation` over the hover areas of the
+/// found points), not beside the pointer: above the top of the middle column of five with
+/// `TooltipPosition::Top`, below it with `Bottom`, and above the centre of a land of a map.
+#[test]
+fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(300.0, 300.0);
+    let chart = Chart::new();
+    chart.set_animations_speed(0.0);
+    let series = ChartSeries::new();
+    series.set_kind(SeriesKind::Column);
+    series.set_numeric_values([1.0, 2.0, 3.0, 4.0, 5.0]);
+    series.set_data_padding(Point::new(0.0, 0.0));
+    chart.series().add(series);
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_visible(false);
+    }
+    let scene = chart.scene(size).unwrap();
+    let pointer = Point::new(150.0, 150.0);
+    let found = scene.hit_test(pointer, FindingStrategy::Automatic, 0.0);
+    assert_eq!(found.len(), 1);
+    let bar = found[0].shape.hover_bounds();
+    let hovered = ChartPointerEventArgs {
+        position: pointer,
+        points: found.into_iter().cloned().collect(),
+    };
+    let tooltip = crate::decorations::tooltip_layout(&hovered, &scene.legend, ChartKind::Cartesian)
+        .size(ferroui_livecharts::PopUpPlacement::Top, size);
+    chart.set_tooltip_position(TooltipPosition::Top);
+    let top = chart.tooltip_location(&hovered, tooltip, size).origin;
+    assert!((top.x + tooltip.width * 0.5 - (bar.x + bar.width * 0.5)).abs() < 1e-6);
+    assert!((top.y + tooltip.height - bar.y).abs() < 1e-6);
+    chart.set_tooltip_position(TooltipPosition::Bottom);
+    let bottom = chart.tooltip_location(&hovered, tooltip, size).origin;
+    assert!((bottom.y - bar.y).abs() < 1e-6, "the source anchors at the end of the bar");
+    // A map anchors at the centre of the land.
+    let map = Chart::new();
+    map.set_chart_kind(ChartKind::GeoMap);
+    map.set_tooltip_position(TooltipPosition::Auto);
+    let land = HitRegion {
+        center: Point::new(150.0, 200.0),
+        ..hovered.points[0].clone()
+    };
+    let hovered = ChartPointerEventArgs {
+        position: Point::new(10.0, 10.0),
+        points: vec![land],
+    };
+    let at = map.tooltip_location(&hovered, tooltip, size).origin;
+    assert!((at.x - (150.0 - tooltip.width * 0.5)).abs() < 1e-6);
+    assert!((at.y - (200.0 - tooltip.height)).abs() < 1e-6);
+}
+
+/// A frame of the tooltip's animation reuses the compiled tooltip; only another hover compiles
+/// it again, and the tooltip that hides is gone at the end of its motion.
+#[test]
+fn tooltip_animation_reuses_its_compiled_frame() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(300.0, 300.0);
+    let chart = Chart::new();
+    chart.set_animations_speed(300.0);
+    let series = ChartSeries::new();
+    series.set_kind(SeriesKind::Column);
+    series.set_numeric_values([1.0, 2.0, 3.0, 4.0, 5.0]);
+    series.set_data_padding(Point::new(0.0, 0.0));
+    chart.series().add(series);
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_visible(false);
+    }
+    let scene = chart.scene(size).unwrap();
+    let hit = |x: f64| ChartPointerEventArgs {
+        position: Point::new(x, 150.0),
+        points: scene
+            .hit_test(Point::new(x, 150.0), FindingStrategy::Automatic, 0.0)
+            .into_iter()
+            .cloned()
+            .collect(),
+    };
+    chart.attached.set(true);
+    *chart.hover.borrow_mut() = Some(hit(150.0));
+    chart.hover_revision.set(1);
+    chart.update_tooltip(size, &scene.legend, 1000.0);
+    let first = chart.tooltip_motion.borrow().as_ref().unwrap().frame.clone();
+    for now in [1016.0, 1032.0, 1100.0] {
+        chart.update_tooltip(size, &scene.legend, now);
+        let current = chart.tooltip_motion.borrow().as_ref().unwrap().frame.clone();
+        assert!(Rc::ptr_eq(&first, &current), "a frame compiled the tooltip again");
+    }
+    *chart.hover.borrow_mut() = Some(hit(30.0));
+    chart.hover_revision.set(2);
+    chart.update_tooltip(size, &scene.legend, 1200.0);
+    let moved = chart.tooltip_motion.borrow().as_ref().unwrap().frame.clone();
+    assert!(!Rc::ptr_eq(&first, &moved), "another hover has its own tooltip");
+    chart.hover.borrow_mut().take();
+    chart.hover_revision.set(3);
+    chart.update_tooltip(size, &scene.legend, 1400.0);
+    let hiding = chart.tooltip_motion.borrow().as_ref().unwrap().is_hiding();
+    assert!(hiding);
+    let done = chart.tooltip_motion.borrow().as_ref().unwrap().is_completed(1550.0);
+    assert!(done);
+    chart.finish_tooltip_motion();
+    assert!(chart.tooltip_motion.borrow().is_none());
+    chart.attached.set(false);
+    chart.stop_tooltip_motion();
+}

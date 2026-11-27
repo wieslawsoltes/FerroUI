@@ -1,0 +1,631 @@
+// 7GUIs task 7, Cells, in Osprey through the C ABI of FerroUI (ferroui-capi): a spreadsheet of
+// 26 columns and 100 rows. A cell shows its value; a double click edits what it holds (a number,
+// text, or a formula after `=`, as seven_guis_model::cells reads them), and Enter, Escape or
+// leaving the field keeps it. The same task as samples/SevenGuis/Builders/Cells.
+//
+// The formulas are read and computed by a recursive-descent parser in Osprey over the text of the
+// formula: + - * /, parentheses, cells (`B12`), and the functions sum, prod, avg, min, max and
+// count of numbers, cells and ranges (`A0:B3`). What the cells hold is an Osprey map; after a
+// change every cell that holds something is computed again (a cell that names itself, directly or
+// not, is an error, `#cycle`, until the cycle is broken). The double click (DoubleTapped), the key
+// (ferro_event_key in the handler of KeyDown), the end of the edit (LostFocus) and the focus of
+// the field (ferro_focus, posted with ferro_post once the field is in the window) go through the
+// C ABI.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program runs the steps of the scenario of the Rust tests and
+// prints what the cells show.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+// @linkdir: target/debug
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_get_i64_or(object: int, property: int, fallback: int) -> int
+extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
+extern fn ferro_set_i64(object: int, property: int, value: int) -> int32
+extern fn ferro_clear(object: int, property: int) -> int32
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_set_handle(object: int, property: int, value: int) -> int32
+extern fn ferro_release(object: int) -> int32
+extern fn ferro_post(function: fn(int) -> int, token: int) -> int32
+extern fn ferro_focus(object: int) -> int32
+extern fn ferro_event_key() -> string
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn getInt(object: int, name: string, fallback: int) -> int =
+    ferro_get_i64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getFlag(object: int, name: string) -> bool =
+    ferro_get_bool_or(object: object, property: prop(name: name), fallback: toInt8(0)) == toInt8(1)
+
+fn setInt(object: int, name: string, value: int) -> Unit =
+    check(what: name, status: ferro_set_i64(object: object, property: prop(name: name), value: value))
+
+fn clear(object: int, name: string) -> Unit = check(what: name, status: ferro_clear(object: object, property: prop(name: name)))
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- cells and values (seven_guis_model::cells) ------------------------------------------------
+
+let columns = 26
+let rows = 100
+
+type Value = Empty | Number { number: float } | Text { text: string } | Fail { message: string }
+
+fn columnName(column: int) -> string = fromCodePoint(65 + column) ?: "?"
+
+fn cellName(index: int) -> string = "${columnName(column: index % 26)}${intDiv(index, 26)}"
+
+// The index of a cell named like `B12` (any case), -1 for a name that is no cell.
+fn cellIndex(name: string) -> int = {
+    let letter = toUpperCase(take(name, 1))
+    let column = match byteAt(letter, 0) {
+        Success { value } => value - 65
+        Error { message } => 0 - 1
+    }
+    let digits = drop(name, 1)
+    let row = isEmpty(digits) ? 0 - 1 : (parseInt(digits) ?: 0 - 1)
+    column >= 0 && column < 26 && row >= 0 && row < 100 && !startsWith(digits, "+") && !startsWith(digits, "-") ? row * 26 + column : 0 - 1
+}
+
+fn trimZeros(text: string) -> string = endsWith(text, "0") ? trimZeros(text: take(text, length(text) - 1)) : text
+
+fn pad4(value: int) -> string = padStart(toString(value), 4, "0") ?: toString(value)
+
+// A number as a cell shows it: whole numbers without a point, others with at most four decimals.
+fn formatNumber(number: float) -> string = {
+    let whole = floor(number) == number && abs(number) < 1000000000000000.0
+    match whole {
+        true => match floatToInt(number) {
+            Success { value } => toString(value)
+            Error { message } => "?"
+        }
+        false => match floatToInt(floor(abs(number) * 10000.0 + 0.5)) {
+            Success { value } => {
+                let fraction = trimZeros(text: pad4(value: value % 10000))
+                let sign = number < 0.0 ? "-" : ""
+                isEmpty(fraction) ? "${sign}${intDiv(value, 10000)}" : "${sign}${intDiv(value, 10000)}.${fraction}"
+            }
+            Error { message } => "?"
+        }
+    }
+}
+
+fn display(value: Value) -> string = match value {
+    Empty => ""
+    Number { number } => formatNumber(number: number)
+    Text { text } => text
+    Fail { message } => "#${message}"
+}
+
+// ---- state -----------------------------------------------------------------------------------
+
+type CellUi = { border: int, text: int }
+
+effect State {
+    contents: fn(Map<string, string>) -> Unit
+    cells: fn(List<CellUi>) -> Unit
+    editing: fn(int, int) -> Unit
+}
+
+// What the cells hold, by name; an empty cell is not in the map.
+mut contents: Map<string, string> = Map()
+// The border and the text of each cell, by index (row * 26 + column).
+mut cells = [CellUi { border: 0, text: 0 }]
+// The cell being edited (-1 for none) and its text field.
+mut editing = 0 - 1
+mut editor = 0
+
+fn setContents(value: Map<string, string>) -> Unit = {
+    handle State { contents v => { contents = v } }
+    perform State.contents(value)
+}
+
+fn setCells(value: List<CellUi>) -> Unit = {
+    handle State { cells v => { cells = v } }
+    perform State.cells(value)
+}
+
+fn setEditing(index: int, field: int) -> Unit = {
+    handle State {
+        editing i f => {
+            editing = i
+            editor = f
+        }
+    }
+    perform State.editing(index, field)
+}
+
+fn content(name: string) -> string = mapGet(contents, name) ?: ""
+
+// ---- formulas --------------------------------------------------------------------------------
+
+// A step of the parser: a number and the position after it, or why the formula fails.
+type Step = { ok: bool, value: float, pos: int, error: string }
+
+type Values = { ok: bool, values: List<float>, pos: int, error: string }
+
+fn fail(error: string) -> Step = Step { ok: false, value: 0.0, pos: 0, error: error }
+
+fn failValues(error: string) -> Values = Values { ok: false, values: List(), pos: 0, error: error }
+
+fn char(text: string, index: int) -> int = match byteAt(text, index) {
+    Success { value } => value
+    Error { message } => 0 - 1
+}
+
+fn isSpace(c: int) -> bool = c == 32 || c == 9 || c == 10 || c == 13
+
+fn isDigit(c: int) -> bool = c >= 48 && c <= 57
+
+fn isLetter(c: int) -> bool = (c >= 65 && c <= 90) || (c >= 97 && c <= 122)
+
+fn skip(text: string, pos: int) -> int = isSpace(c: char(text: text, index: pos)) ? skip(text: text, pos: pos + 1) : pos
+
+fn scan(text: string, pos: int, digits: bool) -> int = {
+    let c = char(text: text, index: pos)
+    let more = digits ? isDigit(c: c) || c == 46 : isLetter(c: c) || isDigit(c: c)
+    more ? scan(text: text, pos: pos + 1, digits: digits) : pos
+}
+
+fn charText(c: int) -> string = fromCodePoint(c) ?: "?"
+
+// The value of a cell as a number in a computation: empty is 0, text is an error.
+fn numberOf(value: Value) -> Step = match value {
+    Empty => Step { ok: true, value: 0.0, pos: 0, error: "" }
+    Number { number } => Step { ok: true, value: number, pos: 0, error: "" }
+    Text { text } => fail(error: "`${text}` is not a number")
+    Fail { message } => fail(error: message)
+}
+
+fn expression(text: string, pos: int, depth: int) -> Step = sums(text: text, left: term(text: text, pos: pos, depth: depth), depth: depth)
+
+fn sums(text: string, left: Step, depth: int) -> Step = {
+    let at = skip(text: text, pos: left.pos)
+    let c = char(text: text, index: at)
+    match left.ok && (c == 43 || c == 45) {
+        true => {
+            let right = term(text: text, pos: at + 1, depth: depth)
+            right.ok ? sums(text: text, left: right { value: c == 43 ? left.value + right.value : left.value - right.value }, depth: depth) : right
+        }
+        false => left
+    }
+}
+
+fn term(text: string, pos: int, depth: int) -> Step = products(text: text, left: factor(text: text, pos: pos, depth: depth), depth: depth)
+
+fn products(text: string, left: Step, depth: int) -> Step = {
+    let at = skip(text: text, pos: left.pos)
+    let c = char(text: text, index: at)
+    match left.ok && (c == 42 || c == 47) {
+        true => {
+            let right = factor(text: text, pos: at + 1, depth: depth)
+            match right.ok {
+                true => match c == 47 && right.value == 0.0 {
+                    true => fail(error: "division by zero")
+                    false => products(text: text, left: right { value: c == 42 ? left.value * right.value : floatDiv(left.value, right.value) }, depth: depth)
+                }
+                false => right
+            }
+        }
+        false => left
+    }
+}
+
+fn factor(text: string, pos: int, depth: int) -> Step = {
+    let at = skip(text: text, pos: pos)
+    let c = char(text: text, index: at)
+    match c {
+        45 => {
+            let inner = factor(text: text, pos: at + 1, depth: depth)
+            inner { value: 0.0 - inner.value }
+        }
+        40 => {
+            let inner = expression(text: text, pos: at + 1, depth: depth)
+            let close = skip(text: text, pos: inner.pos)
+            inner.ok ? (char(text: text, index: close) == 41 ? inner { pos: close + 1 } : fail(error: "expected `)`")) : inner
+        }
+        _ => if c < 0 { fail(error: "the formula ends early") } else { operand(text: text, at: at, c: c, depth: depth) }
+    }
+}
+
+fn operand(text: string, at: int, c: int, depth: int) -> Step =
+    if isDigit(c: c) || c == 46 { numberAt(text: text, at: at) } else { if isLetter(c: c) { word(text: text, at: at, depth: depth) } else { fail(error: "unexpected `${charText(c: c)}`") } }
+
+fn numberAt(text: string, at: int) -> Step = {
+    let end = scan(text: text, pos: at, digits: true)
+    let digits = substring(text, at, end) ?: ""
+    match parseFloat(digits) {
+        Success { value } => Step { ok: true, value: value, pos: end, error: "" }
+        Error { message } => fail(error: "`${digits}` is not a number")
+    }
+}
+
+// A cell, or a function and its arguments.
+fn word(text: string, at: int, depth: int) -> Step = {
+    let end = scan(text: text, pos: at, digits: false)
+    let name = substring(text, at, end) ?: ""
+    let next = skip(text: text, pos: end)
+    match char(text: text, index: next) == 40 {
+        true => call(name: toLowerCase(name), args: arguments(text: text, pos: next + 1, depth: depth))
+        false => {
+            let index = cellIndex(name: name)
+            match index >= 0 {
+                true => {
+                    let value = numberOf(value: valueOf(index: index, depth: depth + 1))
+                    value { pos: end }
+                }
+                false => fail(error: "`${name}` is not a cell")
+            }
+        }
+    }
+}
+
+// The arguments of a function up to its `)`: ranges give the numbers of their cells that are not
+// empty.
+fn arguments(text: string, pos: int, depth: int) -> Values = {
+    let at = skip(text: text, pos: pos)
+    match char(text: text, index: at) == 41 {
+        true => Values { ok: true, values: List(), pos: at + 1, error: "" }
+        false => moreArguments(text: text, done: Values { ok: true, values: List(), pos: at, error: "" }, depth: depth)
+    }
+}
+
+fn moreArguments(text: string, done: Values, depth: int) -> Values = {
+    let next = argument(text: text, pos: done.pos, depth: depth)
+    match next.ok {
+        true => {
+            let values = done.values + next.values
+            let at = skip(text: text, pos: next.pos)
+            let c = char(text: text, index: at)
+            match c {
+                44 => moreArguments(text: text, done: Values { ok: true, values: values, pos: at + 1, error: "" }, depth: depth)
+                41 => Values { ok: true, values: values, pos: at + 1, error: "" }
+                _ => failValues(error: "expected `)`")
+            }
+        }
+        false => next
+    }
+}
+
+// A range `A0:B3` (two cells around a colon), or an expression.
+fn argument(text: string, pos: int, depth: int) -> Values = {
+    let at = skip(text: text, pos: pos)
+    let end = scan(text: text, pos: at, digits: false)
+    let from = cellIndex(name: substring(text, at, end) ?: "")
+    let colon = skip(text: text, pos: end)
+    let start = skip(text: text, pos: colon + 1)
+    let stop = scan(text: text, pos: start, digits: false)
+    let to = cellIndex(name: substring(text, start, stop) ?: "")
+    match from >= 0 && char(text: text, index: colon) == 58 {
+        true => if to >= 0 { rangeValues(from: from, to: to, pos: stop, depth: depth) } else { failValues(error: "a range ends with a cell") }
+        false => {
+            let step = expression(text: text, pos: at, depth: depth)
+            step.ok ? Values { ok: true, values: [step.value], pos: step.pos, error: "" } : failValues(error: step.error)
+        }
+    }
+}
+
+fn minInt(a: int, b: int) -> int = a < b ? a : b
+
+fn maxInt(a: int, b: int) -> int = a > b ? a : b
+
+fn rangeValues(from: int, to: int, pos: int, depth: int) -> Values = {
+    let firstColumn = minInt(a: from % 26, b: to % 26)
+    let lastColumn = maxInt(a: from % 26, b: to % 26)
+    let firstRow = minInt(a: intDiv(from, 26), b: intDiv(to, 26))
+    let lastRow = maxInt(a: intDiv(from, 26), b: intDiv(to, 26))
+    let start = Values { ok: true, values: List(), pos: pos, error: "" }
+    range(firstColumn, lastColumn + 1) |> fold(start, fn(acc, column) =>
+        range(firstRow, lastRow + 1) |> fold(acc, fn(inner, row) => collect(done: inner, value: valueOf(index: row * 26 + column, depth: depth + 1))))
+}
+
+fn collect(done: Values, value: Value) -> Values = match done.ok {
+    true => match value {
+        Empty => done
+        Number { number } => done { values: listAppend(done.values, number) }
+        Text { text } => failValues(error: "`${text}` is not a number")
+        Fail { message } => failValues(error: message)
+    }
+    false => done
+}
+
+fn sum(values: List<float>) -> float = foldList(values, 0.0, fn(total, value) => total + value)
+
+fn call(name: string, args: Values) -> Step = match args.ok {
+    true => {
+        let count = toFloat(length(args.values))
+        let done = Step { ok: true, value: 0.0, pos: args.pos, error: "" }
+        match name {
+            "sum" => done { value: sum(values: args.values) }
+            "prod" => done { value: foldList(args.values, 1.0, fn(total, value) => total * value) }
+            "count" => done { value: count }
+            "avg" => count == 0.0 ? fail(error: "avg of nothing") : done { value: floatDiv(sum(values: args.values), count) }
+            "min" => extreme(values: args.values, done: done, smallest: true, name: name)
+            "max" => extreme(values: args.values, done: done, smallest: false, name: name)
+            _ => fail(error: "no function `${name}`")
+        }
+    }
+    false => fail(error: args.error)
+}
+
+fn extreme(values: List<float>, done: Step, smallest: bool, name: string) -> Step = match values {
+    [first, ...rest] => done { value: foldList(rest, first, fn(best, value) => smallest ? (value < best ? value : best) : (value > best ? value : best)) }
+    [] => fail(error: "${name} of nothing")
+}
+
+// What a cell holds, read and computed; `depth` counts the cells a formula followed to get here:
+// a chain that long is a cycle.
+fn evaluate(text: string, depth: int) -> Value = {
+    let trimmed = trim(text)
+    match isEmpty(trimmed) {
+        true => Empty
+        false => match startsWith(trimmed, "=") {
+            true => formula(text: drop(trimmed, 1), depth: depth)
+            false => match parseFloat(trimmed) {
+                Success { value } => Number { number: value }
+                Error { message } => Text { text: trimmed }
+            }
+        }
+    }
+}
+
+fn formula(text: string, depth: int) -> Value = {
+    let step = expression(text: text, pos: 0, depth: depth)
+    let end = skip(text: text, pos: step.pos)
+    match step.ok {
+        true => if char(text: text, index: end) < 0 { Number { number: step.value } } else { Fail { message: "unexpected `${charText(c: char(text: text, index: end))}`" } }
+        false => Fail { message: step.error }
+    }
+}
+
+fn valueOf(index: int, depth: int) -> Value =
+    depth > 50 ? Fail { message: "cycle" } : evaluate(text: content(name: cellName(index: index)), depth: depth)
+
+// ---- the view --------------------------------------------------------------------------------
+
+fn cellAt(index: int) -> CellUi = listGet(cells, index) ?: CellUi { border: 0, text: 0 }
+
+fn showCell(name: string) -> Unit = {
+    let index = cellIndex(name: name)
+    setText(object: cellAt(index: index).text, name: "Text", text: display(value: valueOf(index: index, depth: 0)))
+}
+
+// Keeps what a cell holds, and computes every cell that holds something again.
+fn setContent(name: string, text: string) -> Unit = {
+    setContents(value: isEmpty(trim(text)) ? mapRemove(contents, name) : mapSet(contents, name, text))
+    setText(object: cellAt(index: cellIndex(name: name)).text, name: "Text", text: "")
+    forEachList(mapKeys(contents), showCell)
+}
+
+fn startEditing(index: int) -> Unit = {
+    if editing >= 0 { stopEditing() } else { nothing() }
+    let field = make(name: "TextBox")
+    setText(object: field, name: "Text", text: content(name: cellName(index: index)))
+    setText(object: field, name: "Padding", text: "2")
+    setNumber(object: field, name: "MinHeight", value: 0.0)
+    let _k = ferro_subscribe(object: field, event: ferro_event_id(name: "KeyDown", length: 0 - 1), function: onKeyDown, token: index)
+    let _l = ferro_subscribe(object: field, event: ferro_event_id(name: "LostFocus", length: 0 - 1), function: onLostFocus, token: index)
+    setEditing(index: index, field: field)
+    check(what: "Child", status: ferro_set_handle(object: cellAt(index: index).border, property: prop(name: "Child"), value: field))
+    // Focused once it is in the window.
+    check(what: "post", status: ferro_post(function: focusEditor, token: index))
+}
+
+fn stopEditing() -> Unit = {
+    let index = editing
+    let field = editor
+    let text = getText(object: field, name: "Text")
+    // Not editing any more first: the field loses the focus as it leaves the window.
+    setEditing(index: 0 - 1, field: 0)
+    let cell = cellAt(index: index)
+    check(what: "Child", status: ferro_set_handle(object: cell.border, property: prop(name: "Child"), value: cell.text))
+    check(what: "release", status: ferro_release(object: field))
+    setContent(name: cellName(index: index), text: text)
+}
+
+// ---- handlers --------------------------------------------------------------------------------
+
+fn onDoubleTapped(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    startEditing(index: token)
+    0
+}
+
+fn onKeyDown(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let key = ferro_event_key() + ""
+    match (key == "Return" || key == "Escape") && editing == token {
+        true => {
+            stopEditing()
+            1
+        }
+        false => 0
+    }
+}
+
+fn onLostFocus(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    if editing == token { stopEditing() } else { nothing() }
+    0
+}
+
+fn focusEditor(token: int) -> int = {
+    if editing == token { check(what: "focus", status: ferro_focus(object: editor)) } else { nothing() }
+    0
+}
+
+fn header(text: string, row: int, column: int) -> int = {
+    let border = make(name: "Border")
+    setInt(object: border, name: "Grid.Row", value: row)
+    setInt(object: border, name: "Grid.Column", value: column)
+    setText(object: border, name: "Background", text: "#EEEEEE")
+    setText(object: border, name: "BorderBrush", text: "#CCCCCC")
+    setText(object: border, name: "BorderThickness", text: "0,0,1,1")
+    let block = make(name: "TextBlock")
+    setText(object: block, name: "Text", text: text)
+    setText(object: block, name: "HorizontalAlignment", text: "Center")
+    setText(object: block, name: "VerticalAlignment", text: "Center")
+    add(parent: border, child: block)
+    border
+}
+
+fn makeCell(index: int) -> CellUi = {
+    let border = make(name: "Border")
+    setText(object: border, name: "Name", text: cellName(index: index))
+    setInt(object: border, name: "Grid.Row", value: intDiv(index, 26) + 1)
+    setInt(object: border, name: "Grid.Column", value: index % 26 + 1)
+    setText(object: border, name: "BorderBrush", text: "#DDDDDD")
+    setText(object: border, name: "BorderThickness", text: "0,0,1,1")
+    setText(object: border, name: "Background", text: "White")
+    let block = make(name: "TextBlock")
+    setText(object: block, name: "Margin", text: "4,0")
+    setText(object: block, name: "VerticalAlignment", text: "Center")
+    add(parent: border, child: block)
+    let _d = ferro_subscribe(object: border, event: ferro_event_id(name: "DoubleTapped", length: 0 - 1), function: onDoubleTapped, token: index)
+    CellUi { border: border, text: block }
+}
+
+fn addTo(grid: int, child: int) -> Unit = add(parent: grid, child: child)
+
+fn onStart(token: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Cells")
+    setNumber(object: window, name: "Width", value: 900.0)
+    setNumber(object: window, name: "Height", value: 600.0)
+    let grid = make(name: "Grid")
+    setText(object: grid, name: "ColumnDefinitions", text: "40," + join(range(0, 26) |> map(fn(column) => "80") |> toList, ","))
+    setText(object: grid, name: "RowDefinitions", text: "Auto," + join(range(0, 100) |> map(fn(row) => "24") |> toList, ","))
+    range(0, 26) |> forEach(fn(column) => addTo(grid: grid, child: header(text: columnName(column: column), row: 0, column: column + 1)))
+    range(0, 100) |> forEach(fn(row) => addTo(grid: grid, child: header(text: toString(row), row: row + 1, column: 0)))
+    let made = range(0, 2600) |> map(makeCell) |> toList
+    forEachList(made, fn(cell) => addTo(grid: grid, child: cell.border))
+    setCells(value: made)
+    let scroll = make(name: "ScrollViewer")
+    setText(object: scroll, name: "HorizontalScrollBarVisibility", text: "Auto")
+    add(parent: scroll, child: grid)
+    add(parent: window, child: scroll)
+    // A few numbers and formulas, to show (Sheet::with_example).
+    setContent(name: "A0", text: "Item")
+    setContent(name: "B0", text: "Price")
+    setContent(name: "C0", text: "Count")
+    setContent(name: "D0", text: "Total")
+    setContent(name: "A1", text: "Apples")
+    setContent(name: "B1", text: "1.2")
+    setContent(name: "C1", text: "10")
+    setContent(name: "D1", text: "=B1 * C1")
+    setContent(name: "A2", text: "Pears")
+    setContent(name: "B2", text: "0.9")
+    setContent(name: "C2", text: "12")
+    setContent(name: "D2", text: "=B2 * C2")
+    setContent(name: "A3", text: "Plums")
+    setContent(name: "B3", text: "2.5")
+    setContent(name: "C3", text: "4")
+    setContent(name: "D3", text: "=B3 * C3")
+    setContent(name: "C4", text: "Sum")
+    setContent(name: "D4", text: "=sum(D1:D3)")
+    setContent(name: "C5", text: "Average")
+    setContent(name: "D5", text: "=avg(D1:D3)")
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn shown(name: string) -> string = getText(object: cellAt(index: cellIndex(name: name)).text, name: "Text")
+
+fn expect(name: string, expected: string) -> Unit = {
+    let text = shown(name: name)
+    print("script: ${name} shows '${text}': ${text == expected ? "ok" : "FAILED"}")
+}
+
+fn script() -> Unit = {
+    expect(name: "D4", expected: "32.8")
+    expect(name: "D5", expected: "10.9333")
+    // The scenario starts from an empty sheet.
+    forEachList(mapKeys(contents), fn(name) => setContent(name: name, text: ""))
+    setContent(name: "A0", text: "1")
+    setContent(name: "A1", text: "=A0 + 1")
+    setContent(name: "A2", text: "=sum(A0:A1) * 2")
+    expect(name: "A2", expected: "6")
+    setContent(name: "A0", text: "10")
+    expect(name: "A2", expected: "42")
+    setContent(name: "A0", text: "=A2")
+    expect(name: "A2", expected: "#cycle")
+    setContent(name: "A0", text: "2")
+    expect(name: "A2", expected: "10")
+    // The edit of B3 through its text field.
+    startEditing(index: cellIndex(name: "B3"))
+    setText(object: editor, name: "Text", text: "=A0 * 3")
+    stopEditing()
+    expect(name: "B3", expected: "6")
+    setContent(name: "C0", text: "=max(1, 2, -3) + avg(A0:A2) / 0")
+    expect(name: "C0", expected: "#division by zero")
+    setContent(name: "C1", text: "=A0 +")
+    expect(name: "C1", expected: "#the formula ends early")
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}

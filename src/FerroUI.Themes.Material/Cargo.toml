@@ -25,7 +25,13 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
-default = []
+default = ["embedded-font-assets"]
+# `register_types` registers the three embedded Roboto files as assets of the theme assembly
+# (`ferres://FerroUI.Themes.Material/Assets/Roboto-*.ttf`), for applications that load them by URI
+# (#856). Without it the files are linked only by `with_material_fonts`, the explicit choice of the
+# embedded family; an application that does not call it uses `Roboto` of the system, else the
+# default font (the fallbacks of `ContentControlThemeFontFamily`).
+embedded-font-assets = []
 # Reads Android 12+ system palettes through the existing platform context.
 android-dynamic-color = ["dep:ferroui-android"]
 

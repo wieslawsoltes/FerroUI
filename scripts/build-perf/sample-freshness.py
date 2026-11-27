@@ -180,10 +180,12 @@ def changed_outputs(first: dict, second: dict) -> list[str]:
 def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env: dict,
                    jobs: int | None, report: dict, save, accept_output_changes: bool = False) -> None:
     reference_outputs: dict[str, dict] = {}
-    build_only = build_only_packages(sources["candidate"])
+    build_only: set[str] = set()
     for label, source in sources.items():
         directory = temporary / f"fixture-{label}"
         make_fixture(directory, source, env)
+        if label == "candidate":
+            build_only = build_only_packages(directory, [FIXTURE_PACKAGE, CONSUMER_PACKAGE])
         target = temporary / f"target-{label}"
         excluded = directory / "fixture/excluded.txt"
         rust_source = directory / "fixture/lib.rs"
@@ -337,7 +339,7 @@ def main() -> int:
                 # The graph of every build is the baseline's; the generated files of a revision are its
                 # own first build's, and the baseline's unless an output change is acknowledged.
                 references = {}
-                build_only = build_only_packages(sources["candidate"])
+                build_only = build_only_packages(sources["candidate"], [package])
                 for label, source in sources.items():
                     target = temporary / f"target-{label}"
                     record = build(source, source, target, output / "graph", label, "populate", package,
