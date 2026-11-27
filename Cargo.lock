@@ -2110,6 +2110,8 @@ dependencies = [
  "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-win32",
+ "ferroui-x11",
  "url",
 ]
 
