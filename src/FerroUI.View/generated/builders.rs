@@ -9289,6 +9289,31 @@ pub trait TableViewProps: ElementBuilder {
     fn can_user_resize_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TableView>::can_user_resize_columns_property(), value)
     }
+
+    /// Sets [`TableView::grid_lines_visibility_property`](ferroui_controls::TableView::grid_lines_visibility_property).
+    fn grid_lines_visibility<M>(self, value: impl IntoProp<ferroui_controls::TableViewGridLinesVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::grid_lines_visibility_property(), value)
+    }
+
+    /// Sets [`TableView::density_property`](ferroui_controls::TableView::density_property).
+    fn density<M>(self, value: impl IntoProp<ferroui_controls::TableViewDensity, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::density_property(), value)
+    }
+
+    /// Sets [`TableView::row_background_property`](ferroui_controls::TableView::row_background_property).
+    fn row_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::row_background_property(), value)
+    }
+
+    /// Sets [`TableView::alternating_row_background_property`](ferroui_controls::TableView::alternating_row_background_property).
+    fn alternating_row_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::alternating_row_background_property(), value)
+    }
+
+    /// Sets [`TableView::empty_template_property`](ferroui_controls::TableView::empty_template_property).
+    fn empty_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::empty_template_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TableView>> TableViewProps for El<T> {}
 

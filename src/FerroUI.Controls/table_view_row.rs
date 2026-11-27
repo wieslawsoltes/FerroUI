@@ -4,12 +4,15 @@ use crate::{ContentControlImpl, ControlImpl, ListBoxItem, TableViewColumn};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
+use crate::primitives::TemplatedControl;
 use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::media::IBrush;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref, StyledElementImpl,
     VisualImpl,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 const PART_CELLS_PRESENTER: &str = "PART_CellsPresenter";
 
@@ -19,6 +22,9 @@ pub struct TableViewRow {
     base: ListBoxItem,
     cells_presenter: RefCell<Option<Ref<TableViewCellsPresenter>>>,
     columns: RefCell<Option<FerroList<Ref<TableViewColumn>>>>,
+    /// Whether the background is the one the table set (`RowBackground`,
+    /// `AlternatingRowBackground`), so that the table clears only its own.
+    has_table_background: Cell<bool>,
 }
 
 ferro_class!(TableViewRow: ListBoxItem);
@@ -63,7 +69,12 @@ impl TemplatedControlImpl for TableViewRow {
 impl TableViewRow {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: ListBoxItem::construct(), cells_presenter: RefCell::new(None), columns: RefCell::new(None) }
+        Self {
+            base: ListBoxItem::construct(),
+            cells_presenter: RefCell::new(None),
+            columns: RefCell::new(None),
+            has_table_background: Cell::new(false),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -77,6 +88,20 @@ impl TableViewRow {
 
     pub(crate) fn set_columns(&self, value: Option<FerroList<Ref<TableViewColumn>>>) {
         *self.columns.borrow_mut() = value;
+    }
+
+    /// Sets the background the table gives the row, or clears the one it gave.
+    pub(crate) fn set_table_background(&self, value: Option<Rc<dyn IBrush>>) {
+        match value {
+            Some(brush) => {
+                self.set_value(TemplatedControl::background_property(), Some(brush));
+                self.has_table_background.set(true);
+            }
+            None if self.has_table_background.replace(false) => {
+                self.clear_value(TemplatedControl::background_property());
+            }
+            None => {}
+        }
     }
 
     fn cells_presenter(&self) -> Option<Ref<TableViewCellsPresenter>> {

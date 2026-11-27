@@ -32,7 +32,7 @@ use std::rc::Rc;
 // Models
 // ---------------------------------------------------------------------------
 
-struct Person {
+pub(super) struct Person {
     name: String,
     nickname: Option<String>,
 }
@@ -42,7 +42,7 @@ ferro_model!(Person, |b| b
     .read_only::<Maybe<String>>("Nickname", |person| person.nickname.clone()));
 
 impl Person {
-    fn new(name: &str, nickname: Option<&str>) -> Rc<Self> {
+    pub(super) fn new(name: &str, nickname: Option<&str>) -> Rc<Self> {
         Model::new_model(Self { name: name.to_string(), nickname: nickname.map(str::to_string) })
     }
 }
@@ -53,26 +53,26 @@ impl Person {
 
 /// A running unit test application with the text services of the tests
 /// registered over its services.
-struct AppScope {
+pub(super) struct AppScope {
     // Dropped in this order: the text services first.
     _text: TextTestScope,
     _app: UnitTestApplicationScope,
 }
 
-fn start() -> AppScope {
+pub(super) fn start() -> AppScope {
     let app = UnitTestApplication::start(TestServices::mock_platform_render_interface());
     AppScope { _text: TextTestScope::new(), _app: app }
 }
 
-fn strs(values: &[&str]) -> ItemsSource {
+pub(super) fn strs(values: &[&str]) -> ItemsSource {
     ItemsSource::from_strs(values.iter().copied())
 }
 
-fn people(values: &[&Rc<Person>]) -> ItemsSource {
+pub(super) fn people(values: &[&Rc<Person>]) -> ItemsSource {
     ItemsSource::from_items(values.iter().map(|person| Some(Rc::clone(person) as BoxedValue)))
 }
 
-fn create_target(items: ItemsSource) -> Ref<TableView> {
+pub(super) fn create_target(items: ItemsSource) -> Ref<TableView> {
     let target = TableView::new();
     target.set_template(Some(table_view_template()));
     target.set_item_container_theme(Some(table_view_row_theme()));
@@ -80,26 +80,26 @@ fn create_target(items: ItemsSource) -> Ref<TableView> {
     target
 }
 
-fn column() -> Ref<TableViewColumn> {
+pub(super) fn column() -> Ref<TableViewColumn> {
     TableViewColumn::new()
 }
 
-fn star_column() -> Ref<TableViewColumn> {
+pub(super) fn star_column() -> Ref<TableViewColumn> {
     let column = TableViewColumn::new();
     column.set_width(GridLength::new(1.0, GridUnitType::Star));
     column
 }
 
-fn binding(path: &str) -> Option<AssignedBinding> {
+pub(super) fn binding(path: &str) -> Option<AssignedBinding> {
     let binding: Rc<dyn BindingBase> = ReflectionBinding::new(path);
     Some(AssignedBinding::new(binding))
 }
 
-fn text_block_template() -> Rc<dyn IDataTemplate> {
+pub(super) fn text_block_template() -> Rc<dyn IDataTemplate> {
     FuncDataTemplate::new(|_| true, |_, _| Some(TextBlock::new().upcast()), false)
 }
 
-fn rows(target: &TableView) -> Vec<Ref<TableViewRow>> {
+pub(super) fn rows(target: &TableView) -> Vec<Ref<TableViewRow>> {
     target
         .get_realized_containers()
         .into_iter()
@@ -107,30 +107,30 @@ fn rows(target: &TableView) -> Vec<Ref<TableViewRow>> {
         .collect()
 }
 
-fn single_row(target: &TableView) -> Ref<TableViewRow> {
+pub(super) fn single_row(target: &TableView) -> Ref<TableViewRow> {
     let mut rows = rows(target);
     assert_eq!(rows.len(), 1);
     rows.remove(0)
 }
 
-fn get_cells_presenter(row: &TableViewRow) -> Ref<TableViewCellsPresenter> {
+pub(super) fn get_cells_presenter(row: &TableViewRow) -> Ref<TableViewCellsPresenter> {
     row.get_visual_descendants()
         .find_map(|visual| visual.cast::<TableViewCellsPresenter>())
         .expect("the row has no cells presenter")
 }
 
-fn get_column_headers_presenter(target: &TableView) -> Ref<TableViewColumnHeadersPresenter> {
+pub(super) fn get_column_headers_presenter(target: &TableView) -> Ref<TableViewColumnHeadersPresenter> {
     target
         .get_visual_descendants()
         .find_map(|visual| visual.cast::<TableViewColumnHeadersPresenter>())
         .expect("the table view has no column headers presenter")
 }
 
-fn cell(presenter: &TableViewCellsPresenter, index: usize) -> Ref<TableViewCell> {
+pub(super) fn cell(presenter: &TableViewCellsPresenter, index: usize) -> Ref<TableViewCell> {
     presenter.children().get(index).cast::<TableViewCell>().expect("the child is not a cell")
 }
 
-fn header(presenter: &TableViewColumnHeadersPresenter, index: usize) -> Ref<TableViewColumnHeader> {
+pub(super) fn header(presenter: &TableViewColumnHeadersPresenter, index: usize) -> Ref<TableViewColumnHeader> {
     presenter.children().get(index).cast::<TableViewColumnHeader>().expect("the child is not a column header")
 }
 
@@ -143,15 +143,15 @@ fn logical_children(row: &TableViewRow) -> Vec<Ref<StyledElement>> {
     StyledElement::logical_children(row).to_vec()
 }
 
-fn content_string(cell: &TableViewCell) -> Option<String> {
+pub(super) fn content_string(cell: &TableViewCell) -> Option<String> {
     cell.content().as_ref().and_then(string_of)
 }
 
-fn prepare(target: &Ref<TableView>) -> Ref<TestRoot> {
+pub(super) fn prepare(target: &Ref<TableView>) -> Ref<TestRoot> {
     prepare_with(target, 300.0, 200.0)
 }
 
-fn prepare_with(target: &Ref<TableView>, width: f64, height: f64) -> Ref<TestRoot> {
+pub(super) fn prepare_with(target: &Ref<TableView>, width: f64, height: f64) -> Ref<TestRoot> {
     target.set_width(width);
     target.set_height(height);
     let root = TestRoot::with_child(target);
@@ -159,7 +159,7 @@ fn prepare_with(target: &Ref<TableView>, width: f64, height: f64) -> Ref<TestRoo
     root
 }
 
-fn layout(control: &Control) {
+pub(super) fn layout(control: &Control) {
     if let Some(layout_manager) = control.get_layout_manager() {
         layout_manager.execute_layout_pass();
     }

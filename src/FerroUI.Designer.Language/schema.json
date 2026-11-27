@@ -24692,6 +24692,50 @@
         ],
         "attached": false
       },
+      "GridLinesVisibility": {
+        "name": "GridLinesVisibility",
+        "type_name": "TableViewGridLinesVisibility",
+        "documentation": "TableView.GridLinesVisibility: TableViewGridLinesVisibility",
+        "values": [
+          "All",
+          "Horizontal",
+          "Vertical",
+          "None"
+        ],
+        "attached": false
+      },
+      "Density": {
+        "name": "Density",
+        "type_name": "TableViewDensity",
+        "documentation": "TableView.Density: TableViewDensity",
+        "values": [
+          "Standard",
+          "Compact",
+          "Comfortable"
+        ],
+        "attached": false
+      },
+      "RowBackground": {
+        "name": "RowBackground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "TableView.RowBackground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "AlternatingRowBackground": {
+        "name": "AlternatingRowBackground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "TableView.AlternatingRowBackground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "EmptyTemplate": {
+        "name": "EmptyTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TableView.EmptyTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
       "DisplayMemberBinding": {
         "name": "DisplayMemberBinding",
         "type_name": "Option<AssignedBinding>",

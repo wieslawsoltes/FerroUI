@@ -512,6 +512,8 @@ ferroui_base::ferro_rust_paths! {
         crate::TabViewCloseButtonOverlayMode,
         crate::TabViewTabCloseRequestedEventArgs,
         crate::TabViewWidthMode,
+        crate::TableViewDensity,
+        crate::TableViewGridLinesVisibility,
         crate::TextChangedEventArgs,
         crate::TextChangingEventArgs,
         crate::TextLayoutRoundingPlacement,

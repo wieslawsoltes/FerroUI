@@ -121,6 +121,9 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::PagerControlDisplayMode as MarkupTyped>::MARKUP,
     <crate::PagerControlButtonVisibility as MarkupTyped>::MARKUP,
     <crate::PagerControlSelectedIndexChangedEventArgs as MarkupTyped>::MARKUP,
+    // The WinUI additions of TableView (docs/porting/winui-controls.md, section 10.11).
+    <crate::TableViewGridLinesVisibility as MarkupTyped>::MARKUP,
+    <crate::TableViewDensity as MarkupTyped>::MARKUP,
     // The WinUI materials (winui-materials.md), declared next to the types.
     <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
     <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
@@ -195,6 +198,8 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<AutoSuggestionBoxTextChangeReason>();
     ValueTypes::register_used::<crate::PagerControlDisplayMode>();
     ValueTypes::register_used::<crate::PagerControlButtonVisibility>();
+    ValueTypes::register_used::<crate::TableViewGridLinesVisibility>();
+    ValueTypes::register_used::<crate::TableViewDensity>();
     ValueTypes::register_used::<crate::media::ApplicationTheme>();
     ValueTypes::register_used::<crate::media::RevealBrushState>();
     ValueTypes::register_used::<crate::media::FocusVisualKind>();
@@ -355,6 +360,18 @@ impl ferroui_base::data::core::ValueTypeRegistration for AutoSuggestionBoxTextCh
 impl ferroui_base::data::core::ValueTypeRegistration for crate::PagerControlDisplayMode {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<crate::PagerControlDisplayMode>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::TableViewGridLinesVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::TableViewGridLinesVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::TableViewDensity {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::TableViewDensity>();
     }
 }
 

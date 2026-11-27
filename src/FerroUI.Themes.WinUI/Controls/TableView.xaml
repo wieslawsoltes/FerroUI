@@ -23,9 +23,14 @@
     does: ClipToBounds is set by the theme and honoured by the border (as in the Fluent theme).
   - The padding of the table is the margin of the items presenter and the padding of the scroll
     viewer is the padding of its presenter, as FerroUI's templates honour them.
-  - PART_EmptyStatePresenter, the frozen columns, the sorting, the grouping and the hierarchy of
-    WinUI's TableView have no counterpart in FerroUI's TableView. IsTabStop="False" (the table is a
-    focus scope of two tab stops) is left out: FerroUI's ListBox keeps its own keyboard handling.
+  - The WinUI additions of FerroUI's TableView (docs/porting/winui-controls.md, section 10.11):
+    PART_EmptyStatePresenter overlays the scroll viewer and shows EmptyTemplate while the table is
+    :empty; GridLinesVisibility and Density are the pseudo-classes :nohorizontalgridlines,
+    :noverticalgridlines, :compact and :comfortable, whose styles set the borders, the minimum
+    heights and the paddings of the rows, the cells and the headers from the resources of the
+    densities. The hierarchy of WinUI's TableView has no counterpart in FerroUI's TableView.
+    IsTabStop="False" (the table is a focus scope of two tab stops) is left out: FerroUI's ListBox
+    keeps its own keyboard handling.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -152,23 +157,67 @@
                 BackgroundSizing="InnerBorderEdge"
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}">
-          <ScrollViewer x:Name="PART_ScrollViewer"
-                        Theme="{StaticResource TableViewScrollViewerStyle}"
-                        VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
-                        HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
-                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
-                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
-                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
-                        IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
-                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
-                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
-                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
-            <ItemsPresenter x:Name="PART_ItemsPresenter"
-                            ItemsPanel="{TemplateBinding ItemsPanel}"
-                            Margin="{TemplateBinding Padding}" />
-          </ScrollViewer>
+          <Panel>
+            <ScrollViewer x:Name="PART_ScrollViewer"
+                          Theme="{StaticResource TableViewScrollViewerStyle}"
+                          VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                          HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                          IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                          IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
+                          IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                          AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                          BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+              <ItemsPresenter x:Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}"
+                              Margin="{TemplateBinding Padding}" />
+            </ScrollViewer>
+            <!-- EmptyTemplate (WinUI): shown while the table has no rows (:empty). -->
+            <ContentPresenter x:Name="PART_EmptyStatePresenter"
+                              ContentTemplate="{TemplateBinding EmptyTemplate}"
+                              IsVisible="False" />
+          </Panel>
         </Border>
       </ControlTemplate>
     </Setter>
+
+    <!-- GridLinesVisibility (WinUI): the lines the table leaves out. -->
+    <Style Selector="^:nohorizontalgridlines TableViewRow">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="^:noverticalgridlines TableViewCell">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="^:noverticalgridlines TableViewColumnHeader">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <!-- Density (WinUI): the compact and comfortable sizes of the resources. -->
+    <Style Selector="^:compact TableViewRow">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+    </Style>
+    <Style Selector="^:compact TableViewCell">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingCompact}" />
+    </Style>
+    <Style Selector="^:compact TableViewColumnHeader">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightCompact}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingCompact}" />
+    </Style>
+    <Style Selector="^:comfortable TableViewRow">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+    </Style>
+    <Style Selector="^:comfortable TableViewCell">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewCellPaddingComfortable}" />
+    </Style>
+    <Style Selector="^:comfortable TableViewColumnHeader">
+      <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeightComfortable}" />
+      <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPaddingComfortable}" />
+    </Style>
+    <!-- EmptyTemplate (WinUI). -->
+    <Style Selector="^:empty /template/ ContentPresenter#PART_EmptyStatePresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
   </ControlTheme>
 </ResourceDictionary>
