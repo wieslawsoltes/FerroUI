@@ -1,4 +1,137 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TabControl Width="500" Height="220" HorizontalAlignment="Left"><TabItem Header="Document 1"><TextBlock Text="First document" Margin="20"/></TabItem><TabItem Header="Document 2"><TextBlock Text="Second document" Margin="20"/></TabItem><TabItem Header="Document 3"><TextBlock Text="Third document" Margin="20"/></TabItem></TabControl>
+<!-- Ported from the pinned TabView examples of WinUI Gallery (14061eea) and the code behind of
+     TabViewPage.xaml.cs (tab_view_samples.rs); see ../NOTICE.md. The tabs of the first and the
+     keyboard, custom content and accent examples are added in code, as TabView_Loaded does; the
+     content of such a tab is a Frame on one of the sample pages, and the content of a tab of
+     markup is the text of its sample page. BaseTextBlockStyle is a semibold TextBlock, and the
+     Headers of the option boxes are the titles above them. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Spacing="8">
+    <TextBlock Text="A TabView that supports adding and closing tabs" FontSize="18" />
+    <TabView x:Name="TabView1" MinHeight="475" SelectedIndex="0" />
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="A TabView with its TabViewItems defined in markup" FontSize="18" />
+    <TabView x:Name="TabViewMarkup" MinHeight="475" SelectedIndex="0">
+      <TabViewItem Header="Document 0">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Placeholder" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 1" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Document 1">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Placeholder" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 2" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Document 2">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Placeholder" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 3" Margin="12" />
+      </TabViewItem>
+    </TabView>
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="Keyboarding support in TabView" FontSize="18" />
+    <TextBlock Text="- Ctrl+T opens a new tab" TextWrapping="WrapWithOverflow" />
+    <TextBlock Text="- Ctrl+W closes the selected tab" TextWrapping="WrapWithOverflow" />
+    <TextBlock Text="- Ctrl+1 to Ctrl+8 selects that number tab" TextWrapping="WrapWithOverflow" />
+    <TextBlock Text="- Ctrl+9 selects the last tab (regardless of the number of tabs)"
+               Margin="0,0,0,24" TextWrapping="WrapWithOverflow" />
+    <TabView x:Name="TabView2" MinHeight="475" SelectedIndex="0" />
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="TabView with custom content in the tab strip" FontSize="18" />
+    <TextBlock Text="You can put any content in the TabStripHeader and TabStripFooter areas" TextWrapping="WrapWithOverflow" />
+    <TextBlock Text="If your TabView is used inside the app's titlebar area, use the TabStripFooter to specify a custom drag region" TextWrapping="WrapWithOverflow" />
+    <TabView x:Name="TabViewCustomContent" MinHeight="475" SelectedIndex="0" TabWidthMode="SizeToContent">
+      <TabView.TabStripHeader>
+        <TextBlock Margin="8,6" VerticalAlignment="Center" FontWeight="SemiBold" Text="TabStripHeader Content" />
+      </TabView.TabStripHeader>
+      <TabView.TabStripFooter>
+        <TextBlock Margin="6" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold" Text="TabStripFooter Content" />
+      </TabView.TabStripFooter>
+    </TabView>
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="Tab widths can either be equal, size to their content or compact" FontSize="18" />
+    <ComboBox x:Name="TabWidthBehaviorComboBox" Width="150" HorizontalAlignment="Left" SelectedIndex="0">
+      <ComboBoxItem Content="SizeToContent" />
+      <ComboBoxItem Content="Equal" />
+      <ComboBoxItem Content="Compact" />
+    </ComboBox>
+    <TabView x:Name="TabView3" MinHeight="475" IsAddTabButtonVisible="False" SelectedIndex="0" TabWidthMode="SizeToContent">
+      <TabViewItem Header="Home" IsClosable="False">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Home" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 1" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Tab 2 Has Longer Text" IsClosable="False">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="MusicInfo" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 2" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Third Tab" IsClosable="False">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Placeholder" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 3" Margin="12" />
+      </TabViewItem>
+    </TabView>
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="The close button of a tab can be persistent or show on hover" FontSize="18" />
+    <ComboBox x:Name="TabCloseButtonOverlayModeComboBox" Width="150" HorizontalAlignment="Left" SelectedIndex="1">
+      <ComboBoxItem Content="Auto" />
+      <ComboBoxItem Content="Always" />
+      <ComboBoxItem Content="OnHover" />
+    </ComboBox>
+    <TabView x:Name="TabView4" MinHeight="475" IsAddTabButtonVisible="False" SelectedIndex="0">
+      <TabViewItem Header="Home">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Home" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 1" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Tab 2 Has Longer Text">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="MusicInfo" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 2" Margin="12" />
+      </TabViewItem>
+      <TabViewItem Header="Third Tab">
+        <TabViewItem.IconSource>
+          <SymbolIconSource Symbol="Placeholder" />
+        </TabViewItem.IconSource>
+        <TextBlock Text="Sample page 3" Margin="12" />
+      </TabViewItem>
+    </TabView>
+  </StackPanel>
+
+  <StackPanel Spacing="8">
+    <TextBlock Text="A TabView with an accent colored tab strip" FontSize="18" />
+    <TabView x:Name="TabViewAccent" MinHeight="475" SelectedIndex="0">
+      <TabView.Resources>
+        <ResourceDictionary>
+          <ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary x:Key="Light">
+              <SolidColorBrush x:Key="TabViewBackground" Color="{DynamicResource SystemAccentColorLight2}" />
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Dark">
+              <SolidColorBrush x:Key="TabViewBackground" Color="{DynamicResource SystemAccentColorDark2}" />
+            </ResourceDictionary>
+          </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+      </TabView.Resources>
+    </TabView>
+  </StackPanel>
 </StackPanel>
