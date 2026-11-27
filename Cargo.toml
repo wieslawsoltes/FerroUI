@@ -29,6 +29,7 @@ members = [
     "src/FerroUI.Media3D",
     "src/FerroUI.Rendering3D",
     "src/FerroUI.Physics",
+    "src/FerroUI.NodeGraph",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
     "src/FerroUI.Media.Qr",
@@ -304,6 +305,7 @@ ferroui-media = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media" }
 ferroui-media3d = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media3D" }
 ferroui-render3d = { version = "=0.5.1-preview.1", path = "src/FerroUI.Rendering3D" }
 ferroui-physics = { version = "=0.5.1-preview.1", path = "src/FerroUI.Physics" }
+ferroui-nodegraph = { version = "=0.5.1-preview.1", path = "src/FerroUI.NodeGraph" }
 ferroui-media-metal = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.Metal" }
 ferroui-media-opengl = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.OpenGL" }
 ferroui-media-android = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.Android" }

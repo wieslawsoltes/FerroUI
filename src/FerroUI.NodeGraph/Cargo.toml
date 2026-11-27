@@ -1,0 +1,41 @@
+[package]
+name = "ferroui-nodegraph"
+description = "Rhino Grasshopper-style parametric data-tree visual node programming engine and interactive FerroUI canvas control"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["node-graph", "grasshopper", "parametric", "visual-programming", "gui"]
+categories = ["gui", "visualization", "development-tools"]
+
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+indexmap.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true
+ferroui-base = { workspace = true, optional = true }
+ferroui-controls = { workspace = true, optional = true }
+ferroui-view = { workspace = true, optional = true }
+ferroui-physics = { workspace = true, optional = true }
+
+[features]
+default = ["ferroui"]
+# Interactive hardware-rendered Grasshopper-style FerroUI canvas control & editor view.
+ferroui = ["dep:ferroui-base", "dep:ferroui-controls", "dep:ferroui-view"]
+# Built-in parametric physics node library targeting ferroui-physics worlds.
+physics = ["dep:ferroui-physics"]
+
+[package.metadata.release]
+group = "core"
+
+[package.metadata.docs.rs]
+features = ["ferroui", "physics"]

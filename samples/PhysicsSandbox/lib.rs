@@ -2,6 +2,7 @@
 //! `ferroui-physics` and `ferroui-view`.
 
 pub mod live_ui_tree;
+pub mod node_graph_studio;
 pub mod scenes;
 pub mod viewport;
 
@@ -30,12 +31,19 @@ fn studio_card(title: &'static str, body: impl IntoElement) -> Element {
         .into()
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum StudioViewMode {
+    Canvas,
+    LiveUiTree,
+    NodeGraph,
+}
+
 /// Builds the full **FerroUI Physics Studio** application layout.
 pub fn physics_sandbox() -> Element {
     let engine = Rc::new(RefCell::new(SandboxEngine::new()));
 
     let active_scene = signal(SceneKind::Playground);
-    let live_ui_mode = signal(false);
+    let view_mode = signal(StudioViewMode::Canvas);
     let active_tool = signal(ToolMode::Drag);
     let active_preset = signal(SpringPreset::Bouncy);
     let active_solver = signal(SolverProfile::Game);
@@ -83,28 +91,41 @@ pub fn physics_sandbox() -> Element {
             button()
                 .padding((8.0, 5.0, 8.0, 5.0))
                 .corner_radius(6.0)
-                .background(move || if !live_ui_mode.get() && active_scene.get() == kind { "#0284C7" } else { "#182235" })
+                .background(move || if view_mode.get() == StudioViewMode::Canvas && active_scene.get() == kind { "#0284C7" } else { "#182235" })
                 .foreground("#F1F5F9")
                 .content(kind.title())
                 .on_click(move |_| {
-                    live_ui_mode.set(false);
+                    view_mode.set(StudioViewMode::Canvas);
+                    eng.borrow_mut().blueprint_driven = false;
                     eng.borrow_mut().load_scene(kind);
                     active_scene.set(kind);
                     paused.set(false);
                 }),
         );
     }
-    scene_tabs = scene_tabs.child(
-        button()
-            .padding((9.0, 5.0, 9.0, 5.0))
-            .corner_radius(6.0)
-            .background(move || if live_ui_mode.get() { "#059669" } else { "#14332A" })
-            .foreground("#ECFDF5")
-            .content("⚡ Live UI Tree")
-            .on_click(move |_| {
-                live_ui_mode.set(true);
-            }),
-    );
+    scene_tabs = scene_tabs
+        .child(
+            button()
+                .padding((9.0, 5.0, 9.0, 5.0))
+                .corner_radius(6.0)
+                .background(move || if view_mode.get() == StudioViewMode::LiveUiTree { "#059669" } else { "#14332A" })
+                .foreground("#ECFDF5")
+                .content("⚡ Live UI Tree")
+                .on_click(move |_| {
+                    view_mode.set(StudioViewMode::LiveUiTree);
+                }),
+        )
+        .child(
+            button()
+                .padding((9.0, 5.0, 9.0, 5.0))
+                .corner_radius(6.0)
+                .background(move || if view_mode.get() == StudioViewMode::NodeGraph { "#7C3AED" } else { "#2A1B47" })
+                .foreground("#F5F3FF")
+                .content("🧩 Node Graph")
+                .on_click(move |_| {
+                    view_mode.set(StudioViewMode::NodeGraph);
+                }),
+        );
 
     let eng_back = engine.clone();
     let eng_pause = engine.clone();
@@ -242,6 +263,7 @@ pub fn physics_sandbox() -> Element {
         .border_thickness((0.0, 0.0, 1.0, 0.0))
         .padding(8.0)
         .clip_to_bounds(true)
+        .is_visible(move || view_mode.get() == StudioViewMode::Canvas)
         .child(tool_rail_stack);
 
     // -------------------------------------------------------------------------
@@ -471,6 +493,7 @@ pub fn physics_sandbox() -> Element {
         .border_brush("#1E293B")
         .border_thickness((1.0, 0.0, 0.0, 0.0))
         .clip_to_bounds(true)
+        .is_visible(move || view_mode.get() == StudioViewMode::Canvas)
         .child(
             scroll_viewer().child(
                 stack_panel()
@@ -527,10 +550,10 @@ pub fn physics_sandbox() -> Element {
         }
     });
 
-    let center_stage = border().clip_to_bounds(true).child(show_else(
-        move || live_ui_mode.get(),
-        move || live_ui_tree::live_ui_tree_showcase(),
-        move || {
+    let center_stage = border().clip_to_bounds(true).child(dynamic(move || match view_mode.get() {
+        StudioViewMode::LiveUiTree => live_ui_tree::live_ui_tree_showcase(),
+        StudioViewMode::NodeGraph => node_graph_studio::node_graph_physics_studio(),
+        StudioViewMode::Canvas => {
             let eng_vp = eng_vp.clone();
             let tick_cb = tick_cb.clone();
             El::<PhysicsViewport>::new()
@@ -538,8 +561,8 @@ pub fn physics_sandbox() -> Element {
                     control.bind_engine(eng_vp.clone(), tick_cb.clone());
                 })
                 .into_element()
-        },
-    ));
+        }
+    }));
 
     dock_panel()
         .background("#090D16")

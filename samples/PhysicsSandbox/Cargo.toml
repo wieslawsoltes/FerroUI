@@ -24,6 +24,7 @@ test = false
 
 [dependencies]
 ferroui-physics = { workspace = true, features = ["simd", "gpu", "ferroui"] }
+ferroui-nodegraph = { workspace = true, features = ["ferroui", "physics"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-view = { workspace = true }
