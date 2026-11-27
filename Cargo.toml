@@ -151,6 +151,8 @@ members = [
     "src/Linux/FerroUI.LinuxFramebuffer",
     "src/Windows/FerroUI.WinUI",
     "src/FerroUI.Fonts.Inter",
+    "src/FerroUI.Fonts.Web.Core",
+    "src/FerroUI.Fonts.Web",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Diagnostics",
     "src/FerroUI.Inspect",
@@ -421,6 +423,8 @@ ferroui-vulkan = { version = "=0.6.0-preview.1", path = "src/FerroUI.Vulkan" }
 ferroui-linuxframebuffer = { version = "=0.6.0-preview.1", path = "src/Linux/FerroUI.LinuxFramebuffer" }
 ferroui-winui = { version = "=0.6.0-preview.1", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.6.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
+ferroui-fonts-web-core = { version = "=0.6.0-preview.1", path = "src/FerroUI.Fonts.Web.Core" }
+ferroui-fonts-web = { version = "=0.6.0-preview.1", path = "src/FerroUI.Fonts.Web" }
 ferroui-dialogs = { version = "=0.6.0-preview.1", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.6.0-preview.1", path = "src/FerroUI.Diagnostics" }
 ferroui-xaml-interactivity = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }
@@ -528,6 +532,11 @@ vello_cpu = { version = "=0.3.0", default-features = false, features = ["std", "
 linesweeper = { version = "=0.5.0" }
 png = { version = "=0.18.1" }
 skrifa = { version = "=0.44.0" }
+# Pinned in step with `skrifa` 0.44, which links this version. Only `ferroui-fonts-web-core` names
+# it, and only there is its feature `experimental_traverse` on: the walk of the sanitizer.
+# Moving this pin means auditing the fields listed in `[package.metadata.read-fonts-guards]` of
+# that crate: a test fails until the list says it was done.
+read-fonts = { version = "=0.41.0", default-features = false, features = ["std", "experimental_traverse"] }
 glifo = { version = "=0.4.0", default-features = false, features = ["std"] }
 fontique = { version = "=0.12.0" }
 # The codecs of the Vello render backend beside PNG (vello-backend.md, section 1.4), one crate a
@@ -569,6 +578,10 @@ sysinfo = { version = "0.37", default-features = false, features = ["disk"] }
 # zlib streams of the Tight encoding (pure Rust, `miniz_oxide`), DES of the VNC password challenge and
 # the random bytes of the challenge.
 flate2 = { version = "1.1", default-features = false, features = ["rust_backend"] }
+# The Brotli decoder of WOFF2, only behind the feature `woff2` of `ferroui-fonts-web`. An exact
+# version (owner decision); `std` alone, for its allocator: its `unsafe`, `ffi-api` and `seccomp`
+# features stay off.
+brotli-decompressor = { version = "=5.0.3", default-features = false, features = ["std"] }
 des = { version = "0.9" }
 getrandom = { version = "0.4" }
 
