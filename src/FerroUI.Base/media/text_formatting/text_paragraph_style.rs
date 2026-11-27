@@ -76,6 +76,7 @@ impl TextParagraphProperties for StyledParagraph {
         self.style.line_height.filter(|v| v.is_finite() && *v > 0.0)
             .unwrap_or_else(|| self.defaults.line_height())
     }
+    fn minimum_line_height(&self) -> f64 { self.defaults.minimum_line_height() }
     fn letter_spacing(&self) -> f64 {
         self.style.letter_spacing.filter(|v| v.is_finite())
             .unwrap_or_else(|| self.defaults.letter_spacing())

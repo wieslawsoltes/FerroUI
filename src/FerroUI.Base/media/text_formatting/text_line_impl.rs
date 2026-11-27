@@ -37,6 +37,11 @@ pub struct TextLineImpl {
     ink_pending: Cell<bool>,
     ink_bounds: Cell<Rect>,
     bounds: Cell<Rect>,
+    /// The space a minimum line height adds above the runs, and as much below
+    /// them ([`TextLine::vertical_padding`]). Kept as `f32` so that it fits in
+    /// the padding of the struct beside the small fields: a line without the
+    /// property is no larger than one before it (`the_vertical_padding_does_not_grow_a_line`).
+    vertical_padding: Cell<f32>,
 }
 
 /// The vertical box of a line, from the metrics of its runs.
@@ -76,6 +81,7 @@ impl TextLineImpl {
             ink_pending: Cell::new(false),
             ink_bounds: Cell::new(Rect::default()),
             bounds: Cell::new(Rect::default()),
+            vertical_padding: Cell::new(0.0),
         })
     }
 
@@ -173,21 +179,26 @@ impl TextLineImpl {
 
         let mut baseline_offset = -baseline;
 
+        // A minimum line height adds `vertical_padding` above the runs and as
+        // much below them; the alignments to an edge of the line keep to the
+        // box of the runs (the centre is the same in both). With no padding
+        // (every line without the property) these are the expressions of upstream.
         match baseline_alignment {
             Some(BaselineAlignment::Baseline) => {
                 baseline_offset += text_line.baseline();
             }
             Some(BaselineAlignment::Top | BaselineAlignment::TextTop) => {
-                baseline_offset += text_line.height() - text_line.extent() + text_run.size().height / 2.0;
+                baseline_offset += text_line.height() - text_line.vertical_padding() - text_line.extent()
+                    + text_run.size().height / 2.0;
             }
             Some(BaselineAlignment::Center) => {
                 baseline_offset += text_line.height() / 2.0 + baseline - text_run.size().height / 2.0;
             }
             Some(BaselineAlignment::Subscript | BaselineAlignment::Bottom | BaselineAlignment::TextBottom) => {
-                baseline_offset += text_line.height() - text_run.size().height + baseline;
+                baseline_offset += text_line.height() - text_line.vertical_padding() - text_run.size().height + baseline;
             }
             Some(BaselineAlignment::Superscript) => {
-                baseline_offset += baseline;
+                baseline_offset += baseline + text_line.vertical_padding();
             }
             None => panic!("Specified argument was out of the range of valid values. (Parameter 'baselineAlignment')"),
         }
@@ -947,14 +958,27 @@ impl TextLineImpl {
         }
 
         height += line_spacing;
+        let minimum = self.paragraph_properties.minimum_line_height();
+        let padding = if minimum > height && minimum.is_finite() {
+            // The box is exactly the minimum; the line keeps the padding as an `f32`, which
+            // places a run aligned to an edge within a ten-millionth of a pixel of it.
+            let padding = (minimum - height) / 2.0;
+            height = minimum;
+            baseline += padding;
+            padding
+        } else {
+            0.0
+        };
+        self.vertical_padding.set(padding as f32);
         // For baseline-aligned runs, family mode reports ink at the actual
         // draw baseline, including a caller's explicit line height. Other
         // alignment modes and the default policy retain their existing rules.
-        let ink_offset = if use_font_family { baseline + ascent } else { ink_offset };
+        let ink_offset = if use_font_family { baseline + ascent } else { ink_offset + padding };
         let ink_shift = if use_font_family {
             ink_offset
         } else if text_line_bounds == TextLineBounds::Full {
-            0.0
+            // The padding of a minimum line height moves the ink of a full box with its baseline.
+            padding
         } else {
             ink_offset - half_line_gap
         };
@@ -1145,6 +1169,10 @@ fn same_run(x: &Rc<dyn TextRun>, y: &Rc<dyn TextRun>) -> bool {
 }
 
 impl TextLine for TextLineImpl {
+    fn vertical_padding(&self) -> f64 {
+        f64::from(self.vertical_padding.get())
+    }
+
     fn text_runs(&self) -> Ref<'_, [Rc<dyn TextRun>]> {
         Ref::map(self.text_runs.borrow(), |text_runs| text_runs.as_slice())
     }
@@ -1721,5 +1749,34 @@ impl TextLine for TextLineImpl {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod size_tests {
+    use super::*;
+
+    /// The struct as it was before the padding of a minimum line height: the
+    /// `f32` of the padding takes no space (the small fields leave room for it).
+    #[allow(dead_code)]
+    struct WithoutPadding {
+        indexed_text_runs: RefCell<Option<Rc<[IndexedTextRun]>>>,
+        text_runs: RefCell<Vec<Rc<dyn TextRun>>>,
+        paragraph_width: f64,
+        paragraph_properties: Rc<dyn TextParagraphProperties>,
+        text_line_metrics: Cell<TextLineMetrics>,
+        text_line_break: RefCell<Option<Rc<TextLineBreak>>>,
+        resolved_flow_direction: FlowDirection,
+        first_text_source_index: i32,
+        length: i32,
+        has_collapsed: bool,
+        ink_pending: Cell<bool>,
+        ink_bounds: Cell<Rect>,
+        bounds: Cell<Rect>,
+    }
+
+    #[test]
+    fn the_vertical_padding_does_not_grow_a_line() {
+        assert_eq!(std::mem::size_of::<TextLineImpl>(), std::mem::size_of::<WithoutPadding>());
     }
 }

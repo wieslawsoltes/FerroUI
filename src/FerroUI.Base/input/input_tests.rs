@@ -5038,6 +5038,8 @@ struct TestTextClient {
     preedit: RefCell<Vec<Option<String>>>,
     /// Whether the client opts in to the exact-edit connection.
     uses_connection: bool,
+    /// Whether the client supports surrounding-text edits (without composition).
+    surrounding_edits: bool,
     /// The owner the client names (`input_method_owner`).
     owner: RefCell<Option<Ref<InputElement>>>,
     /// The focus destinations that belong to the client's editing UI.
@@ -5054,6 +5056,13 @@ impl TestTextClient {
         Self::with_connection(name, view, true)
     }
 
+    /// A client that supports surrounding-text edits only, as the code editor does.
+    fn surrounding_edits_only(name: &'static str, view: &Ref<TestControl>) -> Rc<Self> {
+        let mut client = Self::with_connection(name, view, false);
+        Rc::get_mut(&mut client).expect("a new client").surrounding_edits = true;
+        client
+    }
+
     fn with_connection(name: &'static str, view: &Ref<TestControl>, uses_connection: bool) -> Rc<Self> {
         Rc::new(Self {
             events: TextInputMethodClientEvents::new(),
@@ -5063,6 +5072,7 @@ impl TestTextClient {
             selection: Cell::new(TextSelection::default()),
             preedit: RefCell::new(Vec::new()),
             uses_connection,
+            surrounding_edits: false,
             owner: RefCell::new(None),
             retained: RefCell::new(Vec::new()),
         })
@@ -5089,6 +5099,9 @@ impl TextInputMethodClient for TestTextClient {
     }
     fn input_method_editing(&self) -> Option<&dyn text_input::TextInputMethodEditing> {
         self.uses_connection.then_some(self as &dyn text_input::TextInputMethodEditing)
+    }
+    fn supports_surrounding_text_edits(&self) -> bool {
+        self.surrounding_edits
     }
     fn input_method_owner(&self) -> Option<Ref<InputElement>> {
         self.owner.borrow().clone()

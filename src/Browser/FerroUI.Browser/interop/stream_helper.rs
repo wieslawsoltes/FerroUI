@@ -18,6 +18,9 @@ extern "C" {
     #[wasm_bindgen(js_namespace = StreamHelper, js_name = close)]
     fn close_raw(stream: &JsObject) -> JsObject;
 
+    #[wasm_bindgen(js_namespace = StreamHelper, js_name = abort)]
+    fn abort_raw(stream: &JsObject) -> JsObject;
+
     #[wasm_bindgen(js_namespace = StreamHelper, js_name = byteLength)]
     fn byte_length_raw(stream: &JsObject) -> f64;
 
@@ -51,6 +54,11 @@ pub fn write_async(stream: &JsObject, data: &[u8]) -> PromiseFuture<JsObject> {
 /// Closes `stream`, which commits what was written to the file.
 pub fn close_async(stream: &JsObject) -> PromiseFuture<JsObject> {
     await_promise(&close_raw(stream))
+}
+
+/// Discards the pending output of `stream`.
+pub fn abort_async(stream: &JsObject) -> PromiseFuture<JsObject> {
+    await_promise(&abort_raw(stream))
 }
 
 /// The size of the blob `stream` in bytes.

@@ -1,5 +1,5 @@
 use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaGpuBackend};
-use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
+use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl, FrameEnd};
 use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
 use crate::text_rendering_settings::{TextRenderingSettings, TextRenderingSource};
@@ -151,7 +151,7 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
         let gr_context = session.gr_context();
         self.backend.set(Some(gr_context.backend()));
-        let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
+        let mut context = DrawingContextImpl::with_frame_end(nfo, Vec::new(), Some(FrameEnd::Session(session)));
         // The programs of the runtime effects are made with the second frame
         // of a GPU context (the first paint is not delayed), not with the
         // frame that first needs them.

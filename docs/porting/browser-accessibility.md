@@ -15,14 +15,15 @@ The host holds one `div` per automation peer, nested as the peers are. Each elem
 | The automation control type, or the landmark type of a container | `role` (see the mapping in `browser_accessibility.rs`); a text has no role and is read by its text |
 | The name (`AutomationProperties.Name`, or the text of the content) | `aria-label`; for a text, its text content |
 | The value of a text box or combo box | its text content |
+| A text provider that supports multiline editing | `aria-multiline` on its textbox |
 | The help text, the placeholder | `aria-description`, `aria-placeholder` |
 | Toggle state, expand/collapse state, selection, read-only, the range value, the heading level, the live setting, enabled | `aria-checked` (`aria-pressed` for a toggle button), `aria-expanded`, `aria-selected`, `aria-readonly`, `aria-valuemin`/`max`/`now`, `aria-level`, `aria-live`, `aria-disabled` |
 | The class name and the automation id of the control | `data-ferroui-type`, `data-ferroui-name` |
 | The bounding rectangle | `left`, `top`, `width`, `height` relative to the parent element |
 
-The elements are transparent and take no pointer events. The canvas keeps every pointer and key event, and nothing about input changes. The element picker of the developer tools finds the elements anyway: it hit-tests through `pointer-events: none`. It highlights the control under the pointer, and the Elements panel shows the tree of controls with their types and names.
+The elements are transparent and take no pointer events. The view handles pointer and keyboard events through its canvas and browser input elements. The element picker of the developer tools hit-tests through `pointer-events: none`. It highlights the control under the pointer, and the Elements panel shows the tree of controls with their types and names.
 
-The container of the view keeps the keyboard focus, as before. With the tree on, it has `role="application"`, and `aria-activedescendant` names the element of the focused peer. A screen reader announces the focused control as the focus moves.
+With the tree on, the container has `role="application"` and its `aria-activedescendant` refers to the focused peer. During text entry, a browser input or textarea receives DOM focus. Both inputs receive the focused text peer's name (falling back to its placeholder), description and read-only state. The focused input's `aria-controls` refers to the mirrored peer, which can expose a document value beyond the current IME context. The bridge clears this metadata when text focus is lost or the mirror is disabled.
 
 A screen reader activates an element by clicking it. The framework then invokes the peer (`IInvokeProvider`), toggles it (`IToggleProvider`), selects it (`ISelectionItemProvider`), expands or collapses it (`IExpandCollapseProvider`), or focuses it, in that order of preference.
 
@@ -63,6 +64,8 @@ The tree is kept up to date by what changed, once per animation frame:
 
 - A peer whose children changed (`children_changed`) has its subtree walked again. The rest of the tree is not walked.
 - A peer whose properties changed (`property_changed`) has its attributes read again.
+- An edit peer whose text provider reports `text_changed` has its current value
+  read at the next frame.
 - A layout pass of the top-level reads the bounding rectangles of the known peers, and nothing else.
 - The framework diffs each element against what the page has and sends only the changed fields, in one JSON batch per frame. The page creates each element once and writes only the changed attributes.
 - Peers that leave the tree are released with their subscriptions; nothing is kept alive by the mirror.
@@ -72,6 +75,10 @@ With the tree off (`OnDemand` before activation, or `Disabled`) nothing is subsc
 ## Tests
 
 - `browser_accessibility_tests.rs`: the role mapping, the attributes of real control peers (button, check box, text box, text block) and the diff of the batch (only changed fields, removed states, JSON escaping).
+- `scripts/browser/tests/editor_demo.test.mjs` checks the browser accessibility
+  tree's multiline textbox role and value through a Unicode edit and undo. It
+  checks the actual focused input's accessible name in the editor and Find,
+  its link to the editor's mirrored document, and cleanup on leaving the view.
 - `scripts/browser/tests/themed_view.test.mjs`, "the accessibility tree is built on demand and mirrors the controls of the view", in headless Chrome:
   - Before activation only the enable button is in the page, and it is out of the Tab order.
   - After activation, the roles, names, states and values of the button, check box, text box, slider, progress bar, list and text are there, and the elements lie over their controls.
@@ -82,6 +89,5 @@ With the tree off (`OnDemand` before activation, or `Disabled`) nothing is subsc
 
 ## Limits
 
-- Text editing goes through the hidden input element of the view as before; the text box element mirrors the value but is not itself editable.
-- The DOM focus stays on the container (`aria-activedescendant`). A mode that moves the DOM focus to the elements, as Flutter does, would suit screen readers that handle `aria-activedescendant` poorly.
+- The hidden browser inputs handle text entry. The separate textbox mirror publishes the automation peer's value. Screen-reader navigation from the focused input to the mirror and editing via document-wide text ranges require platform verification.
 - Bounds follow layout passes. A control moved by a render transform alone, with no layout pass, keeps the bounds of the last pass.
