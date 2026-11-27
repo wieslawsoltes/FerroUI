@@ -180,6 +180,12 @@ WinUI rich-text members added to the text formatter (`docs/porting/winui-rich-te
 |---|---|---|---|---|
 | `InteractiveExtensions.AddDisposableHandler` captures the object in the disposable it returns. | The disposable holds the object weakly (`interactive_extensions.rs`); disposing it after the object is gone does nothing. | Representation | An element that keeps the disposable of a handler it added to itself held itself through it (catalog gap C324: a slider and the handler of its own pointer events). The handlers of an object that is gone are gone with it, so nothing is left to remove. | 2026-10-09 |
 
+### Styling (`src/FerroUI.Base/styled_element.rs`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `StyledElement.ApplyControlTheme` attaches the setters of the templated parent's theme to an element of the template when the element derives from the theme's target type. | An element of the template takes the nested styles of that theme only. | Behaviour | With a theme for a base class such as `TemplatedControl`, its `Template` setter replaced the template of a `TextBox` in that template, which then had no `PART_TextPresenter`. | #965 |
+
 ### Data validation (`src/FerroUI.Controls/data_validation_errors.rs`)
 
 | Upstream | Port | Kind | Why | Since |
@@ -1740,6 +1746,20 @@ The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocat
 | The tests compile each source text into an assembly of its own; a test of the generator also compiles its output. | The tests of the generator check the text of the output; the runtime tests are modules of one crate whose build script generates their locators, so every locator sees the view models of every module. Tests of C# features Rust lacks (`ref` overloads, `dynamic`, sealed classes, run-time type tests, base-class contracts) check the Rust counterpart under the same names. | Test | A Rust test cannot compile a crate; the generated source of each shape is compiled and run by `tests/FerroUI.StaticViewLocator.Tests`. | #310 |
 | The demos write their views in markup (AXAML) with compiled bindings, and `MainWindow` is a window class. | The sample writes its views with the builders of `ferroui-view` in `UserControl` classes, from the view model of their data context; both demos are tabs of one window. | Behaviour | The sample shows the locators, which are independent of how a view is written. | #310 |
 
+### WinUI ItemsView (`src/FerroUI.Controls.ItemsView/`)
+
+The port of `ItemsView` and `ItemContainer` of WinUI (`controls/dev/ItemsView`, `controls/dev/ItemContainer`, commit `7e4b0c2`). Upstream here is WinUI.
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `ItemsView` and `ItemContainer` are part of the WinUI controls, with their styles in the framework's theme. | They are in the crate `ferroui-controls-items-view`, which owns their control themes (`Themes/WinUI/`). An application that uses them includes `WinUI.xaml`. | Representation | A hello world links none of the controls or their theme, and the WinUI theme does not depend on the repeater. | #418 |
+| The template of `ItemsView` holds a `ScrollView`, and `ItemsView.ScrollView` returns it. | It holds a `ScrollViewer`, and `scroll_view` returns it once the template is applied. | Representation | FerroUI has no `ScrollView`. | #418 |
+| `PART_CommonVisual` is a `Rectangle` and `PART_SelectionVisual` a `Grid`, and the root `Grid` has the corner radius. | Both are `Border`s, and a `PART_ContainerBackground` under the child draws the rounded background. | Representation | FerroUI's `Grid` has no border or corner radius. | #418 |
+| `PART_SelectionCheckbox` has its own style with an `AnimatedIcon`. | It uses the `CheckBox` theme of the application. | Missing | FerroUI has no `AnimatedIcon` yet (#557). | #418 |
+| `ItemContainer` exposes `CanUserSelect`, `CanUserInvoke` and `MultiSelectMode`, and reports `PointerPressed` as an interaction. | The view decides them from its selection mode and whether items can be invoked; the container reports the release, tap, double tap, Enter and Space. | Missing | The members are internal in WinUI's public API. | #418 |
+| The arrow keys, Page Up and Page Down navigate through the layout's own target search, queued around bring-into-view operations. | The arrow keys go to the nearest realized item in their direction, Home and End to the first and last item. Page Up and Page Down are not ported. | Missing | A first version of the keyboard over realized items. | #418 |
+| `ItemsViewAutomationPeer` and `ItemContainerAutomationPeer` expose selection and invoke patterns. | Not ported yet: the controls use the default peers. | Missing | Follow-up of this control. | #418 |
+
 ### WinUI inking (`src/FerroUI.Controls.Inking/`)
 
 The port of the inking controls and services of WinUI (`docs/porting/winui-inking.md`). Upstream here is WinUI's `InkCanvas`, `InkToolbar` and the `Windows.UI.Input.Inking` services they use.
@@ -1761,6 +1781,7 @@ WinUI members added to upstream-ported controls (`winui-controls.md`, section 6)
 
 | WinUI source | Addition and default | Kind | Why | Since |
 |---|---|---|---|---|
+| `WrapPanel.ItemsStretch` (`controls/dev/WrapPanel`) | `WrapPanel::items_stretch`, default `None`. With `Last`, the final visible item takes the rest of its line and the panel takes the width of the line, when that width is finite | Addition | The WinUI Gallery page sets it | #418 |
 | RichEditBox's `BringIntoView` of the caret (`TextBoxBase.cpp`) | `ScrollContentPresenter::bring_descendant_into_view_aligned` brings a rectangle into view with an alignment; `bring_descendant_into_view` calls it with upstream's alignment, so its behaviour is unchanged. | Behaviour (opt-in) | The rich editor keeps the caret line visible as WinUI aligns it (R8 of #243). | R8 |
 | `Setter.Target` (`TargetPropertyPath`), the setters of `VisualState.Setters` | `Setter::target()` / `set_target()` and the markup property `Target` (`src/FerroUI.Base/styling/setter.rs`), with the new type `TargetPropertyPath` (`styling/target_property_path.rs`, the target held weakly). Default `None`: the upstream setter, applied by styles as before (tests `visual_state_manager_tests::a_setter_has_no_target_by_default` and `a_style_with_a_setter_that_has_a_target_panics`). A style that holds a setter with a target panics when it is applied, and the compiler rejects it (`Setter.Target is only valid in the setters of a visual state`), as WinUI rejects `Setter.Property` in a visual state. | Behaviour (opt-in) | The setters of WinUI's visual states name an element and its property (`docs/porting/winui-calculator-gaps.md`, section 5.2). | #338 |
 | (none: the values of WinUI's visual states) | `FerroObject::bind_binding_with_priority(property, binding, priority, anchor)` and `ValueStore::add_binding_expression_with_priority`: a binding at a given priority, whatever the default priority of the binding is. `add_binding_expression` is `add_binding_expression_with_priority` with the binding's default priority, so nothing changes for upstream callers. | Behaviour (opt-in) | A `{DynamicResource}` or a binding in a setter of a visual state is bound at `BindingPriority::Animation`, WinUI's animation layer (section 5.5). | #338 |

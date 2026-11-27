@@ -195,6 +195,10 @@ jobs:
         run: |
           python3 scripts/generate_api_model.py --check
           python3 scripts/generate_osprey_bindings.py --check
+          python3 scripts/generate_cpp_bindings.py --check
+          python3 scripts/generate_go_bindings.py --check
+          python3 scripts/generate_dart_bindings.py --check
+          python3 scripts/generate_csharp_bindings.py --check
       - name: Tests of the binding generators
         run: python3 scripts/test_generate_bindings.py
       # The XAML schema of the designer's language service, read from the markup metadata of the
@@ -217,6 +221,11 @@ jobs:
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      # The patched Skia binding and the crates that use it name one version (#622).
+      - name: The patched Skia binding agrees with its users
+        run: |
+          python3 scripts/release/skia_bindings_archive.py --check
+          python3 -m unittest discover -s scripts/release -p 'test_*.py'
       - name: No private references (home directories, local tools, other hosts, tokens)
         run: python3 scripts/conventions/private-references.py
       # The types and mechanisms of the API become idiomatic Rust and std, under the .NET names of
@@ -226,6 +235,8 @@ jobs:
       # only shrinks.
       - name: Tests of the idioms inventory
         run: python3 -m unittest discover -s scripts/idioms -p 'test_*.py'
+      - name: Tests of the API gate scripts
+        run: python3 -m unittest discover -s scripts/api-gate -p 'test_*.py'
       - name: No new .NET-shaped infrastructure types
         run: python3 scripts/idioms/inventory.py --check
       # The crates that are published stay publishable (docs/release.md): the manifests state what
@@ -1009,6 +1020,11 @@ jobs:
         env:
           FERROUI_VULKAN_TEST_REQUIRE: 1
         run: cargo test --locked -p ferroui-vulkan --no-fail-fast -- --nocapture --test-threads=1
+      - name: The Vulkan executor of 3D scenes against lavapipe
+        if: ${{ !cancelled() }}
+        env:
+          FERROUI_VULKAN_TEST_REQUIRE: 1
+        run: cargo test --locked -p ferroui-vulkan --features scene3d --lib scene3d -- --nocapture --test-threads=1
       - name: The Vulkan GPU of the Skia backend against lavapipe
         if: ${{ !cancelled() }}
         env:

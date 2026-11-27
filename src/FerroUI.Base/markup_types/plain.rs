@@ -535,6 +535,58 @@ ferro_markup_type!(class TemplateBinding {
     ],
 });
 
+/// A member of a binding declaration on its own, as `Setter.Value` above: the same name, type,
+/// accessors and attributes, as a static of its own. Compiled markup describes the target
+/// property of a markup extension nested in a binding with it (`{StaticResource}` as a
+/// `Converter`, a `{Binding}` in `Bindings`); naming the whole declaration there kept every
+/// member of the binding, and what they reach, in every application with a theme (#603).
+macro_rules! binding_member_alone {
+    ($static_name:ident, $function:ident, $owner:ident, $name:literal: $type_:ty {
+        get: $get:expr, set: $set:expr
+    } [$($attributes:tt)*]) => {
+        static $static_name: crate::metadata::MarkupProperty = crate::metadata::MarkupProperty {
+            name: $name,
+            type_: crate::data::core::ValueType::of::<$type_>,
+            get: crate::__ferro_markup_getter!(Rc<$owner>, $type_; get: $get, set: $set),
+            set: crate::__ferro_markup_setter!(Rc<$owner>, $type_; get: $get, set: $set),
+            attributes: crate::__ferro_markup_attributes!([] $($attributes)*),
+            typed_path_element: None,
+            emit_get: crate::__ferro_compiler_metadata!(@value None),
+            emit_set: crate::__ferro_compiler_metadata!(@value None),
+            value_markup: || None,
+        };
+
+        impl $owner {
+            /// The declared member on its own, without the rest of the declaration.
+            #[doc(hidden)]
+            pub fn $function() -> &'static crate::metadata::MarkupProperty {
+                &$static_name
+            }
+        }
+    };
+}
+
+binding_member_alone!(TEMPLATE_BINDING_CONVERTER, __converter_markup_property, TemplateBinding,
+    "Converter": Option<Rc<dyn IValueConverter>> {
+        get: TemplateBinding::converter, set: TemplateBinding::set_converter
+    } []);
+binding_member_alone!(COMPILED_BINDING_CONVERTER, __converter_markup_property, CompiledBinding,
+    "Converter": Option<Rc<dyn IValueConverter>> {
+        get: CompiledBinding::converter, set: CompiledBinding::set_converter
+    } []);
+binding_member_alone!(MULTI_BINDING_BINDINGS, __bindings_markup_property, MultiBinding,
+    "Bindings": FerroList<Rc<dyn BindingBase>> {
+        get: MultiBinding::bindings, set: MultiBinding::set_bindings
+    } [AssignBinding]);
+binding_member_alone!(MULTI_BINDING_CONVERTER, __converter_markup_property, MultiBinding,
+    "Converter": Option<Rc<dyn IMultiValueConverter>> {
+        get: MultiBinding::converter, set: MultiBinding::set_converter
+    } []);
+binding_member_alone!(REFLECTION_BINDING_RELATIVE_SOURCE, __relative_source_markup_property, ReflectionBinding,
+    "RelativeSource": Option<Rc<RelativeSource>> {
+        get: ReflectionBinding::relative_source, set: ReflectionBinding::set_relative_source
+    } []);
+
 // FerroUI.Data.Converters
 
 ferro_markup_type!(static ObjectConverters {
