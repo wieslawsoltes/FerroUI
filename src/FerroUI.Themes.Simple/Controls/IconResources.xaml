@@ -1,0 +1,11 @@
+<!--
+  Not from the upstream theme: the font of the icon controls, one key that FontIcon and SymbolIcon
+  both refer to, in a unit of its own so that either control keeps it and an application with
+  neither drops it. The value is the one of the WinUI theme of this repository. The font is not
+  bundled: off Windows an application supplies a symbol font and sets this key.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <FontFamily x:Key="SymbolThemeFontFamily">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
+</ResourceDictionary>
