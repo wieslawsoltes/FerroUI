@@ -148,12 +148,10 @@ impl EffectiveValueState {
     }
 
     fn begin_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
-        self.reuse_unmodified_coercion.set(self.explicit_coercion && !force_coerce);
-        // A clear deferred by a styling pass stays requested until the pass reevaluates.
-        self.reset_coercion_on_reevaluation
-            .set(self.explicit_coercion && (clear_local_value || self.reset_coercion_on_reevaluation.get()));
-        if self.explicit_coercion && clear_local_value {
-            self.is_coerced_default_value.set(false);
+        // Only a property that opted out of coercion on reevaluation keeps this state: every other
+        // value pays one test of a field here, as before the option existed.
+        if self.explicit_coercion {
+            self.begin_explicit_coercion_reevaluation(clear_local_value, force_coerce);
         }
         let overridden = self.is_overriden_current_value.get();
         if clear_local_value || (self.priority.get() != BindingPriority::LocalValue && !overridden) {
@@ -161,6 +159,42 @@ impl EffectiveValueState {
         }
         if clear_local_value || (self.base_priority.get() != BindingPriority::LocalValue && !overridden) {
             self.base_priority.set(BindingPriority::Unset);
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn begin_explicit_coercion_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
+        self.reuse_unmodified_coercion.set(!force_coerce);
+        // A clear deferred by a styling pass stays requested until the pass reevaluates.
+        self.reset_coercion_on_reevaluation
+            .set(clear_local_value || self.reset_coercion_on_reevaluation.get());
+        if clear_local_value {
+            self.is_coerced_default_value.set(false);
+        }
+    }
+
+    /// Stores `entry` and says how its value is coerced, for a property that opted out of
+    /// coercion on reevaluation: an unchanged winning entry reuses its coerced output.
+    #[cold]
+    #[inline(never)]
+    fn update_explicit_coercion_entry(
+        &self,
+        owner: &FerroObject,
+        entry: &Rc<dyn IValueEntry>,
+        priority: BindingPriority,
+    ) -> EntryCoercion {
+        let base = priority > BindingPriority::Animation && self.priority.get() <= BindingPriority::Animation;
+        let slot = if base { &self.base_value_entry } else { &self.value_entry };
+        let can_reuse = owner.values().is_evaluating() && self.reuse_unmodified_coercion.get()
+            && slot.with(|previous| previous.is_some_and(|previous| entry_ptr_eq(previous, entry)));
+        self.update_value_entry(Some(entry), priority);
+        if self.reset_coercion_on_reevaluation.get() && owner.values().is_evaluating() {
+            EntryCoercion::Raw
+        } else if can_reuse && slot.with(|current| current.is_some_and(|current| entry_ptr_eq(current, entry))) {
+            EntryCoercion::ReuseUnchanged { base }
+        } else {
+            EntryCoercion::Recompute
         }
     }
 
@@ -268,16 +302,10 @@ impl dyn EffectiveValueDyn {
     pub(crate) fn set_and_raise(&self, owner: &FerroObject, entry: &Rc<dyn IValueEntry>, priority: BindingPriority) {
         debug_assert!(priority != BindingPriority::LocalValue);
         let state = self.state();
-        let base = priority > BindingPriority::Animation && state.priority.get() <= BindingPriority::Animation;
-        let slot = if base { &state.base_value_entry } else { &state.value_entry };
-        let can_reuse = owner.values().is_evaluating() && state.reuse_unmodified_coercion.get()
-            && slot.with(|previous| previous.is_some_and(|previous| entry_ptr_eq(previous, entry)));
-        state.update_value_entry(Some(entry), priority);
-        let coercion = if state.reset_coercion_on_reevaluation.get() && owner.values().is_evaluating() {
-            EntryCoercion::Raw
-        } else if can_reuse && slot.with(|current| current.is_some_and(|current| entry_ptr_eq(current, entry))) {
-            EntryCoercion::ReuseUnchanged { base }
+        let coercion = if state.explicit_coercion {
+            state.update_explicit_coercion_entry(owner, entry, priority)
         } else {
+            state.update_value_entry(Some(entry), priority);
             EntryCoercion::Recompute
         };
         self.apply_entry(owner, &**entry, priority, coercion);
