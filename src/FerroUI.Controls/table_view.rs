@@ -73,12 +73,7 @@ pub struct TableView {
 }
 
 ferro_class!(TableView: ListBox);
-ferro_class_info!(TableView {
-    new: TableView::new,
-    markup: {
-        attributes: [PseudoClasses(":nohorizontalgridlines", ":noverticalgridlines", ":compact", ":comfortable")],
-    },
-});
+ferro_class_info!(TableView { new: TableView::new });
 ferro_impl_classes!(
     TableView: VisualImpl,
     LayoutableImpl,

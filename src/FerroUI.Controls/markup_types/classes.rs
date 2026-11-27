@@ -707,6 +707,7 @@ ferro_class_info!(TableView {
             DisplayMemberBinding: Option<AssignedBinding> { get: TableView::display_member_binding, set: TableView::set_display_member_binding } [AssignBinding, InheritDataTypeFromItems("ItemsSource")],
             ItemTemplate: Option<Rc<dyn IDataTemplate>> { get: TableView::item_template, set: TableView::set_item_template } [InheritDataTypeFromItems("ItemsSource")],
         ],
+        attributes: [PseudoClasses(":nohorizontalgridlines", ":noverticalgridlines", ":compact", ":comfortable")],
     },
 });
 
