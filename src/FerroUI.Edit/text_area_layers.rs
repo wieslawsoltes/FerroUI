@@ -91,12 +91,11 @@ ferro_class!(LayerPlane: Control);
 ferro_impl_classes!(LayerPlane: FerroObjectImpl, StyledElementImpl, LayoutableImpl,
     InteractiveImpl, InputElementImpl);
 
-impl ControlImpl for LayerPlane {
-    fn automation_target(this: &Self) -> Ref<Control> {
-        this.view
-            .upgrade()
-            .map_or_else(|| this.to_ref().upcast(), |view| view.automation_target())
-    }
+impl ControlImpl for LayerPlane {}
+
+/// The text area a layer plane belongs to, for the editor's automation target.
+pub(super) fn layer_plane_view(control: &Ref<Control>) -> Option<Ref<TextArea>> {
+    control.clone().cast::<LayerPlane>()?.view.upgrade()
 }
 
 impl VisualImpl for LayerPlane {

@@ -21,7 +21,12 @@ ferro_impl_classes!(PopupWithCustomPosition: FerroObjectImpl, StyledElementImpl,
 impl PopupWithCustomPosition {
     pub fn construct() -> Self {
         Self {
-            base: Popup::construct(),
+            base: {
+                // Anchored inside the scrolled text area: follow it when layout moves it.
+                let base = Popup::construct();
+                base.set_follows_placement_target_layout(true);
+                base
+            },
         }
     }
     pub fn new() -> Ref<Self> {

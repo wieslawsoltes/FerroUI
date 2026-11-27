@@ -474,6 +474,7 @@ impl CompletionWindow {
         let popup = Popup::new();
         popup.set_child(tip);
         popup.set_placement_target(border.clone());
+        popup.set_follows_placement_target_layout(true);
         popup.set_popup_parent(Some(&self.to_ref().upcast::<Control>()));
         popup.set_should_use_overlay_layer(true);
         popup.set_horizontal_offset(2.0);
