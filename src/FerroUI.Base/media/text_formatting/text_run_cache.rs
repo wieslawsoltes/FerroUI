@@ -1,13 +1,13 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
 use crate::media::i_immutable_glyph_run_reference::release_platform_impl;
 use crate::media::text_formatting::shaped_buffer::GlyphRange;
 use crate::media::text_formatting::{ShapedBuffer, ShapedTextRun, TextLineMetricsMode, TextRun, TextShaperOptions};
-use crate::media::{FlowDirection, GlyphInfoList};
+use crate::media::{FlowDirection, GlyphInfoList, GlyphRun};
 use crate::platform::IGlyphRunImpl;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
@@ -50,6 +50,10 @@ struct LongText {
     /// The platform glyph runs of the lines of the layout that is being made, by the glyphs they
     /// are made of (`keep_line_glyph_runs`).
     line_runs: GlyphRunTable,
+    /// The glyph runs of the lines of the last layout that had no platform glyph run when the
+    /// line was finished: a line makes it when it is drawn or its ink is asked for, and what it
+    /// made by the next layout, or by the time the layout is let go, goes to `line_runs`.
+    line_glyph_runs: Vec<(Weak<GlyphRun>, GlyphRange)>,
     /// While a layout is made (`begin_layout`): the platform glyph runs of the lines of the
     /// layout before, which a line of the same glyphs takes. Empty between layouts.
     previous_line_runs: GlyphRunTable,
@@ -155,6 +159,8 @@ impl TextRunCache {
         let mut state = self.state.borrow_mut();
         state.in_layout = true;
         if let Some(long) = &mut state.long {
+            Self::keep_made_glyph_runs(long);
+            long.line_glyph_runs.clear();
             release_glyph_runs(&mut long.previous_line_runs);
             std::mem::swap(&mut long.line_runs, &mut long.previous_line_runs);
         }
@@ -210,13 +216,36 @@ impl TextRunCache {
             let Some((run, range)) = Self::glyph_range_of(run) else {
                 continue;
             };
-            let Some(platform_impl) = run.glyph_run().created_platform_impl() else {
+            match run.glyph_run().created_platform_impl() {
+                Some(platform_impl) => Self::keep_glyph_run(long, range, platform_impl),
+                None => long.line_glyph_runs.push((Rc::downgrade(run.glyph_run()), range)),
+            }
+        }
+    }
+
+    /// A layout is let go: the platform glyph runs its lines made since they were finished stay
+    /// for the next layout of the text.
+    pub(crate) fn keep_drawn_glyph_runs(&self) {
+        if let Some(long) = &mut self.state.borrow_mut().long {
+            Self::keep_made_glyph_runs(long);
+        }
+    }
+
+    fn keep_made_glyph_runs(long: &mut LongText) {
+        for index in 0..long.line_glyph_runs.len() {
+            let (glyph_run, range) = &long.line_glyph_runs[index];
+            let range = *range;
+            let Some(platform_impl) = glyph_run.upgrade().and_then(|run| run.created_platform_impl()) else {
                 continue;
             };
-            let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
-            if let Some(replaced) = long.line_runs.insert((range.storage, range.start), kept) {
-                release_platform_impl(Some(replaced.platform_impl));
-            }
+            Self::keep_glyph_run(long, range, platform_impl);
+        }
+    }
+
+    fn keep_glyph_run(long: &mut LongText, range: GlyphRange, platform_impl: Arc<dyn IGlyphRunImpl>) {
+        let kept = KeptGlyphRun { length: range.length, generation: range.generation, platform_impl };
+        if let Some(replaced) = long.line_runs.insert((range.storage, range.start), kept) {
+            release_platform_impl(Some(replaced.platform_impl));
         }
     }
 
