@@ -7,11 +7,15 @@
 #![forbid(unsafe_code)]
 
 mod brotli;
+mod fetchers;
 mod font_data_stream;
+#[cfg(not(target_family = "wasm"))]
+mod off_thread;
 mod text_invalidation;
 mod web_font_collection;
 
 pub use brotli::brotli_decoder_factory;
 pub use ferroui_fonts_web_core as core;
+pub use fetchers::{DefaultFontFaceFetcher, FontFetchOptions};
 pub use font_data_stream::FontDataStream;
 pub use web_font_collection::{FontFetchError, FontFetchResult, IFontFaceFetcher, WebFontCollection};

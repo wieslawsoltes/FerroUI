@@ -18,6 +18,9 @@ path = "lib.rs"
 # WOFF2, which needs a Brotli decoder. Off by default: its static dictionary is the largest part
 # of what this feature adds to an application.
 woff2 = ["dep:brotli-decompressor"]
+# Fonts over `https:` on desktop and mobile. Off by default: it brings a TLS stack. In the browser
+# fonts are fetched by the browser, and this feature adds nothing.
+http = ["dep:ureq"]
 
 [dependencies]
 ferroui-base.workspace = true
@@ -26,6 +29,10 @@ ferroui-controls.workspace = true
 ferroui-fonts-web-core.workspace = true
 url.workspace = true
 brotli-decompressor = { workspace = true, optional = true }
+
+# HTTPS only unless plain HTTP is asked for, with limits on redirects, size and time.
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+ureq = { version = "2.12.1", default-features = false, features = ["tls"], optional = true }
 
 [dev-dependencies]
 ferroui-fonts-web-core = { workspace = true, features = ["testing"] }

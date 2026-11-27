@@ -2076,6 +2076,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-fonts-web-core",
  "ferroui-vello",
+ "ureq",
  "url",
 ]
 

@@ -11,6 +11,8 @@ use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_fonts_web_core::css::{parse_stylesheet, FontFaceDescriptors, FontSource, FontTech, FontTechs};
+#[cfg(not(target_family = "wasm"))]
+use ferroui_fonts_web_core::decode_font_with_brotli;
 use ferroui_fonts_web_core::loading::{
     check_faces, find_matching_faces, FontDisplayPhase, FontDisplayTimeline, FontFaceId, FontFaceLoadStatus,
     FontFaceSetError, FontFaceSetEvent, FontFaceSetLoadStatus, FontFaceSetState, FontFaceView,
@@ -32,6 +34,8 @@ use std::time::{Duration, Instant};
 const FACE_SEPARATOR: char = '\u{E000}';
 /// The bytes decoded in one slice of work on the UI thread.
 const DECODE_SLICE: usize = 32 * 1024;
+/// The most fonts fetched at the same time.
+const MAX_CONCURRENT_FETCHES: usize = 8;
 
 /// Why a font could not be fetched.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -70,6 +74,11 @@ struct DecodeJob {
 struct Shared {
     platform: Rc<dyn IFontManagerImpl>,
     fetcher: RefCell<Option<Rc<dyn IFontFaceFetcher>>>,
+    /// What relative URLs of `src` are resolved against.
+    base_uri: RefCell<Option<url::Url>>,
+    active_fetches: Cell<usize>,
+    /// The faces waiting for a fetch to finish, in the order they asked.
+    waiting_fetches: RefCell<VecDeque<FontFaceId>>,
     faces: RefCell<Vec<Slot>>,
     set: RefCell<FontFaceSetState>,
     next_id: Cell<u32>,
@@ -199,17 +208,41 @@ impl Shared {
             let Some(fetcher) = this.fetcher.borrow().clone() else {
                 continue;
             };
+            if this.active_fetches.get() >= MAX_CONCURRENT_FETCHES {
+                this.with_slot(id, |slot| slot.next_source -= 1);
+                this.waiting_fetches.borrow_mut().push_back(id);
+                return;
+            }
+            this.active_fetches.set(this.active_fetches.get() + 1);
+            let url = this.resolve(&url);
             let weak = Rc::downgrade(this);
             fetcher.fetch(
                 &url,
                 Box::new(move |result| {
                     if let Some(this) = weak.upgrade() {
+                        this.active_fetches.set(this.active_fetches.get().saturating_sub(1));
                         Shared::fetched(&this, id, result);
+                        let next = this.waiting_fetches.borrow_mut().pop_front();
+                        if let Some(next) = next {
+                            Shared::try_next_source(&this, next);
+                        }
                     }
                 }),
             );
             return;
         }
+    }
+
+    /// A URL of `src`, against the base URI when it is relative.
+    fn resolve(&self, url: &str) -> String {
+        if url::Url::parse(url).is_ok() {
+            return url.to_owned();
+        }
+        self.base_uri
+            .borrow()
+            .as_ref()
+            .and_then(|base| base.join(url).ok())
+            .map_or_else(|| url.to_owned(), |resolved| resolved.to_string())
     }
 
     fn fetched(this: &Rc<Self>, id: FontFaceId, result: FontFetchResult) {
@@ -218,6 +251,10 @@ impl Shared {
             return;
         };
         let bytes: Arc<[u8]> = bytes.into();
+        #[cfg(not(target_family = "wasm"))]
+        if this.use_dispatcher && Self::decode_off_thread(this, id, bytes.clone()) {
+            return;
+        }
         match FontDecoder::with_brotli(bytes, this.options, brotli_decoder_factory()) {
             Ok(decoder) => {
                 this.jobs.borrow_mut().push_back(DecodeJob { id, decoder });
@@ -225,6 +262,25 @@ impl Shared {
             }
             Err(_) => Self::try_next_source(this, id),
         }
+    }
+
+    /// Decodes on a worker thread. False when no thread could be started: the decode then runs
+    /// in slices on the UI thread.
+    #[cfg(not(target_family = "wasm"))]
+    fn decode_off_thread(this: &Rc<Self>, id: FontFaceId, bytes: Arc<[u8]>) -> bool {
+        let options = this.options;
+        let weak = Rc::downgrade(this);
+        crate::off_thread::run_off_thread(
+            move || decode_font_with_brotli(&bytes, &options, brotli_decoder_factory()),
+            move |result| {
+                if let Some(this) = weak.upgrade() {
+                    this.finished.borrow_mut().push((id, result));
+                    // Through the queue, so that fonts that finish together swap together.
+                    Shared::schedule_work(&this);
+                }
+            },
+        )
+        .is_ok()
     }
 
     fn schedule_work(this: &Rc<Self>) {
@@ -370,8 +426,10 @@ impl WebFontCollection {
     /// The key of the collection, unless another is given.
     pub const DEFAULT_KEY: &'static str = "fonts:WebFonts";
 
-    /// A collection over the active font backend.
+    /// A collection over the active font backend. Without a fetcher it uses
+    /// [`DefaultFontFaceFetcher`](crate::DefaultFontFaceFetcher).
     pub fn new(fetcher: Option<Rc<dyn IFontFaceFetcher>>) -> Self {
+        let fetcher = fetcher.or_else(|| Some(Rc::new(crate::DefaultFontFaceFetcher::default()) as _));
         let platform = FontManager::current().platform_impl().clone();
         let key = url::Url::parse(Self::DEFAULT_KEY).expect("the default key is a URL");
         let started = Instant::now();
@@ -400,6 +458,9 @@ impl WebFontCollection {
         let shared = Rc::new(Shared {
             platform,
             fetcher: RefCell::new(fetcher),
+            base_uri: RefCell::new(None),
+            active_fetches: Cell::new(0),
+            waiting_fetches: RefCell::new(VecDeque::new()),
             faces: RefCell::new(Vec::new()),
             set: RefCell::new(FontFaceSetState::new(false)),
             next_id: Cell::new(1),
@@ -418,6 +479,11 @@ impl WebFontCollection {
     /// Replaces what fetches fonts.
     pub fn set_fetcher(&self, fetcher: Rc<dyn IFontFaceFetcher>) {
         *self.shared.fetcher.borrow_mut() = Some(fetcher);
+    }
+
+    /// What relative URLs of `src` are resolved against.
+    pub fn set_base_uri(&self, base_uri: url::Url) {
+        *self.shared.base_uri.borrow_mut() = Some(base_uri);
     }
 
     /// Declares a face. Nothing is fetched until text needs it.
@@ -859,6 +925,58 @@ mod tests {
         harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
         assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
         assert!(harness.lookup("A").is_none(), "the text keeps its fallback");
+    }
+
+    #[test]
+    fn at_most_eight_fonts_are_fetched_at_once() {
+        let harness = Harness::new();
+        let css: String =
+            (0..12).map(|index| format!("@font-face {{ font-family: F{index}; src: url(f{index}.ttf) }}")).collect();
+        harness.collection.add_style_sheet(&css);
+        for index in 0..12 {
+            harness.lookup(&format!("F{index}"));
+        }
+        assert_eq!(harness.urls().len(), 8);
+        harness.finish(&HashMap::new());
+        assert_eq!(harness.urls(), ["f8.ttf", "f9.ttf", "f10.ttf", "f11.ttf"], "the others follow, in order");
+    }
+
+    #[test]
+    fn relative_urls_use_the_base_uri() {
+        let harness = Harness::new();
+        harness.collection.set_base_uri(url::Url::parse("https://example.test/app/").unwrap());
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(fonts/a.woff2) }");
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["https://example.test/app/fonts/a.woff2"]);
+    }
+
+    #[test]
+    fn a_data_url_loads_through_the_default_fetcher() {
+        const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let bytes = font("Headless/FerroUI.Headless/BareMinimum.ttf");
+        let mut text = String::with_capacity(bytes.len() / 3 * 4 + 4);
+        for chunk in bytes.chunks(3) {
+            let word = (chunk[0] as u32) << 16
+                | (*chunk.get(1).unwrap_or(&0) as u32) << 8
+                | *chunk.get(2).unwrap_or(&0) as u32;
+            for index in 0..4 {
+                if index <= chunk.len() {
+                    text.push(ALPHABET[(word >> (18 - index * 6)) as usize & 63] as char);
+                } else {
+                    text.push('=');
+                }
+            }
+        }
+        let collection = WebFontCollection::with_parts(
+            Rc::new(FontManagerImpl::new()),
+            Some(Rc::new(crate::DefaultFontFaceFetcher::default())),
+            Box::new(|| 0),
+        );
+        let ids = collection
+            .add_style_sheet(&format!("@font-face {{ font-family: A; src: url(data:font/ttf;base64,{text}) }}"));
+        collection.load("A", &request(), "x");
+        collection.run_pending_work();
+        assert_eq!(collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
     }
 
     #[test]
