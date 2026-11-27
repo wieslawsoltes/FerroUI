@@ -3,6 +3,7 @@
 //! enumeration (and set of flags) that markup can name or that is the type of
 //! a property, with the member names of the managed original.
 
+use crate::ContentDialogButton;
 use crate::automation::peers::*;
 use crate::automation::*;
 use crate::chrome::*;
@@ -173,6 +174,7 @@ ferro_markup_enum!(
 ferro_markup_enum!(SplitViewPanePlacement { Left, Right, Top, Bottom }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TabPlacement { Auto, Top, Bottom, Left, Right }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TickBarPlacement { Left, Top, Right, Bottom }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(SliderSnapsTo { StepValues, Ticks }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TickPlacement { None, TopLeft, BottomRight, Outside }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(flags ValidSpinDirections {
     None = ValidSpinDirections::NONE,
@@ -219,12 +221,16 @@ ferro_markup_enum!(
 );
 ferro_markup_enum!(WindowStartupLocation { Manual, CenterScreen, CenterOwner }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(WindowState { Normal, Minimized, Maximized, FullScreen }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(PipsPagerButtonVisibility { Visible, VisibleOnPointerOver, Collapsed }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(PipsPagerWrapMode { None, Wrap }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(ContentDialogButton { None, Primary, Secondary, Close }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(
     WrapPanelItemsAlignment {
         Start, Center, End, Justify, Stretch, StretchAll,
     },
     { namespace: "FerroUI.Controls" }
 );
+ferro_markup_enum!(WrapPanelItemsStretch { None, Last }, { namespace: "FerroUI.Controls" });
 
 // FerroUI.Controls.Chrome
 ferro_markup_enum!(flags TitleBarDecorations {
@@ -375,6 +381,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <SplitViewPanePlacement as MarkupTyped>::MARKUP,
     <TabPlacement as MarkupTyped>::MARKUP,
     <TickBarPlacement as MarkupTyped>::MARKUP,
+    <SliderSnapsTo as MarkupTyped>::MARKUP,
     <TickPlacement as MarkupTyped>::MARKUP,
     <ValidSpinDirections as MarkupTyped>::MARKUP,
     <Win32HitTestValue as MarkupTyped>::MARKUP,
@@ -386,7 +393,11 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <WindowResizeReason as MarkupTyped>::MARKUP,
     <WindowStartupLocation as MarkupTyped>::MARKUP,
     <WindowState as MarkupTyped>::MARKUP,
+    <PipsPagerButtonVisibility as MarkupTyped>::MARKUP,
+    <PipsPagerWrapMode as MarkupTyped>::MARKUP,
+    <ContentDialogButton as MarkupTyped>::MARKUP,
     <WrapPanelItemsAlignment as MarkupTyped>::MARKUP,
+    <WrapPanelItemsStretch as MarkupTyped>::MARKUP,
     <TitleBarDecorations as MarkupTyped>::MARKUP,
     <Corners as MarkupTyped>::MARKUP,
     <NotificationPosition as MarkupTyped>::MARKUP,
@@ -451,6 +462,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<SplitViewPanePlacement>();
     ValueTypes::register_used::<TabPlacement>();
     ValueTypes::register_used::<TickBarPlacement>();
+    ValueTypes::register_used::<SliderSnapsTo>();
     ValueTypes::register_used::<TickPlacement>();
     ValueTypes::register_used::<ValidSpinDirections>();
     ValueTypes::register_used::<Win32HitTestValue>();
@@ -462,7 +474,11 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<WindowResizeReason>();
     ValueTypes::register_used::<WindowStartupLocation>();
     ValueTypes::register_used::<WindowState>();
+    ValueTypes::register_used::<PipsPagerButtonVisibility>();
+    ValueTypes::register_used::<PipsPagerWrapMode>();
+    ValueTypes::register_used::<ContentDialogButton>();
     ValueTypes::register_used::<WrapPanelItemsAlignment>();
+    ValueTypes::register_used::<WrapPanelItemsStretch>();
     ValueTypes::register_used::<TitleBarDecorations>();
     ValueTypes::register_used::<Corners>();
     ValueTypes::register_used::<NotificationPosition>();
@@ -754,6 +770,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for TickBarPlacement {
     }
 }
 
+impl ferroui_base::data::core::ValueTypeRegistration for SliderSnapsTo {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SliderSnapsTo>();
+    }
+}
+
 impl ferroui_base::data::core::ValueTypeRegistration for TickPlacement {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<TickPlacement>();
@@ -820,9 +842,33 @@ impl ferroui_base::data::core::ValueTypeRegistration for WindowState {
     }
 }
 
+impl ferroui_base::data::core::ValueTypeRegistration for ContentDialogButton {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ContentDialogButton>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PipsPagerButtonVisibility {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PipsPagerButtonVisibility>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for PipsPagerWrapMode {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<PipsPagerWrapMode>();
+    }
+}
+
 impl ferroui_base::data::core::ValueTypeRegistration for WrapPanelItemsAlignment {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<WrapPanelItemsAlignment>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for WrapPanelItemsStretch {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<WrapPanelItemsStretch>();
     }
 }
 
