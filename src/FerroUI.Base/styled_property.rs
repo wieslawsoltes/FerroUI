@@ -390,7 +390,11 @@ impl<T: StyledValue> StyledCodec for StyledProperty<T> {
     }
 
     fn get_value_boxed(&'static self, o: &FerroObject) -> BoxedValue {
-        Rc::new(o.get_value(self))
+        let value = match o.values().try_get_effective_value_inlined(self) {
+            Some(value) => value,
+            None => o.get_value(self),
+        };
+        Rc::new(value)
     }
 
     fn set_local_boxed(&'static self, o: &FerroObject, value: BoxedValue) {
