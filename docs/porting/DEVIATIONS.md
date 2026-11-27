@@ -163,6 +163,12 @@ WinUI rich-text members added to the text formatter (`docs/porting/winui-rich-te
 |---|---|---|---|---|
 | `InteractiveExtensions.AddDisposableHandler` captures the object in the disposable it returns. | The disposable holds the object weakly (`interactive_extensions.rs`); disposing it after the object is gone does nothing. | Representation | An element that keeps the disposable of a handler it added to itself held itself through it (catalog gap C324: a slider and the handler of its own pointer events). The handlers of an object that is gone are gone with it, so nothing is left to remove. | 2026-10-09 |
 
+### Styling (`src/FerroUI.Base/styled_element.rs`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `StyledElement.ApplyControlTheme` attaches the setters of the templated parent's theme to an element of the template when the element derives from the theme's target type. | An element of the template takes the nested styles of that theme only. | Behaviour | With a theme for a base class such as `TemplatedControl`, its `Template` setter replaced the template of a `TextBox` in that template, which then had no `PART_TextPresenter`. | #965 |
+
 ### Data validation (`src/FerroUI.Controls/data_validation_errors.rs`)
 
 | Upstream | Port | Kind | Why | Since |
