@@ -238,8 +238,9 @@ impl<'a> Woff1Decoder<'a> {
         }
     }
 
-    /// The decoded font.
-    pub(crate) fn into_font(self) -> Vec<u8> {
+    /// The decoded font, in canonical layout and with its checksums.
+    pub(crate) fn into_font(mut self) -> Vec<u8> {
+        crate::sfnt::update_checksums(&mut self.output);
         self.output
     }
 }

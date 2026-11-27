@@ -15,7 +15,8 @@ mod error;
 mod limits;
 pub mod sfnt;
 mod woff;
+pub mod woff2;
 
-pub use decoder::{decode_font, sniff_container, FontContainer, FontDecoder};
+pub use decoder::{decode_font, decode_font_with_brotli, sniff_container, FontContainer, FontDecoder};
 pub use error::FontDecodeError;
 pub use limits::WebFontLimits;

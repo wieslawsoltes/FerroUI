@@ -2,9 +2,8 @@
 
 use crate::sfnt::{SanitizeOptions, Sanitizer, APPLE_TRUE, COLLECTION, OPEN_TYPE_CFF, TRUETYPE};
 use crate::woff::{Woff1Decoder, WOFF1_SIGNATURE};
+use crate::woff2::{BrotliDecoderFactory, Woff2Decoder, WOFF2_SIGNATURE};
 use crate::FontDecodeError;
-
-const WOFF2_SIGNATURE: u32 = u32::from_be_bytes(*b"wOF2");
 
 /// The container of a font file, told from its first bytes. CSS treats `format()` as a hint, so
 /// this is what decides how a file is read.
@@ -30,6 +29,7 @@ pub fn sniff_container(data: &[u8]) -> Option<FontContainer> {
 
 enum Stage<'a> {
     Woff(Box<Woff1Decoder<'a>>),
+    Woff2(Box<Woff2Decoder<'a>>),
     SanitizeInput(Box<Sanitizer<&'a [u8]>>),
     SanitizeDecoded(Box<Sanitizer<Vec<u8>>>),
     Finished,
@@ -43,8 +43,18 @@ pub struct FontDecoder<'a> {
 }
 
 impl<'a> FontDecoder<'a> {
-    /// Starts decoding a font file. Headers are validated here, before any large allocation.
+    /// Starts decoding a font file, without a Brotli decoder: WOFF2 is refused.
     pub fn new(data: &'a [u8], options: SanitizeOptions) -> Result<Self, FontDecodeError> {
+        Self::with_brotli(data, options, None)
+    }
+
+    /// Starts decoding a font file. Headers are validated here, before any large allocation.
+    /// `brotli` makes the decoders WOFF2 needs.
+    pub fn with_brotli(
+        data: &'a [u8],
+        options: SanitizeOptions,
+        brotli: Option<BrotliDecoderFactory>,
+    ) -> Result<Self, FontDecodeError> {
         if data.len() > options.limits.max_encoded_size {
             return Err(FontDecodeError::LimitExceeded("encoded size"));
         }
@@ -53,46 +63,68 @@ impl<'a> FontDecoder<'a> {
                 Stage::SanitizeInput(Box::new(Sanitizer::new(data, options)?))
             }
             FontContainer::Woff => Stage::Woff(Box::new(Woff1Decoder::new(data, &options.limits)?)),
-            FontContainer::Woff2 => return Err(FontDecodeError::Unsupported("WOFF2")),
+            FontContainer::Woff2 => {
+                let brotli = brotli.ok_or(FontDecodeError::Unsupported("WOFF2 needs a Brotli decoder"))?;
+                Stage::Woff2(Box::new(Woff2Decoder::new(data, &options, brotli)?))
+            }
         };
         Ok(Self { stage, options })
     }
 
     /// Does up to about `budget` bytes of work. Returns the font when it is finished, after
-    /// which the decoder has nothing more to give.
+    /// which the decoder has nothing more to give. After an error it has nothing more either.
     pub fn step(&mut self, budget: usize) -> Result<Option<Vec<u8>>, FontDecodeError> {
-        let budget = budget.max(1);
+        let result = self.advance(budget.max(1));
+        if !matches!(result, Ok(None)) {
+            self.stage = Stage::Finished;
+        }
+        result
+    }
+
+    fn advance(&mut self, budget: usize) -> Result<Option<Vec<u8>>, FontDecodeError> {
         match &mut self.stage {
             Stage::Woff(decoder) => {
                 if decoder.step(budget)? {
                     let Stage::Woff(decoder) = std::mem::replace(&mut self.stage, Stage::Finished) else {
                         return Err(FontDecodeError::Malformed("the decoder changed stage"));
                     };
-                    let font = decoder.into_font();
+                    self.stage = Stage::SanitizeDecoded(Box::new(Sanitizer::new(decoder.into_font(), self.options)?));
+                }
+                Ok(None)
+            }
+            Stage::Woff2(decoder) => {
+                if let Some(font) = decoder.step(budget)? {
                     self.stage = Stage::SanitizeDecoded(Box::new(Sanitizer::new(font, self.options)?));
                 }
                 Ok(None)
             }
-            Stage::SanitizeInput(sanitizer) => Self::finish_with(sanitizer.step(budget), &mut self.stage),
-            Stage::SanitizeDecoded(sanitizer) => Self::finish_with(sanitizer.step(budget), &mut self.stage),
+            Stage::SanitizeInput(sanitizer) => sanitizer.step(budget),
+            Stage::SanitizeDecoded(sanitizer) => {
+                if !sanitizer.advance(budget)? {
+                    return Ok(None);
+                }
+                let Stage::SanitizeDecoded(sanitizer) = std::mem::replace(&mut self.stage, Stage::Finished) else {
+                    return Err(FontDecodeError::Malformed("the decoder changed stage"));
+                };
+                sanitizer.into_font().map(Some)
+            }
             Stage::Finished => Err(FontDecodeError::Malformed("the decoder has already finished")),
         }
     }
-
-    fn finish_with(
-        result: Result<Option<Vec<u8>>, FontDecodeError>,
-        stage: &mut Stage<'a>,
-    ) -> Result<Option<Vec<u8>>, FontDecodeError> {
-        if !matches!(result, Ok(None)) {
-            *stage = Stage::Finished;
-        }
-        result
-    }
 }
 
-/// Decodes and sanitizes a font in one go.
+/// Decodes and sanitizes a font in one go, without a Brotli decoder.
 pub fn decode_font(data: &[u8], options: &SanitizeOptions) -> Result<Vec<u8>, FontDecodeError> {
-    let mut decoder = FontDecoder::new(data, *options)?;
+    decode_font_with_brotli(data, options, None)
+}
+
+/// Decodes and sanitizes a font in one go. `brotli` makes the decoders WOFF2 needs.
+pub fn decode_font_with_brotli(
+    data: &[u8],
+    options: &SanitizeOptions,
+    brotli: Option<BrotliDecoderFactory>,
+) -> Result<Vec<u8>, FontDecodeError> {
+    let mut decoder = FontDecoder::with_brotli(data, *options, brotli)?;
     loop {
         if let Some(font) = decoder.step(usize::MAX)? {
             return Ok(font);

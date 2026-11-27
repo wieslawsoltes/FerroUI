@@ -134,6 +134,33 @@ const fn padded(length: usize) -> Option<usize> {
     }
 }
 
+/// Fills in the checksums of a font in canonical layout, and `head.checkSumAdjustment`.
+pub(crate) fn update_checksums(font: &mut [u8]) {
+    let count = font.u16_at(4).unwrap_or(0) as usize;
+    let mut head = None;
+    for index in 0..count {
+        let record = 12 + index * 16;
+        let (Some(offset), Some(length)) = (font.u32_at(record + 8), font.u32_at(record + 12)) else {
+            return;
+        };
+        let (offset, length) = (offset as usize, length as usize);
+        let Some(table) = offset.checked_add(length).and_then(|end| font.get(offset..end)) else {
+            return;
+        };
+        let is_head = font[record..record + 4] == *b"head" && length >= 12;
+        let sum = if is_head { checksum(table).wrapping_sub(table.u32_at(8).unwrap_or(0)) } else { checksum(table) };
+        if is_head {
+            head = Some(offset);
+        }
+        font[record + 4..record + 8].copy_from_slice(&sum.to_be_bytes());
+    }
+    if let Some(head) = head {
+        font[head + 8..head + 12].fill(0);
+        let adjustment = 0xB1B0_AFBAu32.wrapping_sub(checksum(font));
+        font[head + 8..head + 12].copy_from_slice(&adjustment.to_be_bytes());
+    }
+}
+
 /// Writes a font of the given tables: a directory sorted by tag, each table on a four-byte
 /// boundary, with the checksums and `head.checkSumAdjustment` computed.
 pub(crate) fn assemble(

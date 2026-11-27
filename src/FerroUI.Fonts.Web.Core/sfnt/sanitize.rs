@@ -287,8 +287,8 @@ impl<D: AsRef<[u8]>> Sanitizer<D> {
         assemble(self.version, &mut tables, &self.options.limits)
     }
 
-    /// Does up to about `budget` bytes of work. Returns the font when it is finished.
-    pub fn step(&mut self, budget: usize) -> Result<Option<Vec<u8>>, FontDecodeError> {
+    /// Validates up to about `budget` bytes. Returns whether all of the font was validated.
+    pub(crate) fn advance(&mut self, budget: usize) -> Result<bool, FontDecodeError> {
         let mut budget = budget.max(1);
         loop {
             match std::mem::replace(&mut self.stage, Stage::Done) {
@@ -304,19 +304,45 @@ impl<D: AsRef<[u8]>> Sanitizer<D> {
                 Stage::Glyphs { next } => {
                     self.stage = self.step_glyphs(next, &mut budget)?;
                     if matches!(self.stage, Stage::Finish) {
-                        continue;
+                        return Ok(true);
                     }
                 }
                 Stage::Finish => {
-                    let font = self.finish()?;
-                    return Ok(Some(font));
+                    self.stage = Stage::Finish;
+                    return Ok(true);
                 }
                 Stage::Done => return Err(FontDecodeError::Malformed("the sanitizer has already finished")),
             }
             if budget == 0 {
-                return Ok(None);
+                return Ok(false);
             }
         }
+    }
+
+    /// Whether the validated font keeps every table exactly as it came.
+    pub(crate) fn keeps_everything(&self) -> bool {
+        self.outputs.iter().all(|output| matches!(output, Output::Keep))
+    }
+
+    /// Does up to about `budget` bytes of work. Returns the font when it is finished.
+    pub fn step(&mut self, budget: usize) -> Result<Option<Vec<u8>>, FontDecodeError> {
+        if !self.advance(budget)? {
+            return Ok(None);
+        }
+        let font = self.finish()?;
+        self.stage = Stage::Done;
+        Ok(Some(font))
+    }
+}
+
+impl Sanitizer<Vec<u8>> {
+    /// The font after validation. A font this crate wrote itself, in canonical layout and with
+    /// its checksums, is handed on without a copy when every table was kept.
+    pub(crate) fn into_font(mut self) -> Result<Vec<u8>, FontDecodeError> {
+        if self.keeps_everything() {
+            return Ok(self.data);
+        }
+        self.finish()
     }
 }
 
