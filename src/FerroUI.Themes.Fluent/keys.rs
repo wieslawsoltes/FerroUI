@@ -15,10 +15,11 @@ ferroui_base::theme_keys! {
         PipsPagerNextPageButtonData, PipsPagerNextPageButtonVerticalData, PipsPagerPreviousPageButtonData, PipsPagerPreviousPageButtonVerticalData,
         PrimaryButtonBorderMultiplier, RightCornerRadiusFilterConverter, SecondaryButtonBorderMultiplier, SelectableTextBlockContextFlyout,
         SeparatorBorderMultiplier, SliderPostContentMargin, SliderPreContentMargin, SplitViewPaneAnimationCloseDuration,
-        SplitViewPaneAnimationEasing, SplitViewPaneAnimationOpenDuration, StringFormatConverter, TableViewColumnHeaderResizerTemplate,
-        TextBoxClearButtonData, TextCaretHandleDrawing, TextCaretHandlePath, TextSelectionHandleDrawing,
-        TextSelectionHandlePath, ToggleSwitchPostContentMargin, ToggleSwitchPreContentMargin, TopCornerRadiusFilterConverter,
-        TreeViewItemCollapsedChevronPathData, TreeViewItemExpandedChevronPathData, VerticalScrollBarContextFlyout, VerticalSmallScrollThumbScaleTransform,
+        SplitViewPaneAnimationEasing, SplitViewPaneAnimationOpenDuration, StringFormatConverter, SymbolThemeFontFamily,
+        TableViewColumnHeaderResizerTemplate, TextBoxClearButtonData, TextCaretHandleDrawing, TextCaretHandlePath,
+        TextSelectionHandleDrawing, TextSelectionHandlePath, ToggleSwitchPostContentMargin, ToggleSwitchPreContentMargin,
+        TopCornerRadiusFilterConverter, TreeViewItemCollapsedChevronPathData, TreeViewItemExpandedChevronPathData, VerticalScrollBarContextFlyout,
+        VerticalSmallScrollThumbScaleTransform,
     ;
     ::ferroui_base::CornerRadius =>
         ControlCornerRadius, OverlayCornerRadius, SliderThumbCornerRadius, TabbedPageTabItemHeaderCornerRadius,
