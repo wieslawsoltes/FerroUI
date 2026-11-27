@@ -1,8 +1,9 @@
 //! The font collection of declared web fonts.
 
-use crate::feature_shaper::{to_font_features, FontFeatureShaper};
+use crate::feature_shaper::{language_of, needs_shaper, to_font_features, FontFeatureShaper};
 use crate::text_invalidation::invalidate_text_layouts;
 use crate::{brotli_decoder_factory, FontDataStream};
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::fonts::{IFontCollection, OpenTypeTag};
 use ferroui_base::media::{
     FontFamily, FontManager, FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight,
@@ -144,6 +145,8 @@ struct Shared {
     use_tick: Cell<u64>,
     /// The wrapper of the shaper, once a face has declared features.
     feature_shaper: RefCell<Option<Rc<FontFeatureShaper>>>,
+    /// The `font-language-override` tags already reported as not known.
+    reported_languages: RefCell<Vec<String>>,
     listeners: RefCell<Vec<Rc<dyn Fn(&FontFaceSetEvent)>>>,
 }
 
@@ -582,19 +585,35 @@ impl Shared {
 
     /// Gives a typeface of a face the features the face declares.
     fn register_features(&self, id: FontFaceId, typeface: &Rc<GlyphTypeface>) {
-        let features = self.with_slot(id, |slot| {
-            let settings = &slot.descriptors.feature_settings;
-            (!settings.is_empty()).then(|| to_font_features(settings))
+        let face = self.with_slot(id, |slot| {
+            (to_font_features(&slot.descriptors.feature_settings), slot.descriptors.language_override.clone())
         });
-        let Some(Some(features)) = features else {
+        let Some((features, tag)) = face else {
             return;
         };
+        let language = tag.and_then(|tag| self.language_override(&tag));
+        if features.is_empty() && language.is_none() {
+            return;
+        }
         if self.feature_shaper.borrow().is_none() {
             *self.feature_shaper.borrow_mut() = FontFeatureShaper::install();
         }
         if let Some(shaper) = self.feature_shaper.borrow().as_ref() {
-            shaper.set_features(typeface, features);
+            shaper.set_face(typeface, features, language);
         }
+    }
+
+    /// The culture of a `font-language-override` tag. A tag the table does not know is ignored, so
+    /// the text keeps its culture, and is reported once.
+    fn language_override(&self, tag: &str) -> Option<Locale> {
+        let language = language_of(tag);
+        if language.is_none() && !self.reported_languages.borrow().iter().any(|known| known == tag) {
+            self.reported_languages.borrow_mut().push(tag.to_owned());
+            if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::FONTS) {
+                logger.log_with_values(None, "The font-language-override {Tag} is not known and is ignored", &[&tag]);
+            }
+        }
+        language
     }
 
     /// Lets go of the least recently used faces nothing else holds, until the fonts fit.
@@ -603,7 +622,7 @@ impl Shared {
         let shaper = self.feature_shaper.borrow();
         // The references the collection holds itself: the slot or its list of instances, and the
         // shaper's table for a face that declares features.
-        let table = |slot: &Slot| (shaper.is_some() && !slot.descriptors.feature_settings.is_empty()) as usize;
+        let table = |slot: &Slot| (shaper.is_some() && needs_shaper(&slot.descriptors)) as usize;
         let is_free = |slot: &Slot| {
             let Some(typeface) = &slot.glyph_typeface else {
                 return false;
@@ -837,6 +856,7 @@ impl WebFontCollection {
             chosen_palettes: RefCell::new(Vec::new()),
             use_tick: Cell::new(0),
             feature_shaper: RefCell::new(None),
+            reported_languages: RefCell::new(Vec::new()),
             listeners: RefCell::new(Vec::new()),
         });
         Self { key, shared }
@@ -1151,6 +1171,9 @@ mod tests {
     use super::*;
     use ferroui_fonts_web_core::loading::FontFaceSetEventKind as Kind;
     use ferroui_fonts_web_core::woff2::testing::{encode_woff2, stored_brotli, EncodeOptions};
+    use ferroui_base::media::text_formatting::TextShaperOptions;
+    use ferroui_base::platform::ITextShaperImpl;
+    use ferroui_base::utilities::ReadOnlyMemory;
     use ferroui_vello::FontManagerImpl;
     use std::collections::HashMap;
     use std::path::PathBuf;
@@ -1612,6 +1635,59 @@ mod tests {
         );
         harness.lookup("A");
         assert_eq!(harness.urls(), ["text.ttf"]);
+    }
+
+    fn bind_harfbuzz() -> Rc<dyn ITextShaperImpl> {
+        let harfbuzz: Rc<dyn ITextShaperImpl> = Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new());
+        FerroLocator::current_mutable().bind::<dyn ITextShaperImpl>().to_constant(harfbuzz.clone());
+        harfbuzz
+    }
+
+    fn shaped(shaper: &dyn ITextShaperImpl, typeface: &Rc<GlyphTypeface>, culture: &str) -> Vec<u16> {
+        let culture = Some(culture.parse().unwrap());
+        let options = TextShaperOptions::with_all(typeface.clone(), 16.0, 0, culture, 0.0, 0.0, None);
+        let text = ReadOnlyMemory::from_vec("fi".encode_utf16().collect());
+        shaper.shape_text(&text, &options).glyph_indices().to_vec()
+    }
+
+    const TURKISH_FORMS: &str = "../samples/ControlCatalog/Assets/Fonts/SourceSansPro-Regular.ttf";
+
+    #[test]
+    fn a_language_override_selects_the_language_system_through_harfbuzz() {
+        let harfbuzz = bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(a.ttf); font-language-override: \"TRK\" }",
+        );
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(font(TURKISH_FORMS)))]));
+        let typeface = harness.lookup("A").expect("the font");
+        let installed = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        let turkish = shaped(&*harfbuzz, &typeface, "tr");
+        assert_ne!(shaped(&*harfbuzz, &typeface, "en"), turkish, "the font has forms for Turkish");
+        assert_eq!(shaped(&*installed, &typeface, "en"), turkish, "the run is shaped as Turkish");
+    }
+
+    #[test]
+    fn an_unknown_language_tag_is_reported_once_and_leaves_the_culture_alone() {
+        let harfbuzz = bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(a.ttf); font-language-override: \"XXX\";
+                          font-feature-settings: \"liga\" 1 }
+             @font-face { font-family: B; src: url(b.ttf); font-language-override: \"XXX\" }",
+        );
+        harness.lookup("A");
+        harness.lookup("B");
+        let bytes = font(TURKISH_FORMS);
+        harness.finish(&HashMap::from([("a.ttf", Ok(bytes.clone())), ("b.ttf", Ok(bytes))]));
+        let typeface = harness.lookup("A").expect("the font");
+        harness.lookup("B").expect("the font");
+        assert_eq!(*harness.collection.shared.reported_languages.borrow(), ["XXX"]);
+        let installed = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        for culture in ["en", "tr"] {
+            assert_eq!(shaped(&*installed, &typeface, culture), shaped(&*harfbuzz, &typeface, culture), "{culture}");
+        }
     }
 
     #[test]
