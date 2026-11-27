@@ -561,16 +561,30 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 (the checks, the edits that keep the underlines, the proofing items) and the underlines of
 `presenters/text_presenter.rs`; the checkers of the platforms are `MacOSSpellChecker`
 (`ferroui-native`, `NSSpellChecker`), `Win32SpellChecker` (`ferroui-win32`, the spell checking API
-of Windows: `ISpellCheckerFactory`, `win32_com/spellcheck.idl`) and `IosSpellChecker`
-(`ferroui-ios`, `UITextChecker`). Tests: `text_box_spell_check_tests` (`ferroui-controls`, with a
-checker of the tests), `tests/spell_checker.rs` of `ferroui-native` (AppKit on the main thread),
+of Windows: `ISpellCheckerFactory`, `win32_com/spellcheck.idl`), `IosSpellChecker`
+(`ferroui-ios`, `UITextChecker`) and `AndroidSpellChecker` (`ferroui-android`, a
+`SpellCheckerSession` of the text services through the Java class `SpellCheckerHelper`). Tests:
+`text_box_spell_check_tests` (`ferroui-controls`, with a checker of the tests),
+`tests/spell_checker.rs` of `ferroui-native` (AppKit on the main thread), `spell_checker_tests`
+of `ferroui-android` (the reading of the session's results, on the host),
 `text_box_examples_keep_the_source_properties` (gallery).
 
 An application asks for the checker of its platform with `use_platform_spell_checker()` of
-`AppBuilderDesktopExtensions` (macOS, Windows) or of `IosApplicationExtensions`, or registers any
-`ISpellChecker` with `ferroui_base::platform::register_spell_checker`; nothing registers one by
-default, so an application that does not check spelling links no checker and starts as before.
-`ferroui_base::platform::spell_checker()` is `None` where spell checking is not available.
+`AppBuilderDesktopExtensions` (macOS, Windows), of `IosApplicationExtensions` or of
+`AndroidApplicationExtensions`, or registers any `ISpellChecker` with
+`ferroui_base::platform::register_spell_checker`; nothing registers one by default, so an
+application that does not check spelling links no checker and starts as before (on Android the
+Java class of the session is not even looked up). `ferroui_base::platform::spell_checker()` is
+`None` where spell checking is not available.
+
+Android's session answers asynchronously: `getSentenceSuggestions` sends the text with a sequence
+number, and the result arrives on the looper of the UI thread, which completes the check it
+answers (a check the session never answers has no result, as the contract allows). The
+suggestions of a misspelled word come with the result (five per word, as the text views of the
+system ask for) and are kept for the menu, which asks for them without waiting. One session per
+language; the language of the settings of the spell checker when it has no dictionary for the
+box's language. Where the user turned the spell checker off, the session is not opened and
+nothing is checked (asked again by the next check).
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -578,7 +592,7 @@ default, so an application that does not check spelling links no checker and sta
 | Spell checking is on by default (`m_isSpellCheckEnabled = true`), off for the input scope `PersonalFullName`. | `true`; never for a password box (a `PasswordChar`) or a read-only box. | FerroUI's TextBox has no input scope of its own; a password is never sent to a checker. |
 | RichEdit draws the red wavy underline. | The presenter strokes one wavy line (period 4, amplitude 1, the red `#E81123`) under the rectangles of the misspelled words through the drawing context: the GPU path of every backend. A word the pre-edit text of an input method splits is not underlined while it is there. | The underline is part of the presenter's drawing. |
 | `ProofingMenuFlyout`: up to three suggestions, a separator, "Add to dictionary" and "Ignore", opened from the proofing button of `TextCommandBarFlyout`. | The same items at the top of the text box's context menu flyout (a `MenuFlyout`), followed by a separator, while it is open for a misspelled word at the pointer (or at the caret, for the keyboard); they are removed when it closes. No `ProofingMenuFlyout` property. The strings are the theme strings `StringTextFlyoutAddToDictionaryText` and `StringTextFlyoutIgnoreText`, or their English text. | FerroUI's themes have no command bar flyout (section 5.1); the menu flyout of the theme is shared by the text boxes, so the items are added for one opening. |
-| "Ignore" ignores the word in the text services of Windows; "Add to dictionary" adds it to the user's dictionary. | `ISpellChecker::ignore_word` (for the session: the spell document of `NSSpellChecker`, the `ISpellChecker` of Windows, the `UITextChecker`) and `add_to_dictionary` (`learnWord`, `ISpellChecker::Add`, `UITextChecker.learnWord`). | The services of the platforms. |
+| "Ignore" ignores the word in the text services of Windows; "Add to dictionary" adds it to the user's dictionary. | `ISpellChecker::ignore_word` (for the session: the spell document of `NSSpellChecker`, the `ISpellChecker` of Windows, the `UITextChecker`; on Android the checker leaves the word out of the results itself) and `add_to_dictionary` (`learnWord`, `ISpellChecker::Add`, `UITextChecker.learnWord`; on Android the word is ignored and the dialog of the settings that adds a word to the user's dictionary opens, `USER_DICTIONARY_INSERT`, as for the text views of the system). | The services of the platforms; an Android application cannot write the user's dictionary itself, and its session has no ignored words. |
 | Repeated words ("Delete repeated word") and autocorrection ("Stop correcting"). | Not ported: the checkers report misspelled words only (Windows' repeated words are left out). | The other platforms do not report them. |
-| Every platform of WinUI is Windows. | No checker on Linux (X11 has no spell checking service; a library such as Enchant is not a service of the platform) and in the browser (the DOM checks only the elements it shows, and FerroUI draws its text itself); Android's `SpellCheckerSession` answers asynchronously and is not connected yet. There `spell_checker()` is `None` and a text box checks nothing. | Where the platform has no checker, spell checking is not available. |
+| Every platform of WinUI is Windows. | No checker on Linux (X11 has no spell checking service; a library such as Enchant is not a service of the platform) and in the browser (the DOM checks only the elements it shows, and FerroUI draws its text itself). There `spell_checker()` is `None` and a text box checks nothing. | Where the platform has no checker, spell checking is not available. |
 

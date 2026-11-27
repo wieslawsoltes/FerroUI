@@ -34,6 +34,7 @@ mod i_android_navigation_service;
 mod i_ferro_activity;
 mod i_init_editor_info;
 mod platform_icon_loader;
+mod spell_checker;
 mod stubs;
 
 #[cfg(target_os = "android")]
@@ -89,6 +90,8 @@ pub use ferro_main_activity::FerroMainActivity;
 pub use ferro_view::FerroView;
 #[cfg(target_os = "android")]
 pub use interop::natives::on_load;
+#[cfg(target_os = "android")]
+pub use spell_checker::AndroidSpellChecker;
 
 /// Makes a shared library the native side of an Android application.
 ///

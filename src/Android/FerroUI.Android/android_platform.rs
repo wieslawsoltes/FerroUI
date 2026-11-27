@@ -119,6 +119,12 @@ mod imp {
         /// registered with the builder or the default ones, the HarfBuzz
         /// text shaper and the Skia renderer.
         fn use_android(&self) -> AppBuilder;
+
+        /// Registers the spell checker of the system (a `SpellCheckerSession` of its text
+        /// services) as the spell checker of the application once the platform services are set
+        /// up, so that a `TextBox` with `IsSpellCheckEnabled` underlines its misspelled words
+        /// (#1261). Where the user turned the spell checker off, nothing is checked.
+        fn use_platform_spell_checker(&self) -> AppBuilder;
     }
 
     impl AndroidApplicationExtensions for AppBuilder {
@@ -127,6 +133,12 @@ mod imp {
                 .use_windowing_subsystem(AndroidPlatform::initialize, "Android")
                 .use_harfbuzz()
                 .use_skia()
+        }
+
+        fn use_platform_spell_checker(&self) -> AppBuilder {
+            self.after_platform_services_setup(|_| {
+                crate::AndroidSpellChecker::register();
+            })
         }
     }
 
