@@ -1,5 +1,5 @@
 use crate::primitives::TemplatedControlImpl;
-use crate::{ContentControl, ContentControlImpl, ControlImpl, TableViewColumn};
+use crate::{ContentControl, ContentControlImpl, ControlImpl, TableViewColumn, ToolTip};
 use ferroui_base::data::CompiledBinding;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -8,7 +8,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, DirectProperty, FerroObjectImpl,
     FerroProperty, Ref, StyledElement, StyledElementImpl, Visual, VisualImpl,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 ferroui_base::ferro_thread_local! {
@@ -22,6 +22,8 @@ ferroui_base::ferro_thread_local! {
 pub struct TableViewCell {
     base: ContentControl,
     column: RefCell<Option<Ref<TableViewColumn>>>,
+    /// Whether the tool tip is bound to the `CellToolTipBinding` of the column (WinUI).
+    has_column_tool_tip: Cell<bool>,
 }
 
 ferro_class!(TableViewCell: ContentControl);
@@ -50,7 +52,7 @@ ferro_properties! {
 impl TableViewCell {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: ContentControl::construct(), column: RefCell::new(None) }
+        Self { base: ContentControl::construct(), column: RefCell::new(None), has_column_tool_tip: Cell::new(false) }
     }
 
     pub fn new() -> Ref<Self> {
@@ -78,6 +80,9 @@ impl TableViewCell {
     }
 
     fn clear_properties(&self) {
+        if self.has_column_tool_tip.replace(false) {
+            self.clear_value(ToolTip::tip_property());
+        }
         self.clear_value(Visual::is_visible_property());
         self.clear_value(StyledElement::theme_property());
         self.clear_value(ContentControl::horizontal_content_alignment_property());
@@ -109,6 +114,15 @@ impl TableViewCell {
                 Some(binding) => self.bind_binding(content_property, &*binding),
                 None => self.bind_binding(content_property, &row_binding),
             };
+        }
+
+        match column.cell_tool_tip_binding() {
+            Some(binding) => {
+                self.bind_binding(ToolTip::tip_property().as_property(), &*binding);
+                self.has_column_tool_tip.set(true);
+            }
+            None if self.has_column_tool_tip.replace(false) => self.clear_value(ToolTip::tip_property()),
+            None => {}
         }
     }
 

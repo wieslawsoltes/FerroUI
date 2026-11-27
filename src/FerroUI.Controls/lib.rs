@@ -908,11 +908,18 @@ pub use pips_pager::{
 
 // --- tableview ---
 mod table_view;
+mod table_view_binding_probe;
 mod table_view_cell;
 mod table_view_column;
 mod table_view_column_header;
+mod table_view_column_types;
 mod table_view_row;
+mod table_view_sorting;
+mod table_view_source;
 pub use table_view::{TableView, TableViewDensity, TableViewGridLinesVisibility};
+pub use table_view_column_types::{TableViewTemplateColumn, TableViewTextColumn};
+pub use table_view_sorting::{TableViewSortCycle, TableViewSortDirection, TableViewSortedEventArgs};
+pub use table_view_source::TableViewSource;
 pub use table_view_cell::TableViewCell;
 pub use table_view_column::TableViewColumn;
 pub use table_view_column_header::TableViewColumnHeader;
@@ -926,6 +933,8 @@ pub use visual_state::{
 };
 #[cfg(test)]
 mod table_view_column_header_tests;
+#[cfg(test)]
+mod table_view_sorting_tests;
 #[cfg(test)]
 mod table_view_tests;
 #[cfg(test)]

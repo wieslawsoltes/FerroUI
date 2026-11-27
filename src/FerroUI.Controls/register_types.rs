@@ -515,6 +515,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::TableViewColumn,
     crate::TableViewColumnHeader,
     crate::TableViewRow,
+    crate::TableViewTemplateColumn,
+    crate::TableViewTextColumn,
     // FerroUI.Controls.Presenters
     crate::presenters::TableViewCellsPresenter,
     crate::presenters::TableViewColumnHeadersPresenter,

@@ -141,6 +141,19 @@ impl ItemCollection {
         self.0.writable.borrow().clone().expect("the collection is in items mode")
     }
 
+    /// The source the view presents: the items source, the default collection, or a view over
+    /// one of them that the control presents instead ([`set_presented_source`](Self::set_presented_source)).
+    pub(crate) fn presented_source(&self) -> ItemsSource {
+        self.0.view.source()
+    }
+
+    /// Presents `source` in place of the items source or the default collection, without
+    /// changing the mode of the collection: a table view presents a sorted view over its items
+    /// (WinUI's sorting of TableView). The items mode keeps writing to its default collection.
+    pub(crate) fn set_presented_source(&self, source: ItemsSource) {
+        self.set_source(source);
+    }
+
     pub(crate) fn set_items_source(&self, value: Option<ItemsSource>) {
         if self.0.mode.get() != Mode::ItemsSource && self.0.view.count() > 0 {
             panic!("Items collection must be empty before using ItemsSource.");

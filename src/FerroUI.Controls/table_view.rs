@@ -3,9 +3,12 @@ use crate::presenters::table_view_layout_helper::TableViewLayoutHelper;
 use crate::presenters::TableViewColumnHeadersPresenter;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::templates::IDataTemplate;
+use crate::table_view_source::TableViewSortDescription;
 use crate::{
-    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn, TableViewRow,
+    AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ItemsSource, ListBox,
+    TableViewColumn, TableViewRow, TableViewSortDirection, TableViewSortedEventArgs, TableViewSource,
 };
+use ferroui_base::interactivity::{Interactive, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetBehavior};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -13,8 +16,8 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_properties, instantiate, BoxedValue,
-    DirectProperty,
+    ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_properties, ferro_routed_event,
+    instantiate, BoxedValue, DirectProperty,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement,
     StyledElementImpl, StyledElementImplExt, StyledProperty, VisualImpl, WeakRef,
 };
@@ -70,6 +73,9 @@ pub struct TableView {
     /// The presenter of the column headers of the template; it is part of
     /// the tree below the control and held weakly.
     headers_presenter: RefCell<Option<WeakRef<TableViewColumnHeadersPresenter>>>,
+    /// The sorted view the table presents over an items source that is not a
+    /// [`TableViewSource`] while it is sorted (WinUI's sorting).
+    sort_view: RefCell<Option<Rc<TableViewSource>>>,
 }
 
 ferro_class!(TableView: ListBox);
@@ -95,6 +101,19 @@ impl FerroObjectImpl for TableView {
                 for column in columns.snapshot().iter() {
                     column.update_can_user_effectively_resize();
                 }
+            }
+        } else if property == Self::can_user_sort_columns_property().as_property() {
+            let columns = this.columns.borrow().clone();
+            if let Some(columns) = columns {
+                for column in columns.snapshot().iter() {
+                    column.update_can_user_effectively_sort();
+                }
+            }
+        } else if property == ItemsControl::items_source_property().as_property() {
+            // The items collection presents the new source; a sorted table sorts it again.
+            *this.sort_view.borrow_mut() = None;
+            if let Some(column) = this.sorted_column() {
+                this.apply_sort(Some((&column, column.sort_direction())));
             }
         } else if property == Self::grid_lines_visibility_property().as_property() {
             this.update_grid_lines_pseudo_classes();
@@ -189,6 +208,11 @@ ferro_properties! {
             FerroProperty::register::<TableView, _>("CanUserResizeColumns", true)
         }
 
+        /// Defines the `CanUserSortColumns` property (WinUI).
+        pub fn can_user_sort_columns_property() -> StyledProperty<bool> {
+            FerroProperty::register::<TableView, _>("CanUserSortColumns", false)
+        }
+
         /// Defines the `GridLinesVisibility` property (WinUI).
         pub fn grid_lines_visibility_property() -> StyledProperty<TableViewGridLinesVisibility> {
             FerroProperty::register::<TableView, _>("GridLinesVisibility", TableViewGridLinesVisibility::All)
@@ -216,6 +240,18 @@ ferro_properties! {
     }
 }
 
+ferro_properties! {
+    impl TableView {
+        ferro_routed_event!(
+            /// Defines the `Sorted` event (WinUI): raised after the rows were sorted by a column,
+            /// or put in the order of the source again.
+            pub fn sorted_event() -> RoutedEvent<TableViewSortedEventArgs> {
+                RoutedEvent::register::<TableView, _>("Sorted", RoutingStrategies::BUBBLE)
+            }
+        );
+    }
+}
+
 impl TableView {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
@@ -224,6 +260,7 @@ impl TableView {
             columns_subscription: RefCell::new(None),
             columns: RefCell::new(None),
             headers_presenter: RefCell::new(None),
+            sort_view: RefCell::new(None),
         }
     }
 
@@ -302,6 +339,136 @@ impl TableView {
 
     pub fn set_can_user_resize_columns(&self, value: bool) {
         self.set_value(Self::can_user_resize_columns_property(), value)
+    }
+
+    /// Gets or sets whether a click on the header of a column sorts the rows by it (WinUI's
+    /// `CanUserSortColumns`). The default is `false`, where WinUI's is `true`: an upstream table
+    /// does not sort. A column decides for itself with [`TableViewColumn::can_sort`].
+    pub fn can_user_sort_columns(&self) -> bool {
+        self.get_value(Self::can_user_sort_columns_property())
+    }
+
+    pub fn set_can_user_sort_columns(&self, value: bool) {
+        self.set_value(Self::can_user_sort_columns_property(), value)
+    }
+
+    /// Adds a handler of the `Sorted` event ([`sorted_event`](Self::sorted_event)).
+    pub fn sorted(&self, handler: impl Fn(&Interactive, &TableViewSortedEventArgs) + 'static) -> RoutedEventHandlerToken {
+        self.add_handler(Self::sorted_event(), handler)
+    }
+
+    /// Sorts the rows by `column` in `direction`, or puts them in the order of the source with
+    /// [`None`](TableViewSortDirection::None), and raises `Sorted`. The other columns are no
+    /// longer sorted. The items source is not changed: the table presents a sorted view of it,
+    /// or sets the order of a [`TableViewSource`]. The selected items stay selected.
+    ///
+    /// The column must belong to the table.
+    pub fn sort(&self, column: &Ref<TableViewColumn>, direction: TableViewSortDirection) {
+        let columns = self.columns();
+        assert!(columns.index_of(column).is_some(), "The column {} is not a column of this TableView.", column.debug_display());
+
+        for other in columns.snapshot().iter() {
+            if other != column && other.sort_direction() != TableViewSortDirection::None {
+                other.set_current_value(TableViewColumn::sort_direction_property(), TableViewSortDirection::None);
+            }
+        }
+        column.set_current_value(TableViewColumn::sort_direction_property(), direction);
+
+        self.apply_sort(Some((column, direction)));
+
+        let args = TableViewSortedEventArgs::new(Some(Self::sorted_event()), column.clone(), direction);
+        self.raise_event(&args);
+    }
+
+    /// Puts the rows in the order of the source (no column is sorted); raises no event.
+    pub fn clear_sort(&self) {
+        for column in self.columns().snapshot().iter() {
+            if column.sort_direction() != TableViewSortDirection::None {
+                column.set_current_value(TableViewColumn::sort_direction_property(), TableViewSortDirection::None);
+            }
+        }
+        self.apply_sort(None);
+    }
+
+    /// A click on the header of `column`: the next direction of its sort cycle, if the user can
+    /// sort by it.
+    pub(crate) fn on_column_header_clicked(&self, column: &Ref<TableViewColumn>) {
+        if !column.can_user_effectively_sort() || self.columns().index_of(column).is_none() {
+            return;
+        }
+        let direction = column.sort_cycle().next(column.sort_direction());
+        self.sort(column, direction);
+    }
+
+    /// The column the rows are sorted by, if any.
+    fn sorted_column(&self) -> Option<Ref<TableViewColumn>> {
+        let columns = self.columns.borrow().clone()?;
+        let column = columns.snapshot().iter().find(|column| column.sort_direction() != TableViewSortDirection::None).cloned();
+        column
+    }
+
+    /// Presents the items in the order of `sort`, keeping the selected items selected.
+    fn apply_sort(&self, sort: Option<(&Ref<TableViewColumn>, TableViewSortDirection)>) {
+        let description = sort.and_then(|(column, direction)| match direction {
+            TableViewSortDirection::None => None,
+            direction => Some(TableViewSortDescription {
+                key: column.sort_key(),
+                descending: direction == TableViewSortDirection::Descending,
+            }),
+        });
+
+        // A view of the table (or an unsorted table) has nothing to do without a sort.
+        let own_source = self.items_source().and_then(|source| source.downcast_ref::<TableViewSource>().map(|_| source.clone()));
+        if description.is_none() && own_source.is_none() && self.sort_view.borrow().is_none() {
+            return;
+        }
+
+        let selected: Vec<Option<BoxedValue>> = self.selection().selected_items().iter().collect();
+
+        if let Some(source) = own_source {
+            let view = source.downcast_ref::<TableViewSource>().expect("a TableViewSource");
+            view.set_sort(description);
+        } else {
+            match description {
+                Some(description) => {
+                    let existing = self.sort_view.borrow().clone();
+                    match existing {
+                        Some(view) => view.set_sort(Some(description)),
+                        None => {
+                            let view = TableViewSource::from(self.items().presented_source());
+                            view.set_sort(Some(description));
+                            *self.sort_view.borrow_mut() = Some(view.clone());
+                            self.items().set_presented_source(ItemsSource::from(view));
+                        }
+                    }
+                }
+                None => {
+                    let view = self.sort_view.borrow_mut().take();
+                    if let Some(view) = view {
+                        self.items().set_presented_source(view.source().clone());
+                    }
+                }
+            }
+        }
+
+        self.restore_selection(&selected);
+    }
+
+    fn restore_selection(&self, selected: &[Option<BoxedValue>]) {
+        if selected.is_empty() {
+            return;
+        }
+        let selection = self.selection();
+        let view = self.items_view().clone();
+        selection.begin_batch_update();
+        selection.clear();
+        for item in selected {
+            let index = view.index_of(item);
+            if index >= 0 {
+                selection.select(index);
+            }
+        }
+        selection.end_batch_update();
     }
 
     /// Gets or sets which grid lines the table draws (WinUI's `GridLinesVisibility`). The default

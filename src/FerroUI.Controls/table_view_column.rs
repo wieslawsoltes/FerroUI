@@ -2,7 +2,10 @@ use crate::i_headered::{register_headered, IHeadered};
 use crate::primitives::HeaderedContentControl;
 use crate::templates::IDataTemplate;
 use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
-use crate::{AssignedBinding, ContentControl, GridLength, GridUnitType, TableView};
+use crate::table_view_binding_probe::TableViewBindingAccessor;
+use crate::table_view_source::TableViewSortKey;
+use crate::{AssignedBinding, ContentControl, GridLength, GridUnitType, TableView, TableViewSortCycle, TableViewSortDirection};
+use ferroui_base::data::{BindingBase, ReflectionBinding};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{
@@ -22,6 +25,7 @@ pub struct TableViewColumn {
     table_view: RefCell<Option<WeakRef<TableView>>>,
     actual_width: Cell<f64>,
     can_user_effectively_resize: Cell<bool>,
+    can_user_effectively_sort: Cell<bool>,
 }
 
 ferro_class!(TableViewColumn: StyledElement);
@@ -31,6 +35,7 @@ ferro_class_info!(TableViewColumn {
         property_attributes: [
             CellTemplate: [InheritDataTypeFromItems("ItemsSource", AncestorType = type(Ref<TableView>))],
             Binding: [InheritDataTypeFromItems("ItemsSource", AncestorType = type(Ref<TableView>))],
+            CellToolTipBinding: [InheritDataTypeFromItems("ItemsSource", AncestorType = type(Ref<TableView>))],
         ],
     },
 });
@@ -51,6 +56,12 @@ impl FerroObjectImpl for TableViewColumn {
 
         if property == Self::can_user_resize_property().as_property() {
             this.update_can_user_effectively_resize();
+        } else if property == Self::can_sort_property().as_property() {
+            this.update_can_user_effectively_sort();
+        } else if property == Self::sort_direction_property().as_property() {
+            if let Some(table_view) = this.table_view() {
+                table_view.refresh_column_headers(&this.to_ref());
+            }
         } else {
             if Self::is_header_property(property) {
                 if let Some(table_view) = this.table_view() {
@@ -116,6 +127,49 @@ ferro_properties! {
             FerroProperty::register::<TableViewColumn, _>("CanUserResize", None)
         }
 
+        /// Defines the `CanSort` property (WinUI).
+        pub fn can_sort_property() -> StyledProperty<Option<bool>> {
+            FerroProperty::register::<TableViewColumn, _>("CanSort", None)
+        }
+
+        /// Defines the `SortCycle` property (WinUI).
+        pub fn sort_cycle_property() -> StyledProperty<TableViewSortCycle> {
+            FerroProperty::register::<TableViewColumn, _>("SortCycle", TableViewSortCycle::AscendingDescendingNone)
+        }
+
+        /// Defines the `SortDirection` property (WinUI).
+        pub fn sort_direction_property() -> StyledProperty<TableViewSortDirection> {
+            FerroProperty::register::<TableViewColumn, _>("SortDirection", TableViewSortDirection::None)
+        }
+
+        /// Defines the `SortMemberPath` property (WinUI).
+        pub fn sort_member_path_property() -> StyledProperty<Option<String>> {
+            FerroProperty::register::<TableViewColumn, _>("SortMemberPath", None)
+        }
+
+        /// Defines the `HeaderToolTip` property (WinUI).
+        pub fn header_tool_tip_property() -> StyledProperty<Option<BoxedValue>> {
+            FerroProperty::register::<TableViewColumn, _>("HeaderToolTip", None)
+        }
+
+        /// Defines the `CellToolTipBinding` property (WinUI).
+        pub fn cell_tool_tip_binding_property() -> StyledProperty<Option<AssignedBinding>> {
+            FerroProperty::register_with::<TableViewColumn, _>(
+                "CellToolTipBinding",
+                StyledPropertyOptions::new(None).assign_binding(true),
+            )
+        }
+
+        /// Defines the `CanUserEffectivelySort` property (WinUI).
+        pub fn can_user_effectively_sort_property() -> DirectProperty<TableViewColumn, bool> {
+            FerroProperty::register_direct::<TableViewColumn, _>(
+                "CanUserEffectivelySort",
+                |o| o.can_user_effectively_sort(),
+                None,
+                false,
+            )
+        }
+
         /// Defines the `HorizontalContentAlignment` property.
         pub fn horizontal_content_alignment_property() -> StyledProperty<HorizontalAlignment> {
             ContentControl::horizontal_content_alignment_property()
@@ -159,6 +213,7 @@ impl TableViewColumn {
             table_view: RefCell::new(None),
             actual_width: Cell::new(f64::NAN),
             can_user_effectively_resize: Cell::new(false),
+            can_user_effectively_sort: Cell::new(false),
         }
     }
 
@@ -258,6 +313,106 @@ impl TableViewColumn {
         self.set_value(Self::can_user_resize_property(), value)
     }
 
+    /// Gets or sets whether a click on the header sorts the rows by the column (WinUI's
+    /// `CanSort`). Set to `None` to use the value of [`TableView::can_user_sort_columns`]. The
+    /// default is `None`.
+    pub fn can_sort(&self) -> Option<bool> {
+        self.get_value(Self::can_sort_property())
+    }
+
+    pub fn set_can_sort(&self, value: Option<bool>) {
+        self.set_value(Self::can_sort_property(), value)
+    }
+
+    /// Gets or sets the directions a click on the header goes through (WinUI's `SortCycle`).
+    pub fn sort_cycle(&self) -> TableViewSortCycle {
+        self.get_value(Self::sort_cycle_property())
+    }
+
+    pub fn set_sort_cycle(&self, value: TableViewSortCycle) {
+        self.set_value(Self::sort_cycle_property(), value)
+    }
+
+    /// Gets the direction the rows are sorted by this column in (WinUI's `SortDirection`),
+    /// [`None`](TableViewSortDirection::None) when they are not sorted by it. The table sets it
+    /// when it sorts; to sort, use [`TableView::sort`].
+    pub fn sort_direction(&self) -> TableViewSortDirection {
+        self.get_value(Self::sort_direction_property())
+    }
+
+    pub fn set_sort_direction(&self, value: TableViewSortDirection) {
+        self.set_value(Self::sort_direction_property(), value)
+    }
+
+    /// Gets or sets the path of the property of the items the column sorts by (WinUI's
+    /// `SortMemberPath`). `None`, the default, sorts by the value of
+    /// [`binding`](Self::binding), or by the item itself without a binding.
+    pub fn sort_member_path(&self) -> Option<String> {
+        self.get_value(Self::sort_member_path_property())
+    }
+
+    pub fn set_sort_member_path(&self, value: Option<String>) {
+        self.set_value(Self::sort_member_path_property(), value)
+    }
+
+    /// Gets or sets the tool tip of the header (WinUI's `HeaderToolTip`).
+    pub fn header_tool_tip(&self) -> Option<BoxedValue> {
+        self.get_value(Self::header_tool_tip_property())
+    }
+
+    pub fn set_header_tool_tip(&self, value: Option<BoxedValue>) {
+        self.set_value(Self::header_tool_tip_property(), value)
+    }
+
+    /// Gets or sets a binding that selects the tool tip of a cell from the row data item (WinUI's
+    /// `CellToolTipBinding`).
+    pub fn cell_tool_tip_binding(&self) -> Option<AssignedBinding> {
+        self.get_value(Self::cell_tool_tip_binding_property())
+    }
+
+    pub fn set_cell_tool_tip_binding(&self, value: Option<AssignedBinding>) {
+        self.set_value(Self::cell_tool_tip_binding_property(), value)
+    }
+
+    /// Gets whether a click on the header sorts the rows: [`can_sort`](Self::can_sort), or
+    /// [`TableView::can_user_sort_columns`] when it is `None`.
+    pub fn can_user_effectively_sort(&self) -> bool {
+        self.can_user_effectively_sort.get()
+    }
+
+    pub(crate) fn update_can_user_effectively_sort(&self) {
+        let value = self
+            .can_sort()
+            .or_else(|| self.table_view().map(|table_view| table_view.can_user_sort_columns()))
+            .unwrap_or(false);
+        if self.set_and_raise_cell(
+            Self::can_user_effectively_sort_property(),
+            &self.can_user_effectively_sort,
+            value,
+        ) {
+            if let Some(table_view) = self.table_view() {
+                table_view.refresh_column_headers(&self.to_ref());
+            }
+        }
+    }
+
+    /// The value of an item the column sorts by: the property at
+    /// [`sort_member_path`](Self::sort_member_path), the value of [`binding`](Self::binding), or
+    /// the item itself.
+    pub(crate) fn sort_key(&self) -> TableViewSortKey {
+        let binding: Option<Rc<dyn BindingBase>> = match self.sort_member_path() {
+            Some(path) if !path.is_empty() => Some(ReflectionBinding::new(&path)),
+            _ => self.binding().map(|binding| binding.0.clone()),
+        };
+        match binding {
+            Some(binding) => {
+                let accessor = TableViewBindingAccessor::new(&*binding);
+                Rc::new(move |item: &Option<BoxedValue>| accessor.read(item))
+            }
+            None => Rc::new(|item: &Option<BoxedValue>| item.clone()),
+        }
+    }
+
     /// Gets or sets the horizontal alignment of the content within a cell.
     pub fn horizontal_content_alignment(&self) -> HorizontalAlignment {
         self.get_value(Self::horizontal_content_alignment_property())
@@ -281,6 +436,7 @@ impl TableViewColumn {
         *self.table_view.borrow_mut() = value.as_ref().map(Ref::downgrade);
         self.raise_direct_property_changed(Self::table_view_property(), &old_value, &value);
         self.update_can_user_effectively_resize();
+        self.update_can_user_effectively_sort();
     }
 
     /// Gets the actual width of the column, in device independent pixels.
@@ -319,6 +475,7 @@ impl TableViewColumn {
             || property == Self::binding_property().as_property()
             || property == Self::horizontal_content_alignment_property().as_property()
             || property == Self::is_visible_property().as_property()
+            || property == Self::cell_tool_tip_binding_property().as_property()
     }
 
     fn is_header_property(property: &'static FerroProperty) -> bool {
@@ -327,6 +484,7 @@ impl TableViewColumn {
             || property == Self::header_property().as_property()
             || property == Self::horizontal_content_alignment_property().as_property()
             || property == Self::is_visible_property().as_property()
+            || property == Self::header_tool_tip_property().as_property()
     }
 
     pub(crate) fn update_can_user_effectively_resize(&self) {
