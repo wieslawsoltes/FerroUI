@@ -1,0 +1,21 @@
+<!-- Ported from the two pinned ContentDialog examples of WinUI Gallery (14061eea) and the code
+     behind of ContentDialogPage.xaml.cs (content_dialog_samples.rs); see ../NOTICE.md. The result
+     texts are polite live regions, the source's LiveRegionChanged event. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ContentDialogExample1" Spacing="8">
+    <TextBlock Text="A basic content dialog with content" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <Button x:Name="ShowDialog" Content="Show dialog" />
+      <TextBlock x:Name="DialogResult" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="ContentDialogExample2" Spacing="8">
+    <TextBlock Text="A content dialog without a default button." FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <Button x:Name="ShowDialogNoDefault" Content="Show dialog without a default action" />
+      <TextBlock x:Name="DialogResultNoDefault" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+  </StackPanel>
+</StackPanel>

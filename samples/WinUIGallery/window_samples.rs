@@ -6,6 +6,11 @@
 //!
 //! A window opened by a "Show window" button lives until it is closed, as a WinUI window does:
 //! the sample keeps it in [`opened_windows`] and releases it when it closes.
+//!
+//! Opening a window needs a windowing platform. Where the gallery runs in a single view (the
+//! browser, iOS, Android) the page is not in a `Window` but in the platform's single view, and
+//! the buttons show [`NO_WINDOWS`] on the page instead of opening one. [`owner_window`] makes
+//! that decision for every gallery page that opens windows.
 
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Brushes, Color, IBrush};
@@ -31,6 +36,25 @@ use std::rc::Rc;
 ferroui_base::ferro_thread_local! {
     /// The sample windows that are open (strong: a window lives until it is closed).
     static OPENED: RefCell<Vec<Ref<Window>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The message of a page that is not in a window of a windowing platform.
+pub(crate) const NO_WINDOWS: &str =
+    "This platform shows the gallery in a single view: it has no windows to open.";
+
+/// The window the page is in, if it is in a window of a windowing platform (`App.MainWindow`).
+/// `None` on a single-view platform, where the page's top level is the platform's single view
+/// and no window can be opened.
+pub(crate) fn owner_window(root: &Ref<Control>) -> Option<Ref<Window>> {
+    TopLevel::get_top_level(Some(root)).and_then(|top_level| top_level.cast::<Window>())
+}
+
+/// Shows `message` in the page's `WindowSampleError`, or hides it for `None`.
+pub(crate) fn set_window_sample_error(root: &Ref<Control>, message: Option<&str>) {
+    if let Some(error) = find::<TextBlock>(root, "WindowSampleError") {
+        error.set_text(message);
+        error.set_is_visible(message.is_some());
+    }
 }
 
 /// The sample windows the pages opened that are not closed yet, oldest first.
@@ -91,8 +115,9 @@ fn show(window: &Ref<Window>) {
     window.show();
 }
 
-/// Wires a "Show window" button: `open` creates the window; a failure to load its markup is
-/// shown in the page's `WindowSampleError`.
+/// Wires a "Show window" button: `open` creates the window; a page outside a window (a
+/// single-view platform, see [`owner_window`]) or a failure to load the window's markup is shown
+/// in the page's `WindowSampleError`.
 fn wire_show_button(
     root: &Ref<Control>,
     button: &str,
@@ -102,19 +127,14 @@ fn wire_show_button(
     let weak_root = root.downgrade();
     button.click(move |_, _| {
         let Some(root) = weak_root.upgrade() else { return };
-        let error = find::<TextBlock>(&root, "WindowSampleError");
+        if owner_window(&root).is_none() {
+            set_window_sample_error(&root, Some(NO_WINDOWS));
+            return;
+        }
         match open(&root) {
-            Ok(_) => {
-                if let Some(error) = error {
-                    error.set_text(None);
-                    error.set_is_visible(false);
-                }
-            }
+            Ok(_) => set_window_sample_error(&root, None),
             Err(reason) => {
-                if let Some(error) = error {
-                    error.set_text(Some(&format!("The sample window failed to load: {reason}")));
-                    error.set_is_visible(true);
-                }
+                set_window_sample_error(&root, Some(&format!("The sample window failed to load: {reason}")))
             }
         }
     });

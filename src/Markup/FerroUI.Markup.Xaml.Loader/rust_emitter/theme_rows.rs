@@ -33,10 +33,11 @@ use super::super::emit_types::{EmitTypes, FrameworkType};
 use super::theme_units::unit_marker;
 use super::{absolute, identifiers, is_identifier, is_string_literal, static_resource_alias};
 
-/// Whether the build and the reference tests of the themes write the runs of the deferred
-/// shapes as packed tables (#855, `rt::PackedRows`). On by default: the measurement kept it (the
-/// stripped executables are smaller and start-up is not slower, docs/xaml-themes.md). Turning it
-/// off ([`with_packed_theme_rows`]) gives the slices of row structs of before.
+/// Whether the build and the reference tests of the themes write the runs of rows as packed
+/// tables (#855: `rt::PackedRows` for the deferred shapes, `rt::PackedValueRows` for the plain
+/// values). On by default: the measurement kept it for the deferred shapes (the stripped
+/// executables are smaller and start-up is not slower, docs/xaml-themes.md). Turning it off
+/// ([`with_packed_theme_rows`]) gives the slices of row structs of before.
 pub const DEFAULT_PACKED_THEME_ROWS: bool = true;
 
 ferroui_base::ferro_thread_local! {
@@ -68,6 +69,10 @@ pub fn with_packed_theme_rows<R>(packed: bool, emit: impl FnOnce() -> R) -> R {
 /// as a row even alone, since its row replaces a build function of its own; a single plain value
 /// is one statement either way.
 const MIN_VALUE_RUN: usize = 2;
+
+/// The bytes of an `rt::PackedValueRows`, which a slice of rows does not have: a run of plain
+/// values is packed only when its records and this are smaller than the rows.
+const PACKED_VALUE_HEADER: usize = 48;
 
 /// A shape of resource whose additions are written as rows.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -141,13 +146,37 @@ impl RowKind {
         }
     }
 
-    /// The builder of a packed table of the shape in `rt` (#855), for the deferred shapes.
+    /// The builder of a packed table of the shape in `rt` (#855).
     fn packed_builder(self) -> Option<&'static str> {
+        Some(match self {
+            Self::ResourceAlias => "rt::add_packed_resource_aliases",
+            Self::LiteralBrush => "rt::add_packed_literal_brushes",
+            Self::DynamicBrush => "rt::add_packed_dynamic_brushes",
+            Self::StaticBrush => "rt::add_packed_static_brushes",
+            Self::Double => "rt::add_packed_double_resources",
+            Self::Thickness => "rt::add_packed_thickness_resources",
+            Self::CornerRadius => "rt::add_packed_corner_radius_resources",
+            Self::Color => "rt::add_packed_color_resources",
+            Self::Text => "rt::add_packed_string_resources",
+        })
+    }
+
+    /// The Rust type of a packed table of the shape (#855).
+    fn packed_type(self) -> &'static str {
+        match self.is_deferred() {
+            true => "rt::PackedRows",
+            false => "rt::PackedValueRows",
+        }
+    }
+
+    /// The bytes of a row of a plain value in a slice, and of its packed record (#855): the key,
+    /// the position, and the indices of its numbers, the halves of a colour or the text.
+    fn value_bytes(self) -> Option<(usize, usize)> {
         match self {
-            Self::ResourceAlias => Some("rt::add_packed_resource_aliases"),
-            Self::LiteralBrush => Some("rt::add_packed_literal_brushes"),
-            Self::DynamicBrush => Some("rt::add_packed_dynamic_brushes"),
-            Self::StaticBrush => Some("rt::add_packed_static_brushes"),
+            Self::Double => Some((32, 10)),
+            Self::Thickness | Self::CornerRadius => Some((56, 16)),
+            Self::Color => Some((32, 12)),
+            Self::Text => Some((40, 12)),
             _ => None,
         }
     }
@@ -226,12 +255,12 @@ pub(super) struct RowStatement {
     pub(super) prefix: Option<(String, String)>,
     /// The slot of the build function of a deferred row, which is not emitted when the row is.
     pub(super) slot: Option<usize>,
-    /// The fields of a deferred row, for a packed table (#855).
+    /// The fields of the row, for a packed table (#855).
     pub(super) fields: Option<RowFields>,
 }
 
-/// The fields of a deferred row as values (#855): the key, the target or colour key (or the
-/// ARGB value of a literal brush), the namespace table of the declaration and the positions.
+/// The fields of a row as values (#855): the key, the operand (the target or colour key, the ARGB
+/// value, or a plain value), the namespace table of the declaration and the positions.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct RowFields {
     key: String,
@@ -240,11 +269,14 @@ pub(super) struct RowFields {
     positions: [i32; 4],
 }
 
-/// The operand of a deferred row: a string (target or colour key) or an ARGB value.
+/// The operand of a row: a string (target or colour key, or a text), an ARGB value, or the
+/// literals of a number or of the four components of a thickness or a corner radius.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Operand {
     Text(String),
     Argb(u32),
+    Number(String),
+    Numbers([String; 4]),
 }
 
 /// The text of the Rust string literal `literal` as [`super::rust_string_literal`] writes it,
@@ -293,34 +325,70 @@ fn row_fields(addition: &DeferredAddition<'_>, row: &DeferredRow) -> Option<RowF
     })
 }
 
-/// The packed table of the rows `fields` of the shape `kind` (#855), as the initializer of an
-/// `rt::PackedRows`: one pool of the strings of the table, each written once (a string that is
-/// part of one already in the pool is found there), the namespace tables the rows name, and one
-/// record of 16-bit fields for each row. `None` when a row has no fields, when an offset, a
-/// length, a position or the number of namespace tables does not fit 16 bits, or when a position
-/// is negative: the run keeps its slice of rows.
-fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
-    packed_table_in(kind, fields, &mut String::new(), None)
+/// The fields of the plain value `value` (the text of a [`RowStatement`] of the shape `kind`) with
+/// the key literal `key`, if they are of a form a packed table holds.
+fn value_fields(kind: RowKind, key: &str, value: &str, line: i32, position: i32) -> Option<RowFields> {
+    let operand = match kind {
+        RowKind::Double => Operand::Number(value.to_string()),
+        RowKind::Thickness | RowKind::CornerRadius => {
+            let inner = value.strip_prefix('[')?.strip_suffix(']')?;
+            let components: Vec<String> = inner.split(", ").map(str::to_string).collect();
+            Operand::Numbers(components.try_into().ok()?)
+        }
+        RowKind::Color => Operand::Argb(value.strip_suffix("_u32")?.parse().ok()?),
+        RowKind::Text => Operand::Text(string_value(value)?),
+        _ => return None,
+    };
+    Some(RowFields { key: string_value(key)?, operand, namespaces: None, positions: [line, position, line, position] })
 }
 
-/// [`packed_table`] over the pool `pool`, which the strings of the rows are found in or added to:
-/// the pool of the table, written as its literal (`pool_name` none), or the pool of the unit of
-/// the theme the table is of, named `pool_name` and written once for all the tables of the unit
-/// ([`row_tables_in`]). `None` leaves `pool` as it may have grown: the caller passes a copy.
-fn packed_table_in(kind: RowKind, fields: &[&RowFields], pool: &mut String, pool_name: Option<&str>) -> Option<String> {
+/// The names of the pools of a unit of a theme ([`row_tables_in`]).
+struct UnitPools<'n> {
+    strings: &'n str,
+    numbers: &'n str,
+}
+
+/// The offset and the length of `text` in `pool`, where it is found or added at the end.
+fn intern(pool: &mut String, text: &str) -> Option<[u16; 2]> {
+    let offset = match pool.find(text) {
+        Some(offset) if !text.is_empty() => offset,
+        _ => {
+            pool.push_str(text);
+            pool.len() - text.len()
+        }
+    };
+    Some([u16::try_from(offset).ok()?, u16::try_from(text.len()).ok()?])
+}
+
+/// The packed table of the rows `fields` of the shape `kind` (#855), as the initializer of an
+/// `rt::PackedRows` or, for plain values, an `rt::PackedValueRows`: one pool of the strings of the
+/// table, each written once (a string that is part of one already in the pool is found there),
+/// the namespace tables the rows name or the numbers they hold, and one record of 16-bit fields
+/// for each row. `None` when a row has no fields, when an offset, a length, a position or an index
+/// does not fit 16 bits, when a position is negative, or when a table of plain values would not
+/// be smaller than its rows: the run keeps its slice of rows.
+fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
+    packed_table_in(kind, fields, &mut String::new(), &mut Vec::new(), None)
+}
+
+/// [`packed_table`] over the pools `pool` and `numbers`, which the strings and the numbers of the
+/// rows are found in or added to: those of the table, written as its literals (`names` none), or
+/// those of the unit of the theme the table is of, named by `names` and written once for all the
+/// tables of the unit ([`row_tables_in`]). `None` leaves the pools as they may have grown: the
+/// caller passes copies.
+fn packed_table_in(
+    kind: RowKind,
+    fields: &[&RowFields],
+    pool: &mut String,
+    numbers: &mut Vec<String>,
+    names: Option<&UnitPools<'_>>,
+) -> Option<String> {
+    if !kind.is_deferred() {
+        return packed_value_table_in(kind, fields, pool, numbers, names);
+    }
     let mut namespaces: Vec<&str> = Vec::new();
     let mut records: Vec<String> = Vec::with_capacity(fields.len());
     let narrow = |value: usize| u16::try_from(value).ok();
-    let intern = |pool: &mut String, text: &str| -> Option<[u16; 2]> {
-        let offset = match pool.find(text) {
-            Some(offset) if !text.is_empty() => offset,
-            _ => {
-                pool.push_str(text);
-                pool.len() - text.len()
-            }
-        };
-        Some([narrow(offset)?, narrow(text.len())?])
-    };
     for row in fields {
         let mut record: Vec<u16> = Vec::with_capacity(9);
         record.extend(intern(&mut *pool, &row.key)?);
@@ -355,11 +423,76 @@ fn packed_table_in(kind: RowKind, fields: &[&RowFields], pool: &mut String, pool
     // The pool is read by byte offsets: it must fit them as a whole.
     narrow(pool.len())?;
     let mut text = String::from("rt::PackedRows {\n");
-    match pool_name {
-        Some(name) => text.push_str(&format!("    strings: {name},\n")),
+    match names {
+        Some(names) => text.push_str(&format!("    strings: {},\n", names.strings)),
         None => text.push_str(&format!("    strings: {},\n", super::rust_string_literal(pool))),
     }
     text.push_str(&format!("    namespaces: &[{}],\n", namespaces.join(", ")));
+    text.push_str("    records: &[\n");
+    for record in &records {
+        text.push_str(&format!("        {record},\n"));
+    }
+    text.push_str("    ],\n}");
+    Some(text)
+}
+
+/// [`packed_table_in`] of plain values: a record is the offset and the length of the key, the
+/// line and the position, then the index of the number, the indices of the four components, the
+/// two halves of the colour, or the offset and the length of the text.
+fn packed_value_table_in(
+    kind: RowKind,
+    fields: &[&RowFields],
+    pool: &mut String,
+    numbers: &mut Vec<String>,
+    names: Option<&UnitPools<'_>>,
+) -> Option<String> {
+    let (row_bytes, record_bytes) = kind.value_bytes()?;
+    let number = |numbers: &mut Vec<String>, literal: &str| -> Option<u16> {
+        let index = match numbers.iter().position(|known| known == literal) {
+            Some(index) => index,
+            None => {
+                numbers.push(literal.to_string());
+                numbers.len() - 1
+            }
+        };
+        u16::try_from(index).ok()
+    };
+    let mut records: Vec<String> = Vec::with_capacity(fields.len());
+    for row in fields {
+        let mut record: Vec<u16> = Vec::with_capacity(record_bytes / 2);
+        record.extend(intern(&mut *pool, &row.key)?);
+        record.push(u16::try_from(row.positions[0]).ok()?);
+        record.push(u16::try_from(row.positions[1]).ok()?);
+        match (&row.operand, kind) {
+            (Operand::Number(literal), RowKind::Double) => record.push(number(&mut *numbers, literal)?),
+            (Operand::Numbers(components), RowKind::Thickness | RowKind::CornerRadius) => {
+                for component in components {
+                    record.push(number(&mut *numbers, component)?);
+                }
+            }
+            (Operand::Argb(argb), RowKind::Color) => record.extend([(*argb & 0xFFFF) as u16, (*argb >> 16) as u16]),
+            (Operand::Text(value), RowKind::Text) => record.extend(intern(&mut *pool, value)?),
+            _ => return None,
+        }
+        records.push(record.iter().map(u16::to_string).collect::<Vec<_>>().join(", "));
+    }
+    u16::try_from(pool.len()).ok()?;
+    // The numbers of a table of its own are its cost; those of a unit are shared by its tables.
+    let own_numbers = if names.is_none() { numbers.len() * 8 } else { 0 };
+    if PACKED_VALUE_HEADER + own_numbers + fields.len() * record_bytes >= fields.len() * row_bytes {
+        return None;
+    }
+    let mut text = String::from("rt::PackedValueRows {\n");
+    match names {
+        Some(names) => text.push_str(&format!("    strings: {},\n", names.strings)),
+        None => text.push_str(&format!("    strings: {},\n", super::rust_string_literal(pool))),
+    }
+    let holds_numbers = matches!(kind, RowKind::Double | RowKind::Thickness | RowKind::CornerRadius);
+    match (holds_numbers, names) {
+        (false, _) => text.push_str("    numbers: &[],\n"),
+        (true, Some(names)) => text.push_str(&format!("    numbers: &{},\n", names.numbers)),
+        (true, None) => text.push_str(&format!("    numbers: &[{}],\n", numbers.join(", "))),
+    }
     text.push_str("    records: &[\n");
     for record in &records {
         text.push_str(&format!("        {record},\n"));
@@ -625,6 +758,7 @@ pub(super) fn value_row_statement(paths: &RowPaths, call: &str, previous: Option
         }
     };
     let (line, position) = position;
+    let fields = value_fields(kind, key, &value, line, position);
     Some(RowStatement {
         kind,
         dictionary: dictionary.to_string(),
@@ -634,7 +768,7 @@ pub(super) fn value_row_statement(paths: &RowPaths, call: &str, previous: Option
         row: format!("rt::ValueRow {{ key: {key}, value: {value}, line: {line}, position: {position} }}"),
         prefix,
         slot: None,
-        fields: None,
+        fields,
     })
 }
 
@@ -736,6 +870,7 @@ fn flush(
     } else {
         body.push(match (kind.is_deferred(), &packed, kind.packed_builder()) {
             (true, Some(_), Some(builder)) => format!("{indent}{builder}(&{dictionary}, &context, &{document}, &{name})?;"),
+            (false, Some(_), Some(builder)) => format!("{indent}{builder}(&{dictionary}, &{name})?;"),
             (true, _, _) => format!("{indent}{}(&{dictionary}, &context, &{document}, {name})?;", kind.builder()),
             (false, _, _) => format!("{indent}{}(&{dictionary}, {name})?;", kind.builder()),
         });
@@ -835,19 +970,20 @@ fn packed_static(name: &str, document_text: &str, kind: RowKind, packed: &str) -
     let builder = kind.packed_builder().unwrap_or_default();
     format!(
         "/// {} of a run of `{document_text}`, packed, added in order by `{builder}` (#855).\n\
-         static {name}: rt::PackedRows = {packed};\n",
-        kind.description()
+         static {name}: {} = {packed};\n",
+        kind.description(),
+        kind.packed_type()
     )
 }
 
 /// The texts of the tables `tables` (`(name, document text, run)`, in the order of the calls) of
 /// the function `prefix` (upper case) of a document (#855): the packed tables of one unit of a
 /// theme, when it has two or more, share one pool of strings, the constant
-/// `{prefix}_UNIT_{unit}_STRINGS` written before the first of them. The tables of the theme
-/// dictionaries of a unit name the same keys and targets, which a pool for each table repeated;
-/// a pool for each unit, not one for the theme, leaves the strings of a trimmed unit out with it.
-/// A table whose rows do not fit the 16-bit offsets of the pool keeps a pool of its own, as does
-/// every other table.
+/// `{prefix}_UNIT_{unit}_STRINGS`, and one of numbers, the static `{prefix}_UNIT_{unit}_NUMBERS`,
+/// written before the first of them. The tables of the theme dictionaries of a unit name the same
+/// keys and targets, which a pool for each table repeated; a pool for each unit, not one for the
+/// theme, leaves the strings and the numbers of a trimmed unit out with it. A table whose rows do
+/// not fit the 16-bit offsets of the pool keeps a pool of its own, as does every other table.
 pub(super) fn row_tables_in(prefix: &str, tables: &[(String, String, RowRun)], image: &super::BytecodeImage) -> Vec<String> {
     let mut by_unit: std::collections::BTreeMap<u32, Vec<usize>> = std::collections::BTreeMap::new();
     for (index, (_, _, run)) in tables.iter().enumerate() {
@@ -856,35 +992,47 @@ pub(super) fn row_tables_in(prefix: &str, tables: &[(String, String, RowRun)], i
         }
     }
     let mut shared: HashMap<usize, String> = HashMap::new();
-    let mut pools: HashMap<usize, (u32, String)> = HashMap::new();
+    let mut pools: HashMap<usize, (u32, String, Vec<String>)> = HashMap::new();
     for (unit, indices) in by_unit.into_iter().filter(|(_, indices)| indices.len() >= 2) {
         let pool_name = format!("{prefix}_UNIT_{unit}_STRINGS");
+        let numbers_name = format!("{prefix}_UNIT_{unit}_NUMBERS");
+        let names = UnitPools { strings: &pool_name, numbers: &numbers_name };
         let mut pool = String::new();
+        let mut numbers = Vec::new();
         let mut members = Vec::new();
         for index in indices {
             let run = &tables[index].2;
             let Some(fields) = &run.fields else { continue };
             let fields: Vec<&RowFields> = fields.iter().collect();
-            let mut trial = pool.clone();
-            if let Some(packed) = packed_table_in(run.kind, &fields, &mut trial, Some(&pool_name)) {
+            let (mut trial, mut trial_numbers) = (pool.clone(), numbers.clone());
+            if let Some(packed) = packed_table_in(run.kind, &fields, &mut trial, &mut trial_numbers, Some(&names)) {
                 pool = trial;
+                numbers = trial_numbers;
                 members.push((index, packed));
             }
         }
         if members.len() < 2 {
             continue;
         }
-        pools.insert(members[0].0, (unit, pool));
+        pools.insert(members[0].0, (unit, pool, numbers));
         shared.extend(members);
     }
     let mut texts = Vec::with_capacity(tables.len());
     for (index, (name, document_text, run)) in tables.iter().enumerate() {
-        if let Some((unit, pool)) = pools.get(&index) {
+        if let Some((unit, pool, numbers)) = pools.get(&index) {
             texts.push(format!(
                 "/// The keys and targets of the packed tables of the unit {unit} of `{document_text}`, each once (#855).\n\
                  const {prefix}_UNIT_{unit}_STRINGS: &str = {};\n",
                 super::rust_string_literal(pool)
             ));
+            if !numbers.is_empty() {
+                texts.push(format!(
+                    "/// The numbers of the packed tables of the unit {unit} of `{document_text}`, each once (#855).\n\
+                     static {prefix}_UNIT_{unit}_NUMBERS: [f64; {}] = [{}];\n",
+                    numbers.len(),
+                    numbers.join(", ")
+                ));
+            }
         }
         texts.push(match shared.get(&index) {
             Some(packed) => packed_static(name, document_text, run.kind, packed),
