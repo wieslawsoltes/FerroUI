@@ -633,6 +633,7 @@ impl CartesianChartEngine {
                 .filter(|part| !part.is_empty())
                 .collect::<Vec<_>>()
                 .join(": ");
+            hit.label_parts = crate::scene::TooltipLabelParts::of(&s.name, &header);
         }
         Ok(CartesianMeasurement {
             scene,
@@ -1212,6 +1213,7 @@ fn append_hit(
             if s.name.is_empty() { "" } else { ": " },
             text
         ),
+        label_parts: crate::scene::TooltipLabelParts::of(&s.name, ""),
     });
     // A heat series places its labels in its cells (`draw_heat`).
     if s.data_labels && s.kind != SeriesKind::Heat {

@@ -53,6 +53,21 @@ pub trait ISkiaSurface {
     /// Copies the surface to the canvas.
     fn blit(&self, canvas: &Canvas);
 
+    /// [`blit`](Self::blit) with the `Src` blend mode onto a canvas the surface covers (the
+    /// caller checked), replacing its pixels. Returns `false`, having drawn nothing, when the
+    /// surface does not blit that way.
+    fn blit_replacing(&self, canvas: &Canvas) -> bool {
+        let _ = canvas;
+        false
+    }
+
+    /// The rows of pixels the next frame drawn on the surface can change
+    /// (`IDrawingContextLayerImpl::set_frame_dirty_rows`); a surface that draws its frames whole
+    /// ignores it.
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        let _ = rows;
+    }
+
     /// Begins a frame that the drawing context records as a picture, which the surface draws
     /// by itself when the drawing context is disposed, instead of a frame drawn on the canvas
     /// of [`surface`](Self::surface). `None` (the default): the frame is drawn on that canvas,
