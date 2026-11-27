@@ -6,6 +6,7 @@ fn main() {
     cc::Build::new()
         .file("native/recognize.m")
         .flag("-fobjc-arc")
+        .flag("-fvisibility=hidden")
         .compile("ferroui_media_qr_apple");
     for framework in ["Foundation", "Vision", "CoreImage", "CoreVideo", "ImageIO"] {
         println!("cargo:rustc-link-lib=framework={framework}");
