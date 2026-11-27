@@ -1,6 +1,6 @@
 //! The font collection of declared web fonts.
 
-use crate::feature_shaper::{language_of, needs_shaper, to_font_features, FontFeatureShaper};
+use crate::feature_shaper::{language_of, to_font_features, FontFeatureShaper};
 use crate::text_invalidation::invalidate_text_layouts;
 use crate::{brotli_decoder_factory, FontDataStream};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
@@ -114,6 +114,16 @@ impl InstanceKey {
         };
         Self { weight: request.weight as i32, width: (request.width * 8.0) as i32, style }
     }
+
+    /// The request this key was made from.
+    fn request(self) -> FontMatchRequest {
+        let style = match self.style {
+            0 => FontStyleRequest::Normal,
+            1 => FontStyleRequest::Italic,
+            angle => FontStyleRequest::Oblique((angle - 2) as f32 / 16.0),
+        };
+        FontMatchRequest { weight: self.weight as f32, width: self.width as f32 / 8.0, style }
+    }
 }
 
 struct DecodeJob {
@@ -125,6 +135,7 @@ struct DecodeJob {
 
 #[cfg(feature = "incremental")]
 mod incremental;
+mod size_selector;
 
 struct Shared {
     platform: Rc<dyn IFontManagerImpl>,
@@ -637,6 +648,7 @@ impl Shared {
                 slot.last_used = tick;
             });
             this.register_features(id, &typeface);
+            Self::connect_size_chooser(this);
             #[cfg(feature = "incremental")]
             if this.with_slot(id, |slot| slot.incremental.is_some()) == Some(true) {
                 Self::connect_shaper(this);
@@ -679,7 +691,8 @@ impl Shared {
         let observed = self.with_slot(id, |slot| slot.incremental.is_some()) == Some(true);
         #[cfg(not(feature = "incremental"))]
         let observed = false;
-        if features.is_empty() && language.is_none() && !observed {
+        let sized = self.family_has_sizes(id);
+        if features.is_empty() && language.is_none() && !observed && !sized {
             return;
         }
         if self.feature_shaper.borrow().is_none() {
@@ -687,6 +700,9 @@ impl Shared {
         }
         if let Some(shaper) = self.feature_shaper.borrow().as_ref() {
             shaper.set_face(typeface, features, language);
+            if sized {
+                shaper.set_sized(typeface, id);
+            }
             #[cfg(feature = "incremental")]
             if observed {
                 shaper.observe(typeface, id);
@@ -713,7 +729,9 @@ impl Shared {
         let shaper = self.feature_shaper.borrow();
         // The references the collection holds itself: the slot or its list of instances, and the
         // shaper's table for a face that declares features.
-        let table = |slot: &Slot| (shaper.is_some() && needs_shaper(&slot.descriptors)) as usize;
+        let table = |typeface: &Rc<GlyphTypeface>| {
+            shaper.as_ref().is_some_and(|shaper| shaper.contains(typeface)) as usize
+        };
         let is_free = |slot: &Slot| {
             let Some(typeface) = &slot.glyph_typeface else {
                 return false;
@@ -724,12 +742,12 @@ impl Shared {
                 return false;
             }
             let listed = slot.instances.iter().filter(|(_, instance)| Rc::ptr_eq(instance, typeface)).count();
-            Rc::strong_count(typeface) <= 1 + listed + table(slot)
+            Rc::strong_count(typeface) <= 1 + listed + table(typeface)
                 && slot
                     .instances
                     .iter()
                     .filter(|(_, instance)| !Rc::ptr_eq(instance, typeface))
-                    .all(|(_, instance)| Rc::strong_count(instance) <= 1 + table(slot))
+                    .all(|(_, instance)| Rc::strong_count(instance) <= 1 + table(instance))
         };
         let mut faces = self.faces.borrow_mut();
         loop {
@@ -985,6 +1003,7 @@ impl WebFontCollection {
         self.shared.next_id.set(id.0 + 1);
         let timeline = FontDisplayTimeline::new(descriptors.display);
         self.shared.set.borrow_mut().add(id, FontFaceLoadStatus::Unloaded, false)?;
+        let sized_family = descriptors.size_range.is_some().then(|| descriptors.family.clone());
         self.shared.faces.borrow_mut().push(Slot {
             id,
             descriptors,
@@ -1003,6 +1022,9 @@ impl WebFontCollection {
             #[cfg(feature = "incremental")]
             incremental: None,
         });
+        if let Some(family) = sized_family {
+            Shared::refresh_sized_family(&self.shared, &family);
+        }
         self.shared.fonts_changed();
         Ok(id)
     }
@@ -1930,6 +1952,84 @@ mod tests {
             harness.collection.run_pending_work();
             assert!(harness.urls().is_empty());
         }
+    }
+
+    fn shaped_at(shaper: &dyn ITextShaperImpl, typeface: &Rc<GlyphTypeface>, size: f64) -> Rc<GlyphTypeface> {
+        let options = TextShaperOptions::with_all(typeface.clone(), size, 0, None, 0.0, 0.0, None);
+        let text = ReadOnlyMemory::from_vec("fi".encode_utf16().collect());
+        shaper.shape_text(&text, &options).glyph_typeface().clone()
+    }
+
+    const ROBOTO: &str = "FerroUI.Themes.Material/Assets/Roboto-Regular.ttf";
+
+    #[test]
+    fn a_run_is_shaped_in_the_face_for_its_size() {
+        bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(text.ttf); font-size: 6 24 }
+             @font-face { font-family: A; src: url(display.ttf); font-size: 25 200 }",
+        );
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["text.ttf"], "the range of the default size");
+        harness.finish(&HashMap::from([("text.ttf", Ok(inter()))]));
+        let text = harness.lookup("A").expect("the font");
+        let shaper = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &text, 12.0), &text));
+        assert!(harness.urls().is_empty(), "nothing else is needed at that size");
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &text, 72.0), &text), "it keeps its face while the other loads");
+        assert_eq!(harness.urls(), ["display.ttf"]);
+        harness.finish(&HashMap::from([("display.ttf", Ok(font(ROBOTO)))]));
+        let large = shaped_at(&*shaper, &text, 72.0);
+        assert!(!Rc::ptr_eq(&large, &text), "the face for that size");
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &text, 24.0), &text), "the end of a range is inside it");
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &text, 2.0), &text), "the nearest range below all of them");
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &text, 900.0), &large), "the nearest range above");
+    }
+
+    #[test]
+    fn a_face_for_any_size_serves_the_sizes_no_other_face_takes() {
+        bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(any.ttf) }
+             @font-face { font-family: A; src: url(display.ttf); font-size: 48 200 }",
+        );
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("any.ttf", Ok(inter()))]));
+        let any = harness.lookup("A").expect("the font");
+        let shaper = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        assert!(Rc::ptr_eq(&shaped_at(&*shaper, &any, 12.0), &any));
+        assert!(harness.urls().is_empty());
+        shaped_at(&*shaper, &any, 72.0);
+        assert_eq!(harness.urls(), ["display.ttf"], "the later rule wins where both fit");
+    }
+
+    #[test]
+    fn a_family_without_sizes_does_not_install_the_shaper() {
+        let harfbuzz = bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        harness.lookup("A").expect("the font");
+        assert!(harness.collection.shared.feature_shaper.borrow().is_none());
+        let installed = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        assert!(Rc::ptr_eq(&installed, &harfbuzz));
+    }
+
+    #[test]
+    fn a_face_declared_later_with_a_size_applies_to_what_is_loaded() {
+        bind_harfbuzz();
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(any.ttf) }");
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("any.ttf", Ok(inter()))]));
+        let any = harness.lookup("A").expect("the font");
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(big.ttf); font-size: 48 200 }");
+        let shaper = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
+        shaped_at(&*shaper, &any, 72.0);
+        assert_eq!(harness.urls(), ["big.ttf"]);
     }
 
     #[test]
