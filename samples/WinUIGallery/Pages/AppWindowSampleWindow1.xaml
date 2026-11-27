@@ -1,0 +1,21 @@
+<!-- Ported from SampleWindow1.xaml of the pinned WinUI Gallery (14061eea, SampleSupport/SamplePages);
+     see ../NOTICE.md. The content of the sample window; the window (its Mica backdrop, title, size
+     and position) and the handlers are in Rust (app_window_samples.rs). ThemeResource is
+     DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+  <Button x:Name="Hide" Content="Hide" Width="200"
+          ToolTip.Tip="Hides the window from all UX representations in the system but keeps the object alive." />
+  <Button x:Name="Show" Width="200"
+          ToolTip.Tip="Hides and then shows the window and activates it after 3 seconds.">
+    <TextBlock Text="Hide and show the window after 3 seconds" TextWrapping="Wrap" TextAlignment="Center" />
+  </Button>
+  <Button x:Name="Close" AutomationProperties.Name="Close" Width="200" Margin="0,16,0,0"
+          ToolTip.Tip="Closes the window and releases all resources.">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <SymbolIcon Symbol="Cancel" Margin="0,0,4,0" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+      <TextBlock Text="Close" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+    </StackPanel>
+  </Button>
+</StackPanel>

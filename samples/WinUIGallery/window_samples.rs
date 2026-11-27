@@ -5,7 +5,9 @@
 //! bar are the framework's; the content of each window is its markup in `Pages/`.
 //!
 //! A window opened by a "Show window" button lives until it is closed, as a WinUI window does:
-//! the sample keeps it in [`opened_windows`] and releases it when it closes.
+//! the sample keeps it in [`opened_windows`] and releases it when it closes. The sample windows of
+//! the AppWindow, AppWindowTitleBar and Windowing pages (`app_window_samples.rs`) are kept the same
+//! way.
 
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Brushes, Color, IBrush};
@@ -77,8 +79,8 @@ fn create_window(xaml: &str, title: &str, opener: &Ref<Control>) -> Result<(Ref<
     Ok((window, content))
 }
 
-/// `Activate`: shows the window and keeps it until it closes.
-fn show(window: &Ref<Window>) {
+/// Keeps `window` until it closes (the gallery's `WindowHelper.TrackWindow`).
+pub(crate) fn track(window: &Ref<Window>) {
     OPENED.with(|opened| opened.borrow_mut().push(window.clone()));
     let weak = window.downgrade();
     window
@@ -88,6 +90,11 @@ fn show(window: &Ref<Window>) {
             }
         })
         .detach();
+}
+
+/// `Activate`: shows the window and keeps it until it closes.
+pub(crate) fn show(window: &Ref<Window>) {
+    track(window);
     window.show();
 }
 

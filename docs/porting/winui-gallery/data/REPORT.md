@@ -53,9 +53,9 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 
 | Page state | Count |
 |---|---:|
-| pending | 31 |
+| pending | 28 |
 | partial | 16 |
-| ported | 79 |
+| ported | 82 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -73,8 +73,8 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | AppBarSeparator | Menus & toolbars | ported | 1 |
 | AppBarToggleButton | Menus & toolbars | ported | 4 |
 | AppNotification | Shell | pending | 5 |
-| AppWindow | Windowing | pending | 7 |
-| AppWindowTitleBar | Windowing | pending | 3 |
+| AppWindow | Windowing | ported | 7 |
+| AppWindowTitleBar | Windowing | ported | 3 |
 | AutoSuggestBox | Text | ported | 2 |
 | BadgeNotificationManager | Shell | pending | 2 |
 | Binding | Fundamentals | ported | 7 |
@@ -182,7 +182,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | VariableSizedWrapGrid | Layout | pending | 1 |
 | Viewbox | Layout | ported | 1 |
 | WebView2 | Media | pending | 1 |
-| Windowing | Windowing | pending | 2 |
+| Windowing | Windowing | ported | 2 |
 | WrapPanel | Layout | ported | 2 |
 | XamlCompInterop | Motion | pending | 5 |
 | XamlResources | Fundamentals | ported | 4 |

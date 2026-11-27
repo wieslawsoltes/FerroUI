@@ -36,7 +36,7 @@ The capture host has only the fonts it embeds: glyphs of the symbol font (`Symbo
 - `Gallery.xaml` and `gallery.rs`: the shell (search, categories, history, theme, the source browser). Only the selected page is created; replacing a page releases its controls and handlers.
 - `catalog_data.rs`: the pinned catalog, written by `generate_catalog.py` from a checkout of WinUI Gallery at the pin. `assets-manifest.json` and `generate_assets.py` record the images copied from the gallery.
 - `Pages/*.xaml` and `examples.rs`: the native examples, with their adaptations recorded per page. The original WinUI XAML of a page can also be loaded through the WinUI XAML importer (`ferroui-markup-xaml-winui`) from the page ("Load XAML preview"), which reports what it cannot translate.
-- `*_samples.rs`: the Rust behaviour of the examples (input, feedback, media, navigation, platform, materials, text, repeater, ink, chart), and `window_samples.rs` the sample windows the SystemBackdrops and TitleBar pages open (their content in `Pages/*Window.xaml`).
+- `*_samples.rs`: the Rust behaviour of the examples (input, feedback, media, navigation, platform, materials, text, repeater, ink, chart), `window_samples.rs` the sample windows the SystemBackdrops and TitleBar pages open (their content in `Pages/*Window.xaml`), and `app_window_samples.rs` the code behind and the sample windows of the AppWindow, AppWindowTitleBar and Windowing pages.
 
 ## Tests
 

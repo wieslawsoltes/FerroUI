@@ -133,6 +133,259 @@
       "notes": "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). The bitmap icon is BitmapIcon (ferroui-controls-icons) with the source's Slices2.png, drawn in the foreground's single color. The symbol glyph needs the platform's symbol font.",
       "examples": []
     },
+    "AppWindow": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AppWindow.xaml",
+        "samples/WinUIGallery/Pages/AppWindowSampleWindow1.xaml",
+        "samples/WinUIGallery/Pages/AppWindowSampleWindow3.xaml",
+        "samples/WinUIGallery/Pages/AppWindowModalWindow.xaml",
+        "samples/WinUIGallery/Pages/AppWindowSampleWindow6.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/app_window_samples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "src/FerroUI.Controls/window.rs",
+        "src/FerroUI.Controls/window_base.rs",
+        "src/FerroUI.Controls/screens.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_page_reports_a_platform_without_windows"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_creates_the_customized_window_and_hides_and_shows_it"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_centers_the_window_in_the_work_area"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_overlapped_presenter_applies_the_options_and_drives_the_window_state"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_sets_the_minimum_and_maximum_size_without_maximize"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_opens_the_modal_window_owned_by_the_gallery_window"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_opens_the_full_screen_and_compact_overlay_windows"
+        }
+      ],
+      "notes": "All seven source examples open the source's sample windows with the handlers of AppWindowPage.xaml.cs and of SampleWindow1 to SampleWindow7 and ModalWindow in Rust (app_window_samples.rs), over FerroUI's Window: the title, the size (Resize, physical pixels over the scaling of the gallery's window, of the client area), the position (Move), Hide, and Show after three seconds; the window centred in the working area of the gallery's screen (DisplayArea, with the area's origin, which the source leaves out); the overlapped presenter's IsAlwaysOnTop, IsMaximizable, IsMinimizable and IsResizable (Topmost, CanMaximize, CanMinimize, CanResize), SetBorderAndTitleBar (WindowDecorations Full, BorderOnly, None) with HasBorder_Toggled and HasTitleBar_Toggled, Maximize, Minimize and Restore (WindowState) and the button that follows the state; the preferred minimum and maximum sizes (MinWidth to MaxHeight) without maximize; the modal window (ShowDialog with the gallery's window as its owner, no resizing, minimize or maximize, the owner activated when it closes); the full screen presenter (WindowState FullScreen); and InitialSize_SelectionChanged. FerroUI has no compact overlay presenter: the Picture-in-Picture window is topmost, without minimize and maximize, and covers the share of the working area of its InitialSize. SetIcon, SetTaskbarIcon and SetTitleBarIcon are the window's Icon, which the gallery leaves to the application (it embeds no icon file), and TitleBar.PreferredTheme UseDefaultAppMode is the window's theme. A platform with a single view (the browser, iOS, Android) opens no windows: the page says so. ToggleSwitch's Header is its Content and ComboBox's Header a text.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/AppWindow/CreatingCustomizingAppwindowWindow.txt",
+          "source_sha256": "518d0299f95d9d3c70b298243703e4239d9c6a2094c1836142c9065179e96d2e",
+          "status": "ported",
+          "notes": "SampleWindow1: Title, Resize (physical pixels of the client area over the gallery window's scaling), Move, Hide, Show after three seconds and Close. The icons are the window's Icon, left to the application.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_creates_the_customized_window_and_hides_and_shows_it"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_page_reports_a_platform_without_windows"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/CenteringAppwindowScreenAvailable.txt",
+          "source_sha256": "bd490f38c7f77addfea5dd1b66a15d1023f0a5f201679709ed72aafb9ea5e754",
+          "status": "ported",
+          "notes": "SampleWindow2: centred in the working area of the gallery window's screen (the primary screen when none is known), with the area's origin.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_centers_the_window_in_the_work_area"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/AppwindowOverlapedpresenter.txt",
+          "source_sha256": "222b446731067f6786c617062ae696d32de61ff2cb7037491e50456b13f0142d",
+          "status": "ported",
+          "notes": "SampleWindow3: Topmost, CanMaximize, CanMinimize, CanResize and WindowDecorations of the options with HasBorder_Toggled and HasTitleBar_Toggled; Maximize, Restore and Minimize (WindowState), the button that follows the state, minimize and restore after three seconds, Close.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_overlapped_presenter_applies_the_options_and_drives_the_window_state"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/AppWindowSettingMinimumMaximumWidth.txt",
+          "source_sha256": "9d9b7aa835546f9d898fab6eb4d552315b0fc1b648c6da76fb0a7d03664b1f2e",
+          "status": "ported",
+          "notes": "SampleWindow4: an 800 by 500 window with MinWidth, MinHeight, MaxWidth and MaxHeight of the options (physical pixels over the scaling) and no maximize.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_sets_the_minimum_and_maximum_size_without_maximize"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/ModalWindowOverlappedpresenterAppwindow.txt",
+          "source_sha256": "56ad3c34fb78d895a6e510c28082bbbf8fe347d02f776dde87a86a182a73c38f",
+          "status": "ported",
+          "notes": "ModalWindow: a 400 by 300 dialog of the gallery's window (ShowDialog), not resizable, without minimize and maximize; OK and Cancel close it and the owner is activated.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_opens_the_modal_window_owned_by_the_gallery_window"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/AppwindowFullscreenpresenter.txt",
+          "source_sha256": "3f15dc98c31589c70f23431d86d12a0d5a9316d0fd9ae04dfc3b2ed778ac188c",
+          "status": "ported",
+          "notes": "SampleWindow6: WindowState FullScreen with its Close button.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_opens_the_full_screen_and_compact_overlay_windows"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindow/AppwindowCompactoverlaypresenter.txt",
+          "source_sha256": "10d66156b6c09fe44c7f3d2f700f354016de670889585ad9bd32835ba46bbfd6",
+          "status": "ported",
+          "notes": "SampleWindow7: FerroUI has no compact overlay presenter; a topmost window without minimize and maximize that covers the share of the working area of InitialSize (5, 15, 25 percent), and InitialSize_SelectionChanged.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_opens_the_full_screen_and_compact_overlay_windows"
+            }
+          ]
+        }
+      ]
+    },
+    "AppWindowTitleBar": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AppWindowTitleBar.xaml",
+        "samples/WinUIGallery/Pages/AppWindowTitleBarWindow.xaml",
+        "samples/WinUIGallery/gallery.rs",
+        "src/FerroUI.Controls/title_bar.rs",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/app_window_samples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "src/FerroUI.Controls/window.rs",
+        "src/FerroUI.Controls/window_base.rs",
+        "src/FerroUI.Controls/screens.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_page_reports_a_platform_without_windows"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_title_bar_colors_follow_the_options_and_the_activation"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_title_bar_extends_the_content_and_sets_the_height_and_theme"
+        }
+      ],
+      "notes": "All three source examples open the source's sample windows with the handlers of AppWindowTitleBarPage.xaml.cs in Rust (app_window_samples.rs): topmost windows of 600 by 400 pixels that cannot be resized, each button disabled while its window is open. FerroUI has no colours of a system title bar: the colour window extends its content into the title bar, whose TitleBar control takes BackgroundColor and ForegroundColor while the window is active and InactiveBackgroundColor and InactiveForegroundColor while it is not, set again by each ColorChanged handler (a default colour is left out, as the source does). The caption buttons are the platform's (macOS) or the window's drawn decorations (Windows, Linux), which take their colours from the theme, so the eight Button* colours are kept by the page but have no window to apply to. ExtendsContentIntoTitleBar is ExtendClientAreaToDecorationsHint, changed by the check box, and TitleBarHeightOption the title bar height hint (Standard the platform's, Tall 48, Collapsed 0), changed only while the content extends into the title bar. PreferredTheme is the window's theme, which its title bar and its content follow (Legacy: light; UseDefaultAppMode: the application's). Each ColorSelector is its composition, a SplitButton with the colour whose flyout is a ColorView; the TitleBar page link (Hyperlink_Click) is a HyperlinkButton that the gallery wires (examples::GALLERY_LINKS). A platform with a single view opens no windows: the page says so.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/AppWindowTitleBar/AppwindowtitlebarColorCustomization.txt",
+          "source_sha256": "cd5a0a4cc686c01e0283687fa9e7e59981bafe3c8553cb0a9ba6419c0f63657a",
+          "status": "ported",
+          "notes": "AppWindowTitleBarWindow: topmost, not resizable, 600 by 400; its TitleBar control takes BackgroundColor and ForegroundColor while active and the Inactive colours while not, set again by each ColorChanged. The caption buttons are the platform's or the drawn decorations' with the theme's colours: the eight Button* colours have no window to apply to.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_title_bar_colors_follow_the_options_and_the_activation"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindowTitleBar/ExtendingContentAppwindowtitlebarArea.txt",
+          "source_sha256": "2f74d85699b64ce35a815fc3c8498e337bd305bfac6e21450c263e6a58f760a7",
+          "status": "ported",
+          "notes": "AppWindowTitleBarExtendWindow: ExtendClientAreaToDecorationsHint of the check box and the title bar height hint of TitleBarHeightOption (Standard the platform's, Tall 48, Collapsed 0) while extended.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_title_bar_extends_the_content_and_sets_the_height_and_theme"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/AppWindowTitleBar/AppwindowtitlebarPreferredThemeHeight.txt",
+          "source_sha256": "4863a60667a3e7e28a87e8b54f3bca005d89183fedcdab111ef039948e5088a7",
+          "status": "ported",
+          "notes": "AppWindowTitleBarThemeWindow: PreferredTheme is the window's theme (Legacy light, UseDefaultAppMode the application's, Light, Dark), changed while the window is open.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "app_window_title_bar_extends_the_content_and_sets_the_height_and_theme"
+            }
+          ]
+        }
+      ]
+    },
     "AutoSuggestBox": {
       "status": "ported",
       "implementation": [
@@ -3499,6 +3752,71 @@
         {
           "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml.cs",
           "sha256": "5efa8c95799f15187d1baa24b8eec0e11a78bb866b00cd0fb7955c9f16be5cdb"
+        }
+      ]
+    },
+    "Windowing": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/Windowing.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/app_window_samples.rs",
+        "samples/WinUIGallery/window_samples.rs",
+        "src/FerroUI.Controls/window.rs",
+        "src/FerroUI.Controls/window_base.rs",
+        "src/FerroUI.Controls/screens.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "app_window_page_reports_a_platform_without_windows"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "windowing_creates_a_child_window_with_a_physical_client_size"
+        },
+        {
+          "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+          "name": "windowing_validates_the_dimensions_and_opens_the_configured_window"
+        }
+      ],
+      "notes": "Both source examples with the handlers of WindowingPage.xaml.cs in Rust (app_window_samples.rs): CreateNewWindow_Click opens a window extended into the title bar with Mica and the centred text in the page's theme, with a client area of 500 by 500 physical pixels (ResizeClient, over the scaling of the gallery's window); OpenConfiguredWindow_Click checks the six dimensions with the source's messages in the InfoBar and opens a window with the client size and the minimum and maximum sizes in device-independent pixels, which cannot be maximized. WindowHelper's tracking is the sample's list of open windows; the IsExperimental badge is the example's heading. A platform with a single view opens no windows: the page says so.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/Windowing/CreateMultipleWindows.txt",
+          "source_sha256": "da1831a96b06abd45e51fe16a2d1d333060da70a71e927a532d359df76b0c26b",
+          "status": "ported",
+          "notes": "A window extended into the title bar with Mica and the text in the page's theme, with a client area of 500 by 500 physical pixels over the gallery window's scaling.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "windowing_creates_a_child_window_with_a_physical_client_size"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/Windowing/WindowSizing.txt",
+          "source_sha256": "3d8679a2ba946de556db851609d5a7cf8a568acbd974b92f102b9c3cced6a09e",
+          "status": "ported",
+          "notes": "The six dimensions checked with the source's messages in the InfoBar; a window with the client size and constraints in device-independent pixels, not maximizable.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/app_window_samples_tests.rs",
+              "name": "windowing_validates_the_dimensions_and_opens_the_configured_window"
+            }
+          ]
         }
       ]
     },

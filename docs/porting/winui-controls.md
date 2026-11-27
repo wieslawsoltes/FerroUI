@@ -402,6 +402,9 @@ Phase G1 of the full port (#418) gives the pending pages whose control is on mai
 | Acrylic | 3 of 3 | ported | `materials_samples.rs` | `materials_samples_tests.rs` |
 | SystemBackdrops | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
 | TitleBar | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
+| AppWindow | 7 of 7; no compact overlay presenter (a topmost window), no icon file | ported | `app_window_samples.rs` | `app_window_samples_tests.rs` |
+| AppWindowTitleBar | 3 of 3; no colours of a system title bar (the TitleBar control), none of the caption buttons | ported | `app_window_samples.rs` | `app_window_samples_tests.rs` |
+| Windowing | 2 of 2 | ported | `app_window_samples.rs` | `app_window_samples_tests.rs` |
 | RichTextBlock | 4 of 4 | ported | `text_samples.rs` | `text_samples_tests.rs` |
 | RichEditBox | 2 ported, 1 partial, 2 not applicable | partial | `text_samples.rs` | `text_samples_tests.rs` |
 | ItemsRepeater | 6 of 6 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
@@ -416,6 +419,11 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | WinUI Gallery | Port | Why |
 |---|---|---|
 | The sample windows of SystemBackdrops and TitleBar (`SampleSupport/SamplePages`). | Native windows built by `window_samples.rs` from `Pages/*Window.xaml`, extended into the title bar; a window lives until it closes. | The windows are the examples. |
+| `AppWindow` of a window: `Title`, `Resize`, `ResizeClient`, `Move`, `Hide`, `Show`, `SetPresenter`, the overlapped presenter's `IsAlwaysOnTop`, `IsMaximizable`, `IsMinimizable`, `IsResizable`, `SetBorderAndTitleBar`, `Maximize`, `Minimize`, `Restore` and preferred sizes, the full screen presenter, `IsModal` with an owner, and `DisplayArea` (AppWindow, Windowing). | The window itself: `Title`, `Width` and `Height`, `Position`, `Hide`, `Show`, `Topmost`, `CanMaximize`, `CanMinimize`, `CanResize`, `WindowDecorations` (Full, BorderOnly, None), `WindowState`, `MinWidth` to `MaxHeight`, `ShowDialog` with the owner, and the working area of the window's screen (`Screens`). The physical pixels of `AppWindow` sizes are taken over the render scaling of the gallery's window, as the size of the client area. | `AppWindow` is the Windows App SDK's window object; FerroUI's `Window` has its members. |
+| `CompactOverlayPresenter` with its `InitialSize`. | A topmost window without minimize and maximize that covers the share of the working area of the size (5, 15 and 25 percent, the page's own description). | FerroUI has no compact overlay presenter. |
+| `AppWindowTitleBar` colours (`BackgroundColor` to `ButtonPressedForegroundColor`). | The colour window extends its content into the title bar; its `TitleBar` control takes the background and foreground colours of the active and the inactive window. The eight caption button colours have no counterpart. | FerroUI has no colours of a system title bar; the caption buttons are the system's (macOS) or the drawn decorations' (Windows, Linux), whose colours are the theme's. |
+| `AppWindowTitleBar.ExtendsContentIntoTitleBar`, `PreferredHeightOption` and `PreferredTheme`. | `ExtendClientAreaToDecorationsHint`, the title bar height hint (Standard the platform's height, Tall 48, Collapsed 0) and the window's theme (Legacy is light), which its title bar and its content follow. | The window's chrome is FerroUI's. |
+| `AppWindow.SetIcon`, `SetTaskbarIcon` and `SetTitleBarIcon` with `GalleryIcon.ico`. | Not called: the windows keep the application's icon (`Window.Icon`). | The gallery embeds no icon file. |
 | `SampleSystemBackdropsWindow` adds its Activated, Closed and ActualThemeChanged handlers for every backdrop it sets. | Added once per window. | The repeated handlers of the source are a leak, not behaviour. |
 | `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
 | `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
@@ -425,6 +433,8 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
 | `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
 | The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
+
+The AppWindow, AppWindowTitleBar and Windowing pages open their windows only where the gallery runs in a window of a windowing platform (macOS, Windows, Linux with X11 or Wayland). On the browser, iOS and Android the gallery is a single view, which has no windows: each button says so on the page instead of opening one. Where a platform has no counterpart of a window setting, the platform's window ignores it: a window manager on Linux may keep its minimize and maximize buttons, Wayland gives an application no position for its windows (Move, centring), the native decorations of macOS keep their caption buttons in a collapsed title bar, and the title bar theme follows the window's theme in the system title bars of macOS and Windows and in the drawn decorations, while the title bar a Linux window manager draws keeps the desktop's theme.
 
 #### G2: the WinUI controls not on main (#418)
 
