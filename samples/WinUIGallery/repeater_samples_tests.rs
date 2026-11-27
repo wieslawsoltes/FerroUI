@@ -443,3 +443,31 @@ fn repeater_pages_and_their_handlers_release_their_native_controls() {
         assert!(weak.upgrade().is_none(), "{id} retained its page");
     }
 }
+
+#[test]
+fn recipe_source_keeps_stable_keys_and_announces_the_filter() {
+    use crate::repeater_samples::{recipes, RecipeItemsSource, SampleRandom};
+    use ferroui_controls::{IItemsList, IKeyIndexMapping};
+    use std::cell::Cell;
+
+    let _application = start();
+    let all = recipes(&SampleRandom::new(1));
+    let source = RecipeItemsSource::new(vec![all[3].clone(), all[7].clone()]);
+    assert_eq!(source.key_from_index(1), "7");
+    assert_eq!(source.index_from_key("3"), 0);
+    assert_eq!(source.index_from_key("4"), -1);
+    assert_eq!(source.key_from_index(9), "");
+    let resets = Rc::new(Cell::new(0));
+    let count = resets.clone();
+    source.add_collection_changed(Rc::new(move |_| count.set(count.get() + 1)));
+    source.initialize_collection(vec![all[7].clone()]);
+    assert_eq!(resets.get(), 1);
+    assert_eq!(source.count(), 1);
+    assert_eq!(source.index_from_key("7"), 0, "a recipe that stays keeps its key");
+
+    let root = page("ItemsRepeater");
+    root.get_control::<TextBox>("FilterRecipes").set_text(Some("Garlic"));
+    let text = root.get_control::<TextBlock>("RecipesAnnouncement").text().unwrap_or_default();
+    assert!(text.starts_with("Filtered recipes, ") && text.ends_with(" results."), "{text}");
+}
+

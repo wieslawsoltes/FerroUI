@@ -12,7 +12,7 @@ use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::{
     Carousel, ComboBox, Control, ExpandDirection, Expander, Image, NumberBox, PipsPager,
-    ProgressBar, TextBlock,
+    PipsPagerButtonVisibility, PipsPagerWrapMode, ProgressBar, TextBlock,
 };
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -170,11 +170,31 @@ fn wire_pips_pager(root: &Ref<Control>) {
     on_selected_index(
         &root.get_control::<ComboBox>("PrevButtonComboBox"),
         &pager,
-        |pager, index| pager.set_is_previous_button_visible(index == 0),
+        |pager, index| pager.set_previous_button_visibility(pips_button_visibility(index)),
     );
     on_selected_index(
         &root.get_control::<ComboBox>("NextButtonComboBox"),
         &pager,
-        |pager, index| pager.set_is_next_button_visible(index == 0),
+        |pager, index| pager.set_next_button_visibility(pips_button_visibility(index)),
     );
+    on_selected_index(
+        &root.get_control::<ComboBox>("WrapModeComboBox"),
+        &pager,
+        |pager, index| {
+            pager.set_wrap_mode(if index == 1 {
+                PipsPagerWrapMode::Wrap
+            } else {
+                PipsPagerWrapMode::None
+            });
+        },
+    );
+}
+
+/// The item of `PrevButtonComboBox` and `NextButtonComboBox` as a button visibility.
+fn pips_button_visibility(index: i32) -> PipsPagerButtonVisibility {
+    match index {
+        1 => PipsPagerButtonVisibility::VisibleOnPointerOver,
+        2 => PipsPagerButtonVisibility::Collapsed,
+        _ => PipsPagerButtonVisibility::Visible,
+    }
 }
