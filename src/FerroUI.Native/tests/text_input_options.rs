@@ -366,7 +366,9 @@ mod macos {
             true,
         );
         insert_text(view, c"{");
-        assert_eq!(&*commits.borrow(), &[(Some("{".to_owned()), true)]);
+        // The view tags an input method's commit with the `text-editor` feature only; without
+        // it every commit is a plain text input event, as on main.
+        assert_eq!(&*commits.borrow(), &[(Some("{".to_owned()), cfg!(feature = "text-editor"))]);
         assert_eq!(text_box.text().as_deref(), Some("legacy{"));
 
         window.close();

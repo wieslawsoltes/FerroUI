@@ -44,7 +44,9 @@ use ferroui_controls::platform::{
 use ferroui_controls::{
     AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
 };
-use ferroui_microcom::{make_com_with, ComPtr, HResult, ImplementedBy, InterfaceEntry};
+#[cfg(feature = "text-editor")]
+use ferroui_microcom::{make_com_with, InterfaceEntry};
+use ferroui_microcom::{ComPtr, HResult, ImplementedBy};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::ffi::{c_void, CStr};
@@ -1125,8 +1127,14 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
 pub(crate) struct TopLevelEvents<P>(pub(crate) Rc<P>);
 
 impl<P: TopLevelParent> TopLevelEvents<P> {
+    /// The events object of a top-level. With the `text-editor` feature it also answers
+    /// `IFrnTextInputMethodEvents`, through which the view tags the text an input method
+    /// commits; without it the view sends every commit as a text input event, as on main.
     pub(crate) fn for_parent<I: ImplementedBy<Self>>(parent: Rc<P>) -> ComPtr<I> {
-        make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTextInputMethodEvents>()])
+        #[cfg(feature = "text-editor")]
+        return make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTextInputMethodEvents>()]);
+        #[cfg(not(feature = "text-editor"))]
+        ferroui_microcom::make_com(Self(parent))
     }
 
     fn dispatch_text(&self, time_stamp: u64, text: Option<&CStr>, from_input_method: bool) -> bool {
@@ -1137,6 +1145,7 @@ impl<P: TopLevelParent> TopLevelEvents<P> {
     }
 }
 
+#[cfg(feature = "text-editor")]
 impl<P: TopLevelParent> IFrnTextInputMethodEventsImpl for TopLevelEvents<P> {
     fn raw_text_input_method_commit(&self, time_stamp: u64, text: Option<&CStr>) -> bool {
         self.dispatch_text(time_stamp, text, true)
