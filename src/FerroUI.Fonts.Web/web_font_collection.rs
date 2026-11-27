@@ -219,6 +219,9 @@ fn simulations_for(
     if request.style != FontStyleRequest::Normal && upright && !has(b"ital") && !has(b"slnt") {
         simulations |= FontSimulations::Oblique;
     }
+    // A face with colour glyphs is simulated like any other: its outline glyphs need the bold or
+    // the slant, and whether a simulation reaches a colour glyph is a question for the backend
+    // that draws it.
     simulations
 }
 
@@ -1607,6 +1610,26 @@ mod tests {
         assert!(bold.font_simulations().contains(FontSimulations::Bold));
         let italic = lookup_with(&harness, "A", FontStyle::Italic, 400).unwrap();
         assert!(italic.font_simulations().contains(FontSimulations::Oblique));
+    }
+
+    #[test]
+    fn a_colour_face_is_simulated_like_any_other_face() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: E; src: url(e.ttf) }");
+        harness.lookup("E");
+        let emoji = font("../samples/ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf");
+        harness.finish(&HashMap::from([("e.ttf", Ok(emoji))]));
+        let regular = lookup_with(&harness, "E", FontStyle::Normal, 400).expect("the font");
+        assert_eq!(regular.font_simulations(), FontSimulations::None);
+        let both = FontSimulations::Bold | FontSimulations::Oblique;
+        for (style, weight, simulations) in [
+            (FontStyle::Normal, 700, FontSimulations::Bold),
+            (FontStyle::Italic, 400, FontSimulations::Oblique),
+            (FontStyle::Italic, 800, both),
+        ] {
+            let found = lookup_with(&harness, "E", style, weight).expect("the font");
+            assert_eq!(found.font_simulations(), simulations, "{style:?} {weight}");
+        }
     }
 
     #[test]
