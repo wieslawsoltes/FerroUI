@@ -190,21 +190,11 @@ impl IAssetLoader for StandardAssetLoader {
     }
 }
 
-/// `path` with the characters that a URI path does not keep as they are escaped (`%` among them), so
-/// that the URI of an asset names it whatever characters its name has.
+/// `path` with the characters that a URI path does not keep as they are escaped (`%`, `#` and `?`),
+/// so that the URI of an asset names it whatever characters its name has; the parser of the URI
+/// escapes the others (spaces, other characters than ASCII).
 fn escape_path(path: &str) -> String {
-    let mut escaped = String::with_capacity(path.len());
-    for byte in path.bytes() {
-        if byte.is_ascii_alphanumeric() || b"-._~!$&'()*+,;=:@/".contains(&byte) {
-            escaped.push(byte as char);
-        } else {
-            const HEX: &[u8; 16] = b"0123456789ABCDEF";
-            escaped.push('%');
-            escaped.push(HEX[usize::from(byte >> 4)] as char);
-            escaped.push(HEX[usize::from(byte & 15)] as char);
-        }
-    }
-    escaped
+    path.replace('%', "%25").replace('#', "%23").replace('?', "%3F")
 }
 
 #[cfg(test)]
