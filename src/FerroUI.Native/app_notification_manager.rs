@@ -19,13 +19,34 @@ use ferroui_base::platform::notifications::{
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use objc2::rc::Retained;
 use objc2::runtime::{AnyClass, AnyObject, Bool, NSObject};
-use objc2::{class, define_class, msg_send, sel, AnyThread};
+use objc2::{define_class, msg_send, sel, AnyThread};
 use objc2_foundation::{NSArray, NSBundle, NSDictionary, NSError, NSObjectProtocol, NSSet, NSString};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
-#[link(name = "UserNotifications", kind = "framework")]
-extern "C" {}
+extern "C" {
+    fn dlopen(path: *const std::ffi::c_char, mode: std::ffi::c_int) -> *mut std::ffi::c_void;
+}
+
+/// `RTLD_LAZY | RTLD_GLOBAL`.
+const RTLD_LAZY_GLOBAL: std::ffi::c_int = 0x1 | 0x8;
+
+/// Loads the UserNotifications framework the first time it is needed: the crate does not link
+/// it, so that an application that shows no notification does not load it at start-up.
+fn framework_loaded() -> bool {
+    static LOADED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LOADED.get_or_init(|| {
+        let path = c"/System/Library/Frameworks/UserNotifications.framework/UserNotifications";
+        // SAFETY: a terminated path; the handle is kept for the life of the process.
+        let handle = unsafe { dlopen(path.as_ptr(), RTLD_LAZY_GLOBAL) };
+        !handle.is_null() && AnyClass::get(c"UNUserNotificationCenter").is_some()
+    })
+}
+
+/// A class of the framework, which `is_supported` loaded.
+fn class(name: &std::ffi::CStr) -> &'static AnyClass {
+    AnyClass::get(name).unwrap_or_else(|| panic!("the class {name:?} of the UserNotifications framework"))
+}
 
 /// `UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert`.
 const AUTHORIZATION_OPTIONS: usize = (1 << 0) | (1 << 1) | (1 << 2);
@@ -147,9 +168,9 @@ impl MacOSAppNotificationManager {
     }
 
     fn center() -> Retained<AnyObject> {
-        // SAFETY: the class is in the framework the crate links; `is_supported` checked that the
+        // SAFETY: the class is in the framework `is_supported` loaded, which also checked that the
         // application has the bundle the center needs.
-        unsafe { msg_send![class!(UNUserNotificationCenter), currentNotificationCenter] }
+        unsafe { msg_send![class(c"UNUserNotificationCenter"), currentNotificationCenter] }
     }
 
     /// The identifier of the category of the buttons of `notification`, registered with the
@@ -182,7 +203,7 @@ impl MacOSAppNotificationManager {
                     (0, Some(text_box)) => {
                         let placeholder = NSString::from_str(text_box.placeholder_text());
                         msg_send![
-                            class!(UNTextInputNotificationAction),
+                            class(c"UNTextInputNotificationAction"),
                             actionWithIdentifier: &*action_id,
                             title: &*title,
                             options: ACTION_OPTION_FOREGROUND,
@@ -191,7 +212,7 @@ impl MacOSAppNotificationManager {
                         ]
                     }
                     _ => msg_send![
-                        class!(UNNotificationAction),
+                        class(c"UNNotificationAction"),
                         actionWithIdentifier: &*action_id,
                         title: &*title,
                         options: ACTION_OPTION_FOREGROUND
@@ -203,7 +224,7 @@ impl MacOSAppNotificationManager {
             let intents = NSArray::<NSString>::new();
             let category_id = NSString::from_str(&identifier);
             let category: Retained<AnyObject> = msg_send![
-                class!(UNNotificationCategory),
+                class(c"UNNotificationCategory"),
                 categoryWithIdentifier: &*category_id,
                 actions: &*actions,
                 intentIdentifiers: &*intents,
@@ -249,11 +270,14 @@ impl Default for MacOSAppNotificationManager {
 
 impl IAppNotificationManagerImpl for MacOSAppNotificationManager {
     fn is_supported(&self) -> bool {
-        AnyClass::get(c"UNUserNotificationCenter").is_some()
-            && NSBundle::mainBundle().bundleIdentifier().is_some()
+        // The center serves applications with a bundle only (it raises an exception otherwise).
+        NSBundle::mainBundle().bundleIdentifier().is_some() && framework_loaded()
     }
 
     fn register(&self) {
+        if !self.is_supported() {
+            return;
+        }
         let center = Self::center();
         let mut delegate = self.delegate.borrow_mut();
         let delegate = delegate.get_or_insert_with(NotificationDelegate::new);
@@ -313,7 +337,7 @@ impl IAppNotificationManagerImpl for MacOSAppNotificationManager {
         // SAFETY: the classes are in the framework; the setters take the strings, the
         // dictionary and the sound the content keeps.
         unsafe {
-            let content: Retained<AnyObject> = msg_send![class!(UNMutableNotificationContent), new];
+            let content: Retained<AnyObject> = msg_send![class(c"UNMutableNotificationContent"), new];
             let _: () = msg_send![&content, setTitle: &*NSString::from_str(notification.title())];
             let _: () = msg_send![&content, setBody: &*NSString::from_str(&body)];
             if let Some(attribution) = notification.attribution_text() {
@@ -327,11 +351,11 @@ impl IAppNotificationManagerImpl for MacOSAppNotificationManager {
             }
             let _: () = msg_send![&content, setUserInfo: &*user_info];
             if !notification.is_audio_muted() {
-                let sound: Retained<AnyObject> = msg_send![class!(UNNotificationSound), defaultSound];
+                let sound: Retained<AnyObject> = msg_send![class(c"UNNotificationSound"), defaultSound];
                 let _: () = msg_send![&content, setSound: &*sound];
             }
             let request: Retained<AnyObject> = msg_send![
-                class!(UNNotificationRequest),
+                class(c"UNNotificationRequest"),
                 requestWithIdentifier: &*NSString::from_str(&identifier),
                 content: &*content,
                 trigger: Option::<&AnyObject>::None
@@ -367,6 +391,9 @@ impl IAppNotificationManagerImpl for MacOSAppNotificationManager {
 
     fn remove_all(&self) {
         self.entries.borrow_mut().clear();
+        if !self.is_supported() {
+            return;
+        }
         // SAFETY: methods without arguments.
         unsafe {
             let center = Self::center();
