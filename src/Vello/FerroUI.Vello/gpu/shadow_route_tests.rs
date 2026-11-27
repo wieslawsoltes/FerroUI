@@ -308,3 +308,117 @@ fn an_animated_transform_reuses_one_picture_and_agrees_with_the_cpu_reference() 
         }
     }
 }
+
+/// Coloured content with hard edges and a translucent part, for the blur of colours.
+#[cfg(feature = "gpu")]
+fn coloured_content(scene: &mut dyn IVelloSceneSink) {
+    use kurbo::Shape;
+    use peniko::{BlendMode, Fill};
+    let mut fill = |rect: kurbo::Rect, color: peniko::Color| {
+        let paint = crate::scene::VelloScenePaint::solid(color);
+        scene.fill(&rect.to_path(0.1), Fill::NonZero, kurbo::Affine::IDENTITY, &paint, BlendMode::default(), false);
+    };
+    fill(kurbo::Rect::new(28.0, 28.0, 48.0, 68.0), peniko::Color::from_rgba8(255, 0, 0, 255));
+    fill(kurbo::Rect::new(48.0, 28.0, 68.0, 48.0), peniko::Color::from_rgba8(0, 128, 255, 255));
+    fill(kurbo::Rect::new(48.0, 48.0, 68.0, 68.0), peniko::Color::from_rgba8(255, 160, 0, 128));
+}
+
+/// The texture of the pool holding the content, drawn by the compute renderer.
+#[cfg(feature = "gpu")]
+fn content_texture(device: &Arc<VelloWgpuDevice>) -> Arc<crate::gpu::VelloDeviceTexture> {
+    let mut scene = crate::scene::VelloGpuSceneSink::new(device.clone(), SIZE, SIZE);
+    coloured_content(&mut scene);
+    let texture = crate::gpu::effect_passes::pooled_texture(device, u32::from(SIZE), u32::from(SIZE));
+    scene.render_to_texture(&crate::gpu::VelloGpuTexture { texture: texture.texture() }).unwrap();
+    texture
+}
+
+/// The textures painted one texel per pixel in order, each at its offset, read back.
+#[cfg(feature = "gpu")]
+fn painted(device: &Arc<VelloWgpuDevice>, layers: &[(Arc<crate::gpu::VelloDeviceTexture>, (f64, f64))]) -> Vec<u8> {
+    use kurbo::Shape;
+    let mut scene = crate::scene::VelloGpuSceneSink::new(device.clone(), SIZE, SIZE);
+    let whole = kurbo::Rect::new(0.0, 0.0, f64::from(SIZE), f64::from(SIZE)).to_path(0.1);
+    for (texture, offset) in layers {
+        let paint = crate::scene::VelloScenePaint {
+            brush: crate::scene::VelloSceneBrush::Texture(crate::scene::VelloSceneTexture {
+                texture: texture.clone(),
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                quality: peniko::ImageQuality::Low,
+                alpha: 1.0,
+            }),
+            transform: kurbo::Affine::translate(*offset),
+        };
+        scene.fill(&whole, peniko::Fill::NonZero, kurbo::Affine::IDENTITY, &paint, peniko::BlendMode::default(), false);
+    }
+    let mut pixels = vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4];
+    scene.render_to_pixels(&mut pixels);
+    pixels
+}
+
+/// The filter layer of the CPU renderer over the same content: the reference.
+#[cfg(feature = "gpu")]
+fn through_cpu_filter(filter: crate::scene::VelloSceneFilter) -> Vec<u8> {
+    let mut scene = VelloCpuSceneSink::single_threaded(SIZE, SIZE);
+    scene.push_filter_layer(&filter, kurbo::Affine::IDENTITY);
+    coloured_content(&mut scene);
+    scene.pop_layer();
+    let mut pixels = vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4];
+    scene.render_to_pixels(&mut pixels);
+    pixels
+}
+
+#[cfg(feature = "gpu")]
+fn largest_difference(a: &[u8], b: &[u8]) -> u8 {
+    a.iter().zip(b).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0)
+}
+
+/// The blur of colours and the shadow of a content on the device against the filters of the CPU
+/// renderer, at deviations it blurs directly and at a reduced scale.
+#[cfg(feature = "gpu")]
+#[test]
+fn the_blur_of_colours_on_the_device_agrees_with_the_cpu_filter() {
+    use crate::scene::VelloSceneFilter;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    if !device.supports_compute() {
+        println!("skipped: no compute");
+        return;
+    }
+    let content = content_texture(&device);
+    for deviation in [1.5f32, 3.0, 4.0, 6.0, 9.0, 14.0, 24.0] {
+        let blurred = crate::gpu::shadow_blur::blurred_content(
+            &device,
+            &content,
+            (f64::from(deviation), f64::from(deviation)),
+            None,
+        );
+        let drawn = painted(&device, &[(blurred, (0.0, 0.0))]);
+        let reference = through_cpu_filter(VelloSceneFilter::Blur { std_deviation: deviation });
+        let (largest, error) = (largest_difference(&drawn, &reference), render_test_error(&drawn, &reference));
+        println!("blur {deviation}: {largest} of 255, error {error:.4}");
+        assert!(error <= RENDER_TEST_ALLOWED_ERROR, "blur {deviation}: error {error}");
+
+        let color = peniko::Color::from_rgba8(0, 0, 200, 204);
+        let [red, green, blue, alpha] = color.components;
+        let tint = [red * alpha, green * alpha, blue * alpha, alpha];
+        let shadow = crate::gpu::shadow_blur::blurred_content(
+            &device,
+            &content,
+            (f64::from(deviation), f64::from(deviation)),
+            Some(tint),
+        );
+        let drawn = painted(&device, &[(shadow, (5.0, 3.0)), (content.clone(), (0.0, 0.0))]);
+        let reference =
+            through_cpu_filter(VelloSceneFilter::DropShadow { dx: 5.0, dy: 3.0, std_deviation: deviation, color });
+        let (largest, error) = (largest_difference(&drawn, &reference), render_test_error(&drawn, &reference));
+        println!("drop shadow {deviation}: {largest} of 255, error {error:.4}");
+        assert!(error <= RENDER_TEST_ALLOWED_ERROR, "drop shadow {deviation}: error {error}");
+    }
+}
