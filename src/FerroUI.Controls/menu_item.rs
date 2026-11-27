@@ -873,6 +873,20 @@ impl MenuItem {
     }
 
     /// The menu item viewed as [`IMenuItem`].
+    /// Closes the menu this item is in, as a click on an item without a submenu does.
+    pub fn close_parent_menu(&self) {
+        let mut current: Option<Rc<dyn IMenuElement>> = Some(self.to_menu_item());
+        while let Some(element) = current.clone() {
+            if element.as_menu().is_some() {
+                break;
+            }
+            current = element.as_menu_item().and_then(|item| item.parent());
+        }
+        if let Some(menu) = current {
+            menu.close();
+        }
+    }
+
     pub(crate) fn to_menu_item(&self) -> Rc<dyn IMenuItem> {
         Rc::new(MenuItemHandle(self.to_ref()))
     }
