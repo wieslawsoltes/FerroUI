@@ -7,6 +7,7 @@ fn main() {
         .file("native/buffer.m")
         .flag("-fobjc-arc")
         .flag("-fblocks")
+        .flag("-fvisibility=hidden")
         .compile("ferroui_media_apple");
     for framework in ["Foundation", "CoreVideo", "IOSurface"] {
         println!("cargo:rustc-link-lib=framework={framework}");
