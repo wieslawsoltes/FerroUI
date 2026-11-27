@@ -17,6 +17,18 @@ pub trait ITextDrawingSink {
     /// (`DrawingContext.DrawRectangle(IBrush? brush, IPen? pen, Rect rect)`).
     fn draw_rectangle(&mut self, brush: Option<&Rc<dyn IBrush>>, pen: Option<&Rc<dyn IPen>>, rect: Rect);
 
+    /// Draws a rectangle with a uniform corner radius. Sinks that only support
+    /// rectangular fills and strokes can use the square-corner fallback.
+    fn draw_rounded_rectangle(
+        &mut self,
+        brush: Option<&Rc<dyn IBrush>>,
+        pen: Option<&Rc<dyn IPen>>,
+        rect: Rect,
+        _radius: f64,
+    ) {
+        self.draw_rectangle(brush, pen, rect);
+    }
+
     /// Draws a line (`DrawingContext.DrawLine(IPen pen, Point p1, Point p2)`).
     fn draw_line(&mut self, pen: &Rc<dyn IPen>, p1: Point, p2: Point);
 

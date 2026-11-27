@@ -1,0 +1,6081 @@
+{
+  "upstream": "vscode-textmate 9.3.2 + vscode-oniguruma 2.0.1",
+  "grammar_revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+  "cases": [
+    {
+      "name": "csharp",
+      "scope": "source.cs",
+      "lines": [
+        {
+          "text": "using System;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 5,
+              "scopes": [
+                "source.cs",
+                "keyword.other.directive.using.cs"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 12,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.namespace.cs"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.cs",
+                "punctuation.terminator.statement.cs"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "namespace Example {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 9,
+              "scopes": [
+                "source.cs",
+                "storage.type.namespace.cs"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 17,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.namespace.cs"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.cs",
+                "punctuation.curlybrace.open.cs"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "  class Foo<T> where T : class {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 7,
+              "scopes": [
+                "source.cs",
+                "storage.type.class.cs"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 11,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.class.cs"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.cs",
+                "punctuation.definition.typeparameters.begin.cs"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.type-parameter.cs"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.cs",
+                "punctuation.definition.typeparameters.end.cs"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 20,
+              "scopes": [
+                "source.cs",
+                "storage.modifier.where.cs"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.type-parameter.cs"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.cs",
+                "punctuation.separator.colon.cs"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 30,
+              "scopes": [
+                "source.cs",
+                "storage.type.class.cs"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 32,
+              "scopes": [
+                "source.cs",
+                "punctuation.curlybrace.open.cs"
+              ]
+            }
+          ],
+          "depth": 4
+        },
+        {
+          "text": "    /* multiline",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 6,
+              "scopes": [
+                "source.cs",
+                "comment.block.cs",
+                "punctuation.definition.comment.cs"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 16,
+              "scopes": [
+                "source.cs",
+                "comment.block.cs"
+              ]
+            }
+          ],
+          "depth": 5
+        },
+        {
+          "text": "       comment */ int x = 42;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 15,
+              "scopes": [
+                "source.cs",
+                "comment.block.cs"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 17,
+              "scopes": [
+                "source.cs",
+                "comment.block.cs",
+                "punctuation.definition.comment.cs"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 21,
+              "scopes": [
+                "source.cs",
+                "keyword.type.int.cs"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.cs",
+                "entity.name.variable.field.cs"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.cs",
+                "keyword.operator.assignment.cs"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 28,
+              "scopes": [
+                "source.cs",
+                "constant.numeric.decimal.cs"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.cs",
+                "punctuation.terminator.statement.cs"
+              ]
+            }
+          ],
+          "depth": 4
+        },
+        {
+          "text": "    string s = $\"answer {x + 1}\";",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 10,
+              "scopes": [
+                "source.cs",
+                "keyword.type.string.cs"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.cs",
+                "entity.name.variable.field.cs"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.cs",
+                "keyword.operator.assignment.cs"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 17,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "punctuation.definition.string.begin.cs"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 24,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs",
+                "punctuation.definition.interpolation.begin.cs"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs",
+                "variable.other.readwrite.cs"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs",
+                "keyword.operator.arithmetic.cs"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs",
+                "constant.numeric.decimal.cs"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "meta.interpolation.cs",
+                "punctuation.definition.interpolation.end.cs"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 32,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "punctuation.definition.string.end.cs"
+              ]
+            },
+            {
+              "start_index": 32,
+              "end_index": 33,
+              "scopes": [
+                "source.cs",
+                "punctuation.terminator.statement.cs"
+              ]
+            }
+          ],
+          "depth": 4
+        },
+        {
+          "text": "    var raw = @\"one \"\"quoted\"\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 7,
+              "scopes": [
+                "source.cs",
+                "entity.name.type.cs"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 11,
+              "scopes": [
+                "source.cs",
+                "entity.name.variable.field.cs"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.cs",
+                "keyword.operator.assignment.cs"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 16,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "punctuation.definition.string.begin.cs"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 20,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 22,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "constant.character.escape.cs"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 28,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 30,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "constant.character.escape.cs"
+              ]
+            }
+          ],
+          "depth": 7
+        },
+        {
+          "text": "two\";",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 4,
+              "scopes": [
+                "source.cs",
+                "string.quoted.double.cs",
+                "punctuation.definition.string.end.cs"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.cs",
+                "punctuation.terminator.statement.cs"
+              ]
+            }
+          ],
+          "depth": 4
+        },
+        {
+          "text": "  }",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.cs"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.cs",
+                "punctuation.curlybrace.close.cs"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.cs",
+                "punctuation.curlybrace.close.cs"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "rust",
+      "scope": "source.rust",
+      "lines": [
+        {
+          "text": "use std::collections::HashMap;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "keyword.other.rust"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 4,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 7,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "entity.name.namespace.rust"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 9,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "keyword.operator.namespace.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 20,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "entity.name.namespace.rust"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 22,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "keyword.operator.namespace.rust"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 29,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "entity.name.type.rust"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.rust",
+                "meta.use.rust",
+                "punctuation.semi.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "fn main() {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust",
+                "keyword.other.fn.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 7,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust",
+                "entity.name.function.rust"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 9,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.rust",
+                "meta.function.definition.rust",
+                "punctuation.brackets.curly.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "  let x: Option<&str> = Some(\"hello\\n\");",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 5,
+              "scopes": [
+                "source.rust",
+                "keyword.other.rust",
+                "storage.type.rust"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.rust",
+                "variable.other.rust"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.key-value.rust"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 15,
+              "scopes": [
+                "source.rust",
+                "entity.name.type.rust"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.angle.rust"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.borrow.and.rust"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 20,
+              "scopes": [
+                "source.rust",
+                "entity.name.type.primitive.rust"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.angle.rust"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.assignment.equal.rust"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 28,
+              "scopes": [
+                "source.rust",
+                "entity.name.type.option.rust"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 35,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust"
+              ]
+            },
+            {
+              "start_index": 35,
+              "end_index": 36,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "constant.character.escape.rust",
+                "constant.character.escape.backslash.rust"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 37,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "constant.character.escape.rust"
+              ]
+            },
+            {
+              "start_index": 37,
+              "end_index": 38,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 38,
+              "end_index": 39,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 39,
+              "end_index": 40,
+              "scopes": [
+                "source.rust",
+                "punctuation.semi.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "  /* outer /* nested */",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 11,
+              "scopes": [
+                "source.rust",
+                "comment.block.rust"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 23,
+              "scopes": [
+                "source.rust",
+                "comment.block.rust",
+                "comment.block.rust"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "    comment */ let n = 0xffu32;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 14,
+              "scopes": [
+                "source.rust",
+                "comment.block.rust"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 18,
+              "scopes": [
+                "source.rust",
+                "keyword.other.rust",
+                "storage.type.rust"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.rust",
+                "variable.other.rust"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.assignment.equal.rust"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 27,
+              "scopes": [
+                "source.rust",
+                "constant.numeric.hex.rust"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 30,
+              "scopes": [
+                "source.rust",
+                "constant.numeric.hex.rust",
+                "entity.name.type.numeric.rust"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.rust",
+                "punctuation.semi.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "  let raw = r##\"text # \" quotes",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 5,
+              "scopes": [
+                "source.rust",
+                "keyword.other.rust",
+                "storage.type.rust"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 9,
+              "scopes": [
+                "source.rust",
+                "variable.other.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.assignment.equal.rust"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "string.quoted.byte.raw.rust"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 15,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.raw.rust"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 31,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "  more\"##;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 6,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 9,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.raw.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.rust",
+                "punctuation.semi.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "  println!(\"{}\", x.unwrap());",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 10,
+              "scopes": [
+                "source.rust",
+                "meta.macro.rust",
+                "entity.name.function.macro.rust"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 14,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "meta.interpolation.rust",
+                "punctuation.definition.interpolation.rust"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.rust",
+                "string.quoted.double.rust",
+                "punctuation.definition.string.rust"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.rust",
+                "punctuation.comma.rust"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.rust"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.rust",
+                "variable.other.rust"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.rust",
+                "keyword.operator.access.dot.rust"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 25,
+              "scopes": [
+                "source.rust",
+                "meta.function.call.rust",
+                "entity.name.function.rust"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 27,
+              "scopes": [
+                "source.rust",
+                "meta.function.call.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.rust",
+                "punctuation.semi.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.rust",
+                "punctuation.brackets.curly.rust"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "python",
+      "scope": "source.python",
+      "lines": [
+        {
+          "text": "#!/usr/bin/env python",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.python",
+                "comment.line.number-sign.python",
+                "punctuation.definition.comment.python"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 21,
+              "scopes": [
+                "source.python",
+                "comment.line.number-sign.python"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "@decorator(x=1)",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "entity.name.function.decorator.python",
+                "punctuation.definition.decorator.python"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 10,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "entity.name.function.decorator.python"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "punctuation.definition.arguments.begin.python"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "meta.function-call.arguments.python",
+                "variable.parameter.function-call.python"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "meta.function-call.arguments.python",
+                "keyword.operator.assignment.python"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "meta.function-call.arguments.python",
+                "constant.numeric.dec.python"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.python",
+                "meta.function.decorator.python",
+                "punctuation.definition.arguments.end.python"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "def main(value: str) -> int:",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "storage.type.function.python"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 4,
+              "scopes": [
+                "source.python",
+                "meta.function.python"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 8,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "entity.name.function.python"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python",
+                "punctuation.definition.parameters.begin.python"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 14,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python",
+                "variable.parameter.function.language.python"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python",
+                "punctuation.separator.annotation.python"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 19,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python",
+                "support.type.python"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "meta.function.parameters.python",
+                "punctuation.definition.parameters.end.python"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.python",
+                "meta.function.python"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 23,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "punctuation.separator.annotation.result.python"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.python",
+                "meta.function.python"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 27,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "support.type.python"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.python",
+                "meta.function.python",
+                "punctuation.section.function.begin.python"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "    \"\"\"A multiline",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 7,
+              "scopes": [
+                "source.python",
+                "string.quoted.docstring.multi.python",
+                "punctuation.definition.string.begin.python"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 18,
+              "scopes": [
+                "source.python",
+                "string.quoted.docstring.multi.python"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "    docstring.\"\"\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 14,
+              "scopes": [
+                "source.python",
+                "string.quoted.docstring.multi.python"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 17,
+              "scopes": [
+                "source.python",
+                "string.quoted.docstring.multi.python",
+                "punctuation.definition.string.end.python"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "    return f\"hello {value!r}\" # comment",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 10,
+              "scopes": [
+                "source.python",
+                "keyword.control.flow.python"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "string.interpolated.python",
+                "string.quoted.single.python",
+                "storage.type.string.python"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "punctuation.definition.string.begin.python",
+                "string.interpolated.python",
+                "string.quoted.single.python"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 19,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "string.interpolated.python",
+                "string.quoted.single.python"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "constant.character.format.placeholder.other.python"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 25,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 27,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "storage.type.format.python"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "constant.character.format.placeholder.other.python"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.python",
+                "meta.fstring.python",
+                "punctuation.definition.string.end.python",
+                "string.interpolated.python",
+                "string.quoted.single.python"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.python",
+                "comment.line.number-sign.python",
+                "punctuation.definition.comment.python"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 39,
+              "scopes": [
+                "source.python",
+                "comment.line.number-sign.python"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "x = [v for v in range(10) if v % 2]",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.python",
+                "keyword.operator.assignment.python"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 4,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.python",
+                "punctuation.definition.list.begin.python"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 7,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 10,
+              "scopes": [
+                "source.python",
+                "keyword.control.flow.python"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 13,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 15,
+              "scopes": [
+                "source.python",
+                "keyword.control.flow.python"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 21,
+              "scopes": [
+                "source.python",
+                "meta.function-call.python",
+                "support.function.builtin.python"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.python",
+                "meta.function-call.python",
+                "punctuation.definition.arguments.begin.python"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 24,
+              "scopes": [
+                "source.python",
+                "meta.function-call.python",
+                "meta.function-call.arguments.python",
+                "constant.numeric.dec.python"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.python",
+                "meta.function-call.python",
+                "punctuation.definition.arguments.end.python"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 28,
+              "scopes": [
+                "source.python",
+                "keyword.control.flow.python"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 31,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 32,
+              "scopes": [
+                "source.python",
+                "keyword.operator.arithmetic.python"
+              ]
+            },
+            {
+              "start_index": 32,
+              "end_index": 33,
+              "scopes": [
+                "source.python"
+              ]
+            },
+            {
+              "start_index": 33,
+              "end_index": 34,
+              "scopes": [
+                "source.python",
+                "constant.numeric.dec.python"
+              ]
+            },
+            {
+              "start_index": 34,
+              "end_index": 35,
+              "scopes": [
+                "source.python",
+                "punctuation.definition.list.end.python"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "javascript",
+      "scope": "source.js",
+      "lines": [
+        {
+          "text": "const re = /a(b+)\\s*/gi;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 5,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "storage.type.js"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 8,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js",
+                "meta.definition.variable.js",
+                "variable.other.constant.js"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "keyword.operator.assignment.js"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "punctuation.definition.string.begin.js"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "meta.group.regexp",
+                "punctuation.definition.group.regexp"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "meta.group.regexp"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "meta.group.regexp",
+                "keyword.operator.quantifier.regexp"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "meta.group.regexp",
+                "punctuation.definition.group.regexp"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 19,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "constant.other.character-class.regexp"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "keyword.operator.quantifier.regexp"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "punctuation.definition.string.end.js"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 23,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "string.regexp.js",
+                "keyword.other.js"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.js",
+                "punctuation.terminator.statement.js"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "function example(x) {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 8,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "storage.type.function.js"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.js",
+                "meta.function.js"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 16,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.definition.function.js",
+                "entity.name.function.js"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.parameters.js",
+                "punctuation.definition.parameters.begin.js"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.parameters.js",
+                "variable.parameter.js"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.parameters.js",
+                "punctuation.definition.parameters.end.js"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.js",
+                "meta.function.js"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "punctuation.definition.block.js"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "  return `hello ${x + 1}!`;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 8,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "keyword.control.flow.js"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "punctuation.definition.string.template.begin.js"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 16,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 18,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "punctuation.definition.template-expression.begin.js"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "meta.embedded.line.js",
+                "variable.other.readwrite.js"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "meta.embedded.line.js"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "meta.embedded.line.js",
+                "keyword.operator.arithmetic.js"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "meta.embedded.line.js"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "meta.embedded.line.js",
+                "constant.numeric.decimal.js"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "meta.template.expression.js",
+                "punctuation.definition.template-expression.end.js"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "string.template.js",
+                "punctuation.definition.string.template.end.js"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "punctuation.terminator.statement.js"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.js",
+                "meta.function.js",
+                "meta.block.js",
+                "punctuation.definition.block.js"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "/* multiline",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.js",
+                "comment.block.js",
+                "punctuation.definition.comment.js"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 12,
+              "scopes": [
+                "source.js",
+                "comment.block.js"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "comment */ let n = 123.4e-5;",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 8,
+              "scopes": [
+                "source.js",
+                "comment.block.js"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 10,
+              "scopes": [
+                "source.js",
+                "comment.block.js",
+                "punctuation.definition.comment.js"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.js"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 14,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "storage.type.js"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js",
+                "meta.definition.variable.js",
+                "variable.other.readwrite.js"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "keyword.operator.assignment.js"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 22,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "constant.numeric.decimal.js"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "constant.numeric.decimal.js",
+                "meta.delimiter.decimal.period.js"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 27,
+              "scopes": [
+                "source.js",
+                "meta.var.expr.js",
+                "constant.numeric.decimal.js"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.js",
+                "punctuation.terminator.statement.js"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "typescript",
+      "scope": "source.ts",
+      "lines": [
+        {
+          "text": "interface Shape<T> { value: T; }",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 9,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "storage.type.interface.ts"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 15,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "entity.name.type.interface.ts"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.begin.ts"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.type.parameters.ts",
+                "entity.name.type.ts"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.end.ts"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "punctuation.definition.block.ts"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.field.declaration.ts"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 26,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.field.declaration.ts",
+                "meta.definition.property.ts",
+                "variable.object.property.ts"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.field.declaration.ts",
+                "meta.type.annotation.ts",
+                "keyword.operator.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.field.declaration.ts",
+                "meta.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "meta.field.declaration.ts",
+                "meta.type.annotation.ts",
+                "entity.name.type.ts"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "punctuation.terminator.statement.ts"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 32,
+              "scopes": [
+                "source.ts",
+                "meta.interface.ts",
+                "punctuation.definition.block.ts"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "const x: Shape<number> = { value: 42 };",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 5,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "storage.type.ts"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.definition.variable.ts",
+                "variable.other.constant.ts"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts",
+                "keyword.operator.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 14,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts",
+                "entity.name.type.ts"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.begin.ts"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 21,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts",
+                "meta.type.parameters.ts",
+                "support.type.primitive.ts"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.end.ts"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.var-single-variable.expr.ts",
+                "meta.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "keyword.operator.assignment.ts"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "punctuation.definition.block.ts"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 32,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "meta.object.member.ts",
+                "meta.object-literal.key.ts"
+              ]
+            },
+            {
+              "start_index": 32,
+              "end_index": 33,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "meta.object.member.ts",
+                "meta.object-literal.key.ts",
+                "punctuation.separator.key-value.ts"
+              ]
+            },
+            {
+              "start_index": 33,
+              "end_index": 34,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "meta.object.member.ts"
+              ]
+            },
+            {
+              "start_index": 34,
+              "end_index": 36,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "meta.object.member.ts",
+                "constant.numeric.decimal.ts"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 37,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "meta.object.member.ts"
+              ]
+            },
+            {
+              "start_index": 37,
+              "end_index": 38,
+              "scopes": [
+                "source.ts",
+                "meta.var.expr.ts",
+                "meta.objectliteral.ts",
+                "punctuation.definition.block.ts"
+              ]
+            },
+            {
+              "start_index": 38,
+              "end_index": 39,
+              "scopes": [
+                "source.ts",
+                "punctuation.terminator.statement.ts"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "export async function run(): Promise<void> {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 6,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "keyword.control.export.ts"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 12,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "storage.modifier.async.ts"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 21,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "storage.type.function.ts"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 25,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.definition.function.ts",
+                "entity.name.function.ts"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.parameters.ts",
+                "punctuation.definition.parameters.begin.ts"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.parameters.ts",
+                "punctuation.definition.parameters.end.ts"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts",
+                "keyword.operator.type.annotation.ts"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 36,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts",
+                "entity.name.type.ts"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 37,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.begin.ts"
+              ]
+            },
+            {
+              "start_index": 37,
+              "end_index": 41,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts",
+                "meta.type.parameters.ts",
+                "support.type.primitive.ts"
+              ]
+            },
+            {
+              "start_index": 41,
+              "end_index": 42,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts",
+                "meta.type.parameters.ts",
+                "punctuation.definition.typeparameters.end.ts"
+              ]
+            },
+            {
+              "start_index": 42,
+              "end_index": 43,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.return.type.ts"
+              ]
+            },
+            {
+              "start_index": 43,
+              "end_index": 44,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "punctuation.definition.block.ts"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "  await Promise.resolve();",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 7,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "keyword.control.flow.ts"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 15,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "meta.function-call.ts",
+                "support.class.promise.ts"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "meta.function-call.ts",
+                "punctuation.accessor.ts"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 23,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "meta.function-call.ts",
+                "entity.name.function.ts"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 25,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "meta.brace.round.ts"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "punctuation.terminator.statement.ts"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.ts",
+                "meta.function.ts",
+                "meta.block.ts",
+                "punctuation.definition.block.ts"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "json",
+      "scope": "source.json",
+      "lines": [
+        {
+          "text": "{",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "punctuation.definition.dictionary.begin.json"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "  \"key\": \"value\\n\",",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.begin.json"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 6,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.end.json"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "punctuation.separator.dictionary.key-value.json"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json",
+                "punctuation.definition.string.begin.json"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 15,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 17,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json",
+                "constant.character.escape.json"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json",
+                "punctuation.definition.string.end.json"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "punctuation.separator.dictionary.pair.json"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "  \"array\": [1, 2.5, true, null],",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.begin.json"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 8,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.end.json"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "punctuation.separator.dictionary.key-value.json"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "punctuation.definition.array.begin.json"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "constant.numeric.json"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "punctuation.separator.array.json"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 18,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "constant.numeric.json"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "punctuation.separator.array.json"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 24,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "constant.language.json"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "punctuation.separator.array.json"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 30,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "constant.language.json"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "meta.structure.array.json",
+                "punctuation.definition.array.end.json"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 32,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "punctuation.separator.dictionary.pair.json"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "  \"unicode\": \"😀\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.begin.json"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 10,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "string.json",
+                "support.type.property-name.json",
+                "punctuation.support.type.property-name.end.json"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "punctuation.separator.dictionary.key-value.json"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json",
+                "punctuation.definition.string.begin.json"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 16,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "meta.structure.dictionary.value.json",
+                "string.quoted.double.json",
+                "punctuation.definition.string.end.json"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.json",
+                "meta.structure.dictionary.json",
+                "punctuation.definition.dictionary.end.json"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "css",
+      "scope": "source.css",
+      "lines": [
+        {
+          "text": "body { margin: 25px; color: #aabbcc; }",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.css",
+                "meta.selector.css",
+                "entity.name.tag.css"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.css"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.begin.bracket.curly.css"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 13,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-name.css",
+                "support.type.property-name.css"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 17,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "constant.numeric.css"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 19,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "constant.numeric.css",
+                "keyword.other.unit.px.css"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.terminator.rule.css"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 26,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-name.css",
+                "support.type.property-name.css"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "constant.other.color.rgb-value.hex.css",
+                "punctuation.definition.constant.css"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 35,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "constant.other.color.rgb-value.hex.css"
+              ]
+            },
+            {
+              "start_index": 35,
+              "end_index": 36,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.terminator.rule.css"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 37,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 37,
+              "end_index": 38,
+              "scopes": [
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.end.bracket.curly.css"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "@media screen and (max-width: 600px) {",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "keyword.control.at-rule.media.css",
+                "punctuation.definition.keyword.css"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 6,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "keyword.control.at-rule.media.css"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 13,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "support.constant.media.css"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 17,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "keyword.operator.logical.and.media.css"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "punctuation.definition.parameters.begin.bracket.round.css"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 28,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "support.type.property-name.media.css"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 33,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "constant.numeric.css"
+              ]
+            },
+            {
+              "start_index": 33,
+              "end_index": 35,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "constant.numeric.css",
+                "keyword.other.unit.px.css"
+              ]
+            },
+            {
+              "start_index": 35,
+              "end_index": 36,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.header.css",
+                "punctuation.definition.parameters.end.bracket.round.css"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 37,
+              "scopes": [
+                "source.css"
+              ]
+            },
+            {
+              "start_index": 37,
+              "end_index": 38,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "punctuation.section.media.begin.bracket.curly.css"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": ".foo:hover { --custom: \"abc\"; background: url(\"a.png\"); }",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.class.css",
+                "punctuation.definition.entity.css"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 4,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.class.css"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.pseudo-class.css",
+                "punctuation.definition.entity.css"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 10,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.pseudo-class.css"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.begin.bracket.curly.css"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 21,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "variable.css"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "string.quoted.double.css",
+                "punctuation.definition.string.begin.css"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 27,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "string.quoted.double.css"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "string.quoted.double.css",
+                "punctuation.definition.string.end.css"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.terminator.rule.css"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 40,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-name.css",
+                "support.type.property-name.css"
+              ]
+            },
+            {
+              "start_index": 40,
+              "end_index": 41,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 41,
+              "end_index": 42,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 42,
+              "end_index": 45,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "support.function.url.css"
+              ]
+            },
+            {
+              "start_index": 45,
+              "end_index": 46,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "punctuation.section.function.begin.bracket.round.css"
+              ]
+            },
+            {
+              "start_index": 46,
+              "end_index": 47,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "string.quoted.double.css",
+                "punctuation.definition.string.begin.css"
+              ]
+            },
+            {
+              "start_index": 47,
+              "end_index": 52,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "string.quoted.double.css"
+              ]
+            },
+            {
+              "start_index": 52,
+              "end_index": 53,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "string.quoted.double.css",
+                "punctuation.definition.string.end.css"
+              ]
+            },
+            {
+              "start_index": 53,
+              "end_index": 54,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "meta.function.url.css",
+                "punctuation.section.function.end.bracket.round.css"
+              ]
+            },
+            {
+              "start_index": 54,
+              "end_index": 55,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.terminator.rule.css"
+              ]
+            },
+            {
+              "start_index": 55,
+              "end_index": 56,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 56,
+              "end_index": 57,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.end.bracket.curly.css"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "}",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "source.css",
+                "meta.at-rule.media.body.css",
+                "punctuation.section.media.end.bracket.curly.css"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "html",
+      "scope": "text.html.basic",
+      "lines": [
+        {
+          "text": "<!DOCTYPE html>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.metadata.doctype.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 9,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.metadata.doctype.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.metadata.doctype.html"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 14,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.metadata.doctype.html",
+                "entity.other.attribute-name.html"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.metadata.doctype.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "<html><body>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.start.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 5,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.start.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.start.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.start.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 11,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.start.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.start.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "<script>const x = \"hello\";</script>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.start.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 7,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.start.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.start.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 13,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "storage.type.js"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 15,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js",
+                "meta.definition.variable.js",
+                "variable.other.constant.js"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "meta.var-single-variable.expr.js"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "keyword.operator.assignment.js"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "string.quoted.double.js",
+                "punctuation.definition.string.begin.js"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 24,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "string.quoted.double.js"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "meta.var.expr.js",
+                "string.quoted.double.js",
+                "punctuation.definition.string.end.js"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.js",
+                "punctuation.terminator.statement.js"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.end.html",
+                "punctuation.definition.tag.begin.html",
+                "source.js-ignored-vscode"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.end.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 34,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.end.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 34,
+              "end_index": 35,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.script.end.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "<style>.foo { color: red; }</style>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.start.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 6,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.start.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.start.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.class.css",
+                "punctuation.definition.entity.css"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 11,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.selector.css",
+                "entity.other.attribute-name.class.css"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.begin.bracket.curly.css"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 19,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-name.css",
+                "support.type.property-name.css"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.separator.key-value.css"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 24,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "meta.property-value.css",
+                "support.constant.color.w3c-standard-color-name.css"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.terminator.rule.css"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 26,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css"
+              ]
+            },
+            {
+              "start_index": 26,
+              "end_index": 27,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "source.css",
+                "meta.property-list.css",
+                "punctuation.section.property-list.end.bracket.curly.css"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.end.html",
+                "punctuation.definition.tag.begin.html",
+                "source.css-ignored-vscode"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 29,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.end.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 34,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.end.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 34,
+              "end_index": 35,
+              "scopes": [
+                "text.html.basic",
+                "meta.embedded.block.html",
+                "meta.tag.metadata.style.end.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "<div class=\"foo\">Hello &amp; goodbye</div>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 4,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 10,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "meta.attribute.class.html",
+                "entity.other.attribute-name.html"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "meta.attribute.class.html",
+                "punctuation.separator.key-value.html"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "meta.attribute.class.html",
+                "string.quoted.double.html",
+                "punctuation.definition.string.begin.html"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 15,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "meta.attribute.class.html",
+                "string.quoted.double.html"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "meta.attribute.class.html",
+                "string.quoted.double.html",
+                "punctuation.definition.string.end.html"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.start.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 23,
+              "scopes": [
+                "text.html.basic"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "text.html.basic",
+                "constant.character.entity.named.amp.html",
+                "punctuation.definition.entity.html"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 27,
+              "scopes": [
+                "text.html.basic",
+                "constant.character.entity.named.amp.html"
+              ]
+            },
+            {
+              "start_index": 27,
+              "end_index": 28,
+              "scopes": [
+                "text.html.basic",
+                "constant.character.entity.named.amp.html",
+                "punctuation.definition.entity.html"
+              ]
+            },
+            {
+              "start_index": 28,
+              "end_index": 36,
+              "scopes": [
+                "text.html.basic"
+              ]
+            },
+            {
+              "start_index": 36,
+              "end_index": 38,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.end.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 38,
+              "end_index": 41,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.end.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 41,
+              "end_index": 42,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.div.end.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "</body></html>",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.end.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 6,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.end.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.body.end.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 9,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.end.html",
+                "punctuation.definition.tag.begin.html"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 13,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.end.html",
+                "entity.name.tag.html"
+              ]
+            },
+            {
+              "start_index": 13,
+              "end_index": 14,
+              "scopes": [
+                "text.html.basic",
+                "meta.tag.structure.html.end.html",
+                "punctuation.definition.tag.end.html"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "markdown",
+      "scope": "text.html.markdown",
+      "lines": [
+        {
+          "text": "# Heading",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.markdown",
+                "markup.heading.markdown",
+                "heading.1.markdown",
+                "punctuation.definition.heading.markdown"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "markup.heading.markdown",
+                "heading.1.markdown"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 9,
+              "scopes": [
+                "text.html.markdown",
+                "markup.heading.markdown",
+                "heading.1.markdown",
+                "entity.name.section.markdown"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "A **bold** and *italic* [link](https://example.com).",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 4,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.bold.markdown",
+                "punctuation.definition.bold.markdown"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 8,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.bold.markdown"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 10,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.bold.markdown",
+                "punctuation.definition.bold.markdown"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 15,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.italic.markdown",
+                "punctuation.definition.italic.markdown"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 22,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.italic.markdown"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "markup.italic.markdown",
+                "punctuation.definition.italic.markdown"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown"
+              ]
+            },
+            {
+              "start_index": 24,
+              "end_index": 25,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "punctuation.definition.string.begin.markdown"
+              ]
+            },
+            {
+              "start_index": 25,
+              "end_index": 29,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "string.other.link.title.markdown"
+              ]
+            },
+            {
+              "start_index": 29,
+              "end_index": 30,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "punctuation.definition.string.end.markdown"
+              ]
+            },
+            {
+              "start_index": 30,
+              "end_index": 31,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "punctuation.definition.metadata.markdown"
+              ]
+            },
+            {
+              "start_index": 31,
+              "end_index": 50,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "markup.underline.link.markdown"
+              ]
+            },
+            {
+              "start_index": 50,
+              "end_index": 51,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown",
+                "meta.link.inline.markdown",
+                "punctuation.definition.metadata.markdown"
+              ]
+            },
+            {
+              "start_index": 51,
+              "end_index": 52,
+              "scopes": [
+                "text.html.markdown",
+                "meta.paragraph.markdown"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 0,
+              "scopes": [
+                "text.html.markdown"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "```rust",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "punctuation.definition.markdown"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 7,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "fenced_code.block.language.markdown"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "fn main() { let x = 1; }",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust",
+                "keyword.other.fn.rust"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 7,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust",
+                "entity.name.function.rust"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 9,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust",
+                "punctuation.brackets.round.rust"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "meta.function.definition.rust",
+                "punctuation.brackets.curly.rust"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 15,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "keyword.other.rust",
+                "storage.type.rust"
+              ]
+            },
+            {
+              "start_index": 15,
+              "end_index": 16,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "variable.other.rust"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "keyword.operator.assignment.equal.rust"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust"
+              ]
+            },
+            {
+              "start_index": 20,
+              "end_index": 21,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "constant.numeric.decimal.rust"
+              ]
+            },
+            {
+              "start_index": 21,
+              "end_index": 22,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "punctuation.semi.rust"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust"
+              ]
+            },
+            {
+              "start_index": 23,
+              "end_index": 24,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "meta.embedded.block.rust",
+                "punctuation.brackets.curly.rust"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "```",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "text.html.markdown",
+                "markup.fenced_code.block.markdown",
+                "punctuation.definition.markdown"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "> quoted",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown",
+                "punctuation.definition.quote.begin.markdown"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 8,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown",
+                "meta.paragraph.markdown"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "> paragraph",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown",
+                "punctuation.definition.quote.begin.markdown"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 11,
+              "scopes": [
+                "text.html.markdown",
+                "markup.quote.markdown",
+                "meta.paragraph.markdown"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 0,
+              "scopes": [
+                "text.html.markdown"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "- item",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 1,
+              "scopes": [
+                "text.html.markdown",
+                "markup.list.unnumbered.markdown",
+                "punctuation.definition.list.begin.markdown"
+              ]
+            },
+            {
+              "start_index": 1,
+              "end_index": 2,
+              "scopes": [
+                "text.html.markdown",
+                "markup.list.unnumbered.markdown"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 6,
+              "scopes": [
+                "text.html.markdown",
+                "markup.list.unnumbered.markdown",
+                "meta.paragraph.markdown"
+              ]
+            }
+          ],
+          "depth": 2
+        }
+      ]
+    },
+    {
+      "name": "shell",
+      "scope": "source.shell",
+      "lines": [
+        {
+          "text": "#!/bin/bash",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.shell",
+                "comment.line.number-sign.shebang.shell",
+                "punctuation.definition.comment.shebang.shell"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 11,
+              "scopes": [
+                "source.shell",
+                "comment.line.number-sign.shebang.shell"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "name=\"world\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 5,
+              "scopes": [
+                "source.shell"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "punctuation.definition.string.begin.shell"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 11,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "punctuation.definition.string.end.shell"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "echo \"hello ${name}\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.shell",
+                "support.function.builtin.shell"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.shell"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "punctuation.definition.string.begin.shell"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 12,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 14,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "variable.other.bracket.shell",
+                "punctuation.definition.variable.shell"
+              ]
+            },
+            {
+              "start_index": 14,
+              "end_index": 18,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "variable.other.bracket.shell"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 19,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "variable.other.bracket.shell",
+                "punctuation.definition.variable.shell"
+              ]
+            },
+            {
+              "start_index": 19,
+              "end_index": 20,
+              "scopes": [
+                "source.shell",
+                "string.quoted.double.shell",
+                "punctuation.definition.string.end.shell"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "cat <<EOF",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.shell"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 6,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell",
+                "keyword.operator.heredoc.shell"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 9,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell",
+                "keyword.control.heredoc-token.shell"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "a $name",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 2,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell"
+              ]
+            },
+            {
+              "start_index": 2,
+              "end_index": 3,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell",
+                "variable.other.normal.shell",
+                "punctuation.definition.variable.shell"
+              ]
+            },
+            {
+              "start_index": 3,
+              "end_index": 7,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell",
+                "variable.other.normal.shell"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "EOF",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 3,
+              "scopes": [
+                "source.shell",
+                "string.unquoted.heredoc.expanded.shell",
+                "keyword.control.heredoc-token.shell"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    },
+    {
+      "name": "yaml",
+      "scope": "source.yaml",
+      "lines": [
+        {
+          "text": "name: example",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.plain.out.yaml",
+                "entity.name.tag.yaml"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.yaml",
+                "punctuation.separator.key-value.mapping.yaml"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.yaml"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 13,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.plain.out.yaml"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "values: [1, true, null]",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 6,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.plain.out.yaml",
+                "entity.name.tag.yaml"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.yaml",
+                "punctuation.separator.key-value.mapping.yaml"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 8,
+              "scopes": [
+                "source.yaml"
+              ]
+            },
+            {
+              "start_index": 8,
+              "end_index": 9,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "punctuation.definition.sequence.begin.yaml"
+              ]
+            },
+            {
+              "start_index": 9,
+              "end_index": 10,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "constant.numeric.integer.yaml"
+              ]
+            },
+            {
+              "start_index": 10,
+              "end_index": 11,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "punctuation.separator.sequence.yaml"
+              ]
+            },
+            {
+              "start_index": 11,
+              "end_index": 12,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 16,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "constant.language.boolean.yaml"
+              ]
+            },
+            {
+              "start_index": 16,
+              "end_index": 17,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "punctuation.separator.sequence.yaml"
+              ]
+            },
+            {
+              "start_index": 17,
+              "end_index": 18,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml"
+              ]
+            },
+            {
+              "start_index": 18,
+              "end_index": 22,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "constant.language.null.yaml"
+              ]
+            },
+            {
+              "start_index": 22,
+              "end_index": 23,
+              "scopes": [
+                "source.yaml",
+                "meta.flow-sequence.yaml",
+                "punctuation.definition.sequence.end.yaml"
+              ]
+            }
+          ],
+          "depth": 0
+        },
+        {
+          "text": "text: |",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.plain.out.yaml",
+                "entity.name.tag.yaml"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.yaml",
+                "punctuation.separator.key-value.mapping.yaml"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.yaml"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.yaml",
+                "keyword.control.flow.block-scalar.literal.yaml"
+              ]
+            }
+          ],
+          "depth": 1
+        },
+        {
+          "text": "  first line",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 12,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.block.yaml"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "  second line",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 13,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.block.yaml"
+              ]
+            }
+          ],
+          "depth": 2
+        },
+        {
+          "text": "next: \"value\"",
+          "tokens": [
+            {
+              "start_index": 0,
+              "end_index": 4,
+              "scopes": [
+                "source.yaml",
+                "string.unquoted.plain.out.yaml",
+                "entity.name.tag.yaml"
+              ]
+            },
+            {
+              "start_index": 4,
+              "end_index": 5,
+              "scopes": [
+                "source.yaml",
+                "punctuation.separator.key-value.mapping.yaml"
+              ]
+            },
+            {
+              "start_index": 5,
+              "end_index": 6,
+              "scopes": [
+                "source.yaml"
+              ]
+            },
+            {
+              "start_index": 6,
+              "end_index": 7,
+              "scopes": [
+                "source.yaml",
+                "string.quoted.double.yaml",
+                "punctuation.definition.string.begin.yaml"
+              ]
+            },
+            {
+              "start_index": 7,
+              "end_index": 12,
+              "scopes": [
+                "source.yaml",
+                "string.quoted.double.yaml"
+              ]
+            },
+            {
+              "start_index": 12,
+              "end_index": 13,
+              "scopes": [
+                "source.yaml",
+                "string.quoted.double.yaml",
+                "punctuation.definition.string.end.yaml"
+              ]
+            }
+          ],
+          "depth": 0
+        }
+      ]
+    }
+  ]
+}

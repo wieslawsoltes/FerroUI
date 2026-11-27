@@ -21,11 +21,9 @@ fn same_input_method(a: Option<&Rc<dyn ITextInputMethodImpl>>, b: Option<&Rc<dyn
     }
 }
 
-/// Whether a client opted in to the exact-edit connection: it implements the
-/// atomic composition capability. Every other client keeps the upstream manager
-/// behaviour (`docs/porting/winui-rich-text.md`, decision D5).
+/// Whether a client needs a managed connection to its semantic input owner.
 fn uses_connection(client: &dyn TextInputMethodClient) -> bool {
-    client.input_method_editing().is_some()
+    client.input_method_editing().is_some() || client.supports_surrounding_text_edits()
 }
 
 fn is_input_options_property(property: &FerroProperty) -> bool {
@@ -49,7 +47,7 @@ fn is_input_options_property(property: &FerroProperty) -> bool {
 /// the text input method client of the element and keeps the input method
 /// informed about the client, its options and the cursor rectangle.
 ///
-/// A client that opts in to the exact-edit connection ([`uses_connection`])
+/// A client that opts in to managed editing ([`uses_connection`])
 /// also gets, as WinUI's text controls do (`docs/porting/DEVIATIONS.md`,
 /// Input): a [`TextInputMethodConnection`] to its semantic owner
 /// ([`TextInputMethodClient::input_method_owner`]), which may differ from the

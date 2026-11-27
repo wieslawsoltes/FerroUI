@@ -334,6 +334,12 @@ pub struct SourceReferences {
     pub names: BTreeSet<String>,
     /// The values of the string literals, up to [`SourceReferences::MAX_STRING`] bytes long.
     pub strings: BTreeSet<String>,
+    /// The typed resource keys the code names: what follows `keys::` in a path, in a `use` item
+    /// or in the body of a macro (`keys::ButtonBackground`).
+    pub key_names: BTreeSet<String>,
+    /// The code imports a `keys` module in a way that hides which keys it names (`keys::*`,
+    /// `keys as k`): every name of [`names`](Self::names) may be a key.
+    pub names_may_be_keys: bool,
 }
 
 impl SourceReferences {
@@ -362,6 +368,31 @@ impl SourceReferences {
         }
         if !self.names.contains(&type_name) {
             self.names.insert(type_name);
+        }
+    }
+
+    pub(crate) fn add_key_name(&mut self, name: &str) {
+        if !self.key_names.contains(name) {
+            self.key_names.insert(name.to_string());
+        }
+    }
+
+    /// The typed keys a `use` tree imports; `in_keys` when the tree is below a `keys` segment.
+    pub(crate) fn add_use_tree(&mut self, tree: &syn::UseTree, in_keys: bool) {
+        match tree {
+            syn::UseTree::Path(path) => self.add_use_tree(&path.tree, path.ident == "keys"),
+            syn::UseTree::Name(name) if in_keys => self.add_key_name(&name.ident.to_string()),
+            syn::UseTree::Name(_) => {}
+            syn::UseTree::Rename(rename) => {
+                if in_keys {
+                    self.add_key_name(&rename.ident.to_string());
+                }
+                if rename.ident == "keys" {
+                    self.names_may_be_keys = true;
+                }
+            }
+            syn::UseTree::Glob(_) => self.names_may_be_keys |= in_keys,
+            syn::UseTree::Group(group) => group.items.iter().for_each(|item| self.add_use_tree(item, in_keys)),
         }
     }
 
