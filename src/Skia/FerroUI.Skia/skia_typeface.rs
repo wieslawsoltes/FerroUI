@@ -193,7 +193,7 @@ mod collection_index_tests {
     fn the_collection_index_comes_from_the_kept_data() {
         let bytes = include_bytes!("test_assets/assets/AdobeBlank2VF.ttf");
         let typeface = skia_safe::FontMgr::new()
-            .new_from_data(bytes, None)
+            .new_from_data(skia_safe::Data::new_copy(bytes), None)
             .expect("a typeface from the bytes of a variable font");
         assert_eq!(collection_index(&typeface), 0);
         let platform = SkiaTypeface::new(typeface, FontSimulations::None);
