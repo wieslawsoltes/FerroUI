@@ -292,5 +292,5 @@ React runs `useLayoutEffect` after the DOM changes and before the browser paints
 - Call hooks at the top of the function, never in a condition or a loop. A run that calls them in another order panics.
 - State made with `signal(..)` inside a component that runs again is lost on the next run. Use `use_signal`.
 - When a value changes often and drives one property (a progress value, a clock), bind the property to the signal (`value: elapsed`) instead of reading it in the function. Only that property updates.
-- Layout is not CSS. A `StackPanel` stacks, a `Grid` has rows and columns (`row_definitions: "Auto,*"`), and alignment and margins are properties of each control.
+- Layout is not CSS. A `StackPanel` stacks, a `Grid` has rows and columns (`row_definitions: [auto(), star(1.0)]`), and alignment and margins are properties of each control.
 - The samples are the best reference. `samples/SevenGuis` has every 7GUIs task three times (builders, `rsx!`, hooks), each a small crate with a scenario test.
