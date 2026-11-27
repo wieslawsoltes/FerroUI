@@ -573,10 +573,22 @@ pub trait PseudoClassSelectors: Sized {
         self.with_pseudo_class(":left")
     }
 
+    /// The pseudo-class `:left-bottom-border-line-short`.
+    #[inline]
+    fn left_bottom_border_line_short(self) -> Selector {
+        self.with_pseudo_class(":left-bottom-border-line-short")
+    }
+
     /// The pseudo-class `:left-header-visible`.
     #[inline]
     fn left_header_visible(self) -> Selector {
         self.with_pseudo_class(":left-header-visible")
+    }
+
+    /// The pseudo-class `:left-of-selected-tab`.
+    #[inline]
+    fn left_of_selected_tab(self) -> Selector {
+        self.with_pseudo_class(":left-of-selected-tab")
     }
 
     /// The pseudo-class `:lightDismiss`.
@@ -669,6 +681,12 @@ pub trait PseudoClassSelectors: Sized {
         self.with_pseudo_class(":no-banner-content")
     }
 
+    /// The pseudo-class `:no-bottom-border-line`.
+    #[inline]
+    fn no_bottom_border_line(self) -> Selector {
+        self.with_pseudo_class(":no-bottom-border-line")
+    }
+
     /// The pseudo-class `:nophotoorinitials`.
     #[inline]
     fn no_photo_or_initials(self) -> Selector {
@@ -691,6 +709,12 @@ pub trait PseudoClassSelectors: Sized {
     #[inline]
     fn number_panel(self) -> Selector {
         self.with_pseudo_class(":numberpanel")
+    }
+
+    /// The pseudo-class `:on-top-navigation-overflow`.
+    #[inline]
+    fn on_top_navigation_overflow(self) -> Selector {
+        self.with_pseudo_class(":on-top-navigation-overflow")
     }
 
     /// The pseudo-class `:on-top-navigation-primary`.
@@ -727,6 +751,12 @@ pub trait PseudoClassSelectors: Sized {
     #[inline]
     fn pane_toggle_button_visible(self) -> Selector {
         self.with_pseudo_class(":pane-toggle-button-visible")
+    }
+
+    /// The pseudo-class `:paused`.
+    #[inline]
+    fn paused(self) -> Selector {
+        self.with_pseudo_class(":paused")
     }
 
     /// The pseudo-class `:photo`.
@@ -831,10 +861,22 @@ pub trait PseudoClassSelectors: Sized {
         self.with_pseudo_class(":right")
     }
 
+    /// The pseudo-class `:right-bottom-border-line-short`.
+    #[inline]
+    fn right_bottom_border_line_short(self) -> Selector {
+        self.with_pseudo_class(":right-bottom-border-line-short")
+    }
+
     /// The pseudo-class `:right-header-visible`.
     #[inline]
     fn right_header_visible(self) -> Selector {
         self.with_pseudo_class(":right-header-visible")
+    }
+
+    /// The pseudo-class `:right-of-selected-tab`.
+    #[inline]
+    fn right_of_selected_tab(self) -> Selector {
+        self.with_pseudo_class(":right-of-selected-tab")
     }
 
     /// The pseudo-class `:selected`.
@@ -853,6 +895,18 @@ pub trait PseudoClassSelectors: Sized {
     #[inline]
     fn set(self) -> Selector {
         self.with_pseudo_class(":set")
+    }
+
+    /// The pseudo-class `:showing`.
+    #[inline]
+    fn showing(self) -> Selector {
+        self.with_pseudo_class(":showing")
+    }
+
+    /// The pseudo-class `:single-bottom-border-line`.
+    #[inline]
+    fn single_bottom_border_line(self) -> Selector {
+        self.with_pseudo_class(":single-bottom-border-line")
     }
 
     /// The pseudo-class `:singleitem`.
