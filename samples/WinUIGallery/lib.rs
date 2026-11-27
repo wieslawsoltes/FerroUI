@@ -54,6 +54,7 @@ mod content_dialog_samples;
 mod scratch_pad_samples;
 mod selector_bar_samples;
 mod status_samples;
+mod storage_picker_samples;
 mod text_input_samples;
 mod text_samples;
 mod tree_samples;
@@ -139,6 +140,8 @@ mod scratch_pad_samples_tests;
 mod selector_bar_samples_tests;
 #[cfg(test)]
 mod status_samples_tests;
+#[cfg(test)]
+mod storage_picker_samples_tests;
 
 #[cfg(test)]
 mod command_samples_tests;

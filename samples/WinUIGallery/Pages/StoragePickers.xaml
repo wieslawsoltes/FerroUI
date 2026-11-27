@@ -1,0 +1,199 @@
+<!-- Ported from the five pinned StoragePickers examples of WinUI Gallery (14061eea) and the handlers of
+     StoragePickersPage.xaml.cs (storage_picker_samples.rs); see ../NOTICE.md. The pickers are the
+     window's storage provider (TopLevel.StorageProvider): FileOpenPicker is its file picker,
+     FileSavePicker its save picker and FolderPicker its folder picker, each used only where the
+     provider reports it (CanOpen, CanSave, CanPickFolder); otherwise the example says that the
+     platform has none. CommitButtonText is the picker's title (FerroUI's pickers have no commit
+     button text), SuggestedStartLocation is a well-known folder of the provider and FerroUI's
+     pickers have no ViewMode: the view mode options feed the source viewer only. The thumbnail is
+     the picked image decoded within the requested size (FerroUI has no shell thumbnails, so the
+     thumbnail mode feeds the details only). The location, view mode and thumbnail mode lists, the
+     source's x:Bind of the page's own lists, are filled in Rust. The ComboBoxes', TextBoxes' and
+     NumberBox's Headers are composed where the control has none; ThemeResource is DynamicResource;
+     the announcements of UIHelper.AnnounceActionForAccessibility are polite live regions. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <InfoBar x:Name="LocationInfoBar" Margin="0,8,0,0" IsClosable="False" IsOpen="True">
+    <RichTextBlock Margin="0,12,12,12" IsTextSelectionEnabled="False" TextWrapping="Wrap">
+      <Paragraph><Run Text="The picker opens in the " /><Run FontWeight="SemiBold" Text="suggested start location" /><Run Text=" where the platform supports one. The " /><Run FontWeight="SemiBold" FontFamily="Consolas" Text="SuggestedStartLocation" /><Run Text=" is a well-known folder of the window's storage provider; a platform that remembers the last selected location may open there instead." /></Paragraph>
+    </RichTextBlock>
+  </InfoBar>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Pick single file" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <Button x:Name="PickSingleFileButton" Content="Pick a single file" />
+        <TextBlock x:Name="PickedSingleFileTextBlock" Text="No file picked" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Text="File type" />
+          <ComboBox x:Name="FileTypeComboBox1" Width="200" AutomationProperties.Name="File type" SelectedIndex="0">
+            <ComboBoxItem Content="All Files (*)" Tag="*" />
+            <ComboBoxItem Content="Text Files (*.txt)" Tag=".txt" />
+            <ComboBoxItem Content="Images (*.jpg, *.png)" Tag="images" />
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Commit button text" />
+          <TextBox x:Name="CommitButtonTextTextBox" AutomationProperties.Name="Commit button text"
+                   PlaceholderText="Open" Text="Pick File" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Suggested start location" />
+          <ComboBox x:Name="PickerLocationComboBox1" Width="200" AutomationProperties.Name="Suggested start location" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="View mode" />
+          <ComboBox x:Name="PickerViewModeComboBox1" Width="200" AutomationProperties.Name="View mode" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Pick multiple files" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <Button x:Name="PickMultipleFilesButton" Content="Pick multiple files" />
+        <TextBlock x:Name="PickedMultipleFilesTextBlock" Text="No files picked" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Text="File type" />
+          <ComboBox x:Name="FileTypeComboBox2" Width="200" AutomationProperties.Name="File type" SelectedIndex="0">
+            <ComboBoxItem Content="All Files (*)" Tag="*" />
+            <ComboBoxItem Content="Text Files (*.txt)" Tag=".txt" />
+            <ComboBoxItem Content="Images (*.jpg, *.png)" Tag="images" />
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Commit button text" />
+          <TextBox x:Name="CommitButtonTextTextBox2" AutomationProperties.Name="Commit button text"
+                   PlaceholderText="Open" Text="Pick Files" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Suggested start location" />
+          <ComboBox x:Name="PickerLocationComboBox2" Width="200" AutomationProperties.Name="Suggested start location" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="View mode" />
+          <ComboBox x:Name="PickerViewModeComboBox2" Width="200" AutomationProperties.Name="View mode" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Save file" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <StackPanel Spacing="4">
+          <TextBlock Text="File content" />
+          <TextBox x:Name="FileContentTextBox" Width="500" Height="200" HorizontalAlignment="Left"
+                   AutomationProperties.Name="File content" AcceptsReturn="True" TextWrapping="Wrap"
+                   Text="Hello, WinUI!" />
+        </StackPanel>
+        <Button x:Name="SaveFileButton" Content="Save a file" />
+        <TextBlock x:Name="SavedFileTextBlock" Text="No file saved" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <TextBlock Text="File types:" />
+        <CheckBox x:Name="TxtCheckBox" Content="Text Files (*.txt)" />
+        <CheckBox x:Name="JsonCheckBox" Content="JSON Files (*.json)" />
+        <CheckBox x:Name="XmlCheckBox" Content="XML Files (*.xml)" />
+        <StackPanel Spacing="4">
+          <TextBlock Text="Default extension" />
+          <ComboBox x:Name="DefaultExtensionComboBox" Width="200" AutomationProperties.Name="Default extension"
+                    SelectedIndex="0">
+            <x:String>.txt</x:String>
+            <x:String>.json</x:String>
+            <x:String>.xml</x:String>
+          </ComboBox>
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Suggested file name" />
+          <TextBox x:Name="SuggestedFileNameTextBox" AutomationProperties.Name="Suggested file name"
+                   Text="NewDocument" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Commit button text" />
+          <TextBox x:Name="CommitButtonTextTextBox3" AutomationProperties.Name="Commit button text"
+                   PlaceholderText="Save" Text="Save File" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Suggested start location" />
+          <ComboBox x:Name="PickerLocationComboBox3" Width="200" AutomationProperties.Name="Suggested start location" />
+        </StackPanel>
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Suggested folder" />
+            <TextBox x:Name="SuggestedFolderTextBox" Width="148" AutomationProperties.Name="Suggested folder"
+                     PlaceholderText="Optional" IsReadOnly="True"
+                     Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+          </StackPanel>
+          <Button x:Name="SelectSuggestedFolderButton" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Bottom"
+                  AutomationProperties.Name="Select folder" ToolTip.Tip="Select folder">
+            <FontIcon Glyph="&#xF89A;" />
+          </Button>
+        </Grid>
+        <TextBlock x:Name="SuggestedFolderStatus" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Pick folder" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <Button x:Name="PickFolderButton" Content="Pick a folder" />
+        <TextBlock x:Name="PickedFolderTextBlock" Text="No folder picked" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Commit button text" />
+          <TextBox x:Name="CommitButtonTextTextBox4" AutomationProperties.Name="Commit button text"
+                   PlaceholderText="Select Folder" Text="Pick Folder" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="Suggested start location" />
+          <ComboBox x:Name="PickerLocationComboBox4" Width="200" AutomationProperties.Name="Suggested start location" />
+        </StackPanel>
+        <StackPanel Spacing="4">
+          <TextBlock Text="View mode" />
+          <ComboBox x:Name="PickerViewModeComboBox3" Width="200" AutomationProperties.Name="View mode" />
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Pick a file and display its thumbnail" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" Orientation="Horizontal" VerticalAlignment="Top">
+        <StackPanel Spacing="8">
+          <Button x:Name="PickFileForThumbnailButton" Content="Pick a file" />
+          <TextBlock x:Name="ThumbnailDetailsTextBlock" Text="No file picked" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+        <Border Width="160" Height="160" HorizontalAlignment="Left" CornerRadius="4"
+                Background="{DynamicResource SubtleFillColorTertiaryBrush}">
+          <Image x:Name="ThumbnailImage" Stretch="Uniform" AutomationProperties.Name="File thumbnail" />
+        </Border>
+      </StackPanel>
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <StackPanel Spacing="4">
+          <TextBlock Text="Thumbnail mode" />
+          <ComboBox x:Name="ThumbnailModeComboBox" Width="200" AutomationProperties.Name="Thumbnail mode" />
+        </StackPanel>
+        <NumberBox x:Name="ThumbnailSizeNumberBox" Width="200" Header="Requested size (px)"
+                   Value="200" Minimum="16" Maximum="1024" SpinButtonPlacementMode="Inline" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>
