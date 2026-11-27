@@ -45,23 +45,18 @@ pub(crate) enum EntryCoercion {
     Raw,
     /// The value under an animation that ended: the uncoerced base value is the input again.
     RestoreBase,
-    /// Explicit coercion: the uncoerced inputs become the values again (`reset_coercion`).
-    Reset,
 }
 
 /// The typed operations of explicit coercion (`StyledPropertyMetadata::with_coerce_on_reevaluation`).
 /// The table of a value type is made by that builder alone, so a value type whose coercion is not
 /// explicit carries none of them (docs/binary-size.md, section 4.17).
 pub(crate) struct ExplicitFns<T> {
-    /// The uncoerced inputs become the value and the base value again (`reset_coercion`).
-    reset: fn(&EffectiveValue<T>, &FerroObject),
     /// The output of a write whose coercion is reused or skipped, `None` to coerce it.
     output: fn(&EffectiveValue<T>, &T, BindingPriority, EntryCoercion) -> Option<T>,
 }
 
 impl<T: StyledValue> ExplicitFns<T> {
     const FNS: Self = Self {
-        reset: EffectiveValue::<T>::reset_coerced,
         output: EffectiveValue::<T>::explicit_output,
     };
 
@@ -362,11 +357,11 @@ impl dyn EffectiveValueDyn {
     /// The uncoerced inputs become the values again, for a property whose coercion is explicit
     /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); nothing for any other property.
     pub(crate) fn reset_coercion(&self, owner: &FerroObject) {
-        let state = self.state();
-        if state.explicit_coercion {
-            state.pending_coercion.set(EntryCoercion::Reset);
-            self.coerce_value(owner);
-            state.pending_coercion.set(EntryCoercion::Recompute);
+        if self.state().explicit_coercion {
+            // Found by the type of the value: registered with the explicit coercion of its type.
+            if let Some(reset) = crate::ferro_property_metadata::explicit_reset(Any::type_id(self)) {
+                reset(self, owner);
+            }
         }
     }
 
@@ -564,7 +559,14 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         }
     }
 
-    /// The uncoerced inputs become the value and the base value again (`ExplicitFns::reset`).
+    /// `reset_coerced` of an untyped value of this type (`explicit_reset`).
+    pub(crate) fn reset_erased(value: &dyn EffectiveValueDyn, owner: &FerroObject) {
+        if let Some(value) = (value as &dyn Any).downcast_ref::<Self>() {
+            value.reset_coerced(owner);
+        }
+    }
+
+    /// The uncoerced inputs become the value and the base value again (`reset_coercion`).
     fn reset_coerced(&self, owner: &FerroObject) {
         let Some(uncommon) = &self.uncommon else { return };
         let operations = &uncommon.operations;
@@ -598,13 +600,6 @@ impl<T: Clone + 'static> EffectiveValue<T> {
     // clone the uncoerced value, then the base, then read priorities in the
     // original call. Clone, equality, coercion and Drop can reenter the store.
     pub(crate) fn apply_coercion(&self, owner: &FerroObject, operations: CoercionOperations<T>) {
-        if self.state.pending_coercion.get() == EntryCoercion::Reset {
-            self.state.pending_coercion.set(EntryCoercion::Recompute);
-            if let Some(explicit) = self.metadata.explicit_coercion() {
-                (explicit.reset)(self, owner);
-            }
-            return;
-        }
         let Some(uncommon) = &self.uncommon else { return };
         let value = uncommon.uncoerced_value.borrow().clone();
         let base_value = uncommon.uncoerced_base_value.borrow().clone();
@@ -639,7 +634,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         let operations = &uncommon_fields.operations;
         // What the untyped store asked of this write instead of a coercion of its input.
         let (value, output) = match self.state.pending_coercion.replace(EntryCoercion::Recompute) {
-            EntryCoercion::Recompute | EntryCoercion::Reset => (value, None),
+            EntryCoercion::Recompute => (value, None),
             pending => self.pending_input(value, priority, pending),
         };
         // The coerced default: its inputs are the default while it is written; the previous ones

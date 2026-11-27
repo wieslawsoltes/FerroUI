@@ -35,6 +35,24 @@ pub(crate) fn register_explicit_table<T: 'static>(table: &'static ExplicitFns<T>
     }
 }
 
+/// The resets of explicit coercion (`reset_coercion`), by the type of the effective value.
+type ExplicitReset = fn(&dyn EffectiveValueDyn, &FerroObject);
+static EXPLICIT_RESETS: std::sync::Mutex<Vec<(TypeId, ExplicitReset)>> = std::sync::Mutex::new(Vec::new());
+
+fn register_explicit_reset(id: TypeId, reset: ExplicitReset) {
+    let mut resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    if !resets.iter().any(|(known, _)| *known == id) {
+        resets.push((id, reset));
+    }
+}
+
+/// The reset of explicit coercion of an effective value of the type `id`, if its coercion is
+/// explicit somewhere.
+pub(crate) fn explicit_reset(id: TypeId) -> Option<ExplicitReset> {
+    let resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    resets.iter().find(|(known, _)| *known == id).map(|(_, reset)| *reset)
+}
+
 /// The address of the registered table of the type `id` (one function for every value type).
 #[inline(never)]
 fn explicit_table_address(id: TypeId) -> Option<usize> {
@@ -480,6 +498,8 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
             // The tables of the value type and of its storage type, which the store reads.
             register_explicit_table(crate::property_store::ExplicitFns::<T>::get());
             register_explicit_table(crate::property_store::ExplicitFns::<T::Storage>::get());
+            // The store holds the values of the storage type.
+            register_explicit_reset(TypeId::of::<EffectiveValue<T::Storage>>(), EffectiveValue::<T::Storage>::reset_erased);
         }
         self.base.reevaluation = Some(value);
         self
