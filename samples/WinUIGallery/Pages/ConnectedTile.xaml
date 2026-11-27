@@ -1,0 +1,14 @@
+<!-- The item template of CardPage.xaml and ItemsRepeaterCollectionPage.xaml of the pinned WinUI
+     Gallery; see ../NOTICE.md. The Grid with a corner radius is a Border that clips it. -->
+<Border xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="150" Height="120" CornerRadius="4" ClipToBounds="True">
+  <Grid>
+    <Image x:Name="TileImage" Stretch="UniformToFill" />
+    <Border VerticalAlignment="Bottom" Padding="8,4"
+            Background="{DynamicResource AcrylicBackgroundFillColorBaseBrush}">
+      <TextBlock x:Name="TileTitle" FontSize="12"
+                 Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+    </Border>
+  </Grid>
+</Border>
