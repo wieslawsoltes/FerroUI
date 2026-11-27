@@ -516,3 +516,56 @@ fn assert_equal_precision(expected: f64, actual: f64, precision: i32) {
     let round = |value: f64| (value * scale).round_ties_even() / scale;
     assert_eq!(round(expected), round(actual), "expected {expected}, actual {actual} (precision {precision})");
 }
+
+/// The glyph run of "Text" in Inter at 14 pixels and its Skia implementation.
+fn text_run() -> (Rc<GlyphRun>, std::sync::Arc<dyn ferroui_base::platform::IGlyphRunImpl>) {
+    let typeface = Typeface::from_name("resm:FerroUI.Skia.UnitTests.Assets?assembly=ferroui-skia#Inter");
+    let options = TextShaperOptions::with_all(typeface.glyph_typeface(), 14.0, 0, None, 0.0, 0.0, None);
+    let shaped_buffer = TextShaper::current().shape_text(&ReadOnlyMemory::from_str("Text"), &options);
+    let glyph_run = create_glyph_run(&shaped_buffer);
+    let platform_impl = glyph_run.platform_impl();
+    (glyph_run, platform_impl)
+}
+
+#[test]
+fn repeated_draws_of_a_glyph_run_draw_the_one_cached_blob() {
+    let _app = start();
+    let (_glyph_run, platform_impl) = text_run();
+    let run = platform_impl.as_any().downcast_ref::<GlyphRunImpl>().unwrap();
+    let mut surface = skia_safe::surfaces::raster_n32_premul((64, 32)).unwrap();
+    let paint = skia_safe::Paint::default();
+    let origin = ferroui_base::Point::new(2.0, 20.0);
+    // The first draw draws the glyphs alone and caches nothing; the second makes and caches the blob, the
+    // third draws the cached one.
+    for _ in 0..3 {
+        run.draw(surface.canvas(), TextOptions::default(), RenderOptions::default(), origin, &paint);
+    }
+    let first = run.get_text_blob(TextOptions::default(), RenderOptions::default()).unwrap().unique_id();
+    run.draw(surface.canvas(), TextOptions::default(), RenderOptions::default(), origin, &paint);
+    let again = run.get_text_blob(TextOptions::default(), RenderOptions::default()).unwrap().unique_id();
+    assert_eq!(first, again);
+}
+
+#[test]
+fn concurrent_reads_of_a_glyph_run_get_the_same_blob_and_dispose_drops_it() {
+    let _app = start();
+    let (_glyph_run, platform_impl) = text_run();
+    let run = platform_impl.as_any().downcast_ref::<GlyphRunImpl>().unwrap();
+    let first = run.get_text_blob(TextOptions::default(), RenderOptions::default()).unwrap().unique_id();
+    let ids: Vec<u32> = std::thread::scope(|scope| {
+        let readers: Vec<_> = (0..4)
+            .map(|_| {
+                scope.spawn(|| {
+                    let blob = || run.get_text_blob(TextOptions::default(), RenderOptions::default()).unwrap();
+                    (0..50).map(|_| blob().unique_id()).collect::<Vec<_>>()
+                })
+            })
+            .collect();
+        readers.into_iter().flat_map(|reader| reader.join().unwrap()).collect()
+    });
+    assert!(ids.iter().all(|id| *id == first));
+    // Dispose empties the cache: the next request makes another blob.
+    platform_impl.dispose();
+    let after = run.get_text_blob(TextOptions::default(), RenderOptions::default()).unwrap().unique_id();
+    assert_ne!(first, after);
+}
