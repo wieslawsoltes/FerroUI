@@ -306,6 +306,7 @@ dependencies = [
  "ferroui-controls-icons",
  "ferroui-headless",
  "ferroui-markup-xaml",
+ "ferroui-native",
  "ferroui-system",
  "ferroui-themes-simple",
  "futures-channel",
@@ -748,6 +749,7 @@ dependencies = [
  "ferroui-vulkan",
  "skia-bindings",
  "skia-safe",
+ "smallvec",
 ]
 
 [[package]]

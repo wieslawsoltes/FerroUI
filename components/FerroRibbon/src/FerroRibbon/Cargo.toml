@@ -37,6 +37,11 @@ web-sys = { version = "=0.3.106", features = [
 [target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "emscripten"))'.dependencies]
 ferroribbon-platform = { path = "../FerroRibbon.Platform" }
 
+# The scroll panel reads the AppKit wheel axes of wheel events (`PointerWheelEventArgs::platform_delta`):
+# the macOS backend sends them only to applications that turn the feature on.
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, features = ["platform-wheel-delta"] }
+
 [build-dependencies]
 ferroui-build-scan.workspace = true
 ferroui-build.workspace = true
