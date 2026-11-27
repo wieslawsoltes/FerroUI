@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources><ResourceDictionary>
+    <SymbolIconSource x:Key="Source" Symbol="Save" Foreground="#0000ff" />
+  </ResourceDictionary></StackPanel.Resources>
+  <SymbolIcon x:Name="Original" Symbol="Home" Foreground="#0000ff" />
+  <RibbonIconPresenter Icon="{Binding ElementName=Original}" IconSize="24" Foreground="#ff0000" />
+  <RibbonIconPresenter Icon="{StaticResource Source}" IconSize="23.5" Foreground="#ff0000" />
+  <MenuFlyoutItem Text="Symbol" RibbonMenu.Icon="{StaticResource Source}" />
+</StackPanel>

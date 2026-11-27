@@ -1,0 +1,5 @@
+<ContentControl xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FerroRibbon.Consumer"
+    x:DataType="local:DialogFutureViewModel" x:CompileBindings="True"
+    Content="{Binding Outcome^}" />

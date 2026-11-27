@@ -1,0 +1,6 @@
+<Border xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Name="Root" Background="{DynamicResource RibbonAccentBrush}"
+        BorderBrush="{DynamicResource RibbonCommandBarBorderBrush}" BorderThickness="1">
+  <TextBlock Text="Resource consumer" Foreground="{DynamicResource RibbonForegroundBrush}" />
+</Border>

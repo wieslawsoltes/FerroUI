@@ -1,0 +1,2 @@
+<local:StaticEventConsumer xmlns="https://github.com/ferroui"
+ xmlns:local="using:FerroRibbon.Consumer" Tag="{Binding $self.OnValue}" />

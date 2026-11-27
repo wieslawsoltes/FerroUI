@@ -70,6 +70,7 @@ pub trait TextRunProperties: 'static {
         crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
             typeface.glyph_typeface(),
             typeface.font_family(),
+            self.requested_font_family(),
             self.effective_font_rendering_em_size(),
         )
     }
@@ -117,6 +118,7 @@ impl dyn TextRunProperties {
         .with_cached_glyph_typeface(crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
             mapping.glyph_typeface().clone(),
             mapping.typeface().font_family(),
+            self.requested_font_family(),
             self.font_rendering_em_size() * mapping.scale(),
         )))
     }

@@ -1,0 +1,17 @@
+<local:ConsumerScreenTip xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FerroRibbon.Consumer"
+    x:DataType="local:IconViewModel" x:CompileBindings="True"
+    Title="{Binding IconText,Mode=TwoWay}" Shortcut="Ctrl+S"
+    Description="Description" ExtendedDescription="Extended" HelpText="Help">
+  <local:ConsumerScreenTip.DataContext><local:IconViewModel /></local:ConsumerScreenTip.DataContext>
+  <local:ConsumerScreenTip.Template>
+    <ControlTemplate>
+      <StackPanel>
+        <TextBlock x:Name="TitlePart" Text="{TemplateBinding TitleText}" />
+        <TextBlock x:Name="PART_Description" Text="{TemplateBinding Description}" />
+        <Border x:Name="PART_Extended"><TextBlock Text="{TemplateBinding ExtendedDescription}" /></Border>
+      </StackPanel>
+    </ControlTemplate>
+  </local:ConsumerScreenTip.Template>
+</local:ConsumerScreenTip>

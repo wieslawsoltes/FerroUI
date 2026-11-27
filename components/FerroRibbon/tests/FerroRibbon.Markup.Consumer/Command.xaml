@@ -1,0 +1,11 @@
+<local:CommandConsumer xmlns="https://github.com/ferroui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:CommandViewModel"
+  x:CompileBindings="True" Id="consumer.command" Label="Paste" KeyTip="V" Shortcut="Ctrl+V"
+  Icon="paste" LargeIcon="paste-large" Size="Large" SizeDefinition="Large,Medium,Small"
+  CurrentSize="Small" IsSimplified="True" ActualShowLabel="False"
+  SimplifiedVisibility="Pinned" SimplifiedLabel="Show" ShowLabel="False" CanAddToQuickAccess="False"
+  Command="{Binding Command}"
+  CommandParameter="{Binding Value,Mode=TwoWay}">
+  <local:CommandConsumer.DataContext><local:CommandViewModel /></local:CommandConsumer.DataContext>
+</local:CommandConsumer>

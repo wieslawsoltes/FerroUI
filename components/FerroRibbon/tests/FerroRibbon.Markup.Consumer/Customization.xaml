@@ -1,0 +1,4 @@
+<Ribbon xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Ribbon" IsSimplifiedModeAvailable="False">
+ <Ribbon.QuickAccessToolBar><RibbonQuickAccessToolBar /></Ribbon.QuickAccessToolBar>
+ <RibbonTab Id="home" Header="Home"><RibbonGroup Id="editing" Header="Editing"><RibbonButton Id="save" Label="Save" /></RibbonGroup></RibbonTab>
+</Ribbon>

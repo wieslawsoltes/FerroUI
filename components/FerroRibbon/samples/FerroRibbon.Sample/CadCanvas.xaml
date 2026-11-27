@@ -1,0 +1,3 @@
+<cad:CadDrawingCanvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:cad="using:FerroRibbon.Sample.Cad" x:Name="Viewport" ViewInsets="41,31,151,131" IsPanMode="True" IsGridVisible="False" ShowLineweights="True">
+ <Border x:Name="ExtraOverlay"><TextBlock Text="Downstream overlay" /></Border>
+</cad:CadDrawingCanvas>

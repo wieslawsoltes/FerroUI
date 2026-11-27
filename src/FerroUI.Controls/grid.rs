@@ -2,7 +2,7 @@
 // (https://github.com/dotnet/wpf/)
 
 use crate::{
-    ColumnDefinition, ColumnDefinitions, Control, ControlImpl, DefinitionBase, GridUnitType, Panel, PanelImpl,
+    ColumnDefinition, ColumnDefinitions, Control, ControlImpl, Decorator, DefinitionBase, GridUnitType, Panel, PanelImpl,
     PanelImplExt, RowDefinition, RowDefinitions,
 };
 use ferroui_base::collections::NotifyCollectionChangedEventArgs;
@@ -12,7 +12,7 @@ use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl};
 use ferroui_base::utilities::math_utilities::{max as math_max, min as math_min, MathUtilities};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl,
-    StyledProperty, StyledPropertyOptions, VisualImpl,
+    StyledProperty, StyledPropertyOptions, Thickness, VisualImpl,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::cmp::Ordering;
@@ -290,6 +290,7 @@ pub struct Grid {
     rounding_errors: RefCell<Option<Vec<f64>>>,
     /// The visual that draws the grid lines, while they are shown.
     grid_lines_renderer: RefCell<Option<Ref<GridLinesRenderer>>>,
+    kept_padding: ferroui_base::property_store::HotValue<Thickness>,
 }
 
 ferro_class!(Grid: Panel);
@@ -329,6 +330,10 @@ impl LayoutableImpl for Grid {
     /// Any other grid holds nothing.
     fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
         use ferroui_base::layout::MeasureHold;
+        // The ranges below assume the grid has no inset.
+        if this.padding() != Thickness::default() {
+            return None;
+        }
         let children = this.children().snapshot();
         if !this.is_measured_with_definitions() {
             let mut hold = MeasureHold::ANY;
@@ -433,6 +438,8 @@ impl LayoutableImpl for Grid {
     }
 
     fn measure_override(this: &Self, constraint: Size) -> Size {
+        let padding = this.padding();
+        let constraint = constraint.deflate(padding);
         let grid_desired_size;
         let ext_data = this.ext_data.get();
 
@@ -735,13 +742,14 @@ impl LayoutableImpl for Grid {
             }
         }
 
-        grid_desired_size
+        grid_desired_size.inflate(padding)
     }
 
     /// Content arrangement.
     fn arrange_override(this: &Self, arrange_size: Size) -> Size {
         this.set_flags(true, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
         let _in_progress = FlagGuard(this, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
+        let inner = Rect::from_size(arrange_size).deflate_thickness(this.padding());
 
         // Arranged as it was measured: a grid whose definitions were first asked for after its
         // measure was measured as a trivial grid (`is_measured_with_definitions`).
@@ -749,7 +757,7 @@ impl LayoutableImpl for Grid {
             let children = this.children().snapshot();
 
             for child in children.iter() {
-                child.arrange(Rect::from_size(arrange_size));
+                child.arrange(inner);
             }
         } else {
             let definitions_u = this.definitions_u();
@@ -760,8 +768,8 @@ impl LayoutableImpl for Grid {
             let column_spacing = this.column_spacing();
             let combined_row_spacing = row_spacing * (definitions_v.count() as f64 - 1.0);
             let combined_column_spacing = column_spacing * (definitions_u.count() as f64 - 1.0);
-            this.set_final_size(&definitions_u, arrange_size.width - combined_column_spacing, true);
-            this.set_final_size(&definitions_v, arrange_size.height - combined_row_spacing, false);
+            this.set_final_size(&definitions_u, inner.width - combined_column_spacing, true);
+            this.set_final_size(&definitions_v, inner.height - combined_row_spacing, false);
 
             let children = this.children().snapshot();
 
@@ -775,12 +783,12 @@ impl LayoutableImpl for Grid {
                 let row_span = cache.row_span;
 
                 let cell_rect = Rect::new(
-                    if column_index == 0 {
+                    inner.x + if column_index == 0 {
                         0.0
                     } else {
                         definitions_u[column_index].final_offset()
                     },
-                    if row_index == 0 {
+                    inner.y + if row_index == 0 {
                         0.0
                     } else {
                         definitions_v[row_index].final_offset()
@@ -810,6 +818,13 @@ impl PanelImpl for Grid {
 }
 
 ferroui_base::ferro_properties! { impl Grid {
+    ferro_property!(
+        /// Defines the inset between the grid bounds and its cells.
+        pub fn padding_property() -> StyledProperty<Thickness> {
+            Decorator::padding_property().add_owner::<Grid>()
+        }
+    );
+
     ferro_property!(
         /// Defines the `ShowGridLines` property. This property is used mostly
         /// for the simplification of visual debugging. When it is set to
@@ -948,7 +963,11 @@ impl Grid {
             .add_class_handler::<Control>(Self::on_cell_attached_property_changed)
             .detach();
 
-        Layoutable::affects_measure::<Grid>(&[column_spacing.as_property(), row_spacing.as_property()]);
+        Layoutable::affects_measure::<Grid>(&[
+            column_spacing.as_property(),
+            row_spacing.as_property(),
+            Self::padding_property().as_property(),
+        ]);
         Panel::affects_parent_measure::<Grid>(&[
             column.as_property(),
             column_span.as_property(),
@@ -966,6 +985,7 @@ impl Grid {
             definition_indices: RefCell::new(None),
             rounding_errors: RefCell::new(None),
             grid_lines_renderer: RefCell::new(None),
+            kept_padding: Default::default(),
         }
     }
 
@@ -1048,6 +1068,16 @@ impl Grid {
 
     pub fn set_column_spacing(&self, value: f64) {
         self.set_value(Self::column_spacing_property(), value)
+    }
+
+    /// The inset between the grid bounds and its cells, in device-independent units.
+    #[inline]
+    pub fn padding(&self) -> Thickness {
+        self.kept_padding.get_for(self, || self.get_value(Self::padding_property()))
+    }
+
+    pub fn set_padding(&self, value: Thickness) {
+        self.set_value(Self::padding_property(), value)
     }
 
     /// The collection of column definitions.
@@ -2954,21 +2984,21 @@ impl VisualImpl for GridLinesRenderer {
             return;
         }
 
-        let last_arrange_size = GRID_LINES_LAST_ARRANGE_SIZE.get();
+        let inner = Rect::from_size(GRID_LINES_LAST_ARRANGE_SIZE.get()).deflate_thickness(grid.padding());
 
         let column_definitions = grid.column_definitions();
         let column_spacing = grid.column_spacing();
         for i in 1..column_definitions.count() {
-            let final_offset = column_definitions.get(i).final_offset();
-            Self::draw_grid_line(drawing_context, final_offset, 0.0, final_offset, last_arrange_size.height);
+            let x = inner.x + column_definitions.get(i).final_offset();
+            Self::draw_grid_line(drawing_context, x, inner.y, x, inner.bottom());
 
             if column_spacing != 0.0 {
                 Self::draw_grid_line(
                     drawing_context,
-                    final_offset - column_spacing,
-                    0.0,
-                    final_offset - column_spacing,
-                    last_arrange_size.height,
+                    x - column_spacing,
+                    inner.y,
+                    x - column_spacing,
+                    inner.bottom(),
                 );
             }
         }
@@ -2976,16 +3006,16 @@ impl VisualImpl for GridLinesRenderer {
         let row_definitions = grid.row_definitions();
         let row_spacing = grid.row_spacing();
         for i in 1..row_definitions.count() {
-            let final_offset = row_definitions.get(i).final_offset();
-            Self::draw_grid_line(drawing_context, 0.0, final_offset, last_arrange_size.width, final_offset);
+            let y = inner.y + row_definitions.get(i).final_offset();
+            Self::draw_grid_line(drawing_context, inner.x, y, inner.right(), y);
 
             if row_spacing != 0.0 {
                 Self::draw_grid_line(
                     drawing_context,
-                    0.0,
-                    final_offset - row_spacing,
-                    last_arrange_size.width,
-                    final_offset - row_spacing,
+                    inner.x,
+                    y - row_spacing,
+                    inner.right(),
+                    y - row_spacing,
                 );
             }
         }

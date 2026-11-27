@@ -680,3 +680,22 @@ fn font_family_line_metrics_forked_continuations_preserve_policy_without_reshapi
     assert!(fork.remaining_runs.borrow().is_none());
     assert!(previous.remaining_runs.borrow().is_some());
 }
+
+/// The line box of a family that does not ask for automatic optical sizing is that of its regular
+/// face, as before the opt-in existed: the optical size instance is taken only with
+/// `FontFamily::with_automatic_optical_sizing`.
+#[test]
+fn the_line_box_follows_the_regular_face_unless_the_family_opts_in() {
+    let _scope = TextTestScope::new();
+    let family = FontFamily::from(DEFAULT_FAMILY);
+    let regular = Typeface::new(family.clone()).glyph_typeface();
+    for size in [9.0, 12.0, 28.0, 72.0] {
+        let face = FontFamilyLineMetrics::line_typeface(regular.clone(), &family, size);
+        assert!(Rc::ptr_eq(&face, &regular), "{size}");
+    }
+    let opted = family.clone().with_automatic_optical_sizing();
+    assert!(opted.automatic_optical_sizing() && !family.automatic_optical_sizing());
+    // A face without an optical size axis has no instance to take: the regular face again.
+    let face = FontFamilyLineMetrics::line_typeface(regular.clone(), &opted, 28.0);
+    assert!(Rc::ptr_eq(&face, &regular));
+}

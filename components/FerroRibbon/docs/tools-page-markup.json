@@ -1,0 +1,63 @@
+{
+  "source": "samples/RibbonSpace.Demo/Pages/ToolsPage.xaml",
+  "revision": "9755e281547923f10397dffa366e3355b12b55ea",
+  "source_sha256": "fca9c4ce330d6460843e73683eeaa27f52a9f31e6bc6296ce74f6727bacde94f",
+  "source_elements": 130,
+  "native_elements": 131,
+  "source_names": [
+    "MenuBar",
+    "Options",
+    "Tools",
+    "CanvasText",
+    "ToolStatus"
+  ],
+  "source_ids": [],
+  "changes": [
+    {
+      "element": "Grid",
+      "attribute": "Background",
+      "source": "{ThemeResource RibbonWindowBackgroundBrush}",
+      "native_attribute": "Background",
+      "native": "{DynamicResource RibbonWindowBackgroundBrush}"
+    },
+    {
+      "element": "Border",
+      "attribute": "BorderBrush",
+      "source": "{ThemeResource RibbonCommandBarBorderBrush}",
+      "native_attribute": "BorderBrush",
+      "native": "{DynamicResource RibbonCommandBarBorderBrush}"
+    },
+    {
+      "source": "Grid.Padding",
+      "native": "outer native Border.Padding, with parent Grid attached placement moved to wrapper; source Grid retained"
+    },
+    {
+      "element": "Options",
+      "attribute": "ActiveContext",
+      "source": "brush",
+      "native": "{Binding ActiveContext, Mode=TwoWay}",
+      "reason": "passive native bindings with ReactiveUI actions and retained brush identity"
+    },
+    {
+      "element": "CanvasText",
+      "attribute": "Text",
+      "source": "Pick a tool \u2014 the options bar follows the active tool",
+      "native": "{Binding CanvasText, Mode=TwoWay}",
+      "reason": "passive native bindings with ReactiveUI actions and retained brush identity"
+    },
+    {
+      "element": "ToolStatus",
+      "attribute": "DataContext",
+      "source": null,
+      "native": "{Binding #ToolsView.((vm:ToolsViewModel)DataContext)}",
+      "reason": "passive native bindings with ReactiveUI actions and retained brush identity"
+    },
+    {
+      "element": "ToolStatus",
+      "attribute": "Text",
+      "source": "Brush tool",
+      "native": "{Binding ToolStatus, Mode=TwoWay}",
+      "reason": "passive native bindings with ReactiveUI actions and retained brush identity"
+    }
+  ]
+}

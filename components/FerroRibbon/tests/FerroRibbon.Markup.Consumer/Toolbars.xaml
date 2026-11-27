@@ -1,0 +1,21 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
+  <ResourceInclude Source="ferres://FerroRibbon/Themes/Buttons.xaml" />
+  <ResourceInclude Source="ferres://FerroRibbon/Themes/Toolbars.xaml" />
+ </ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <c:ConsumerToolBar x:Name="Tools" Width="150" Columns="-2" Orientation="Horizontal">
+  <RibbonButton x:Name="Draw" Label="Draw" Icon="A" />
+  <RibbonButton Label="Review" Icon="B" Width="120" />
+  <RibbonButton Label="Erase" Icon="C" Width="120" />
+ </c:ConsumerToolBar>
+ <RibbonContextualToolBar x:Name="Contexts" ActiveContext="text">
+  <RibbonToolBar x:Name="TextTools" RibbonContextualToolBar.Context="text" ShowLabels="True"><RibbonButton Label="Text" /></RibbonToolBar>
+  <RibbonToolBar x:Name="DrawTools" RibbonContextualToolBar.Context="draw"><RibbonButton Label="Pen" /></RibbonToolBar>
+ </RibbonContextualToolBar>
+ <RibbonMenuBar x:Name="Menus">
+  <RibbonMenuBarItem x:Name="File" Header="File"><MenuFlyoutItem x:Name="Open" Text="Open" /></RibbonMenuBarItem>
+  <RibbonMenuBarItem Header="Edit"><MenuFlyoutItem Text="Copy" /></RibbonMenuBarItem>
+ </RibbonMenuBar>
+ <TextBlock x:Name="Count" x:DataType="c:ConsumerToolBar" DataContext="{Binding #Tools}" Text="{Binding Items.Count}" />
+ <RibbonToolBar x:Name="Custom" ShowLabels="True"><RibbonToolBar.Theme><ControlTheme TargetType="RibbonToolBar"><Setter Property="Template"><ControlTemplate><Border x:Name="PART_ItemsHost" /></ControlTemplate></Setter></ControlTheme></RibbonToolBar.Theme><RibbonButton Label="Custom" /></RibbonToolBar>
+</StackPanel>

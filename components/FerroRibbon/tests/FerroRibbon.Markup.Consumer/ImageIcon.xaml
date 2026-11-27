@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FerroRibbon.Consumer">
+  <RibbonIconPresenter IconSize="22">
+    <RibbonIconPresenter.Icon>
+      <ImageIcon Source="{StaticResource ConsumerBitmap}" />
+    </RibbonIconPresenter.Icon>
+  </RibbonIconPresenter>
+  <MenuFlyoutItem Text="Image" RibbonMenu.Icon="Assets/cut.png" />
+  <local:ConsumerImageIcon x:DataType="local:ImageViewModel"
+      Source="{Binding Image, Mode=TwoWay}">
+    <local:ConsumerImageIcon.DataContext><local:ImageViewModel /></local:ConsumerImageIcon.DataContext>
+  </local:ConsumerImageIcon>
+  <ImageIcon Source="{x:Null}" />
+</StackPanel>

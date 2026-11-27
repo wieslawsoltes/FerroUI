@@ -1,4 +1,4 @@
-use super::Layoutable;
+use super::{LayoutHelper, Layoutable};
 
 /// The effective minimum and maximum size of a layoutable, combining its
 /// explicit size with its min/max constraints.
@@ -19,6 +19,15 @@ impl MinMax {
         let (min_width, max_width) = Self::calc_min_max(e.width(), e.min_width(), e.max_width());
         let (min_height, max_height) = Self::calc_min_max(e.height(), e.min_height(), e.max_height());
         Self { min_width, max_width, min_height, max_height }
+    }
+
+    pub(crate) fn round_for_winui(self, scale: f64) -> Self {
+        Self {
+            min_width: LayoutHelper::round_winui_dimension(self.min_width, scale),
+            max_width: LayoutHelper::round_winui_dimension(self.max_width, scale),
+            min_height: LayoutHelper::round_winui_dimension(self.min_height, scale),
+            max_height: LayoutHelper::round_winui_dimension(self.max_height, scale),
+        }
     }
 
     fn calc_min_max(value: f64, min: f64, max: f64) -> (f64, f64) {

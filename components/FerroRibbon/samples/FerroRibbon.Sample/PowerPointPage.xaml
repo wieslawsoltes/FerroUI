@@ -1,0 +1,201 @@
+<!-- Adapted from pinned RibbonSpace PowerPointPage.xaml. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.PowerPointPage" x:DataType="vm:PowerPointViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}" x:Name="PowerPointView">
+  <Grid Background="{DynamicResource RibbonWindowBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <RibbonTitleBar x:Name="TitleBar" Title="Product launch" Subtitle="• Simplified ribbon" AppIcon="" />
+    <Ribbon x:Name="Ribbon" Grid.Row="1" DisplayMode="Simplified" IsShortcutRoutingEnabled="True">
+      <Ribbon.QuickAccessToolBar>
+        <RibbonQuickAccessToolBar>
+          <RibbonButton Id="pp.save" Label="Save" Icon="" />
+          <RibbonButton Id="pp.undo" Label="Undo" Icon="" />
+          <RibbonButton Id="pp.fromBeginning" Label="From Beginning" Icon="" Shortcut="F5" />
+        </RibbonQuickAccessToolBar>
+      </Ribbon.QuickAccessToolBar>
+      <Ribbon.TabStripItems>
+        <RibbonButton Id="pp.record" Label="Record" Icon="" SimplifiedLabel="Show" />
+        <RibbonSplitButton Id="pp.present" Label="Present" Icon="" Size="Small" SimplifiedLabel="Show" />
+        <RibbonButton Id="pp.share" Label="Share" Icon="" SimplifiedLabel="Show" />
+      </Ribbon.TabStripItems>
+      <RibbonTab Header="Home" Id="home">
+        <RibbonGroup Header="Clipboard" Id="clipboard" Icon="">
+          <RibbonSplitButton Id="pp.paste" Label="Paste" Icon="" SizeDefinition="Large" SimplifiedVisibility="Pinned" />
+          <RibbonButton Id="pp.cut" Label="Cut" Icon="" />
+          <RibbonButton Id="pp.copy" Label="Copy" Icon="" />
+          <RibbonToggleButton Id="pp.formatPainter" Label="Format Painter" Icon="" Size="Medium" SimplifiedVisibility="Overflow" />
+        </RibbonGroup>
+        <RibbonGroup Header="Slides" Id="slides" Icon="">
+          <RibbonSplitButton Id="pp.newSlide" Label="New Slide" Icon="" SizeDefinition="Large" Shortcut="Ctrl+M" />
+          <RibbonDropDownButton Id="pp.layout" Label="Layout" Icon="" />
+          <RibbonButton Id="pp.reset" Label="Reset" Icon="" SimplifiedVisibility="Overflow" />
+          <RibbonDropDownButton Id="pp.section" Label="Section" Icon="" SimplifiedVisibility="Overflow" />
+        </RibbonGroup>
+        <RibbonGroup Header="Font" Id="font" ItemsLayout="Rows" RowCount="2" Icon="">
+          <RibbonStackPanel>
+            <RibbonFontComboBox Id="pp.font" Text="Aptos Display" />
+            <RibbonFontSizeComboBox Id="pp.fontSize" Text="28" />
+          </RibbonStackPanel>
+          <RibbonStackPanel>
+            <RibbonButtonGroup>
+              <RibbonToggleButton Id="pp.bold" Label="Bold" Icon="" Shortcut="Ctrl+B" />
+              <RibbonToggleButton Id="pp.italic" Label="Italic" Icon="" Shortcut="Ctrl+I" />
+              <RibbonToggleButton Id="pp.underline" Label="Underline" Icon="" Shortcut="Ctrl+U" />
+            </RibbonButtonGroup>
+            <RibbonColorPicker Id="pp.fontColor" Label="Font Color" Icon="" SelectedColor="#C43E1C" />
+          </RibbonStackPanel>
+        </RibbonGroup>
+        <RibbonGroup Header="Paragraph" Id="paragraph" Icon="">
+          <RibbonSplitButton Id="pp.bullets" Label="Bullets" Icon="" Size="Small" IsCheckable="True" />
+          <RibbonButtonGroup>
+            <RibbonToggleButton Id="pp.left" Label="Align Left" Icon="" GroupName="ppalign" IsChecked="True" />
+            <RibbonToggleButton Id="pp.center" Label="Center" Icon="" GroupName="ppalign" />
+            <RibbonToggleButton Id="pp.right" Label="Align Right" Icon="" GroupName="ppalign" />
+          </RibbonButtonGroup>
+          <RibbonDropDownButton Id="pp.textDirection" Label="Text Direction" Icon="" SimplifiedVisibility="Overflow" />
+        </RibbonGroup>
+        <RibbonGroup Header="Drawing" Id="drawing" Icon="">
+          <RibbonDropDownButton Id="pp.shapes" Label="Shapes" Icon="" SizeDefinition="Large" />
+          <RibbonDropDownButton Id="pp.arrange" Label="Arrange" Icon="" />
+          <RibbonColorPicker Id="pp.shapeFill" Label="Shape Fill" Icon="" SelectedColor="#C43E1C" />
+          <RibbonColorPicker Id="pp.shapeOutline" Label="Shape Outline" Icon="" SelectedColor="#404040" />
+        </RibbonGroup>
+        <RibbonGroup Header="Designer" Id="designer" Icon="">
+          <RibbonButton Id="pp.designer" Label="Designer" Icon="" Size="Large" SimplifiedVisibility="Pinned" />
+        </RibbonGroup>
+      </RibbonTab>
+      <RibbonTab Header="Insert" Id="insert">
+        <RibbonGroup Header="Slides" Id="insertSlides">
+          <RibbonSplitButton Id="pp.newSlide2" Label="New Slide" Icon="" SizeDefinition="Large" />
+        </RibbonGroup>
+        <RibbonGroup Header="Tables" Id="insertTables">
+          <RibbonDropDownButton Id="pp.table" Label="Table" Icon="" Size="Large" />
+        </RibbonGroup>
+        <RibbonGroup Header="Images" Id="images">
+          <RibbonDropDownButton Id="pp.pictures" Label="Pictures" Icon="" Size="Large" />
+          <RibbonButton Id="pp.screenshot" Label="Screenshot" Icon="" />
+          <RibbonButton Id="pp.photoAlbum" Label="Photo Album" Icon="" />
+        </RibbonGroup>
+        <RibbonGroup Header="Illustrations" Id="pp.illustrations">
+          <RibbonDropDownButton Id="pp.shapes2" Label="Shapes" Icon="" Size="Large" />
+          <RibbonButton Id="pp.icons" Label="Icons" Icon="" Size="Large" />
+          <RibbonButton Id="pp.chart" Label="Chart" Icon="" />
+        </RibbonGroup>
+        <RibbonGroup Header="Media" Id="pp.media">
+          <RibbonDropDownButton Id="pp.video" Label="Video" Icon="" Size="Large" />
+          <RibbonDropDownButton Id="pp.audio" Label="Audio" Icon="" Size="Large" />
+        </RibbonGroup>
+      </RibbonTab>
+      <RibbonTab Header="Design" Id="design">
+        <RibbonGroup Header="Themes" Id="themes" ReductionOrder="1">
+          <RibbonGallery x:Name="Themes" Id="pp.themes" Label="Themes" Icon="" MaxColumns="6" MinColumns="3" ItemWidth="80" ItemHeight="56" ShowItemLabels="False">
+            <RibbonGalleryItem Label="Office Theme" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#FFFFFF" PreviewForeground="#262626" />
+            <RibbonGalleryItem Label="Facet" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#90C226" PreviewForeground="#FFFFFF" />
+            <RibbonGalleryItem Label="Ion" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#1E5155" PreviewForeground="#FFFFFF" />
+            <RibbonGalleryItem Label="Retrospect" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#E48312" PreviewForeground="#FFFFFF" />
+            <RibbonGalleryItem Label="Slice" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#146194" PreviewForeground="#FFFFFF" />
+            <RibbonGalleryItem Label="Wisp" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#EFE3C6" PreviewForeground="#5E3A1B" />
+            <RibbonGalleryItem Label="Berlin" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#A6452E" PreviewForeground="#FFFFFF" />
+            <RibbonGalleryItem Label="Dividend" PreviewText="Aa" PreviewFontSize="20" PreviewBackground="#4D1434" PreviewForeground="#FFFFFF" />
+          </RibbonGallery>
+        </RibbonGroup>
+        <RibbonGroup Header="Customize" Id="customize">
+          <RibbonDropDownButton Id="pp.slideSize" Label="Slide Size" Icon="" Size="Large" />
+          <RibbonButton Id="pp.formatBackground" Label="Format Background" Icon="" Size="Large" />
+        </RibbonGroup>
+      </RibbonTab>
+      <RibbonTab Header="Transitions" Id="transitions">
+        <RibbonGroup Header="Preview" Id="preview">
+          <RibbonButton Id="pp.previewTransition" Label="Preview" Icon="" Size="Large" />
+        </RibbonGroup>
+        <RibbonGroup Header="Transition to This Slide" Id="transitionGallery" ReductionOrder="1">
+          <RibbonGallery Id="pp.transitions" Label="Transitions" Icon="" MaxColumns="7" MinColumns="3" ItemWidth="60" ItemHeight="60">
+            <RibbonGalleryItem Label="None" Icon="" />
+            <RibbonGalleryItem Label="Morph" Icon="" />
+            <RibbonGalleryItem Label="Fade" Icon="" />
+            <RibbonGalleryItem Label="Push" Icon="" />
+            <RibbonGalleryItem Label="Wipe" Icon="" />
+            <RibbonGalleryItem Label="Split" Icon="" />
+            <RibbonGalleryItem Label="Reveal" Icon="" />
+            <RibbonGalleryItem Label="Cut" Icon="" />
+            <RibbonGalleryItem Label="Random Bars" Icon="" />
+          </RibbonGallery>
+          <RibbonDropDownButton Id="pp.effectOptions" Label="Effect Options" Icon="" Size="Large" />
+        </RibbonGroup>
+        <RibbonGroup Header="Timing" Id="timing">
+          <RibbonSpinner Id="pp.duration" Label="Duration:" Value="2" Minimum="0" Maximum="59" Increment="0.25" Format="00.00" />
+          <RibbonCheckBox Id="pp.onMouseClick" Label="On Mouse Click" IsChecked="True" />
+          <RibbonButton Id="pp.applyToAll" Label="Apply To All" Icon="" />
+        </RibbonGroup>
+      </RibbonTab>
+      <RibbonTab Header="Slide Show" Id="slideShow">
+        <RibbonGroup Header="Start Slide Show" Id="start">
+          <RibbonButton Id="pp.fromBeginning2" Label="From Beginning" Icon="" Size="Large" Shortcut="F5" />
+          <RibbonButton Id="pp.fromCurrent" Label="From Current Slide" Icon="" Size="Large" Shortcut="Shift+F5" />
+        </RibbonGroup>
+        <RibbonGroup Header="Set Up" Id="setUp">
+          <RibbonButton Id="pp.setUpShow" Label="Set Up Slide Show" Icon="" Size="Large" />
+          <RibbonToggleButton Id="pp.hideSlide" Label="Hide Slide" Icon="" Size="Large" />
+          <RibbonCheckBox Id="pp.useTimings" Label="Use Timings" IsChecked="True" />
+        </RibbonGroup>
+      </RibbonTab>
+      <RibbonTab Header="View" Id="view">
+        <RibbonGroup Header="Presentation Views" Id="presentationViews">
+          <RibbonToggleButton Id="pp.normal" Label="Normal" Icon="" Size="Large" GroupName="ppview" IsChecked="True" />
+          <RibbonToggleButton Id="pp.sorter" Label="Slide Sorter" Icon="" Size="Large" GroupName="ppview" />
+          <RibbonToggleButton Id="pp.notesPage" Label="Notes Page" Icon="" Size="Large" GroupName="ppview" />
+        </RibbonGroup>
+        <RibbonGroup Header="Show" Id="ppShow">
+          <RibbonCheckBox Id="pp.ruler" Label="Ruler" />
+          <RibbonCheckBox Id="pp.gridlines" Label="Gridlines" />
+          <RibbonCheckBox Id="pp.guides" Label="Guides" />
+        </RibbonGroup>
+      </RibbonTab>
+    </Ribbon>
+    <Border Padding="12" Grid.Row="2">
+      <Grid ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="170" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel x:Name="Thumbnails" Spacing="10">
+          <Border Height="90" CornerRadius="3" Background="White" BorderThickness="2" BorderBrush="{Binding #PowerPointView.ThumbnailAccent}">
+            <TextBlock Text="Slide 1" Margin="8" FontSize="11" Foreground="Gray" />
+          </Border>
+          <Border Height="90" CornerRadius="3" Background="White" BorderThickness="1" BorderBrush="#22000000">
+            <TextBlock Text="Slide 2" Margin="8" FontSize="11" Foreground="Gray" />
+          </Border>
+          <Border Height="90" CornerRadius="3" Background="White" BorderThickness="1" BorderBrush="#22000000">
+            <TextBlock Text="Slide 3" Margin="8" FontSize="11" Foreground="Gray" />
+          </Border>
+          <Border Height="90" CornerRadius="3" Background="White" BorderThickness="1" BorderBrush="#22000000">
+            <TextBlock Text="Slide 4" Margin="8" FontSize="11" Foreground="Gray" />
+          </Border>
+        </StackPanel>
+        <Viewbox Grid.Column="1" Stretch="Uniform">
+          <Border x:Name="Slide" Width="960" Height="540" Background="{Binding #PowerPointView.SlidePaint}" CornerRadius="4" BorderThickness="1" BorderBrush="#22000000">
+            <Border Padding="60">
+              <Grid>
+                <StackPanel VerticalAlignment="Center" Spacing="16">
+                  <TextBlock x:Name="SlideTitle" Text="Introducing RibbonSpace" FontSize="54" FontWeight="SemiBold" Foreground="{Binding #PowerPointView.TitlePaint}" />
+                  <TextBlock x:Name="SlideSubtitle" FontSize="28" Foreground="{Binding #PowerPointView.SubtitlePaint}" Text="A modern ribbon for FerroUI" />
+                </StackPanel>
+              </Grid>
+            </Border>
+          </Border>
+        </Viewbox>
+      </Grid>
+    </Border>
+    <RibbonStatusBar Grid.Row="3">
+      <TextBlock Text="Slide 1 of 4" VerticalAlignment="Center" />
+      <TextBlock x:Name="Status" Text="{Binding Status, Mode=TwoWay}" VerticalAlignment="Center" DataContext="{Binding #PowerPointView.((vm:PowerPointViewModel)DataContext)}" />
+      <RibbonStatusBar.EndItems>
+        <RibbonButton Label="Notes" Icon="" />
+        <RibbonZoomControl Value="64" />
+      </RibbonStatusBar.EndItems>
+    </RibbonStatusBar>
+  </Grid>
+</UserControl>

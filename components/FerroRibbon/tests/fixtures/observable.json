@@ -1,0 +1,1 @@
+{"equal":{"changes":[false,true,false,true,false],"trace":["override:Value:1","override:Value:NaN"]},"reentrant":["override:Value:1","a:1","override:Value:2","a:2","b"],"failure":{"trace":["override:Value:3"],"value":3},"names":[null,"","Value"],"senders":[true,true,true],"collection":["Count","Item[]","Add","Item[]","Replace","Count","Item[]","Remove"]}

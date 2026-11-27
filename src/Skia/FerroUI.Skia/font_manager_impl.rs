@@ -114,6 +114,13 @@ impl IFontManagerImpl for FontManagerImpl {
         Some(SkiaTypeface::new(sk_typeface, FontSimulations::None))
     }
 
+    /// The private names of the system UI font of Apple's systems (`.AppleSystemUIFont` and the
+    /// other names with a leading dot) are aliases: Core Text gives the face of the system font
+    /// for them. Any other name is an alias only if the face is of that family.
+    fn is_family_alias(&self, family_name: &str, face_family_name: &str) -> bool {
+        cfg!(target_vendor = "apple") && family_name.starts_with('.') && !face_family_name.is_empty()
+    }
+
     fn try_create_glyph_typeface(
         &self,
         family_name: &str,

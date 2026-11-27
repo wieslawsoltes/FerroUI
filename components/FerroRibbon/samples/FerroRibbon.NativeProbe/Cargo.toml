@@ -1,0 +1,32 @@
+[package]
+name = "ferroribbon-native-probe"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+build = "build.rs"
+[lib]
+path = "lib.rs"
+[[bin]]
+name = "ferroribbon-native-probe"
+path = "program.rs"
+required-features = ["desktop"]
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-desktop"]
+[dependencies]
+ferroribbon = { path = "../../src/FerroRibbon" }
+ferroribbon-core = { path = "../../src/FerroRibbon.Core" }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-system = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-simple = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
+[build-dependencies]
+ferroui-build = { workspace = true }
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }
+[lints.rust]
+unsafe_code = "forbid"

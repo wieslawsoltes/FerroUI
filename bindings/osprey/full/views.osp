@@ -2225,8 +2225,8 @@ fn overflowButtonVisibilityCommandBarOverflowButtonVisibility(value) = AttrText 
 // overlayDismissEventPassThrough(value: bool) -> Attr<M>: sets OverlayDismissEventPassThrough
 // (Popup, PopupFlyoutBase).
 fn overlayDismissEventPassThrough(value) = AttrBool { attrBoolProperty: 618, attrBoolValue: value }
-// padding(value: string) -> Attr<M>: sets Padding (ContentPresenter, Decorator, RichTextBlock,
-// TemplatedControl, TextBlock).
+// padding(value: string) -> Attr<M>: sets Padding (ContentPresenter, Decorator, Grid,
+// RichTextBlock, TemplatedControl, TextBlock).
 fn padding(value) = AttrText { attrTextProperty: 621, attrTextValue: value }
 // pages(value: string) -> Attr<M>: sets Pages (MultiPage, PagerControlTemplateSettings).
 fn pages(value) = AttrText { attrTextProperty: 626, attrTextValue: value }
@@ -3080,111 +3080,113 @@ fn useLightDismissOverlayMode(value) = AttrBool { attrBoolProperty: 1029, attrBo
 fn useRenderTransform(value) = AttrBool { attrBoolProperty: 1030, attrBoolValue: value }
 // useSeconds(value: bool) -> Attr<M>: sets UseSeconds (TimePicker, TimePickerPresenter).
 fn useSeconds(value) = AttrBool { attrBoolProperty: 1031, attrBoolValue: value }
+// useWinUiMeasureRounding(value: bool) -> Attr<M>: sets UseWinUiMeasureRounding (Layoutable).
+fn useWinUiMeasureRounding(value) = AttrBool { attrBoolProperty: 1032, attrBoolValue: value }
 // validSpinDirection(value: string) -> Attr<M>: sets ValidSpinDirection (Spinner).
-fn validSpinDirection(value) = AttrText { attrTextProperty: 1032, attrTextValue: value }
+fn validSpinDirection(value) = AttrText { attrTextProperty: 1033, attrTextValue: value }
 // validationMode(value: NumberBoxValidationMode) -> Attr<M>: sets ValidationMode (NumberBox).
-fn validationMode(value) = AttrText { attrTextProperty: 1033, attrTextValue: numberBoxValidationModeName(value: value) }
+fn validationMode(value) = AttrText { attrTextProperty: 1034, attrTextValue: numberBoxValidationModeName(value: value) }
 // value(value: string) -> Attr<M>: sets Value (AnimatorKeyFrame, BindingEvaluator,
 // ColorKeyFrame, DoubleKeyFrame, InfoBadge, NumberBox, NumericUpDown, ObjectKeyFrame,
 // PointKeyFrame, ProgressRing, RangeBase, RatingControl, Track).
-fn value(value) = AttrText { attrTextProperty: 1034, attrTextValue: value }
+fn value(value) = AttrText { attrTextProperty: 1035, attrTextValue: value }
 // valueNumber(value: float) -> Attr<M>: sets Value (AnimatorKeyFrame, BindingEvaluator,
 // ColorKeyFrame, DoubleKeyFrame, InfoBadge, NumberBox, NumericUpDown, ObjectKeyFrame,
 // PointKeyFrame, ProgressRing, RangeBase, RatingControl, Track).
-fn valueNumber(value) = AttrNumber { attrNumberProperty: 1034, attrNumberValue: value }
+fn valueNumber(value) = AttrNumber { attrNumberProperty: 1035, attrNumberValue: value }
 // valueMemberBinding(value: string) -> Attr<M>: sets ValueMemberBinding (AutoCompleteBox).
-fn valueMemberBinding(value) = AttrText { attrTextProperty: 1035, attrTextValue: value }
+fn valueMemberBinding(value) = AttrText { attrTextProperty: 1036, attrTextValue: value }
 // verticalAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalAlignment (Layoutable).
-fn verticalAlignment(value) = AttrText { attrTextProperty: 1036, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalAlignment(value) = AttrText { attrTextProperty: 1037, attrTextValue: verticalAlignmentName(value: value) }
 // verticalContentAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalContentAlignment
 // (CalendarDatePicker, ComboBox, ContentControl, ContentPage, ContentPresenter, DatePicker,
 // DrawerPage, NumericUpDown, TabControl, TextBox, TimePicker).
-fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1037, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1038, attrTextValue: verticalAlignmentName(value: value) }
 // verticalOffset(value: float) -> Attr<M>: sets VerticalOffset (ContextMenu, Popup,
 // PopupFlyoutBase).
-fn verticalOffset(value) = AttrNumber { attrNumberProperty: 1038, attrNumberValue: value }
+fn verticalOffset(value) = AttrNumber { attrNumberProperty: 1039, attrNumberValue: value }
 // verticalOrientationPadding(value: string) -> Attr<M>: sets VerticalOrientationPadding
 // (InfoBarPanel).
-fn verticalOrientationPadding(value) = AttrText { attrTextProperty: 1039, attrTextValue: value }
+fn verticalOrientationPadding(value) = AttrText { attrTextProperty: 1040, attrTextValue: value }
 // verticalSpacing(value: float) -> Attr<M>: sets VerticalSpacing (DockPanel).
-fn verticalSpacing(value) = AttrNumber { attrNumberProperty: 1040, attrNumberValue: value }
+fn verticalSpacing(value) = AttrNumber { attrNumberProperty: 1041, attrNumberValue: value }
 // viewboxOf(value: string) -> Attr<M>: sets Viewbox (DrawingImage).
-fn viewboxOf(value) = AttrText { attrTextProperty: 1041, attrTextValue: value }
+fn viewboxOf(value) = AttrText { attrTextProperty: 1042, attrTextValue: value }
 // viewport(value: string) -> Attr<M>: sets Viewport (ScrollContentPresenter,
 // ScrollGestureRecognizer, ScrollViewer).
-fn viewport(value) = AttrText { attrTextProperty: 1042, attrTextValue: value }
+fn viewport(value) = AttrText { attrTextProperty: 1043, attrTextValue: value }
 // viewportFraction(value: float) -> Attr<M>: sets ViewportFraction (Carousel).
-fn viewportFraction(value) = AttrNumber { attrNumberProperty: 1043, attrNumberValue: value }
+fn viewportFraction(value) = AttrNumber { attrNumberProperty: 1044, attrNumberValue: value }
 // viewportSize(value: float) -> Attr<M>: sets ViewportSize (ScrollBar, Track).
-fn viewportSize(value) = AttrNumber { attrNumberProperty: 1044, attrNumberValue: value }
+fn viewportSize(value) = AttrNumber { attrNumberProperty: 1045, attrNumberValue: value }
 // visibility(value: ScrollBarVisibility) -> Attr<M>: sets Visibility (ScrollBar).
-fn visibility(value) = AttrText { attrTextProperty: 1045, attrTextValue: scrollBarVisibilityName(value: value) }
+fn visibility(value) = AttrText { attrTextProperty: 1046, attrTextValue: scrollBarVisibilityName(value: value) }
 // visualFlowDirection(value: FlowDirection) -> Attr<M>: sets Visual.FlowDirection (Visual).
-fn visualFlowDirection(value) = AttrText { attrTextProperty: 1047, attrTextValue: flowDirectionName(value: value) }
+fn visualFlowDirection(value) = AttrText { attrTextProperty: 1048, attrTextValue: flowDirectionName(value: value) }
 // visualStateManagerVisualStateGroups(value: string) -> Attr<M>: sets
 // VisualStateManager.VisualStateGroups (VisualStateManager).
-fn visualStateManagerVisualStateGroups(value) = AttrText { attrTextProperty: 1050, attrTextValue: value }
+fn visualStateManagerVisualStateGroups(value) = AttrText { attrTextProperty: 1051, attrTextValue: value }
 // waylandPropertiesAppId(value: string) -> Attr<M>: sets WaylandProperties.AppId
 // (WaylandProperties).
-fn waylandPropertiesAppId(value) = AttrText { attrTextProperty: 1052, attrTextValue: value }
+fn waylandPropertiesAppId(value) = AttrText { attrTextProperty: 1053, attrTextValue: value }
 // weekNumberRule(value: CalendarWeekRule) -> Attr<M>: sets WeekNumberRule (Calendar,
 // CalendarDatePicker).
-fn weekNumberRule(value) = AttrText { attrTextProperty: 1053, attrTextValue: calendarWeekRuleName(value: value) }
+fn weekNumberRule(value) = AttrText { attrTextProperty: 1054, attrTextValue: calendarWeekRuleName(value: value) }
 // width(value: float) -> Attr<M>: sets Width (ColumnDefinition, Layoutable, TableViewColumn).
-fn width(value) = AttrNumber { attrNumberProperty: 1054, attrNumberValue: value }
+fn width(value) = AttrNumber { attrNumberProperty: 1055, attrNumberValue: value }
 // widthText(value: string) -> Attr<M>: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn).
-fn widthText(value) = AttrText { attrTextProperty: 1054, attrTextValue: value }
+fn widthText(value) = AttrText { attrTextProperty: 1055, attrTextValue: value }
 // win32PropertiesNonClientHitTestResult(value: Win32HitTestValue) -> Attr<M>: sets
 // Win32Properties.NonClientHitTestResult (Win32Properties).
-fn win32PropertiesNonClientHitTestResult(value) = AttrText { attrTextProperty: 1055, attrTextValue: win32HitTestValueName(value: value) }
+fn win32PropertiesNonClientHitTestResult(value) = AttrText { attrTextProperty: 1056, attrTextValue: win32HitTestValueName(value: value) }
 // win32PropertiesWindowCornerPreference(value: WindowCornerPreference) -> Attr<M>: sets
 // Win32Properties.WindowCornerPreference (Win32Properties).
-fn win32PropertiesWindowCornerPreference(value) = AttrText { attrTextProperty: 1056, attrTextValue: windowCornerPreferenceName(value: value) }
+fn win32PropertiesWindowCornerPreference(value) = AttrText { attrTextProperty: 1057, attrTextValue: windowCornerPreferenceName(value: value) }
 // windowDecorationPropertiesElementRole(value: WindowDecorationsElementRole) -> Attr<M>: sets
 // WindowDecorationProperties.ElementRole (WindowDecorationProperties).
-fn windowDecorationPropertiesElementRole(value) = AttrText { attrTextProperty: 1058, attrTextValue: windowDecorationsElementRoleName(value: value) }
+fn windowDecorationPropertiesElementRole(value) = AttrText { attrTextProperty: 1059, attrTextValue: windowDecorationsElementRoleName(value: value) }
 // windowDecorations(value: WindowDecorations) -> Attr<M>: sets WindowDecorations (Window).
-fn windowDecorations(value) = AttrText { attrTextProperty: 1059, attrTextValue: windowDecorationsName(value: value) }
+fn windowDecorations(value) = AttrText { attrTextProperty: 1060, attrTextValue: windowDecorationsName(value: value) }
 // windowDrawnDecorationsTitleBarDecorations(value: string) -> Attr<M>: sets
 // WindowDrawnDecorations.TitleBarDecorations (WindowDrawnDecorations).
-fn windowDrawnDecorationsTitleBarDecorations(value) = AttrText { attrTextProperty: 1061, attrTextValue: value }
+fn windowDrawnDecorationsTitleBarDecorations(value) = AttrText { attrTextProperty: 1062, attrTextValue: value }
 // windowManagerAddShadowHint(value: bool) -> Attr<M>: sets WindowManagerAddShadowHint
 // (ContextMenu, Popup, PopupRoot).
-fn windowManagerAddShadowHint(value) = AttrBool { attrBoolProperty: 1062, attrBoolValue: value }
+fn windowManagerAddShadowHint(value) = AttrBool { attrBoolProperty: 1063, attrBoolValue: value }
 // windowStartupLocation(value: WindowStartupLocation) -> Attr<M>: sets WindowStartupLocation
 // (Window).
-fn windowStartupLocation(value) = AttrText { attrTextProperty: 1063, attrTextValue: windowStartupLocationName(value: value) }
+fn windowStartupLocation(value) = AttrText { attrTextProperty: 1064, attrTextValue: windowStartupLocationName(value: value) }
 // windowState(value: WindowState) -> Attr<M>: sets WindowState (Window).
-fn windowState(value) = AttrText { attrTextProperty: 1064, attrTextValue: windowStateName(value: value) }
+fn windowState(value) = AttrText { attrTextProperty: 1065, attrTextValue: windowStateName(value: value) }
 // wrap(value: FlexWrap) -> Attr<M>: sets Wrap (FlexPanel).
-fn wrap(value) = AttrText { attrTextProperty: 1065, attrTextValue: flexWrapName(value: value) }
+fn wrap(value) = AttrText { attrTextProperty: 1066, attrTextValue: flexWrapName(value: value) }
 // wrapMode(value: PipsPagerWrapMode) -> Attr<M>: sets WrapMode (PipsPager).
-fn wrapMode(value) = AttrText { attrTextProperty: 1066, attrTextValue: pipsPagerWrapModeName(value: value) }
+fn wrapMode(value) = AttrText { attrTextProperty: 1067, attrTextValue: pipsPagerWrapModeName(value: value) }
 // wrapSelection(value: bool) -> Attr<M>: sets WrapSelection (SelectingItemsControl).
-fn wrapSelection(value) = AttrBool { attrBoolProperty: 1067, attrBoolValue: value }
+fn wrapSelection(value) = AttrBool { attrBoolProperty: 1068, attrBoolValue: value }
 // x(value: float) -> Attr<M>: sets X (TranslateTransform).
-fn x(value) = AttrNumber { attrNumberProperty: 1068, attrNumberValue: value }
+fn x(value) = AttrNumber { attrNumberProperty: 1069, attrNumberValue: value }
 // x11PropertiesNetWmWindowType(value: X11NetWmWindowType) -> Attr<M>: sets
 // X11Properties.NetWmWindowType (X11Properties).
-fn x11PropertiesNetWmWindowType(value) = AttrText { attrTextProperty: 1069, attrTextValue: x11NetWmWindowTypeName(value: value) }
+fn x11PropertiesNetWmWindowType(value) = AttrText { attrTextProperty: 1070, attrTextValue: x11NetWmWindowTypeName(value: value) }
 // x11PropertiesWmClass(value: string) -> Attr<M>: sets X11Properties.WmClass (X11Properties).
-fn x11PropertiesWmClass(value) = AttrText { attrTextProperty: 1070, attrTextValue: value }
+fn x11PropertiesWmClass(value) = AttrText { attrTextProperty: 1071, attrTextValue: value }
 // xyFocusNavigationModes(value: string) -> Attr<M>: sets XYFocus.NavigationModes (XYFocus).
-fn xyFocusNavigationModes(value) = AttrText { attrTextProperty: 1071, attrTextValue: value }
+fn xyFocusNavigationModes(value) = AttrText { attrTextProperty: 1072, attrTextValue: value }
 // xamlAmbientLightIsTarget(value: bool) -> Attr<M>: sets XamlAmbientLight.IsTarget
 // (XamlAmbientLight).
-fn xamlAmbientLightIsTarget(value) = AttrBool { attrBoolProperty: 1072, attrBoolValue: value }
+fn xamlAmbientLightIsTarget(value) = AttrBool { attrBoolProperty: 1073, attrBoolValue: value }
 // y(value: float) -> Attr<M>: sets Y (TranslateTransform).
-fn y(value) = AttrNumber { attrNumberProperty: 1074, attrNumberValue: value }
+fn y(value) = AttrNumber { attrNumberProperty: 1075, attrNumberValue: value }
 // yearFormat(value: string) -> Attr<M>: sets YearFormat (DatePicker, DatePickerPresenter).
-fn yearFormat(value) = AttrText { attrTextProperty: 1075, attrTextValue: value }
+fn yearFormat(value) = AttrText { attrTextProperty: 1076, attrTextValue: value }
 // yearVisible(value: bool) -> Attr<M>: sets YearVisible (DatePicker, DatePickerPresenter).
-fn yearVisible(value) = AttrBool { attrBoolProperty: 1076, attrBoolValue: value }
+fn yearVisible(value) = AttrBool { attrBoolProperty: 1077, attrBoolValue: value }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1077, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1078, attrIntegerValue: value }
 // zoomMode(value: ZoomMode) -> Attr<M>: sets ZoomMode (ScrollViewer).
-fn zoomMode(value) = AttrText { attrTextProperty: 1079, attrTextValue: zoomModeName(value: value) }
+fn zoomMode(value) = AttrText { attrTextProperty: 1080, attrTextValue: zoomModeName(value: value) }
 
 // ---- attributes of events ------------------------------------------------------------------
 
@@ -3440,7 +3442,7 @@ fn onTransitionCompleted(message) = AttrOn { attrOnEvent: 93, attrOnMessage: mes
 fn onUnloaded(message) = AttrOn { attrOnEvent: 94, attrOnMessage: message }
 // onValueChanged(message: M) -> Attr<M>: sends the message on every ValueChanged
 // (NumericUpDown, RangeBase); `eventText()` is the Value of the sender while `update` runs.
-fn onValueChanged(message) = AttrOnValue { attrValueEvent: 95, attrValueProperty: 1034, attrValueMessage: message }
+fn onValueChanged(message) = AttrOnValue { attrValueEvent: 95, attrValueProperty: 1035, attrValueMessage: message }
 // onVerticalSnapPointsChanged(message: M) -> Attr<M>: sends the message on every
 // VerticalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
 fn onVerticalSnapPointsChanged(message) = AttrOn { attrOnEvent: 96, attrOnMessage: message }

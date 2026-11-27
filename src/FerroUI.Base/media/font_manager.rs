@@ -279,7 +279,13 @@ impl FontManager {
 
                     if let Some(glyph_typeface) = self.try_get_glyph_typeface_by_key_and_name(typeface, &key, family_name)
                     {
-                        if glyph_typeface.family_name().contains(family_name) {
+                        // The face of the family, or of a system alias of it (a name the backend
+                        // resolves to another family). A face the backend substituted for a name
+                        // it does not know is neither, and the next family is tried.
+                        if glyph_typeface.family_name().contains(family_name)
+                            || (Self::is_system_font_source(&collection_key(Self::absolute_source(&key)))
+                                && self.platform_impl.is_family_alias(family_name, glyph_typeface.family_name()))
+                        {
                             return Some(glyph_typeface);
                         }
                     }
@@ -614,7 +620,7 @@ impl FontManager {
         // system font collection. The key is checked before the generic font collection branch
         // so that the system font collection is created on demand regardless of which URI form
         // is used.
-        if source.scheme() == Self::SYSTEM_FONT_SCHEME || source.as_str() == Self::SYSTEM_FONTS_KEY {
+        if Self::is_system_font_source(&source) {
             return Some(self.get_or_create_font_collection(&self.system_fonts_key, |_| {
                 Rc::new(SystemFontCollection::new(self.platform_impl.clone()))
             }));
@@ -633,6 +639,10 @@ impl FontManager {
         }
 
         None
+    }
+
+    fn is_system_font_source(source: &url::Url) -> bool {
+        source.scheme() == Self::SYSTEM_FONT_SCHEME || source.as_str() == Self::SYSTEM_FONTS_KEY
     }
 
     /// The URL of the source of a key (C# `key.Source.EnsureAbsolute(key.BaseUri)`), resolved

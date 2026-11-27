@@ -1,0 +1,12 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer" x:DataType="local:CommandViewModel">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <StackPanel.DataContext><local:CommandViewModel /></StackPanel.DataContext>
+ <local:ConsumerRibbon x:Name="OwnerRoot" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <local:ConsumerRibbon.TabStripItems><RibbonButton Label="Share" Command="{Binding Command}" CommandParameter="{Binding Value}" /></local:ConsumerRibbon.TabStripItems>
+  <RibbonTab Id="home" Header="Home"><RibbonGroup Header="Tools">
+   <RibbonGroup.SlideOutItems><RibbonButton Label="Advanced" Command="{Binding Command}" CommandParameter="{Binding Value}" RibbonItemHelper.Owner="{Binding ElementName=OwnerRoot}" /></RibbonGroup.SlideOutItems>
+   <RibbonButton Label="Run" Command="{Binding Command}" CommandParameter="{Binding Value}" />
+  </RibbonGroup></RibbonTab>
+ </local:ConsumerRibbon>
+ <RibbonButton Label="Detached" RibbonItemHelper.Owner="{Binding ElementName=OwnerRoot}" />
+</StackPanel>

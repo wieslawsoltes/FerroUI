@@ -2,7 +2,7 @@
 
 package ferroui
 
-const apiFingerprint int64 = -4387658432560162436
+const apiFingerprint int64 = -2903654145985797389
 const selectionFingerprint int64 = 0
 
 // AcrylicBackgroundSource: Background sources for acrylic.
@@ -1562,18 +1562,18 @@ func (o Visual) SetRenderTransformOrigin(value string) error { return setString(
 
 // VisualFlowDirection reads the attached property Visual.FlowDirection. Defines the
 // `FlowDirection` attached property.
-func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1047)) }
+func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1048)) }
 // VisualSetFlowDirection writes the attached property Visual.FlowDirection.
-func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1047, int64(value)) }
+func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1048, int64(value)) }
 
 // VisualParent reads VisualParent. Defines the `VisualParent` property.
 // VisualParent is the object the property holds, with one reference counted: release it.
-func (o Visual) VisualParent() Object { return getObject(o.h, 1048) }
+func (o Visual) VisualParent() Object { return getObject(o.h, 1049) }
 
 // ZIndex reads ZIndex. Defines the `ZIndex` property.
-func (o Visual) ZIndex() int64 { return getI64(o.h, 1077) }
+func (o Visual) ZIndex() int64 { return getI64(o.h, 1078) }
 // SetZIndex writes ZIndex.
-func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1077, value) }
+func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1078, value) }
 
 // Layoutable: Implements layout-related functionality for a control.
 type Layoutable struct{ Visual }
@@ -1627,15 +1627,22 @@ func (o Layoutable) UseLayoutRounding() bool { return getBool(o.h, 1028) }
 // SetUseLayoutRounding writes UseLayoutRounding.
 func (o Layoutable) SetUseLayoutRounding(value bool) error { return setBool(o.h, 1028, value) }
 
+// UseWinUiMeasureRounding reads UseWinUiMeasureRounding. Defines the inherited
+// `UseWinUiMeasureRounding` property. When layout rounding is enabled, this uses WinUI's
+// physical-pixel rounding for layout sizes, offsets and border insets.
+func (o Layoutable) UseWinUiMeasureRounding() bool { return getBool(o.h, 1032) }
+// SetUseWinUiMeasureRounding writes UseWinUiMeasureRounding.
+func (o Layoutable) SetUseWinUiMeasureRounding(value bool) error { return setBool(o.h, 1032, value) }
+
 // VerticalAlignment reads VerticalAlignment. Defines the `VerticalAlignment` property.
-func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1036)) }
+func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
 // SetVerticalAlignment writes VerticalAlignment.
-func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1036, int64(value)) }
+func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
 
 // Width reads Width. Defines the `Width` property.
-func (o Layoutable) Width() float64 { return getF64(o.h, 1054) }
+func (o Layoutable) Width() float64 { return getF64(o.h, 1055) }
 // SetWidth writes Width.
-func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1054, value) }
+func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1055, value) }
 
 // Interactive: Base class for objects that raise routed events.
 type Interactive struct{ Layoutable }
@@ -2501,9 +2508,9 @@ func (o SelectingItemsControl) SelectionMode() string { return getString(o.h, 79
 func (o SelectingItemsControl) SetSelectionMode(value string) error { return setString(o.h, 793, value) }
 
 // WrapSelection reads WrapSelection. Defines the `WrapSelection` property.
-func (o SelectingItemsControl) WrapSelection() bool { return getBool(o.h, 1067) }
+func (o SelectingItemsControl) WrapSelection() bool { return getBool(o.h, 1068) }
 // SetWrapSelection writes WrapSelection.
-func (o SelectingItemsControl) SetWrapSelection(value bool) error { return setBool(o.h, 1067, value) }
+func (o SelectingItemsControl) SetWrapSelection(value bool) error { return setBool(o.h, 1068, value) }
 
 // OnIsSelectedChanged subscribes to IsSelectedChanged; the sender is valid for the call. Event
 // that should be raised by containers when their selection state changes to notify the parent
@@ -2547,13 +2554,13 @@ func (o Animation) SetSpeedRatio(value float64) error { return setF64(o.h, 828, 
 type AnimatorKeyFrame struct{ Object }
 
 // Value reads Value. Defines the `Value` property.
-func (o AnimatorKeyFrame) Value() string { return getString(o.h, 1034) }
+func (o AnimatorKeyFrame) Value() string { return getString(o.h, 1035) }
 // ValueObject is the object the property holds, with one reference counted: release it.
-func (o AnimatorKeyFrame) ValueObject() Object { return getObject(o.h, 1034) }
+func (o AnimatorKeyFrame) ValueObject() Object { return getObject(o.h, 1035) }
 // SetValue writes Value.
-func (o AnimatorKeyFrame) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o AnimatorKeyFrame) SetValue(value string) error { return setString(o.h, 1035, value) }
 // SetValueObject writes Value to an object; nil is null.
-func (o AnimatorKeyFrame) SetValueObject(value Wrapper) error { return setObject(o.h, 1034, value) }
+func (o AnimatorKeyFrame) SetValueObject(value Wrapper) error { return setObject(o.h, 1035, value) }
 
 // Application: Encapsulates a FerroUI application. The [`Application`] class encapsulates
 // application-specific functionality, including: - A global set of
@@ -2822,9 +2829,9 @@ func (o AutoCompleteBox) Text() string { return getString(o.h, 880) }
 func (o AutoCompleteBox) SetText(value string) error { return setString(o.h, 880, value) }
 
 // ValueMemberBinding reads ValueMemberBinding.
-func (o AutoCompleteBox) ValueMemberBinding() string { return getString(o.h, 1035) }
+func (o AutoCompleteBox) ValueMemberBinding() string { return getString(o.h, 1036) }
 // SetValueMemberBinding writes ValueMemberBinding.
-func (o AutoCompleteBox) SetValueMemberBinding(value string) error { return setString(o.h, 1035, value) }
+func (o AutoCompleteBox) SetValueMemberBinding(value string) error { return setString(o.h, 1036, value) }
 
 // OnQuerySubmitted subscribes to QuerySubmitted; the sender is valid for the call. Defines the
 // `QuerySubmitted` event: a FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`,
@@ -3019,13 +3026,13 @@ func NewBindingEvaluator() (BindingEvaluator, error) {
 }
 
 // Value reads Value. Defines the `Value` property.
-func (o BindingEvaluator) Value() string { return getString(o.h, 1034) }
+func (o BindingEvaluator) Value() string { return getString(o.h, 1035) }
 // ValueObject is the object the property holds, with one reference counted: release it.
-func (o BindingEvaluator) ValueObject() Object { return getObject(o.h, 1034) }
+func (o BindingEvaluator) ValueObject() Object { return getObject(o.h, 1035) }
 // SetValue writes Value.
-func (o BindingEvaluator) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o BindingEvaluator) SetValue(value string) error { return setString(o.h, 1035, value) }
 // SetValueObject writes Value to an object; nil is null.
-func (o BindingEvaluator) SetValueObject(value Wrapper) error { return setObject(o.h, 1034, value) }
+func (o BindingEvaluator) SetValueObject(value Wrapper) error { return setObject(o.h, 1035, value) }
 
 // CacheMode: Represents cached content modes for graphics acceleration features.
 type CacheMode struct{ StyledElement }
@@ -3310,9 +3317,9 @@ func (o ContentControl) SetHorizontalContentAlignment(value HorizontalAlignment)
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // Button: A standard button control.
 type Button struct{ ContentControl }
@@ -3377,9 +3384,9 @@ type ButtonAutomationPeer struct{ ContentControlAutomationPeer }
 type Spinner struct{ ContentControl }
 
 // ValidSpinDirection reads ValidSpinDirection. Defines the `ValidSpinDirection` property.
-func (o Spinner) ValidSpinDirection() string { return getString(o.h, 1032) }
+func (o Spinner) ValidSpinDirection() string { return getString(o.h, 1033) }
 // SetValidSpinDirection writes ValidSpinDirection.
-func (o Spinner) SetValidSpinDirection(value string) error { return setString(o.h, 1032, value) }
+func (o Spinner) SetValidSpinDirection(value string) error { return setString(o.h, 1033, value) }
 
 // OnSpin subscribes to Spin; the sender is valid for the call. Defines the `Spin` routed
 // event.
@@ -3496,9 +3503,9 @@ func (o Calendar) SelectionMode() CalendarSelectionMode { return CalendarSelecti
 func (o Calendar) SetSelectionMode(value CalendarSelectionMode) error { return setI64(o.h, 793, int64(value)) }
 
 // WeekNumberRule reads WeekNumberRule. Defines the `WeekNumberRule` property.
-func (o Calendar) WeekNumberRule() CalendarWeekRule { return CalendarWeekRule(getI64(o.h, 1053)) }
+func (o Calendar) WeekNumberRule() CalendarWeekRule { return CalendarWeekRule(getI64(o.h, 1054)) }
 // SetWeekNumberRule writes WeekNumberRule.
-func (o Calendar) SetWeekNumberRule(value CalendarWeekRule) error { return setI64(o.h, 1053, int64(value)) }
+func (o Calendar) SetWeekNumberRule(value CalendarWeekRule) error { return setI64(o.h, 1054, int64(value)) }
 
 // CalendarAutomationPeer: An automation peer which represents a [`Calendar`].
 type CalendarAutomationPeer struct{ ControlAutomationPeer }
@@ -3602,14 +3609,14 @@ func (o CalendarDatePicker) SetUseFloatingPlaceholder(value bool) error { return
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o CalendarDatePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o CalendarDatePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o CalendarDatePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o CalendarDatePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // WeekNumberRule reads WeekNumberRule. Defines the `WeekNumberRule` property.
-func (o CalendarDatePicker) WeekNumberRule() CalendarWeekRule { return CalendarWeekRule(getI64(o.h, 1053)) }
+func (o CalendarDatePicker) WeekNumberRule() CalendarWeekRule { return CalendarWeekRule(getI64(o.h, 1054)) }
 // SetWeekNumberRule writes WeekNumberRule.
-func (o CalendarDatePicker) SetWeekNumberRule(value CalendarWeekRule) error { return setI64(o.h, 1053, int64(value)) }
+func (o CalendarDatePicker) SetWeekNumberRule(value CalendarWeekRule) error { return setI64(o.h, 1054, int64(value)) }
 
 // CalendarDatePickerAutomationPeer: An automation peer which represents a
 // [`CalendarDatePicker`].
@@ -3661,9 +3668,9 @@ func (o Carousel) SetIsSwipeEnabled(value bool) error { return setBool(o.h, 456,
 func (o Carousel) IsSwiping() bool { return getBool(o.h, 457) }
 
 // ViewportFraction reads ViewportFraction. Defines the `ViewportFraction` property.
-func (o Carousel) ViewportFraction() float64 { return getF64(o.h, 1043) }
+func (o Carousel) ViewportFraction() float64 { return getF64(o.h, 1044) }
 // SetViewportFraction writes ViewportFraction.
-func (o Carousel) SetViewportFraction(value float64) error { return setF64(o.h, 1043, value) }
+func (o Carousel) SetViewportFraction(value float64) error { return setF64(o.h, 1044, value) }
 
 // Page: Abstract base class for all page types.
 type Page struct{ TemplatedControl }
@@ -3956,9 +3963,9 @@ func (o ColorKeyFrame) KeyTime() string { return getString(o.h, 495) }
 func (o ColorKeyFrame) SetKeyTime(value string) error { return setString(o.h, 495, value) }
 
 // Value reads Value. Defines the `Value` property: the value of the key frame.
-func (o ColorKeyFrame) Value() string { return getString(o.h, 1034) }
+func (o ColorKeyFrame) Value() string { return getString(o.h, 1035) }
 // SetValue writes Value.
-func (o ColorKeyFrame) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o ColorKeyFrame) SetValue(value string) error { return setString(o.h, 1035, value) }
 
 // DefinitionBase: Provides the core functionality used internally by `Grid` and the column and
 // row definition collections. This class is abstract: only its subclasses
@@ -3994,9 +4001,9 @@ func (o ColumnDefinition) MinWidth() float64 { return getF64(o.h, 559) }
 func (o ColumnDefinition) SetMinWidth(value float64) error { return setF64(o.h, 559, value) }
 
 // Width reads Width. Defines the `Width` property.
-func (o ColumnDefinition) Width() string { return getString(o.h, 1054) }
+func (o ColumnDefinition) Width() string { return getString(o.h, 1055) }
 // SetWidth writes Width.
-func (o ColumnDefinition) SetWidth(value string) error { return setString(o.h, 1054, value) }
+func (o ColumnDefinition) SetWidth(value string) error { return setString(o.h, 1055, value) }
 
 // Geometry: Defines a geometric shape.
 type Geometry struct{ Object }
@@ -4087,9 +4094,9 @@ func (o ComboBox) SetText(value string) error { return setString(o.h, 880, value
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ComboBox) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o ComboBox) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ComboBox) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o ComboBox) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // ItemsControlAutomationPeer: An automation peer which represents an [`ItemsControl`].
 type ItemsControlAutomationPeer struct{ ControlAutomationPeer }
@@ -4583,9 +4590,9 @@ func (o ContentPage) SetTopCommandBarObject(value Wrapper) error { return setObj
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ContentPage) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o ContentPage) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ContentPage) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o ContentPage) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // ContentPageAutomationPeer: An automation peer which represents a [`ContentPage`].
 type ContentPageAutomationPeer struct{ ControlAutomationPeer }
@@ -4715,9 +4722,9 @@ func (o ContentPresenter) SetTextWrapping(value TextWrapping) error { return set
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ContentPresenter) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o ContentPresenter) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ContentPresenter) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o ContentPresenter) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // MenuBase: Base class for menu controls.
 type MenuBase struct{ SelectingItemsControl }
@@ -4789,15 +4796,15 @@ func (o ContextMenu) PlacementTarget() Object { return getObject(o.h, 659) }
 func (o ContextMenu) SetPlacementTarget(value Wrapper) error { return setObject(o.h, 659, value) }
 
 // VerticalOffset reads VerticalOffset. Defines the `VerticalOffset` property.
-func (o ContextMenu) VerticalOffset() float64 { return getF64(o.h, 1038) }
+func (o ContextMenu) VerticalOffset() float64 { return getF64(o.h, 1039) }
 // SetVerticalOffset writes VerticalOffset.
-func (o ContextMenu) SetVerticalOffset(value float64) error { return setF64(o.h, 1038, value) }
+func (o ContextMenu) SetVerticalOffset(value float64) error { return setF64(o.h, 1039, value) }
 
 // WindowManagerAddShadowHint reads WindowManagerAddShadowHint. Defines the
 // `WindowManagerAddShadowHint` property.
-func (o ContextMenu) WindowManagerAddShadowHint() bool { return getBool(o.h, 1062) }
+func (o ContextMenu) WindowManagerAddShadowHint() bool { return getBool(o.h, 1063) }
 // SetWindowManagerAddShadowHint writes WindowManagerAddShadowHint.
-func (o ContextMenu) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1062, value) }
+func (o ContextMenu) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1063, value) }
 
 // ControlTheme: Defines a switchable theme for a control.
 type ControlTheme struct{ StyleBase }
@@ -4933,19 +4940,19 @@ func (o DatePicker) SetSelectedDate(value string) error { return setString(o.h, 
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o DatePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o DatePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o DatePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o DatePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // YearFormat reads YearFormat. Defines the `YearFormat` property.
-func (o DatePicker) YearFormat() string { return getString(o.h, 1075) }
+func (o DatePicker) YearFormat() string { return getString(o.h, 1076) }
 // SetYearFormat writes YearFormat.
-func (o DatePicker) SetYearFormat(value string) error { return setString(o.h, 1075, value) }
+func (o DatePicker) SetYearFormat(value string) error { return setString(o.h, 1076, value) }
 
 // YearVisible reads YearVisible. Defines the `YearVisible` property.
-func (o DatePicker) YearVisible() bool { return getBool(o.h, 1076) }
+func (o DatePicker) YearVisible() bool { return getBool(o.h, 1077) }
 // SetYearVisible writes YearVisible.
-func (o DatePicker) SetYearVisible(value bool) error { return setBool(o.h, 1076, value) }
+func (o DatePicker) SetYearVisible(value bool) error { return setBool(o.h, 1077, value) }
 
 // DatePickerAutomationPeer: An automation peer which represents a [`DatePicker`].
 type DatePickerAutomationPeer struct{ ControlAutomationPeer }
@@ -4998,14 +5005,14 @@ func (o DatePickerPresenter) MonthVisible() bool { return getBool(o.h, 573) }
 func (o DatePickerPresenter) SetMonthVisible(value bool) error { return setBool(o.h, 573, value) }
 
 // YearFormat reads YearFormat. Defines the `YearFormat` property.
-func (o DatePickerPresenter) YearFormat() string { return getString(o.h, 1075) }
+func (o DatePickerPresenter) YearFormat() string { return getString(o.h, 1076) }
 // SetYearFormat writes YearFormat.
-func (o DatePickerPresenter) SetYearFormat(value string) error { return setString(o.h, 1075, value) }
+func (o DatePickerPresenter) SetYearFormat(value string) error { return setString(o.h, 1076, value) }
 
 // YearVisible reads YearVisible. Defines the `YearVisible` property.
-func (o DatePickerPresenter) YearVisible() bool { return getBool(o.h, 1076) }
+func (o DatePickerPresenter) YearVisible() bool { return getBool(o.h, 1077) }
 // SetYearVisible writes YearVisible.
-func (o DatePickerPresenter) SetYearVisible(value bool) error { return setBool(o.h, 1076, value) }
+func (o DatePickerPresenter) SetYearVisible(value bool) error { return setBool(o.h, 1077, value) }
 
 // DateTimePickerPanel: The looping, virtualizing panel that shows the values of one unit of a
 // date or time picker.
@@ -5079,9 +5086,9 @@ func (o DoubleKeyFrame) KeyTime() string { return getString(o.h, 495) }
 func (o DoubleKeyFrame) SetKeyTime(value string) error { return setString(o.h, 495, value) }
 
 // Value reads Value. Defines the `Value` property: the value of the key frame.
-func (o DoubleKeyFrame) Value() float64 { return getF64(o.h, 1034) }
+func (o DoubleKeyFrame) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o DoubleKeyFrame) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o DoubleKeyFrame) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // DiscreteDoubleKeyFrame: Holds the value before it until its key time, then jumps.
 type DiscreteDoubleKeyFrame struct{ DoubleKeyFrame }
@@ -5105,13 +5112,13 @@ func (o ObjectKeyFrame) KeyTime() string { return getString(o.h, 495) }
 func (o ObjectKeyFrame) SetKeyTime(value string) error { return setString(o.h, 495, value) }
 
 // Value reads Value. Defines the `Value` property. Default `None` (null).
-func (o ObjectKeyFrame) Value() string { return getString(o.h, 1034) }
+func (o ObjectKeyFrame) Value() string { return getString(o.h, 1035) }
 // ValueObject is the object the property holds, with one reference counted: release it.
-func (o ObjectKeyFrame) ValueObject() Object { return getObject(o.h, 1034) }
+func (o ObjectKeyFrame) ValueObject() Object { return getObject(o.h, 1035) }
 // SetValue writes Value.
-func (o ObjectKeyFrame) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o ObjectKeyFrame) SetValue(value string) error { return setString(o.h, 1035, value) }
 // SetValueObject writes Value to an object; nil is null.
-func (o ObjectKeyFrame) SetValueObject(value Wrapper) error { return setObject(o.h, 1034, value) }
+func (o ObjectKeyFrame) SetValueObject(value Wrapper) error { return setObject(o.h, 1035, value) }
 
 // DiscreteObjectKeyFrame: Sets its value at its key time (WinUI's `DiscreteObjectKeyFrame`).
 type DiscreteObjectKeyFrame struct{ ObjectKeyFrame }
@@ -5133,9 +5140,9 @@ func (o PointKeyFrame) KeyTime() string { return getString(o.h, 495) }
 func (o PointKeyFrame) SetKeyTime(value string) error { return setString(o.h, 495, value) }
 
 // Value reads Value. Defines the `Value` property: the value of the key frame.
-func (o PointKeyFrame) Value() string { return getString(o.h, 1034) }
+func (o PointKeyFrame) Value() string { return getString(o.h, 1035) }
 // SetValue writes Value.
-func (o PointKeyFrame) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o PointKeyFrame) SetValue(value string) error { return setString(o.h, 1035, value) }
 
 // DiscretePointKeyFrame: Holds the value before it until its key time, then jumps.
 type DiscretePointKeyFrame struct{ PointKeyFrame }
@@ -5172,9 +5179,9 @@ func (o DockPanel) LastChildFill() bool { return getBool(o.h, 511) }
 func (o DockPanel) SetLastChildFill(value bool) error { return setBool(o.h, 511, value) }
 
 // VerticalSpacing reads VerticalSpacing. Defines the `VerticalSpacing` property.
-func (o DockPanel) VerticalSpacing() float64 { return getF64(o.h, 1040) }
+func (o DockPanel) VerticalSpacing() float64 { return getF64(o.h, 1041) }
 // SetVerticalSpacing writes VerticalSpacing.
-func (o DockPanel) SetVerticalSpacing(value float64) error { return setF64(o.h, 1040, value) }
+func (o DockPanel) SetVerticalSpacing(value float64) error { return setF64(o.h, 1041, value) }
 
 // DoubleAnimation: Animates a `f64` property (WinUI's `DoubleAnimation`). It animates from
 // `From` (or the value the property has when it begins) to `To`, or by `By` from the start;
@@ -5381,9 +5388,9 @@ func (o DrawerPage) SetIsOpen(value bool) error { return setBool(o.h, 437, value
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o DrawerPage) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o DrawerPage) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o DrawerPage) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o DrawerPage) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // OnClosed subscribes to Closed; the sender is valid for the call. Defines the `Closed` routed
 // event.
@@ -5515,9 +5522,9 @@ func (o DrawingImage) Drawing() Object { return getObject(o.h, 257) }
 func (o DrawingImage) SetDrawing(value Wrapper) error { return setObject(o.h, 257, value) }
 
 // Viewbox reads Viewbox. Defines the `Viewbox` property.
-func (o DrawingImage) Viewbox() string { return getString(o.h, 1041) }
+func (o DrawingImage) Viewbox() string { return getString(o.h, 1042) }
 // SetViewbox writes Viewbox.
-func (o DrawingImage) SetViewbox(value string) error { return setString(o.h, 1041, value) }
+func (o DrawingImage) SetViewbox(value string) error { return setString(o.h, 1042, value) }
 
 // DropDownButton: A button with an added drop-down chevron to visually indicate it has a
 // flyout with additional actions.
@@ -5941,9 +5948,9 @@ func (o FlexPanel) RowSpacing() float64 { return getF64(o.h, 739) }
 func (o FlexPanel) SetRowSpacing(value float64) error { return setF64(o.h, 739, value) }
 
 // Wrap reads Wrap. Defines the `Wrap` property.
-func (o FlexPanel) Wrap() FlexWrap { return FlexWrap(getI64(o.h, 1065)) }
+func (o FlexPanel) Wrap() FlexWrap { return FlexWrap(getI64(o.h, 1066)) }
 // SetWrap writes Wrap.
-func (o FlexPanel) SetWrap(value FlexWrap) error { return setI64(o.h, 1065, int64(value)) }
+func (o FlexPanel) SetWrap(value FlexWrap) error { return setI64(o.h, 1066, int64(value)) }
 
 // FlyoutBase: The base class of flyouts. This class is abstract: only its subclasses can be
 // created.
@@ -6012,9 +6019,9 @@ func (o PopupFlyoutBase) ShowMode() FlyoutShowMode { return FlyoutShowMode(getI6
 func (o PopupFlyoutBase) SetShowMode(value FlyoutShowMode) error { return setI64(o.h, 809, int64(value)) }
 
 // VerticalOffset reads VerticalOffset. Defines the `VerticalOffset` property.
-func (o PopupFlyoutBase) VerticalOffset() float64 { return getF64(o.h, 1038) }
+func (o PopupFlyoutBase) VerticalOffset() float64 { return getF64(o.h, 1039) }
 // SetVerticalOffset writes VerticalOffset.
-func (o PopupFlyoutBase) SetVerticalOffset(value float64) error { return setF64(o.h, 1038, value) }
+func (o PopupFlyoutBase) SetVerticalOffset(value float64) error { return setF64(o.h, 1039, value) }
 
 // Flyout: A flyout that displays arbitrary content.
 type Flyout struct{ PopupFlyoutBase }
@@ -6367,6 +6374,11 @@ func GridSetRow(target Wrapper, value int64) error { return setI64(target.Handle
 func GridRowSpan(target Wrapper) int64 { return getI64(target.Handle(), 332) }
 // GridSetRowSpan writes the attached property Grid.RowSpan.
 func GridSetRowSpan(target Wrapper, value int64) error { return setI64(target.Handle(), 332, value) }
+
+// Padding reads Padding. Defines the inset between the grid bounds and its cells.
+func (o Grid) Padding() string { return getString(o.h, 621) }
+// SetPadding writes Padding.
+func (o Grid) SetPadding(value string) error { return setString(o.h, 621, value) }
 
 // RowSpacing reads RowSpacing. Defines the `RowSpacing` property.
 func (o Grid) RowSpacing() float64 { return getF64(o.h, 739) }
@@ -6801,9 +6813,9 @@ func (o InfoBadge) TemplateSettings() Object { return getObject(o.h, 877) }
 
 // Value reads Value. Defines the `Value` property: the number the badge shows when it is 0 or
 // more; -1 (the default) shows the icon or the dot. A value below -1 is coerced to -1.
-func (o InfoBadge) Value() int64 { return getI64(o.h, 1034) }
+func (o InfoBadge) Value() int64 { return getI64(o.h, 1035) }
 // SetValue writes Value.
-func (o InfoBadge) SetValue(value int64) error { return setI64(o.h, 1034, value) }
+func (o InfoBadge) SetValue(value int64) error { return setI64(o.h, 1035, value) }
 
 // InfoBadgeTemplateSettings: The values the template of an [`InfoBadge`](crate::InfoBadge)
 // binds to: the corner radius of the badge (half its height unless the badge has a local
@@ -6975,9 +6987,9 @@ func InfoBarPanelSetVerticalOrientationMargin(target Wrapper, value string) erro
 
 // VerticalOrientationPadding reads VerticalOrientationPadding. Defines the
 // `VerticalOrientationPadding` property.
-func (o InfoBarPanel) VerticalOrientationPadding() string { return getString(o.h, 1039) }
+func (o InfoBarPanel) VerticalOrientationPadding() string { return getString(o.h, 1040) }
 // SetVerticalOrientationPadding writes VerticalOrientationPadding.
-func (o InfoBarPanel) SetVerticalOrientationPadding(value string) error { return setString(o.h, 1039, value) }
+func (o InfoBarPanel) SetVerticalOrientationPadding(value string) error { return setString(o.h, 1040, value) }
 
 // InfoBarTemplateSettings: The values the template of an [`InfoBar`](crate::InfoBar) binds to:
 // the icon element created from its `IconSource` (`TemplateSettings.IconElement`, the child of
@@ -7719,9 +7731,9 @@ func (o TextBox) SetUseFloatingPlaceholder(value bool) error { return setBool(o.
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o TextBox) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o TextBox) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o TextBox) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o TextBox) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // OnCopyingToClipboard subscribes to CopyingToClipboard; the sender is valid for the call.
 // Defines the `CopyingToClipboard` event.
@@ -8772,15 +8784,15 @@ func (o NumberBox) SetTextAlignment(value TextAlignment) error { return setI64(o
 
 // ValidationMode reads ValidationMode. Defines the `ValidationMode` property.
 // `InvalidInputOverwritten` by default.
-func (o NumberBox) ValidationMode() NumberBoxValidationMode { return NumberBoxValidationMode(getI64(o.h, 1033)) }
+func (o NumberBox) ValidationMode() NumberBoxValidationMode { return NumberBoxValidationMode(getI64(o.h, 1034)) }
 // SetValidationMode writes ValidationMode.
-func (o NumberBox) SetValidationMode(value NumberBoxValidationMode) error { return setI64(o.h, 1033, int64(value)) }
+func (o NumberBox) SetValidationMode(value NumberBoxValidationMode) error { return setI64(o.h, 1034, int64(value)) }
 
 // Value reads Value. Defines the `Value` property: the number, NaN when the box is empty (the
 // default).
-func (o NumberBox) Value() float64 { return getF64(o.h, 1034) }
+func (o NumberBox) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o NumberBox) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o NumberBox) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // NumberBoxAutomationPeer: An automation peer which represents a [`NumberBox`]: a spinner with
 // the range value pattern, named by its header when it has no name. Deviation
@@ -8921,15 +8933,15 @@ func (o NumericUpDown) Text() string { return getString(o.h, 880) }
 func (o NumericUpDown) SetText(value string) error { return setString(o.h, 880, value) }
 
 // Value reads Value. Defines the `Value` property.
-func (o NumericUpDown) Value() string { return getString(o.h, 1034) }
+func (o NumericUpDown) Value() string { return getString(o.h, 1035) }
 // SetValue writes Value.
-func (o NumericUpDown) SetValue(value string) error { return setString(o.h, 1034, value) }
+func (o NumericUpDown) SetValue(value string) error { return setString(o.h, 1035, value) }
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o NumericUpDown) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o NumericUpDown) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o NumericUpDown) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o NumericUpDown) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // OnValueChanged subscribes to ValueChanged; the sender is valid for the call. Defines the
 // `ValueChanged` event.
@@ -9504,9 +9516,9 @@ func (o PipsPager) SetSelectedPageIndex(value int64) error { return setI64(o.h, 
 func (o PipsPager) TemplateSettings() Object { return getObject(o.h, 877) }
 
 // WrapMode reads WrapMode. Defines the `WrapMode` property.
-func (o PipsPager) WrapMode() PipsPagerWrapMode { return PipsPagerWrapMode(getI64(o.h, 1066)) }
+func (o PipsPager) WrapMode() PipsPagerWrapMode { return PipsPagerWrapMode(getI64(o.h, 1067)) }
 // SetWrapMode writes WrapMode.
-func (o PipsPager) SetWrapMode(value PipsPagerWrapMode) error { return setI64(o.h, 1066, int64(value)) }
+func (o PipsPager) SetWrapMode(value PipsPagerWrapMode) error { return setI64(o.h, 1067, int64(value)) }
 
 // OnSelectedIndexChanged subscribes to SelectedIndexChanged; the sender is valid for the call.
 // Defines the `SelectedIndexChanged` event.
@@ -9943,15 +9955,15 @@ func (o Popup) Topmost() bool { return getBool(o.h, 970) }
 func (o Popup) SetTopmost(value bool) error { return setBool(o.h, 970, value) }
 
 // VerticalOffset reads VerticalOffset. Defines the `VerticalOffset` property.
-func (o Popup) VerticalOffset() float64 { return getF64(o.h, 1038) }
+func (o Popup) VerticalOffset() float64 { return getF64(o.h, 1039) }
 // SetVerticalOffset writes VerticalOffset.
-func (o Popup) SetVerticalOffset(value float64) error { return setF64(o.h, 1038, value) }
+func (o Popup) SetVerticalOffset(value float64) error { return setF64(o.h, 1039, value) }
 
 // WindowManagerAddShadowHint reads WindowManagerAddShadowHint. Defines the
 // `WindowManagerAddShadowHint` property.
-func (o Popup) WindowManagerAddShadowHint() bool { return getBool(o.h, 1062) }
+func (o Popup) WindowManagerAddShadowHint() bool { return getBool(o.h, 1063) }
 // SetWindowManagerAddShadowHint writes WindowManagerAddShadowHint.
-func (o Popup) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1062, value) }
+func (o Popup) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1063, value) }
 
 // PopupAutomationPeer: An automation peer which represents a [`Popup`].
 type PopupAutomationPeer struct{ ControlAutomationPeer }
@@ -9997,9 +10009,9 @@ func (o PopupRoot) SetTransform(value Wrapper) error { return setObject(o.h, 971
 
 // WindowManagerAddShadowHint reads WindowManagerAddShadowHint. Defines the
 // `WindowManagerAddShadowHint` property.
-func (o PopupRoot) WindowManagerAddShadowHint() bool { return getBool(o.h, 1062) }
+func (o PopupRoot) WindowManagerAddShadowHint() bool { return getBool(o.h, 1063) }
 // SetWindowManagerAddShadowHint writes WindowManagerAddShadowHint.
-func (o PopupRoot) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1062, value) }
+func (o PopupRoot) SetWindowManagerAddShadowHint(value bool) error { return setBool(o.h, 1063, value) }
 
 // WindowBaseAutomationPeer: An automation peer which represents a [`WindowBase`]: the root of
 // an automation tree.
@@ -10050,9 +10062,9 @@ func (o RangeBase) SmallChange() float64 { return getF64(o.h, 818) }
 func (o RangeBase) SetSmallChange(value float64) error { return setF64(o.h, 818, value) }
 
 // Value reads Value. Defines the `Value` property.
-func (o RangeBase) Value() float64 { return getF64(o.h, 1034) }
+func (o RangeBase) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o RangeBase) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o RangeBase) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // OnValueChanged subscribes to ValueChanged; the sender is valid for the call. Defines the
 // `ValueChanged` event.
@@ -10223,9 +10235,9 @@ func (o ProgressRing) TemplateSettings() Object { return getObject(o.h, 877) }
 
 // Value reads Value. Defines the `Value` property: the progress between `Minimum` and
 // `Maximum`. 0 by default.
-func (o ProgressRing) Value() float64 { return getF64(o.h, 1034) }
+func (o ProgressRing) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o ProgressRing) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o ProgressRing) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // ProgressRingAutomationPeer: The automation peer of a [`ProgressRing`]: a progress bar with
 // the range value pattern while the ring is determinate, as in WinUI. The name of an active
@@ -10505,9 +10517,9 @@ func (o RatingControl) SetPlaceholderValue(value float64) error { return setF64(
 
 // Value reads Value. Defines the `Value` property: the rating, from 1 to `MaxRating`, or -1
 // while it is not set (the default).
-func (o RatingControl) Value() float64 { return getF64(o.h, 1034) }
+func (o RatingControl) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o RatingControl) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o RatingControl) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // RatingControlAutomationPeer: An automation peer which represents a [`RatingControl`]: a
 // slider with the value pattern (the text of the rating) and the range value pattern (0 to
@@ -10672,9 +10684,9 @@ func (o RefreshContainer) SetPullDirection(value PullDirection) error { return s
 
 // Visualizer reads Visualizer. Defines the `Visualizer` property.
 // Visualizer is the object the property holds, with one reference counted: release it.
-func (o RefreshContainer) Visualizer() Object { return getObject(o.h, 1051) }
+func (o RefreshContainer) Visualizer() Object { return getObject(o.h, 1052) }
 // SetVisualizer writes Visualizer to an object; nil is null.
-func (o RefreshContainer) SetVisualizer(value Wrapper) error { return setObject(o.h, 1051, value) }
+func (o RefreshContainer) SetVisualizer(value Wrapper) error { return setObject(o.h, 1052, value) }
 
 // OnRefreshRequested subscribes to RefreshRequested; the sender is valid for the call. Defines
 // the `RefreshRequested` event.
@@ -11715,14 +11727,14 @@ func (o ScrollBar) ShowDelay() string { return getString(o.h, 805) }
 func (o ScrollBar) SetShowDelay(value string) error { return setString(o.h, 805, value) }
 
 // ViewportSize reads ViewportSize. Defines the `ViewportSize` property.
-func (o ScrollBar) ViewportSize() float64 { return getF64(o.h, 1044) }
+func (o ScrollBar) ViewportSize() float64 { return getF64(o.h, 1045) }
 // SetViewportSize writes ViewportSize.
-func (o ScrollBar) SetViewportSize(value float64) error { return setF64(o.h, 1044, value) }
+func (o ScrollBar) SetViewportSize(value float64) error { return setF64(o.h, 1045, value) }
 
 // Visibility reads Visibility. Defines the `Visibility` property.
-func (o ScrollBar) Visibility() ScrollBarVisibility { return ScrollBarVisibility(getI64(o.h, 1045)) }
+func (o ScrollBar) Visibility() ScrollBarVisibility { return ScrollBarVisibility(getI64(o.h, 1046)) }
 // SetVisibility writes Visibility.
-func (o ScrollBar) SetVisibility(value ScrollBarVisibility) error { return setI64(o.h, 1045, int64(value)) }
+func (o ScrollBar) SetVisibility(value ScrollBarVisibility) error { return setI64(o.h, 1046, int64(value)) }
 
 // ScrollBarAutomationPeer: An automation peer which represents a [`ScrollBar`].
 type ScrollBarAutomationPeer struct{ RangeBaseAutomationPeer }
@@ -11793,9 +11805,9 @@ func ScrollContentPresenterVerticalSnapPointsType(target Wrapper) SnapPointsType
 func ScrollContentPresenterSetVerticalSnapPointsType(target Wrapper, value SnapPointsType) error { return setI64(target.Handle(), 750, int64(value)) }
 
 // Viewport reads Viewport. Defines the `Viewport` property.
-func (o ScrollContentPresenter) Viewport() string { return getString(o.h, 1042) }
+func (o ScrollContentPresenter) Viewport() string { return getString(o.h, 1043) }
 // SetViewport writes Viewport.
-func (o ScrollContentPresenter) SetViewport(value string) error { return setString(o.h, 1042, value) }
+func (o ScrollContentPresenter) SetViewport(value string) error { return setString(o.h, 1043, value) }
 
 // ScrollGestureRecognizer: Recognizes the scroll gesture: a touch or pen drag, optionally
 // followed by inertia.
@@ -11840,9 +11852,9 @@ func (o ScrollGestureRecognizer) ScrollStartDistance() int64 { return getI64(o.h
 func (o ScrollGestureRecognizer) SetScrollStartDistance(value int64) error { return setI64(o.h, 751, value) }
 
 // Viewport reads Viewport. Defines the `Viewport` property.
-func (o ScrollGestureRecognizer) Viewport() string { return getString(o.h, 1042) }
+func (o ScrollGestureRecognizer) Viewport() string { return getString(o.h, 1043) }
 // SetViewport writes Viewport.
-func (o ScrollGestureRecognizer) SetViewport(value string) error { return setString(o.h, 1042, value) }
+func (o ScrollGestureRecognizer) SetViewport(value string) error { return setString(o.h, 1043, value) }
 
 // ScrollViewer: A control which scrolls its content if the content is bigger than the space
 // available.
@@ -11959,17 +11971,17 @@ func ScrollViewerSetVerticalSnapPointsType(target Wrapper, value SnapPointsType)
 func (o ScrollViewer) SmallChange() string { return getString(o.h, 818) }
 
 // Viewport reads Viewport. Defines the `Viewport` property.
-func (o ScrollViewer) Viewport() string { return getString(o.h, 1042) }
+func (o ScrollViewer) Viewport() string { return getString(o.h, 1043) }
 
 // ZoomFactor reads ZoomFactor. Defines the `ZoomFactor` property (WinUI, not upstream): the
 // zoom of the content, changed with [`change_view`](ScrollViewer::change_view) or by the user.
-func (o ScrollViewer) ZoomFactor() float64 { return getF64(o.h, 1078) }
+func (o ScrollViewer) ZoomFactor() float64 { return getF64(o.h, 1079) }
 
 // ZoomMode reads ZoomMode. Defines the `ZoomMode` property (WinUI `ScrollViewer.ZoomMode`, not
 // upstream): whether the user can zoom the content.
-func (o ScrollViewer) ZoomMode() ZoomMode { return ZoomMode(getI64(o.h, 1079)) }
+func (o ScrollViewer) ZoomMode() ZoomMode { return ZoomMode(getI64(o.h, 1080)) }
 // SetZoomMode writes ZoomMode.
-func (o ScrollViewer) SetZoomMode(value ZoomMode) error { return setI64(o.h, 1079, int64(value)) }
+func (o ScrollViewer) SetZoomMode(value ZoomMode) error { return setI64(o.h, 1080, int64(value)) }
 
 // OnScrollChanged subscribes to ScrollChanged; the sender is valid for the call. Defines the
 // `ScrollChanged` event.
@@ -12740,9 +12752,9 @@ func (o TabControl) SetTabStripPlacement(value Dock) error { return setI64(o.h, 
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o TabControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o TabControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o TabControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o TabControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // TabItem: An item in a `TabControl`.
 type TabItem struct{ HeaderedContentControl }
@@ -13113,9 +13125,9 @@ func (o TableViewColumn) SetIsVisible(value bool) error { return setBool(o.h, 47
 func (o TableViewColumn) TableView() Object { return getObject(o.h, 871) }
 
 // Width reads Width. Defines the `Width` property.
-func (o TableViewColumn) Width() string { return getString(o.h, 1054) }
+func (o TableViewColumn) Width() string { return getString(o.h, 1055) }
 // SetWidth writes Width.
-func (o TableViewColumn) SetWidth(value string) error { return setString(o.h, 1054, value) }
+func (o TableViewColumn) SetWidth(value string) error { return setString(o.h, 1055, value) }
 
 // TableViewColumnHeader: Represents the header of a [`TableViewColumn`].
 type TableViewColumnHeader struct{ ContentControl }
@@ -13531,9 +13543,9 @@ func (o TimePicker) SetUseSeconds(value bool) error { return setBool(o.h, 1031, 
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o TimePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o TimePicker) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o TimePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o TimePicker) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // TimePickerAutomationPeer: An automation peer which represents a [`TimePicker`].
 type TimePickerAutomationPeer struct{ ControlAutomationPeer }
@@ -13939,14 +13951,14 @@ func (o Track) Thumb() Object { return getObject(o.h, 933) }
 func (o Track) SetThumb(value Wrapper) error { return setObject(o.h, 933, value) }
 
 // Value reads Value. Defines the `Value` property.
-func (o Track) Value() float64 { return getF64(o.h, 1034) }
+func (o Track) Value() float64 { return getF64(o.h, 1035) }
 // SetValue writes Value.
-func (o Track) SetValue(value float64) error { return setF64(o.h, 1034, value) }
+func (o Track) SetValue(value float64) error { return setF64(o.h, 1035, value) }
 
 // ViewportSize reads ViewportSize. Defines the `ViewportSize` property.
-func (o Track) ViewportSize() float64 { return getF64(o.h, 1044) }
+func (o Track) ViewportSize() float64 { return getF64(o.h, 1045) }
 // SetViewportSize writes ViewportSize.
-func (o Track) SetViewportSize(value float64) error { return setF64(o.h, 1044, value) }
+func (o Track) SetViewportSize(value float64) error { return setF64(o.h, 1045, value) }
 
 // TrackingPage:
 type TrackingPage struct{ ContentPage }
@@ -14015,14 +14027,14 @@ func NewTranslateTransform() (TranslateTransform, error) {
 }
 
 // X reads X.
-func (o TranslateTransform) X() float64 { return getF64(o.h, 1068) }
+func (o TranslateTransform) X() float64 { return getF64(o.h, 1069) }
 // SetX writes X.
-func (o TranslateTransform) SetX(value float64) error { return setF64(o.h, 1068, value) }
+func (o TranslateTransform) SetX(value float64) error { return setF64(o.h, 1069, value) }
 
 // Y reads Y.
-func (o TranslateTransform) Y() float64 { return getF64(o.h, 1074) }
+func (o TranslateTransform) Y() float64 { return getF64(o.h, 1075) }
 // SetY writes Y.
-func (o TranslateTransform) SetY(value float64) error { return setF64(o.h, 1074, value) }
+func (o TranslateTransform) SetY(value float64) error { return setF64(o.h, 1075, value) }
 
 // TrayIcon: An icon in the notification area of the platform.
 type TrayIcon struct{ Object }
@@ -14242,9 +14254,9 @@ func NewVisualBrush() (VisualBrush, error) {
 
 // Visual reads Visual.
 // Visual is the object the property holds, with one reference counted: release it.
-func (o VisualBrush) Visual() Object { return getObject(o.h, 1046) }
+func (o VisualBrush) Visual() Object { return getObject(o.h, 1047) }
 // SetVisual writes Visual to an object; nil is null.
-func (o VisualBrush) SetVisual(value Wrapper) error { return setObject(o.h, 1046, value) }
+func (o VisualBrush) SetVisual(value Wrapper) error { return setObject(o.h, 1047, value) }
 
 // VisualLayerManager: A control that manages multiple layers such as adorners, overlays, text
 // selectors, and popups.
@@ -14308,9 +14320,9 @@ func NewVisualStateManager() (VisualStateManager, error) {
 // VisualStateManagerCustomVisualStateManager reads the attached property
 // VisualStateManager.CustomVisualStateManager. Defines the attached `CustomVisualStateManager`
 // property: the manager that changes the states of the groups of the element it is set on.
-func VisualStateManagerCustomVisualStateManager(target Wrapper) Object { return getObject(target.Handle(), 1049) }
+func VisualStateManagerCustomVisualStateManager(target Wrapper) Object { return getObject(target.Handle(), 1050) }
 // VisualStateManagerSetCustomVisualStateManager writes the attached property VisualStateManager.CustomVisualStateManager to an object.
-func VisualStateManagerSetCustomVisualStateManager(target Wrapper, value Wrapper) error { return setObject(target.Handle(), 1049, value) }
+func VisualStateManagerSetCustomVisualStateManager(target Wrapper, value Wrapper) error { return setObject(target.Handle(), 1050, value) }
 
 // VisualStateManagerVisualStateGroups reads the attached property
 // VisualStateManager.VisualStateGroups. Defines the attached `VisualStateGroups` property: the
@@ -14318,9 +14330,9 @@ func VisualStateManagerSetCustomVisualStateManager(target Wrapper, value Wrapper
 // [`get_visual_state_groups`](VisualStateManager::get_visual_state_groups) creates the
 // collection when the element has none, which is what markup's property element syntax
 // (`<VisualStateManager.VisualStateGroups>`) adds the groups to.
-func VisualStateManagerVisualStateGroups(target Wrapper) string { return getString(target.Handle(), 1050) }
+func VisualStateManagerVisualStateGroups(target Wrapper) string { return getString(target.Handle(), 1051) }
 // VisualStateManagerSetVisualStateGroups writes the attached property VisualStateManager.VisualStateGroups.
-func VisualStateManagerSetVisualStateGroups(target Wrapper, value string) error { return setString(target.Handle(), 1050, value) }
+func VisualStateManagerSetVisualStateGroups(target Wrapper, value string) error { return setString(target.Handle(), 1051, value) }
 
 // VisualTransition: How a [`VisualStateGroup`](super::VisualStateGroup) changes from one state
 // to another when `GoToState` is called with transitions (WinUI's `VisualTransition`). A
@@ -14408,31 +14420,31 @@ func (o Window) SetTitle(value string) error { return setString(o.h, 944, value)
 
 // WindowDecorationMargin reads WindowDecorationMargin. Defines the `WindowDecorationMargin`
 // property.
-func (o Window) WindowDecorationMargin() string { return getString(o.h, 1057) }
+func (o Window) WindowDecorationMargin() string { return getString(o.h, 1058) }
 
 // WindowDecorations reads WindowDecorations. Defines the `WindowDecorations` property.
-func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1059)) }
+func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1060)) }
 // SetWindowDecorations writes WindowDecorations.
-func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1059, int64(value)) }
+func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1060, int64(value)) }
 
 // WindowDecorationsTheme reads WindowDecorationsTheme. Defines the `WindowDecorationsTheme`
 // property.
 // WindowDecorationsTheme is the object the property holds, with one reference counted: release it.
-func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1060) }
+func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1061) }
 // SetWindowDecorationsTheme writes WindowDecorationsTheme to an object; nil is null.
-func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1060, value) }
+func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1061, value) }
 
 // WindowStartupLocation reads WindowStartupLocation. Defines the `WindowStartupLocation`
 // property.
-func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1063)) }
+func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1064)) }
 // SetWindowStartupLocation writes WindowStartupLocation.
-func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1063, int64(value)) }
+func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1064, int64(value)) }
 
 // WindowState reads WindowState. Represents the currently effective window state (normal,
 // minimized, maximized).
-func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1064)) }
+func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1065)) }
 // SetWindowState writes WindowState.
-func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1064, int64(value)) }
+func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1065, int64(value)) }
 
 // OnWindowClosed subscribes to WindowClosed; the sender is valid for the call. Routed event
 // that can be used for global tracking of window destruction.
@@ -14507,9 +14519,9 @@ func (o WindowDrawnDecorations) TitleBarHeight() float64 { return getF64(o.h, 94
 // WindowDrawnDecorationsTitleBarDecorations reads the attached property
 // WindowDrawnDecorations.TitleBarDecorations. Defines the `TitleBarDecorations` attached
 // property.
-func WindowDrawnDecorationsTitleBarDecorations(target Wrapper) string { return getString(target.Handle(), 1061) }
+func WindowDrawnDecorationsTitleBarDecorations(target Wrapper) string { return getString(target.Handle(), 1062) }
 // WindowDrawnDecorationsSetTitleBarDecorations writes the attached property WindowDrawnDecorations.TitleBarDecorations.
-func WindowDrawnDecorationsSetTitleBarDecorations(target Wrapper, value string) error { return setString(target.Handle(), 1061, value) }
+func WindowDrawnDecorationsSetTitleBarDecorations(target Wrapper, value string) error { return setString(target.Handle(), 1062, value) }
 
 // WindowDrawnDecorationsContent: Holds the template content for
 // [`WindowDrawnDecorations`](super::WindowDrawnDecorations). Contains three visual slots:
@@ -14561,6 +14573,6 @@ func (o XamlAmbientLight) SetColor(value string) error { return setString(o.h, 1
 
 // XamlAmbientLightIsTarget reads the attached property XamlAmbientLight.IsTarget. `IsTarget`
 // (attached): the ambient lights light the element or brush it is set on.
-func XamlAmbientLightIsTarget(target Wrapper) bool { return getBool(target.Handle(), 1072) }
+func XamlAmbientLightIsTarget(target Wrapper) bool { return getBool(target.Handle(), 1073) }
 // XamlAmbientLightSetIsTarget writes the attached property XamlAmbientLight.IsTarget.
-func XamlAmbientLightSetIsTarget(target Wrapper, value bool) error { return setBool(target.Handle(), 1072, value) }
+func XamlAmbientLightSetIsTarget(target Wrapper, value bool) error { return setBool(target.Handle(), 1073, value) }

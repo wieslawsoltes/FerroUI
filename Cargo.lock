@@ -1696,6 +1696,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "url",
 ]
 
 [[package]]

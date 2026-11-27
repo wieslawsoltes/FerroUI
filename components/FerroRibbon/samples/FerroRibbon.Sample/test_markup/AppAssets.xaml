@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Image x:Name="ApplicationIcon" Source="ferres://ferroribbon_sample/Assets/Generated/Assets.xcassets/icon.appiconset/icon256x256@1x.png" />
+  <Image x:Name="SplashImage" Source="ferres://ferroribbon_sample/Assets/Generated/splash_screen.png" />
+</StackPanel>

@@ -281,7 +281,7 @@ namespace FerroUI.Bindings
     {
         internal const int AbiVersion = 1;
         internal const int BufferTooSmall = -14;
-        internal const long ApiFingerprint = -4387658432560162436L;
+        internal const long ApiFingerprint = -2903654145985797389L;
         internal const long SelectionFingerprint = 0L;
 
         internal static void RegisterTypes()
@@ -1597,8 +1597,8 @@ namespace FerroUI.Bindings
         public ulong Handle { get; }
         public static Visual Create() => new Visual(Native.Create(TypeId));
         /// <summary>The attached property Visual.FlowDirection. Defines the `FlowDirection` attached property.</summary>
-        public static global::FerroUI.Bindings.FlowDirection GetFlowDirection(IFerroObject self) => (global::FerroUI.Bindings.FlowDirection)Native.ferro_get_i64_or(self.Handle, 1047, 0);
-        public static void SetFlowDirection(IFerroObject target, global::FerroUI.Bindings.FlowDirection value) { Native.Check(Native.ferro_set_i64(target.Handle, 1047, (long)value)); }
+        public static global::FerroUI.Bindings.FlowDirection GetFlowDirection(IFerroObject self) => (global::FerroUI.Bindings.FlowDirection)Native.ferro_get_i64_or(self.Handle, 1048, 0);
+        public static void SetFlowDirection(IFerroObject target, global::FerroUI.Bindings.FlowDirection value) { Native.Check(Native.ferro_set_i64(target.Handle, 1048, (long)value)); }
     }
 
     public static class VisualExtensions
@@ -1632,10 +1632,10 @@ namespace FerroUI.Bindings
         /// <summary>Reads RenderTransformOrigin. Defines the `RenderTransformOrigin` property.</summary>
         public static string RenderTransformOrigin<T>(this T self) where T : struct, IVisual => Native.GetString(self.Handle, 720);
         public static T RenderTransformOrigin<T>(this T self, string value) where T : struct, IVisual { Native.SetString(self.Handle, 720, value); return self; }
-        public static FerroObject VisualParent<T>(this T self) where T : struct, IVisual => Native.GetObject(self.Handle, 1048);
+        public static FerroObject VisualParent<T>(this T self) where T : struct, IVisual => Native.GetObject(self.Handle, 1049);
         /// <summary>Reads ZIndex. Defines the `ZIndex` property.</summary>
-        public static long ZIndex<T>(this T self) where T : struct, IVisual => Native.ferro_get_i64_or(self.Handle, 1077, 0);
-        public static T ZIndex<T>(this T self, long value) where T : struct, IVisual { Native.Check(Native.ferro_set_i64(self.Handle, 1077, value)); return self; }
+        public static long ZIndex<T>(this T self) where T : struct, IVisual => Native.ferro_get_i64_or(self.Handle, 1078, 0);
+        public static T ZIndex<T>(this T self, long value) where T : struct, IVisual { Native.Check(Native.ferro_set_i64(self.Handle, 1078, value)); return self; }
     }
 
     /// <summary>Implements layout-related functionality for a control.</summary>
@@ -1678,12 +1678,15 @@ namespace FerroUI.Bindings
         /// <summary>Reads UseLayoutRounding. Defines the `UseLayoutRounding` property.</summary>
         public static bool UseLayoutRounding<T>(this T self) where T : struct, ILayoutable => Native.ferro_get_bool_or(self.Handle, 1028, 0) != 0;
         public static T UseLayoutRounding<T>(this T self, bool value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_bool(self.Handle, 1028, value ? (byte)1 : (byte)0)); return self; }
+        /// <summary>Reads UseWinUiMeasureRounding. Defines the inherited `UseWinUiMeasureRounding` property. When layout rounding is enabled, this uses WinUI's physical-pixel rounding for layout sizes, offsets and border insets.</summary>
+        public static bool UseWinUiMeasureRounding<T>(this T self) where T : struct, ILayoutable => Native.ferro_get_bool_or(self.Handle, 1032, 0) != 0;
+        public static T UseWinUiMeasureRounding<T>(this T self, bool value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_bool(self.Handle, 1032, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalAlignment. Defines the `VerticalAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalAlignment<T>(this T self) where T : struct, ILayoutable => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1036, 0);
-        public static T VerticalAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_i64(self.Handle, 1036, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalAlignment<T>(this T self) where T : struct, ILayoutable => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
+        public static T VerticalAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
         /// <summary>Reads Width. Defines the `Width` property.</summary>
-        public static double Width<T>(this T self) where T : struct, ILayoutable => Native.ferro_get_f64_or(self.Handle, 1054, 0);
-        public static T Width<T>(this T self, double value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_f64(self.Handle, 1054, value)); return self; }
+        public static double Width<T>(this T self) where T : struct, ILayoutable => Native.ferro_get_f64_or(self.Handle, 1055, 0);
+        public static T Width<T>(this T self, double value) where T : struct, ILayoutable { Native.Check(Native.ferro_set_f64(self.Handle, 1055, value)); return self; }
     }
 
     /// <summary>Base class for objects that raise routed events.</summary>
@@ -2284,8 +2287,8 @@ namespace FerroUI.Bindings
         public static string SelectionMode<T>(this T self) where T : struct, ISelectingItemsControl => Native.GetString(self.Handle, 793);
         public static T SelectionMode<T>(this T self, string value) where T : struct, ISelectingItemsControl { Native.SetString(self.Handle, 793, value); return self; }
         /// <summary>Reads WrapSelection. Defines the `WrapSelection` property.</summary>
-        public static bool WrapSelection<T>(this T self) where T : struct, ISelectingItemsControl => Native.ferro_get_bool_or(self.Handle, 1067, 0) != 0;
-        public static T WrapSelection<T>(this T self, bool value) where T : struct, ISelectingItemsControl { Native.Check(Native.ferro_set_bool(self.Handle, 1067, value ? (byte)1 : (byte)0)); return self; }
+        public static bool WrapSelection<T>(this T self) where T : struct, ISelectingItemsControl => Native.ferro_get_bool_or(self.Handle, 1068, 0) != 0;
+        public static T WrapSelection<T>(this T self, bool value) where T : struct, ISelectingItemsControl { Native.Check(Native.ferro_set_bool(self.Handle, 1068, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>IsSelectedChanged: the sender is valid for the call. Event that should be raised by containers when their selection state changes to notify the parent [`SelectingItemsControl`] that their selection state has changed.</summary>
         public static Subscription OnIsSelectedChanged<T>(this T self, global::System.Action<T> handler) where T : struct, ISelectingItemsControl =>
             Native.Subscribe(self.Handle, 31, sender => handler(Native.Wrap<T>(sender)));
@@ -2348,10 +2351,10 @@ namespace FerroUI.Bindings
     public static class AnimatorKeyFrameExtensions
     {
         /// <summary>Reads Value. Defines the `Value` property.</summary>
-        public static string Value<T>(this T self) where T : struct, IAnimatorKeyFrame => Native.GetString(self.Handle, 1034);
-        public static FerroObject ValueObject<T>(this T self) where T : struct, IAnimatorKeyFrame => Native.GetObject(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, IAnimatorKeyFrame { Native.SetString(self.Handle, 1034, value); return self; }
-        public static T Value<T>(this T self, IFerroObject value) where T : struct, IAnimatorKeyFrame { Native.Check(Native.ferro_set_handle(self.Handle, 1034, value?.Handle ?? 0)); return self; }
+        public static string Value<T>(this T self) where T : struct, IAnimatorKeyFrame => Native.GetString(self.Handle, 1035);
+        public static FerroObject ValueObject<T>(this T self) where T : struct, IAnimatorKeyFrame => Native.GetObject(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, IAnimatorKeyFrame { Native.SetString(self.Handle, 1035, value); return self; }
+        public static T Value<T>(this T self, IFerroObject value) where T : struct, IAnimatorKeyFrame { Native.Check(Native.ferro_set_handle(self.Handle, 1035, value?.Handle ?? 0)); return self; }
     }
 
     /// <summary>Encapsulates a FerroUI application. The [`Application`] class encapsulates application-specific functionality, including: - A global set of [`data_templates`](Application::data_templates). - A global set of [`styles`](Application::styles). - An input manager. - Registers services needed by the rest of the framework in the [`register_services`](Application::register_services) method. - Tracks the lifetime of the application. An application class derives from it and overrides the members of [`ApplicationImpl`]: ```ignore #[repr(C)] pub struct App { base: Application } ferro_class!(App: Application); ferro_impl_classes!(App: FerroObjectImpl); impl ApplicationImpl for App { fn initialize(this: &amp;Self) { this.styles().add(theme()); } } impl NewApplication for App { fn new_application() -&gt; Ref&lt;Self&gt; { instantiate(Self { base: Application::construct() }) } } ```</summary>
@@ -2568,8 +2571,8 @@ namespace FerroUI.Bindings
         public static string Text<T>(this T self) where T : struct, IAutoCompleteBox => Native.GetString(self.Handle, 880);
         public static T Text<T>(this T self, string value) where T : struct, IAutoCompleteBox { Native.SetString(self.Handle, 880, value); return self; }
         /// <summary>Reads ValueMemberBinding.</summary>
-        public static string ValueMemberBinding<T>(this T self) where T : struct, IAutoCompleteBox => Native.GetString(self.Handle, 1035);
-        public static T ValueMemberBinding<T>(this T self, string value) where T : struct, IAutoCompleteBox { Native.SetString(self.Handle, 1035, value); return self; }
+        public static string ValueMemberBinding<T>(this T self) where T : struct, IAutoCompleteBox => Native.GetString(self.Handle, 1036);
+        public static T ValueMemberBinding<T>(this T self, string value) where T : struct, IAutoCompleteBox { Native.SetString(self.Handle, 1036, value); return self; }
         /// <summary>QuerySubmitted: the sender is valid for the call. Defines the `QuerySubmitted` event: a FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`, raised when Enter submits the text of the box.</summary>
         public static Subscription OnQuerySubmitted<T>(this T self, global::System.Action<T> handler) where T : struct, IAutoCompleteBox =>
             Native.Subscribe(self.Handle, 64, sender => handler(Native.Wrap<T>(sender)));
@@ -2764,10 +2767,10 @@ namespace FerroUI.Bindings
     public static class BindingEvaluatorExtensions
     {
         /// <summary>Reads Value. Defines the `Value` property.</summary>
-        public static string Value<T>(this T self) where T : struct, IBindingEvaluator => Native.GetString(self.Handle, 1034);
-        public static FerroObject ValueObject<T>(this T self) where T : struct, IBindingEvaluator => Native.GetObject(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, IBindingEvaluator { Native.SetString(self.Handle, 1034, value); return self; }
-        public static T Value<T>(this T self, IFerroObject value) where T : struct, IBindingEvaluator { Native.Check(Native.ferro_set_handle(self.Handle, 1034, value?.Handle ?? 0)); return self; }
+        public static string Value<T>(this T self) where T : struct, IBindingEvaluator => Native.GetString(self.Handle, 1035);
+        public static FerroObject ValueObject<T>(this T self) where T : struct, IBindingEvaluator => Native.GetObject(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, IBindingEvaluator { Native.SetString(self.Handle, 1035, value); return self; }
+        public static T Value<T>(this T self, IFerroObject value) where T : struct, IBindingEvaluator { Native.Check(Native.ferro_set_handle(self.Handle, 1035, value?.Handle ?? 0)); return self; }
     }
 
     /// <summary>Represents cached content modes for graphics acceleration features.</summary>
@@ -3063,8 +3066,8 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.HorizontalAlignment HorizontalContentAlignment<T>(this T self) where T : struct, IContentControl => (global::FerroUI.Bindings.HorizontalAlignment)Native.ferro_get_i64_or(self.Handle, 352, 0);
         public static T HorizontalContentAlignment<T>(this T self, global::FerroUI.Bindings.HorizontalAlignment value) where T : struct, IContentControl { Native.Check(Native.ferro_set_i64(self.Handle, 352, (long)value)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentControl => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentControl { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentControl => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentControl { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>A standard button control.</summary>
@@ -3143,8 +3146,8 @@ namespace FerroUI.Bindings
     public static class SpinnerExtensions
     {
         /// <summary>Reads ValidSpinDirection. Defines the `ValidSpinDirection` property.</summary>
-        public static string ValidSpinDirection<T>(this T self) where T : struct, ISpinner => Native.GetString(self.Handle, 1032);
-        public static T ValidSpinDirection<T>(this T self, string value) where T : struct, ISpinner { Native.SetString(self.Handle, 1032, value); return self; }
+        public static string ValidSpinDirection<T>(this T self) where T : struct, ISpinner => Native.GetString(self.Handle, 1033);
+        public static T ValidSpinDirection<T>(this T self, string value) where T : struct, ISpinner { Native.SetString(self.Handle, 1033, value); return self; }
         /// <summary>Spin: the sender is valid for the call. Defines the `Spin` routed event.</summary>
         public static Subscription OnSpin<T>(this T self, global::System.Action<T> handler) where T : struct, ISpinner =>
             Native.Subscribe(self.Handle, 78, sender => handler(Native.Wrap<T>(sender)));
@@ -3223,8 +3226,8 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.CalendarSelectionMode SelectionMode<T>(this T self) where T : struct, ICalendar => (global::FerroUI.Bindings.CalendarSelectionMode)Native.ferro_get_i64_or(self.Handle, 793, 0);
         public static T SelectionMode<T>(this T self, global::FerroUI.Bindings.CalendarSelectionMode value) where T : struct, ICalendar { Native.Check(Native.ferro_set_i64(self.Handle, 793, (long)value)); return self; }
         /// <summary>Reads WeekNumberRule. Defines the `WeekNumberRule` property.</summary>
-        public static global::FerroUI.Bindings.CalendarWeekRule WeekNumberRule<T>(this T self) where T : struct, ICalendar => (global::FerroUI.Bindings.CalendarWeekRule)Native.ferro_get_i64_or(self.Handle, 1053, 0);
-        public static T WeekNumberRule<T>(this T self, global::FerroUI.Bindings.CalendarWeekRule value) where T : struct, ICalendar { Native.Check(Native.ferro_set_i64(self.Handle, 1053, (long)value)); return self; }
+        public static global::FerroUI.Bindings.CalendarWeekRule WeekNumberRule<T>(this T self) where T : struct, ICalendar => (global::FerroUI.Bindings.CalendarWeekRule)Native.ferro_get_i64_or(self.Handle, 1054, 0);
+        public static T WeekNumberRule<T>(this T self, global::FerroUI.Bindings.CalendarWeekRule value) where T : struct, ICalendar { Native.Check(Native.ferro_set_i64(self.Handle, 1054, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`Calendar`].</summary>
@@ -3310,11 +3313,11 @@ namespace FerroUI.Bindings
         public static bool UseFloatingPlaceholder<T>(this T self) where T : struct, ICalendarDatePicker => Native.ferro_get_bool_or(self.Handle, 1027, 0) != 0;
         public static T UseFloatingPlaceholder<T>(this T self, bool value) where T : struct, ICalendarDatePicker { Native.Check(Native.ferro_set_bool(self.Handle, 1027, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ICalendarDatePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ICalendarDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ICalendarDatePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ICalendarDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
         /// <summary>Reads WeekNumberRule. Defines the `WeekNumberRule` property.</summary>
-        public static global::FerroUI.Bindings.CalendarWeekRule WeekNumberRule<T>(this T self) where T : struct, ICalendarDatePicker => (global::FerroUI.Bindings.CalendarWeekRule)Native.ferro_get_i64_or(self.Handle, 1053, 0);
-        public static T WeekNumberRule<T>(this T self, global::FerroUI.Bindings.CalendarWeekRule value) where T : struct, ICalendarDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1053, (long)value)); return self; }
+        public static global::FerroUI.Bindings.CalendarWeekRule WeekNumberRule<T>(this T self) where T : struct, ICalendarDatePicker => (global::FerroUI.Bindings.CalendarWeekRule)Native.ferro_get_i64_or(self.Handle, 1054, 0);
+        public static T WeekNumberRule<T>(this T self, global::FerroUI.Bindings.CalendarWeekRule value) where T : struct, ICalendarDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1054, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`CalendarDatePicker`].</summary>
@@ -3390,8 +3393,8 @@ namespace FerroUI.Bindings
         /// <summary>Reads IsSwiping. Defines the `IsSwiping` property.</summary>
         public static bool IsSwiping<T>(this T self) where T : struct, ICarousel => Native.ferro_get_bool_or(self.Handle, 457, 0) != 0;
         /// <summary>Reads ViewportFraction. Defines the `ViewportFraction` property.</summary>
-        public static double ViewportFraction<T>(this T self) where T : struct, ICarousel => Native.ferro_get_f64_or(self.Handle, 1043, 0);
-        public static T ViewportFraction<T>(this T self, double value) where T : struct, ICarousel { Native.Check(Native.ferro_set_f64(self.Handle, 1043, value)); return self; }
+        public static double ViewportFraction<T>(this T self) where T : struct, ICarousel => Native.ferro_get_f64_or(self.Handle, 1044, 0);
+        public static T ViewportFraction<T>(this T self, double value) where T : struct, ICarousel { Native.Check(Native.ferro_set_f64(self.Handle, 1044, value)); return self; }
     }
 
     /// <summary>Abstract base class for all page types.</summary>
@@ -3702,8 +3705,8 @@ namespace FerroUI.Bindings
         public static string KeyTime<T>(this T self) where T : struct, IColorKeyFrame => Native.GetString(self.Handle, 495);
         public static T KeyTime<T>(this T self, string value) where T : struct, IColorKeyFrame { Native.SetString(self.Handle, 495, value); return self; }
         /// <summary>Reads Value. Defines the `Value` property: the value of the key frame.</summary>
-        public static string Value<T>(this T self) where T : struct, IColorKeyFrame => Native.GetString(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, IColorKeyFrame { Native.SetString(self.Handle, 1034, value); return self; }
+        public static string Value<T>(this T self) where T : struct, IColorKeyFrame => Native.GetString(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, IColorKeyFrame { Native.SetString(self.Handle, 1035, value); return self; }
     }
 
     /// <summary>Provides the core functionality used internally by `Grid` and the column and row definition collections. This class is abstract: only its subclasses [`crate::ColumnDefinition`] and [`crate::RowDefinition`] can be created.</summary>
@@ -3741,8 +3744,8 @@ namespace FerroUI.Bindings
         public static double MinWidth<T>(this T self) where T : struct, IColumnDefinition => Native.ferro_get_f64_or(self.Handle, 559, 0);
         public static T MinWidth<T>(this T self, double value) where T : struct, IColumnDefinition { Native.Check(Native.ferro_set_f64(self.Handle, 559, value)); return self; }
         /// <summary>Reads Width. Defines the `Width` property.</summary>
-        public static string Width<T>(this T self) where T : struct, IColumnDefinition => Native.GetString(self.Handle, 1054);
-        public static T Width<T>(this T self, string value) where T : struct, IColumnDefinition { Native.SetString(self.Handle, 1054, value); return self; }
+        public static string Width<T>(this T self) where T : struct, IColumnDefinition => Native.GetString(self.Handle, 1055);
+        public static T Width<T>(this T self, string value) where T : struct, IColumnDefinition { Native.SetString(self.Handle, 1055, value); return self; }
     }
 
     /// <summary>Defines a geometric shape.</summary>
@@ -3824,8 +3827,8 @@ namespace FerroUI.Bindings
         public static string Text<T>(this T self) where T : struct, IComboBox => Native.GetString(self.Handle, 880);
         public static T Text<T>(this T self, string value) where T : struct, IComboBox { Native.SetString(self.Handle, 880, value); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IComboBox => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IComboBox { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IComboBox => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IComboBox { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents an [`ItemsControl`].</summary>
@@ -4280,8 +4283,8 @@ namespace FerroUI.Bindings
         public static T TopCommandBar<T>(this T self, string value) where T : struct, IContentPage { Native.SetString(self.Handle, 964, value); return self; }
         public static T TopCommandBar<T>(this T self, IFerroObject value) where T : struct, IContentPage { Native.Check(Native.ferro_set_handle(self.Handle, 964, value?.Handle ?? 0)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentPage => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentPage { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentPage => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentPage { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`ContentPage`].</summary>
@@ -4376,8 +4379,8 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.TextWrapping TextWrapping<T>(this T self) where T : struct, IContentPresenter => (global::FerroUI.Bindings.TextWrapping)Native.ferro_get_i64_or(self.Handle, 929, 0);
         public static T TextWrapping<T>(this T self, global::FerroUI.Bindings.TextWrapping value) where T : struct, IContentPresenter { Native.Check(Native.ferro_set_i64(self.Handle, 929, (long)value)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentPresenter => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentPresenter { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IContentPresenter => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IContentPresenter { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>Base class for menu controls.</summary>
@@ -4441,11 +4444,11 @@ namespace FerroUI.Bindings
         public static FerroObject PlacementTarget<T>(this T self) where T : struct, IContextMenu => Native.GetObject(self.Handle, 659);
         public static T PlacementTarget<T>(this T self, IFerroObject value) where T : struct, IContextMenu { Native.Check(Native.ferro_set_handle(self.Handle, 659, value?.Handle ?? 0)); return self; }
         /// <summary>Reads VerticalOffset. Defines the `VerticalOffset` property.</summary>
-        public static double VerticalOffset<T>(this T self) where T : struct, IContextMenu => Native.ferro_get_f64_or(self.Handle, 1038, 0);
-        public static T VerticalOffset<T>(this T self, double value) where T : struct, IContextMenu { Native.Check(Native.ferro_set_f64(self.Handle, 1038, value)); return self; }
+        public static double VerticalOffset<T>(this T self) where T : struct, IContextMenu => Native.ferro_get_f64_or(self.Handle, 1039, 0);
+        public static T VerticalOffset<T>(this T self, double value) where T : struct, IContextMenu { Native.Check(Native.ferro_set_f64(self.Handle, 1039, value)); return self; }
         /// <summary>Reads WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.</summary>
-        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IContextMenu => Native.ferro_get_bool_or(self.Handle, 1062, 0) != 0;
-        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IContextMenu { Native.Check(Native.ferro_set_bool(self.Handle, 1062, value ? (byte)1 : (byte)0)); return self; }
+        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IContextMenu => Native.ferro_get_bool_or(self.Handle, 1063, 0) != 0;
+        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IContextMenu { Native.Check(Native.ferro_set_bool(self.Handle, 1063, value ? (byte)1 : (byte)0)); return self; }
     }
 
     /// <summary>Defines a switchable theme for a control.</summary>
@@ -4573,14 +4576,14 @@ namespace FerroUI.Bindings
         public static string SelectedDate<T>(this T self) where T : struct, IDatePicker => Native.GetString(self.Handle, 772);
         public static T SelectedDate<T>(this T self, string value) where T : struct, IDatePicker { Native.SetString(self.Handle, 772, value); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IDatePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IDatePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IDatePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
         /// <summary>Reads YearFormat. Defines the `YearFormat` property.</summary>
-        public static string YearFormat<T>(this T self) where T : struct, IDatePicker => Native.GetString(self.Handle, 1075);
-        public static T YearFormat<T>(this T self, string value) where T : struct, IDatePicker { Native.SetString(self.Handle, 1075, value); return self; }
+        public static string YearFormat<T>(this T self) where T : struct, IDatePicker => Native.GetString(self.Handle, 1076);
+        public static T YearFormat<T>(this T self, string value) where T : struct, IDatePicker { Native.SetString(self.Handle, 1076, value); return self; }
         /// <summary>Reads YearVisible. Defines the `YearVisible` property.</summary>
-        public static bool YearVisible<T>(this T self) where T : struct, IDatePicker => Native.ferro_get_bool_or(self.Handle, 1076, 0) != 0;
-        public static T YearVisible<T>(this T self, bool value) where T : struct, IDatePicker { Native.Check(Native.ferro_set_bool(self.Handle, 1076, value ? (byte)1 : (byte)0)); return self; }
+        public static bool YearVisible<T>(this T self) where T : struct, IDatePicker => Native.ferro_get_bool_or(self.Handle, 1077, 0) != 0;
+        public static T YearVisible<T>(this T self, bool value) where T : struct, IDatePicker { Native.Check(Native.ferro_set_bool(self.Handle, 1077, value ? (byte)1 : (byte)0)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`DatePicker`].</summary>
@@ -4641,11 +4644,11 @@ namespace FerroUI.Bindings
         public static bool MonthVisible<T>(this T self) where T : struct, IDatePickerPresenter => Native.ferro_get_bool_or(self.Handle, 573, 0) != 0;
         public static T MonthVisible<T>(this T self, bool value) where T : struct, IDatePickerPresenter { Native.Check(Native.ferro_set_bool(self.Handle, 573, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads YearFormat. Defines the `YearFormat` property.</summary>
-        public static string YearFormat<T>(this T self) where T : struct, IDatePickerPresenter => Native.GetString(self.Handle, 1075);
-        public static T YearFormat<T>(this T self, string value) where T : struct, IDatePickerPresenter { Native.SetString(self.Handle, 1075, value); return self; }
+        public static string YearFormat<T>(this T self) where T : struct, IDatePickerPresenter => Native.GetString(self.Handle, 1076);
+        public static T YearFormat<T>(this T self, string value) where T : struct, IDatePickerPresenter { Native.SetString(self.Handle, 1076, value); return self; }
         /// <summary>Reads YearVisible. Defines the `YearVisible` property.</summary>
-        public static bool YearVisible<T>(this T self) where T : struct, IDatePickerPresenter => Native.ferro_get_bool_or(self.Handle, 1076, 0) != 0;
-        public static T YearVisible<T>(this T self, bool value) where T : struct, IDatePickerPresenter { Native.Check(Native.ferro_set_bool(self.Handle, 1076, value ? (byte)1 : (byte)0)); return self; }
+        public static bool YearVisible<T>(this T self) where T : struct, IDatePickerPresenter => Native.ferro_get_bool_or(self.Handle, 1077, 0) != 0;
+        public static T YearVisible<T>(this T self, bool value) where T : struct, IDatePickerPresenter { Native.Check(Native.ferro_set_bool(self.Handle, 1077, value ? (byte)1 : (byte)0)); return self; }
     }
 
     /// <summary>The looping, virtualizing panel that shows the values of one unit of a date or time picker.</summary>
@@ -4737,8 +4740,8 @@ namespace FerroUI.Bindings
         public static string KeyTime<T>(this T self) where T : struct, IDoubleKeyFrame => Native.GetString(self.Handle, 495);
         public static T KeyTime<T>(this T self, string value) where T : struct, IDoubleKeyFrame { Native.SetString(self.Handle, 495, value); return self; }
         /// <summary>Reads Value. Defines the `Value` property: the value of the key frame.</summary>
-        public static double Value<T>(this T self) where T : struct, IDoubleKeyFrame => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, IDoubleKeyFrame { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, IDoubleKeyFrame => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, IDoubleKeyFrame { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
     }
 
     /// <summary>Holds the value before it until its key time, then jumps.</summary>
@@ -4770,10 +4773,10 @@ namespace FerroUI.Bindings
         public static string KeyTime<T>(this T self) where T : struct, IObjectKeyFrame => Native.GetString(self.Handle, 495);
         public static T KeyTime<T>(this T self, string value) where T : struct, IObjectKeyFrame { Native.SetString(self.Handle, 495, value); return self; }
         /// <summary>Reads Value. Defines the `Value` property. Default `None` (null).</summary>
-        public static string Value<T>(this T self) where T : struct, IObjectKeyFrame => Native.GetString(self.Handle, 1034);
-        public static FerroObject ValueObject<T>(this T self) where T : struct, IObjectKeyFrame => Native.GetObject(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, IObjectKeyFrame { Native.SetString(self.Handle, 1034, value); return self; }
-        public static T Value<T>(this T self, IFerroObject value) where T : struct, IObjectKeyFrame { Native.Check(Native.ferro_set_handle(self.Handle, 1034, value?.Handle ?? 0)); return self; }
+        public static string Value<T>(this T self) where T : struct, IObjectKeyFrame => Native.GetString(self.Handle, 1035);
+        public static FerroObject ValueObject<T>(this T self) where T : struct, IObjectKeyFrame => Native.GetObject(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, IObjectKeyFrame { Native.SetString(self.Handle, 1035, value); return self; }
+        public static T Value<T>(this T self, IFerroObject value) where T : struct, IObjectKeyFrame { Native.Check(Native.ferro_set_handle(self.Handle, 1035, value?.Handle ?? 0)); return self; }
     }
 
     /// <summary>Sets its value at its key time (WinUI's `DiscreteObjectKeyFrame`).</summary>
@@ -4805,8 +4808,8 @@ namespace FerroUI.Bindings
         public static string KeyTime<T>(this T self) where T : struct, IPointKeyFrame => Native.GetString(self.Handle, 495);
         public static T KeyTime<T>(this T self, string value) where T : struct, IPointKeyFrame { Native.SetString(self.Handle, 495, value); return self; }
         /// <summary>Reads Value. Defines the `Value` property: the value of the key frame.</summary>
-        public static string Value<T>(this T self) where T : struct, IPointKeyFrame => Native.GetString(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, IPointKeyFrame { Native.SetString(self.Handle, 1034, value); return self; }
+        public static string Value<T>(this T self) where T : struct, IPointKeyFrame => Native.GetString(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, IPointKeyFrame { Native.SetString(self.Handle, 1035, value); return self; }
     }
 
     /// <summary>Holds the value before it until its key time, then jumps.</summary>
@@ -4845,8 +4848,8 @@ namespace FerroUI.Bindings
         public static bool LastChildFill<T>(this T self) where T : struct, IDockPanel => Native.ferro_get_bool_or(self.Handle, 511, 0) != 0;
         public static T LastChildFill<T>(this T self, bool value) where T : struct, IDockPanel { Native.Check(Native.ferro_set_bool(self.Handle, 511, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalSpacing. Defines the `VerticalSpacing` property.</summary>
-        public static double VerticalSpacing<T>(this T self) where T : struct, IDockPanel => Native.ferro_get_f64_or(self.Handle, 1040, 0);
-        public static T VerticalSpacing<T>(this T self, double value) where T : struct, IDockPanel { Native.Check(Native.ferro_set_f64(self.Handle, 1040, value)); return self; }
+        public static double VerticalSpacing<T>(this T self) where T : struct, IDockPanel => Native.ferro_get_f64_or(self.Handle, 1041, 0);
+        public static T VerticalSpacing<T>(this T self, double value) where T : struct, IDockPanel { Native.Check(Native.ferro_set_f64(self.Handle, 1041, value)); return self; }
     }
 
     /// <summary>Animates a `f64` property (WinUI's `DoubleAnimation`). It animates from `From` (or the value the property has when it begins) to `To`, or by `By` from the start; with neither `To` nor `By` it animates back to the value of the property without animations. `EasingFunction` eases the progress. `EnableDependentAnimation` is accepted and has no effect: every property is animated on the UI thread.</summary>
@@ -4986,8 +4989,8 @@ namespace FerroUI.Bindings
         public static bool IsOpen<T>(this T self) where T : struct, IDrawerPage => Native.ferro_get_bool_or(self.Handle, 437, 0) != 0;
         public static T IsOpen<T>(this T self, bool value) where T : struct, IDrawerPage { Native.Check(Native.ferro_set_bool(self.Handle, 437, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IDrawerPage => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IDrawerPage { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, IDrawerPage => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, IDrawerPage { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
         /// <summary>Closed: the sender is valid for the call. Defines the `Closed` routed event.</summary>
         public static Subscription OnClosed<T>(this T self, global::System.Action<T> handler) where T : struct, IDrawerPage =>
             Native.Subscribe(self.Handle, 5, sender => handler(Native.Wrap<T>(sender)));
@@ -5121,8 +5124,8 @@ namespace FerroUI.Bindings
         public static FerroObject Drawing<T>(this T self) where T : struct, IDrawingImage => Native.GetObject(self.Handle, 257);
         public static T Drawing<T>(this T self, IFerroObject value) where T : struct, IDrawingImage { Native.Check(Native.ferro_set_handle(self.Handle, 257, value?.Handle ?? 0)); return self; }
         /// <summary>Reads Viewbox. Defines the `Viewbox` property.</summary>
-        public static string Viewbox<T>(this T self) where T : struct, IDrawingImage => Native.GetString(self.Handle, 1041);
-        public static T Viewbox<T>(this T self, string value) where T : struct, IDrawingImage { Native.SetString(self.Handle, 1041, value); return self; }
+        public static string Viewbox<T>(this T self) where T : struct, IDrawingImage => Native.GetString(self.Handle, 1042);
+        public static T Viewbox<T>(this T self, string value) where T : struct, IDrawingImage { Native.SetString(self.Handle, 1042, value); return self; }
     }
 
     /// <summary>A button with an added drop-down chevron to visually indicate it has a flyout with additional actions.</summary>
@@ -5553,8 +5556,8 @@ namespace FerroUI.Bindings
         public static double RowSpacing<T>(this T self) where T : struct, IFlexPanel => Native.ferro_get_f64_or(self.Handle, 739, 0);
         public static T RowSpacing<T>(this T self, double value) where T : struct, IFlexPanel { Native.Check(Native.ferro_set_f64(self.Handle, 739, value)); return self; }
         /// <summary>Reads Wrap. Defines the `Wrap` property.</summary>
-        public static global::FerroUI.Bindings.FlexWrap Wrap<T>(this T self) where T : struct, IFlexPanel => (global::FerroUI.Bindings.FlexWrap)Native.ferro_get_i64_or(self.Handle, 1065, 0);
-        public static T Wrap<T>(this T self, global::FerroUI.Bindings.FlexWrap value) where T : struct, IFlexPanel { Native.Check(Native.ferro_set_i64(self.Handle, 1065, (long)value)); return self; }
+        public static global::FerroUI.Bindings.FlexWrap Wrap<T>(this T self) where T : struct, IFlexPanel => (global::FerroUI.Bindings.FlexWrap)Native.ferro_get_i64_or(self.Handle, 1066, 0);
+        public static T Wrap<T>(this T self, global::FerroUI.Bindings.FlexWrap value) where T : struct, IFlexPanel { Native.Check(Native.ferro_set_i64(self.Handle, 1066, (long)value)); return self; }
     }
 
     /// <summary>The base class of flyouts. This class is abstract: only its subclasses can be created.</summary>
@@ -5617,8 +5620,8 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.FlyoutShowMode ShowMode<T>(this T self) where T : struct, IPopupFlyoutBase => (global::FerroUI.Bindings.FlyoutShowMode)Native.ferro_get_i64_or(self.Handle, 809, 0);
         public static T ShowMode<T>(this T self, global::FerroUI.Bindings.FlyoutShowMode value) where T : struct, IPopupFlyoutBase { Native.Check(Native.ferro_set_i64(self.Handle, 809, (long)value)); return self; }
         /// <summary>Reads VerticalOffset. Defines the `VerticalOffset` property.</summary>
-        public static double VerticalOffset<T>(this T self) where T : struct, IPopupFlyoutBase => Native.ferro_get_f64_or(self.Handle, 1038, 0);
-        public static T VerticalOffset<T>(this T self, double value) where T : struct, IPopupFlyoutBase { Native.Check(Native.ferro_set_f64(self.Handle, 1038, value)); return self; }
+        public static double VerticalOffset<T>(this T self) where T : struct, IPopupFlyoutBase => Native.ferro_get_f64_or(self.Handle, 1039, 0);
+        public static T VerticalOffset<T>(this T self, double value) where T : struct, IPopupFlyoutBase { Native.Check(Native.ferro_set_f64(self.Handle, 1039, value)); return self; }
     }
 
     /// <summary>A flyout that displays arbitrary content.</summary>
@@ -5933,6 +5936,9 @@ namespace FerroUI.Bindings
         /// <summary>Reads ColumnSpacing. Defines the `ColumnSpacing` property.</summary>
         public static double ColumnSpacing<T>(this T self) where T : struct, IGrid => Native.ferro_get_f64_or(self.Handle, 160, 0);
         public static T ColumnSpacing<T>(this T self, double value) where T : struct, IGrid { Native.Check(Native.ferro_set_f64(self.Handle, 160, value)); return self; }
+        /// <summary>Reads Padding. Defines the inset between the grid bounds and its cells.</summary>
+        public static string Padding<T>(this T self) where T : struct, IGrid => Native.GetString(self.Handle, 621);
+        public static T Padding<T>(this T self, string value) where T : struct, IGrid { Native.SetString(self.Handle, 621, value); return self; }
         /// <summary>Reads RowSpacing. Defines the `RowSpacing` property.</summary>
         public static double RowSpacing<T>(this T self) where T : struct, IGrid => Native.ferro_get_f64_or(self.Handle, 739, 0);
         public static T RowSpacing<T>(this T self, double value) where T : struct, IGrid { Native.Check(Native.ferro_set_f64(self.Handle, 739, value)); return self; }
@@ -6369,8 +6375,8 @@ namespace FerroUI.Bindings
         public static T IconSource<T>(this T self, IFerroObject value) where T : struct, IInfoBadge { Native.Check(Native.ferro_set_handle(self.Handle, 360, value?.Handle ?? 0)); return self; }
         public static FerroObject TemplateSettings<T>(this T self) where T : struct, IInfoBadge => Native.GetObject(self.Handle, 877);
         /// <summary>Reads Value. Defines the `Value` property: the number the badge shows when it is 0 or more; -1 (the default) shows the icon or the dot. A value below -1 is coerced to -1.</summary>
-        public static long Value<T>(this T self) where T : struct, IInfoBadge => Native.ferro_get_i64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, long value) where T : struct, IInfoBadge { Native.Check(Native.ferro_set_i64(self.Handle, 1034, value)); return self; }
+        public static long Value<T>(this T self) where T : struct, IInfoBadge => Native.ferro_get_i64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, long value) where T : struct, IInfoBadge { Native.Check(Native.ferro_set_i64(self.Handle, 1035, value)); return self; }
     }
 
     /// <summary>The values the template of an [`InfoBadge`](crate::InfoBadge) binds to: the corner radius of the badge (half its height unless the badge has a local `CornerRadius`) and the icon element created from its `IconSource`. Each badge has its own.</summary>
@@ -6475,8 +6481,8 @@ namespace FerroUI.Bindings
         public static string HorizontalOrientationPadding<T>(this T self) where T : struct, IInfoBarPanel => Native.GetString(self.Handle, 354);
         public static T HorizontalOrientationPadding<T>(this T self, string value) where T : struct, IInfoBarPanel { Native.SetString(self.Handle, 354, value); return self; }
         /// <summary>Reads VerticalOrientationPadding. Defines the `VerticalOrientationPadding` property.</summary>
-        public static string VerticalOrientationPadding<T>(this T self) where T : struct, IInfoBarPanel => Native.GetString(self.Handle, 1039);
-        public static T VerticalOrientationPadding<T>(this T self, string value) where T : struct, IInfoBarPanel { Native.SetString(self.Handle, 1039, value); return self; }
+        public static string VerticalOrientationPadding<T>(this T self) where T : struct, IInfoBarPanel => Native.GetString(self.Handle, 1040);
+        public static T VerticalOrientationPadding<T>(this T self, string value) where T : struct, IInfoBarPanel { Native.SetString(self.Handle, 1040, value); return self; }
     }
 
     /// <summary>The values the template of an [`InfoBar`](crate::InfoBar) binds to: the icon element created from its `IconSource` (`TemplateSettings.IconElement`, the child of the `UserIconBox` of the template). Each bar has its own.</summary>
@@ -7249,8 +7255,8 @@ namespace FerroUI.Bindings
         public static bool UseFloatingPlaceholder<T>(this T self) where T : struct, ITextBox => Native.ferro_get_bool_or(self.Handle, 1027, 0) != 0;
         public static T UseFloatingPlaceholder<T>(this T self, bool value) where T : struct, ITextBox { Native.Check(Native.ferro_set_bool(self.Handle, 1027, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITextBox => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITextBox { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITextBox => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITextBox { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
         /// <summary>CopyingToClipboard: the sender is valid for the call. Defines the `CopyingToClipboard` event.</summary>
         public static Subscription OnCopyingToClipboard<T>(this T self, global::System.Action<T> handler) where T : struct, ITextBox =>
             Native.Subscribe(self.Handle, 12, sender => handler(Native.Wrap<T>(sender)));
@@ -8064,11 +8070,11 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.TextAlignment TextAlignment<T>(this T self) where T : struct, INumberBox => (global::FerroUI.Bindings.TextAlignment)Native.ferro_get_i64_or(self.Handle, 881, 0);
         public static T TextAlignment<T>(this T self, global::FerroUI.Bindings.TextAlignment value) where T : struct, INumberBox { Native.Check(Native.ferro_set_i64(self.Handle, 881, (long)value)); return self; }
         /// <summary>Reads ValidationMode. Defines the `ValidationMode` property. `InvalidInputOverwritten` by default.</summary>
-        public static global::FerroUI.Bindings.NumberBoxValidationMode ValidationMode<T>(this T self) where T : struct, INumberBox => (global::FerroUI.Bindings.NumberBoxValidationMode)Native.ferro_get_i64_or(self.Handle, 1033, 0);
-        public static T ValidationMode<T>(this T self, global::FerroUI.Bindings.NumberBoxValidationMode value) where T : struct, INumberBox { Native.Check(Native.ferro_set_i64(self.Handle, 1033, (long)value)); return self; }
+        public static global::FerroUI.Bindings.NumberBoxValidationMode ValidationMode<T>(this T self) where T : struct, INumberBox => (global::FerroUI.Bindings.NumberBoxValidationMode)Native.ferro_get_i64_or(self.Handle, 1034, 0);
+        public static T ValidationMode<T>(this T self, global::FerroUI.Bindings.NumberBoxValidationMode value) where T : struct, INumberBox { Native.Check(Native.ferro_set_i64(self.Handle, 1034, (long)value)); return self; }
         /// <summary>Reads Value. Defines the `Value` property: the number, NaN when the box is empty (the default).</summary>
-        public static double Value<T>(this T self) where T : struct, INumberBox => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, INumberBox { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, INumberBox => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, INumberBox { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`NumberBox`]: a spinner with the range value pattern, named by its header when it has no name. Deviation (docs/porting/winui-controls.md, Input): WinUI's peer raises the change of `Value` only; this one also raises the changes of `Minimum`, `Maximum`, `SmallChange` and `LargeChange` (the identifiers of W1), as the range peers of the framework do.</summary>
@@ -8161,11 +8167,11 @@ namespace FerroUI.Bindings
         public static string Text<T>(this T self) where T : struct, INumericUpDown => Native.GetString(self.Handle, 880);
         public static T Text<T>(this T self, string value) where T : struct, INumericUpDown { Native.SetString(self.Handle, 880, value); return self; }
         /// <summary>Reads Value. Defines the `Value` property.</summary>
-        public static string Value<T>(this T self) where T : struct, INumericUpDown => Native.GetString(self.Handle, 1034);
-        public static T Value<T>(this T self, string value) where T : struct, INumericUpDown { Native.SetString(self.Handle, 1034, value); return self; }
+        public static string Value<T>(this T self) where T : struct, INumericUpDown => Native.GetString(self.Handle, 1035);
+        public static T Value<T>(this T self, string value) where T : struct, INumericUpDown { Native.SetString(self.Handle, 1035, value); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, INumericUpDown => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, INumericUpDown { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, INumericUpDown => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, INumericUpDown { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
         /// <summary>ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.</summary>
         public static Subscription OnValueChanged<T>(this T self, global::System.Action<T> handler) where T : struct, INumericUpDown =>
             Native.Subscribe(self.Handle, 95, sender => handler(Native.Wrap<T>(sender)));
@@ -8663,8 +8669,8 @@ namespace FerroUI.Bindings
         public static T SelectedPageIndex<T>(this T self, long value) where T : struct, IPipsPager { Native.Check(Native.ferro_set_i64(self.Handle, 778, value)); return self; }
         public static FerroObject TemplateSettings<T>(this T self) where T : struct, IPipsPager => Native.GetObject(self.Handle, 877);
         /// <summary>Reads WrapMode. Defines the `WrapMode` property.</summary>
-        public static global::FerroUI.Bindings.PipsPagerWrapMode WrapMode<T>(this T self) where T : struct, IPipsPager => (global::FerroUI.Bindings.PipsPagerWrapMode)Native.ferro_get_i64_or(self.Handle, 1066, 0);
-        public static T WrapMode<T>(this T self, global::FerroUI.Bindings.PipsPagerWrapMode value) where T : struct, IPipsPager { Native.Check(Native.ferro_set_i64(self.Handle, 1066, (long)value)); return self; }
+        public static global::FerroUI.Bindings.PipsPagerWrapMode WrapMode<T>(this T self) where T : struct, IPipsPager => (global::FerroUI.Bindings.PipsPagerWrapMode)Native.ferro_get_i64_or(self.Handle, 1067, 0);
+        public static T WrapMode<T>(this T self, global::FerroUI.Bindings.PipsPagerWrapMode value) where T : struct, IPipsPager { Native.Check(Native.ferro_set_i64(self.Handle, 1067, (long)value)); return self; }
         /// <summary>SelectedIndexChanged: the sender is valid for the call. Defines the `SelectedIndexChanged` event.</summary>
         public static Subscription OnSelectedIndexChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IPipsPager =>
             Native.Subscribe(self.Handle, 74, sender => handler(Native.Wrap<T>(sender)));
@@ -9053,11 +9059,11 @@ namespace FerroUI.Bindings
         public static bool Topmost<T>(this T self) where T : struct, IPopup => Native.ferro_get_bool_or(self.Handle, 970, 0) != 0;
         public static T Topmost<T>(this T self, bool value) where T : struct, IPopup { Native.Check(Native.ferro_set_bool(self.Handle, 970, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalOffset. Defines the `VerticalOffset` property.</summary>
-        public static double VerticalOffset<T>(this T self) where T : struct, IPopup => Native.ferro_get_f64_or(self.Handle, 1038, 0);
-        public static T VerticalOffset<T>(this T self, double value) where T : struct, IPopup { Native.Check(Native.ferro_set_f64(self.Handle, 1038, value)); return self; }
+        public static double VerticalOffset<T>(this T self) where T : struct, IPopup => Native.ferro_get_f64_or(self.Handle, 1039, 0);
+        public static T VerticalOffset<T>(this T self, double value) where T : struct, IPopup { Native.Check(Native.ferro_set_f64(self.Handle, 1039, value)); return self; }
         /// <summary>Reads WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.</summary>
-        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IPopup => Native.ferro_get_bool_or(self.Handle, 1062, 0) != 0;
-        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IPopup { Native.Check(Native.ferro_set_bool(self.Handle, 1062, value ? (byte)1 : (byte)0)); return self; }
+        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IPopup => Native.ferro_get_bool_or(self.Handle, 1063, 0) != 0;
+        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IPopup { Native.Check(Native.ferro_set_bool(self.Handle, 1063, value ? (byte)1 : (byte)0)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`Popup`].</summary>
@@ -9129,8 +9135,8 @@ namespace FerroUI.Bindings
         public static FerroObject Transform<T>(this T self) where T : struct, IPopupRoot => Native.GetObject(self.Handle, 971);
         public static T Transform<T>(this T self, IFerroObject value) where T : struct, IPopupRoot { Native.Check(Native.ferro_set_handle(self.Handle, 971, value?.Handle ?? 0)); return self; }
         /// <summary>Reads WindowManagerAddShadowHint. Defines the `WindowManagerAddShadowHint` property.</summary>
-        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IPopupRoot => Native.ferro_get_bool_or(self.Handle, 1062, 0) != 0;
-        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IPopupRoot { Native.Check(Native.ferro_set_bool(self.Handle, 1062, value ? (byte)1 : (byte)0)); return self; }
+        public static bool WindowManagerAddShadowHint<T>(this T self) where T : struct, IPopupRoot => Native.ferro_get_bool_or(self.Handle, 1063, 0) != 0;
+        public static T WindowManagerAddShadowHint<T>(this T self, bool value) where T : struct, IPopupRoot { Native.Check(Native.ferro_set_bool(self.Handle, 1063, value ? (byte)1 : (byte)0)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`WindowBase`]: the root of an automation tree.</summary>
@@ -9209,8 +9215,8 @@ namespace FerroUI.Bindings
         public static double SmallChange<T>(this T self) where T : struct, IRangeBase => Native.ferro_get_f64_or(self.Handle, 818, 0);
         public static T SmallChange<T>(this T self, double value) where T : struct, IRangeBase { Native.Check(Native.ferro_set_f64(self.Handle, 818, value)); return self; }
         /// <summary>Reads Value. Defines the `Value` property.</summary>
-        public static double Value<T>(this T self) where T : struct, IRangeBase => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, IRangeBase { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, IRangeBase => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, IRangeBase { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
         /// <summary>ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.</summary>
         public static Subscription OnValueChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IRangeBase =>
             Native.Subscribe(self.Handle, 95, sender => handler(Native.Wrap<T>(sender)));
@@ -9342,8 +9348,8 @@ namespace FerroUI.Bindings
         public static T Minimum<T>(this T self, double value) where T : struct, IProgressRing { Native.Check(Native.ferro_set_f64(self.Handle, 564, value)); return self; }
         public static FerroObject TemplateSettings<T>(this T self) where T : struct, IProgressRing => Native.GetObject(self.Handle, 877);
         /// <summary>Reads Value. Defines the `Value` property: the progress between `Minimum` and `Maximum`. 0 by default.</summary>
-        public static double Value<T>(this T self) where T : struct, IProgressRing => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, IProgressRing { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, IProgressRing => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, IProgressRing { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
     }
 
     /// <summary>The automation peer of a [`ProgressRing`]: a progress bar with the range value pattern while the ring is determinate, as in WinUI. The name of an active indeterminate ring starts with "Busy".</summary>
@@ -9612,8 +9618,8 @@ namespace FerroUI.Bindings
         public static double PlaceholderValue<T>(this T self) where T : struct, IRatingControl => Native.ferro_get_f64_or(self.Handle, 653, 0);
         public static T PlaceholderValue<T>(this T self, double value) where T : struct, IRatingControl { Native.Check(Native.ferro_set_f64(self.Handle, 653, value)); return self; }
         /// <summary>Reads Value. Defines the `Value` property: the rating, from 1 to `MaxRating`, or -1 while it is not set (the default).</summary>
-        public static double Value<T>(this T self) where T : struct, IRatingControl => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, IRatingControl { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, IRatingControl => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, IRatingControl { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`RatingControl`]: a slider with the value pattern (the text of the rating) and the range value pattern (0 to `MaxRating`; an unset rating is 0), named by the caption when it has no name.</summary>
@@ -9774,8 +9780,8 @@ namespace FerroUI.Bindings
         /// <summary>Reads PullDirection. Defines the `PullDirection` property.</summary>
         public static global::FerroUI.Bindings.PullDirection PullDirection<T>(this T self) where T : struct, IRefreshContainer => (global::FerroUI.Bindings.PullDirection)Native.ferro_get_i64_or(self.Handle, 692, 0);
         public static T PullDirection<T>(this T self, global::FerroUI.Bindings.PullDirection value) where T : struct, IRefreshContainer { Native.Check(Native.ferro_set_i64(self.Handle, 692, (long)value)); return self; }
-        public static FerroObject Visualizer<T>(this T self) where T : struct, IRefreshContainer => Native.GetObject(self.Handle, 1051);
-        public static T Visualizer<T>(this T self, IFerroObject value) where T : struct, IRefreshContainer { Native.Check(Native.ferro_set_handle(self.Handle, 1051, value?.Handle ?? 0)); return self; }
+        public static FerroObject Visualizer<T>(this T self) where T : struct, IRefreshContainer => Native.GetObject(self.Handle, 1052);
+        public static T Visualizer<T>(this T self, IFerroObject value) where T : struct, IRefreshContainer { Native.Check(Native.ferro_set_handle(self.Handle, 1052, value?.Handle ?? 0)); return self; }
         /// <summary>RefreshRequested: the sender is valid for the call. Defines the `RefreshRequested` event.</summary>
         public static Subscription OnRefreshRequested<T>(this T self, global::System.Action<T> handler) where T : struct, IRefreshContainer =>
             Native.Subscribe(self.Handle, 66, sender => handler(Native.Wrap<T>(sender)));
@@ -10617,11 +10623,11 @@ namespace FerroUI.Bindings
         public static string ShowDelay<T>(this T self) where T : struct, IScrollBar => Native.GetString(self.Handle, 805);
         public static T ShowDelay<T>(this T self, string value) where T : struct, IScrollBar { Native.SetString(self.Handle, 805, value); return self; }
         /// <summary>Reads ViewportSize. Defines the `ViewportSize` property.</summary>
-        public static double ViewportSize<T>(this T self) where T : struct, IScrollBar => Native.ferro_get_f64_or(self.Handle, 1044, 0);
-        public static T ViewportSize<T>(this T self, double value) where T : struct, IScrollBar { Native.Check(Native.ferro_set_f64(self.Handle, 1044, value)); return self; }
+        public static double ViewportSize<T>(this T self) where T : struct, IScrollBar => Native.ferro_get_f64_or(self.Handle, 1045, 0);
+        public static T ViewportSize<T>(this T self, double value) where T : struct, IScrollBar { Native.Check(Native.ferro_set_f64(self.Handle, 1045, value)); return self; }
         /// <summary>Reads Visibility. Defines the `Visibility` property.</summary>
-        public static global::FerroUI.Bindings.ScrollBarVisibility Visibility<T>(this T self) where T : struct, IScrollBar => (global::FerroUI.Bindings.ScrollBarVisibility)Native.ferro_get_i64_or(self.Handle, 1045, 0);
-        public static T Visibility<T>(this T self, global::FerroUI.Bindings.ScrollBarVisibility value) where T : struct, IScrollBar { Native.Check(Native.ferro_set_i64(self.Handle, 1045, (long)value)); return self; }
+        public static global::FerroUI.Bindings.ScrollBarVisibility Visibility<T>(this T self) where T : struct, IScrollBar => (global::FerroUI.Bindings.ScrollBarVisibility)Native.ferro_get_i64_or(self.Handle, 1046, 0);
+        public static T Visibility<T>(this T self, global::FerroUI.Bindings.ScrollBarVisibility value) where T : struct, IScrollBar { Native.Check(Native.ferro_set_i64(self.Handle, 1046, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`ScrollBar`].</summary>
@@ -10677,8 +10683,8 @@ namespace FerroUI.Bindings
         public static string Offset<T>(this T self) where T : struct, IScrollContentPresenter => Native.GetString(self.Handle, 606);
         public static T Offset<T>(this T self, string value) where T : struct, IScrollContentPresenter { Native.SetString(self.Handle, 606, value); return self; }
         /// <summary>Reads Viewport. Defines the `Viewport` property.</summary>
-        public static string Viewport<T>(this T self) where T : struct, IScrollContentPresenter => Native.GetString(self.Handle, 1042);
-        public static T Viewport<T>(this T self, string value) where T : struct, IScrollContentPresenter { Native.SetString(self.Handle, 1042, value); return self; }
+        public static string Viewport<T>(this T self) where T : struct, IScrollContentPresenter => Native.GetString(self.Handle, 1043);
+        public static T Viewport<T>(this T self, string value) where T : struct, IScrollContentPresenter { Native.SetString(self.Handle, 1043, value); return self; }
     }
 
     /// <summary>Recognizes the scroll gesture: a touch or pen drag, optionally followed by inertia.</summary>
@@ -10714,8 +10720,8 @@ namespace FerroUI.Bindings
         public static long ScrollStartDistance<T>(this T self) where T : struct, IScrollGestureRecognizer => Native.ferro_get_i64_or(self.Handle, 751, 0);
         public static T ScrollStartDistance<T>(this T self, long value) where T : struct, IScrollGestureRecognizer { Native.Check(Native.ferro_set_i64(self.Handle, 751, value)); return self; }
         /// <summary>Reads Viewport. Defines the `Viewport` property.</summary>
-        public static string Viewport<T>(this T self) where T : struct, IScrollGestureRecognizer => Native.GetString(self.Handle, 1042);
-        public static T Viewport<T>(this T self, string value) where T : struct, IScrollGestureRecognizer { Native.SetString(self.Handle, 1042, value); return self; }
+        public static string Viewport<T>(this T self) where T : struct, IScrollGestureRecognizer => Native.GetString(self.Handle, 1043);
+        public static T Viewport<T>(this T self, string value) where T : struct, IScrollGestureRecognizer { Native.SetString(self.Handle, 1043, value); return self; }
     }
 
     /// <summary>A control which scrolls its content if the content is bigger than the space available.</summary>
@@ -10786,12 +10792,12 @@ namespace FerroUI.Bindings
         /// <summary>Reads SmallChange. Defines the `SmallChange` property.</summary>
         public static string SmallChange<T>(this T self) where T : struct, IScrollViewer => Native.GetString(self.Handle, 818);
         /// <summary>Reads Viewport. Defines the `Viewport` property.</summary>
-        public static string Viewport<T>(this T self) where T : struct, IScrollViewer => Native.GetString(self.Handle, 1042);
+        public static string Viewport<T>(this T self) where T : struct, IScrollViewer => Native.GetString(self.Handle, 1043);
         /// <summary>Reads ZoomFactor. Defines the `ZoomFactor` property (WinUI, not upstream): the zoom of the content, changed with [`change_view`](ScrollViewer::change_view) or by the user.</summary>
-        public static double ZoomFactor<T>(this T self) where T : struct, IScrollViewer => Native.ferro_get_f64_or(self.Handle, 1078, 0);
+        public static double ZoomFactor<T>(this T self) where T : struct, IScrollViewer => Native.ferro_get_f64_or(self.Handle, 1079, 0);
         /// <summary>Reads ZoomMode. Defines the `ZoomMode` property (WinUI `ScrollViewer.ZoomMode`, not upstream): whether the user can zoom the content.</summary>
-        public static global::FerroUI.Bindings.ZoomMode ZoomMode<T>(this T self) where T : struct, IScrollViewer => (global::FerroUI.Bindings.ZoomMode)Native.ferro_get_i64_or(self.Handle, 1079, 0);
-        public static T ZoomMode<T>(this T self, global::FerroUI.Bindings.ZoomMode value) where T : struct, IScrollViewer { Native.Check(Native.ferro_set_i64(self.Handle, 1079, (long)value)); return self; }
+        public static global::FerroUI.Bindings.ZoomMode ZoomMode<T>(this T self) where T : struct, IScrollViewer => (global::FerroUI.Bindings.ZoomMode)Native.ferro_get_i64_or(self.Handle, 1080, 0);
+        public static T ZoomMode<T>(this T self, global::FerroUI.Bindings.ZoomMode value) where T : struct, IScrollViewer { Native.Check(Native.ferro_set_i64(self.Handle, 1080, (long)value)); return self; }
         /// <summary>ScrollChanged: the sender is valid for the call. Defines the `ScrollChanged` event.</summary>
         public static Subscription OnScrollChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IScrollViewer =>
             Native.Subscribe(self.Handle, 70, sender => handler(Native.Wrap<T>(sender)));
@@ -11521,8 +11527,8 @@ namespace FerroUI.Bindings
         public static global::FerroUI.Bindings.Dock TabStripPlacement<T>(this T self) where T : struct, ITabControl => (global::FerroUI.Bindings.Dock)Native.ferro_get_i64_or(self.Handle, 867, 0);
         public static T TabStripPlacement<T>(this T self, global::FerroUI.Bindings.Dock value) where T : struct, ITabControl { Native.Check(Native.ferro_set_i64(self.Handle, 867, (long)value)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITabControl => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITabControl { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITabControl => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITabControl { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>An item in a `TabControl`.</summary>
@@ -11825,8 +11831,8 @@ namespace FerroUI.Bindings
         public static T IsVisible<T>(this T self, bool value) where T : struct, ITableViewColumn { Native.Check(Native.ferro_set_bool(self.Handle, 470, value ? (byte)1 : (byte)0)); return self; }
         public static FerroObject TableView<T>(this T self) where T : struct, ITableViewColumn => Native.GetObject(self.Handle, 871);
         /// <summary>Reads Width. Defines the `Width` property.</summary>
-        public static string Width<T>(this T self) where T : struct, ITableViewColumn => Native.GetString(self.Handle, 1054);
-        public static T Width<T>(this T self, string value) where T : struct, ITableViewColumn { Native.SetString(self.Handle, 1054, value); return self; }
+        public static string Width<T>(this T self) where T : struct, ITableViewColumn => Native.GetString(self.Handle, 1055);
+        public static T Width<T>(this T self, string value) where T : struct, ITableViewColumn { Native.SetString(self.Handle, 1055, value); return self; }
     }
 
     /// <summary>Represents the header of a [`TableViewColumn`].</summary>
@@ -12281,8 +12287,8 @@ namespace FerroUI.Bindings
         public static bool UseSeconds<T>(this T self) where T : struct, ITimePicker => Native.ferro_get_bool_or(self.Handle, 1031, 0) != 0;
         public static T UseSeconds<T>(this T self, bool value) where T : struct, ITimePicker { Native.Check(Native.ferro_set_bool(self.Handle, 1031, value ? (byte)1 : (byte)0)); return self; }
         /// <summary>Reads VerticalContentAlignment. Defines the `VerticalContentAlignment` property.</summary>
-        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITimePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1037, 0);
-        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITimePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1037, (long)value)); return self; }
+        public static global::FerroUI.Bindings.VerticalAlignment VerticalContentAlignment<T>(this T self) where T : struct, ITimePicker => (global::FerroUI.Bindings.VerticalAlignment)Native.ferro_get_i64_or(self.Handle, 1038, 0);
+        public static T VerticalContentAlignment<T>(this T self, global::FerroUI.Bindings.VerticalAlignment value) where T : struct, ITimePicker { Native.Check(Native.ferro_set_i64(self.Handle, 1038, (long)value)); return self; }
     }
 
     /// <summary>An automation peer which represents a [`TimePicker`].</summary>
@@ -12592,11 +12598,11 @@ namespace FerroUI.Bindings
         public static FerroObject Thumb<T>(this T self) where T : struct, ITrack => Native.GetObject(self.Handle, 933);
         public static T Thumb<T>(this T self, IFerroObject value) where T : struct, ITrack { Native.Check(Native.ferro_set_handle(self.Handle, 933, value?.Handle ?? 0)); return self; }
         /// <summary>Reads Value. Defines the `Value` property.</summary>
-        public static double Value<T>(this T self) where T : struct, ITrack => Native.ferro_get_f64_or(self.Handle, 1034, 0);
-        public static T Value<T>(this T self, double value) where T : struct, ITrack { Native.Check(Native.ferro_set_f64(self.Handle, 1034, value)); return self; }
+        public static double Value<T>(this T self) where T : struct, ITrack => Native.ferro_get_f64_or(self.Handle, 1035, 0);
+        public static T Value<T>(this T self, double value) where T : struct, ITrack { Native.Check(Native.ferro_set_f64(self.Handle, 1035, value)); return self; }
         /// <summary>Reads ViewportSize. Defines the `ViewportSize` property.</summary>
-        public static double ViewportSize<T>(this T self) where T : struct, ITrack => Native.ferro_get_f64_or(self.Handle, 1044, 0);
-        public static T ViewportSize<T>(this T self, double value) where T : struct, ITrack { Native.Check(Native.ferro_set_f64(self.Handle, 1044, value)); return self; }
+        public static double ViewportSize<T>(this T self) where T : struct, ITrack => Native.ferro_get_f64_or(self.Handle, 1045, 0);
+        public static T ViewportSize<T>(this T self, double value) where T : struct, ITrack { Native.Check(Native.ferro_set_f64(self.Handle, 1045, value)); return self; }
     }
 
     public interface ITrackingPage : IContentPage { }
@@ -12688,11 +12694,11 @@ namespace FerroUI.Bindings
     public static class TranslateTransformExtensions
     {
         /// <summary>Reads X.</summary>
-        public static double X<T>(this T self) where T : struct, ITranslateTransform => Native.ferro_get_f64_or(self.Handle, 1068, 0);
-        public static T X<T>(this T self, double value) where T : struct, ITranslateTransform { Native.Check(Native.ferro_set_f64(self.Handle, 1068, value)); return self; }
+        public static double X<T>(this T self) where T : struct, ITranslateTransform => Native.ferro_get_f64_or(self.Handle, 1069, 0);
+        public static T X<T>(this T self, double value) where T : struct, ITranslateTransform { Native.Check(Native.ferro_set_f64(self.Handle, 1069, value)); return self; }
         /// <summary>Reads Y.</summary>
-        public static double Y<T>(this T self) where T : struct, ITranslateTransform => Native.ferro_get_f64_or(self.Handle, 1074, 0);
-        public static T Y<T>(this T self, double value) where T : struct, ITranslateTransform { Native.Check(Native.ferro_set_f64(self.Handle, 1074, value)); return self; }
+        public static double Y<T>(this T self) where T : struct, ITranslateTransform => Native.ferro_get_f64_or(self.Handle, 1075, 0);
+        public static T Y<T>(this T self, double value) where T : struct, ITranslateTransform { Native.Check(Native.ferro_set_f64(self.Handle, 1075, value)); return self; }
     }
 
     /// <summary>An icon in the notification area of the platform.</summary>
@@ -12959,8 +12965,8 @@ namespace FerroUI.Bindings
 
     public static class VisualBrushExtensions
     {
-        public static FerroObject Visual<T>(this T self) where T : struct, IVisualBrush => Native.GetObject(self.Handle, 1046);
-        public static T Visual<T>(this T self, IFerroObject value) where T : struct, IVisualBrush { Native.Check(Native.ferro_set_handle(self.Handle, 1046, value?.Handle ?? 0)); return self; }
+        public static FerroObject Visual<T>(this T self) where T : struct, IVisualBrush => Native.GetObject(self.Handle, 1047);
+        public static T Visual<T>(this T self, IFerroObject value) where T : struct, IVisualBrush { Native.Check(Native.ferro_set_handle(self.Handle, 1047, value?.Handle ?? 0)); return self; }
     }
 
     /// <summary>A control that manages multiple layers such as adorners, overlays, text selectors, and popups.</summary>
@@ -13010,11 +13016,11 @@ namespace FerroUI.Bindings
         public ulong Handle { get; }
         public static VisualStateManager Create() => new VisualStateManager(Native.Create(TypeId));
         /// <summary>The attached property VisualStateManager.CustomVisualStateManager. Defines the attached `CustomVisualStateManager` property: the manager that changes the states of the groups of the element it is set on.</summary>
-        public static FerroObject GetCustomVisualStateManager(IFerroObject self) => Native.GetObject(self.Handle, 1049);
-        public static void SetCustomVisualStateManager(IFerroObject target, IFerroObject value) { Native.Check(Native.ferro_set_handle(target.Handle, 1049, value?.Handle ?? 0)); }
+        public static FerroObject GetCustomVisualStateManager(IFerroObject self) => Native.GetObject(self.Handle, 1050);
+        public static void SetCustomVisualStateManager(IFerroObject target, IFerroObject value) { Native.Check(Native.ferro_set_handle(target.Handle, 1050, value?.Handle ?? 0)); }
         /// <summary>The attached property VisualStateManager.VisualStateGroups. Defines the attached `VisualStateGroups` property: the groups of visual states of an element. [`get_visual_state_groups`](VisualStateManager::get_visual_state_groups) creates the collection when the element has none, which is what markup's property element syntax (`&lt;VisualStateManager.VisualStateGroups&gt;`) adds the groups to.</summary>
-        public static string GetVisualStateGroups(IFerroObject self) => Native.GetString(self.Handle, 1050);
-        public static void SetVisualStateGroups(IFerroObject target, string value) { Native.SetString(target.Handle, 1050, value); }
+        public static string GetVisualStateGroups(IFerroObject self) => Native.GetString(self.Handle, 1051);
+        public static void SetVisualStateGroups(IFerroObject target, string value) { Native.SetString(target.Handle, 1051, value); }
     }
 
     /// <summary>How a [`VisualStateGroup`](super::VisualStateGroup) changes from one state to another when `GoToState` is called with transitions (WinUI's `VisualTransition`). A transition applies from the state named [`from`](Self::from) (empty: any) to the state named [`to`](Self::to) (empty: any). It runs its [`storyboard`](Self::storyboard) and, over [`generated_duration`](Self::generated_duration) eased by [`generated_easing_function`](Self::generated_easing_function), animations it generates from the values of the old state to those of the new one; the setters and the storyboard of the new state apply when they have completed.</summary>
@@ -13078,18 +13084,18 @@ namespace FerroUI.Bindings
         public static string Title<T>(this T self) where T : struct, IWindow => Native.GetString(self.Handle, 944);
         public static T Title<T>(this T self, string value) where T : struct, IWindow { Native.SetString(self.Handle, 944, value); return self; }
         /// <summary>Reads WindowDecorationMargin. Defines the `WindowDecorationMargin` property.</summary>
-        public static string WindowDecorationMargin<T>(this T self) where T : struct, IWindow => Native.GetString(self.Handle, 1057);
+        public static string WindowDecorationMargin<T>(this T self) where T : struct, IWindow => Native.GetString(self.Handle, 1058);
         /// <summary>Reads WindowDecorations. Defines the `WindowDecorations` property.</summary>
-        public static global::FerroUI.Bindings.WindowDecorations WindowDecorations<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowDecorations)Native.ferro_get_i64_or(self.Handle, 1059, 0);
-        public static T WindowDecorations<T>(this T self, global::FerroUI.Bindings.WindowDecorations value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1059, (long)value)); return self; }
-        public static FerroObject WindowDecorationsTheme<T>(this T self) where T : struct, IWindow => Native.GetObject(self.Handle, 1060);
-        public static T WindowDecorationsTheme<T>(this T self, IFerroObject value) where T : struct, IWindow { Native.Check(Native.ferro_set_handle(self.Handle, 1060, value?.Handle ?? 0)); return self; }
+        public static global::FerroUI.Bindings.WindowDecorations WindowDecorations<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowDecorations)Native.ferro_get_i64_or(self.Handle, 1060, 0);
+        public static T WindowDecorations<T>(this T self, global::FerroUI.Bindings.WindowDecorations value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1060, (long)value)); return self; }
+        public static FerroObject WindowDecorationsTheme<T>(this T self) where T : struct, IWindow => Native.GetObject(self.Handle, 1061);
+        public static T WindowDecorationsTheme<T>(this T self, IFerroObject value) where T : struct, IWindow { Native.Check(Native.ferro_set_handle(self.Handle, 1061, value?.Handle ?? 0)); return self; }
         /// <summary>Reads WindowStartupLocation. Defines the `WindowStartupLocation` property.</summary>
-        public static global::FerroUI.Bindings.WindowStartupLocation WindowStartupLocation<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowStartupLocation)Native.ferro_get_i64_or(self.Handle, 1063, 0);
-        public static T WindowStartupLocation<T>(this T self, global::FerroUI.Bindings.WindowStartupLocation value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1063, (long)value)); return self; }
+        public static global::FerroUI.Bindings.WindowStartupLocation WindowStartupLocation<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowStartupLocation)Native.ferro_get_i64_or(self.Handle, 1064, 0);
+        public static T WindowStartupLocation<T>(this T self, global::FerroUI.Bindings.WindowStartupLocation value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1064, (long)value)); return self; }
         /// <summary>Reads WindowState. Represents the currently effective window state (normal, minimized, maximized).</summary>
-        public static global::FerroUI.Bindings.WindowState WindowState<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowState)Native.ferro_get_i64_or(self.Handle, 1064, 0);
-        public static T WindowState<T>(this T self, global::FerroUI.Bindings.WindowState value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1064, (long)value)); return self; }
+        public static global::FerroUI.Bindings.WindowState WindowState<T>(this T self) where T : struct, IWindow => (global::FerroUI.Bindings.WindowState)Native.ferro_get_i64_or(self.Handle, 1065, 0);
+        public static T WindowState<T>(this T self, global::FerroUI.Bindings.WindowState value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1065, (long)value)); return self; }
         /// <summary>WindowClosed: the sender is valid for the call. Routed event that can be used for global tracking of window destruction.</summary>
         public static Subscription OnWindowClosed<T>(this T self, global::System.Action<T> handler) where T : struct, IWindow =>
             Native.Subscribe(self.Handle, 97, sender => handler(Native.Wrap<T>(sender)));
@@ -13120,8 +13126,8 @@ namespace FerroUI.Bindings
         public ulong Handle { get; }
         public static WindowDrawnDecorations Create() => new WindowDrawnDecorations(Native.Create(TypeId));
         /// <summary>The attached property WindowDrawnDecorations.TitleBarDecorations. Defines the `TitleBarDecorations` attached property.</summary>
-        public static string GetTitleBarDecorations(IFerroObject self) => Native.GetString(self.Handle, 1061);
-        public static void SetTitleBarDecorations(IFerroObject target, string value) { Native.SetString(target.Handle, 1061, value); }
+        public static string GetTitleBarDecorations(IFerroObject self) => Native.GetString(self.Handle, 1062);
+        public static void SetTitleBarDecorations(IFerroObject target, string value) { Native.SetString(target.Handle, 1062, value); }
     }
 
     public static class WindowDrawnDecorationsExtensions
@@ -13197,8 +13203,8 @@ namespace FerroUI.Bindings
         public ulong Handle { get; }
         public static XamlAmbientLight Create() => new XamlAmbientLight(Native.Create(TypeId));
         /// <summary>The attached property XamlAmbientLight.IsTarget. `IsTarget` (attached): the ambient lights light the element or brush it is set on.</summary>
-        public static bool GetIsTarget(IFerroObject self) => Native.ferro_get_bool_or(self.Handle, 1072, 0) != 0;
-        public static void SetIsTarget(IFerroObject target, bool value) { Native.Check(Native.ferro_set_bool(target.Handle, 1072, value ? (byte)1 : (byte)0)); }
+        public static bool GetIsTarget(IFerroObject self) => Native.ferro_get_bool_or(self.Handle, 1073, 0) != 0;
+        public static void SetIsTarget(IFerroObject target, bool value) { Native.Check(Native.ferro_set_bool(target.Handle, 1073, value ? (byte)1 : (byte)0)); }
     }
 
     public static class XamlAmbientLightExtensions
