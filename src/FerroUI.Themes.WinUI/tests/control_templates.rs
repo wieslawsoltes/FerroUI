@@ -221,6 +221,9 @@ control_tests! {
     list_box_item => "ListBoxItem";
     list_view => "ListView";
     list_view_item => "ListViewItem";
+    tab_view => "TabView";
+    tab_view_item => "TabViewItem";
+    tab_view_list_view => "TabViewListView";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";
@@ -256,6 +259,7 @@ control_tests! {
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
     info_bar => "InfoBar";
+    content_dialog => "ContentDialog";
     rich_edit_box => "RichEditBox";
     number_box => "NumberBox";
     auto_suggest_box => "AutoSuggestBox";

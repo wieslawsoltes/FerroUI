@@ -30,6 +30,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "alloc-no-stdlib"
+version = "2.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc7bb162ec39d46ab1ca8c77bf72e890535becd1751bb45f64c597edb4c8c6b3"
+
+[[package]]
+name = "alloc-stdlib"
+version = "0.2.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e76a019e91224d279006ff972f1e984179a6e9feb050adba6ce8274aef23195"
+dependencies = [
+ "alloc-no-stdlib",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -262,6 +277,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "brotli-decompressor"
+version = "5.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583"
+dependencies = [
+ "alloc-no-stdlib",
+ "alloc-stdlib",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -473,6 +498,7 @@ dependencies = [
  "ferroui-media-qr",
  "ferroui-media-video",
  "ferroui-media-video-controls",
+ "ferroui-media3d",
  "ferroui-opengl",
  "ferroui-rendering-benchmarks",
  "ferroui-skia",
@@ -528,6 +554,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "control-catalog",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -554,6 +581,7 @@ dependencies = [
  "ferroui-media-windows",
  "ferroui-native",
  "ferroui-quartz",
+ "ferroui-skia",
  "ferroui-vello",
  "ferroui-wayland",
  "ferroui-win32",
@@ -566,6 +594,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "control-catalog",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-ios",
  "ferroui-quartz",
@@ -1655,6 +1684,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-flip-view",
+ "ferroui-controls-icons",
+ "ferroui-controls-password-box",
+ "ferroui-controls-split-menu",
+ "ferroui-controls-teaching-tip",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-controls-flip-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-icons"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
 name = "ferroui-controls-inking"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -1672,6 +1738,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-items-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-repeater",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-itemsview-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-items-view",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -1681,6 +1772,15 @@ dependencies = [
  "ferroui-controls",
  "ferroui-livecharts",
  "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-controls-password-box"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
 ]
 
 [[package]]
@@ -1694,6 +1794,27 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "rustc-hash 2.1.3",
  "xamlx",
+]
+
+[[package]]
+name = "ferroui-controls-split-menu"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-controls-teaching-tip"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
 ]
 
 [[package]]
@@ -1966,6 +2087,34 @@ dependencies = [
  "ferroui-controls",
  "ferroui-skia",
  "url",
+]
+
+[[package]]
+name = "ferroui-fonts-web"
+version = "0.6.0-preview.1"
+dependencies = [
+ "brotli-decompressor",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-fonts-web-core",
+ "ferroui-harfbuzz",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-vello",
+ "harfbuzz-sys",
+ "js-sys",
+ "ureq",
+ "url",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "ferroui-fonts-web-core"
+version = "0.6.0-preview.1"
+dependencies = [
+ "flate2",
+ "read-fonts",
 ]
 
 [[package]]
@@ -2553,7 +2702,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2587,6 +2738,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 
@@ -2808,6 +2960,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
@@ -3159,6 +3312,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ash",
  "ferroui-base",
+ "ferroui-render3d",
 ]
 
 [[package]]
@@ -5301,6 +5455,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
@@ -8039,10 +8194,16 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-flip-view",
+ "ferroui-controls-icons",
  "ferroui-controls-inking",
- "ferroui-controls-livecharts",
+ "ferroui-controls-items-view",
+ "ferroui-controls-password-box",
  "ferroui-controls-repeater",
+ "ferroui-controls-split-menu",
+ "ferroui-controls-teaching-tip",
  "ferroui-desktop",
  "ferroui-harfbuzz",
  "ferroui-headless",
