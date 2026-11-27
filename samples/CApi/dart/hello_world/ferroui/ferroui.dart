@@ -290,8 +290,8 @@ void runApp(void Function() start) {
 
 const int _abiVersion = 1;
 const int _bufferTooSmall = -14;
-const int _apiFingerprint = -5451091071318546145;
-const int _selectionFingerprint = -1321240882640037536;
+const int _apiFingerprint = 2794213326097157368;
+const int _selectionFingerprint = 4470969244075256880;
 
 void _registerTypes() {
   for (final entry in const ['ferro_type_button', 'ferro_type_stack_panel', 'ferro_type_text_block', 'ferro_type_window']) {
@@ -429,8 +429,8 @@ extension type Animatable._(int handle) implements FerroObject {
   factory Animatable() => Animatable._(_create(typeId));
   Animatable.of(FerroObject object) : this._(object.handle);
   /// Transitions. Defines the `Transitions` property.
-  String get transitions => _getString(handle, 953);
-  set transitions(String value) => _setString(handle, 953, value);
+  String get transitions => _getString(handle, 971);
+  set transitions(String value) => _setString(handle, 971, value);
 }
 
 /// Extends an [`Animatable`] with the following features: - An inherited `DataContext`. -
@@ -446,24 +446,24 @@ extension type StyledElement._(int handle) implements Animatable {
   String get actualThemeVariant => _getString(handle, 9);
   set actualThemeVariant(String value) => _setString(handle, 9, value);
   /// DataContext. Defines the `DataContext` property.
-  String get dataContext => _getString(handle, 185);
-  set dataContext(String value) => _setString(handle, 185, value);
-  FerroObject get dataContextObject => FerroObject(_getObject(handle, 185));
-  set dataContextObject(FerroObject value) => _setObject(handle, 185, value.handle);
+  String get dataContext => _getString(handle, 192);
+  set dataContext(String value) => _setString(handle, 192, value);
+  FerroObject get dataContextObject => FerroObject(_getObject(handle, 192));
+  set dataContextObject(FerroObject value) => _setObject(handle, 192, value.handle);
   /// Name. Defines the `Name` property.
-  String get name => _getString(handle, 564);
-  set name(String value) => _setString(handle, 564, value);
+  String get name => _getString(handle, 572);
+  set name(String value) => _setString(handle, 572, value);
   /// Parent. Defines the `Parent` property.
-  FerroObject get parent => FerroObject(_getObject(handle, 632));
+  FerroObject get parent => FerroObject(_getObject(handle, 640));
   /// RequestedThemeVariant. Defines the RequestedThemeVariant property: the theme variant
   /// requested for an element and its descendants.
-  String get requestedThemeVariant => _getString(handle, 713);
-  set requestedThemeVariant(String value) => _setString(handle, 713, value);
+  String get requestedThemeVariant => _getString(handle, 721);
+  set requestedThemeVariant(String value) => _setString(handle, 721, value);
   /// TemplatedParent. Defines the `TemplatedParent` property.
-  FerroObject get templatedParent => FerroObject(_getObject(handle, 859));
+  FerroObject get templatedParent => FerroObject(_getObject(handle, 877));
   /// Theme. Defines the `Theme` property.
-  FerroObject get theme => FerroObject(_getObject(handle, 910));
-  set theme(FerroObject value) => _setObject(handle, 910, value.handle);
+  FerroObject get theme => FerroObject(_getObject(handle, 928));
+  set theme(FerroObject value) => _setObject(handle, 928, value.handle);
 }
 
 /// Base class for controls that provides rendering and related visual properties. The visual
@@ -471,48 +471,48 @@ extension type StyledElement._(int handle) implements Animatable {
 /// information needed for a renderer to render the control. To traverse the visual tree, use
 /// the methods in the `visual_tree` module.
 extension type Visual._(int handle) implements StyledElement {
-  static const int typeId = 494;
+  static const int typeId = 500;
   factory Visual() => Visual._(_create(typeId));
   Visual.of(FerroObject object) : this._(object.handle);
   /// Bounds. Defines the `Bounds` property.
-  String get bounds => _getString(handle, 87);
+  String get bounds => _getString(handle, 90);
   /// CacheMode. Defines the `CacheMode` property.
-  FerroObject get cacheMode => FerroObject(_getObject(handle, 94));
-  set cacheMode(FerroObject value) => _setObject(handle, 94, value.handle);
+  FerroObject get cacheMode => FerroObject(_getObject(handle, 97));
+  set cacheMode(FerroObject value) => _setObject(handle, 97, value.handle);
   /// Clip. Defines the `Clip` property.
-  FerroObject get clip => FerroObject(_getObject(handle, 136));
-  set clip(FerroObject value) => _setObject(handle, 136, value.handle);
+  FerroObject get clip => FerroObject(_getObject(handle, 142));
+  set clip(FerroObject value) => _setObject(handle, 142, value.handle);
   /// ClipToBounds. Defines the `ClipToBounds` property.
-  bool get clipToBounds => _getBool(handle, 138);
-  set clipToBounds(bool value) => _setBool(handle, 138, value);
+  bool get clipToBounds => _getBool(handle, 144);
+  set clipToBounds(bool value) => _setBool(handle, 144, value);
   /// Effect. Defines the `Effect` property.
-  String get effect => _getString(handle, 254);
-  set effect(String value) => _setString(handle, 254, value);
+  String get effect => _getString(handle, 261);
+  set effect(String value) => _setString(handle, 261, value);
   /// HasMirrorTransform. Defines the `HasMirrorTransform` property.
-  bool get hasMirrorTransform => _getBool(handle, 328);
+  bool get hasMirrorTransform => _getBool(handle, 335);
   /// IsVisible. Defines the `IsVisible` property.
-  bool get isVisible => _getBool(handle, 460);
-  set isVisible(bool value) => _setBool(handle, 460, value);
+  bool get isVisible => _getBool(handle, 468);
+  set isVisible(bool value) => _setBool(handle, 468, value);
   /// Opacity. Defines the `Opacity` property.
-  double get opacity => _getF64(handle, 601);
-  set opacity(double value) => _setF64(handle, 601, value);
+  double get opacity => _getF64(handle, 609);
+  set opacity(double value) => _setF64(handle, 609, value);
   /// OpacityMask. Defines the `OpacityMask` property.
-  String get opacityMask => _getString(handle, 602);
-  set opacityMask(String value) => _setString(handle, 602, value);
+  String get opacityMask => _getString(handle, 610);
+  set opacityMask(String value) => _setString(handle, 610, value);
   /// RenderTransform. Defines the `RenderTransform` property.
-  String get renderTransform => _getString(handle, 709);
-  set renderTransform(String value) => _setString(handle, 709, value);
+  String get renderTransform => _getString(handle, 717);
+  set renderTransform(String value) => _setString(handle, 717, value);
   /// RenderTransformOrigin. Defines the `RenderTransformOrigin` property.
-  String get renderTransformOrigin => _getString(handle, 710);
-  set renderTransformOrigin(String value) => _setString(handle, 710, value);
+  String get renderTransformOrigin => _getString(handle, 718);
+  set renderTransformOrigin(String value) => _setString(handle, 718, value);
   /// Visual.FlowDirection (attached). Defines the `FlowDirection` attached property.
-  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1027));
-  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1027, value.value);
+  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1045));
+  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1045, value.value);
   /// VisualParent. Defines the `VisualParent` property.
-  FerroObject get visualParent => FerroObject(_getObject(handle, 1028));
+  FerroObject get visualParent => FerroObject(_getObject(handle, 1046));
   /// ZIndex. Defines the `ZIndex` property.
-  int get zIndex => _getI64(handle, 1057);
-  set zIndex(int value) => _setI64(handle, 1057, value);
+  int get zIndex => _getI64(handle, 1075);
+  set zIndex(int value) => _setI64(handle, 1075, value);
 }
 
 /// Implements layout-related functionality for a control.
@@ -521,37 +521,37 @@ extension type Layoutable._(int handle) implements Visual {
   factory Layoutable() => Layoutable._(_create(typeId));
   Layoutable.of(FerroObject object) : this._(object.handle);
   /// DesiredSize. Defines the `DesiredSize` property.
-  String get desiredSize => _getString(handle, 212);
+  String get desiredSize => _getString(handle, 219);
   /// Height. Defines the `Height` property.
-  double get height => _getF64(handle, 339);
-  set height(double value) => _setF64(handle, 339, value);
+  double get height => _getF64(handle, 346);
+  set height(double value) => _setF64(handle, 346, value);
   /// HorizontalAlignment. Defines the `HorizontalAlignment` property.
-  HorizontalAlignment get horizontalAlignment => HorizontalAlignment(_getI64(handle, 342));
-  set horizontalAlignment(HorizontalAlignment value) => _setI64(handle, 342, value.value);
+  HorizontalAlignment get horizontalAlignment => HorizontalAlignment(_getI64(handle, 349));
+  set horizontalAlignment(HorizontalAlignment value) => _setI64(handle, 349, value.value);
   /// Margin. Defines the `Margin` property.
-  String get margin => _getString(handle, 519);
-  set margin(String value) => _setString(handle, 519, value);
+  String get margin => _getString(handle, 527);
+  set margin(String value) => _setString(handle, 527, value);
   /// MaxHeight. Defines the `MaxHeight` property.
-  double get maxHeight => _getF64(handle, 528);
-  set maxHeight(double value) => _setF64(handle, 528, value);
+  double get maxHeight => _getF64(handle, 536);
+  set maxHeight(double value) => _setF64(handle, 536, value);
   /// MaxWidth. Defines the `MaxWidth` property.
-  double get maxWidth => _getF64(handle, 536);
-  set maxWidth(double value) => _setF64(handle, 536, value);
+  double get maxWidth => _getF64(handle, 544);
+  set maxWidth(double value) => _setF64(handle, 544, value);
   /// MinHeight. Defines the `MinHeight` property.
-  double get minHeight => _getF64(handle, 547);
-  set minHeight(double value) => _setF64(handle, 547, value);
+  double get minHeight => _getF64(handle, 555);
+  set minHeight(double value) => _setF64(handle, 555, value);
   /// MinWidth. Defines the `MinWidth` property.
-  double get minWidth => _getF64(handle, 549);
-  set minWidth(double value) => _setF64(handle, 549, value);
+  double get minWidth => _getF64(handle, 557);
+  set minWidth(double value) => _setF64(handle, 557, value);
   /// UseLayoutRounding. Defines the `UseLayoutRounding` property.
-  bool get useLayoutRounding => _getBool(handle, 1008);
-  set useLayoutRounding(bool value) => _setBool(handle, 1008, value);
+  bool get useLayoutRounding => _getBool(handle, 1026);
+  set useLayoutRounding(bool value) => _setBool(handle, 1026, value);
   /// VerticalAlignment. Defines the `VerticalAlignment` property.
-  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1016));
-  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1016, value.value);
+  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1034));
+  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1034, value.value);
   /// Width. Defines the `Width` property.
-  double get width => _getF64(handle, 1034);
-  set width(double value) => _setF64(handle, 1034, value);
+  double get width => _getF64(handle, 1052);
+  set width(double value) => _setF64(handle, 1052, value);
 }
 
 /// Base class for objects that raise routed events.
@@ -571,31 +571,31 @@ extension type InputElement._(int handle) implements Interactive {
   /// AllowFocusOnInteraction. Whether pointer-origin focus changes may focus this element.
   /// Inherited; programmatic, tab and directional focus remain controlled by
   /// Focusable/IsTabStop as before.
-  bool get allowFocusOnInteraction => _getBool(handle, 20);
-  set allowFocusOnInteraction(bool value) => _setBool(handle, 20, value);
+  bool get allowFocusOnInteraction => _getBool(handle, 23);
+  set allowFocusOnInteraction(bool value) => _setBool(handle, 23, value);
   /// Focusable. Defines the `Focusable` property.
-  bool get focusable => _getBool(handle, 291);
-  set focusable(bool value) => _setBool(handle, 291, value);
+  bool get focusable => _getBool(handle, 298);
+  set focusable(bool value) => _setBool(handle, 298, value);
   /// IsEffectivelyEnabled. Defines the `IsEffectivelyEnabled` property.
-  bool get isEffectivelyEnabled => _getBool(handle, 399);
+  bool get isEffectivelyEnabled => _getBool(handle, 407);
   /// IsEnabled. Defines the `IsEnabled` property.
-  bool get isEnabled => _getBool(handle, 400);
-  set isEnabled(bool value) => _setBool(handle, 400, value);
+  bool get isEnabled => _getBool(handle, 408);
+  set isEnabled(bool value) => _setBool(handle, 408, value);
   /// IsFocused. Defines the `IsFocused` property.
-  bool get isFocused => _getBool(handle, 404);
+  bool get isFocused => _getBool(handle, 412);
   /// IsHitTestVisible. Defines the `IsHitTestVisible` property.
-  bool get isHitTestVisible => _getBool(handle, 408);
-  set isHitTestVisible(bool value) => _setBool(handle, 408, value);
+  bool get isHitTestVisible => _getBool(handle, 416);
+  set isHitTestVisible(bool value) => _setBool(handle, 416, value);
   /// IsKeyboardFocusWithin. Defines the `IsKeyboardFocusWithin` property.
-  bool get isKeyboardFocusWithin => _getBool(handle, 417);
+  bool get isKeyboardFocusWithin => _getBool(handle, 425);
   /// IsPointerOver. Defines the `IsPointerOver` property.
-  bool get isPointerOver => _getBool(handle, 432);
+  bool get isPointerOver => _getBool(handle, 440);
   /// IsTabStop. Defines the `IsTabStop` property.
-  bool get isTabStop => _getBool(handle, 448);
-  set isTabStop(bool value) => _setBool(handle, 448, value);
+  bool get isTabStop => _getBool(handle, 456);
+  set isTabStop(bool value) => _setBool(handle, 456, value);
   /// TabIndex. Defines the `TabIndex` property.
-  int get tabIndex => _getI64(handle, 846);
-  set tabIndex(int value) => _setI64(handle, 846, value);
+  int get tabIndex => _getI64(handle, 855);
+  set tabIndex(int value) => _setI64(handle, 855, value);
   /// ContextCanceled: the sender is valid for the call. Provides event data for the
   /// `ContextCanceled` event.
   Subscription onContextCanceled(void Function(InputElement sender) handler) =>
@@ -719,16 +719,16 @@ extension type Control._(int handle) implements InputElement {
   factory Control() => Control._(_create(typeId));
   Control.of(FerroObject object) : this._(object.handle);
   /// ContextFlyout. Defines the `ContextFlyout` property.
-  FerroObject get contextFlyout => FerroObject(_getObject(handle, 173));
-  set contextFlyout(FerroObject value) => _setObject(handle, 173, value.handle);
+  FerroObject get contextFlyout => FerroObject(_getObject(handle, 180));
+  set contextFlyout(FerroObject value) => _setObject(handle, 180, value.handle);
   /// ContextMenu. Defines the `ContextMenu` property.
-  FerroObject get contextMenu => FerroObject(_getObject(handle, 174));
-  set contextMenu(FerroObject value) => _setObject(handle, 174, value.handle);
+  FerroObject get contextMenu => FerroObject(_getObject(handle, 181));
+  set contextMenu(FerroObject value) => _setObject(handle, 181, value.handle);
   /// Tag. Defines the `Tag` property.
-  String get tag => _getString(handle, 852);
-  set tag(String value) => _setString(handle, 852, value);
-  FerroObject get tagObject => FerroObject(_getObject(handle, 852));
-  set tagObject(FerroObject value) => _setObject(handle, 852, value.handle);
+  String get tag => _getString(handle, 870);
+  set tag(String value) => _setString(handle, 870, value);
+  FerroObject get tagObject => FerroObject(_getObject(handle, 870));
+  set tagObject(FerroObject value) => _setObject(handle, 870, value.handle);
   /// Loaded: the sender is valid for the call. Defines the `Loaded` event.
   Subscription onLoaded(void Function(Control sender) handler) =>
       _subscribe(handle, 33, (sender) => handler(Control._(sender)));
@@ -746,55 +746,55 @@ extension type Control._(int handle) implements InputElement {
 
 /// A lookless control whose visual appearance is defined by its `Template`.
 extension type TemplatedControl._(int handle) implements Control {
-  static const int typeId = 422;
+  static const int typeId = 428;
   factory TemplatedControl() => TemplatedControl._(_create(typeId));
   TemplatedControl.of(FerroObject object) : this._(object.handle);
   /// Background. Defines the `Background` property.
-  String get background => _getString(handle, 64);
-  set background(String value) => _setString(handle, 64, value);
+  String get background => _getString(handle, 67);
+  set background(String value) => _setString(handle, 67, value);
   /// BackgroundSizing. Defines the `BackgroundSizing` property.
-  BackgroundSizing get backgroundSizing => BackgroundSizing(_getI64(handle, 65));
-  set backgroundSizing(BackgroundSizing value) => _setI64(handle, 65, value.value);
+  BackgroundSizing get backgroundSizing => BackgroundSizing(_getI64(handle, 68));
+  set backgroundSizing(BackgroundSizing value) => _setI64(handle, 68, value.value);
   /// BorderBrush. Defines the `BorderBrush` property.
-  String get borderBrush => _getString(handle, 81);
-  set borderBrush(String value) => _setString(handle, 81, value);
+  String get borderBrush => _getString(handle, 84);
+  set borderBrush(String value) => _setString(handle, 84, value);
   /// BorderThickness. Defines the `BorderThickness` property.
-  String get borderThickness => _getString(handle, 82);
-  set borderThickness(String value) => _setString(handle, 82, value);
+  String get borderThickness => _getString(handle, 85);
+  set borderThickness(String value) => _setString(handle, 85, value);
   /// CornerRadius. Defines the `CornerRadius` property.
-  String get cornerRadius => _getString(handle, 175);
-  set cornerRadius(String value) => _setString(handle, 175, value);
+  String get cornerRadius => _getString(handle, 182);
+  set cornerRadius(String value) => _setString(handle, 182, value);
   /// FontFamily. Defines the `FontFamily` property.
-  String get fontFamily => _getString(handle, 292);
-  set fontFamily(String value) => _setString(handle, 292, value);
+  String get fontFamily => _getString(handle, 299);
+  set fontFamily(String value) => _setString(handle, 299, value);
   /// FontFeatures. Defines the `FontFeatures` property.
-  String get fontFeatures => _getString(handle, 293);
-  set fontFeatures(String value) => _setString(handle, 293, value);
+  String get fontFeatures => _getString(handle, 300);
+  set fontFeatures(String value) => _setString(handle, 300, value);
   /// FontSize. Defines the `FontSize` property.
-  double get fontSize => _getF64(handle, 294);
-  set fontSize(double value) => _setF64(handle, 294, value);
+  double get fontSize => _getF64(handle, 301);
+  set fontSize(double value) => _setF64(handle, 301, value);
   /// FontStretch. Defines the `FontStretch` property.
-  FontStretch get fontStretch => FontStretch(_getI64(handle, 295));
-  set fontStretch(FontStretch value) => _setI64(handle, 295, value.value);
+  FontStretch get fontStretch => FontStretch(_getI64(handle, 302));
+  set fontStretch(FontStretch value) => _setI64(handle, 302, value.value);
   /// FontStyle. Defines the `FontStyle` property.
-  FontStyle get fontStyle => FontStyle(_getI64(handle, 296));
-  set fontStyle(FontStyle value) => _setI64(handle, 296, value.value);
+  FontStyle get fontStyle => FontStyle(_getI64(handle, 303));
+  set fontStyle(FontStyle value) => _setI64(handle, 303, value.value);
   /// FontWeight. Defines the `FontWeight` property.
-  String get fontWeight => _getString(handle, 297);
-  set fontWeight(String value) => _setString(handle, 297, value);
+  String get fontWeight => _getString(handle, 304);
+  set fontWeight(String value) => _setString(handle, 304, value);
   /// Foreground. Defines the `Foreground` property.
-  String get foreground => _getString(handle, 303);
-  set foreground(String value) => _setString(handle, 303, value);
+  String get foreground => _getString(handle, 310);
+  set foreground(String value) => _setString(handle, 310, value);
   /// LetterSpacing. Defines the `LetterSpacing` property.
-  double get letterSpacing => _getF64(handle, 509);
-  set letterSpacing(double value) => _setF64(handle, 509, value);
+  double get letterSpacing => _getF64(handle, 517);
+  set letterSpacing(double value) => _setF64(handle, 517, value);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 611);
-  set padding(String value) => _setString(handle, 611, value);
+  String get padding => _getString(handle, 619);
+  set padding(String value) => _setString(handle, 619, value);
   /// TemplatedControl.IsTemplateFocusTarget (attached). Defines the `IsTemplateFocusTarget`
   /// attached property.
-  static bool getIsTemplateFocusTarget(FerroObject target) => _getBool(target.handle, 858);
-  static void setIsTemplateFocusTarget(FerroObject target, bool value) => _setBool(target.handle, 858, value);
+  static bool getIsTemplateFocusTarget(FerroObject target) => _getBool(target.handle, 876);
+  static void setIsTemplateFocusTarget(FerroObject target, bool value) => _setBool(target.handle, 876, value);
   /// TemplateApplied: the sender is valid for the call. Defines the `TemplateApplied` routed
   /// event.
   Subscription onTemplateApplied(void Function(TemplatedControl sender) handler) =>
@@ -807,16 +807,16 @@ extension type ContentControl._(int handle) implements TemplatedControl {
   factory ContentControl() => ContentControl._(_create(typeId));
   ContentControl.of(FerroObject object) : this._(object.handle);
   /// Content. Defines the `Content` property.
-  String get content => _getString(handle, 168);
-  set content(String value) => _setString(handle, 168, value);
-  FerroObject get contentObject => FerroObject(_getObject(handle, 168));
-  set contentObject(FerroObject value) => _setObject(handle, 168, value.handle);
+  String get content => _getString(handle, 175);
+  set content(String value) => _setString(handle, 175, value);
+  FerroObject get contentObject => FerroObject(_getObject(handle, 175));
+  set contentObject(FerroObject value) => _setObject(handle, 175, value.handle);
   /// HorizontalContentAlignment. Defines the `HorizontalContentAlignment` property.
-  HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 343));
-  set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 343, value.value);
+  HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 350));
+  set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 350, value.value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1017));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1017, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1035));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1035, value.value);
 }
 
 /// A standard button control.
@@ -825,27 +825,27 @@ extension type Button._(int handle) implements ContentControl {
   factory Button() => Button._(_create(typeId));
   Button.of(FerroObject object) : this._(object.handle);
   /// ClickMode. Defines the `ClickMode` property.
-  ClickMode get clickMode => ClickMode(_getI64(handle, 134));
-  set clickMode(ClickMode value) => _setI64(handle, 134, value.value);
+  ClickMode get clickMode => ClickMode(_getI64(handle, 140));
+  set clickMode(ClickMode value) => _setI64(handle, 140, value.value);
   /// CommandParameter. Defines the `CommandParameter` property.
-  String get commandParameter => _getString(handle, 155);
-  set commandParameter(String value) => _setString(handle, 155, value);
-  FerroObject get commandParameterObject => FerroObject(_getObject(handle, 155));
-  set commandParameterObject(FerroObject value) => _setObject(handle, 155, value.handle);
+  String get commandParameter => _getString(handle, 162);
+  set commandParameter(String value) => _setString(handle, 162, value);
+  FerroObject get commandParameterObject => FerroObject(_getObject(handle, 162));
+  set commandParameterObject(FerroObject value) => _setObject(handle, 162, value.handle);
   /// Flyout. Defines the `Flyout` property.
-  FerroObject get flyout => FerroObject(_getObject(handle, 287));
-  set flyout(FerroObject value) => _setObject(handle, 287, value.handle);
+  FerroObject get flyout => FerroObject(_getObject(handle, 294));
+  set flyout(FerroObject value) => _setObject(handle, 294, value.handle);
   /// HotKey. Defines the `HotKey` property.
-  String get hotKey => _getString(handle, 347);
-  set hotKey(String value) => _setString(handle, 347, value);
+  String get hotKey => _getString(handle, 354);
+  set hotKey(String value) => _setString(handle, 354, value);
   /// IsCancel. Defines the `IsCancel` property.
-  bool get isCancel => _getBool(handle, 386);
-  set isCancel(bool value) => _setBool(handle, 386, value);
+  bool get isCancel => _getBool(handle, 394);
+  set isCancel(bool value) => _setBool(handle, 394, value);
   /// IsDefault. Defines the `IsDefault` property.
-  bool get isDefault => _getBool(handle, 394);
-  set isDefault(bool value) => _setBool(handle, 394, value);
+  bool get isDefault => _getBool(handle, 402);
+  set isDefault(bool value) => _setBool(handle, 402, value);
   /// IsPressed. Defines the `IsPressed` property.
-  bool get isPressed => _getBool(handle, 433);
+  bool get isPressed => _getBool(handle, 441);
   /// Click: the sender is valid for the call. Defines the `Click` event.
   Subscription onClick(void Function(Button sender) handler) =>
       _subscribe(handle, 4, (sender) => handler(Button._(sender)));
@@ -858,8 +858,8 @@ extension type Panel._(int handle) implements Control {
   factory Panel() => Panel._(_create(typeId));
   Panel.of(FerroObject object) : this._(object.handle);
   /// Background. Defines the `Background` property.
-  String get background => _getString(handle, 64);
-  set background(String value) => _setString(handle, 64, value);
+  String get background => _getString(handle, 67);
+  set background(String value) => _setString(handle, 67, value);
 }
 
 /// A panel which lays out its children horizontally or vertically.
@@ -868,17 +868,17 @@ extension type StackPanel._(int handle) implements Panel {
   factory StackPanel() => StackPanel._(_create(typeId));
   StackPanel.of(FerroObject object) : this._(object.handle);
   /// AreHorizontalSnapPointsRegular. Defines the `AreHorizontalSnapPointsRegular` property.
-  bool get areHorizontalSnapPointsRegular => _getBool(handle, 30);
-  set areHorizontalSnapPointsRegular(bool value) => _setBool(handle, 30, value);
+  bool get areHorizontalSnapPointsRegular => _getBool(handle, 33);
+  set areHorizontalSnapPointsRegular(bool value) => _setBool(handle, 33, value);
   /// AreVerticalSnapPointsRegular. Defines the `AreVerticalSnapPointsRegular` property.
-  bool get areVerticalSnapPointsRegular => _getBool(handle, 32);
-  set areVerticalSnapPointsRegular(bool value) => _setBool(handle, 32, value);
+  bool get areVerticalSnapPointsRegular => _getBool(handle, 35);
+  set areVerticalSnapPointsRegular(bool value) => _setBool(handle, 35, value);
   /// Orientation. Defines the `Orientation` property.
-  Orientation get orientation => Orientation(_getI64(handle, 604));
-  set orientation(Orientation value) => _setI64(handle, 604, value.value);
+  Orientation get orientation => Orientation(_getI64(handle, 612));
+  set orientation(Orientation value) => _setI64(handle, 612, value.value);
   /// Spacing. Defines the `Spacing` property.
-  double get spacing => _getF64(handle, 817);
-  set spacing(double value) => _setF64(handle, 817, value);
+  double get spacing => _getF64(handle, 825);
+  set spacing(double value) => _setF64(handle, 825, value);
   /// HorizontalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `HorizontalSnapPointsChanged` event.
   Subscription onHorizontalSnapPointsChanged(void Function(StackPanel sender) handler) =>
@@ -891,104 +891,104 @@ extension type StackPanel._(int handle) implements Panel {
 
 /// A control that displays a block of text.
 extension type TextBlock._(int handle) implements Control {
-  static const int typeId = 433;
+  static const int typeId = 439;
   factory TextBlock() => TextBlock._(_create(typeId));
   TextBlock.of(FerroObject object) : this._(object.handle);
   /// Background. Defines the `Background` property.
-  String get background => _getString(handle, 64);
-  set background(String value) => _setString(handle, 64, value);
+  String get background => _getString(handle, 67);
+  set background(String value) => _setString(handle, 67, value);
   /// FontFamily. Defines the `FontFamily` property.
-  String get fontFamily => _getString(handle, 292);
-  set fontFamily(String value) => _setString(handle, 292, value);
+  String get fontFamily => _getString(handle, 299);
+  set fontFamily(String value) => _setString(handle, 299, value);
   /// FontFeatures. Defines the `FontFeatures` property.
-  String get fontFeatures => _getString(handle, 293);
-  set fontFeatures(String value) => _setString(handle, 293, value);
+  String get fontFeatures => _getString(handle, 300);
+  set fontFeatures(String value) => _setString(handle, 300, value);
   /// FontSize. Defines the `FontSize` property.
-  double get fontSize => _getF64(handle, 294);
-  set fontSize(double value) => _setF64(handle, 294, value);
+  double get fontSize => _getF64(handle, 301);
+  set fontSize(double value) => _setF64(handle, 301, value);
   /// FontStretch. Defines the `FontStretch` property.
-  FontStretch get fontStretch => FontStretch(_getI64(handle, 295));
-  set fontStretch(FontStretch value) => _setI64(handle, 295, value.value);
+  FontStretch get fontStretch => FontStretch(_getI64(handle, 302));
+  set fontStretch(FontStretch value) => _setI64(handle, 302, value.value);
   /// FontStyle. Defines the `FontStyle` property.
-  FontStyle get fontStyle => FontStyle(_getI64(handle, 296));
-  set fontStyle(FontStyle value) => _setI64(handle, 296, value.value);
+  FontStyle get fontStyle => FontStyle(_getI64(handle, 303));
+  set fontStyle(FontStyle value) => _setI64(handle, 303, value.value);
   /// FontWeight. Defines the `FontWeight` property.
-  String get fontWeight => _getString(handle, 297);
-  set fontWeight(String value) => _setString(handle, 297, value);
+  String get fontWeight => _getString(handle, 304);
+  set fontWeight(String value) => _setString(handle, 304, value);
   /// Foreground. Defines the `Foreground` property.
-  String get foreground => _getString(handle, 303);
-  set foreground(String value) => _setString(handle, 303, value);
+  String get foreground => _getString(handle, 310);
+  set foreground(String value) => _setString(handle, 310, value);
   /// Inlines. Defines the `Inlines` property.
-  String get inlines => _getString(handle, 372);
-  set inlines(String value) => _setString(handle, 372, value);
+  String get inlines => _getString(handle, 379);
+  set inlines(String value) => _setString(handle, 379, value);
   /// LetterSpacing. Defines the `LetterSpacing` property.
-  double get letterSpacing => _getF64(handle, 509);
-  set letterSpacing(double value) => _setF64(handle, 509, value);
+  double get letterSpacing => _getF64(handle, 517);
+  set letterSpacing(double value) => _setF64(handle, 517, value);
   /// Padding. Defines the `Padding` property.
-  String get padding => _getString(handle, 611);
-  set padding(String value) => _setString(handle, 611, value);
+  String get padding => _getString(handle, 619);
+  set padding(String value) => _setString(handle, 619, value);
   /// Text. Defines the `Text` property.
-  String get text => _getString(handle, 860);
-  set text(String value) => _setString(handle, 860, value);
+  String get text => _getString(handle, 878);
+  set text(String value) => _setString(handle, 878, value);
   /// TextBlock.BaselineOffset (attached). Defines the `BaselineOffset` attached property.
-  static double getBaselineOffset(FerroObject target) => _getF64(target.handle, 862);
-  static void setBaselineOffset(FerroObject target, double value) => _setF64(target.handle, 862, value);
+  static double getBaselineOffset(FerroObject target) => _getF64(target.handle, 880);
+  static void setBaselineOffset(FerroObject target, double value) => _setF64(target.handle, 880, value);
   /// TextBlock.LayoutRoundingPlacement (attached). Defines the `LayoutRoundingPlacement`
   /// attached property: where a text block puts the height layout rounding adds to it (a
   /// FerroUI addition). Inherited, so that a theme sets it once on the top-level.
-  static TextLayoutRoundingPlacement getLayoutRoundingPlacement(FerroObject target) => TextLayoutRoundingPlacement(_getI64(target.handle, 863));
-  static void setLayoutRoundingPlacement(FerroObject target, TextLayoutRoundingPlacement value) => _setI64(target.handle, 863, value.value);
+  static TextLayoutRoundingPlacement getLayoutRoundingPlacement(FerroObject target) => TextLayoutRoundingPlacement(_getI64(target.handle, 881));
+  static void setLayoutRoundingPlacement(FerroObject target, TextLayoutRoundingPlacement value) => _setI64(target.handle, 881, value.value);
   /// TextBlock.LineHeight (attached). Defines the `LineHeight` property.
-  static double getLineHeight(FerroObject target) => _getF64(target.handle, 864);
-  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 864, value);
+  static double getLineHeight(FerroObject target) => _getF64(target.handle, 882);
+  static void setLineHeight(FerroObject target, double value) => _setF64(target.handle, 882, value);
   /// TextBlock.LineSpacing (attached). Defines the `LineSpacing` property.
-  static double getLineSpacing(FerroObject target) => _getF64(target.handle, 865);
-  static void setLineSpacing(FerroObject target, double value) => _setF64(target.handle, 865, value);
+  static double getLineSpacing(FerroObject target) => _getF64(target.handle, 883);
+  static void setLineSpacing(FerroObject target, double value) => _setF64(target.handle, 883, value);
   /// TextBlock.MaxLines (attached). Defines the `MaxLines` property.
-  static int getMaxLines(FerroObject target) => _getI64(target.handle, 866);
-  static void setMaxLines(FerroObject target, int value) => _setI64(target.handle, 866, value);
+  static int getMaxLines(FerroObject target) => _getI64(target.handle, 884);
+  static void setMaxLines(FerroObject target, int value) => _setI64(target.handle, 884, value);
   /// TextBlock.TextAlignment (attached). Defines the `TextAlignment` property.
-  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 867));
-  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 867, value.value);
+  static TextAlignment getTextAlignment(FerroObject target) => TextAlignment(_getI64(target.handle, 885));
+  static void setTextAlignment(FerroObject target, TextAlignment value) => _setI64(target.handle, 885, value.value);
   /// TextBlock.TextLineBounds (attached). Defines the `TextLineBounds` attached property: how
   /// the box of each line is bounded above and below (a FerroUI addition after WinUI's
   /// `TextBlock.TextLineBounds`, DEVIATIONS.md, Text block). Inherited, as the other attached
   /// text properties, so that a content presenter sets it for the text of its content.
-  static TextLineBounds getTextLineBounds(FerroObject target) => TextLineBounds(_getI64(target.handle, 868));
-  static void setTextLineBounds(FerroObject target, TextLineBounds value) => _setI64(target.handle, 868, value.value);
+  static TextLineBounds getTextLineBounds(FerroObject target) => TextLineBounds(_getI64(target.handle, 886));
+  static void setTextLineBounds(FerroObject target, TextLineBounds value) => _setI64(target.handle, 886, value.value);
   /// TextBlock.TextWrapping (attached). Defines the `TextWrapping` property.
-  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 870));
-  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 870, value.value);
+  static TextWrapping getTextWrapping(FerroObject target) => TextWrapping(_getI64(target.handle, 888));
+  static void setTextWrapping(FerroObject target, TextWrapping value) => _setI64(target.handle, 888, value.value);
   /// TextDecorations. Defines the `TextDecorations` property.
-  String get textDecorations => _getString(handle, 875);
-  set textDecorations(String value) => _setString(handle, 875, value);
+  String get textDecorations => _getString(handle, 893);
+  set textDecorations(String value) => _setString(handle, 893, value);
 }
 
 /// Base class for top-level widgets. This class acts as a base for top level widget. It handles
 /// scheduling layout, styling and rendering as well as tracking the widget's
 /// [`client_size`](TopLevel::client_size).
 extension type TopLevel._(int handle) implements ContentControl {
-  static const int typeId = 466;
+  static const int typeId = 472;
   TopLevel.of(FerroObject object) : this._(object.handle);
   /// ActualTransparencyLevel. Defines the `ActualTransparencyLevel` property.
   String get actualTransparencyLevel => _getString(handle, 10);
   /// ClientSize. Defines the `ClientSize` property.
-  String get clientSize => _getString(handle, 135);
+  String get clientSize => _getString(handle, 141);
   /// FrameSize. Defines the `FrameSize` property.
-  String get frameSize => _getString(handle, 306);
+  String get frameSize => _getString(handle, 313);
   /// TopLevel.AutoSafeAreaPadding (attached). Defines the AutoSafeAreaPadding attached
   /// property.
-  static bool getAutoSafeAreaPadding(FerroObject target) => _getBool(target.handle, 946);
-  static void setAutoSafeAreaPadding(FerroObject target, bool value) => _setBool(target.handle, 946, value);
+  static bool getAutoSafeAreaPadding(FerroObject target) => _getBool(target.handle, 964);
+  static void setAutoSafeAreaPadding(FerroObject target, bool value) => _setBool(target.handle, 964, value);
   /// TopLevel.SystemBarColor (attached). Defines the SystemBarColor attached property.
-  static FerroObject getSystemBarColor(FerroObject target) => FerroObject(_getObject(target.handle, 947));
-  static void setSystemBarColor(FerroObject target, FerroObject value) => _setObject(target.handle, 947, value.handle);
+  static FerroObject getSystemBarColor(FerroObject target) => FerroObject(_getObject(target.handle, 965));
+  static void setSystemBarColor(FerroObject target, FerroObject value) => _setObject(target.handle, 965, value.handle);
   /// TransparencyBackgroundFallback. Defines the `TransparencyBackgroundFallback` property.
-  String get transparencyBackgroundFallback => _getString(handle, 955);
-  set transparencyBackgroundFallback(String value) => _setString(handle, 955, value);
+  String get transparencyBackgroundFallback => _getString(handle, 973);
+  set transparencyBackgroundFallback(String value) => _setString(handle, 973, value);
   /// TransparencyLevelHint. Defines the `TransparencyLevelHint` property.
-  String get transparencyLevelHint => _getString(handle, 956);
-  set transparencyLevelHint(String value) => _setString(handle, 956, value);
+  String get transparencyLevelHint => _getString(handle, 974);
+  set transparencyLevelHint(String value) => _setString(handle, 974, value);
   /// BackRequested: the sender is valid for the call. Defines the `BackRequested` event.
   Subscription onBackRequested(void Function(TopLevel sender) handler) =>
       _subscribe(handle, 3, (sender) => handler(TopLevel._(sender)));
@@ -998,73 +998,73 @@ extension type TopLevel._(int handle) implements ContentControl {
 /// `Window` and `PopupRoot`. It handles scheduling layout, styling and rendering as well as
 /// tracking the window client size and window activation.
 extension type WindowBase._(int handle) implements TopLevel {
-  static const int typeId = 503;
+  static const int typeId = 509;
   WindowBase.of(FerroObject object) : this._(object.handle);
   /// IsActive. Defines the `IsActive` property.
-  bool get isActive => _getBool(handle, 380);
+  bool get isActive => _getBool(handle, 387);
   /// Owner. Defines the `Owner` property.
-  FerroObject get owner => FerroObject(_getObject(handle, 610));
+  FerroObject get owner => FerroObject(_getObject(handle, 618));
   /// Topmost. Defines the `Topmost` property.
-  bool get topmost => _getBool(handle, 950);
-  set topmost(bool value) => _setBool(handle, 950, value);
+  bool get topmost => _getBool(handle, 968);
+  set topmost(bool value) => _setBool(handle, 968, value);
 }
 
 /// A top-level window.
 extension type Window._(int handle) implements WindowBase {
-  static const int typeId = 501;
+  static const int typeId = 507;
   factory Window() => Window._(_create(typeId));
   Window.of(FerroObject object) : this._(object.handle);
   /// CanMaximize. Defines the `CanMaximize` property.
-  bool get canMaximize => _getBool(handle, 104);
-  set canMaximize(bool value) => _setBool(handle, 104, value);
+  bool get canMaximize => _getBool(handle, 108);
+  set canMaximize(bool value) => _setBool(handle, 108, value);
   /// CanMinimize. Defines the `CanMinimize` property.
-  bool get canMinimize => _getBool(handle, 105);
-  set canMinimize(bool value) => _setBool(handle, 105, value);
+  bool get canMinimize => _getBool(handle, 109);
+  set canMinimize(bool value) => _setBool(handle, 109, value);
   /// CanResize. Defines the `CanResize` property.
-  bool get canResize => _getBool(handle, 109);
-  set canResize(bool value) => _setBool(handle, 109, value);
+  bool get canResize => _getBool(handle, 114);
+  set canResize(bool value) => _setBool(handle, 114, value);
   /// ClosingBehavior. Defines the `ClosingBehavior` property.
-  WindowClosingBehavior get closingBehavior => WindowClosingBehavior(_getI64(handle, 149));
-  set closingBehavior(WindowClosingBehavior value) => _setI64(handle, 149, value.value);
+  WindowClosingBehavior get closingBehavior => WindowClosingBehavior(_getI64(handle, 156));
+  set closingBehavior(WindowClosingBehavior value) => _setI64(handle, 156, value.value);
   /// ExtendClientAreaTitleBarHeightHint. Defines the `ExtendClientAreaTitleBarHeightHint`
   /// property.
-  double get extendClientAreaTitleBarHeightHint => _getF64(handle, 266);
-  set extendClientAreaTitleBarHeightHint(double value) => _setF64(handle, 266, value);
+  double get extendClientAreaTitleBarHeightHint => _getF64(handle, 273);
+  set extendClientAreaTitleBarHeightHint(double value) => _setF64(handle, 273, value);
   /// ExtendClientAreaToDecorationsHint. Defines the `ExtendClientAreaToDecorationsHint`
   /// property.
-  bool get extendClientAreaToDecorationsHint => _getBool(handle, 267);
-  set extendClientAreaToDecorationsHint(bool value) => _setBool(handle, 267, value);
+  bool get extendClientAreaToDecorationsHint => _getBool(handle, 274);
+  set extendClientAreaToDecorationsHint(bool value) => _setBool(handle, 274, value);
   /// IsExtendedIntoWindowDecorations. Defines the `IsExtendedIntoWindowDecorations` property.
-  bool get isExtendedIntoWindowDecorations => _getBool(handle, 402);
+  bool get isExtendedIntoWindowDecorations => _getBool(handle, 410);
   /// OffScreenMargin. Defines the `OffScreenMargin` property.
-  String get offScreenMargin => _getString(handle, 595);
+  String get offScreenMargin => _getString(handle, 603);
   /// ShowActivated. Defines the `ShowActivated` property.
-  bool get showActivated => _getBool(handle, 793);
-  set showActivated(bool value) => _setBool(handle, 793, value);
+  bool get showActivated => _getBool(handle, 801);
+  set showActivated(bool value) => _setBool(handle, 801, value);
   /// ShowInTaskbar. Enables or disables the taskbar icon.
-  bool get showInTaskbar => _getBool(handle, 798);
-  set showInTaskbar(bool value) => _setBool(handle, 798, value);
+  bool get showInTaskbar => _getBool(handle, 806);
+  set showInTaskbar(bool value) => _setBool(handle, 806, value);
   /// SizeToContent. Defines the `SizeToContent` property.
-  String get sizeToContent => _getString(handle, 807);
-  set sizeToContent(String value) => _setString(handle, 807, value);
+  String get sizeToContent => _getString(handle, 815);
+  set sizeToContent(String value) => _setString(handle, 815, value);
   /// Title. Defines the `Title` property.
-  String get title => _getString(handle, 924);
-  set title(String value) => _setString(handle, 924, value);
+  String get title => _getString(handle, 942);
+  set title(String value) => _setString(handle, 942, value);
   /// WindowDecorationMargin. Defines the `WindowDecorationMargin` property.
-  String get windowDecorationMargin => _getString(handle, 1037);
+  String get windowDecorationMargin => _getString(handle, 1055);
   /// WindowDecorations. Defines the `WindowDecorations` property.
-  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1039));
-  set windowDecorations(WindowDecorations value) => _setI64(handle, 1039, value.value);
+  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1057));
+  set windowDecorations(WindowDecorations value) => _setI64(handle, 1057, value.value);
   /// WindowDecorationsTheme. Defines the `WindowDecorationsTheme` property.
-  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1040));
-  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1040, value.handle);
+  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1058));
+  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1058, value.handle);
   /// WindowStartupLocation. Defines the `WindowStartupLocation` property.
-  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1043));
-  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1043, value.value);
+  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1061));
+  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1061, value.value);
   /// WindowState. Represents the currently effective window state (normal, minimized,
   /// maximized).
-  WindowState get windowState => WindowState(_getI64(handle, 1044));
-  set windowState(WindowState value) => _setI64(handle, 1044, value.value);
+  WindowState get windowState => WindowState(_getI64(handle, 1062));
+  set windowState(WindowState value) => _setI64(handle, 1062, value.value);
   /// WindowClosed: the sender is valid for the call. Routed event that can be used for global
   /// tracking of window destruction.
   Subscription onWindowClosed(void Function(Window sender) handler) =>
