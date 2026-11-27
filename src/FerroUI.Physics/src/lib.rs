@@ -98,7 +98,8 @@ pub mod prelude {
     #[cfg(feature = "ferroui")]
     pub use crate::compositor_integration::{
         CompositorPhysicsController, CompositorPhysicsSimulation, CompositorPhysicsTelemetry,
-        PhysicsCompositorBehavior, PhysicsImpactRippleEffect, PhysicsKineticGlassEffect, PhysicsShaderMode,
+        PhysicsCompositorBehavior, PhysicsEnergyFieldEffect, PhysicsImpactRippleEffect,
+        PhysicsKineticGlassEffect, PhysicsShaderMode,
     };
 }
 

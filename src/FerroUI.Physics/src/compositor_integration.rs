@@ -67,31 +67,32 @@ half4 main(float2 coord) {
 
     float vlen = length(velocity);
     float2 dir = vlen > 0.001 ? (velocity / vlen) : float2(cos(tilt), sin(tilt));
-    float shift = e * 2.8 * layer_scale;
+    float shift = (0.4 + e * 5.2) * layer_scale;
 
     half4 base = sample_clamped(coord);
     half4 r_s = sample_clamped(coord + dir * shift);
     half4 b_s = sample_clamped(coord - dir * shift);
     half4 out_c = half4(
-        mix(base.r, r_s.r, half(e * 0.55)),
+        mix(base.r, r_s.r, half(e * 0.78)),
         base.g,
-        mix(base.b, b_s.b, half(e * 0.55)),
+        mix(base.b, b_s.b, half(e * 0.78)),
         base.a
     );
 
     // Velocity- & tilt-coupled iridescent specular sweep across the visual.
-    float angle = atan(dir.y, dir.x) * 0.45 + tilt * 0.7;
+    float angle = atan(dir.y, dir.x) * 0.45 + tilt * 0.85 + 0.55;
     float2 sweep_axis = float2(cos(angle), sin(angle));
     float diag = dot(uv - 0.5, sweep_axis);
-    float sweep_pos = clamp(dot(velocity, float2(0.00055, 0.00045)) + sin(phase) * 0.22, -0.55, 0.55);
-    float band = exp(-((diag - sweep_pos) * (diag - sweep_pos)) * 28.0);
+    float sweep_pos = clamp(dot(velocity, float2(0.00065, 0.00055)) + sin(phase) * 0.34, -0.62, 0.62);
+    float band = exp(-((diag - sweep_pos) * (diag - sweep_pos)) * 22.0);
+    float band2 = exp(-((diag - sweep_pos + 0.16) * (diag - sweep_pos + 0.16)) * 55.0) * 0.45;
 
     // Kinetic perimeter edge glow.
     float2 edge_d = min(uv, 1.0 - uv);
-    float edge = 1.0 - smoothstep(0.0, 0.14, min(edge_d.x, edge_d.y));
+    float edge = 1.0 - smoothstep(0.0, 0.16, min(edge_d.x, edge_d.y));
 
-    float glow_strength = e * (band * 0.42 + edge * 0.34);
-    float3 sheen_rgb = mix(float3(1.0, 1.0, 1.0), accent.rgb / max(accent.a, 0.001), 0.52);
+    float glow_strength = (0.18 + e * 0.82) * ((band + band2) * 0.62 + edge * 0.48);
+    float3 sheen_rgb = mix(float3(1.0, 1.0, 1.0), accent.rgb / max(accent.a, 0.001), 0.58);
     float alpha = float(out_c.a);
     float3 lit = clamp(float3(out_c.rgb) + sheen_rgb * glow_strength * alpha, 0.0, alpha);
     return half4(half3(lit), out_c.a);
@@ -126,37 +127,39 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
     let vlen = length(uniforms.velocity);
     let fallback_dir = vec2<f32>(cos(uniforms.tilt), sin(uniforms.tilt));
     let dir = select(fallback_dir, uniforms.velocity / max(vlen, 0.001), vlen > 0.001);
-    let shift = e * 2.8 * uniforms.layer_scale;
+    let shift = (0.4 + e * 5.2) * uniforms.layer_scale;
 
     let base = sample_clamped(coord);
     let r_s = sample_clamped(coord + dir * shift);
     let b_s = sample_clamped(coord - dir * shift);
     let out_c = vec4<f32>(
-        mix(base.r, r_s.r, e * 0.55),
+        mix(base.r, r_s.r, e * 0.78),
         base.g,
-        mix(base.b, b_s.b, e * 0.55),
+        mix(base.b, b_s.b, e * 0.78),
         base.a,
     );
 
     // Velocity- & tilt-coupled iridescent specular sweep across the visual.
-    let angle = atan2(dir.y, dir.x) * 0.45 + uniforms.tilt * 0.7;
+    let angle = atan2(dir.y, dir.x) * 0.45 + uniforms.tilt * 0.85 + 0.55;
     let sweep_axis = vec2<f32>(cos(angle), sin(angle));
     let diag = dot(uv - vec2<f32>(0.5), sweep_axis);
     let sweep_pos = clamp(
-        dot(uniforms.velocity, vec2<f32>(0.00055, 0.00045)) + sin(uniforms.phase) * 0.22,
-        -0.55,
-        0.55,
+        dot(uniforms.velocity, vec2<f32>(0.00065, 0.00055)) + sin(uniforms.phase) * 0.34,
+        -0.62,
+        0.62,
     );
     let d_band = diag - sweep_pos;
-    let band = exp(-(d_band * d_band) * 28.0);
+    let band = exp(-(d_band * d_band) * 22.0);
+    let d_band2 = diag - sweep_pos + 0.16;
+    let band2 = exp(-(d_band2 * d_band2) * 55.0) * 0.45;
 
     // Kinetic perimeter edge glow.
     let edge_d = min(uv, vec2<f32>(1.0) - uv);
-    let edge = 1.0 - smoothstep(0.0, 0.14, min(edge_d.x, edge_d.y));
+    let edge = 1.0 - smoothstep(0.0, 0.16, min(edge_d.x, edge_d.y));
 
-    let glow_strength = e * (band * 0.42 + edge * 0.34);
+    let glow_strength = (0.18 + e * 0.82) * ((band + band2) * 0.62 + edge * 0.48);
     let accent_rgb = uniforms.accent.rgb / max(uniforms.accent.a, 0.001);
-    let sheen_rgb = mix(vec3<f32>(1.0, 1.0, 1.0), accent_rgb, 0.52);
+    let sheen_rgb = mix(vec3<f32>(1.0, 1.0, 1.0), accent_rgb, 0.58);
     let alpha = out_c.a;
     let lit = clamp(out_c.rgb + sheen_rgb * (glow_strength * alpha), vec3<f32>(0.0), vec3<f32>(alpha));
     return vec4<f32>(lit, alpha);
@@ -298,14 +301,14 @@ half4 main(float2 coord) {
     float dist = length(delta);
     float2 dir = dist > 0.0001 ? (delta / dist) : float2(1.0, 0.0);
 
-    float radius = prog * max(aspect, 1.0) * 1.15;
+    float radius = prog * max(aspect, 1.0) * 1.18;
     float width = max(ring_width, 0.03);
     float diff = dist - radius;
     float envelope = exp(-((diff * diff) / (width * width))) * (1.0 - prog) * amp;
-    float wave = sin(diff * 36.0) * envelope;
+    float wave = sin(diff * 42.0) * envelope;
 
-    float2 disp = dir * (wave * 11.0 * layer_scale);
-    float2 chroma = dir * (envelope * 3.0 * layer_scale);
+    float2 disp = dir * (wave * 16.0 * layer_scale);
+    float2 chroma = dir * (envelope * 5.0 * layer_scale);
 
     half4 base = sample_clamped(coord);
     half4 r_c = sample_clamped(coord + disp + chroma);
@@ -313,9 +316,9 @@ half4 main(float2 coord) {
     half4 b_c = sample_clamped(coord + disp - chroma);
     half4 warped = half4(r_c.r, g_c.g, b_c.b, base.a);
 
-    float3 ring_rgb = mix(float3(1.0, 1.0, 1.0), accent.rgb / max(accent.a, 0.001), 0.65);
+    float3 ring_rgb = mix(float3(1.0, 1.0, 1.0), accent.rgb / max(accent.a, 0.001), 0.62);
     float alpha = float(base.a);
-    float glow = envelope * 0.68;
+    float glow = envelope * 0.92;
     float3 lit = clamp(float3(warped.rgb) + ring_rgb * (glow * alpha), 0.0, alpha);
     return half4(half3(lit), base.a);
 }
@@ -352,14 +355,14 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
     let dist = length(delta);
     let dir = select(vec2<f32>(1.0, 0.0), delta / max(dist, 0.0001), dist > 0.0001);
 
-    let radius = prog * max(aspect, 1.0) * 1.15;
+    let radius = prog * max(aspect, 1.0) * 1.18;
     let width = max(uniforms.ring_width, 0.03);
     let diff = dist - radius;
     let envelope = exp(-((diff * diff) / (width * width))) * (1.0 - prog) * amp;
-    let wave = sin(diff * 36.0) * envelope;
+    let wave = sin(diff * 42.0) * envelope;
 
-    let disp = dir * (wave * 11.0 * uniforms.layer_scale);
-    let chroma = dir * (envelope * 3.0 * uniforms.layer_scale);
+    let disp = dir * (wave * 16.0 * uniforms.layer_scale);
+    let chroma = dir * (envelope * 5.0 * uniforms.layer_scale);
 
     let base = sample_clamped(coord);
     let r_c = sample_clamped(coord + disp + chroma);
@@ -368,9 +371,9 @@ fn effect(coord: vec2<f32>) -> vec4<f32> {
     let warped = vec4<f32>(r_c.r, g_c.g, b_c.b, base.a);
 
     let accent_rgb = uniforms.accent.rgb / max(uniforms.accent.a, 0.001);
-    let ring_rgb = mix(vec3<f32>(1.0, 1.0, 1.0), accent_rgb, 0.65);
+    let ring_rgb = mix(vec3<f32>(1.0, 1.0, 1.0), accent_rgb, 0.62);
     let alpha = base.a;
-    let glow = envelope * 0.68;
+    let glow = envelope * 0.92;
     let lit = clamp(warped.rgb + ring_rgb * (glow * alpha), vec3<f32>(0.0), vec3<f32>(alpha));
     return vec4<f32>(lit, alpha);
 }
@@ -482,6 +485,168 @@ impl CustomEffect for PhysicsImpactRippleEffect {
 }
 
 // ---------------------------------------------------------------------------
+// Physics-Driven GPU Shader #3: PhysicsEnergyFieldEffect
+// ---------------------------------------------------------------------------
+
+const ENERGY_FIELD_SKSL: &str = r#"
+uniform float2 layer_size;
+uniform float layer_scale;
+uniform float2 velocity;
+uniform float energy;
+uniform float phase;
+uniform float4 accent;
+uniform shader content;
+
+half4 sample_clamped(float2 p) {
+    float2 hi = max(layer_size - 1.0, float2(0.0));
+    float2 q = clamp(floor(p), float2(0.0), hi) + 0.5;
+    return content.eval(q);
+}
+
+half4 main(float2 coord) {
+    float2 size = max(layer_size, float2(1.0));
+    float2 uv = coord / size;
+    float e = clamp(energy, 0.0, 1.0);
+    float w1 = sin(uv.x * 11.0 + phase * 1.9 + velocity.x * 0.004);
+    float w2 = cos(uv.y * 9.0 - phase * 1.5 + velocity.y * 0.004);
+    float field = (w1 * w2) * 0.5 + 0.5;
+
+    float2 warp = float2(w2, w1) * ((0.8 + e * 4.5) * layer_scale);
+    half4 base = sample_clamped(coord);
+    half4 sampled = sample_clamped(coord + warp);
+    float alpha = float(base.a);
+
+    float3 col_a = accent.rgb / max(accent.a, 0.001);
+    float3 col_b = float3(col_a.b, col_a.r, col_a.g);
+    float3 aurora = mix(col_a, col_b, field);
+
+    float2 edge_d = min(uv, 1.0 - uv);
+    float rim = 1.0 - smoothstep(0.0, 0.22, min(edge_d.x, edge_d.y));
+    float strength = (0.14 + e * 0.45) * (0.45 * field + 0.75 * rim);
+    float3 lit = clamp(float3(sampled.rgb) + aurora * (strength * alpha), 0.0, alpha);
+    return half4(half3(lit), base.a);
+}
+"#;
+
+const ENERGY_FIELD_WGSL: &str = r#"
+struct Uniforms {
+    layer_size: vec2<f32>,
+    layer_scale: f32,
+    velocity: vec2<f32>,
+    energy: f32,
+    phase: f32,
+    accent: vec4<f32>,
+}
+
+fn sample_clamped(p: vec2<f32>) -> vec4<f32> {
+    let hi = max(uniforms.layer_size - vec2<f32>(1.0), vec2<f32>(0.0));
+    let q = clamp(floor(p), vec2<f32>(0.0), hi) + vec2<f32>(0.5);
+    return sample_content(q);
+}
+
+fn effect(coord: vec2<f32>) -> vec4<f32> {
+    let size = max(uniforms.layer_size, vec2<f32>(1.0));
+    let uv = coord / size;
+    let e = clamp(uniforms.energy, 0.0, 1.0);
+    let w1 = sin(uv.x * 11.0 + uniforms.phase * 1.9 + uniforms.velocity.x * 0.004);
+    let w2 = cos(uv.y * 9.0 - uniforms.phase * 1.5 + uniforms.velocity.y * 0.004);
+    let field = (w1 * w2) * 0.5 + 0.5;
+
+    let warp = vec2<f32>(w2, w1) * ((0.8 + e * 4.5) * uniforms.layer_scale);
+    let base = sample_clamped(coord);
+    let sampled = sample_clamped(coord + warp);
+    let alpha = base.a;
+
+    let col_a = uniforms.accent.rgb / max(uniforms.accent.a, 0.001);
+    let col_b = vec3<f32>(col_a.b, col_a.r, col_a.g);
+    let aurora = mix(col_a, col_b, field);
+
+    let edge_d = min(uv, vec2<f32>(1.0) - uv);
+    let rim = 1.0 - smoothstep(0.0, 0.22, min(edge_d.x, edge_d.y));
+    let strength = (0.14 + e * 0.45) * (0.45 * field + 0.75 * rim);
+    let lit = clamp(sampled.rgb + aurora * (strength * alpha), vec3<f32>(0.0), vec3<f32>(alpha));
+    return vec4<f32>(lit, alpha);
+}
+"#;
+
+/// Physics-driven harmonic plasma / aurora GPU shader effect (`WGSL` + `SkSL` + CPU).
+///
+/// Renders fluid wave refraction and a velocity-coupled iridescent energy aura
+/// driven continuously by physics velocity, kinetic energy, and phase.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PhysicsEnergyFieldEffect {
+    pub velocity: Vector,
+    pub energy: f64,
+    pub phase: f64,
+    pub accent: Color,
+}
+
+impl Default for PhysicsEnergyFieldEffect {
+    fn default() -> Self {
+        Self {
+            velocity: Vector::new(0.0, 0.0),
+            energy: 0.35,
+            phase: 0.0,
+            accent: Color::from_argb(255, 168, 85, 247),
+        }
+    }
+}
+
+impl CustomEffect for PhysicsEnergyFieldEffect {
+    const NAME: &'static str = "physics-energy-field";
+
+    fn for_each_parameter(&self, f: &mut dyn FnMut(&'static str, EffectParameterValue)) {
+        f("velocity", self.velocity.into());
+        f("energy", self.energy.into());
+        f("phase", self.phase.into());
+        f("accent", self.accent.into());
+    }
+
+    fn set_parameter(&mut self, name: &str, value: EffectParameterValue) -> bool {
+        match name {
+            "velocity" => value.as_vector().map(|v| self.velocity = v).is_some(),
+            "energy" => value.as_float().map(|v| self.energy = v).is_some(),
+            "phase" => value.as_float().map(|v| self.phase = v).is_some(),
+            "accent" => value.as_color().map(|v| self.accent = v).is_some(),
+            _ => false,
+        }
+    }
+
+    fn neutral() -> Option<Self> {
+        Some(Self { energy: 0.0, ..Self::default() })
+    }
+
+    fn shader() -> Option<ShaderEffectDescription> {
+        Some(
+            ShaderEffectDescription::content_sampling(ENERGY_FIELD_SKSL, ENERGY_FIELD_WGSL)
+                .with_sample_radius(12.0),
+        )
+    }
+
+    fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
+        let e = self.energy.clamp(0.0, 1.0) as f32;
+        if width == 0 || height == 0 {
+            return true;
+        }
+        let ar = f32::from(self.accent.r) / 255.0;
+        let ag = f32::from(self.accent.g) / 255.0;
+        let ab = f32::from(self.accent.b) / 255.0;
+        let strength = (0.14 + e * 0.45) * 0.55;
+        for px in pixels.chunks_exact_mut(4) {
+            let a = f32::from(px[3]) / 255.0;
+            if a <= 0.0 {
+                continue;
+            }
+            for (ch, acc) in [ar, ag, ab].into_iter().enumerate() {
+                let c = f32::from(px[ch]) / 255.0;
+                px[ch] = ((c + acc * strength * a).clamp(0.0, a) * 255.0).round() as u8;
+            }
+        }
+        true
+    }
+}
+
+// ---------------------------------------------------------------------------
 // CompositorPhysicsSimulation + Controller
 // ---------------------------------------------------------------------------
 
@@ -506,6 +671,8 @@ pub enum PhysicsShaderMode {
     KineticGlassOnly,
     /// Impact/collision radial ripple shader only.
     ImpactRippleOnly,
+    /// Continuous velocity/phase-driven aurora energy field shader.
+    EnergyFieldOnly,
     /// Pure composition transforms with no GPU shader effect.
     Disabled,
 }
@@ -833,8 +1000,8 @@ impl CompositorPhysicsController {
         entry.ripple = Some(ActiveRipple {
             origin: Point::new(normalized_origin.x.clamp(0.0, 1.0), normalized_origin.y.clamp(0.0, 1.0)),
             progress: 0.02,
-            amplitude: 0.72,
-            speed: 1.55,
+            amplitude: 0.92,
+            speed: 0.92,
         });
         let handle = entry.body;
         if let Some(body) = st.world.body_mut(handle) {
@@ -923,8 +1090,8 @@ impl CompositorPhysicsController {
         entry.ripple = Some(ActiveRipple {
             origin: Point::new(normalized_origin.x.clamp(0.0, 1.0), normalized_origin.y.clamp(0.0, 1.0)),
             progress: 0.02,
-            amplitude: intensity.clamp(0.15, 1.0),
-            speed: 1.35,
+            amplitude: intensity.clamp(0.25, 1.0),
+            speed: 0.88,
         });
         entry.spring_scale.velocity -= intensity * 1.4;
         let handle = entry.body;
@@ -983,8 +1150,8 @@ impl CompositorPhysicsController {
                 e.ripple = Some(ActiveRipple {
                     origin: local_origin,
                     progress: 0.02,
-                    amplitude: (0.7 + 0.3 * falloff).clamp(0.0, 1.0),
-                    speed: 1.25,
+                    amplitude: (0.78 + 0.22 * falloff).clamp(0.0, 1.0),
+                    speed: 0.85,
                 });
                 e.spring_scale.velocity -= 1.8 * falloff;
                 if behavior == PhysicsCompositorBehavior::ElasticSprings {
@@ -1255,7 +1422,7 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
             }
 
             // Compute physics-driven GPU shader effect update.
-            let energy = (speed_px / 620.0).clamp(0.0, 1.0);
+            let energy = (speed_px / 520.0).clamp(0.0, 1.0);
             let effect_update = match shader_mode {
                 PhysicsShaderMode::Disabled => SimulationEffectUpdate::Keep,
                 PhysicsShaderMode::ImpactRippleOnly => {
@@ -1275,20 +1442,29 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                     }
                 }
                 PhysicsShaderMode::KineticGlassOnly => {
-                    if energy > 0.015 || entry.dragging {
-                        let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                            PhysicsKineticGlassEffect {
-                                velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
-                                energy: if entry.dragging { energy.max(0.38) } else { energy } as f64,
-                                tilt: rot as f64,
-                                phase: entry.phase as f64,
-                                accent: entry.accent,
-                            },
-                        ));
-                        SimulationEffectUpdate::Set(eff)
-                    } else {
-                        SimulationEffectUpdate::Clear
-                    }
+                    any_active = true;
+                    let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
+                        PhysicsKineticGlassEffect {
+                            velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
+                            energy: if entry.dragging { energy.max(0.62) } else { energy.max(0.28) } as f64,
+                            tilt: rot as f64,
+                            phase: entry.phase as f64,
+                            accent: entry.accent,
+                        },
+                    ));
+                    SimulationEffectUpdate::Set(eff)
+                }
+                PhysicsShaderMode::EnergyFieldOnly => {
+                    any_active = true;
+                    let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
+                        PhysicsEnergyFieldEffect {
+                            velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
+                            energy: if entry.dragging { energy.max(0.75) } else { energy.max(0.22) } as f64,
+                            phase: entry.phase as f64,
+                            accent: entry.accent,
+                        },
+                    ));
+                    SimulationEffectUpdate::Set(eff)
                 }
                 PhysicsShaderMode::ReactiveAuto => {
                     if let Some(r) = &entry.ripple {
@@ -1302,11 +1478,11 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                             },
                         ));
                         SimulationEffectUpdate::Set(eff)
-                    } else if energy > 0.015 || entry.dragging {
+                    } else if energy > 0.01 || entry.dragging {
                         let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
                             PhysicsKineticGlassEffect {
                                 velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
-                                energy: if entry.dragging { energy.max(0.38) } else { energy } as f64,
+                                energy: if entry.dragging { energy.max(0.55) } else { energy.max(0.22) } as f64,
                                 tilt: rot as f64,
                                 phase: entry.phase as f64,
                                 accent: entry.accent,
@@ -1314,7 +1490,17 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                         ));
                         SimulationEffectUpdate::Set(eff)
                     } else {
-                        SimulationEffectUpdate::Clear
+                        // Subtle resting kinetic glass catchlight so users can see the GPU shader active.
+                        let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
+                            PhysicsKineticGlassEffect {
+                                velocity: Vector::new(0.0, 0.0),
+                                energy: 0.18,
+                                tilt: rot as f64,
+                                phase: entry.phase as f64,
+                                accent: entry.accent,
+                            },
+                        ));
+                        SimulationEffectUpdate::Set(eff)
                     }
                 }
             };

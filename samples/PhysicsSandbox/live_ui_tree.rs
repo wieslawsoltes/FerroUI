@@ -15,9 +15,11 @@
 //! 4. **🔐 Keypad & Chaos UI** — Real 4-digit macOS Passcode keypad (tactile key pops, wrong-PIN
 //!    damped shake, `1234` unlock pop), macOS Magnetic Hover Dock, and Live Logical-Tree Gravity!
 
+use crate::icons::{icon_label, Icons};
 use ferroui_base::input::InputElement;
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
-use ferroui_base::media::MatrixTransform;
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{FontWeight, IBrush, MatrixTransform};
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{Matrix, Rect, Ref, RelativePoint, StyledElement, Visual};
 use ferroui_controls::{Border, Canvas, StackPanel};
@@ -26,6 +28,10 @@ use ferroui_view::prelude::*;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::{Duration, Instant};
+
+fn solid(argb: u32) -> Option<Rc<dyn IBrush>> {
+    Some(Rc::new(ImmutableSolidColorBrush::from_uint32(argb)) as Rc<dyn IBrush>)
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum UxDemoTab {
@@ -40,10 +46,19 @@ impl UxDemoTab {
 
     fn title(self) -> &'static str {
         match self {
-            Self::PipPlayer => "📺 PiP Window",
-            Self::SwipeInbox => "📬 Swipe Inbox",
-            Self::BottomSheet => "▤ Bottom Sheet",
-            Self::KeypadDockChaos => "🔐 Keypad, Dock & UI Gravity",
+            Self::PipPlayer => "PiP Window",
+            Self::SwipeInbox => "Swipe Inbox",
+            Self::BottomSheet => "Bottom Sheet",
+            Self::KeypadDockChaos => "Keypad, Dock & Gravity",
+        }
+    }
+
+    fn icon(self) -> &'static str {
+        match self {
+            Self::PipPlayer => Icons::UI_MOTION,
+            Self::SwipeInbox => Icons::LAYERS,
+            Self::BottomSheet => Icons::SLIDER,
+            Self::KeypadDockChaos => Icons::CUBE,
         }
     }
 }
@@ -56,29 +71,37 @@ pub fn live_ui_tree_showcase() -> Element {
     for tab in UxDemoTab::ALL {
         sub_tabs = sub_tabs.child(
             button()
-                .padding((12.0, 6.0, 12.0, 6.0))
-                .corner_radius(7.0)
-                .background(move || if active_tab.get() == tab { "#059669" } else { "#182235" })
-                .foreground("#F8FAFC")
-                .content(tab.title())
+                .padding((11.0, 6.0, 11.0, 6.0))
+                .border_brush(move || if active_tab.get() == tab { solid(0xFF0078D4) } else { None })
+                .border_thickness(move || if active_tab.get() == tab { 1.5 } else { 1.0 })
+                .content(icon_label(tab.icon(), tab.title(), 14.0))
                 .on_click(move |_| active_tab.set(tab)),
         );
     }
 
     let top_nav = border()
         .dock_panel_dock(ferroui_controls::Dock::Top)
-        .background("#101726")
-        .border_brush("#24314A")
+        .border_brush(solid(0x22808080))
         .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .padding((14.0, 9.0, 14.0, 9.0))
+        .padding((22.0, 14.0, 22.0, 12.0))
         .child(
-            dock_panel()
+            stack_panel()
+                .spacing(10.0)
                 .child(
-                    text_block()
-                        .dock_panel_dock(ferroui_controls::Dock::Right)
-                        .text("Real FerroUI Controls · 0 Layout Passes · MatrixTransform Sync")
-                        .font_size(11.0)
-                        .foreground("#34D399"),
+                    stack_panel()
+                        .spacing(3.0)
+                        .child(
+                            text_block()
+                                .text("Live UI Tree Physics")
+                                .font_size(22.0)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(
+                            text_block()
+                                .text("Interactive FerroUI controls animated at 60 FPS via persistent MatrixTransform bindings with zero layout passes.")
+                                .font_size(12.5)
+                                .opacity(0.75),
+                        ),
                 )
                 .child(sub_tabs),
         );

@@ -40,7 +40,7 @@ gpu = ["dep:wgpu"]
 ferroui = ["dep:ferroui-base"]
 
 [dev-dependencies]
-naga = { workspace = true, features = ["wgsl-in"] }
+naga = { workspace = true, features = ["wgsl-in", "msl-out"] }
 
 [package.metadata.release]
 group = "core"

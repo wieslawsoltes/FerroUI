@@ -6,9 +6,11 @@
 //! - Right: Live hardware-accelerated `PhysicsViewport` running the compiled output of the node
 //!   graph in real time (drag sliders on the canvas and watch the physics world morph live!)
 
+use crate::icons::{icon_label, Icons};
 use crate::scenes::SandboxEngine;
 use crate::viewport::PhysicsViewport;
 use ferroui_base::layout::Orientation;
+use ferroui_base::media::FontWeight;
 use ferroui_controls::Dock;
 use ferroui_nodegraph::prelude::*;
 use ferroui_physics::Vec2;
@@ -101,13 +103,19 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .content(move || if live_rebuild.get() { "⚡ Live Sync: ON" } else { "⚡ Live Sync: OFF" })
+                .content(dynamic(move || {
+                    if live_rebuild.get() {
+                        icon_label(Icons::LIGHTNING, "Live Sync: On", 13.0)
+                    } else {
+                        icon_label(Icons::LIGHTNING, "Live Sync: Off", 13.0)
+                    }
+                }))
                 .on_click(move |_| live_rebuild.update(|v| *v = !*v)),
         )
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .content("↺ Rebuild Sim")
+                .content(icon_label(Icons::RESET, "Rebuild", 13.0))
                 .on_click(move |_| {
                     let mut g = g_reb.borrow_mut();
                     g.mark_all_dirty();
@@ -121,7 +129,13 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .content(move || if preview_paused.get() { "▶ Play" } else { "⏸ Pause" })
+                .content(dynamic(move || {
+                    if preview_paused.get() {
+                        icon_label(Icons::PLAY, "Play", 13.0)
+                    } else {
+                        icon_label(Icons::PAUSE, "Pause", 13.0)
+                    }
+                }))
                 .on_click(move |_| {
                     let next = !preview_paused.get_untracked();
                     eng_pause.borrow_mut().paused = next;
@@ -131,7 +145,7 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .content("💥 Blast")
+                .content(icon_label(Icons::TARGET, "Blast", 13.0))
                 .on_click(move |_| {
                     eng_blast.borrow_mut().world.apply_explosion(Vec2::new(8.0, 5.5), 6.5, 16.0);
                 }),
@@ -166,8 +180,9 @@ pub fn node_graph_physics_studio() -> Element {
                                 .spacing(2.0)
                                 .child(
                                     text_block()
-                                        .text("⚡ LIVE GRASSHOPPER → PHYSICS VIEWPORT")
-                                        .font_size(11.0),
+                                        .text("Live Grasshopper Physics Preview")
+                                        .font_size(12.0)
+                                        .font_weight(FontWeight::SemiBold),
                                 )
                                 .child(
                                     text_block()

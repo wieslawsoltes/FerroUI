@@ -1,32 +1,30 @@
-//! **Compositor Engine & Physics-Driven GPU Shaders Showcase**
+//! **Compositor Engine & Physics-Driven GPU Shaders Page**
 //!
-//! Demonstrates FerroUI's public composition simulation contract
-//! (`ferroui_base::rendering::composition::ICompositionSimulation`):
-//! 1. **Zero-Layout-Pass Compositor Motion**: Real interactive FerroUI UI cards driven
-//!    directly on `Compositor` (`MediaContext` animation frames, ZERO `DispatcherTimer`!).
-//! 2. **Multi-Mode Extensibility**: Switch the exact same UI visuals live between:
-//!    - `SimulationMode::Physics` (`CompositorPhysicsSimulation` rigid bodies + collisions)
-//!    - `SimulationMode::SpringDynamics` (`CompositorPhysicsSimulation` elastic UI springs)
-//!    - `SimulationMode::Harmonic` (`HarmonicWaveSimulation` from `ferroui-base` — zero physics!)
-//! 3. **Physics-Driven WGSL/SkSL GPU Shaders** (compiled to Apple Metal MSL via `ferroui-quartz`!):
-//!    - `PhysicsKineticGlassEffect`: live velocity, tilt, and kinetic energy drive iridescent
-//!      specular sweeps, directional micro-refraction, and kinetic perimeter glow.
-//!    - `PhysicsImpactRippleEffect`: real physics collisions, pointer grabs, and shockwaves
-//!      trigger radial refractive wavefront ripples & chromatic rings right on each UI card!
+//! Styled in the clean `ControlCatalog` gallery layout (stock WinUI theme + vector `PathIcon`s):
+//! - Runs simulations natively on FerroUI's `Compositor` (`ICompositionSimulation` contract)
+//!   with ZERO `DispatcherTimer` and ZERO layout passes.
+//! - Live multi-mode switcher on the exact same FerroUI visual tree:
+//!   - `Physics Rigid Bodies` (`SimulationMode::Physics`)
+//!   - `Elastic Springs` (`SimulationMode::SpringDynamics`)
+//!   - `Harmonic Wave` (`SimulationMode::Harmonic` — pure `ferroui-base`, zero physics!)
+//! - Live GPU WGSL → Metal MSL / SkSL shader switcher (`Auto`, `Kinetic Glass`, `Impact Ripple`,
+//!   `Energy Field`, `Off`) rendered natively via `ferroui-quartz` `runtime-shaders`!
 
+use crate::icons::{icon_label, icon_view, Icons};
 use ferroui_base::input::InputElement;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::effects::{IImmutableEffect, ImmutableCustomEffect};
-use ferroui_base::media::Color;
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Color, FontWeight, IBrush};
 use ferroui_base::rendering::composition::{
-    CompositionSimulationHandle, Compositor, HarmonicWaveSimulation, SimulationEffectUpdate,
-    SimulationMode, SimulationTarget,
+    CompositionSimulationHandle, Compositor, ElementComposition, HarmonicWaveSimulation,
+    SimulationEffectUpdate, SimulationMode, SimulationTarget,
 };
 use ferroui_base::{Point, Ref, Vector, Visual};
 use ferroui_controls::{Border, Dock};
 use ferroui_physics::compositor::{
-    CompositorPhysicsController, PhysicsCompositorBehavior, PhysicsKineticGlassEffect,
-    PhysicsShaderMode,
+    CompositorPhysicsController, PhysicsCompositorBehavior, PhysicsEnergyFieldEffect,
+    PhysicsKineticGlassEffect, PhysicsShaderMode,
 };
 use ferroui_physics::Vec2;
 use ferroui_view::prelude::*;
@@ -34,6 +32,10 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Instant;
+
+fn solid(argb: u32) -> Option<Rc<dyn IBrush>> {
+    Some(Rc::new(ImmutableSolidColorBrush::from_uint32(argb)) as Rc<dyn IBrush>)
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ShowcaseMode {
@@ -43,13 +45,21 @@ enum ShowcaseMode {
 }
 
 impl ShowcaseMode {
-    const ALL: [Self; 3] = [Self::PhysicsRigidBody, Self::SpringElastic, Self::HarmonicWave];
+    const ALL: [Self; 3] = [Self::SpringElastic, Self::PhysicsRigidBody, Self::HarmonicWave];
 
     fn label(self) -> &'static str {
         match self {
-            Self::PhysicsRigidBody => "⚡ Physics Rigid Bodies",
-            Self::SpringElastic => "🧲 Elastic Springs",
-            Self::HarmonicWave => "🌊 Harmonic Wave (Non-Physics)",
+            Self::PhysicsRigidBody => "Rigid Bodies",
+            Self::SpringElastic => "Elastic Springs",
+            Self::HarmonicWave => "Harmonic Wave (Non-Physics)",
+        }
+    }
+
+    fn icon(self) -> &'static str {
+        match self {
+            Self::PhysicsRigidBody => Icons::CUBE,
+            Self::SpringElastic => Icons::MAGNET,
+            Self::HarmonicWave => Icons::WAVE,
         }
     }
 
@@ -67,120 +77,167 @@ struct CardSpec {
     subtitle: &'static str,
     badge: &'static str,
     metric: &'static str,
-    accent_hex: &'static str,
+    icon: &'static str,
+    accent_argb: u32,
     accent_color: Color,
     rest_x: f64,
     rest_y: f64,
 }
 
-const CARD_W: f64 = 248.0;
-const CARD_H: f64 = 154.0;
+const CARD_W: f64 = 256.0;
+const CARD_H: f64 = 156.0;
 
 const CARDS: [CardSpec; 6] = [
     CardSpec {
-        title: "Metal WGSL Shader",
-        subtitle: "Kinetic glass & impact wavefronts",
+        title: "Kinetic Glass Shader",
+        subtitle: "Velocity sheen & chromatic micro-refraction",
         badge: "WGSL → MSL",
-        metric: "60/120 Hz · Zero Layout",
-        accent_hex: "#38BDF8",
-        accent_color: Color::from_argb(255, 56, 189, 248),
-        rest_x: 42.0,
-        rest_y: 34.0,
+        metric: "GPU Runtime Shader",
+        icon: Icons::SPARKLE,
+        accent_argb: 0xFF0EA5E9,
+        accent_color: Color::from_argb(255, 14, 165, 233),
+        rest_x: 28.0,
+        rest_y: 26.0,
     },
     CardSpec {
-        title: "Rigid-Body Dynamics",
-        subtitle: "Collision contacts fire GPU ripples",
+        title: "Impact Shockwaves",
+        subtitle: "Collisions & taps fire radial warp ripples",
         badge: "PHYSICS",
-        metric: "Substepped SIMD Solver",
-        accent_hex: "#A855F7",
-        accent_color: Color::from_argb(255, 168, 85, 247),
-        rest_x: 320.0,
-        rest_y: 34.0,
+        metric: "Contact-Driven",
+        icon: Icons::TARGET,
+        accent_argb: 0xFF8B5CF6,
+        accent_color: Color::from_argb(255, 139, 92, 246),
+        rest_x: 312.0,
+        rest_y: 26.0,
     },
     CardSpec {
-        title: "Elastic UI Springs",
-        subtitle: "Velocity sheen + squash & stretch",
-        badge: "SPRING 2D",
-        metric: "Analytical Closed-Form",
-        accent_hex: "#34D399",
-        accent_color: Color::from_argb(255, 52, 211, 153),
-        rest_x: 598.0,
-        rest_y: 34.0,
+        title: "Aurora Energy Field",
+        subtitle: "Fluid plasma waves coupled to velocity",
+        badge: "GPU FIELD",
+        metric: "60/120 Hz Uniforms",
+        icon: Icons::BLUR,
+        accent_argb: 0xFF10B981,
+        accent_color: Color::from_argb(255, 16, 185, 129),
+        rest_x: 596.0,
+        rest_y: 26.0,
     },
     CardSpec {
         title: "Compositor Clock",
-        subtitle: "Direct CompositionVisual batching",
-        badge: "COMPOSITOR",
-        metric: "Auto-Idle Equilibrium",
-        accent_hex: "#F59E0B",
+        subtitle: "Direct CompositionVisual transform batching",
+        badge: "ZERO LAYOUT",
+        metric: "Auto-Idle Sleep",
+        icon: Icons::LAYERS,
+        accent_argb: 0xFFF59E0B,
         accent_color: Color::from_argb(255, 245, 158, 11),
-        rest_x: 42.0,
-        rest_y: 220.0,
+        rest_x: 28.0,
+        rest_y: 208.0,
     },
     CardSpec {
-        title: "Harmonic Field Mode",
-        subtitle: "Pure ferroui-base non-physics sim",
-        badge: "MULTI-MODE",
-        metric: "Zero Physics Dependency",
-        accent_hex: "#F472B6",
-        accent_color: Color::from_argb(255, 244, 114, 182),
-        rest_x: 320.0,
-        rest_y: 220.0,
+        title: "Multi-Mode Contract",
+        subtitle: "Harmonic wave runs via ferroui-base alone",
+        badge: "EXTENSIBLE",
+        metric: "Zero Physics Coupling",
+        icon: Icons::WAVE,
+        accent_argb: 0xFFEC4899,
+        accent_color: Color::from_argb(255, 236, 72, 153),
+        rest_x: 312.0,
+        rest_y: 208.0,
     },
     CardSpec {
-        title: "Interactive Hit-Test",
-        subtitle: "Drag, fling, or tap Pulse below",
-        badge: "LIVE TREE",
-        metric: "Real FerroUI Controls",
-        accent_hex: "#22D3EE",
-        accent_color: Color::from_argb(255, 34, 211, 238),
-        rest_x: 598.0,
-        rest_y: 220.0,
+        title: "Live Hit-Tested UI",
+        subtitle: "Drag, fling, or click Pulse on any card",
+        badge: "INTERACTIVE",
+        metric: "Real FerroUI Tree",
+        icon: Icons::CURSOR,
+        accent_argb: 0xFF06B6D4,
+        accent_color: Color::from_argb(255, 6, 182, 212),
+        rest_x: 596.0,
+        rest_y: 208.0,
     },
 ];
 
-/// Builds the live **Compositor Engine & Physics-Driven GPU Shaders** showcase tab.
+/// Builds the ControlCatalog-styled **Compositor & GPU Shaders** showcase page.
 pub fn compositor_shader_showcase() -> Element {
     let active_mode = signal(ShowcaseMode::SpringElastic);
     let shader_mode = signal(PhysicsShaderMode::ReactiveAuto);
     let gravity_enabled = signal(true);
     let sim_paused = signal(false);
-    let telemetry_line = signal(String::from(
-        "Compositor: binding visuals to ICompositionSimulation (WGSL → Metal GPU shaders ready)",
-    ));
+    let telemetry_line = signal(String::from("Attaching simulation to FerroUI Compositor…"));
 
-    // Shared handles owned for the lifetime of this tab.
     let active_handle: Rc<RefCell<Option<CompositionSimulationHandle>>> = Rc::new(RefCell::new(None));
     let physics_ctrl: Rc<RefCell<Option<CompositorPhysicsController>>> = Rc::new(RefCell::new(None));
     let card_targets: Rc<RefCell<Vec<SimulationTarget>>> = Rc::new(RefCell::new(Vec::new()));
     let compositor_ref: Rc<RefCell<Option<Rc<Compositor>>>> = Rc::new(RefCell::new(None));
+    let commit_sub: Rc<RefCell<Option<ferroui_base::reactive::Subscription>>> = Rc::new(RefCell::new(None));
+    let stage_size: Rc<Cell<(f32, f32)>> = Rc::new(Cell::new((900.0, 440.0)));
 
-    // Helper that registers whichever simulation mode is currently selected directly on FerroUI's Compositor.
     let install_mode: Rc<dyn Fn(ShowcaseMode)> = {
         let active_handle = active_handle.clone();
         let physics_ctrl = physics_ctrl.clone();
         let card_targets = card_targets.clone();
         let compositor_ref = compositor_ref.clone();
+        let commit_sub = commit_sub.clone();
+        let stage_size = stage_size.clone();
         Rc::new(move |mode: ShowcaseMode| {
-            // 1. Detach previous simulation handle cleanly (resets visuals to identity).
             *active_handle.borrow_mut() = None;
             *physics_ctrl.borrow_mut() = None;
-
-            let Some(comp) = compositor_ref
-                .borrow()
-                .clone()
-                .or_else(Compositor::try_get_default_compositor)
-            else {
-                return;
-            };
-            *compositor_ref.borrow_mut() = Some(comp.clone());
 
             let targets = card_targets.borrow().clone();
             if targets.is_empty() {
                 return;
             }
 
+            // Resolve the live window Compositor from an attached visual first, falling back to default.
+            let found_comp = targets
+                .iter()
+                .find_map(|t| t.composition_visual().map(|cv| cv.compositor().clone()))
+                .or_else(|| compositor_ref.borrow().clone())
+                .or_else(Compositor::try_get_default_compositor);
+
+            let Some(comp) = found_comp else {
+                return;
+            };
+            *compositor_ref.borrow_mut() = Some(comp.clone());
+
+            // Wire live compositor telemetry callback once per compositor.
+            if commit_sub.borrow().is_none() {
+                let pctrl = physics_ctrl.clone();
+                let last_update = Rc::new(Cell::new(Instant::now()));
+                let sub = comp.after_commit(move || {
+                    if !telemetry_line.is_alive() {
+                        return;
+                    }
+                    if last_update.get().elapsed().as_millis() < 120 {
+                        return;
+                    }
+                    last_update.set(Instant::now());
+                    let m = active_mode.get_untracked();
+                    if let Some(ctrl) = pctrl.borrow().as_ref() {
+                        let t = ctrl.telemetry();
+                        telemetry_line.set_if_changed(format!(
+                            "Contract: {}  ·  Shader: {:?}  ·  Awake: {}/{}  ·  Peak: {:.0} px/s  ·  Ripples: {}  ·  Collisions: {}  ·  Steps: {}",
+                            m.contract_mode(),
+                            shader_mode.get_untracked(),
+                            t.awake_bodies,
+                            t.bound_visuals,
+                            t.peak_speed_px,
+                            t.active_ripples,
+                            t.total_collisions,
+                            t.step_count,
+                        ));
+                    } else {
+                        telemetry_line.set_if_changed(format!(
+                            "Contract: {} (Zero-Physics ferroui-base Mode)  ·  Shader: {:?}  ·  Direct Compositor Clock",
+                            m.contract_mode(),
+                            shader_mode.get_untracked(),
+                        ));
+                    }
+                });
+                *commit_sub.borrow_mut() = Some(sub);
+            }
+
             let cur_shader = shader_mode.get_untracked();
+            let (aw, ah) = stage_size.get();
 
             match mode {
                 ShowcaseMode::PhysicsRigidBody | ShowcaseMode::SpringElastic => {
@@ -191,8 +248,8 @@ pub fn compositor_shader_showcase() -> Element {
                     let (handle, ctrl) = CompositorPhysicsController::attach_to_compositor(
                         &comp,
                         "studio-compositor-physics",
-                        920.0,
-                        460.0,
+                        aw,
+                        ah,
                         behavior,
                     );
                     ctrl.set_shader_mode(cur_shader);
@@ -216,8 +273,8 @@ pub fn compositor_shader_showcase() -> Element {
                         );
                     }
 
-                    // Give an immediate lively entrance impulse so shaders & motion shine immediately!
-                    ctrl.shockwave(Vec2::new(440.0, 200.0), 260.0);
+                    // Launch an immediate radial shockwave so GPU ripples + motion are visible right away!
+                    ctrl.shockwave(Vec2::new(aw * 0.5, ah * 0.45), 340.0);
                     if sim_paused.get_untracked() {
                         handle.pause();
                     }
@@ -225,28 +282,38 @@ pub fn compositor_shader_showcase() -> Element {
                     *active_handle.borrow_mut() = Some(handle);
                 }
                 ShowcaseMode::HarmonicWave => {
-                    // Pure ferroui-base non-physics simulation mode driving BOTH CompositionVisual
-                    // motion AND live WGSL shader uniforms via the shared public contract!
                     let mut wave = HarmonicWaveSimulation::new("studio-harmonic-wave", targets)
-                        .with_amplitudes(18.0, 26.0)
+                        .with_amplitudes(18.0, 24.0)
                         .with_tilt_and_pulse(0.075, 0.04)
                         .with_frequency(0.55, 0.92);
 
                     let sh_sig = shader_mode;
                     wave = wave.with_effect_driver(move |idx, phase, vel_norm, energy| {
-                        if sh_sig.get_untracked() == PhysicsShaderMode::Disabled {
+                        let sm = sh_sig.get_untracked();
+                        if sm == PhysicsShaderMode::Disabled {
                             return SimulationEffectUpdate::Clear;
                         }
-                        let accent = CARDS.get(idx).map(|c| c.accent_color).unwrap_or(Color::from_argb(255, 56, 189, 248));
-                        let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                            PhysicsKineticGlassEffect {
-                                velocity: Vector::new((vel_norm * 420.0) as f64, ((energy - 0.5) * 380.0) as f64),
-                                energy: (0.28 + energy * 0.62) as f64,
-                                tilt: (vel_norm * 0.25) as f64,
+                        let accent = CARDS
+                            .get(idx)
+                            .map(|c| c.accent_color)
+                            .unwrap_or(Color::from_argb(255, 14, 165, 233));
+                        let eff: Arc<dyn IImmutableEffect> = match sm {
+                            PhysicsShaderMode::EnergyFieldOnly => Arc::new(ImmutableCustomEffect::new(
+                                PhysicsEnergyFieldEffect {
+                                    velocity: Vector::new((vel_norm * 420.0) as f64, ((energy - 0.5) * 380.0) as f64),
+                                    energy: (0.35 + energy * 0.65) as f64,
+                                    phase: phase as f64,
+                                    accent,
+                                },
+                            )),
+                            _ => Arc::new(ImmutableCustomEffect::new(PhysicsKineticGlassEffect {
+                                velocity: Vector::new((vel_norm * 460.0) as f64, ((energy - 0.5) * 420.0) as f64),
+                                energy: (0.38 + energy * 0.62) as f64,
+                                tilt: (vel_norm * 0.30) as f64,
                                 phase: phase as f64,
                                 accent,
-                            },
-                        ));
+                            })),
+                        };
                         SimulationEffectUpdate::Set(eff)
                     });
 
@@ -257,60 +324,9 @@ pub fn compositor_shader_showcase() -> Element {
                     *active_handle.borrow_mut() = Some(handle);
                 }
             }
-
-            if telemetry_line.is_alive() {
-                telemetry_line.set(format!(
-                    "Contract Mode: {} · Active Compositor Sims: {} · Shaders: {:?}",
-                    mode.contract_mode(),
-                    comp.simulation_count(),
-                    cur_shader,
-                ));
-            }
         })
     };
 
-    // Keep live telemetry refreshed gently from the compositor's after_commit hook (no DispatcherTimer!).
-    let commit_sub: Rc<RefCell<Option<ferroui_base::reactive::Subscription>>> = Rc::new(RefCell::new(None));
-    {
-        let pctrl = physics_ctrl.clone();
-        let comp_ref = compositor_ref.clone();
-        let last_update = Rc::new(Cell::new(Instant::now()));
-        if let Some(comp) = Compositor::try_get_default_compositor() {
-            *comp_ref.borrow_mut() = Some(comp.clone());
-            let sub = comp.after_commit(move || {
-                if !telemetry_line.is_alive() {
-                    return;
-                }
-                if last_update.get().elapsed().as_millis() < 120 {
-                    return;
-                }
-                last_update.set(Instant::now());
-                let mode = active_mode.get_untracked();
-                if let Some(ctrl) = pctrl.borrow().as_ref() {
-                    let t = ctrl.telemetry();
-                    telemetry_line.set_if_changed(format!(
-                        "Mode: {}  ·  Awake: {}/{}  ·  Peak Speed: {:.0} px/s  ·  GPU Ripples: {}  ·  Collisions: {}  ·  Steps: {}",
-                        mode.contract_mode(),
-                        t.awake_bodies,
-                        t.bound_visuals,
-                        t.peak_speed_px,
-                        t.active_ripples,
-                        t.total_collisions,
-                        t.step_count,
-                    ));
-                } else {
-                    telemetry_line.set_if_changed(format!(
-                        "Mode: {} (Zero-Physics ferroui-base Contract)  ·  Shaders: {:?}  ·  Direct Compositor Clock",
-                        mode.contract_mode(),
-                        shader_mode.get_untracked(),
-                    ));
-                }
-            });
-            *commit_sub.borrow_mut() = Some(sub);
-        }
-    }
-
-    // Cleanup simulation handle & commit subscription when leaving tab.
     {
         let ah = active_handle.clone();
         let cs = commit_sub.clone();
@@ -321,19 +337,17 @@ pub fn compositor_shader_showcase() -> Element {
     }
 
     // -------------------------------------------------------------------------
-    // 1. Top Mode Switcher & Shader Pipeline Toolbar
+    // 1. Clean ControlCatalog-style Page Header & Control Bar
     // -------------------------------------------------------------------------
-    let mut mode_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
+    let mut mode_row = stack_panel().orientation(Orientation::Horizontal).spacing(6.0);
     for mode in ShowcaseMode::ALL {
         let install = install_mode.clone();
         mode_row = mode_row.child(
             button()
-                .padding((10.0, 5.0, 10.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if active_mode.get() == mode { "#0284C7" } else { "#182235" })
-                .foreground("#F8FAFC")
-                .font_size(11.5)
-                .content(mode.label())
+                .padding((11.0, 6.0, 11.0, 6.0))
+                .border_brush(move || if active_mode.get() == mode { solid(0xFF0078D4) } else { None })
+                .border_thickness(move || if active_mode.get() == mode { 1.5 } else { 1.0 })
+                .content(icon_label(mode.icon(), mode.label(), 14.0))
                 .on_click(move |_| {
                     active_mode.set(mode);
                     install(mode);
@@ -342,23 +356,22 @@ pub fn compositor_shader_showcase() -> Element {
     }
 
     let shader_buttons = [
-        ("✨ Auto Shaders", PhysicsShaderMode::ReactiveAuto),
-        ("💎 Kinetic Glass", PhysicsShaderMode::KineticGlassOnly),
-        ("🌊 Impact Ripple", PhysicsShaderMode::ImpactRippleOnly),
-        ("⬜ Shaders Off", PhysicsShaderMode::Disabled),
+        (Icons::SPARKLE, "Auto Shaders", PhysicsShaderMode::ReactiveAuto),
+        (Icons::LAYERS, "Kinetic Glass", PhysicsShaderMode::KineticGlassOnly),
+        (Icons::TARGET, "Impact Ripple", PhysicsShaderMode::ImpactRippleOnly),
+        (Icons::BLUR, "Energy Field", PhysicsShaderMode::EnergyFieldOnly),
+        (Icons::BOX_SHAPE, "Off", PhysicsShaderMode::Disabled),
     ];
-    let mut shader_row = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    for (lbl, sm) in shader_buttons {
+    let mut shader_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
+    for (ic, lbl, sm) in shader_buttons {
         let pctrl = physics_ctrl.clone();
         let ah = active_handle.clone();
         shader_row = shader_row.child(
             button()
-                .padding((8.0, 4.0, 8.0, 4.0))
-                .corner_radius(5.0)
-                .background(move || if shader_mode.get() == sm { "#7C3AED" } else { "#1E293B" })
-                .foreground("#F8FAFC")
-                .font_size(11.0)
-                .content(lbl)
+                .padding((9.0, 5.0, 9.0, 5.0))
+                .border_brush(move || if shader_mode.get() == sm { solid(0xFF8B5CF6) } else { None })
+                .border_thickness(move || if shader_mode.get() == sm { 1.5 } else { 1.0 })
+                .content(icon_label(ic, lbl, 13.0))
                 .on_click(move |_| {
                     shader_mode.set(sm);
                     if let Some(ctrl) = pctrl.borrow().as_ref() {
@@ -375,32 +388,33 @@ pub fn compositor_shader_showcase() -> Element {
     let pctrl_grav = physics_ctrl.clone();
     let pctrl_home = physics_ctrl.clone();
     let ah_pause = active_handle.clone();
+    let ss_blast = stage_size.clone();
 
     let action_row = stack_panel()
         .orientation(Orientation::Horizontal)
-        .spacing(5.0)
+        .spacing(6.0)
         .child(
             button()
-                .padding((10.0, 5.0, 10.0, 5.0))
-                .corner_radius(6.0)
-                .background("#D97706")
-                .foreground("#FFFFFF")
-                .font_size(11.5)
-                .content("💥 Shockwave")
+                .padding((11.0, 6.0, 11.0, 6.0))
+                .content(icon_label(Icons::LIGHTNING, "Shockwave", 14.0))
                 .on_click(move |_| {
+                    let (w, h) = ss_blast.get();
                     if let Some(ctrl) = pctrl_blast.borrow().as_ref() {
-                        ctrl.shockwave(Vec2::new(450.0, 210.0), 560.0);
+                        ctrl.shockwave(Vec2::new(w * 0.5, h * 0.45), 620.0);
                     }
                 }),
         )
         .child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if gravity_enabled.get() { "#059669" } else { "#334155" })
-                .foreground("#FFFFFF")
-                .font_size(11.5)
-                .content(move || if gravity_enabled.get() { "🌍 Gravity: ON" } else { "🪐 Zero-G" })
+                .padding((10.0, 6.0, 10.0, 6.0))
+                .border_brush(move || if gravity_enabled.get() { solid(0xFF10B981) } else { None })
+                .content(dynamic(move || {
+                    if gravity_enabled.get() {
+                        icon_label(Icons::ORBIT, "Gravity: On", 14.0)
+                    } else {
+                        icon_label(Icons::ORBIT, "Zero-G", 14.0)
+                    }
+                }))
                 .on_click(move |_| {
                     let next = !gravity_enabled.get_untracked();
                     gravity_enabled.set(next);
@@ -411,12 +425,8 @@ pub fn compositor_shader_showcase() -> Element {
         )
         .child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background("#1E293B")
-                .foreground("#E2E8F0")
-                .font_size(11.5)
-                .content("🧲 Snap Home")
+                .padding((10.0, 6.0, 10.0, 6.0))
+                .content(icon_label(Icons::RESET, "Snap Home", 14.0))
                 .on_click(move |_| {
                     if let Some(ctrl) = pctrl_home.borrow().as_ref() {
                         ctrl.snap_home();
@@ -425,12 +435,14 @@ pub fn compositor_shader_showcase() -> Element {
         )
         .child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if sim_paused.get() { "#059669" } else { "#2563EB" })
-                .foreground("#FFFFFF")
-                .font_size(11.5)
-                .content(move || if sim_paused.get() { "▶ Resume" } else { "⏸ Pause" })
+                .padding((10.0, 6.0, 10.0, 6.0))
+                .content(dynamic(move || {
+                    if sim_paused.get() {
+                        icon_label(Icons::PLAY, "Resume", 14.0)
+                    } else {
+                        icon_label(Icons::PAUSE, "Pause", 14.0)
+                    }
+                }))
                 .on_click(move |_| {
                     let next = !sim_paused.get_untracked();
                     sim_paused.set(next);
@@ -440,15 +452,30 @@ pub fn compositor_shader_showcase() -> Element {
                 }),
         );
 
-    let top_bar = border()
+    let header_block = border()
         .dock_panel_dock(Dock::Top)
-        .background("#0F172A")
-        .border_brush("#24314A")
+        .padding((22.0, 16.0, 22.0, 12.0))
+        .border_brush(solid(0x20808080))
         .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .padding((14.0, 9.0, 14.0, 9.0))
         .child(
             stack_panel()
-                .spacing(7.0)
+                .spacing(10.0)
+                .child(
+                    stack_panel()
+                        .spacing(3.0)
+                        .child(
+                            text_block()
+                                .text("Compositor & GPU Shaders")
+                                .font_size(22.0)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(
+                            text_block()
+                                .text("Native ferroui-base ICompositionSimulation pipeline driving CompositionVisual transforms and live WGSL/SkSL GPU shader effects with zero layout passes.")
+                                .font_size(12.5)
+                                .opacity(0.75),
+                        ),
+                )
                 .child(dock_panel().child(action_row.dock_panel_dock(Dock::Right)).child(mode_row))
                 .child(
                     dock_panel()
@@ -457,7 +484,7 @@ pub fn compositor_shader_showcase() -> Element {
                                 .dock_panel_dock(Dock::Right)
                                 .text(move || telemetry_line.get())
                                 .font_size(11.0)
-                                .foreground("#38BDF8")
+                                .opacity(0.75)
                                 .vertical_alignment(VerticalAlignment::Center),
                         )
                         .child(shader_row),
@@ -465,7 +492,7 @@ pub fn compositor_shader_showcase() -> Element {
         );
 
     // -------------------------------------------------------------------------
-    // 2. Interactive Compositor Arena with 6 Live Shader-Driven UI Cards
+    // 2. Interactive Compositor Arena with 6 Live Shader-Driven Cards
     // -------------------------------------------------------------------------
     let mut stage = canvas().clip_to_bounds(true);
 
@@ -473,6 +500,7 @@ pub fn compositor_shader_showcase() -> Element {
         let card_ref = NodeRef::<Border>::new();
         let targets_mount = card_targets.clone();
         let install_mount = install_mode.clone();
+        let comp_mount = compositor_ref.clone();
 
         let pctrl_down = physics_ctrl.clone();
         let pctrl_move = physics_ctrl.clone();
@@ -491,24 +519,43 @@ pub fn compositor_shader_showcase() -> Element {
         let lt_d = last_t.clone();
         let lt_m = last_t.clone();
 
+        let badge_bg = (spec.accent_argb & 0x00FF_FFFF) | 0x2600_0000;
+
         let card_el = border()
             .canvas_left(spec.rest_x)
             .canvas_top(spec.rest_y)
             .width(CARD_W)
             .height(CARD_H)
-            .background("#141E33")
-            .border_brush(spec.accent_hex)
+            .background(solid(0x1E808080))
+            .border_brush(solid(spec.accent_argb))
             .border_thickness(1.5)
-            .corner_radius(12.0)
+            .corner_radius(10.0)
             .padding(14.0)
             .node_ref(card_ref)
             .with(move |b: &Ref<Border>| {
                 let vis: Ref<Visual> = b.clone().upcast();
                 let mut list = targets_mount.borrow_mut();
-                list.push(SimulationTarget::visual(vis));
+                list.push(SimulationTarget::visual(vis.clone()));
                 if list.len() == CARDS.len() {
                     drop(list);
-                    install_mount(active_mode.get_untracked());
+                    // Attach once the last card enters the visual tree (or immediately if already attached).
+                    if let Some(cv) = ElementComposition::get_element_visual(&vis) {
+                        *comp_mount.borrow_mut() = Some(cv.compositor().clone());
+                        install_mount(active_mode.get_untracked());
+                    } else {
+                        let vis_att = vis.clone();
+                        let comp_att = comp_mount.clone();
+                        let inst_att = install_mount.clone();
+                        vis.attached_to_visual_tree(move |_| {
+                            if let Some(cv) = ElementComposition::get_element_visual(&vis_att) {
+                                *comp_att.borrow_mut() = Some(cv.compositor().clone());
+                            }
+                            inst_att(active_mode.get_untracked());
+                        })
+                        .detach();
+                        // Also try immediately in case default compositor is already live.
+                        install_mount(active_mode.get_untracked());
+                    }
                 }
             })
             .on_pointer_pressed(move |e| {
@@ -561,19 +608,42 @@ pub fn compositor_shader_showcase() -> Element {
                             .child(
                                 border()
                                     .dock_panel_dock(Dock::Right)
-                                    .background("#0B1221")
-                                    .border_brush(spec.accent_hex)
-                                    .border_thickness(1.0)
+                                    .background(solid(badge_bg))
                                     .corner_radius(4.0)
                                     .padding((6.0, 2.0, 6.0, 2.0))
-                                    .child(text_block().text(spec.badge).font_size(9.5).foreground(spec.accent_hex)),
+                                    .vertical_alignment(VerticalAlignment::Center)
+                                    .child(
+                                        text_block()
+                                            .text(spec.badge)
+                                            .font_size(9.5)
+                                            .foreground(solid(spec.accent_argb)),
+                                    ),
                             )
                             .child(
-                                text_block()
-                                    .text(spec.title)
-                                    .font_size(14.0)
-                                    .foreground("#F8FAFC")
-                                    .vertical_alignment(VerticalAlignment::Center),
+                                stack_panel()
+                                    .orientation(Orientation::Horizontal)
+                                    .spacing(8.0)
+                                    .vertical_alignment(VerticalAlignment::Center)
+                                    .child(
+                                        border()
+                                            .width(28.0)
+                                            .height(28.0)
+                                            .corner_radius(6.0)
+                                            .background(solid(badge_bg))
+                                            .child(
+                                                border()
+                                                    .horizontal_alignment(HorizontalAlignment::Center)
+                                                    .vertical_alignment(VerticalAlignment::Center)
+                                                    .child(icon_view(spec.icon, 15.0)),
+                                            ),
+                                    )
+                                    .child(
+                                        text_block()
+                                            .text(spec.title)
+                                            .font_size(13.5)
+                                            .font_weight(FontWeight::SemiBold)
+                                            .vertical_alignment(VerticalAlignment::Center),
+                                    ),
                             ),
                     )
                     .child(
@@ -584,19 +654,16 @@ pub fn compositor_shader_showcase() -> Element {
                                 button()
                                     .dock_panel_dock(Dock::Right)
                                     .padding((9.0, 4.0, 9.0, 4.0))
-                                    .corner_radius(5.0)
-                                    .background(spec.accent_hex)
-                                    .foreground("#08101E")
-                                    .font_size(10.5)
-                                    .content("⚡ Pulse")
+                                    .font_size(11.0)
+                                    .content(icon_label(Icons::LIGHTNING, "Pulse", 12.0))
                                     .on_click(move |_| {
                                         if let Some(ctrl) = pctrl_pulse.borrow().as_ref() {
                                             let angle = idx as f32 * 1.1;
                                             ctrl.trigger_impact(
                                                 idx,
-                                                Point::new(0.82, 0.80),
+                                                Point::new(0.75, 0.72),
                                                 1.0,
-                                                Vec2::new(angle.cos() * 340.0, -320.0),
+                                                Vec2::new(angle.cos() * 380.0, -360.0),
                                             );
                                         }
                                     }),
@@ -605,7 +672,7 @@ pub fn compositor_shader_showcase() -> Element {
                                 text_block()
                                     .text(spec.metric)
                                     .font_size(10.5)
-                                    .foreground("#94A3B8")
+                                    .opacity(0.68)
                                     .vertical_alignment(VerticalAlignment::Center),
                             ),
                     )
@@ -614,22 +681,27 @@ pub fn compositor_shader_showcase() -> Element {
                             .margin((0.0, 10.0, 0.0, 0.0))
                             .text(spec.subtitle)
                             .font_size(11.5)
-                            .foreground("#CBD5E1"),
+                            .opacity(0.82),
                     ),
             );
 
         stage = stage.child(card_el);
     }
 
-    // Keep rigid-body arena bounds matched to stage size automatically.
-    let stage_container = border()
-        .background("#090E1A")
+    let ss_resize = stage_size.clone();
+    let stage_frame = border()
+        .margin((22.0, 14.0, 22.0, 18.0))
+        .corner_radius(10.0)
+        .border_brush(solid(0x28808080))
+        .border_thickness(1.0)
+        .background(solid(0x0D808080))
         .clip_to_bounds(true)
         .on_size_changed({
             let pctrl = physics_ctrl.clone();
             move |e| {
                 let sz = e.new_size();
                 if sz.width > 120.0 && sz.height > 120.0 {
+                    ss_resize.set((sz.width as f32, sz.height as f32));
                     if let Some(ctrl) = pctrl.borrow().as_ref() {
                         ctrl.set_arena_size(sz.width as f32, sz.height as f32);
                     }
@@ -638,25 +710,9 @@ pub fn compositor_shader_showcase() -> Element {
         })
         .child(stage);
 
-    let footer_hint = border()
-        .dock_panel_dock(Dock::Bottom)
-        .background("#0B1120")
-        .border_brush("#1E293B")
-        .border_thickness((0.0, 1.0, 0.0, 0.0))
-        .padding((14.0, 6.0, 14.0, 6.0))
-        .child(
-            text_block()
-                .text("Drag & fling any card to drive GPU Kinetic Glass velocity sheen · Smash cards or click ⚡ Pulse / 💥 Shockwave for WGSL Impact Ripples · Switch to 🌊 Harmonic Wave to test a non-physics simulation mode on the same ferroui-base ICompositionSimulation contract!")
-                .font_size(11.0)
-                .foreground("#94A3B8")
-                .horizontal_alignment(HorizontalAlignment::Left),
-        );
-
     dock_panel()
-        .background("#090D16")
         .clip_to_bounds(true)
-        .child(top_bar)
-        .child(footer_hint)
-        .child(stage_container)
+        .child(header_block)
+        .child(stage_frame)
         .into()
 }

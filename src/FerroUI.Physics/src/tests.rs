@@ -602,23 +602,49 @@ fn newtonian_gravity_conserves_circular_orbit_across_substeps() {
 #[cfg(feature = "ferroui")]
 #[test]
 fn physics_custom_shader_effects_validate_wgsl_and_uniform_layout() {
-    use crate::compositor_integration::{PhysicsImpactRippleEffect, PhysicsKineticGlassEffect};
+    use crate::compositor_integration::{
+        PhysicsEnergyFieldEffect, PhysicsImpactRippleEffect, PhysicsKineticGlassEffect,
+    };
     use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformType};
 
     for (label, eff) in [
         ("kinetic_glass", ImmutableCustomEffect::new(PhysicsKineticGlassEffect::default())),
         ("impact_ripple", ImmutableCustomEffect::new(PhysicsImpactRippleEffect::default())),
+        ("energy_field", ImmutableCustomEffect::new(PhysicsEnergyFieldEffect::default())),
     ] {
         let shader = eff.shader().expect("effect must expose a runtime shader");
         let wgsl = shader.wgsl_module();
         let module = naga::front::wgsl::parse_str(&wgsl)
             .unwrap_or_else(|e| panic!("{label} WGSL parse error:\n{}", e.emit_to_string(&wgsl)));
-        naga::valid::Validator::new(
+        let info = naga::valid::Validator::new(
             naga::valid::ValidationFlags::all(),
             naga::valid::Capabilities::empty(),
         )
         .validate(&module)
         .unwrap_or_else(|e| panic!("{label} WGSL validation error:\n{}", e.emit_to_string(&wgsl)));
+
+        // Also validate WGSL -> Apple Metal MSL 2.4 translation identically to ferroui-quartz!
+        let mut msl_options = naga::back::msl::Options {
+            lang_version: (2, 4),
+            fake_missing_bindings: false,
+            ..Default::default()
+        };
+        let mut resources = naga::back::msl::EntryPointResources::default();
+        for binding in 0..3u32 {
+            resources.resources.insert(
+                naga::ResourceBinding { group: 0, binding },
+                naga::back::msl::BindTarget {
+                    buffer: (binding < 2).then_some(binding as u8),
+                    texture: (binding >= 2).then_some(binding.saturating_sub(2) as u8),
+                    ..Default::default()
+                },
+            );
+        }
+        msl_options.per_entry_point_map.insert("vs_main".into(), resources.clone());
+        msl_options.per_entry_point_map.insert("fs_main".into(), resources);
+        let (msl, _) = naga::back::msl::write_string(&module, &info, &msl_options, &Default::default())
+            .unwrap_or_else(|e| panic!("{label} MSL translation error: {e}"));
+        assert!(msl.contains("fragment"), "{label} MSL output missing fragment shader");
 
         // Verify struct Uniforms fields match `shader_uniform_layout()` identically (what Quartz Metal checks!).
         let var = module

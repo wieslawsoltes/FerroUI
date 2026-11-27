@@ -1362,8 +1362,15 @@ impl Compositor {
     }
 
     /// The compositor registered in the service locator, if any.
+    /// Returns the default compositor registered in the service locator, or the
+    /// active UI-thread compositor if the platform backend creates compositors
+    /// per top-level without registering one in `FerroLocator`.
     pub fn try_get_default_compositor() -> Option<Rc<Compositor>> {
-        FerroLocator::current().get_service::<Compositor>()
+        FerroLocator::current().get_service::<Compositor>().or_else(|| {
+            COMPOSITORS.with(|compositors| {
+                compositors.borrow().values().find_map(Weak::upgrade)
+            })
+        })
     }
 }
 

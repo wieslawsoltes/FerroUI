@@ -1,57 +1,310 @@
-//! **FerroUI Physics Studio** — Professional hardware-accelerated physics showcase built on
-//! `ferroui-physics` and `ferroui-view`.
+//! **FerroUI Physics & Compositor Studio** — Organized in the clean `ControlCatalog`
+//! WinUI 3 `NavigationView` + vector `PathIcon` gallery style.
 
 pub mod compositor_showcase;
+pub mod icons;
 pub mod live_ui_tree;
 pub mod node_graph_studio;
 pub mod scenes;
 pub mod viewport;
 
+use crate::icons::{icon_label, icon_view, nav_icon, Icons};
 use crate::scenes::{SandboxEngine, SceneKind, SolverProfile, SpringPreset, ToolMode};
 use crate::viewport::PhysicsViewport;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
-use ferroui_controls::Dock;
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{FontWeight, IBrush, TextWrapping};
+use ferroui_base::styling::ThemeVariant;
+use ferroui_base::{BoxedValue, Ref};
+use ferroui_controls::{
+    Application, Control, Dock, NavigationView, NavigationViewBackButtonVisible,
+    NavigationViewItem, NavigationViewItemHeader, NavigationViewPaneDisplayMode,
+};
 use ferroui_view::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// Reusable studio inspector section card with dark recessed backdrop and crisp hairline border.
-fn studio_card(title: &'static str, body: impl IntoElement) -> Element {
+fn solid(argb: u32) -> Option<Rc<dyn IBrush>> {
+    Some(Rc::new(ImmutableSolidColorBrush::from_uint32(argb)) as Rc<dyn IBrush>)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum StudioPage {
+    Home,
+    CompositorShaders,
+    LiveUiTree,
+    NodeGraph,
+    Scene(SceneKind),
+}
+
+impl StudioPage {
+    fn title(self) -> &'static str {
+        match self {
+            Self::Home => "Home",
+            Self::CompositorShaders => "Compositor & Shaders",
+            Self::LiveUiTree => "Live UI Tree",
+            Self::NodeGraph => "Grasshopper Studio",
+            Self::Scene(kind) => kind.title(),
+        }
+    }
+
+    fn icon(self) -> &'static str {
+        match self {
+            Self::Home => Icons::HOME,
+            Self::CompositorShaders => Icons::SPARKLE,
+            Self::LiveUiTree => Icons::LAYERS,
+            Self::NodeGraph => Icons::NODE_GRAPH,
+            Self::Scene(SceneKind::Playground) => Icons::CUBE,
+            Self::Scene(SceneKind::GpuParticles) => Icons::WATER,
+            Self::Scene(SceneKind::ClothSoftBody) => Icons::CLOTH,
+            Self::Scene(SceneKind::UiSprings) => Icons::UI_MOTION,
+            Self::Scene(SceneKind::RagdollWrecking) => Icons::SHATTER,
+            Self::Scene(SceneKind::VehicleTerrain) => Icons::VEHICLE,
+            Self::Scene(SceneKind::CharacterDemo) => Icons::PERSON,
+            Self::Scene(SceneKind::LaserGravity) => Icons::ORBIT,
+        }
+    }
+}
+
+fn scene_description(kind: SceneKind) -> &'static str {
+    match kind {
+        SceneKind::Playground => "Stacked rigid-body pyramids, bridge chains, and interactive drag/shatter tools.",
+        SceneKind::GpuParticles => "Up to 8K hardware GPU compute (wgpu) spatial-hash fluid particles with obstacle interaction.",
+        SceneKind::ClothSoftBody => "Tearable XPBD cloth mesh with wind gusts and pressure-inflated soft-body jelly.",
+        SceneKind::UiSprings => "Analytical harmonic UI springs, magnetic snap anchors, and rubber-band inertia.",
+        SceneKind::RagdollWrecking => "Breakable joints and radial convex shard fracturing under blast shockwaves.",
+        SceneKind::VehicleTerrain => "Wheel-joint suspension rig with live motor torque over bumpy terrain.",
+        SceneKind::CharacterDemo => "Swept shape-cast move-and-slide controller with slopes, jumps, and box pushing.",
+        SceneKind::LaserGravity => "Keplerian inverse-square orbital gravity with live multi-bounce laser raycasts.",
+    }
+}
+
+/// Clean stock-themed inspector card matching `ControlCatalog` gallery styling.
+fn inspector_card(title: &'static str, body: impl IntoElement) -> Element {
     border()
-        .background("#141B2D")
-        .border_brush("#24314A")
+        .background(solid(0x14808080))
+        .border_brush(solid(0x28808080))
         .border_thickness(1.0)
         .corner_radius(8.0)
-        .padding(10.0)
+        .padding(12.0)
         .child(
             stack_panel()
-                .spacing(7.0)
-                .child(text_block().text(title).font_size(11.0).foreground("#7DD3FC"))
+                .spacing(8.0)
+                .child(
+                    text_block()
+                        .text(title)
+                        .font_size(12.0)
+                        .font_weight(FontWeight::SemiBold),
+                )
                 .child(body),
         )
         .into()
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum StudioViewMode {
-    Canvas,
-    LiveUiTree,
-    CompositorShaders,
-    NodeGraph,
+/// Builds a ControlCatalog-style Home gallery tile card.
+fn gallery_card(
+    page: StudioPage,
+    description: &'static str,
+    accent_argb: u32,
+    on_select: Rc<dyn Fn(StudioPage)>,
+) -> Element {
+    let badge_bg = (accent_argb & 0x00FF_FFFF) | 0x2400_0000;
+    button()
+        .width(268.0)
+        .padding(14.0)
+        .horizontal_content_alignment(HorizontalAlignment::Stretch)
+        .vertical_content_alignment(VerticalAlignment::Top)
+        .content(
+            stack_panel()
+                .spacing(10.0)
+                .child(
+                    border()
+                        .width(36.0)
+                        .height(36.0)
+                        .corner_radius(8.0)
+                        .background(solid(badge_bg))
+                        .horizontal_alignment(HorizontalAlignment::Left)
+                        .child(
+                            border()
+                                .horizontal_alignment(HorizontalAlignment::Center)
+                                .vertical_alignment(VerticalAlignment::Center)
+                                .child(icon_view(page.icon(), 18.0)),
+                        ),
+                )
+                .child(
+                    stack_panel()
+                        .spacing(3.0)
+                        .child(
+                            text_block()
+                                .text(page.title())
+                                .font_size(14.0)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(
+                            text_block()
+                                .text(description)
+                                .font_size(11.5)
+                                .opacity(0.72)
+                                .text_wrapping(TextWrapping::Wrap),
+                        ),
+                ),
+        )
+        .on_click(move |_| on_select(page))
+        .into()
 }
 
-/// Builds the full **FerroUI Physics Studio** application layout.
+fn stat_pill(value: &'static str, label: &'static str, accent_argb: u32) -> Element {
+    let tint = (accent_argb & 0x00FF_FFFF) | 0x2200_0000;
+    border()
+        .background(solid(tint))
+        .border_brush(solid((accent_argb & 0x00FF_FFFF) | 0x5500_0000))
+        .border_thickness(1.0)
+        .corner_radius(8.0)
+        .padding((14.0, 10.0, 14.0, 10.0))
+        .child(
+            stack_panel()
+                .spacing(2.0)
+                .child(text_block().text(value).font_size(15.0).font_weight(FontWeight::SemiBold))
+                .child(text_block().text(label).font_size(11.0).opacity(0.75)),
+        )
+        .into()
+}
+
+fn build_home_page(gpu_available: bool, navigate: Rc<dyn Fn(StudioPage)>) -> Element {
+    let hero = border()
+        .corner_radius(12.0)
+        .background(solid(0x160078D4))
+        .border_brush(solid(0x380078D4))
+        .border_thickness(1.0)
+        .padding(22.0)
+        .child(
+            stack_panel()
+                .spacing(14.0)
+                .child(
+                    stack_panel()
+                        .spacing(5.0)
+                        .child(
+                            text_block()
+                                .text("FerroUI Physics & Compositor Studio")
+                                .font_size(26.0)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(
+                            text_block()
+                                .text("Hardware-accelerated 2D physics, multi-mode Compositor simulations, live WGSL → Metal GPU shaders, and Rhino Grasshopper parametric node graphs.")
+                                .font_size(13.0)
+                                .opacity(0.78)
+                                .text_wrapping(TextWrapping::Wrap),
+                        ),
+                )
+                .child(
+                    wrap_panel()
+                        .item_spacing(10.0)
+                        .line_spacing(10.0)
+                        .child(stat_pill(
+                            if gpu_available { "Metal GPU" } else { "CPU SIMD" },
+                            "Compute particle backend",
+                            0xFF0EA5E9,
+                        ))
+                        .child(stat_pill("WGSL → MSL", "Live runtime GPU shaders", 0xFF8B5CF6))
+                        .child(stat_pill("ICompositionSimulation", "Multi-mode compositor contract", 0xFF10B981))
+                        .child(stat_pill("65+ Nodes", "Stock-themed Grasshopper editor", 0xFFF59E0B)),
+                ),
+        );
+
+    let compositor_section = stack_panel()
+        .spacing(12.0)
+        .child(
+            text_block()
+                .text("Compositor, GPU Shaders & Parametric Graph")
+                .font_size(18.0)
+                .font_weight(FontWeight::SemiBold),
+        )
+        .child(
+            wrap_panel()
+                .item_spacing(12.0)
+                .line_spacing(12.0)
+                .child(gallery_card(
+                    StudioPage::CompositorShaders,
+                    "Direct CompositionVisual physics, elastic springs, non-physics harmonic waves, and 3 live WGSL/SkSL GPU shaders.",
+                    0xFF0EA5E9,
+                    navigate.clone(),
+                ))
+                .child(gallery_card(
+                    StudioPage::LiveUiTree,
+                    "Apply rigid bodies, springs, shockwaves, and tactile gestures directly to real FerroUI visual & logical trees.",
+                    0xFF10B981,
+                    navigate.clone(),
+                ))
+                .child(gallery_card(
+                    StudioPage::NodeGraph,
+                    "Visual Grasshopper-style node editor in the stock FerroUI theme wired live into the physics viewport.",
+                    0xFF8B5CF6,
+                    navigate.clone(),
+                )),
+        );
+
+    let mut sandbox_cards = wrap_panel().item_spacing(12.0).line_spacing(12.0);
+    let accents = [
+        0xFF0EA5E9, 0xFF06B6D4, 0xFF10B981, 0xFF8B5CF6,
+        0xFFEF4444, 0xFFF59E0B, 0xFFEC4899, 0xFF3B82F6,
+    ];
+    for (idx, kind) in SceneKind::ALL.iter().copied().enumerate() {
+        sandbox_cards = sandbox_cards.child(gallery_card(
+            StudioPage::Scene(kind),
+            scene_description(kind),
+            accents[idx % accents.len()],
+            navigate.clone(),
+        ));
+    }
+
+    let sandbox_section = stack_panel()
+        .spacing(12.0)
+        .child(
+            text_block()
+                .text("Hardware-Accelerated 2D Physics Scenes")
+                .font_size(18.0)
+                .font_weight(FontWeight::SemiBold),
+        )
+        .child(sandbox_cards);
+
+    scroll_viewer()
+        .padding((28.0, 22.0, 28.0, 28.0))
+        .content(
+            stack_panel()
+                .spacing(26.0)
+                .child(hero)
+                .child(compositor_section)
+                .child(sandbox_section),
+        )
+        .into()
+}
+
+/// Builds the full **ControlCatalog-style FerroUI Physics & Compositor Studio**.
 pub fn physics_sandbox() -> Element {
     let engine = Rc::new(RefCell::new(SandboxEngine::new()));
+    let gpu_available = engine.borrow().gpu_available();
 
+    let initial_page = match std::env::var("FERROUI_START_PAGE").as_deref() {
+        Ok("compositor") => StudioPage::CompositorShaders,
+        Ok("ui") => StudioPage::LiveUiTree,
+        Ok("nodegraph") => StudioPage::NodeGraph,
+        Ok("playground") => StudioPage::Scene(SceneKind::Playground),
+        _ => StudioPage::Home,
+    };
+    let active_page = signal(initial_page);
     let active_scene = signal(SceneKind::Playground);
-    let view_mode = signal(StudioViewMode::Canvas);
     let active_tool = signal(ToolMode::Drag);
     let active_preset = signal(SpringPreset::Bouncy);
     let active_solver = signal(SolverProfile::Game);
     let active_pcount = signal(4096usize);
     let paused = signal(false);
-    let prefer_gpu = signal(engine.borrow().gpu_available());
+    let prefer_gpu = signal(gpu_available);
+    let is_dark_theme = signal(
+        Application::current()
+            .and_then(|a| a.actual_theme_variant())
+            .is_none_or(|v| v == ThemeVariant::dark()),
+    );
 
     let gravity = signal(9.81_f64);
     let time_scale = signal(1.0_f64);
@@ -71,7 +324,7 @@ pub fn physics_sandbox() -> Element {
     let telemetry_entities = signal(String::from("Ready"));
     let telemetry_history = signal(String::from("Frame 0/0"));
 
-    // Reactive sync of sliders into engine
+    // Reactive sync of environment sliders into SandboxEngine
     {
         let eng = engine.clone();
         effect(move || {
@@ -83,508 +336,536 @@ pub fn physics_sandbox() -> Element {
         });
     }
 
-    // -------------------------------------------------------------------------
-    // 1. Top Studio Header & Transport Bar
-    // -------------------------------------------------------------------------
-    let mut scene_tabs = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    for kind in SceneKind::ALL {
+    // Track NavigationView + menu item handles so gallery Home cards sync sidebar selection!
+    let nav_ref = NodeRef::<NavigationView>::new();
+    let nav_entries: Rc<RefCell<Vec<(StudioPage, Ref<NavigationViewItem>)>>> = Rc::new(RefCell::new(Vec::new()));
+    let syncing_nav = Rc::new(std::cell::Cell::new(false));
+
+    let navigate_to: Rc<dyn Fn(StudioPage)> = {
         let eng = engine.clone();
-        scene_tabs = scene_tabs.child(
-            button()
-                .padding((8.0, 5.0, 8.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if view_mode.get() == StudioViewMode::Canvas && active_scene.get() == kind { "#0284C7" } else { "#182235" })
-                .foreground("#F1F5F9")
-                .content(kind.title())
-                .on_click(move |_| {
-                    view_mode.set(StudioViewMode::Canvas);
-                    eng.borrow_mut().blueprint_driven = false;
-                    eng.borrow_mut().load_scene(kind);
-                    active_scene.set(kind);
-                    paused.set(false);
-                }),
-        );
-    }
-    scene_tabs = scene_tabs
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if view_mode.get() == StudioViewMode::LiveUiTree { "#059669" } else { "#14332A" })
-                .foreground("#ECFDF5")
-                .content("⚡ Live UI Tree")
-                .on_click(move |_| {
-                    view_mode.set(StudioViewMode::LiveUiTree);
-                }),
-        )
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if view_mode.get() == StudioViewMode::CompositorShaders { "#0EA5E9" } else { "#122B3E" })
-                .foreground("#F0F9FF")
-                .content("✨ Compositor & Shaders")
-                .on_click(move |_| {
-                    view_mode.set(StudioViewMode::CompositorShaders);
-                }),
-        )
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if view_mode.get() == StudioViewMode::NodeGraph { "#7C3AED" } else { "#2A1B47" })
-                .foreground("#F5F3FF")
-                .content("🧩 Node Graph")
-                .on_click(move |_| {
-                    view_mode.set(StudioViewMode::NodeGraph);
-                }),
-        );
+        let nav_entries = nav_entries.clone();
+        let syncing_nav = syncing_nav.clone();
+        Rc::new(move |page: StudioPage| {
+            if let StudioPage::Scene(kind) = page {
+                {
+                    let mut sim = eng.borrow_mut();
+                    sim.blueprint_driven = false;
+                    sim.load_scene(kind);
+                }
+                active_scene.set(kind);
+                paused.set(false);
+            }
+            active_page.set(page);
 
-    let eng_back = engine.clone();
-    let eng_pause = engine.clone();
-    let eng_fwd = engine.clone();
-    let eng_reset = engine.clone();
-    let eng_burst = engine.clone();
+            if let Some(nav) = nav_ref.get_untracked() {
+                if let Some((_, item)) = nav_entries.borrow().iter().find(|(p, _)| *p == page) {
+                    syncing_nav.set(true);
+                    nav.set_selected_item(Some(Control::boxed(item)));
+                    syncing_nav.set(false);
+                }
+            }
+        })
+    };
 
-    let transport = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(4.0)
-        .child(
-            button()
-                .padding((8.0, 5.0, 8.0, 5.0))
-                .corner_radius(6.0)
-                .background("#1E293B")
-                .foreground("#E2E8F0")
-                .content("◀")
-                .on_click(move |_| {
-                    eng_back.borrow_mut().step_back_history();
-                    paused.set(true);
-                }),
-        )
-        .child(
-            button()
-                .padding((10.0, 5.0, 10.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if paused.get() { "#059669" } else { "#2563EB" })
-                .foreground("#FFFFFF")
-                .content(move || if paused.get() { "▶ Play" } else { "⏸ Pause" })
-                .on_click(move |_| {
-                    let next = !paused.get_untracked();
-                    eng_pause.borrow_mut().paused = next;
-                    paused.set(next);
-                }),
-        )
-        .child(
-            button()
-                .padding((8.0, 5.0, 8.0, 5.0))
-                .corner_radius(6.0)
-                .background("#1E293B")
-                .foreground("#E2E8F0")
-                .content("▶|")
-                .on_click(move |_| {
-                    eng_fwd.borrow_mut().step_forward_one();
-                }),
-        )
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background("#1E293B")
-                .foreground("#E2E8F0")
-                .content("↺ Reset")
-                .on_click(move |_| {
-                    let sc = active_scene.get_untracked();
-                    eng_reset.borrow_mut().load_scene(sc);
-                    paused.set(false);
-                }),
-        )
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background("#7C3AED")
-                .foreground("#FFFFFF")
-                .content("✦ Burst")
-                .on_click(move |_| {
-                    eng_burst.borrow_mut().spawn_quick_burst();
-                }),
-        );
+    // -------------------------------------------------------------------------
+    // Build the Canvas Physics Sandbox Page (with clean ControlCatalog chrome)
+    // -------------------------------------------------------------------------
+    let build_sandbox_page = {
+        let engine = engine.clone();
+        move || -> Element {
+            let eng_back = engine.clone();
+            let eng_pause = engine.clone();
+            let eng_fwd = engine.clone();
+            let eng_reset = engine.clone();
+            let eng_burst = engine.clone();
 
-    let gpu_badge_text = if engine.borrow().gpu_available() { "METAL GPU" } else { "CPU SIMD" };
-    let header = border()
-        .dock_panel_dock(Dock::Top)
-        .background("#0D1321")
-        .border_brush("#1E293B")
-        .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .padding((12.0, 8.0, 12.0, 8.0))
-        .child(
-            dock_panel()
+            let transport = stack_panel()
+                .orientation(Orientation::Horizontal)
+                .spacing(5.0)
+                .child(
+                    button()
+                        .padding((8.0, 5.0, 8.0, 5.0))
+                        .content(icon_view(Icons::STEP_BACK, 14.0))
+                        .on_click(move |_| {
+                            eng_back.borrow_mut().step_back_history();
+                            paused.set(true);
+                        }),
+                )
+                .child(
+                    button()
+                        .padding((10.0, 5.0, 10.0, 5.0))
+                        .border_brush(move || if paused.get() { solid(0xFF10B981) } else { solid(0xFF0078D4) })
+                        .content(dynamic(move || {
+                            if paused.get() {
+                                icon_label(Icons::PLAY, "Play", 14.0)
+                            } else {
+                                icon_label(Icons::PAUSE, "Pause", 14.0)
+                            }
+                        }))
+                        .on_click(move |_| {
+                            let next = !paused.get_untracked();
+                            eng_pause.borrow_mut().paused = next;
+                            paused.set(next);
+                        }),
+                )
+                .child(
+                    button()
+                        .padding((8.0, 5.0, 8.0, 5.0))
+                        .content(icon_view(Icons::STEP_FWD, 14.0))
+                        .on_click(move |_| {
+                            eng_fwd.borrow_mut().step_forward_one();
+                        }),
+                )
+                .child(
+                    button()
+                        .padding((10.0, 5.0, 10.0, 5.0))
+                        .content(icon_label(Icons::RESET, "Reset", 14.0))
+                        .on_click(move |_| {
+                            let sc = active_scene.get_untracked();
+                            eng_reset.borrow_mut().load_scene(sc);
+                            paused.set(false);
+                        }),
+                )
+                .child(
+                    button()
+                        .padding((10.0, 5.0, 10.0, 5.0))
+                        .content(icon_label(Icons::SPARKLE, "Burst", 14.0))
+                        .on_click(move |_| {
+                            eng_burst.borrow_mut().spawn_quick_burst();
+                        }),
+                );
+
+            let tool_specs = [
+                (ToolMode::Drag, Icons::CURSOR),
+                (ToolMode::SpawnBox, Icons::BOX_SHAPE),
+                (ToolMode::SpawnCircle, Icons::CIRCLE_SHAPE),
+                (ToolMode::SpawnPolygon, Icons::HEX_SHAPE),
+                (ToolMode::SpawnJelly, Icons::BLUR),
+                (ToolMode::Shatter, Icons::SHATTER),
+                (ToolMode::Explosion, Icons::LIGHTNING),
+            ];
+            let mut tools_row = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
+            for (tool, ic) in tool_specs {
+                let eng = engine.clone();
+                tools_row = tools_row.child(
+                    button()
+                        .padding((9.0, 4.0, 9.0, 4.0))
+                        .border_brush(move || if active_tool.get() == tool { solid(0xFF0078D4) } else { None })
+                        .border_thickness(move || if active_tool.get() == tool { 1.5 } else { 1.0 })
+                        .font_size(11.5)
+                        .content(icon_label(ic, tool.label(), 13.0))
+                        .on_click(move |_| {
+                            eng.borrow_mut().tool = tool;
+                            active_tool.set(tool);
+                        }),
+                );
+            }
+
+            let scene_header = border()
+                .dock_panel_dock(Dock::Top)
+                .padding((18.0, 12.0, 18.0, 10.0))
+                .border_brush(solid(0x22808080))
+                .border_thickness((0.0, 0.0, 0.0, 1.0))
                 .child(
                     stack_panel()
-                        .dock_panel_dock(Dock::Left)
-                        .orientation(Orientation::Horizontal)
-                        .vertical_alignment(VerticalAlignment::Center)
                         .spacing(8.0)
-                        .margin((0.0, 0.0, 14.0, 0.0))
-                        .child(text_block().text("⚡ FERRO PHYSICS").font_size(14.0).foreground("#F8FAFC"))
                         .child(
-                            border()
-                                .background("#064E3B")
-                                .border_brush("#10B981")
-                                .border_thickness(1.0)
-                                .corner_radius(4.0)
-                                .padding((6.0, 2.0, 6.0, 2.0))
-                                .child(text_block().text(gpu_badge_text).font_size(10.0).foreground("#6EE7B7")),
-                        ),
-                )
-                .child(transport.dock_panel_dock(Dock::Right))
-                .child(scene_tabs),
-        );
+                            dock_panel()
+                                .child(transport.dock_panel_dock(Dock::Right))
+                                .child(
+                                    stack_panel()
+                                        .spacing(2.0)
+                                        .child(
+                                            text_block()
+                                                .text(move || active_scene.get().title())
+                                                .font_size(19.0)
+                                                .font_weight(FontWeight::SemiBold),
+                                        )
+                                        .child(
+                                            text_block()
+                                                .text(move || active_scene.get().hint())
+                                                .font_size(11.5)
+                                                .opacity(0.72),
+                                        ),
+                                ),
+                        )
+                        .child(tools_row),
+                );
 
-    // -------------------------------------------------------------------------
-    // 2. Left Vertical Studio Tool Rail
-    // -------------------------------------------------------------------------
-    let mut tool_rail_stack = stack_panel().spacing(6.0).child(
-        text_block()
-            .text("TOOLS")
-            .font_size(10.0)
-            .foreground("#64748B")
-            .horizontal_alignment(HorizontalAlignment::Center),
-    );
-    for tool in ToolMode::ALL {
-        let eng = engine.clone();
-        tool_rail_stack = tool_rail_stack.child(
-            button()
-                .horizontal_alignment(HorizontalAlignment::Stretch)
-                .padding((4.0, 8.0, 4.0, 8.0))
-                .corner_radius(6.0)
-                .background(move || if active_tool.get() == tool { "#0284C7" } else { "#141B2D" })
-                .foreground("#F1F5F9")
-                .content(tool.label())
-                .on_click(move |_| {
-                    eng.borrow_mut().tool = tool;
-                    active_tool.set(tool);
-                }),
-        );
-    }
+            // Right Inspector (clean stock theme cards)
+            let adapter_name = engine.borrow().gpu_adapter_name().unwrap_or("CPU SIMD Fallback").to_string();
+            let eng_gpu = engine.clone();
+            let mut pcount_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
+            for count in [2048usize, 4096, 8192] {
+                let eng = engine.clone();
+                let label = format!("{}K", count / 1024);
+                pcount_row = pcount_row.child(
+                    button()
+                        .padding((9.0, 4.0, 9.0, 4.0))
+                        .border_brush(move || if active_pcount.get() == count { solid(0xFF0078D4) } else { None })
+                        .border_thickness(move || if active_pcount.get() == count { 1.5 } else { 1.0 })
+                        .font_size(11.0)
+                        .content(label)
+                        .on_click(move |_| {
+                            eng.borrow_mut().set_particle_count(count);
+                            active_pcount.set(count);
+                        }),
+                );
+            }
+            let mut solver_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
+            for prof in SolverProfile::ALL {
+                let eng = engine.clone();
+                solver_row = solver_row.child(
+                    button()
+                        .padding((8.0, 4.0, 8.0, 4.0))
+                        .border_brush(move || if active_solver.get() == prof { solid(0xFF0078D4) } else { None })
+                        .border_thickness(move || if active_solver.get() == prof { 1.5 } else { 1.0 })
+                        .font_size(11.0)
+                        .content(prof.label())
+                        .on_click(move |_| {
+                            eng.borrow_mut().set_solver_profile(prof);
+                            active_solver.set(prof);
+                        }),
+                );
+            }
 
-    let left_rail = border()
-        .dock_panel_dock(Dock::Left)
-        .width(88.0)
-        .background("#0D1321")
-        .border_brush("#1E293B")
-        .border_thickness((0.0, 0.0, 1.0, 0.0))
-        .padding(8.0)
-        .clip_to_bounds(true)
-        .is_visible(move || view_mode.get() == StudioViewMode::Canvas)
-        .child(tool_rail_stack);
+            let hardware_card = inspector_card(
+                "Hardware & Solver",
+                stack_panel()
+                    .spacing(7.0)
+                    .child(text_block().text(format!("Adapter: {adapter_name}")).font_size(11.0).opacity(0.75))
+                    .child(
+                        button()
+                            .horizontal_alignment(HorizontalAlignment::Stretch)
+                            .padding((10.0, 5.0, 10.0, 5.0))
+                            .border_brush(move || if prefer_gpu.get() { solid(0xFF0EA5E9) } else { None })
+                            .content(move || {
+                                if prefer_gpu.get() {
+                                    "Backend: GPU Compute (wgpu)"
+                                } else {
+                                    "Backend: CPU SIMD Fallback"
+                                }
+                            })
+                            .on_click(move |_| {
+                                let next = !prefer_gpu.get_untracked();
+                                eng_gpu.borrow_mut().prefer_gpu = next;
+                                prefer_gpu.set(next);
+                            }),
+                    )
+                    .child(text_block().text("GPU Fluid Particles").font_size(10.5).opacity(0.72))
+                    .child(pcount_row)
+                    .child(text_block().text("Rigid Solver Profile").font_size(10.5).opacity(0.72))
+                    .child(solver_row),
+            );
 
-    // -------------------------------------------------------------------------
-    // 3. Right Studio Inspector Dock (Scrollable Cards)
-    // -------------------------------------------------------------------------
-    let gpu_name = engine
-        .borrow()
-        .gpu_adapter_name()
-        .unwrap_or("CPU SIMD Fallback")
-        .to_string();
+            let eng_scrub = engine.clone();
+            let timeline_card = inspector_card(
+                "Time-Travel & Speed",
+                stack_panel()
+                    .spacing(5.0)
+                    .child(text_block().text(move || format!("History: {}", telemetry_history.get())).font_size(11.0).opacity(0.78))
+                    .child(
+                        slider()
+                            .minimum(0.0)
+                            .maximum(1.0)
+                            .value(timeline.two_way())
+                            .on_changed(ferroui_controls::primitives::RangeBase::value_property(), move |v| {
+                                let mut sim = eng_scrub.borrow_mut();
+                                if sim.paused && !sim.history.is_empty() {
+                                    sim.scrub_history(*v as f32);
+                                }
+                            }),
+                    )
+                    .child(text_block().text(move || format!("Time Scale: {:.2}×", time_scale.get())).font_size(11.0).opacity(0.78))
+                    .child(slider().minimum(0.1).maximum(2.0).value(time_scale.two_way())),
+            );
 
-    let eng_gpu = engine.clone();
-    let mut pcount_row = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    for &(cnt, label) in &[(2048usize, "2K"), (4096, "4K"), (8192, "8K")] {
-        let eng = engine.clone();
-        pcount_row = pcount_row.child(
-            button()
-                .padding((10.0, 4.0, 10.0, 4.0))
-                .corner_radius(5.0)
-                .background(move || if active_pcount.get() == cnt { "#0284C7" } else { "#1E293B" })
-                .foreground("#F1F5F9")
-                .content(label)
-                .on_click(move |_| {
-                    eng.borrow_mut().set_particle_count(cnt);
-                    active_pcount.set(cnt);
-                }),
-        );
-    }
+            let env_card = inspector_card(
+                "Environment",
+                stack_panel()
+                    .spacing(5.0)
+                    .child(text_block().text(move || format!("Gravity: {:.1} m/s²", gravity.get())).font_size(11.0).opacity(0.78))
+                    .child(slider().minimum(-15.0).maximum(25.0).value(gravity.two_way()))
+                    .child(text_block().text(move || format!("Bounciness: {:.2}", restitution.get())).font_size(11.0).opacity(0.78))
+                    .child(slider().minimum(0.0).maximum(0.95).value(restitution.two_way()))
+                    .child(text_block().text(move || format!("Wind Gust: {:.1} m/s²", wind_x.get())).font_size(11.0).opacity(0.78))
+                    .child(slider().minimum(-12.0).maximum(12.0).value(wind_x.two_way())),
+            );
 
-    let mut solver_row = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    for prof in SolverProfile::ALL {
-        let eng = engine.clone();
-        solver_row = solver_row.child(
-            button()
-                .padding((8.0, 4.0, 8.0, 4.0))
-                .corner_radius(5.0)
-                .background(move || if active_solver.get() == prof { "#0284C7" } else { "#1E293B" })
-                .foreground("#F1F5F9")
-                .content(prof.label())
-                .on_click(move |_| {
-                    eng.borrow_mut().set_solver_profile(prof);
-                    active_solver.set(prof);
-                }),
-        );
-    }
+            let mut preset_wrap = wrap_panel().item_spacing(5.0).line_spacing(5.0);
+            for preset in SpringPreset::ALL {
+                let eng = engine.clone();
+                preset_wrap = preset_wrap.child(
+                    button()
+                        .padding((8.0, 4.0, 8.0, 4.0))
+                        .border_brush(move || if active_preset.get() == preset { solid(0xFF8B5CF6) } else { None })
+                        .border_thickness(move || if active_preset.get() == preset { 1.5 } else { 1.0 })
+                        .font_size(11.0)
+                        .content(preset.label())
+                        .on_click(move |_| {
+                            eng.borrow_mut().set_spring_preset(preset);
+                            active_preset.set(preset);
+                        }),
+                );
+            }
+            let spring_card = inspector_card("UI Spring Preset", preset_wrap);
 
-    let compute_card = studio_card(
-        "HARDWARE & SOLVER",
-        stack_panel()
-            .spacing(6.0)
-            .child(text_block().text(format!("Adapter: {gpu_name}")).font_size(11.0).foreground("#CBD5E1"))
-            .child(
+            let make_dbg = |label: &'static str, sig: Signal<bool>, setter: fn(&mut SandboxEngine, bool)| {
+                let eng = engine.clone();
                 button()
-                    .horizontal_alignment(HorizontalAlignment::Stretch)
-                    .padding((8.0, 6.0, 8.0, 6.0))
-                    .corner_radius(6.0)
-                    .background(move || if prefer_gpu.get() { "#0369A1" } else { "#334155" })
-                    .foreground("#FFFFFF")
-                    .content(move || {
-                        if prefer_gpu.get() {
-                            "Backend: GPU Compute (wgpu)"
-                        } else {
-                            "Backend: CPU SIMD (NEON/AVX2)"
-                        }
-                    })
+                    .padding((8.0, 4.0, 8.0, 4.0))
+                    .border_brush(move || if sig.get() { solid(0xFF10B981) } else { None })
+                    .border_thickness(move || if sig.get() { 1.5 } else { 1.0 })
+                    .font_size(11.0)
+                    .content(label)
                     .on_click(move |_| {
-                        let next = !prefer_gpu.get_untracked();
-                        eng_gpu.borrow_mut().prefer_gpu = next;
-                        prefer_gpu.set(next);
-                    }),
-            )
-            .child(text_block().text("GPU Fluid Particles").font_size(10.5).foreground("#94A3B8"))
-            .child(pcount_row)
-            .child(text_block().text("Rigid Solver Profile").font_size(10.5).foreground("#94A3B8"))
-            .child(solver_row),
-    );
+                        let next = !sig.get_untracked();
+                        setter(&mut eng.borrow_mut(), next);
+                        sig.set(next);
+                    })
+            };
+            let debug_card = inspector_card(
+                "Viewport Overlays",
+                wrap_panel()
+                    .item_spacing(5.0)
+                    .line_spacing(5.0)
+                    .child(make_dbg("BVH AABB", show_aabbs, |s, v| s.show_aabbs = v))
+                    .child(make_dbg("Contacts", show_contacts, |s, v| s.show_contacts = v))
+                    .child(make_dbg("Velocities", show_velocities, |s, v| s.show_velocities = v))
+                    .child(make_dbg("Joints", show_joints, |s, v| s.show_joints = v))
+                    .child(make_dbg("HUD Graph", show_hud, |s, v| s.show_hud_graph = v)),
+            );
 
-    let eng_scrub = engine.clone();
-    let timeline_card = studio_card(
-        "TIME-TRAVEL & SPEED",
-        stack_panel()
-            .spacing(5.0)
-            .child(text_block().text(move || format!("History Scrub: {}", telemetry_history.get())).font_size(11.0).foreground("#CBD5E1"))
-            .child(
-                slider()
-                    .minimum(0.0)
-                    .maximum(1.0)
-                    .value(timeline.two_way())
-                    .on_changed(ferroui_controls::primitives::RangeBase::value_property(), move |v| {
-                        if paused.get_untracked() {
-                            eng_scrub.borrow_mut().scrub_history(*v as f32);
+            let inspector = border()
+                .dock_panel_dock(Dock::Right)
+                .width(276.0)
+                .border_brush(solid(0x22808080))
+                .border_thickness((1.0, 0.0, 0.0, 0.0))
+                .padding(12.0)
+                .child(
+                    scroll_viewer().content(
+                        stack_panel()
+                            .spacing(10.0)
+                            .child(hardware_card)
+                            .child(timeline_card)
+                            .child(env_card)
+                            .child(spring_card)
+                            .child(debug_card),
+                    ),
+                );
+
+            let status_bar = border()
+                .dock_panel_dock(Dock::Bottom)
+                .border_brush(solid(0x22808080))
+                .border_thickness((0.0, 1.0, 0.0, 0.0))
+                .padding((16.0, 6.0, 16.0, 6.0))
+                .child(
+                    stack_panel()
+                        .orientation(Orientation::Horizontal)
+                        .spacing(16.0)
+                        .child(text_block().text(move || telemetry_backend.get()).font_size(11.0).font_weight(FontWeight::SemiBold))
+                        .child(text_block().text(move || format!("Step {:.2} ms", telemetry_step_ms.get())).font_size(11.0).opacity(0.85))
+                        .child(text_block().text(move || telemetry_breakdown.get()).font_size(11.0).opacity(0.72))
+                        .child(text_block().text(move || telemetry_entities.get()).font_size(11.0).opacity(0.8)),
+                );
+
+            let eng_vp = engine.clone();
+            let tick_cb: Rc<dyn Fn(&SandboxEngine)> = Rc::new(move |sim: &SandboxEngine| {
+                if telemetry_backend.is_alive() {
+                    telemetry_backend.set_if_changed(sim.telemetry.backend_label.clone());
+                    telemetry_step_ms.set(sim.telemetry.step_ms);
+                    telemetry_breakdown.set_if_changed(sim.telemetry.breakdown.clone());
+                    telemetry_entities.set_if_changed(sim.telemetry.entity_summary.clone());
+                    if sim.telemetry.history_len > 0 {
+                        telemetry_history.set_if_changed(format!(
+                            "Frame {}/{}",
+                            sim.telemetry.history_frame + 1,
+                            sim.telemetry.history_len
+                        ));
+                        if !sim.paused {
+                            timeline.set_if_changed(sim.history.normalized_cursor() as f64);
                         }
-                    }),
-            )
-            .child(text_block().text(move || format!("Time Scale: {:.2}x", time_scale.get())).font_size(11.0).foreground("#CBD5E1"))
-            .child(slider().minimum(0.05).maximum(2.0).value(time_scale.two_way())),
-    );
-
-    let env_card = studio_card(
-        "WORLD ENVIRONMENT",
-        stack_panel()
-            .spacing(5.0)
-            .child(text_block().text(move || format!("Gravity: {:.1} m/s²", gravity.get())).font_size(11.0).foreground("#CBD5E1"))
-            .child(slider().minimum(-15.0).maximum(25.0).value(gravity.two_way()))
-            .child(text_block().text(move || format!("Bounciness: {:.2}", restitution.get())).font_size(11.0).foreground("#CBD5E1"))
-            .child(slider().minimum(0.0).maximum(0.98).value(restitution.two_way()))
-            .child(text_block().text(move || format!("Wind / Gust: {:.1} m/s²", wind_x.get())).font_size(11.0).foreground("#CBD5E1"))
-            .child(slider().minimum(-12.0).maximum(12.0).value(wind_x.two_way())),
-    );
-
-    let mut preset_row1 = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    let mut preset_row2 = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
-    for (idx, preset) in SpringPreset::ALL.iter().copied().enumerate() {
-        let eng = engine.clone();
-        let btn = button()
-            .padding((8.0, 4.0, 8.0, 4.0))
-            .corner_radius(5.0)
-            .background(move || if active_preset.get() == preset { "#7C3AED" } else { "#1E293B" })
-            .foreground("#F1F5F9")
-            .content(preset.label())
-            .on_click(move |_| {
-                eng.borrow_mut().set_spring_preset(preset);
-                active_preset.set(preset);
+                    }
+                }
             });
-        if idx < 3 {
-            preset_row1 = preset_row1.child(btn);
-        } else {
-            preset_row2 = preset_row2.child(btn);
+
+            let viewport_frame = border().clip_to_bounds(true).child(
+                El::<PhysicsViewport>::new()
+                    .with(move |control| {
+                        control.bind_engine(eng_vp.clone(), tick_cb.clone());
+                    })
+                    .into_element(),
+            );
+
+            dock_panel()
+                .clip_to_bounds(true)
+                .child(scene_header)
+                .child(status_bar)
+                .child(inspector)
+                .child(viewport_frame)
+                .into()
         }
-    }
-    let spring_card = studio_card(
-        "UI SPRING PRESET",
-        stack_panel().spacing(5.0).child(preset_row1).child(preset_row2),
-    );
-
-    let eng_aabb = engine.clone();
-    let eng_contacts = engine.clone();
-    let eng_vel = engine.clone();
-    let eng_joints = engine.clone();
-    let eng_hud = engine.clone();
-
-    let debug_card = studio_card(
-        "VIEWPORT OVERLAYS",
-        stack_panel()
-            .spacing(5.0)
-            .child(
-                stack_panel()
-                    .orientation(Orientation::Horizontal)
-                    .spacing(4.0)
-                    .child(
-                        button()
-                            .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(5.0)
-                            .background(move || if show_aabbs.get() { "#0284C7" } else { "#1E293B" })
-                            .foreground("#F1F5F9")
-                            .content("BVH AABB")
-                            .on_click(move |_| {
-                                let v = !show_aabbs.get_untracked();
-                                eng_aabb.borrow_mut().show_aabbs = v;
-                                show_aabbs.set(v);
-                            }),
-                    )
-                    .child(
-                        button()
-                            .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(5.0)
-                            .background(move || if show_contacts.get() { "#DB2777" } else { "#1E293B" })
-                            .foreground("#F1F5F9")
-                            .content("Contacts")
-                            .on_click(move |_| {
-                                let v = !show_contacts.get_untracked();
-                                eng_contacts.borrow_mut().show_contacts = v;
-                                show_contacts.set(v);
-                            }),
-                    )
-                    .child(
-                        button()
-                            .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(5.0)
-                            .background(move || if show_velocities.get() { "#0891B2" } else { "#1E293B" })
-                            .foreground("#F1F5F9")
-                            .content("Vel")
-                            .on_click(move |_| {
-                                let v = !show_velocities.get_untracked();
-                                eng_vel.borrow_mut().show_velocities = v;
-                                show_velocities.set(v);
-                            }),
-                    ),
-            )
-            .child(
-                stack_panel()
-                    .orientation(Orientation::Horizontal)
-                    .spacing(4.0)
-                    .child(
-                        button()
-                            .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(5.0)
-                            .background(move || if show_joints.get() { "#CA8A04" } else { "#1E293B" })
-                            .foreground("#F1F5F9")
-                            .content("Joints")
-                            .on_click(move |_| {
-                                let v = !show_joints.get_untracked();
-                                eng_joints.borrow_mut().show_joints = v;
-                                show_joints.set(v);
-                            }),
-                    )
-                    .child(
-                        button()
-                            .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(5.0)
-                            .background(move || if show_hud.get() { "#059669" } else { "#1E293B" })
-                            .foreground("#F1F5F9")
-                            .content("HUD Graph")
-                            .on_click(move |_| {
-                                let v = !show_hud.get_untracked();
-                                eng_hud.borrow_mut().show_hud_graph = v;
-                                show_hud.set(v);
-                            }),
-                    ),
-            ),
-    );
-
-    let inspector = border()
-        .dock_panel_dock(Dock::Right)
-        .width(308.0)
-        .background("#0D1321")
-        .border_brush("#1E293B")
-        .border_thickness((1.0, 0.0, 0.0, 0.0))
-        .clip_to_bounds(true)
-        .is_visible(move || view_mode.get() == StudioViewMode::Canvas)
-        .child(
-            scroll_viewer().child(
-                stack_panel()
-                    .margin(10.0)
-                    .spacing(9.0)
-                    .child(compute_card)
-                    .child(timeline_card)
-                    .child(env_card)
-                    .child(spring_card)
-                    .child(debug_card),
-            ),
-        );
+    };
 
     // -------------------------------------------------------------------------
-    // 4. Bottom Precision Telemetry Bar
+    // Root ControlCatalog-style WinUI 3 NavigationView Shell
     // -------------------------------------------------------------------------
-    let status_bar = border()
-        .dock_panel_dock(Dock::Bottom)
-        .background("#080C14")
-        .border_brush("#1E293B")
-        .border_thickness((0.0, 1.0, 0.0, 0.0))
-        .padding((12.0, 6.0, 12.0, 6.0))
+    let nav_entries_setup = nav_entries.clone();
+    let nav_entries_sel = nav_entries.clone();
+    let syncing_sel = syncing_nav.clone();
+    let nav_to_sel = navigate_to.clone();
+    let nav_to_home = navigate_to.clone();
+
+    let pane_header = border()
+        .padding((8.0, 6.0, 8.0, 6.0))
         .child(
             stack_panel()
                 .orientation(Orientation::Horizontal)
-                .spacing(16.0)
-                .child(text_block().text(move || telemetry_backend.get()).font_size(11.0).foreground("#38BDF8"))
-                .child(text_block().text(move || format!("Step {:.2} ms", telemetry_step_ms.get())).font_size(11.0).foreground("#34D399"))
-                .child(text_block().text(move || telemetry_breakdown.get()).font_size(11.0).foreground("#94A3B8"))
-                .child(text_block().text(move || telemetry_entities.get()).font_size(11.0).foreground("#CBD5E1"))
-                .child(text_block().text(move || active_scene.get().hint()).font_size(11.0).foreground("#64748B")),
+                .spacing(10.0)
+                .vertical_alignment(VerticalAlignment::Center)
+                .child(
+                    border()
+                        .width(28.0)
+                        .height(28.0)
+                        .corner_radius(7.0)
+                        .background(solid(0xFF0078D4))
+                        .child(
+                            border()
+                                .horizontal_alignment(HorizontalAlignment::Center)
+                                .vertical_alignment(VerticalAlignment::Center)
+                                .child(icon_view(Icons::LIGHTNING, 16.0)),
+                        ),
+                )
+                .child(
+                    stack_panel()
+                        .spacing(0.0)
+                        .child(text_block().text("FerroUI Physics").font_size(13.5).font_weight(FontWeight::SemiBold))
+                        .child(
+                            text_block()
+                                .text(if gpu_available { "Metal GPU · WGSL Shaders" } else { "CPU SIMD · Shaders" })
+                                .font_size(10.0)
+                                .opacity(0.68),
+                        ),
+                ),
         );
 
-    // -------------------------------------------------------------------------
-    // 5. Center Hardware-Rendered Studio Viewport
-    // -------------------------------------------------------------------------
-    let eng_vp = engine.clone();
-    let tick_cb: Rc<dyn Fn(&SandboxEngine)> = Rc::new(move |sim: &SandboxEngine| {
-        if telemetry_backend.is_alive() {
-            telemetry_backend.set_if_changed(sim.telemetry.backend_label.clone());
-            telemetry_step_ms.set(sim.telemetry.step_ms);
-            telemetry_breakdown.set_if_changed(sim.telemetry.breakdown.clone());
-            telemetry_entities.set_if_changed(sim.telemetry.entity_summary.clone());
-            if sim.telemetry.history_len > 0 {
-                telemetry_history.set_if_changed(format!(
-                    "Frame {}/{}",
-                    sim.telemetry.history_frame + 1,
-                    sim.telemetry.history_len
-                ));
-                if !sim.paused {
-                    timeline.set_if_changed(sim.history.normalized_cursor() as f64);
-                }
-            }
-        }
-    });
+    let pane_footer = border()
+        .padding((8.0, 6.0, 8.0, 8.0))
+        .child(
+            button()
+                .horizontal_alignment(HorizontalAlignment::Stretch)
+                .padding((10.0, 6.0, 10.0, 6.0))
+                .content(dynamic(move || {
+                    if is_dark_theme.get() {
+                        icon_label(Icons::THEME, "Switch to Light Theme", 14.0)
+                    } else {
+                        icon_label(Icons::THEME, "Switch to Dark Theme", 14.0)
+                    }
+                }))
+                .on_click(move |_| {
+                    let next_dark = !is_dark_theme.get_untracked();
+                    is_dark_theme.set(next_dark);
+                    if let Some(app) = Application::current() {
+                        app.set_requested_theme_variant(Some(if next_dark {
+                            ThemeVariant::dark()
+                        } else {
+                            ThemeVariant::light()
+                        }));
+                    }
+                }),
+        );
 
-    let center_stage = border().clip_to_bounds(true).child(dynamic(move || match view_mode.get() {
-        StudioViewMode::LiveUiTree => live_ui_tree::live_ui_tree_showcase(),
-        StudioViewMode::CompositorShaders => compositor_showcase::compositor_shader_showcase(),
-        StudioViewMode::NodeGraph => node_graph_studio::node_graph_physics_studio(),
-        StudioViewMode::Canvas => {
-            let eng_vp = eng_vp.clone();
-            let tick_cb = tick_cb.clone();
-            El::<PhysicsViewport>::new()
-                .with(move |control| {
-                    control.bind_engine(eng_vp.clone(), tick_cb.clone());
-                })
-                .into_element()
-        }
+    let page_content = border().clip_to_bounds(true).child(dynamic(move || match active_page.get() {
+        StudioPage::Home => build_home_page(gpu_available, nav_to_home.clone()),
+        StudioPage::CompositorShaders => compositor_showcase::compositor_shader_showcase(),
+        StudioPage::LiveUiTree => live_ui_tree::live_ui_tree_showcase(),
+        StudioPage::NodeGraph => node_graph_studio::node_graph_physics_studio(),
+        StudioPage::Scene(_) => build_sandbox_page(),
     }));
 
-    dock_panel()
-        .background("#090D16")
-        .child(header)
-        .child(status_bar)
-        .child(left_rail)
-        .child(inspector)
-        .child(center_stage)
+    navigation_view()
+        .node_ref(nav_ref)
+        .pane_display_mode(NavigationViewPaneDisplayMode::Auto)
+        .compact_mode_threshold_width(680.0)
+        .expanded_mode_threshold_width(980.0)
+        .open_pane_length(248.0)
+        .is_settings_visible(false)
+        .is_back_button_visible(NavigationViewBackButtonVisible::Collapsed)
+        .always_show_header(false)
+        .pane_header(pane_header)
+        .pane_footer(pane_footer)
+        .content(page_content)
+        .with(move |nav: &Ref<NavigationView>| {
+            let mut entries = nav_entries_setup.borrow_mut();
+            let add_header = |title: &str| {
+                let hdr = NavigationViewItemHeader::new();
+                hdr.set_content(Some(Rc::new(title.to_string()) as BoxedValue));
+                nav.menu_items().add(Some(Control::boxed(&hdr)));
+            };
+            let mut add_item = |page: StudioPage| -> Ref<NavigationViewItem> {
+                let item = NavigationViewItem::new();
+                item.set_content(Some(Rc::new(page.title().to_string()) as BoxedValue));
+                if let Some(ic) = nav_icon(page.icon()) {
+                    item.set_icon(Some(ic));
+                }
+                nav.menu_items().add(Some(Control::boxed(&item)));
+                entries.push((page, item.clone()));
+                item
+            };
+
+            let home_item = add_item(StudioPage::Home);
+
+            add_header("Compositor & UI");
+            let comp_item = add_item(StudioPage::CompositorShaders);
+            let ui_item = add_item(StudioPage::LiveUiTree);
+
+            add_header("Parametric Graph");
+            let ng_item = add_item(StudioPage::NodeGraph);
+
+            add_header("2D Physics Sandbox");
+            let mut first_scene_item = None;
+            for kind in SceneKind::ALL {
+                let it = add_item(StudioPage::Scene(kind));
+                if first_scene_item.is_none() {
+                    first_scene_item = Some(it);
+                }
+            }
+            drop(entries);
+
+            let initial_item = match initial_page {
+                StudioPage::CompositorShaders => &comp_item,
+                StudioPage::LiveUiTree => &ui_item,
+                StudioPage::NodeGraph => &ng_item,
+                StudioPage::Scene(_) => first_scene_item.as_ref().unwrap_or(&home_item),
+                StudioPage::Home => &home_item,
+            };
+            syncing_sel.set(true);
+            nav.set_selected_item(Some(Control::boxed(initial_item)));
+            syncing_sel.set(false);
+
+            let entries_cb = nav_entries_sel.clone();
+            let syncing_cb = syncing_sel.clone();
+            let nav_to = nav_to_sel.clone();
+            nav.selection_changed(move |args| {
+                if syncing_cb.get() {
+                    return;
+                }
+                if let Some(container) = args
+                    .selected_item_container()
+                    .and_then(|c| c.cast::<NavigationViewItem>())
+                {
+                    let found = entries_cb
+                        .borrow()
+                        .iter()
+                        .find(|(_, item)| *item == container)
+                        .map(|(page, _)| *page);
+                    if let Some(page) = found {
+                        nav_to(page);
+                    }
+                }
+            })
+            .detach();
+        })
         .into()
 }
 
@@ -647,7 +928,6 @@ mod tests {
             .collect();
         assert_eq!(initial_radii.len(), 5, "expected 5 orbital bodies");
 
-        // Simulate 5 full seconds (300 frames) and verify every planet holds a stable orbit
         for _ in 0..300 {
             engine.step(1.0 / 60.0);
         }
