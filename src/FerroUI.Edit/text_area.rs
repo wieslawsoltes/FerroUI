@@ -241,15 +241,22 @@ ferro_class!(TextArea: Control);
 ferroui_base::ferro_class_info!(TextArea { new: TextArea::new });
 ferro_impl_classes!(TextArea: StyledElementImpl, InteractiveImpl);
 
-impl ControlImpl for TextArea {
-    fn automation_target(this: &Self) -> Ref<Control> {
-        this.editor().map_or_else(|| this.to_ref().upcast(), Ref::upcast)
-    }
+impl ControlImpl for TextArea {}
+
+/// The editor's resolver of automation targets
+/// ([`ControlAutomationPeer::register_automation_target`]): the text area and its
+/// layer planes take the focus and the hits of the editor, so they stand for the
+/// editor that hosts them (or for the text area when it has no editor).
+fn automation_target(control: &Ref<Control>) -> Option<Ref<Control>> {
+    let area = control.clone().cast::<TextArea>().or_else(|| layers::layer_plane_view(control))?;
+    Some(area.editor().map_or_else(|| area.upcast(), Ref::upcast))
 }
 
 impl FerroObjectImpl for TextArea {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
+        // Once per process; later calls are refused and change nothing.
+        let _ = ferroui_controls::automation::peers::ControlAutomationPeer::register_automation_target(automation_target);
         this.im_client
             .set(EditorTextInputMethodClient::new(this.to_ref().downgrade()))
             .ok();

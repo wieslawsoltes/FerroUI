@@ -100,7 +100,12 @@ ferro_properties! {impl SearchPanel{
 impl SearchPanel {
     pub fn construct() -> Self {
         Self {
-            base: Popup::construct(),
+            base: {
+                // Anchored inside the scrolled text area: follow it when layout moves it.
+                let base = Popup::construct();
+                base.set_follows_placement_target_layout(true);
+                base
+            },
             editor: RefCell::new(None),
             query: OnceCell::new(),
             replacement: OnceCell::new(),
