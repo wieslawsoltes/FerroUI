@@ -960,9 +960,10 @@ impl TextLineImpl {
         height += line_spacing;
         let minimum = self.paragraph_properties.minimum_line_height();
         let padding = if minimum > height && minimum.is_finite() {
-            // Rounded to what the line keeps, so that the box and the runs agree.
-            let padding = f64::from(((minimum - height) / 2.0) as f32);
-            height += 2.0 * padding;
+            // The box is exactly the minimum; the line keeps the padding as an `f32`, which
+            // places a run aligned to an edge within a ten-millionth of a pixel of it.
+            let padding = (minimum - height) / 2.0;
+            height = minimum;
             baseline += padding;
             padding
         } else {
