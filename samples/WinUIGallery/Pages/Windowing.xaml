@@ -1,0 +1,69 @@
+<!-- Ported from the two pinned Windowing examples of WinUI Gallery (14061eea) and the handlers of
+     WindowingPage.xaml.cs (app_window_samples.rs); see ../NOTICE.md. A top-level Window is
+     FerroUI's Window: ExtendsContentIntoTitleBar is ExtendClientAreaToDecorationsHint, the
+     SystemBackdrop a MicaBackdrop, AppWindow.ResizeClient (physical pixels) the client size over
+     the scaling of the gallery's window, and MinWidth, MinHeight, MaxWidth, MaxHeight, Width and
+     Height are the window's own, in device-independent pixels. WindowHelper's tracking of the
+     windows is the sample's list of open windows. A platform with a single view (the browser, iOS,
+     Android) opens no windows: the page says so. The IsExperimental badge of the second example is
+     its heading. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Margin="0,16,0,0" Spacing="24">
+  <TextBlock Margin="0,0,0,8" TextWrapping="Wrap"
+             Text="Create top-level XAML windows and configure their client-area size. Each example opens a separate window." />
+
+  <StackPanel x:Name="WindowingExample1" Spacing="12">
+    <TextBlock Text="Create a top-level Window" FontSize="18" />
+    <TextBlock TextWrapping="Wrap"
+               Text="This stable example uses AppWindow.ResizeClient to request a 500 by 500 physical-pixel client area." />
+    <Button x:Name="CreateWindowButton" AutomationProperties.AutomationId="WindowingCreateWindow"
+            AutomationProperties.Name="Create a top-level window" Content="Create new Window" />
+  </StackPanel>
+
+  <StackPanel x:Name="WindowingExample2" Spacing="12">
+    <TextBlock Text="Window client size and constraints (experimental)" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="12" VerticalAlignment="Top">
+        <TextBlock TextWrapping="Wrap"
+                   Text="Configure the initial, minimum, and maximum client-area dimensions in device-independent pixels (DIPs). The initial size must be within the minimum and maximum limits." />
+        <InfoBar x:Name="SizeValidationInfoBar" IsClosable="True" IsOpen="False" Severity="Error"
+                 Title="Check the window dimensions" />
+        <Button x:Name="OpenConfiguredWindowButton" AutomationProperties.AutomationId="WindowingOpenConfiguredWindow"
+                AutomationProperties.Name="Open a window with the configured client size and constraints"
+                Content="Open configured window" />
+      </StackPanel>
+      <Grid Grid.Column="1" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+        <NumberBox x:Name="ClientWidthInput" AutomationProperties.AutomationId="WindowingClientWidth"
+                   AutomationProperties.Name="Client width in DIPs" HorizontalAlignment="Stretch" Header="Width"
+                   Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="640" />
+        <NumberBox x:Name="ClientHeightInput" Grid.Column="1" AutomationProperties.AutomationId="WindowingClientHeight"
+                   AutomationProperties.Name="Client height in DIPs" HorizontalAlignment="Stretch" Header="Height"
+                   Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="480" />
+        <NumberBox x:Name="MinimumWidthInput" Grid.Row="1" AutomationProperties.AutomationId="WindowingMinimumWidth"
+                   AutomationProperties.Name="Minimum client width in DIPs" HorizontalAlignment="Stretch"
+                   Header="MinWidth" Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="320" />
+        <NumberBox x:Name="MinimumHeightInput" Grid.Row="1" Grid.Column="1"
+                   AutomationProperties.AutomationId="WindowingMinimumHeight"
+                   AutomationProperties.Name="Minimum client height in DIPs" HorizontalAlignment="Stretch"
+                   Header="MinHeight" Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="240" />
+        <NumberBox x:Name="MaximumWidthInput" Grid.Row="2" AutomationProperties.AutomationId="WindowingMaximumWidth"
+                   AutomationProperties.Name="Maximum client width in DIPs" HorizontalAlignment="Stretch"
+                   Header="MaxWidth" Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="960" />
+        <NumberBox x:Name="MaximumHeightInput" Grid.Row="2" Grid.Column="1"
+                   AutomationProperties.AutomationId="WindowingMaximumHeight"
+                   AutomationProperties.Name="Maximum client height in DIPs" HorizontalAlignment="Stretch"
+                   Header="MaxHeight" Maximum="10000" Minimum="1" SmallChange="10" SpinButtonPlacementMode="Compact"
+                   ValidationMode="InvalidInputOverwritten" Value="720" />
+      </Grid>
+    </Grid>
+  </StackPanel>
+
+  <TextBlock x:Name="WindowSampleError" IsVisible="False" TextWrapping="Wrap"
+             AutomationProperties.LiveSetting="Polite"
+             Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+</StackPanel>

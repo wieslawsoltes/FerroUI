@@ -1,0 +1,14 @@
+<!-- Ported from AppWindowTitleBarWindow.xaml of the pinned WinUI Gallery (14061eea,
+     SampleSupport/SamplePages); see ../NOTICE.md. The content of the colour sample window. FerroUI
+     has no colours of a system title bar: the window extends its content into the title bar, and
+     its title bar is the TitleBar control, whose Background and Foreground are the source's title
+     bar colours (set by app_window_samples.rs for the active and the inactive window). The window
+     (its Mica backdrop and presenter settings) is in Rust. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      RowDefinitions="Auto,*">
+  <TitleBar x:Name="titleBar" Title="AppWindowTitleBarWindow" />
+  <TextBlock Grid.Row="1" Text="This is a sample window to demonstrate AppWindowTitleBar color customization."
+             HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Margin="20"
+             FontSize="16" />
+</Grid>

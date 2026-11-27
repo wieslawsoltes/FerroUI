@@ -41,6 +41,7 @@ pub mod playback_samples;
 #[path = "../media_desktop.rs"]
 mod desktop_media;
 pub mod navigation;
+mod app_window_samples;
 mod color_samples;
 mod color_sections;
 mod navigation_view_samples;
@@ -106,6 +107,8 @@ mod materials_samples_tests;
 
 #[cfg(test)]
 mod window_samples_tests;
+#[cfg(all(test, feature = "theme"))]
+mod app_window_samples_tests;
 
 #[cfg(test)]
 mod text_samples_tests;

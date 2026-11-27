@@ -1,0 +1,148 @@
+<!-- Ported from the seven pinned AppWindow examples of WinUI Gallery (14061eea) and the handlers of
+     AppWindowPage.xaml.cs (app_window_samples.rs); see ../NOTICE.md. The AppWindow of a window is
+     FerroUI's Window: Title, Width and Height (Resize), Position (Move), Hide and Show, Topmost
+     (IsAlwaysOnTop), CanMaximize, CanMinimize, CanResize, WindowDecorations (SetBorderAndTitleBar),
+     WindowState (Maximize, Minimize, Restore, the full screen presenter), MinWidth to MaxHeight (the
+     preferred minimum and maximum sizes), ShowDialog with an owner (the modal window) and the
+     working area of the window's screen (DisplayArea). The sizes of AppWindow are physical pixels:
+     the windows take them over the scaling of the gallery's window. The compact overlay presenter
+     is a topmost window without minimize and maximize, sized to the share of the working area of
+     its InitialSize. The sample windows are the source's (SampleSupport/SamplePages), their content
+     in Pages/AppWindow*Window*.xaml. A platform with a single view (the browser, iOS, Android) opens
+     no windows: the page says so. ToggleSwitch's Header is its Content, ComboBox's Header a text;
+     SubtitleHeadingTextBlockStyle is the theme's SubtitleTextBlockStyle with heading level 2. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <TextBlock Margin="0,16,0,0" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             AutomationProperties.HeadingLevel="2" Text="General usage of AppWindow" />
+
+  <StackPanel x:Name="AppWindowExample1" Spacing="8">
+    <TextBlock Text="Create and customize a window" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel VerticalAlignment="Top">
+        <Button x:Name="ShowSampleWindow1" Content="Show window" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <TextBlock FontWeight="SemiBold" Text="Window title" />
+        <TextBox x:Name="WindowTitle" HorizontalAlignment="Stretch" PlaceholderText="Enter window title"
+                 Text="This is a title" AutomationProperties.Name="Window title" />
+        <TextBlock FontWeight="SemiBold" Text="Window size" />
+        <Grid ColumnDefinitions="Auto,Auto">
+          <NumberBox x:Name="WindowWidth" Margin="0,0,8,0" Header="Width" LargeChange="100"
+                     Maximum="1000" Minimum="200" SmallChange="10" SpinButtonPlacementMode="Inline"
+                     Value="800" AutomationProperties.Name="Width" />
+          <NumberBox x:Name="WindowHeight" Grid.Column="1" Header="Height" LargeChange="100"
+                     Maximum="700" Minimum="200" SmallChange="10" SpinButtonPlacementMode="Inline"
+                     Value="500" AutomationProperties.Name="Height" />
+        </Grid>
+        <TextBlock FontWeight="SemiBold" Text="Window postion" />
+        <Grid ColumnDefinitions="Auto,Auto">
+          <NumberBox x:Name="XPoint" Margin="0,0,8,0" Header="X" LargeChange="100" Maximum="800"
+                     Minimum="0" SmallChange="10" SpinButtonPlacementMode="Inline" Value="50"
+                     AutomationProperties.Name="X" />
+          <NumberBox x:Name="YPoint" Grid.Column="1" Header="Y" LargeChange="100" Maximum="300"
+                     Minimum="0" SmallChange="10" SpinButtonPlacementMode="Inline" Value="50"
+                     AutomationProperties.Name="Y" />
+        </Grid>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowExample2" Spacing="8">
+    <TextBlock Text="Center a window in the available screen area" FontSize="18" />
+    <Button x:Name="ShowSampleWindow2" Content="Show centered sample window" />
+  </StackPanel>
+
+  <TextBlock Margin="0,8,0,0" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             AutomationProperties.HeadingLevel="2" Text="AppWindow Presenters" />
+
+  <StackPanel x:Name="AppWindowExample3" Spacing="8">
+    <TextBlock Text="OverlappedPresenter" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <TextBlock TextWrapping="Wrap"
+                   Text="OverlappedPresenter is the default presenter for AppWindow, providing a standard resizable window with system buttons. It is used for typical app windows and can be customized to control resizing and button visibility." />
+        <InfoBar Title="Warning" IsClosable="False" IsOpen="True" Severity="Warning">
+          <RichTextBlock Margin="0,0,16,16" IsTextSelectionEnabled="False" TextWrapping="Wrap">
+            <Paragraph><Run Text="For an " /><Run FontWeight="SemiBold" Text="AppWindow" /><Run Text=" with " /><Run FontWeight="SemiBold" Text="OverlappedPresenter" /><Run Text=", if the title bar (" /><Run FontWeight="SemiBold" Text="HasTitleBar = true" /><Run Text=") is enabled, the window must have a border (" /><Run FontWeight="SemiBold" Text="HasBorder = true" /><Run Text="). Setting " /><Run FontWeight="SemiBold" Text="HasBorder" /><Run Text=" to " /><Run FontWeight="SemiBold" Text="false" /><Run Text=" while " /><Run FontWeight="SemiBold" Text="HasTitleBar" /><Run Text=" is " /><Run FontWeight="SemiBold" Text="true" /><Run Text=" will result in a fatal error." /></Paragraph>
+          </RichTextBlock>
+        </InfoBar>
+        <Button x:Name="ShowSampleWindow3" Content="Show window" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <ToggleSwitch x:Name="IsAlwaysOnTop" Content="IsAlwaysOnTop" IsChecked="False" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Keeps the window above all other windows when enabled." />
+        <ToggleSwitch x:Name="IsMaximizable" Content="IsMaximizable" IsChecked="True" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Controls the visibility and enable state of the maximize button." />
+        <ToggleSwitch x:Name="IsMinimizable" Content="IsMinimizable" IsChecked="True" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Controls the visibility and enable state of the minimize button." />
+        <ToggleSwitch x:Name="IsResizable" Content="IsResizable" IsChecked="True" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Allows resizing the window by dragging its edges." />
+        <ToggleSwitch x:Name="HasBorder" Content="HasBorder" IsChecked="True" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Determines if the window has a visible outer border." />
+        <ToggleSwitch x:Name="HasTitleBar" Content="HasTitleBar" IsChecked="True" OffContent="false"
+                      OnContent="true" ToolTip.Tip="Specifies whether the window includes a system title bar." />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowExample4" Spacing="8">
+    <TextBlock Text="Minimum and maximum size" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <TextBlock TextWrapping="Wrap"
+                   Text="The minimum and maximum width and height can be set on an AppWindow. When setting the maximum width or height, it's recommended to disable the window maximization." />
+        <Button x:Name="ShowSampleWindow4" Content="Show window" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <NumberBox x:Name="MinWidthBox" Header="PreferredMinimumWidth" Value="400"
+                   AutomationProperties.Name="PreferredMinimumWidth" />
+        <NumberBox x:Name="MinHeightBox" Header="PreferredMinimumHeight" Value="400"
+                   AutomationProperties.Name="PreferredMinimumHeight" />
+        <NumberBox x:Name="MaxWidthBox" Header="PreferredMaximumWidth" Value="1000"
+                   AutomationProperties.Name="PreferredMaximumWidth" />
+        <NumberBox x:Name="MaxHeightBox" Header="PreferredMaximumHeight" Value="1000"
+                   AutomationProperties.Name="PreferredMaximumHeight" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowExample5" Spacing="8">
+    <TextBlock Text="Modal window" FontSize="18" />
+    <TextBlock TextWrapping="Wrap"
+               Text="A modal window is a separate window that blocks interaction with its owner window until it is closed, often used for critical actions like confirmations, authentication, or settings. Unlike a ContentDialog, which is a lightweight pop-up within the same window, a modal window is a fully independent window, making it suitable for multi-window applications or scenarios requiring more flexibility in layout and behavior." />
+    <Button x:Name="ShowSampleWindow5" Margin="0,8,0,0" Content="Show modal window" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowExample6" Spacing="8">
+    <TextBlock Text="FullScreenPresenter" FontSize="18" />
+    <TextBlock TextWrapping="Wrap"
+               Text="The FullScreenPresenter makes an AppWindow cover the entire screen, removing the title bar and system UI to create an immersive experience. To ensure usability, an exit mechanism, such as handling the Escape key or close button, should be included, and fullscreen mode should be used in scenarios like media playback or focused tasks." />
+    <Button x:Name="ShowSampleWindow6" Content="Show window (Fullscreen mode)" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowExample7" Spacing="8">
+    <TextBlock Text="CompactOverlayPresenter" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel Spacing="8" VerticalAlignment="Top">
+        <TextBlock TextWrapping="Wrap"
+                   Text="CompactOverlayPresenter (Picture-in-Picture mode) keeps an AppWindow always on top while using minimal screen space. To ensure a good user experience, the window should have a small yet functional size (e.g., for media players or floating tools)." />
+        <Button x:Name="ShowSampleWindow7" Content="Show window (Picture-in-Picture mode)" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <TextBlock Text="InitialSize" />
+        <ComboBox x:Name="InitialSize" Width="150" SelectedIndex="0" AutomationProperties.Name="InitialSize">
+          <ComboBoxItem Content="Small" />
+          <ComboBoxItem Content="Medium" />
+          <ComboBoxItem Content="Large" />
+        </ComboBox>
+        <TextBlock x:Name="InitialSizeDescription" Width="250" TextWrapping="Wrap"
+                   Text="Small: Window size is approximately 5% of the display's work area." />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <TextBlock x:Name="WindowSampleError" IsVisible="False" TextWrapping="Wrap"
+             AutomationProperties.LiveSetting="Polite"
+             Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+</StackPanel>

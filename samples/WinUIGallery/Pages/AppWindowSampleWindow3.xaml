@@ -1,0 +1,20 @@
+<!-- Ported from SampleWindow3.xaml and SampleWindow4.xaml of the pinned WinUI Gallery (14061eea,
+     SampleSupport/SamplePages); see ../NOTICE.md. The content of the two presenter sample windows:
+     SampleWindow4 has no maximize button, which its window hides (app_window_samples.rs). The
+     windows (their Mica backdrop and presenter settings) and the handlers are in Rust.
+     ThemeResource is DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+  <Button x:Name="MaximizeRestoreBtn" Width="200" Content="Maximize" />
+  <Button x:Name="MinimizeBtn" Width="200" Content="Minimize" />
+  <Button x:Name="RestoreBtn" Width="200">
+    <TextBlock Text="Minimize and restore the window after 3 seconds" TextWrapping="Wrap" TextAlignment="Center" />
+  </Button>
+  <Button x:Name="CloseBtn" AutomationProperties.Name="Close" Width="200" Margin="0,16,0,0">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <SymbolIcon Symbol="Cancel" Margin="0,0,4,0" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+      <TextBlock Text="Close" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+    </StackPanel>
+  </Button>
+</StackPanel>

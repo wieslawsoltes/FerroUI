@@ -1,0 +1,15 @@
+<!-- Ported from ModalWindow.xaml of the pinned WinUI Gallery (14061eea, SampleSupport/SamplePages);
+     see ../NOTICE.md. The content of the modal sample window; the window (its Mica backdrop, owner
+     and dialog presenter) and the handlers are in Rust (app_window_samples.rs). ThemeResource is
+     DynamicResource and AccentButtonStyle the theme's. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+  <TextBlock Text="Modal Window" Theme="{DynamicResource TitleTextBlockStyle}" TextAlignment="Center" />
+  <TextBlock Text="This is a modal window created using AppWindow with OverlappedPresenter."
+             Theme="{DynamicResource BodyTextBlockStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+    <Button x:Name="OKButton" Content="OK" Width="80" Theme="{DynamicResource AccentButtonStyle}" />
+    <Button x:Name="CancelButton" Content="Cancel" Width="80" />
+  </StackPanel>
+</StackPanel>

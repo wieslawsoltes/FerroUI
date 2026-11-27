@@ -1,0 +1,16 @@
+<!-- Ported from SampleWindow6.xaml of the pinned WinUI Gallery (14061eea, SampleSupport/SamplePages);
+     see ../NOTICE.md. The content of the full screen sample window; the window (its Mica backdrop
+     and the full screen state) and the handler are in Rust (app_window_samples.rs). ThemeResource
+     is DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+  <TextBlock Text="This window is running in Fullscreen mode" Theme="{DynamicResource TitleTextBlockStyle}"
+             TextAlignment="Center" />
+  <Button x:Name="Close" AutomationProperties.Name="Close" Width="200" HorizontalAlignment="Center">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <SymbolIcon Symbol="Cancel" Margin="0,0,4,0" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+      <TextBlock Text="Close" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+    </StackPanel>
+  </Button>
+</StackPanel>

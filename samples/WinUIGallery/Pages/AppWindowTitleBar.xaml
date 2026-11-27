@@ -1,0 +1,224 @@
+<!-- Ported from the three pinned AppWindowTitleBar examples of WinUI Gallery (14061eea) and the
+     handlers of AppWindowTitleBarPage.xaml.cs (app_window_samples.rs); see ../NOTICE.md. The sample
+     windows are the source's AppWindowTitleBarWindow, AppWindowTitleBarExtendWindow and
+     AppWindowTitleBarThemeWindow (SampleSupport/SamplePages): topmost windows that cannot be
+     resized (the overlapped presenter's IsAlwaysOnTop and IsResizable). FerroUI has no colours of a
+     system title bar: the colour window extends its content into the title bar and its title bar
+     is FerroUI's TitleBar control (Pages/AppWindowTitleBarWindow.xaml), with BackgroundColor and
+     ForegroundColor while the window is active and InactiveBackgroundColor and
+     InactiveForegroundColor while it is not; the caption buttons are the platform's or the
+     window's drawn decorations, which take their colours from the theme, so the eight Button*
+     colours have no window to apply to (recorded in the page notes). ExtendsContentIntoTitleBar is
+     ExtendClientAreaToDecorationsHint and TitleBarHeightOption the title bar height hint
+     (Standard: the platform's, Tall: 48, Collapsed: 0). PreferredTheme is the window's theme
+     (Legacy: light; UseDefaultAppMode: the application's), which its title bar follows. Each
+     ColorSelector is its composition (a SplitButton with the colour whose flyout is a ColorView);
+     the Hyperlink to the TitleBar page is a HyperlinkButton that the gallery wires
+     (examples::GALLERY_LINKS); AppBarSeparator is CommandBarSeparator; ComboBox's Header is a
+     text. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+  </StackPanel.Styles>
+  <WrapPanel Margin="0,8,0,0">
+    <TextBlock VerticalAlignment="Center" Text="For the default title bar and basic scenarios, use the " />
+    <HyperlinkButton x:Name="TitleBarPageLink" Padding="0" Content="TitleBar" />
+    <TextBlock VerticalAlignment="Center" Text=" control." />
+  </WrapPanel>
+
+  <StackPanel x:Name="AppWindowTitleBarExample1" Spacing="8">
+    <TextBlock Text="Title bar colors" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel VerticalAlignment="Top">
+        <Button x:Name="ShowWindowButton" Content="Show window" />
+      </StackPanel>
+      <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="16">
+        <!-- Normal & Hover states -->
+        <StackPanel Spacing="8">
+          <TextBlock Text="BackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="Background" Margin="0,2,0,8" AutomationProperties.Name="BackgroundColor">
+            <Border x:Name="BackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFF2F6FA" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="BackgroundPicker" Color="#FFF2F6FA" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="Foreground" Margin="0,2,0,8" AutomationProperties.Name="ForegroundColor">
+            <Border x:Name="ForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF1E2933" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ForegroundPicker" Color="#FF1E2933" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonBackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonBackground" Margin="0,2,0,8" AutomationProperties.Name="ButtonBackgroundColor">
+            <Border x:Name="ButtonBackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF3B82F6" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonBackgroundPicker" Color="#FF3B82F6" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonForeground" Margin="0,2,0,8" AutomationProperties.Name="ButtonForegroundColor">
+            <Border x:Name="ButtonForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFFFFFFF" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonForegroundPicker" Color="#FFFFFFFF" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonHoverBackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonHoverBackground" Margin="0,2,0,8" AutomationProperties.Name="ButtonHoverBackgroundColor">
+            <Border x:Name="ButtonHoverBackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF2563EB" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonHoverBackgroundPicker" Color="#FF2563EB" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonHoverForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonHoverForeground" Margin="0,2,0,8" AutomationProperties.Name="ButtonHoverForegroundColor">
+            <Border x:Name="ButtonHoverForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFFFFFFF" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonHoverForegroundPicker" Color="#FFFFFFFF" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+        </StackPanel>
+        <!-- Separator -->
+        <CommandBarSeparator Grid.Column="1" />
+        <!-- Inactive & Pressed states -->
+        <StackPanel Grid.Column="2" Spacing="8">
+          <TextBlock Text="InactiveBackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="InactiveBackground" Margin="0,2,0,8" AutomationProperties.Name="InactiveBackgroundColor">
+            <Border x:Name="InactiveBackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFE5EAF0" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="InactiveBackgroundPicker" Color="#FFE5EAF0" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="InactiveForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="InactiveForeground" Margin="0,2,0,8" AutomationProperties.Name="InactiveForegroundColor">
+            <Border x:Name="InactiveForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF6B7280" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="InactiveForegroundPicker" Color="#FF6B7280" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonInactiveBackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonInactiveBackground" Margin="0,2,0,8" AutomationProperties.Name="ButtonInactiveBackgroundColor">
+            <Border x:Name="ButtonInactiveBackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFCBD5E1" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonInactiveBackgroundPicker" Color="#FFCBD5E1" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonInactiveForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonInactiveForeground" Margin="0,2,0,8" AutomationProperties.Name="ButtonInactiveForegroundColor">
+            <Border x:Name="ButtonInactiveForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF475569" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonInactiveForegroundPicker" Color="#FF475569" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonPressedBackgroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonPressedBackground" Margin="0,2,0,8" AutomationProperties.Name="ButtonPressedBackgroundColor">
+            <Border x:Name="ButtonPressedBackgroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FF1D4ED8" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonPressedBackgroundPicker" Color="#FF1D4ED8" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBlock Text="ButtonPressedForegroundColor" />
+          <!-- The gallery's ColorSelector: a SplitButton with the colour, its flyout the colour picker. -->
+          <SplitButton x:Name="ButtonPressedForeground" Margin="0,2,0,8" AutomationProperties.Name="ButtonPressedForegroundColor">
+            <Border x:Name="ButtonPressedForegroundPreview" Width="64" Height="32" Margin="-11,-6" CornerRadius="4,0,0,4"
+                    Background="#FFFFFFFF" />
+            <SplitButton.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorView x:Name="ButtonPressedForegroundPicker" Color="#FFFFFFFF" ColorSpectrumShape="Ring" IsAlphaEnabled="False"
+                           IsHexInputVisible="False" IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+        </StackPanel>
+      </Grid>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowTitleBarExample2" Spacing="8">
+    <TextBlock Text="Extending content into the title bar area" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel VerticalAlignment="Top">
+        <Button x:Name="ShowExtendButton" Content="Show window" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <CheckBox x:Name="ExtendContentCheckBox" Margin="0,0,0,12" Content="Extend content into title bar"
+                  IsChecked="True" />
+        <TextBlock Text="TitleBarHeightOption" />
+        <ComboBox x:Name="HeightComboBox" Width="200" AutomationProperties.Name="TitleBarHeightOption" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="AppWindowTitleBarExample3" Spacing="8">
+    <TextBlock Text="Title bar theme" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <StackPanel VerticalAlignment="Top">
+        <Button x:Name="ShowThemeHeightButton" Content="Show window" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <TextBlock Text="TitleBarTheme" />
+        <ComboBox x:Name="ThemeComboBox" Width="200" AutomationProperties.Name="TitleBarTheme" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <TextBlock x:Name="WindowSampleError" IsVisible="False" TextWrapping="Wrap"
+             AutomationProperties.LiveSetting="Polite"
+             Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+</StackPanel>
