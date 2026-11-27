@@ -655,8 +655,8 @@ impl<T: Clone + 'static> EffectiveValue<T> {
                 if self.state.base_priority.get() != BindingPriority::LocalValue {
                     return true;
                 }
-                let old = uncommon.uncoerced_base_value.borrow().clone();
-                !(operations.equals)(&old, requested)
+                // Compared in place: a comparison does not write the input it reads.
+                !(operations.equals)(&uncommon.uncoerced_base_value.borrow(), requested)
             });
 
         if priority <= self.state.priority.get() {
