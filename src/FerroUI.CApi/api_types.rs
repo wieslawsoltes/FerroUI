@@ -2686,134 +2686,140 @@ pub extern "C" fn ferro_type_user_control_automation_peer() -> i64 {
     entry_static::<::ferroui_controls::automation::peers::UserControlAutomationPeer>(493, units!())
 }
 
-/// Registers `Viewbox` (with its default constructor) and returns its type ID, 494.
+/// Registers `VariableSizedWrapGrid` (with its default constructor) and returns its type ID, 494.
+#[no_mangle]
+pub extern "C" fn ferro_type_variable_sized_wrap_grid() -> i64 {
+    entry::<::ferroui_controls::VariableSizedWrapGrid>(494, units!())
+}
+
+/// Registers `Viewbox` (with its default constructor) and returns its type ID, 495.
 #[no_mangle]
 pub extern "C" fn ferro_type_viewbox() -> i64 {
-    entry::<::ferroui_controls::Viewbox>(494, units!())
+    entry::<::ferroui_controls::Viewbox>(495, units!())
 }
 
-/// Registers `VirtualizingCarouselPanel` (with its default constructor) and returns its type ID, 496.
+/// Registers `VirtualizingCarouselPanel` (with its default constructor) and returns its type ID, 497.
 #[no_mangle]
 pub extern "C" fn ferro_type_virtualizing_carousel_panel() -> i64 {
-    entry::<::ferroui_controls::VirtualizingCarouselPanel>(496, units!())
+    entry::<::ferroui_controls::VirtualizingCarouselPanel>(497, units!())
 }
 
-/// Registers `VirtualizingPanel` (without a constructor) and returns its type ID, 497.
+/// Registers `VirtualizingPanel` (without a constructor) and returns its type ID, 498.
 #[no_mangle]
 pub extern "C" fn ferro_type_virtualizing_panel() -> i64 {
-    entry_static::<::ferroui_controls::VirtualizingPanel>(497, units!())
+    entry_static::<::ferroui_controls::VirtualizingPanel>(498, units!())
 }
 
-/// Registers `VirtualizingStackPanel` (with its default constructor) and returns its type ID, 498.
+/// Registers `VirtualizingStackPanel` (with its default constructor) and returns its type ID, 499.
 #[no_mangle]
 pub extern "C" fn ferro_type_virtualizing_stack_panel() -> i64 {
-    entry::<::ferroui_controls::VirtualizingStackPanel>(498, units!())
+    entry::<::ferroui_controls::VirtualizingStackPanel>(499, units!())
 }
 
-/// Registers `Visual` (with its default constructor) and returns its type ID, 500.
+/// Registers `Visual` (with its default constructor) and returns its type ID, 501.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual() -> i64 {
-    entry::<::ferroui_base::Visual>(500, units!())
+    entry::<::ferroui_base::Visual>(501, units!())
 }
 
-/// Registers `VisualBrush` (with its default constructor) and returns its type ID, 501.
+/// Registers `VisualBrush` (with its default constructor) and returns its type ID, 502.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_brush() -> i64 {
-    entry::<::ferroui_base::media::VisualBrush>(501, units!())
+    entry::<::ferroui_base::media::VisualBrush>(502, units!())
 }
 
-/// Registers `VisualLayerManager` (with its default constructor) and returns its type ID, 502.
+/// Registers `VisualLayerManager` (with its default constructor) and returns its type ID, 503.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_layer_manager() -> i64 {
-    entry::<::ferroui_controls::primitives::VisualLayerManager>(502, units!())
+    entry::<::ferroui_controls::primitives::VisualLayerManager>(503, units!())
 }
 
-/// Registers `VisualState` (with its default constructor) and returns its type ID, 503.
+/// Registers `VisualState` (with its default constructor) and returns its type ID, 504.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_state() -> i64 {
-    entry::<::ferroui_controls::VisualState>(503, units!())
+    entry::<::ferroui_controls::VisualState>(504, units!())
 }
 
-/// Registers `VisualStateGroup` (with its default constructor) and returns its type ID, 504.
+/// Registers `VisualStateGroup` (with its default constructor) and returns its type ID, 505.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_state_group() -> i64 {
-    entry::<::ferroui_controls::VisualStateGroup>(504, units!())
+    entry::<::ferroui_controls::VisualStateGroup>(505, units!())
 }
 
-/// Registers `VisualStateManager` (with its default constructor) and returns its type ID, 505.
+/// Registers `VisualStateManager` (with its default constructor) and returns its type ID, 506.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_state_manager() -> i64 {
-    entry::<::ferroui_controls::VisualStateManager>(505, units!())
+    entry::<::ferroui_controls::VisualStateManager>(506, units!())
 }
 
-/// Registers `VisualTransition` (with its default constructor) and returns its type ID, 506.
+/// Registers `VisualTransition` (with its default constructor) and returns its type ID, 507.
 #[no_mangle]
 pub extern "C" fn ferro_type_visual_transition() -> i64 {
-    entry::<::ferroui_controls::VisualTransition>(506, units!())
+    entry::<::ferroui_controls::VisualTransition>(507, units!())
 }
 
-/// Registers `Window` (with its default constructor) and returns its type ID, 507.
+/// Registers `Window` (with its default constructor) and returns its type ID, 508.
 #[no_mangle]
 pub extern "C" fn ferro_type_window() -> i64 {
-    entry::<::ferroui_controls::Window>(507, units!())
+    entry::<::ferroui_controls::Window>(508, units!())
 }
 
-/// Registers `WindowAutomationPeer` (without a constructor) and returns its type ID, 508.
+/// Registers `WindowAutomationPeer` (without a constructor) and returns its type ID, 509.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_automation_peer() -> i64 {
-    entry_static::<::ferroui_controls::automation::peers::WindowAutomationPeer>(508, units!())
+    entry_static::<::ferroui_controls::automation::peers::WindowAutomationPeer>(509, units!())
 }
 
-/// Registers `WindowBase` (without a constructor) and returns its type ID, 509.
+/// Registers `WindowBase` (without a constructor) and returns its type ID, 510.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_base() -> i64 {
-    entry_static::<::ferroui_controls::WindowBase>(509, units!())
+    entry_static::<::ferroui_controls::WindowBase>(510, units!())
 }
 
-/// Registers `WindowBaseAutomationPeer` (without a constructor) and returns its type ID, 510.
+/// Registers `WindowBaseAutomationPeer` (without a constructor) and returns its type ID, 511.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_base_automation_peer() -> i64 {
-    entry_static::<::ferroui_controls::automation::peers::WindowBaseAutomationPeer>(510, units!())
+    entry_static::<::ferroui_controls::automation::peers::WindowBaseAutomationPeer>(511, units!())
 }
 
-/// Registers `WindowDrawnDecorations` (with its default constructor) and returns its type ID, 511.
+/// Registers `WindowDrawnDecorations` (with its default constructor) and returns its type ID, 512.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_drawn_decorations() -> i64 {
-    entry::<::ferroui_controls::chrome::WindowDrawnDecorations>(511, units!())
+    entry::<::ferroui_controls::chrome::WindowDrawnDecorations>(512, units!())
 }
 
-/// Registers `WindowDrawnDecorationsContent` (with its default constructor) and returns its type ID, 512.
+/// Registers `WindowDrawnDecorationsContent` (with its default constructor) and returns its type ID, 513.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_drawn_decorations_content() -> i64 {
-    entry::<::ferroui_controls::chrome::WindowDrawnDecorationsContent>(512, units!())
+    entry::<::ferroui_controls::chrome::WindowDrawnDecorationsContent>(513, units!())
 }
 
-/// Registers `WindowNotificationManager` (with its default constructor) and returns its type ID, 513.
+/// Registers `WindowNotificationManager` (with its default constructor) and returns its type ID, 514.
 #[no_mangle]
 pub extern "C" fn ferro_type_window_notification_manager() -> i64 {
-    entry::<::ferroui_controls::WindowNotificationManager>(513, units!(THEME_UNIT_35, THEME_UNIT_65))
+    entry::<::ferroui_controls::WindowNotificationManager>(514, units!(THEME_UNIT_35, THEME_UNIT_65))
 }
 
-/// Registers `WrapPanel` (with its default constructor) and returns its type ID, 514.
+/// Registers `WrapPanel` (with its default constructor) and returns its type ID, 515.
 #[no_mangle]
 pub extern "C" fn ferro_type_wrap_panel() -> i64 {
-    entry::<::ferroui_controls::WrapPanel>(514, units!())
+    entry::<::ferroui_controls::WrapPanel>(515, units!())
 }
 
-/// Registers `XamlAmbientLight` (with its default constructor) and returns its type ID, 515.
+/// Registers `XamlAmbientLight` (with its default constructor) and returns its type ID, 516.
 #[no_mangle]
 pub extern "C" fn ferro_type_xaml_ambient_light() -> i64 {
-    entry::<::ferroui_controls::media::XamlAmbientLight>(515, units!())
+    entry::<::ferroui_controls::media::XamlAmbientLight>(516, units!())
 }
 
-/// Registers `XamlCompositionBrushBase` (without a constructor) and returns its type ID, 516.
+/// Registers `XamlCompositionBrushBase` (without a constructor) and returns its type ID, 517.
 #[no_mangle]
 pub extern "C" fn ferro_type_xaml_composition_brush_base() -> i64 {
-    entry_static::<::ferroui_base::media::XamlCompositionBrushBase>(516, units!())
+    entry_static::<::ferroui_base::media::XamlCompositionBrushBase>(517, units!())
 }
 
-/// Registers `XamlLight` (without a constructor) and returns its type ID, 517.
+/// Registers `XamlLight` (without a constructor) and returns its type ID, 518.
 #[no_mangle]
 pub extern "C" fn ferro_type_xaml_light() -> i64 {
-    entry_static::<::ferroui_base::media::XamlLight>(517, units!())
+    entry_static::<::ferroui_base::media::XamlLight>(518, units!())
 }

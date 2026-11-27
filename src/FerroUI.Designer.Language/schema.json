@@ -29863,6 +29863,88 @@
     ]
   },
   {
+    "name": "VariableSizedWrapGrid",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::VariableSizedWrapGrid",
+    "base": "Panel",
+    "constructible": true,
+    "properties": {
+      "ItemHeight": {
+        "name": "ItemHeight",
+        "type_name": "f64",
+        "documentation": "VariableSizedWrapGrid.ItemHeight: f64",
+        "values": [],
+        "attached": false
+      },
+      "ItemWidth": {
+        "name": "ItemWidth",
+        "type_name": "f64",
+        "documentation": "VariableSizedWrapGrid.ItemWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "Orientation": {
+        "name": "Orientation",
+        "type_name": "Orientation",
+        "documentation": "VariableSizedWrapGrid.Orientation: Orientation",
+        "values": [
+          "Horizontal",
+          "Vertical"
+        ],
+        "attached": false
+      },
+      "HorizontalChildrenAlignment": {
+        "name": "HorizontalChildrenAlignment",
+        "type_name": "HorizontalAlignment",
+        "documentation": "VariableSizedWrapGrid.HorizontalChildrenAlignment: HorizontalAlignment",
+        "values": [
+          "Stretch",
+          "Left",
+          "Center",
+          "Right"
+        ],
+        "attached": false
+      },
+      "VerticalChildrenAlignment": {
+        "name": "VerticalChildrenAlignment",
+        "type_name": "VerticalAlignment",
+        "documentation": "VariableSizedWrapGrid.VerticalChildrenAlignment: VerticalAlignment",
+        "values": [
+          "Stretch",
+          "Top",
+          "Center",
+          "Bottom"
+        ],
+        "attached": false
+      },
+      "MaximumRowsOrColumns": {
+        "name": "MaximumRowsOrColumns",
+        "type_name": "i32",
+        "documentation": "VariableSizedWrapGrid.MaximumRowsOrColumns: i32",
+        "values": [],
+        "attached": false
+      },
+      "RowSpan": {
+        "name": "RowSpan",
+        "type_name": "i32",
+        "documentation": "VariableSizedWrapGrid.RowSpan: i32",
+        "values": [],
+        "attached": true
+      },
+      "ColumnSpan": {
+        "name": "ColumnSpan",
+        "type_name": "i32",
+        "documentation": "VariableSizedWrapGrid.ColumnSpan: i32",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "VectorTransition",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::VectorTransition",
