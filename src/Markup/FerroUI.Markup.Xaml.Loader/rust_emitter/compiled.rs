@@ -383,7 +383,15 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
     source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
     source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
-    source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {\n");
+    // A request may spell the URI of a document with characters a URI escapes escaped: those
+    // documents take the comparison that unescapes, which no other application links.
+    let compare = match exported.iter().any(|(name, ..)| {
+        uri_needs_unescaping(&format!("{root_uri}{name}"))
+    }) {
+        true => "uri_equals_escaped",
+        false => "uri_equals",
+    };
+    source.push_str(&format!("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::{compare}(uri, ROOT_URI, document)) else {{\n"));
     source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
     source.push_str("    };\n");
     source.push_str("    let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
@@ -1132,7 +1140,11 @@ fn loader_table(
     // The class has an entry when it has a constructor the table can call.
     for index in constructor.iter().map(|_| 0).chain(loadable.iter().copied()) {
         let uri = documents[index].2.clone().unwrap_or_default();
-        source.push_str(&format!("    if rt::uri_equals(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
+        let compare = match uri_needs_unescaping(&uri) {
+            true => "uri_equals_escaped",
+            false => "uri_equals",
+        };
+        source.push_str(&format!("    if rt::{compare}(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
         let value = match (index, constructor) {
             (0, Some(Constructor::Parameterless(function))) => format!("::{class_path}::{function}()"),
             (0, Some(Constructor::ServiceProvider(function))) => {
@@ -1236,4 +1248,11 @@ mod tests {
         let names: Vec<&str> = group.iter().map(|(name, _, _)| name.as_str()).collect();
         assert_eq!(names, ["Theme.xaml", "A&B.xaml", "Keyed.xaml"]);
     }
+}
+
+/// Whether the URI of a document may be requested escaped: it has a character that a URI escapes, or
+/// an escape (as `rt::uri_needs_unescaping`, which the emitter does not link). Such a document is
+/// compared with a request by `rt::uri_equals_escaped`, any other by `rt::uri_equals`.
+fn uri_needs_unescaping(uri: &str) -> bool {
+    uri.chars().any(|c| !c.is_ascii() || c.is_ascii_control() || " %\"<>`{}#?^|\\".contains(c))
 }
