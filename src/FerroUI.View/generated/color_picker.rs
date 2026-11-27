@@ -116,6 +116,8 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorPrev
 /// The properties and routed events of [`ColorSlider`](ferroui_controls_color_picker::primitives::ColorSlider).
 pub trait ColorSliderProps: ElementBuilder {
     /// Sets [`ColorSlider::color_property`](ferroui_controls_color_picker::primitives::ColorSlider::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::color_property(), value)
     }
@@ -155,6 +157,8 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorSlid
 /// The properties and routed events of [`ColorSpectrum`](ferroui_controls_color_picker::primitives::ColorSpectrum).
 pub trait ColorSpectrumProps: ElementBuilder {
     /// Sets [`ColorSpectrum::color_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::color_property(), value)
     }
@@ -209,6 +213,8 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorSpec
 /// The properties and routed events of [`ColorView`](ferroui_controls_color_picker::ColorView).
 pub trait ColorViewProps: ElementBuilder {
     /// Sets [`ColorView::color_property`](ferroui_controls_color_picker::ColorView::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::color_property(), value)
     }
