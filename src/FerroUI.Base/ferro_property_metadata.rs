@@ -35,11 +35,16 @@ pub(crate) fn register_explicit_table<T: 'static>(table: &'static ExplicitFns<T>
     }
 }
 
+/// The address of the registered table of the type `id` (one function for every value type).
+#[inline(never)]
+fn explicit_table_address(id: TypeId) -> Option<usize> {
+    let tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
+    tables.iter().find(|(known, _)| *known == id).map(|(_, address)| *address)
+}
+
 /// The table of the typed operations of explicit coercion of `T`, if registered.
 fn explicit_table<T: 'static>() -> Option<&'static ExplicitFns<T>> {
-    let id = TypeId::of::<ExplicitFns<T>>();
-    let tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
-    let address = tables.iter().find(|(known, _)| *known == id)?.1;
+    let address = explicit_table_address(TypeId::of::<ExplicitFns<T>>())?;
     // SAFETY: the address of the constant table `ExplicitFns::<T>::get`, registered with the
     // type of the table checked above; valid for the whole program.
     Some(unsafe { &*(address as *const ExplicitFns<T>) })
