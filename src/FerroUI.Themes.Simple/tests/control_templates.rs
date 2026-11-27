@@ -221,6 +221,8 @@ control_tests! {
     notification_card => "NotificationCard";
     numeric_up_down => "NumericUpDown";
     path_icon => "PathIcon";
+    font_icon => "FontIcon";
+    symbol_icon => "SymbolIcon";
     pips_pager => "PipsPager";
     progress_bar => "ProgressBar";
     radio_button => "RadioButton";
@@ -504,4 +506,34 @@ fn managed_file_chooser_opens_quick_links_and_double_pressed_entries() {
 
     window.close();
     let _ = std::fs::remove_dir_all(&root);
+}
+
+/// #1290: the icons draw their glyph on this theme, through the part of their template.
+#[test]
+fn font_and_symbol_icons_show_their_glyph() {
+    use ferroui_controls::{FontIcon, StackPanel, Symbol, SymbolIcon, TextBlock};
+    let _app = start_themed_application();
+    let font = FontIcon::new();
+    font.set_glyph("\u{E710}");
+    let symbol = SymbolIcon::with_symbol(Symbol::Accept);
+    let panel = StackPanel::new();
+    panel.children().add(font.clone().upcast::<Control>());
+    panel.children().add(symbol.clone().upcast::<Control>());
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(panel)));
+    window.show();
+    window.update_layout();
+    let text_of = |control: &Control| {
+        control
+            .get_visual_descendants()
+            .find_map(|visual| visual.cast::<TextBlock>())
+            .expect("the template has its text block")
+    };
+    let font_text = text_of(&font);
+    assert_eq!(font_text.text().as_deref(), Some("\u{E710}"));
+    assert!(font_text.font_family().to_string().contains("Segoe Fluent Icons"));
+    assert_eq!(font.font_size(), 20.0);
+    let symbol_text = text_of(&symbol);
+    assert_eq!(symbol_text.text(), Some(Symbol::Accept.glyph().to_string()));
+    assert!(symbol_text.font_family().to_string().contains("Segoe Fluent Icons"));
 }
