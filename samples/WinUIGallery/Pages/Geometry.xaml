@@ -1,9 +1,8 @@
 <!-- Ported from the pinned Geometry example of WinUI Gallery (14061eea) and the code behind of
      GeometryPage.xaml.cs (shape_samples.rs); see ../NOTICE.md. The header image is the source's
      Geometry.dark.png or Geometry.light.png of the page's theme, set by shape_samples.rs (the
-     ThemeDictionaries of HeaderImage). FerroUI has no TeachingTip: each tip is the Flyout of its
-     button, with the tip's title and subtitle, which the button's click opens and closes as
-     ShowGeometryButtonClick toggles IsOpen. The gallery's CopyButton is a Button with its glyph;
+     ThemeDictionaries of HeaderImage). Each tip is the TeachingTip of ferroui-controls-teaching-tip,
+     whose target and IsOpen toggle the code behind wires as ShowGeometryButtonClick does. The gallery's CopyButton is a Button with its glyph;
      the copied text is announced in a polite live region for its feedback; ThemeResource becomes
      DynamicResource, the corner radii are their values (OverlayCornerRadius 8,
      ControlCornerRadius 4), CaptionTextBlockStyle is 12, and the cards of DesignRowCardStyle and
@@ -12,6 +11,9 @@
      SelectableTextBlocks. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.TeachingTip/Themes/WinUI/WinUI.xaml" />
+  </StackPanel.Styles>
   <StackPanel.Styles>
     <Style Selector="Border.DesignRowCard">
       <Setter Property="Padding" Value="0,12" />
@@ -38,36 +40,18 @@
         <Button x:Name="ShowGeometryButton1" Canvas.Left="16" Canvas.Top="16" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show Geometry" ToolTip.Tip="8px">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="8px" />
-                <TextBlock Text="OverlayCornerRadius" />
-              </StackPanel>
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowGeometryInfoTooltip1" Title="8px" Subtitle="OverlayCornerRadius" />
         <Button x:Name="ShowGeometryButton2" Canvas.Left="16" Canvas.Top="148" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show Geometry" ToolTip.Tip="Body">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <TextBlock FontWeight="SemiBold" Text="0px" />
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowGeometryInfoTooltip2" Title="0px" />
         <Button x:Name="ShowGeometryButton3" Canvas.Left="240" Canvas.Top="168" Padding="4" ZIndex="1"
                 AutomationProperties.Name="Show geometry" ToolTip.Tip="4px">
           <FontIcon FontSize="16" Glyph="&#xE946;" />
-          <Button.Flyout>
-            <Flyout>
-              <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="4px" />
-                <TextBlock Text="ControlCornerRadius" />
-              </StackPanel>
-            </Flyout>
-          </Button.Flyout>
         </Button>
+        <TeachingTip x:Name="ShowGeometryInfoTooltip3" Title="4px" Subtitle="ControlCornerRadius" />
       </Canvas>
     </ScrollViewer>
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">

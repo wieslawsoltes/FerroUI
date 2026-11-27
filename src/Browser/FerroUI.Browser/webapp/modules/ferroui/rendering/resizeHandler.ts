@@ -4,11 +4,18 @@ type ResizeObserverWithCallbacks = {
 
 export class ResizeHandler {
     private static resizeObserver?: ResizeObserverWithCallbacks;
+    private static resolutionQuery?: MediaQueryList;
+    private static observedDpr?: number;
+
+    private static currentDpr(): number {
+        const dpr = window.devicePixelRatio;
+        return Number.isFinite(dpr) && dpr > 0 ? dpr : 1;
+    }
 
     // A synchronous estimate for construction, before the first observer delivery. Measure the
     // untransformed content box; the observer will refine its device-pixel rounding.
     public static getInitialSize(element: HTMLElement): [number, number, number] {
-        const dpr = window.devicePixelRatio;
+        const dpr = this.currentDpr();
         if (element.getClientRects().length === 0) { return [0, 0, dpr]; }
         const style = getComputedStyle(element);
         let width = parseFloat(style.width);
@@ -30,12 +37,41 @@ export class ResizeHandler {
 
         this.resizeObserver.callbacks.set(element, callback);
         this.resizeObserver.observe(element, { box: "content-box" });
+        if (this.resizeObserver.callbacks.size === 1) {
+            this.watchDpr();
+            window.addEventListener("resize", this.onDprChanged);
+        }
 
         return () => {
+            if (this.resizeObserver?.callbacks.get(element) !== callback) { return; }
             this.resizeObserver?.callbacks.delete(element);
             this.resizeObserver?.unobserve(element);
+            if (this.resizeObserver?.callbacks.size === 0) {
+                this.resolutionQuery?.removeEventListener("change", this.onDprChanged);
+                this.resolutionQuery = undefined;
+                this.observedDpr = undefined;
+                window.removeEventListener("resize", this.onDprChanged);
+            }
         };
     }
+
+    private static watchDpr(): void {
+        this.resolutionQuery?.removeEventListener("change", this.onDprChanged);
+        this.observedDpr = this.currentDpr();
+        this.resolutionQuery = window.matchMedia?.(`(resolution: ${this.observedDpr}dppx)`);
+        this.resolutionQuery?.addEventListener("change", this.onDprChanged);
+    }
+
+    private static readonly onDprChanged = (): void => {
+        if (!this.resizeObserver?.callbacks.size || this.currentDpr() === this.observedDpr) { return; }
+        // A content-box observer need not fire when moving between displays or
+        // changing emulation DPR without changing CSS size. Re-arm the query at
+        // the new ratio and measure current CSS, never a cached device box.
+        this.watchDpr();
+        this.resizeObserver?.callbacks.forEach((resize, element) => {
+            resize(...this.getInitialSize(element as HTMLElement));
+        });
+    };
 
     private static onResize(entries: ResizeObserverEntry[], observer: ResizeObserver) {
         for (const entry of entries) {
@@ -44,32 +80,24 @@ export class ResizeHandler {
                 continue;
             }
 
-            const trueDpr = window.devicePixelRatio;
-            let width;
-            let height;
-            let dpr = trueDpr;
-            if (entry.devicePixelContentBoxSize) {
-                // NOTE: Only this path gives the correct answer
-                // The other paths are imperfect fallbacks
-                // for browsers that don't provide anyway to do this
-                width = entry.devicePixelContentBoxSize[0].inlineSize;
-                height = entry.devicePixelContentBoxSize[0].blockSize;
-                dpr = 1; // it's already in width and height
-            } else if (entry.contentBoxSize) {
-                if (entry.contentBoxSize[0]) {
-                    width = entry.contentBoxSize[0].inlineSize;
-                    height = entry.contentBoxSize[0].blockSize;
-                } else {
-                    width = (entry.contentBoxSize as any).inlineSize;
-                    height = (entry.contentBoxSize as any).blockSize;
-                }
-            } else {
-                width = entry.contentRect.width;
-                height = entry.contentRect.height;
-            }
-            const displayWidth = Math.round(width * dpr);
-            const displayHeight = Math.round(height * dpr);
-            callback(displayWidth, displayHeight, trueDpr);
+            const dpr = ResizeHandler.currentDpr();
+            // contentRect gives physical width/height in untransformed CSS
+            // pixels, including in vertical writing modes and older observers.
+            const width = entry.contentRect.width * dpr;
+            const height = entry.contentRect.height * dpr;
+            const deviceBox = entry.devicePixelContentBoxSize?.[0];
+            // Preserve the browser's precise pixel snapping when it agrees with
+            // the scale sent to the renderer. DevTools emulation and a queued
+            // delivery during a DPR change can expose a box at another ratio.
+            // Edge snapping can differ from CSS * DPR by up to one device pixel.
+            const consistent = deviceBox != null &&
+                deviceBox.inlineSize >= 0 && deviceBox.blockSize >= 0 &&
+                Math.abs(deviceBox.inlineSize - width) <= 1 &&
+                Math.abs(deviceBox.blockSize - height) <= 1;
+            callback(
+                Math.max(0, Math.round(consistent ? deviceBox.inlineSize : width)),
+                Math.max(0, Math.round(consistent ? deviceBox.blockSize : height)),
+                dpr);
         }
     }
 }
