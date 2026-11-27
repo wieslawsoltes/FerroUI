@@ -207,6 +207,16 @@ impl RecordedLeases {
         Self { bounds, pending: RefCell::new(Vec::new()), has_pending: Cell::new(false), used: Cell::new(false) }
     }
 
+    /// Makes the leases of an ended recording those of a new one over the same bounds, keeping the
+    /// storage of the pending pictures.
+    // Only the surface of a pipelined frame layer reuses them (Graphite on Metal).
+    #[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
+    pub(crate) fn reset(&self) {
+        self.pending.borrow_mut().clear();
+        self.has_pending.set(false);
+        self.used.set(false);
+    }
+
     /// Whether the Skia API was leased since the recording began.
     // Only the surface of a pipelined frame layer makes these (Graphite on Metal).
     #[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
@@ -2233,11 +2243,38 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 leases.draw_pending(canvas);
             }
             on_finished(recorder.finish_recording_as_picture(None));
+            recycle_picture_recorder(recorder);
         }
     }
 }
 
-/// 3D scenes: the CPU reference drawn as an image (`scene3d.rs`, #608).
+/// How many ended picture recorders a thread keeps for the next recordings.
+const KEPT_PICTURE_RECORDERS: usize = 2;
+
+ferroui_base::ferro_thread_local! {
+    static PICTURE_RECORDERS: RefCell<Vec<sk::PictureRecorder>> = const { RefCell::new(Vec::new()) };
+}
+
+/// A picture recorder for a new recording: one an ended recording left (`recycle_picture_recorder`),
+/// or a new one. A frame that records its drawing allocates no recorder then.
+// Only the surface of a pipelined frame layer takes them (Graphite on Metal).
+#[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
+pub(crate) fn take_picture_recorder() -> sk::PictureRecorder {
+    PICTURE_RECORDERS.with(|recorders| recorders.borrow_mut().pop()).unwrap_or_else(sk::PictureRecorder::new)
+}
+
+/// Keeps the recorder of an ended recording for a later one, up to [`KEPT_PICTURE_RECORDERS`].
+fn recycle_picture_recorder(recorder: sk::PictureRecorder) {
+    PICTURE_RECORDERS.with(|recorders| {
+        let mut recorders = recorders.borrow_mut();
+        if recorders.len() < KEPT_PICTURE_RECORDERS {
+            recorders.push(recorder);
+        }
+    });
+}
+
+/// 3D scenes: on Graphite drawn by the Metal executor, elsewhere the CPU reference drawn as an image
+/// (`scene3d.rs`, #608).
 #[cfg(feature = "media3d")]
 impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
     fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
@@ -2249,7 +2286,9 @@ impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextIm
         let antialiased = self.render_options.edge_mode != EdgeMode::Aliased;
         let opacity = self.current_opacity;
         let gr_context = self.gr_context.clone();
-        crate::scene3d::draw_scene_3d(self.canvas.get(), gr_context.as_deref(), device, opacity, antialiased, frame)
+        let gpu = self.gpu.clone();
+        let canvas = self.canvas.get();
+        crate::scene3d::draw_scene_3d(canvas, gr_context.as_ref(), gpu.as_ref(), device, opacity, antialiased, frame)
     }
 }
 

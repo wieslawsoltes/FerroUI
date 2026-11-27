@@ -595,10 +595,10 @@
           "name": "Resources/ProgressBar_themeresources.xaml",
           "index": 62,
           "documents": ["Resources/ProgressBar_themeresources.xaml"],
-          "keys": ["ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundColor", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundColor", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight"],
+          "keys": ["ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundBrush", "ProgressBarErrorForegroundColor", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundBrush", "ProgressBarPausedForegroundColor", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight"],
           "type_keys": [],
           "references": ["AccentFillColorDefaultBrush", "ControlStrokeColorDefaultBrush", "ControlStrongStrokeColorDefault", "SystemColorHighlightColor", "SystemColorHotlightColor", "SystemColorWindowColor", "SystemColorWindowTextColor", "SystemFillColorCaution", "SystemFillColorCritical"],
-          "types": ["CornerRadius", "ResourceDictionary", "StaticResource", "Thickness"]
+          "types": ["CornerRadius", "ResourceDictionary", "SolidColorBrush", "StaticResource", "Thickness"]
         },
         {
           "name": "Resources/ProgressRing_themeresources.xaml",
@@ -712,7 +712,7 @@
           "name": "Resources/Glyphs.xaml",
           "index": 75,
           "documents": ["Resources/Glyphs.xaml"],
-          "keys": ["GlyphGeometryE15B", "GlyphGeometryE15D", "GlyphGeometryE198", "GlyphGeometryE1CC", "GlyphGeometryE1CD", "GlyphGeometryE1D8", "GlyphGeometryE1D9", "GlyphGeometryE627", "GlyphGeometryE628", "GlyphGeometryE700", "GlyphGeometryE70D", "GlyphGeometryE70E", "GlyphGeometryE711", "GlyphGeometryE712", "GlyphGeometryE72B", "GlyphGeometryE72C", "GlyphGeometryE73E", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE74A", "GlyphGeometryE76C", "GlyphGeometryE77F", "GlyphGeometryE787", "GlyphGeometryE799", "GlyphGeometryE7A6", "GlyphGeometryE7A7", "GlyphGeometryE7C3", "GlyphGeometryE894", "GlyphGeometryE8B7", "GlyphGeometryE8BB", "GlyphGeometryE8C6", "GlyphGeometryE8C8", "GlyphGeometryE8FB", "GlyphGeometryE915", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "GlyphGeometryE96E", "GlyphGeometryE972", "GlyphGeometryE974", "GlyphGeometryE9AE", "GlyphGeometryEA3B", "GlyphGeometryEC15", "GlyphGeometryEC57", "GlyphGeometryEC8F", "GlyphGeometryED1E", "GlyphGeometryED1F", "GlyphGeometryED3C", "GlyphGeometryED3D", "GlyphGeometryEDA2", "GlyphGeometryEDD9", "GlyphGeometryEDDA", "GlyphGeometryEDDB", "GlyphGeometryEDDC", "GlyphGeometryF136", "GlyphGeometryF13C", "GlyphGeometryF13D", "GlyphGeometryF13E", "GlyphGeometryF13F", "GlyphGeometryF5B0", "GlyphGeometryF78D", "GlyphGeometryF8AC", "GlyphGeometryF8AD", "GlyphGeometryF8AE", "NavigationPageMenuIcon"],
+          "keys": ["GlyphGeometryE15B", "GlyphGeometryE15D", "GlyphGeometryE198", "GlyphGeometryE1CC", "GlyphGeometryE1CD", "GlyphGeometryE1D8", "GlyphGeometryE1D9", "GlyphGeometryE627", "GlyphGeometryE628", "GlyphGeometryE700", "GlyphGeometryE70D", "GlyphGeometryE70E", "GlyphGeometryE710", "GlyphGeometryE711", "GlyphGeometryE712", "GlyphGeometryE72B", "GlyphGeometryE72C", "GlyphGeometryE73E", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE74A", "GlyphGeometryE76C", "GlyphGeometryE77F", "GlyphGeometryE787", "GlyphGeometryE799", "GlyphGeometryE7A6", "GlyphGeometryE7A7", "GlyphGeometryE7C3", "GlyphGeometryE894", "GlyphGeometryE8B7", "GlyphGeometryE8BB", "GlyphGeometryE8C6", "GlyphGeometryE8C8", "GlyphGeometryE8FB", "GlyphGeometryE915", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "GlyphGeometryE96E", "GlyphGeometryE972", "GlyphGeometryE974", "GlyphGeometryE9AE", "GlyphGeometryEA3B", "GlyphGeometryEC15", "GlyphGeometryEC57", "GlyphGeometryEC8F", "GlyphGeometryED1E", "GlyphGeometryED1F", "GlyphGeometryED3C", "GlyphGeometryED3D", "GlyphGeometryEDA2", "GlyphGeometryEDD9", "GlyphGeometryEDDA", "GlyphGeometryEDDB", "GlyphGeometryEDDC", "GlyphGeometryF136", "GlyphGeometryF13C", "GlyphGeometryF13D", "GlyphGeometryF13E", "GlyphGeometryF13F", "GlyphGeometryF5B0", "GlyphGeometryF78D", "GlyphGeometryF8AC", "GlyphGeometryF8AD", "GlyphGeometryF8AE", "NavigationPageMenuIcon"],
           "type_keys": [],
           "references": [],
           "types": ["ResourceDictionary", "StreamGeometry"]
@@ -867,7 +867,7 @@
           "documents": ["Controls/ProgressBar.xaml"],
           "keys": ["DefaultProgressBarStyle", "ProgressBarTextFormatConverter"],
           "type_keys": ["ProgressBar"],
-          "references": ["DefaultProgressBarStyle", "ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarTextFormatConverter", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight", "TextFillColorPrimaryBrush"],
+          "references": ["DefaultProgressBarStyle", "ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundBrush", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundBrush", "ProgressBarTextFormatConverter", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight", "TextFillColorPrimaryBrush"],
           "types": ["Animation", "Binding", "Border", "ControlTemplate", "ControlTheme", "Grid", "KeyFrame", "LayoutTransformControl", "MultiBinding", "ProgressBar", "ResourceDictionary", "Setter", "StringFormatConverter", "Style", "TemplateBinding", "TextBlock"]
         },
         {
@@ -1288,10 +1288,10 @@
           "name": "Controls/NavigationView.xaml",
           "index": 139,
           "documents": ["Controls/NavigationView.xaml"],
-          "keys": ["NavigationViewPaneSearchButtonStyle"],
+          "keys": ["NavigationViewOverflowButtonStyleWhenPaneOnTop", "NavigationViewPaneSearchButtonStyle"],
           "type_keys": ["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"],
-          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "ControlCornerRadius", "DefaultButtonStyle", "FlyoutBorderThemeBrush", "FlyoutBorderThemeThickness", "FlyoutPresenterBackground", "FlyoutThemeMaxHeight", "FlyoutThemeMaxWidth", "FlyoutThemeMinHeight", "FlyoutThemeMinWidth", "ListViewItemDisabledThemeOpacity", "NavigationBackButtonNormalStyle", "NavigationBackButtonSmallStyle", "NavigationBackButtonWidth", "NavigationViewAutoSuggestAreaHeight", "NavigationViewAutoSuggestBoxMargin", "NavigationViewBorderThickness", "NavigationViewButtonHolderGridMargin", "NavigationViewCompactItemContentPresenterMargin", "NavigationViewCompactItemSeparatorMargin", "NavigationViewCompactPaneLength", "NavigationViewContentBackground", "NavigationViewContentGridBorderBrush", "NavigationViewContentGridBorderThickness", "NavigationViewContentGridCornerRadius", "NavigationViewContentMargin", "NavigationViewContentPresenterMargin", "NavigationViewDefaultPaneBackground", "NavigationViewExpandedPaneBackground", "NavigationViewItemBackground", "NavigationViewItemBackgroundDisabled", "NavigationViewItemBackgroundPointerOver", "NavigationViewItemBackgroundPressed", "NavigationViewItemBackgroundSelected", "NavigationViewItemBackgroundSelectedPointerOver", "NavigationViewItemBackgroundSelectedPressed", "NavigationViewItemBorderBrush", "NavigationViewItemBorderBrushDisabled", "NavigationViewItemBorderBrushPointerOver", "NavigationViewItemBorderBrushPressed", "NavigationViewItemBorderThickness", "NavigationViewItemButtonMargin", "NavigationViewItemChildrenMenuFlyoutPadding", "NavigationViewItemContentPresenterMargin", "NavigationViewItemExpandChevronMargin", "NavigationViewItemExpandedGlyph", "NavigationViewItemExpandedGlyphFontSize", "NavigationViewItemForeground", "NavigationViewItemForegroundDisabled", "NavigationViewItemForegroundPointerOver", "NavigationViewItemForegroundPressed", "NavigationViewItemForegroundSelected", "NavigationViewItemForegroundSelectedPointerOver", "NavigationViewItemForegroundSelectedPressed", "NavigationViewItemHeaderForeground", "NavigationViewItemHeaderTextStyle", "NavigationViewItemIconBackground", "NavigationViewItemInnerHeaderMargin", "NavigationViewItemMargin", "NavigationViewItemOnLeftIconBoxHeight", "NavigationViewItemOnLeftIconBoxMargin", "NavigationViewItemOnLeftMinHeight", "NavigationViewItemSeparatorForeground", "NavigationViewItemSeparatorHeight", "NavigationViewItemSeparatorMargin", "NavigationViewMinimalContentGridBorderThickness", "NavigationViewMinimalContentGridCornerRadius", "NavigationViewMinimalContentMargin", "NavigationViewMinimalHeaderMargin", "NavigationViewPaneContentGridMargin", "NavigationViewPaneHeaderRowMinHeight", "NavigationViewPaneSearchButtonStyle", "NavigationViewPaneTitlePresenterMargin", "NavigationViewSelectionIndicatorForeground", "NavigationViewSelectionIndicatorHeight", "NavigationViewSelectionIndicatorRadius", "NavigationViewSelectionIndicatorWidth", "NavigationViewTitleHeaderContentControlTextStyle", "NavigationViewToggleBorderThickness", "NavigationViewTopPaneBackground", "NavigationViewTopPaneHeight", "OverlayCornerRadius", "PaneToggleButtonHeight", "PaneToggleButtonStyle", "PathIconUnscaledTemplate", "RightCornerRadiusFilterConverter", "SymbolThemeFontFamily", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualSecondaryBrush", "TopNavigationViewAutoSuggestBoxMargin", "TopNavigationViewContentGridBorderThickness", "TopNavigationViewContentGridCornerRadius", "TopNavigationViewContentMargin", "TopNavigationViewItemBackgroundPointerOver", "TopNavigationViewItemBackgroundPressed", "TopNavigationViewItemBackgroundSelected", "TopNavigationViewItemBackgroundSelectedPointerOver", "TopNavigationViewItemBackgroundSelectedPressed", "TopNavigationViewItemContentOnlyContentPresenterMargin", "TopNavigationViewItemContentOnlyExpandChevronMargin", "TopNavigationViewItemContentPresenterMargin", "TopNavigationViewItemExpandChevronMargin", "TopNavigationViewItemForegroundDisabled", "TopNavigationViewItemForegroundPointerOver", "TopNavigationViewItemForegroundPressed", "TopNavigationViewItemForegroundSelected", "TopNavigationViewItemForegroundSelectedPointerOver", "TopNavigationViewItemForegroundSelectedPressed", "TopNavigationViewItemIconOnlyExpandChevronMargin", "TopNavigationViewItemInnerHeaderMargin", "TopNavigationViewItemMargin", "TopNavigationViewItemSeparatorForeground", "TopNavigationViewItemSeparatorMargin", "TopNavigationViewItemSeparatorWidth", "TopNavigationViewPaneCustomContentMinWidth", "TopNavigationViewTopNavGridMargin"],
-          "types": ["Border", "Button", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "FocusAdornerTemplate", "Grid", "NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator", "Panel", "Popup", "Rectangle", "ResourceDictionary", "ScrollViewer", "SelectionIndicator", "Setter", "SplitView", "StackPanel", "Style", "TextBlock", "ToolTip", "Viewbox"]
+          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "ControlCornerRadius", "DefaultButtonStyle", "FlyoutBorderThemeBrush", "FlyoutBorderThemeThickness", "FlyoutPresenterBackground", "FlyoutThemeMaxHeight", "FlyoutThemeMaxWidth", "FlyoutThemeMinHeight", "FlyoutThemeMinWidth", "GlyphGeometryE712", "ListViewItemDisabledThemeOpacity", "NavigationBackButtonNormalStyle", "NavigationBackButtonSmallStyle", "NavigationBackButtonWidth", "NavigationViewAutoSuggestAreaHeight", "NavigationViewAutoSuggestBoxMargin", "NavigationViewBorderThickness", "NavigationViewButtonHolderGridMargin", "NavigationViewCompactItemContentPresenterMargin", "NavigationViewCompactItemSeparatorMargin", "NavigationViewCompactPaneLength", "NavigationViewContentBackground", "NavigationViewContentGridBorderBrush", "NavigationViewContentGridBorderThickness", "NavigationViewContentGridCornerRadius", "NavigationViewContentMargin", "NavigationViewContentPresenterMargin", "NavigationViewDefaultPaneBackground", "NavigationViewExpandedPaneBackground", "NavigationViewItemBackground", "NavigationViewItemBackgroundDisabled", "NavigationViewItemBackgroundPointerOver", "NavigationViewItemBackgroundPressed", "NavigationViewItemBackgroundSelected", "NavigationViewItemBackgroundSelectedPointerOver", "NavigationViewItemBackgroundSelectedPressed", "NavigationViewItemBorderBrush", "NavigationViewItemBorderBrushDisabled", "NavigationViewItemBorderBrushPointerOver", "NavigationViewItemBorderBrushPressed", "NavigationViewItemBorderThickness", "NavigationViewItemButtonMargin", "NavigationViewItemChildrenMenuFlyoutPadding", "NavigationViewItemContentPresenterMargin", "NavigationViewItemExpandChevronMargin", "NavigationViewItemExpandedGlyph", "NavigationViewItemExpandedGlyphFontSize", "NavigationViewItemForeground", "NavigationViewItemForegroundDisabled", "NavigationViewItemForegroundPointerOver", "NavigationViewItemForegroundPressed", "NavigationViewItemForegroundSelected", "NavigationViewItemForegroundSelectedPointerOver", "NavigationViewItemForegroundSelectedPressed", "NavigationViewItemHeaderForeground", "NavigationViewItemHeaderTextStyle", "NavigationViewItemIconBackground", "NavigationViewItemInnerHeaderMargin", "NavigationViewItemMargin", "NavigationViewItemOnLeftIconBoxHeight", "NavigationViewItemOnLeftIconBoxMargin", "NavigationViewItemOnLeftMinHeight", "NavigationViewItemSeparatorForeground", "NavigationViewItemSeparatorHeight", "NavigationViewItemSeparatorMargin", "NavigationViewMinimalContentGridBorderThickness", "NavigationViewMinimalContentGridCornerRadius", "NavigationViewMinimalContentMargin", "NavigationViewMinimalHeaderMargin", "NavigationViewOverflowButtonStyleWhenPaneOnTop", "NavigationViewPaneContentGridMargin", "NavigationViewPaneHeaderRowMinHeight", "NavigationViewPaneSearchButtonStyle", "NavigationViewPaneTitlePresenterMargin", "NavigationViewSelectionIndicatorForeground", "NavigationViewSelectionIndicatorHeight", "NavigationViewSelectionIndicatorRadius", "NavigationViewSelectionIndicatorWidth", "NavigationViewTitleHeaderContentControlTextStyle", "NavigationViewToggleBorderThickness", "NavigationViewTopPaneBackground", "NavigationViewTopPaneHeight", "OverlayCornerRadius", "PaneToggleButtonHeight", "PaneToggleButtonStyle", "PathIconUnscaledTemplate", "RightCornerRadiusFilterConverter", "SymbolThemeFontFamily", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualSecondaryBrush", "TopNavigationViewAutoSuggestBoxMargin", "TopNavigationViewContentGridBorderThickness", "TopNavigationViewContentGridCornerRadius", "TopNavigationViewContentMargin", "TopNavigationViewItemBackgroundPointerOver", "TopNavigationViewItemBackgroundPressed", "TopNavigationViewItemBackgroundSelected", "TopNavigationViewItemBackgroundSelectedPointerOver", "TopNavigationViewItemBackgroundSelectedPressed", "TopNavigationViewItemContentOnlyContentPresenterMargin", "TopNavigationViewItemContentOnlyExpandChevronMargin", "TopNavigationViewItemContentPresenterMargin", "TopNavigationViewItemExpandChevronMargin", "TopNavigationViewItemForeground", "TopNavigationViewItemForegroundDisabled", "TopNavigationViewItemForegroundPointerOver", "TopNavigationViewItemForegroundPressed", "TopNavigationViewItemForegroundSelected", "TopNavigationViewItemForegroundSelectedPointerOver", "TopNavigationViewItemForegroundSelectedPressed", "TopNavigationViewItemIconOnlyExpandChevronMargin", "TopNavigationViewItemInnerHeaderMargin", "TopNavigationViewItemMargin", "TopNavigationViewItemOnOverflowContentPresenterMargin", "TopNavigationViewItemOnOverflowExpandChevronMargin", "TopNavigationViewItemOnOverflowExpandChevronPadding", "TopNavigationViewItemOnOverflowNoIconContentPresenterMargin", "TopNavigationViewItemSeparatorForeground", "TopNavigationViewItemSeparatorMargin", "TopNavigationViewItemSeparatorWidth", "TopNavigationViewOverflowButtonHeight", "TopNavigationViewOverflowButtonMargin", "TopNavigationViewOverflowButtonWidth", "TopNavigationViewOverflowMenuPadding", "TopNavigationViewPaneCustomContentMinWidth", "TopNavigationViewTopNavGridMargin"],
+          "types": ["Border", "Button", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "FocusAdornerTemplate", "Grid", "NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator", "Panel", "Path", "Popup", "Rectangle", "ResourceDictionary", "ScrollViewer", "SelectionIndicator", "Setter", "SplitView", "StackPanel", "Style", "TextBlock", "ToolTip", "Viewbox"]
         },
         {
           "name": "Controls/Carousel.xaml",
@@ -1546,8 +1546,17 @@
           "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "ListView", "ListViewItem", "ResourceDictionary", "ScrollViewer", "Setter", "StackPanel"]
         },
         {
-          "name": "Controls/GridView.xaml",
+          "name": "Controls/TabView.xaml",
           "index": 168,
+          "documents": ["Controls/TabView.xaml"],
+          "keys": ["TabViewScrollViewerStyle"],
+          "type_keys": ["TabView", "TabViewItem", "TabViewListView"],
+          "references": ["GlyphGeometryE710", "GlyphGeometryE711", "GlyphGeometryEDD9", "GlyphGeometryEDDA", "OverlayCornerRadius", "TabViewBackground", "TabViewBorderBrush", "TabViewButtonForegroundDisabled", "TabViewButtonStyle", "TabViewCloseButtonStyle", "TabViewHeaderPadding", "TabViewItemAddButtonContainerPadding", "TabViewItemAddButtonFontSize", "TabViewItemBorderBrush", "TabViewItemBorderThickness", "TabViewItemHeaderBackground", "TabViewItemHeaderBackgroundDisabled", "TabViewItemHeaderBackgroundPointerOver", "TabViewItemHeaderBackgroundPressed", "TabViewItemHeaderBackgroundSelected", "TabViewItemHeaderCloseButtonBorderBrushDisabled", "TabViewItemHeaderCloseFontSize", "TabViewItemHeaderCloseMargin", "TabViewItemHeaderDisabledCloseButtonBackground", "TabViewItemHeaderDisabledCloseButtonForeground", "TabViewItemHeaderFontSize", "TabViewItemHeaderForeground", "TabViewItemHeaderForegroundDisabled", "TabViewItemHeaderForegroundPointerOver", "TabViewItemHeaderForegroundPressed", "TabViewItemHeaderForegroundSelected", "TabViewItemHeaderIconMargin", "TabViewItemHeaderIconSize", "TabViewItemHeaderPaddingWithCloseButton", "TabViewItemHeaderPaddingWithoutCloseButton", "TabViewItemHeaderPointerOverCloseButtonBackground", "TabViewItemHeaderPointerOverCloseButtonForeground", "TabViewItemHeaderPressedCloseButtonBackground", "TabViewItemHeaderPressedCloseButtonForeground", "TabViewItemHeaderSelectedCloseButtonBackground", "TabViewItemHeaderSelectedCloseButtonForeground", "TabViewItemIconForeground", "TabViewItemIconForegroundPointerOver", "TabViewItemIconForegroundPressed", "TabViewItemIconForegroundSelected", "TabViewItemLeftScrollButtonContainerPadding", "TabViewItemMinHeight", "TabViewItemRightScrollButtonContainerPadding", "TabViewItemScrollButonFontSize", "TabViewItemSeparator", "TabViewItemSeparatorMargin", "TabViewScrollButtonStyle", "TabViewScrollViewerStyle", "TabViewSelectedItemBorderBrush", "TabViewSelectedItemBorderThickness", "TabViewSelectedItemHeaderMargin", "TopCornerRadiusFilterConverter"],
+          "types": ["Binding", "Border", "Button", "Canvas", "ColumnDefinition", "ContentPresenter", "ControlTemplate", "ControlTheme", "Grid", "ItemsPanelTemplate", "ItemsPresenter", "ItemsStackPanel", "MultiBinding", "Panel", "Path", "RepeatButton", "ResourceDictionary", "ScrollContentPresenter", "ScrollGestureRecognizer", "ScrollViewer", "Setter", "StackPanel", "Style", "TabView", "TabViewItem", "TabViewListView", "Viewbox"]
+        },
+        {
+          "name": "Controls/GridView.xaml",
+          "index": 169,
           "documents": ["Controls/GridView.xaml"],
           "keys": ["DefaultGridViewItemStyle", "DefaultGridViewStyle"],
           "type_keys": ["GridView", "GridViewItem"],
@@ -1556,7 +1565,7 @@
         },
         {
           "name": "Controls/ComboBoxItem.xaml",
-          "index": 169,
+          "index": 170,
           "documents": ["Controls/ComboBoxItem.xaml"],
           "keys": ["ComboBoxItemPill", "DefaultComboBoxItemStyle"],
           "type_keys": ["ComboBoxItem"],
@@ -1565,7 +1574,7 @@
         },
         {
           "name": "Controls/ComboBox.xaml",
-          "index": 170,
+          "index": 171,
           "documents": ["Controls/ComboBox.xaml"],
           "keys": ["ComboBoxTextBoxStyle", "DefaultComboBoxStyle"],
           "type_keys": ["ComboBox"],
@@ -1574,7 +1583,7 @@
         },
         {
           "name": "Controls/TreeViewItem.xaml",
-          "index": 171,
+          "index": 172,
           "documents": ["Controls/TreeViewItem.xaml"],
           "keys": ["MUX_TreeViewItemStyle", "TreeViewItemExpandCollapseChevron", "TreeViewItemIndentationConverter"],
           "type_keys": ["TreeViewItem"],
@@ -1583,7 +1592,7 @@
         },
         {
           "name": "Controls/TreeView.xaml",
-          "index": 172,
+          "index": 173,
           "documents": ["Controls/TreeView.xaml"],
           "keys": ["DefaultTreeViewStyle"],
           "type_keys": ["TreeView"],
@@ -1592,7 +1601,7 @@
         },
         {
           "name": "Controls/AutoCompleteBox.xaml",
-          "index": 173,
+          "index": 174,
           "documents": ["Controls/AutoCompleteBox.xaml"],
           "keys": ["AutoSuggestBoxDeleteButtonStyle", "AutoSuggestBoxTextBoxStyle", "DefaultAutoSuggestBoxStyle"],
           "type_keys": ["AutoCompleteBox"],
@@ -1601,7 +1610,7 @@
         },
         {
           "name": "Controls/AutoSuggestBox.xaml",
-          "index": 174,
+          "index": 175,
           "documents": ["Controls/AutoSuggestBox.xaml"],
           "keys": ["AutoSuggestBoxQueryButtonStyle", "AutoSuggestBoxQuerySymbolIconTemplate"],
           "type_keys": ["AutoSuggestBox"],
@@ -1610,7 +1619,7 @@
         },
         {
           "name": "Controls/RadioButtons.xaml",
-          "index": 175,
+          "index": 176,
           "documents": ["Controls/RadioButtons.xaml"],
           "keys": ["DefaultRadioButtonsStyle"],
           "type_keys": ["RadioButtons"],
@@ -1619,7 +1628,7 @@
         },
         {
           "name": "Controls/RichEditBox.xaml",
-          "index": 176,
+          "index": 177,
           "documents": ["Controls/RichEditBox.xaml"],
           "keys": ["DefaultRichEditBoxStyle", "StringRichEditBoldText", "StringRichEditItalicText", "StringRichEditUnderlineText", "WinUIRichEditBoxContextFlyout"],
           "type_keys": ["RichEditBox"],

@@ -38,6 +38,17 @@ pub enum WrapPanelItemsAlignment {
     StretchAll = 5,
 }
 
+/// Whether the final item of a [`WrapPanel`] fills its line (WinUI `WrapPanelItemsStretch`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum WrapPanelItemsStretch {
+    /// Every item keeps its size.
+    #[default]
+    None = 0,
+    /// The final item takes the rest of its line.
+    Last = 1,
+}
+
 /// Positions child elements in sequential position from left to right,
 /// breaking content to the next line at the edge of the containing box.
 /// Subsequent ordering happens sequentially from top to bottom or from right
@@ -176,6 +187,14 @@ impl LayoutableImpl for WrapPanel {
             }
         }
 
+        // The final item fills its line, so the panel takes the whole line.
+        if this.items_stretch() == WrapPanelItemsStretch::Last
+            && uv_constraint.u != f64::INFINITY
+            && children.last().is_some_and(|child| child.is_visible())
+        {
+            panel_size.u = uv_constraint.u;
+        }
+
         // Stretch needs to measure with the full constraint on the U axis if
         // there are multiple lines
         if line_exists && items_alignment == WrapPanelItemsAlignment::Stretch {
@@ -221,6 +240,8 @@ impl LayoutableImpl for WrapPanel {
             item_spacing,
             final_u: uv_final_size.u,
             items_alignment,
+            stretch_last: this.items_stretch() == WrapPanelItemsStretch::Last
+                && uv_final_size.u != f64::INFINITY,
         };
 
         for (i, child) in children.iter().enumerate() {
@@ -270,6 +291,8 @@ struct LineArrangement<'a> {
     item_spacing: f64,
     final_u: f64,
     items_alignment: WrapPanelItemsAlignment,
+    /// Whether the final item of the panel takes the rest of its line.
+    stretch_last: bool,
 }
 
 impl LineArrangement<'_> {
@@ -330,8 +353,12 @@ impl LineArrangement<'_> {
             }
         }
 
-        for child in &children[start..end_excluded] {
-            let layout_slot_u = self.child_u(child) * stretch_ratio;
+        for (index, child) in children.iter().enumerate().take(end_excluded).skip(start) {
+            let layout_slot_u = if self.stretch_last && index + 1 == children.len() && child.is_visible() {
+                max(self.final_u - u, 0.0)
+            } else {
+                self.child_u(child) * stretch_ratio
+            };
             child.arrange(if self.is_horizontal {
                 Rect::new(u, accumulated_v, layout_slot_u, line_v)
             } else {
@@ -418,6 +445,13 @@ ferroui_base::ferro_properties! { impl WrapPanel {
     );
 
     ferro_property!(
+        /// Defines the `ItemsStretch` property.
+        pub fn items_stretch_property() -> StyledProperty<WrapPanelItemsStretch> {
+            FerroProperty::register::<WrapPanel, _>("ItemsStretch", WrapPanelItemsStretch::None)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `ItemWidth` property.
         pub fn item_width_property() -> StyledProperty<f64> {
             FerroProperty::register::<WrapPanel, _>("ItemWidth", f64::NAN)
@@ -440,6 +474,7 @@ impl WrapPanel {
             Self::orientation_property().as_property(),
             Self::item_width_property().as_property(),
             Self::item_height_property().as_property(),
+            Self::items_stretch_property().as_property(),
         ]);
         Layoutable::affects_arrange::<WrapPanel>(&[Self::items_alignment_property().as_property()]);
     }
@@ -487,6 +522,15 @@ impl WrapPanel {
 
     pub fn set_items_alignment(&self, value: WrapPanelItemsAlignment) {
         self.set_value(Self::items_alignment_property(), value)
+    }
+
+    /// Whether the final item takes the rest of its line (WinUI `ItemsStretch`).
+    pub fn items_stretch(&self) -> WrapPanelItemsStretch {
+        self.get_value(Self::items_stretch_property())
+    }
+
+    pub fn set_items_stretch(&self, value: WrapPanelItemsStretch) {
+        self.set_value(Self::items_stretch_property(), value)
     }
 
     /// The width of all items in the panel.

@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 8339196173667450423;
+pub(crate) const API_FINGERPRINT: i64 = 2794213326097157368;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 510] = [
+pub(crate) static TYPE_NAMES: [&str; 517] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -415,11 +415,18 @@ pub(crate) static TYPE_NAMES: [&str; 510] = [
     "SymbolIcon",
     "SymbolIconSource",
     "SystemBackdrop",
+    "SystemBackdropElement",
     "SystemBackdropHostBrush",
     "TabControl",
     "TabItem",
     "TabStrip",
     "TabStripItem",
+    "TabView",
+    "TabViewAutomationPeer",
+    "TabViewItem",
+    "TabViewItemAutomationPeer",
+    "TabViewItemTemplateSettings",
+    "TabViewListView",
     "TabbedPage",
     "TabbedPageAutomationPeer",
     "TableView",
@@ -522,7 +529,7 @@ pub(crate) static TYPE_NAMES: [&str; 510] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1077] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -534,6 +541,8 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "ActualThemeVariant",
     "ActualTransparencyLevel",
     "ActualWidth",
+    "AddTabButtonCommand",
+    "AddTabButtonCommandParameter",
     "AdornerLayer.AdornedElement",
     "AdornerLayer.Adorner",
     "AdornerLayer.IsClipEnabled",
@@ -542,6 +551,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "AlignmentX",
     "AlignmentY",
     "AllowAutoHide",
+    "AllowDropTabs",
     "AllowFocusOnInteraction",
     "AllowSpin",
     "AllowTapRangeSelection",
@@ -621,6 +631,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "CanCopy",
     "CanCut",
     "CanDragItems",
+    "CanDragTabs",
     "CanFormat",
     "CanGoBack",
     "CanGoForward",
@@ -631,7 +642,9 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "CanPaste",
     "CanRedo",
     "CanReorderItems",
+    "CanReorderTabs",
     "CanResize",
+    "CanTearOutTabs",
     "CanUndo",
     "CanUserEffectivelyResize",
     "CanUserResize",
@@ -667,6 +680,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "ClockIdentifier",
     "CloseButtonCommand",
     "CloseButtonCommandParameter",
+    "CloseButtonOverlayMode",
     "CloseButtonStyle",
     "CloseButtonText",
     "ClosedPaneHeight",
@@ -903,6 +917,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "InteractionRatio",
     "Interval",
     "IsActive",
+    "IsAddTabButtonVisible",
     "IsBackButtonEffectivelyVisible",
     "IsBackButtonEnabled",
     "IsBackButtonVisible",
@@ -1003,6 +1018,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "ItemsAlignment",
     "ItemsPanel",
     "ItemsSource",
+    "ItemsStretch",
     "ItemsUpdatingScrollMode",
     "JustifyContent",
     "KeySpline",
@@ -1317,9 +1333,11 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "ShowActivated",
     "ShowButtonSpinner",
     "ShowDelay",
+    "ShowError",
     "ShowGridLines",
     "ShowInTaskbar",
     "ShowMode",
+    "ShowPaused",
     "ShowProgressText",
     "ShowSelectionHighlight",
     "ShowsPreview",
@@ -1365,10 +1383,20 @@ pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "SweepDirection",
     "Symbol",
     "SystemBackdrop",
+    "TabGeometry",
     "TabIndex",
+    "TabItemTemplate",
+    "TabItems",
+    "TabItemsSource",
     "TabPlacement",
     "TabStops",
+    "TabStripFooter",
+    "TabStripFooterTemplate",
+    "TabStripHeader",
+    "TabStripHeaderTemplate",
     "TabStripPlacement",
+    "TabViewTemplateSettings",
+    "TabWidthMode",
     "TabbedPage.IsTabEnabled",
     "TableView",
     "Tag",

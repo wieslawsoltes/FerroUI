@@ -13,7 +13,7 @@ use ferroui_controls::documents::CharacterFormat;
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{
-    Border, Button, ComboBox, Control, Image, NumberBox, RadioButtons, RepeatButton, RichEditBox,
+    Border, Button, ComboBox, ContentDialog, ContentDialogButton, Control, Image, NumberBox, RadioButtons, RepeatButton, RichEditBox,
     Slider, SliderSnapsTo, SplitButton, Symbol, SymbolIcon, TextBlock, ToggleSplitButton,
 };
 use std::cell::Cell;
@@ -404,4 +404,47 @@ fn wire_combo_box(root: &Ref<Control>) {
         sizes.items().add(Some(Rc::new(size) as BoxedValue));
     }
     sizes.set_selected_index(2);
+    wire_font_size_submit(&sizes, &root.get_control::<TextBlock>("Control3Output"));
+}
+
+/// Whether `Combo3_TextSubmitted` accepts a typed font size: one of the source's sizes, or a custom
+/// value between 8 and 100.
+pub(crate) fn accepts_font_size(text: &str) -> Option<f64> {
+    let value = text.trim().parse::<f64>().ok()?;
+    (FONT_SIZES.contains(&value) || (value > 8.0 && value < 100.0)).then_some(value)
+}
+
+/// `Combo3_TextSubmitted`: a valid size applies, and anything else reverts the text and says why
+/// in a dialog.
+fn wire_font_size_submit(sizes: &Ref<ComboBox>, output: &Ref<TextBlock>) {
+    let last_valid = Rc::new(Cell::new(FONT_SIZES[2]));
+    let weak_sizes = sizes.downgrade();
+    let weak_output = output.downgrade();
+    sizes
+        .text_submitted(move |args| {
+            let (Some(sizes), Some(output)) = (weak_sizes.upgrade(), weak_output.upgrade()) else {
+                return;
+            };
+            args.set_handled(true);
+            if let Some(value) = accepts_font_size(args.text()) {
+                last_valid.set(value);
+                match FONT_SIZES.iter().position(|size| *size == value) {
+                    Some(index) => sizes.set_selected_index(index as i32),
+                    // WinUI keeps a custom value as the selected item; here it is the output's
+                    // current value, which leaves the page's binding in place.
+                    None => output.set_current_value(TextBlock::font_size_property(), value),
+                }
+                return;
+            }
+            sizes.set_text(Some(last_valid.get().to_string()));
+            let dialog = ContentDialog::new();
+            dialog.set_content(Some(
+                Rc::new("The font size must be a number between 8 and 100.".to_string()) as BoxedValue,
+            ));
+            dialog.set_close_button_text(Some("Close"));
+            dialog.set_default_button(ContentDialogButton::Close);
+            // A box outside a window, or a window with an open dialog, shows none.
+            drop(dialog.show_async(&sizes));
+        })
+        .detach();
 }
