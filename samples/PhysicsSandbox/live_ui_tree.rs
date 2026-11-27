@@ -415,17 +415,23 @@ pub fn live_ui_tree_showcase() -> Element {
                 }
             })
             .on_pointer_released(move |_| {
-                if let Some((active_i, _, _)) = *drag_r.borrow() {
+                let active = *drag_r.borrow();
+                if let Some((active_i, _, _)) = active {
                     if active_i == idx {
                         *drag_r.borrow_mut() = None;
-                        let mut rows = sp_r.borrow_mut();
-                        if rows[idx].value < -62.0 {
-                            rows[idx].set_target(-92.0);
-                            arch_sig.set(true);
+                        let open = {
+                            let mut rows = sp_r.borrow_mut();
+                            if rows[idx].value < -62.0 {
+                                rows[idx].set_target(-92.0);
+                                true
+                            } else {
+                                rows[idx].set_target(0.0);
+                                false
+                            }
+                        };
+                        arch_sig.set(open);
+                        if open {
                             ux_log.set(format!("Swiped `{title}` open — Archive action revealed!"));
-                        } else {
-                            rows[idx].set_target(0.0);
-                            arch_sig.set(false);
                         }
                     }
                 }
