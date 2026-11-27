@@ -34,8 +34,13 @@ impl FerroObjectImpl for InfoBarAutomationPeer {
         let weak = this.to_ref().downgrade();
         let _subscription = this.owner().property_changed(move |change| {
             let property = change.property();
-            if property == AutomationProperties::name_property().as_property()
-                || property == AutomationProperties::labeled_by_property().as_property()
+            if property == AutomationProperties::name_property().as_property() {
+                // The base peer reports this change; keep the fallback-name cache current
+                // without reporting the same name a second time.
+                if let Some(peer) = weak.upgrade() {
+                    *peer.last_name.borrow_mut() = peer.get_name();
+                }
+            } else if property == AutomationProperties::labeled_by_property().as_property()
                 || property == InfoBar::title_property().as_property()
                 || property == InfoBar::message_property().as_property()
             {

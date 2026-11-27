@@ -96,7 +96,7 @@
               Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
               BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4"
               Padding="12">
-        <WrapPanel x:Name="Control2" ItemSpacing="8">
+        <WrapPanel x:Name="Control2" ItemSpacing="8" ItemsStretch="Last">
           <Border Width="72" Padding="12,8" Background="{DynamicResource ControlFillColorDefaultBrush}"
                   BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="4">
             <TextBlock Text="One" />

@@ -1844,10 +1844,14 @@ pub fn delegate_result<T: PartialEq + 'static>(value: T) -> MarkupValue {
 /// delegate is attached to, and a strong reference would close a cycle. A delegate whose
 /// root object is gone does nothing, as does one that is called with other arguments than
 /// the method takes or whose method fails: a handler has nowhere to report a failure to.
+///
+/// `method` is a plain function: the closure generated code writes captures nothing and coerces to
+/// it, so there is one copy of this function and of its delegate per `This`, not one per handler
+/// of a document (#998).
 pub fn method_delegate<This: Clone + 'static>(
     context: &Rc<XamlIlContext>,
     parameters: usize,
-    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+    method: fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError>,
 ) -> ferroui_base::metadata::MarkupDelegate {
     let instance = context.root_object_field().as_ref().map(ferroui_base::data::core::WeakValue::new);
     ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
