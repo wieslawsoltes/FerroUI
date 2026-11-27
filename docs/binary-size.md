@@ -1743,9 +1743,19 @@ them.
   `ferroui-native` (macOS) with the feature, so cargo turns it on for every application that links
   the editor; `ferroui-desktop` forwards it as `text-editor` for an application with span
   operations of its own.
-- **The Chromium map on macOS.** The native clipboard tests `MAP_ENABLED` of `ferroui-base` (the
-  feature `chromium-clipboard-map`, which `ferroui-edit` turns on) before the code that publishes
-  and reads the map, so that without the feature that code is not linked.
+- **The Chromium map on macOS.** The feature `chromium-clipboard-map` of `ferroui-native` (which
+  forwards to the feature of `ferroui-base`; `ferroui-edit` turns it on) compiles the code that
+  publishes and reads the map, the item cache it needs, and in `clipboard.mm`
+  (`FRN_WEB_CUSTOM_FORMATS`) the web custom pasteboard types and the checks of a pasteboard that
+  changes while it is read. Without it the clipboard is main's code.
+- **The origin of committed text on macOS.** The tag of an input method's commit (`FrnView.mm`,
+  `FrnTextInputDispatch.h`, `IFrnTextInputMethodEvents`) is part of the `text-editor` feature;
+  without it every commit is a text input event, as on main (964 bytes of `dist` `__text`).
+- **No new virtual on `Control`.** The automation target of the editor's text area is a resolver the
+  editor registers (`ControlAutomationPeer::register_automation_target`), not a method of the
+  vtable of every control class (0 bytes; the virtual was part of the +3,580 bytes below).
+- **Text sinks.** Only the drawing context implements `draw_rounded_rectangle` of
+  `ITextDrawingSink`; the geometry sink and the selection sink of rich text take its square default.
 - **`IStorageFile::write_with_async`** is a method of `dyn IStorageFile`, not a default method of
   the trait: the default body was in the vtable of every storage file. A provider that commits a
   write itself (the browser) implements `write_committed_async`.
@@ -1759,6 +1769,20 @@ Measured on macOS (arm64), hello world, `__text` in bytes, against the base of P
 |---|---:|---:|---:|
 | `release` | 12,929,012 | 12,966,476 (+37,464) | 12,942,008 (+12,996) |
 | `dist` | 11,754,192 | +34,624 in the size run of CI | 11,757,772 (+3,580) |
+
+Against main `8af335b50` (macOS arm64, 2026-11-27), after the review of the stack:
+
+| Build | main | PR 1057 | Change |
+|---|---:|---:|---:|
+| `release` `__text` | 11,777,428 | 11,765,844 | -11,584 |
+| `dist` `__text` | 10,896,084 | 10,896,888 | +804 |
+| `dist` file | 13,267,936 | 13,267,952 | +16 |
+
+Of the +804 bytes, 288 are the minimum line height of the text formatter
+(`TextParagraphProperties::minimum_line_height`, its key in the layout cache and the padding of a
+line) and 292 the rounded rectangle of `ITextDrawingSink`. The clipboard (1,744 bytes before it
+became a feature), the input method tag (964 bytes before), the automation resolver and the popup
+opt-in add nothing.
 
 In `dist` the rest is code PR 1057 adds to paths every application runs: the value of a value
 provider as bytes and a length, the bounds checks of the pasteboard, the tag of input method
