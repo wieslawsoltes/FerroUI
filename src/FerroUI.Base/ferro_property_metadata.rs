@@ -17,42 +17,44 @@ pub struct FerroPropertyMetadata {
     /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); `None` inherits it, by default
     /// it does. Kept here, untyped, so that the typed metadata of every value type is what it is
     /// without it.
-    reevaluation: Option<Reevaluation>,
+    /// One address: the metadata is copied by the code of every value type.
+    reevaluation: Option<&'static ExplicitCoercion>,
 }
 
-/// The coercion policy of a property on reevaluation (`FerroPropertyMetadata::reevaluation`).
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum Reevaluation {
-    Coerce,
-    Explicit(ExplicitCoercion),
-}
-
-/// The table of the typed operations of explicit coercion of one value type, untyped: the type
-/// is checked where it is read.
-#[derive(Clone, Copy)]
+/// The untyped head of the table of the typed operations of explicit coercion of one value type
+/// (`ExplicitFns`, whose first field it is), or `COERCE_ON_REEVALUATION`.
 pub(crate) struct ExplicitCoercion {
-    ops: *const (),
-    of: TypeId,
-    storage: fn() -> ExplicitCoercion,
+    /// The type of the table, checked where it is read.
+    of: fn() -> TypeId,
+    /// The table of the storage type.
+    pub(crate) storage: fn() -> &'static ExplicitCoercion,
 }
 
 impl std::fmt::Debug for ExplicitCoercion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("ExplicitCoercion")
+        f.write_str(if self.is_explicit() { "Explicit" } else { "Coerce" })
     }
 }
 
+/// The policy of a property that coerces an unchanged input again (`with_coerce_on_reevaluation(true)`).
+static COERCE_ON_REEVALUATION: ExplicitCoercion =
+    ExplicitCoercion { of: TypeId::of::<()>, storage: || &COERCE_ON_REEVALUATION };
+
 impl ExplicitCoercion {
-    pub(crate) fn new<T: 'static>(ops: &'static ExplicitFns<T>) -> Self {
-        Self { ops: (ops as *const ExplicitFns<T>).cast(), of: TypeId::of::<ExplicitFns<T>>(), storage: ops.storage }
+    pub(crate) const fn new(of: fn() -> TypeId, storage: fn() -> &'static ExplicitCoercion) -> Self {
+        Self { of, storage }
+    }
+
+    fn is_explicit(&self) -> bool {
+        !std::ptr::eq(self, &COERCE_ON_REEVALUATION)
     }
 
     /// The table, of the value type `T` it was made for.
-    pub(crate) fn ops<T: 'static>(&self) -> &'static ExplicitFns<T> {
-        assert!(self.of == TypeId::of::<ExplicitFns<T>>(), "explicit coercion of another value type");
-        // SAFETY: `ops` is the address of the constant table `ExplicitFns::<T>::get`, of the type
-        // checked above, valid for the whole program.
-        unsafe { &*self.ops.cast::<ExplicitFns<T>>() }
+    pub(crate) fn ops<T: 'static>(&'static self) -> &'static ExplicitFns<T> {
+        assert!((self.of)() == TypeId::of::<ExplicitFns<T>>(), "explicit coercion of another value type");
+        // SAFETY: an `ExplicitCoercion` of that type is the first field of the constant table
+        // `ExplicitFns::<T>::get` (`repr(C)`), valid for the whole program.
+        unsafe { &*(self as *const ExplicitCoercion).cast::<ExplicitFns<T>>() }
     }
 }
 
@@ -71,8 +73,8 @@ impl FerroPropertyMetadata {
     /// the table of the storage type.
     pub(crate) fn for_storage(&self) -> Self {
         let mut copy = self.clone();
-        if let Some(Reevaluation::Explicit(explicit)) = copy.reevaluation {
-            copy.reevaluation = Some(Reevaluation::Explicit((explicit.storage)()));
+        if let Some(explicit) = copy.reevaluation {
+            copy.reevaluation = Some((explicit.storage)());
         }
         copy
     }
@@ -438,13 +440,13 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
     /// Whether frame reevaluation recalculates coercion for an unchanged input
     /// (`with_coerce_on_reevaluation`).
     pub fn coerce_on_reevaluation(&self) -> bool {
-        !matches!(self.base.reevaluation, Some(Reevaluation::Explicit(_)))
+        !self.base.reevaluation.is_some_and(|policy| policy.is_explicit())
     }
 
     /// The typed operations of explicit coercion, for a property whose coercion is explicit.
     pub(crate) fn explicit_coercion(&self) -> Option<&'static crate::property_store::ExplicitFns<T>> {
         match self.base.reevaluation {
-            Some(Reevaluation::Explicit(explicit)) => Some(explicit.ops::<T>()),
+            Some(explicit) if explicit.is_explicit() => Some(explicit.ops::<T>()),
             _ => None,
         }
     }
@@ -493,9 +495,9 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
     /// `FerroObject::reset_coercion` applies to a property whose coercion is explicit.
     pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
         self.base.reevaluation = Some(if value {
-            Reevaluation::Coerce
+            &COERCE_ON_REEVALUATION
         } else {
-            Reevaluation::Explicit(ExplicitCoercion::new(crate::property_store::ExplicitFns::<T>::get()))
+            crate::property_store::ExplicitFns::<T>::get().head()
         });
         self
     }
