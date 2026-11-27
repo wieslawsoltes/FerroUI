@@ -162,7 +162,9 @@ impl IPlatformRenderInterfaceImportedImage for Image {
         let inner = self.inner.borrow().clone().unwrap_or_else(|| panic!("The imported image has been disposed."));
         let info = inner.info();
 
-        self.gr_context.reset_context();
+        // No reset of the context (reviewed with the kept window surface): Ganesh on Vulkan keeps no state of the API
+        // that the submission of the semaphore changes. The image is wrapped for each snapshot (each import is
+        // another image) and flushed once, below, before the semaphore is signalled.
         imported_semaphore(wait_for_semaphore).inner().submit_wait_semaphore();
         let image_info = sk_image_info(&info, self.context.device().graphics_queue_family_index());
         let render_target =

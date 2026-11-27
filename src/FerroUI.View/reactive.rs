@@ -897,6 +897,12 @@ impl Owner {
         with_runtime(|runtime| runtime.dispose(self.id));
     }
 
+    /// Disposes the owner, unless the thread is being torn down and its runtime is gone: for
+    /// what holds an owner and is dropped.
+    pub(crate) fn try_dispose(self) {
+        let _ = RUNTIME.try_with(|runtime| runtime.dispose(self.id));
+    }
+
     /// Whether the owner was not disposed.
     pub fn is_alive(&self) -> bool {
         with_runtime(|runtime| runtime.is_alive(self.id))
