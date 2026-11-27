@@ -237,16 +237,24 @@ pub struct SandboxEngine {
     pub ui_snap: MagneticSnap,
     pub ui_scroller: InertiaScroller,
     pub ui_ribbon: SpringChain,
+    pub ui_projected_slot: Option<usize>,
+    pub ui_fab_center: Vec2,
+    pub ui_fab_open: bool,
+    pub ui_fab_items: Vec<(Spring2D, &'static str, u32)>,
+    pub ui_curve_samples: Vec<f32>,
     active_card_idx: Option<usize>,
     dragging_scroller: bool,
     last_pointer_world: Vec2,
+    pointer_in_arena: bool,
     pointer_down: bool,
     pointer_right: bool,
     gesture_tracker: GestureTracker,
 
     // Visual effects & telemetry
     pub sim_time: f32,
+    pub laser_origin: Vec2,
     pub laser_segments: Vec<(Vec2, Vec2, Option<Vec2>)>,
+    pub orbit_trails: Vec<(BodyHandle, VecDeque<Vec2>, u32)>,
     pub closest_tether: Option<(Vec2, Vec2, f32)>,
     pub blast_ring: Option<(Vec2, f32)>,
     pub step_ms_history: VecDeque<f32>,
@@ -292,14 +300,22 @@ impl SandboxEngine {
             ui_snap: MagneticSnap::new(Vec::new()),
             ui_scroller: InertiaScroller::new(0.0, 12.0, 4.0),
             ui_ribbon: SpringChain::new(12, Vec2::new(8.0, 5.0), SpringConfig::from_response_damping(0.18, 0.78)),
+            ui_projected_slot: None,
+            ui_fab_center: Vec2::new(13.6, 5.5),
+            ui_fab_open: true,
+            ui_fab_items: Vec::new(),
+            ui_curve_samples: Vec::new(),
             active_card_idx: None,
             dragging_scroller: false,
             last_pointer_world: Vec2::new(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5),
+            pointer_in_arena: false,
             pointer_down: false,
             pointer_right: false,
             gesture_tracker: GestureTracker::default(),
             sim_time: 0.0,
+            laser_origin: Vec2::new(0.55, 5.0),
             laser_segments: Vec::new(),
+            orbit_trails: Vec::new(),
             closest_tether: None,
             blast_ring: None,
             step_ms_history: VecDeque::with_capacity(96),
@@ -329,6 +345,19 @@ impl SandboxEngine {
         let cfg = preset.config();
         for c in &mut self.ui_cards {
             c.card.set_spring_config(cfg);
+        }
+        for (sp, _, _) in &mut self.ui_fab_items {
+            sp.set_config(cfg);
+        }
+        self.recompute_spring_curve();
+    }
+
+    fn recompute_spring_curve(&mut self) {
+        self.ui_curve_samples.clear();
+        let mut s = Spring1D::new(0.0, self.spring_preset.config());
+        s.set_target(1.0);
+        for _ in 0..80 {
+            self.ui_curve_samples.push(s.step(1.0 / 60.0));
         }
     }
 
@@ -383,7 +412,9 @@ impl SandboxEngine {
         self.character = None;
         self.moving_platform = None;
         self.laser_segments.clear();
+        self.orbit_trails.clear();
         self.closest_tether = None;
+        self.ui_projected_slot = None;
         self.blast_ring = None;
         self.shatter_candidates.clear();
         self.sim_time = 0.0;
@@ -605,35 +636,58 @@ impl SandboxEngine {
 
     fn build_ui_springs_scene(&mut self) {
         let anchors = vec![
-            Vec2::new(3.4, 2.6),
-            Vec2::new(8.0, 2.6),
-            Vec2::new(12.6, 2.6),
-            Vec2::new(5.7, 5.5),
-            Vec2::new(10.3, 5.5),
+            Vec2::new(2.7, 2.55),
+            Vec2::new(6.3, 2.55),
+            Vec2::new(9.9, 2.55),
+            Vec2::new(4.5, 5.45),
+            Vec2::new(8.1, 5.45),
         ];
         self.ui_snap = MagneticSnap::new(anchors.clone());
         let cfg = self.spring_preset.config();
 
         let defs = [
-            ("Spring2D", "Analytical ODE", 0xFF0284C7, 0),
-            ("Tilt Torque", "Velocity-Coupled", 0xFF7C3AED, 1),
-            ("MagneticSnap", "Projected Target", 0xFFDB2777, 2),
-            ("SpringChain", "12-Node Ribbon", 0xFF059669, 3),
+            ("PiP Player", "Magnetic Corner", 0xFF0284C7, 0),
+            ("Kanban Card", "Velocity Tilt", 0xFF7C3AED, 1),
+            ("Wallet Pass", "Spring Reflow", 0xFFDB2777, 2),
+            ("Quick Action", "Analytical ODE", 0xFF059669, 3),
         ];
         self.ui_cards = defs
             .into_iter()
             .map(|(label, subtitle, accent_argb, slot_index)| {
-                let mut card = DraggableCard::new(anchors[slot_index] + Vec2::new(0.0, -1.8), cfg);
+                let mut card = DraggableCard::new(anchors[slot_index] + Vec2::new(0.0, -1.5), cfg);
                 card.position.set_target(anchors[slot_index]);
-                card.tilt_sensitivity = 0.035;
-                UiDemoCard { label, subtitle, accent_argb, half_size: Vec2::new(1.55, 0.92), card, slot_index }
+                card.tilt_sensitivity = 0.032;
+                UiDemoCard { label, subtitle, accent_argb, half_size: Vec2::new(1.48, 0.88), card, slot_index }
             })
             .collect();
+
+        // Expandable Radial Spring FAB Menu on the right side
+        self.ui_fab_center = Vec2::new(13.6, 5.45);
+        self.ui_fab_open = true;
+        let fab_defs = [
+            ("Cam", 0xFF38BDF8),
+            ("Mic", 0xFFA78BFA),
+            ("Pin", 0xFFF472B6),
+            ("Tag", 0xFF34D399),
+            ("Zap", 0xFFF59E0B),
+        ];
+        self.ui_fab_items = fab_defs
+            .into_iter()
+            .enumerate()
+            .map(|(i, (lbl, col))| {
+                let ang = -PI + (i as f32) * (PI / 4.0);
+                let target = self.ui_fab_center + Vec2::new(ang.cos() * 1.45, ang.sin() * 1.45);
+                let mut sp = Spring2D::new(self.ui_fab_center, cfg);
+                sp.set_target(target);
+                (sp, lbl, col)
+            })
+            .collect();
+        self.recompute_spring_curve();
 
         self.ui_scroller = InertiaScroller::new(0.0, 12.0, 5.0);
         self.ui_scroller.detents = vec![0.0, 3.0, 6.0, 9.0, 12.0];
         self.ui_scroller.position = 3.0;
-        self.ui_ribbon = SpringChain::new(12, Vec2::new(8.0, 4.2), SpringConfig::from_response_damping(0.16, 0.78));
+        self.ui_ribbon = SpringChain::new(10, Vec2::new(6.3, 4.0), SpringConfig::from_response_damping(0.15, 0.78));
     }
 
     fn build_ragdoll_scene(&mut self) {
@@ -904,48 +958,67 @@ impl SandboxEngine {
 
     fn build_laser_gravity_scene(&mut self) {
         self.world.gravity = Vec2::ZERO;
-        self.world.config = SolverConfig::game_default();
+        self.world.config = SolverConfig::high_precision();
         self.add_arena_walls();
 
-        let center = Vec2::new(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5);
-        self.world.add_force_field(ForceField::Vortex {
+        let center = Vec2::new(WORLD_WIDTH * 0.52, WORLD_HEIGHT * 0.5);
+        let mu = 52.0_f32;
+        self.world.add_force_field(ForceField::NewtonianGravity {
             center,
-            tangent_strength: 6.5,
-            inward_strength: 16.0,
-            radius: 7.5,
+            mu,
+            min_radius: 1.0,
+            max_radius: 4.75,
         });
 
+        // Glowing central star
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::circle(0.65))
+            BodyBuilder::static_body(Shape2D::circle(0.68))
                 .position(center)
                 .restitution(0.95)
                 .user_data(0xFFFBBF24),
         );
 
-        let colors = [0xFF38BDF8, 0xFFA78BFA, 0xFF34D399, 0xFFF472B6, 0xFFFB923C];
-        for i in 0..14 {
-            let ang = i as f32 * (2.0 * PI / 14.0);
-            let dist = 2.4 + (i % 3) as f32 * 1.15;
-            let pos = center + Vec2::new(ang.cos() * dist, ang.sin() * dist);
+        // Planets & reflective crystal satellites on exact Keplerian circular & elliptical orbits!
+        let specs: &[(f32, f32, f32, u8, u32)] = &[
+            // (orbit_radius, start_angle, ecc_scale, shape_kind, color)
+            (1.65, 0.2, 1.0, 0, 0xFF38BDF8),
+            (2.25, 2.1, 1.0, 1, 0xFFA78BFA),
+            (2.85, 4.0, 0.96, 2, 0xFF34D399),
+            (3.40, 0.9, 1.02, 0, 0xFFF472B6),
+            (3.95, 3.3, 0.98, 1, 0xFFFB923C),
+            (4.40, 5.2, 1.0, 2, 0xFF2DD4BF),
+            (2.55, 5.5, 1.06, 0, 0xFFFDE047),
+            (3.70, 1.8, 0.93, 1, 0xFF818CF8),
+        ];
+
+        for &(r, ang, ecc, kind, color) in specs {
+            let pos = center + Vec2::new(ang.cos() * r, ang.sin() * r);
             let tangent = Vec2::new(-ang.sin(), ang.cos());
-            let shape = match i % 3 {
-                0 => Shape2D::rect(0.95, 0.24),
-                1 => Shape2D::regular_polygon(6, 0.42),
-                _ => Shape2D::circle(0.34),
+            // Exact circular orbital speed v = sqrt(mu / r)
+            let v_orbit = (mu / r).sqrt() * ecc;
+            let shape = match kind {
+                0 => Shape2D::circle(0.28),
+                1 => Shape2D::regular_polygon(6, 0.34),
+                _ => Shape2D::rect(0.76, 0.20),
             };
-            self.world.add_body(
+            let h = self.world.add_body(
                 BodyBuilder::dynamic(shape)
                     .position(pos)
                     .angle(ang)
-                    .linear_velocity(tangent * 4.2)
-                    .angular_velocity(0.9)
-                    .linear_damping(0.02)
-                    .angular_damping(0.02)
-                    .restitution(0.92)
+                    .linear_velocity(tangent * v_orbit)
+                    .angular_velocity(1.1)
+                    .linear_damping(0.0)
+                    .angular_damping(0.0)
+                    .restitution(0.95)
                     .can_sleep(false)
-                    .user_data(colors[i % colors.len()]),
+                    .user_data(color as u64),
             );
+            let mut trail = VecDeque::with_capacity(56);
+            trail.push_back(pos);
+            self.orbit_trails.push((h, trail, color as u32));
         }
+
+        self.laser_origin = Vec2::new(0.45, WORLD_HEIGHT * 0.5);
     }
 
     pub fn step(&mut self, raw_dt: f32) {
@@ -1012,11 +1085,25 @@ impl SandboxEngine {
         }
 
         if self.scene == SceneKind::LaserGravity {
+            // Update Keplerian orbital trails
+            for (h, trail, _) in &mut self.orbit_trails {
+                if let Some(b) = self.world.body(*h) {
+                    if trail.back().map_or(true, |p| p.distance_squared(b.position) > 0.015) {
+                        if trail.len() >= 56 {
+                            trail.pop_front();
+                        }
+                        trail.push_back(b.position);
+                    }
+                }
+            }
             self.update_laser_raycast();
-            self.closest_tether = self
-                .world
-                .closest_point(self.last_pointer_world, 8.0, CollisionFilter::ALL)
-                .map(|hit| (self.last_pointer_world, hit.point, hit.distance));
+            self.closest_tether = if self.pointer_in_arena {
+                self.world
+                    .closest_point(self.last_pointer_world, 6.0, CollisionFilter::ALL)
+                    .map(|hit| (self.last_pointer_world, hit.point, hit.distance))
+            } else {
+                None
+            };
         }
 
         self.history.record(&self.world);
@@ -1130,23 +1217,28 @@ impl SandboxEngine {
 
     fn update_laser_raycast(&mut self) {
         self.laser_segments.clear();
-        let mut origin = Vec2::new(0.8, 1.0 + (self.sim_time * 0.7).sin() * 0.5);
-        let aim = self.last_pointer_world - origin;
-        let mut dir = if aim.length_squared() > 0.25 {
-            aim.normalize_or_zero()
+        let mut origin = self.laser_origin;
+        // Aim smoothly through the solar system (follow pointer only while cursor is well inside arena)
+        let mut dir = if self.pointer_in_arena
+            && self.last_pointer_world.x > 1.2
+            && self.last_pointer_world.x < WORLD_WIDTH - 0.5
+            && self.last_pointer_world.y > 0.6
+            && self.last_pointer_world.y < WORLD_HEIGHT - 0.6
+        {
+            (self.last_pointer_world - origin).normalize_or_zero()
         } else {
-            let sweep = 0.45 + 0.35 * (self.sim_time * 0.6).sin();
+            let sweep = (self.sim_time * 0.55).sin() * 0.42;
             Vec2::new(sweep.cos(), sweep.sin())
         };
 
         for _bounce in 0..6 {
             let ray = Ray2::new(origin, dir);
-            if let Some(hit) = self.world.raycast(ray, 25.0, CollisionFilter::ALL) {
+            if let Some(hit) = self.world.raycast(ray, 22.0, CollisionFilter::ALL) {
                 self.laser_segments.push((origin, hit.point, Some(hit.normal)));
                 dir = (dir - hit.normal * (2.0 * dir.dot(hit.normal))).normalize_or_zero();
-                origin = hit.point + hit.normal * 0.02;
+                origin = hit.point + hit.normal * 0.03;
             } else {
-                self.laser_segments.push((origin, origin + dir * 22.0, None));
+                self.laser_segments.push((origin, origin + dir * 20.0, None));
                 break;
             }
         }
@@ -1212,16 +1304,24 @@ impl SandboxEngine {
         for c in &mut self.ui_cards {
             c.card.step(dt);
         }
+        for (sp, _, _) in &mut self.ui_fab_items {
+            sp.step(dt);
+        }
         self.ui_scroller.step(dt);
-        self.ui_ribbon.set_leader_target(self.last_pointer_world);
+        let ribbon_target = if self.pointer_in_arena {
+            self.last_pointer_world
+        } else {
+            Vec2::new(6.3 + (self.sim_time * 1.4).cos() * 2.2, 4.0 + (self.sim_time * 2.1).sin() * 0.8)
+        };
+        self.ui_ribbon.set_leader_target(ribbon_target);
         self.ui_ribbon.step(dt);
         let us = start.elapsed().as_micros();
         self.telemetry = TelemetrySnapshot {
-            backend_label: format!("Analytical UI Springs ({})", self.spring_preset.label()),
+            backend_label: format!("UI Physics Lab ({} · ζ={:.2})", self.spring_preset.label(), self.spring_preset.config().damping_ratio()),
             step_ms: us as f32 / 1000.0,
             fps: self.telemetry.fps,
-            breakdown: format!("scroll={:.2} · vel={:.1} · 12-node SpringChain", self.ui_scroller.position, self.ui_scroller.velocity),
-            entity_summary: format!("{} cards · 5 detents", self.ui_cards.len()),
+            breakdown: format!("scroll={:.2} · vel={:.1} · FAB {}", self.ui_scroller.position, self.ui_scroller.velocity, if self.ui_fab_open { "Open" } else { "Closed" }),
+            entity_summary: format!("{} cards · 5 radial orbs · 5 detents", self.ui_cards.len()),
             gpu_available: self.gpu_solver.is_some(),
             history_frame: 0,
             history_len: 0,
@@ -1265,6 +1365,19 @@ impl SandboxEngine {
         }
 
         if self.scene == SceneKind::UiSprings {
+            // Check expandable radial FAB orb click
+            if world_pos.distance(self.ui_fab_center) <= 0.65 {
+                self.ui_fab_open = !self.ui_fab_open;
+                for (i, (sp, _, _)) in self.ui_fab_items.iter_mut().enumerate() {
+                    if self.ui_fab_open {
+                        let ang = -PI + (i as f32) * (PI / 4.0);
+                        sp.set_target(self.ui_fab_center + Vec2::new(ang.cos() * 1.45, ang.sin() * 1.45));
+                    } else {
+                        sp.set_target(self.ui_fab_center);
+                    }
+                }
+                return;
+            }
             if world_pos.y > 7.4 {
                 self.dragging_scroller = true;
                 self.ui_scroller.begin_drag();
@@ -1317,6 +1430,10 @@ impl SandboxEngine {
     pub fn on_pointer_moved(&mut self, world_pos: Vec2) {
         let delta = world_pos - self.last_pointer_world;
         self.last_pointer_world = world_pos;
+        self.pointer_in_arena = world_pos.x >= 0.0
+            && world_pos.x <= WORLD_WIDTH
+            && world_pos.y >= 0.0
+            && world_pos.y <= WORLD_HEIGHT;
         if self.pointer_down {
             self.gesture_tracker.push(self.sim_time as f64, world_pos);
         }
@@ -1341,6 +1458,8 @@ impl SandboxEngine {
                 self.ui_scroller.drag_by(-delta.x * 1.15);
             } else if let Some(idx) = self.active_card_idx {
                 self.ui_cards[idx].card.drag_to(world_pos, 1.0 / 60.0);
+                let vel = self.gesture_tracker.velocity();
+                self.ui_projected_slot = self.ui_snap.choose_anchor(world_pos, vel).map(|(s, _)| s);
             }
             return;
         }
@@ -1353,6 +1472,7 @@ impl SandboxEngine {
     pub fn on_pointer_released(&mut self) {
         self.pointer_down = false;
         self.pointer_right = false;
+        self.ui_projected_slot = None;
 
         if let Some(cloth) = self.cloth.as_mut() {
             cloth.grab_node = None;
@@ -1404,11 +1524,22 @@ impl SandboxEngine {
             .friction(0.45)
             .user_data(color);
         if self.scene == SceneKind::LaserGravity {
-            let center = Vec2::new(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5);
+            let center = Vec2::new(WORLD_WIDTH * 0.52, WORLD_HEIGHT * 0.5);
+            let r = (pos - center).length().max(1.2);
             let tangent = (pos - center).perp().normalize_or_zero();
-            builder = builder.linear_velocity(tangent * 4.5).can_sleep(false);
+            let v_orbit = (52.0 / r).sqrt();
+            builder = builder
+                .linear_velocity(tangent * v_orbit)
+                .linear_damping(0.0)
+                .angular_damping(0.0)
+                .can_sleep(false);
         }
-        self.world.add_body(builder);
+        let h = self.world.add_body(builder);
+        if self.scene == SceneKind::LaserGravity {
+            let mut trail = VecDeque::with_capacity(56);
+            trail.push_back(pos);
+            self.orbit_trails.push((h, trail, color as u32));
+        }
     }
 
     pub fn spawn_quick_burst(&mut self) {

@@ -58,6 +58,8 @@ pub enum TriggerEvent {
 pub enum ForceField {
     /// Radial point gravity/magnet (`strength > 0` attracts toward `center`, `< 0` repels).
     Radial { center: Vec2, strength: f32, radius: f32, falloff_power: f32 },
+    /// True inverse-square Newtonian orbital gravity (`a = mu / max(r, min_radius)^2`) for stable Keplerian orbits.
+    NewtonianGravity { center: Vec2, mu: f32, min_radius: f32, max_radius: f32 },
     /// Swirl/vortex around `center` combining tangential spin and inward pull.
     Vortex { center: Vec2, tangent_strength: f32, inward_strength: f32, radius: f32 },
     /// Uniform directional wind/thrust inside an optional AABB (`None` = global).
@@ -79,6 +81,16 @@ impl ForceField {
                     let norm = delta * (1.0 / dist);
                     let falloff = (1.0 - dist / radius).powf(falloff_power.max(0.0));
                     body.force += norm * (strength * falloff * body.mass);
+                }
+            }
+            Self::NewtonianGravity { center, mu, min_radius, max_radius } => {
+                let delta = center - body.position;
+                let dist = delta.length();
+                if dist > 1e-4 && dist < max_radius {
+                    let norm = delta * (1.0 / dist);
+                    let r_eff = dist.max(min_radius.max(0.1));
+                    let accel = mu / (r_eff * r_eff);
+                    body.force += norm * (accel * body.mass);
                 }
             }
             Self::Vortex { center, tangent_strength, inward_strength, radius } => {

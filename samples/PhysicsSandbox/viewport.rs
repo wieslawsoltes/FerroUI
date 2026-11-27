@@ -203,16 +203,22 @@ impl VisualImpl for PhysicsViewport {
         let engine = this.engine.borrow();
         let sim = engine.borrow();
 
-        match sim.scene {
-            SceneKind::GpuParticles => this.render_particles(&mut dc, &sim, scale, ox, oy),
-            SceneKind::UiSprings => this.render_ui_springs(&mut dc, &sim, scale, ox, oy),
-            _ => {
-                this.render_rigid_world(&mut dc, &sim, scale, ox, oy);
-                if sim.cloth.is_some() || !sim.soft_bodies.is_empty() {
-                    this.render_cloth_and_softbodies(&mut dc, &sim, scale, ox, oy);
-                }
-                if sim.character.is_some() {
-                    this.render_character(&mut dc, &sim, scale, ox, oy);
+        // Clip all world scene content cleanly inside the 16x10m arena border so gravity rings,
+        // shockwaves, and laser trails never bleed outside the studio grid!
+        {
+            let arena_clip = dc.push_clip(Rect::new(ox, oy, arena_w, arena_h));
+            let mut adc = dc.scope(arena_clip);
+            match sim.scene {
+                SceneKind::GpuParticles => this.render_particles(&mut adc, &sim, scale, ox, oy),
+                SceneKind::UiSprings => this.render_ui_springs(&mut adc, &sim, scale, ox, oy),
+                _ => {
+                    this.render_rigid_world(&mut adc, &sim, scale, ox, oy);
+                    if sim.cloth.is_some() || !sim.soft_bodies.is_empty() {
+                        this.render_cloth_and_softbodies(&mut adc, &sim, scale, ox, oy);
+                    }
+                    if sim.character.is_some() {
+                        this.render_character(&mut adc, &sim, scale, ox, oy);
+                    }
                 }
             }
         }
@@ -317,12 +323,14 @@ impl PhysicsViewport {
     fn render_rigid_world(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
         let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
 
-        // 1. Force fields (vortex rings & animated water buoyancy zones)
+        // 1. Force fields (gravity well rings & animated water buoyancy zones)
         for field in sim.world.force_fields() {
             match *field {
-                ForceField::Vortex { center, radius, .. } | ForceField::Radial { center, radius, .. } => {
+                ForceField::Vortex { center, radius, .. }
+                | ForceField::Radial { center, radius, .. }
+                | ForceField::NewtonianGravity { center, max_radius: radius, .. } => {
                     let c = to_screen(center);
-                    for ring in [0.32_f64, 0.64, 1.0] {
+                    for ring in [0.35_f64, 0.62, 0.85, 1.0] {
                         dc.draw_ellipse_at(
                             None,
                             Some(&self.palette.slot_pen),
@@ -353,6 +361,20 @@ impl PhysicsViewport {
                     }
                 }
                 ForceField::Wind { .. } => {}
+            }
+        }
+
+        // 1b. Keplerian orbital trails in Ray & Orbit scene
+        for (_, trail, color) in &sim.orbit_trails {
+            if trail.len() < 2 {
+                continue;
+            }
+            let trail_pen: Rc<dyn IPen> = Rc::new(ImmutablePen::from_uint32((*color & 0x00FF_FFFF) | 0x6600_0000, 1.8));
+            let mut prev = to_screen(trail[0]);
+            for &pt in trail.iter().skip(1) {
+                let cur = to_screen(pt);
+                dc.draw_line(&trail_pen, prev, cur);
+                prev = cur;
             }
         }
 
@@ -470,7 +492,11 @@ impl PhysicsViewport {
             }
         }
 
-        // 4. Multi-bounce laser rays & closest_point proximity tether
+        // 4. Multi-bounce laser rays, turret mount & closest_point proximity tether
+        if !sim.laser_segments.is_empty() {
+            let emitter = to_screen(sim.laser_origin);
+            dc.draw_ellipse_at(Some(&self.palette.obstacle_fill), Some(&self.palette.laser_core_pen), emitter, 7.0, 7.0);
+        }
         for &(p0, p1, hit_normal) in &sim.laser_segments {
             let s0 = to_screen(p0);
             let s1 = to_screen(p1);
@@ -653,35 +679,92 @@ impl PhysicsViewport {
     fn render_ui_springs(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
         let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
 
-        // 1. Magnetic dock slots
+        // 1. Magnetic dock slots (with live velocity-projected landing highlight!)
         for (i, &anchor) in sim.ui_snap.anchors.iter().enumerate() {
             let c = to_screen(anchor);
-            let w = 3.1 * scale;
-            let h = 1.84 * scale;
-            dc.draw_rectangle_outline(
-                &self.palette.slot_pen,
-                Rect::new(c.x - w * 0.5, c.y - h * 0.5, w, h),
-                12.0,
-            );
-            draw_label(
-                dc,
-                &format!("SLOT {}", i + 1),
-                Point::new(c.x - 20.0, c.y - 6.0),
-                10.0,
-                &self.palette.hud_muted,
-            );
+            let w = 2.96 * scale;
+            let h = 1.76 * scale;
+            let is_projected = sim.ui_projected_slot == Some(i);
+            let pen = if is_projected { &self.palette.tether_pen } else { &self.palette.slot_pen };
+            if is_projected {
+                dc.fill_rectangle(
+                    &self.palette.water_fill,
+                    Rect::new(c.x - w * 0.5, c.y - h * 0.5, w, h),
+                    12.0,
+                );
+            }
+            dc.draw_rectangle_outline(pen, Rect::new(c.x - w * 0.5, c.y - h * 0.5, w, h), 12.0);
+            let lbl = if is_projected { "LAND HERE" } else { "DOCK SLOT" };
+            draw_label(dc, lbl, Point::new(c.x - 28.0, c.y - 6.0), 9.5, &self.palette.hud_muted);
         }
 
-        // 2. Glowing 12-node SpringChain cursor trail ribbon!
+        // 2. Live Analytical Spring Step-Response Oscilloscope (top-right inside UI Lab!)
+        let osc_tl = to_screen(Vec2::new(11.75, 0.7));
+        let osc_br = to_screen(Vec2::new(15.65, 3.65));
+        let osc_rect = Rect::new(osc_tl.x, osc_tl.y, osc_br.x - osc_tl.x, osc_br.y - osc_tl.y);
+        dc.fill_rectangle(&self.palette.hud_bg, osc_rect, 10.0);
+        dc.draw_rectangle_outline(&self.palette.hud_border, osc_rect, 10.0);
+        let cfg = sim.spring_preset.config();
+        let peak = sim.ui_curve_samples.iter().copied().fold(1.0_f32, f32::max);
+        let overshoot_pct = ((peak - 1.0) * 100.0).max(0.0);
+        draw_label(
+            dc,
+            &format!("{}  ·  ζ={:.2}  ·  +{:.0}% overshoot", sim.spring_preset.label(), cfg.damping_ratio(), overshoot_pct),
+            Point::new(osc_rect.x + 10.0, osc_rect.y + 8.0),
+            10.5,
+            &self.palette.hud_accent,
+        );
+        // Target=1.0 dashed reference line + analytical response curve
+        let gx = osc_rect.x + 12.0;
+        let gy = osc_rect.y + 34.0;
+        let gw = (osc_rect.width - 24.0).max(10.0);
+        let gh = (osc_rect.height - 46.0).max(10.0);
+        let target_y = gy + gh * (1.0 - 1.0 / 1.55);
+        dc.draw_line(&self.palette.sparkline_budget_pen, Point::new(gx, target_y), Point::new(gx + gw, target_y));
+        if sim.ui_curve_samples.len() >= 2 {
+            let n = sim.ui_curve_samples.len();
+            let mut prev = Point::new(gx, gy + gh);
+            for (i, &val) in sim.ui_curve_samples.iter().enumerate() {
+                let px = gx + (i as f64 / (n - 1) as f64) * gw;
+                let py = gy + gh * (1.0 - (val.clamp(0.0, 1.55) as f64 / 1.55));
+                let cur = Point::new(px, py);
+                dc.draw_line(&self.palette.sparkline_pen, prev, cur);
+                prev = cur;
+            }
+        }
+
+        // 3. Expandable Radial Spring FAB Menu (bottom-right above carousel)
+        let fab_c = to_screen(sim.ui_fab_center);
+        for (sp, lbl, col) in &sim.ui_fab_items {
+            let p = sp.value();
+            if p.distance(sim.ui_fab_center) > 0.15 {
+                let sp_pt = to_screen(p);
+                dc.draw_line(&self.palette.slot_pen, fab_c, sp_pt);
+                let orb_fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(*col));
+                dc.draw_ellipse_at(Some(&orb_fill), Some(&self.palette.outline_pen), sp_pt, 18.0, 18.0);
+                draw_label(dc, lbl, Point::new(sp_pt.x - 11.0, sp_pt.y - 6.0), 10.0, &self.palette.hud_text);
+            }
+        }
+        dc.draw_ellipse_at(Some(&self.palette.track_pill), Some(&self.palette.outline_pen), fab_c, 22.0, 22.0);
+        draw_label(
+            dc,
+            if sim.ui_fab_open { "×" } else { "+" },
+            Point::new(fab_c.x - 5.0, fab_c.y - 10.0),
+            16.0,
+            &self.palette.hud_text,
+        );
+        draw_label(dc, "Radial Spring FAB", Point::new(fab_c.x - 44.0, fab_c.y + 26.0), 9.5, &self.palette.hud_muted);
+
+        // 4. Glowing 10-node SpringChain cursor ribbon
         for i in 1..sim.ui_ribbon.nodes.len() {
             let p0 = to_screen(sim.ui_ribbon.nodes[i - 1].value());
             let p1 = to_screen(sim.ui_ribbon.nodes[i].value());
             dc.draw_line(&self.palette.spring_pen, p0, p1);
-            let r = (7.5 - i as f64 * 0.45).max(2.0);
+            let r = (6.5 - i as f64 * 0.45).max(1.8);
             dc.draw_ellipse_at(Some(&self.palette.hud_accent), None, p1, r, r);
         }
 
-        // 3. Draggable spring cards with titles, drop shadow, scale spring, and velocity tilt
+        // 5. Draggable spring cards with titles, drop shadow, scale spring, and velocity tilt
         for item in &sim.ui_cards {
             let pos = item.card.position.value();
             let target = item.card.position.target();
@@ -718,26 +801,32 @@ impl PhysicsViewport {
                 Point::new(c.x - w * 0.42, c.y - h * 0.42),
                 Point::new(c.x + w * 0.42, c.y - h * 0.42),
             );
-            draw_label(&mut g, item.label, Point::new(c.x - w * 0.38, c.y - 16.0), 13.5, &self.palette.hud_text);
-            draw_label(&mut g, item.subtitle, Point::new(c.x - w * 0.38, c.y + 4.0), 10.5, &self.palette.hud_text);
+            draw_label(&mut g, item.label, Point::new(c.x - w * 0.38, c.y - 16.0), 13.0, &self.palette.hud_text);
+            draw_label(&mut g, item.subtitle, Point::new(c.x - w * 0.38, c.y + 4.0), 10.0, &self.palette.hud_text);
         }
 
-        // 4. Rubber-band InertiaScroller carousel strip
-        let strip_tl = to_screen(Vec2::new(0.8, 7.6));
-        let strip_br = to_screen(Vec2::new(WORLD_WIDTH - 0.8, 9.45));
+        // 6. Rubber-band InertiaScroller carousel strip with live overscroll tension indicator
+        let strip_tl = to_screen(Vec2::new(0.6, 7.55));
+        let strip_br = to_screen(Vec2::new(WORLD_WIDTH - 0.6, 9.42));
         let strip_rect = Rect::new(strip_tl.x, strip_tl.y, strip_br.x - strip_tl.x, strip_br.y - strip_tl.y);
+        let overscrolling = sim.ui_scroller.position < sim.ui_scroller.min_bound - 0.05
+            || sim.ui_scroller.position > sim.ui_scroller.max_bound + 0.05;
         dc.fill_rectangle(&self.palette.track_bg, strip_rect, 12.0);
-        dc.draw_rectangle_outline(&self.palette.slot_pen, strip_rect, 12.0);
+        dc.draw_rectangle_outline(
+            if overscrolling { &self.palette.blast_pen } else { &self.palette.slot_pen },
+            strip_rect,
+            12.0,
+        );
 
         let clip = dc.push_clip(strip_rect);
         {
             let mut g = dc.scope(clip);
             let scroll = sim.ui_scroller.position;
             let pill_colors = [0xFF0284C7, 0xFF7C3AED, 0xFFDB2777, 0xFF059669, 0xFFD97706];
-            let pill_titles = ["Detent 1", "Detent 2", "Detent 3", "Detent 4", "Detent 5"];
+            let pill_titles = ["Album 1", "Album 2", "Album 3", "Album 4", "Album 5"];
             for i in 0..5 {
                 let wx = 4.0 + i as f32 * 3.0 - scroll;
-                let p = to_screen(Vec2::new(wx, 8.52));
+                let p = to_screen(Vec2::new(wx, 8.48));
                 let pw = 2.4 * scale;
                 let ph = 1.25 * scale;
                 let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(pill_colors[i]));
@@ -749,7 +838,7 @@ impl PhysicsViewport {
                     10.0,
                     &BoxShadows::default(),
                 );
-                draw_label(&mut g, pill_titles[i], Point::new(p.x - 28.0, p.y - 8.0), 12.0, &self.palette.hud_text);
+                draw_label(&mut g, pill_titles[i], Point::new(p.x - 26.0, p.y - 8.0), 12.0, &self.palette.hud_text);
             }
         }
         for (i, &detent) in sim.ui_scroller.detents.iter().enumerate() {
