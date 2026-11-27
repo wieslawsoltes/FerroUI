@@ -17,6 +17,16 @@
 //! | [`ResourceAliasRow`] | key offset, key length, target offset, target length, namespaces, line, position, value line, value position |
 //! | [`LiteralBrushRow`] | key offset, key length, colour low, colour high, namespaces, line, position |
 //! | [`DynamicBrushRow`], [`StaticBrushRow`] | key offset, key length, colour key offset, colour key length, namespaces, line, position, value line, value position |
+//!
+//! The plain values are a [`PackedValueRows`]: the same pool of strings, a pool of the numbers of
+//! the table, and a record of the key, the position and the value.
+//!
+//! | Value | Record |
+//! |---|---|
+//! | number | key offset, key length, line, position, index of the number |
+//! | thickness, corner radius | key offset, key length, line, position, indices of the four numbers |
+//! | colour | key offset, key length, line, position, colour low, colour high |
+//! | text | key offset, key length, line, position, text offset, text length |
 
 use std::marker::PhantomData;
 
@@ -39,6 +49,51 @@ pub struct PackedRows {
     pub records: &'static [u16],
 }
 
+/// A packed table of plain values of one shape (#855; module documentation of
+/// `packed_resource_rows.rs` for the layout). Written by the emitter, read by
+/// `rt::add_packed_double_resources`, `rt::add_packed_thickness_resources`,
+/// `rt::add_packed_corner_radius_resources`, `rt::add_packed_color_resources` and
+/// `rt::add_packed_string_resources`.
+#[derive(Clone, Copy, Debug)]
+pub struct PackedValueRows {
+    /// The keys and texts of the rows, each once, concatenated.
+    pub strings: &'static str,
+    /// The numbers the rows name by their index, each once.
+    pub numbers: &'static [f64],
+    /// The records of the rows, in order, each as wide as its shape states.
+    pub records: &'static [u16],
+}
+
+/// The fields of a record of a [`PackedValueRows`] before its value.
+const VALUE_HEADER: usize = 4;
+
+impl PackedValueRows {
+    /// Calls `add` for each record of `width` fields, in order, with its index, key, line,
+    /// position and value fields; the first failure is the error. A trailing partial record is
+    /// not a row, as in a [`PackedRows`].
+    pub(super) fn each(
+        &self,
+        width: usize,
+        add: &mut dyn FnMut(usize, &'static str, i32, i32, &'static [u16]) -> Result<(), XamlLoadError>,
+    ) -> Result<(), XamlLoadError> {
+        for (index, record) in self.records.chunks_exact(width).enumerate() {
+            let key = pool_string(self.strings, record[0], record[1]).ok_or_else(|| out_of_range(index))?;
+            add(index, key, record[2].into(), record[3].into(), &record[VALUE_HEADER..])?;
+        }
+        Ok(())
+    }
+
+    /// The number at `field` of the pool, for the record `index`.
+    pub(super) fn number(&self, index: usize, field: u16) -> Result<f64, XamlLoadError> {
+        self.numbers.get(usize::from(field)).copied().ok_or_else(|| out_of_range(index))
+    }
+
+    /// The text at `offset` and `length` of the pool, for the record `index`.
+    pub(super) fn text(&self, index: usize, offset: u16, length: u16) -> Result<&'static str, XamlLoadError> {
+        pool_string(self.strings, offset, length).ok_or_else(|| out_of_range(index))
+    }
+}
+
 /// The error of a row of a packed table that cannot be read.
 pub(super) fn out_of_range(index: usize) -> XamlLoadError {
     XamlLoadError::with_message(format!("row {index} of a compiled resource table is out of range"))
@@ -52,9 +107,13 @@ pub(super) trait Packed: Sized {
     fn decode(table: &PackedRows, fields: &[u16]) -> Option<Self>;
 }
 
-fn string(table: &PackedRows, offset: u16, length: u16) -> Option<&'static str> {
+fn pool_string(strings: &'static str, offset: u16, length: u16) -> Option<&'static str> {
     let start = usize::from(offset);
-    table.strings.get(start..start.checked_add(usize::from(length))?)
+    strings.get(start..start.checked_add(usize::from(length))?)
+}
+
+fn string(table: &PackedRows, offset: u16, length: u16) -> Option<&'static str> {
+    pool_string(table.strings, offset, length)
 }
 
 fn namespaces(table: &PackedRows, index: u16) -> Option<Option<XmlNamespaceTable>> {
