@@ -121,39 +121,35 @@ fn multicast_uses_nominal_compatibility_last_subsequence_and_error_order() {
     };
     let a = make("a");
     let b = make("b");
-    let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
-    let twice = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap();
+    let pair = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap().unwrap();
+    let twice = MarkupDelegate::combine(Some(&pair), Some(&pair)).unwrap().unwrap();
     assert!(twice.is_of_type(&SYSTEM_ACTION_DELEGATE));
     assert_eq!(
-        MarkupDelegate::remove(Some(&twice), Some(&pair)).unwrap(),
+        MarkupDelegate::remove(Some(&twice), Some(&pair)).unwrap().unwrap(),
         pair
     );
-    assert!(MarkupDelegate::remove(Some(&pair), Some(&pair)).is_none());
+    assert!(MarkupDelegate::remove(Some(&pair), Some(&pair)).unwrap().is_none());
     let custom = MarkupDelegate::new_typed(&CUSTOM, |_| None);
-    for op in [0, 1] {
-        assert!(
-            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| if op == 0 {
-                MarkupDelegate::combine(Some(&a), Some(&custom))
-            } else {
-                MarkupDelegate::remove(Some(&a), Some(&custom))
-            }))
-            .is_err()
-        );
-    }
+    // Different nominal types are an error that leaves both delegates unchanged; nothing panics.
+    assert_eq!(
+        MarkupDelegate::combine(Some(&a), Some(&custom)),
+        Err(MarkupInvokeError::Failed("delegates must have the same nominal type".into()))
+    );
+    assert!(MarkupDelegate::remove(Some(&a), Some(&custom)).is_err());
     assert!(
-        MarkupDelegate::combine(None, Some(&custom))
+        MarkupDelegate::combine(None, Some(&custom)).unwrap()
             .unwrap()
             .ptr_eq(&custom)
     );
-    assert!(MarkupDelegate::remove(None, Some(&custom)).is_none());
+    assert!(MarkupDelegate::remove(None, Some(&custom)).unwrap().is_none());
     let fail = MarkupDelegate::for_action_method(
         None,
         Target::MARKUP,
         Target::MARKUP.find_methods("Fail").next().unwrap(),
     )
     .unwrap();
-    let before = MarkupDelegate::combine(Some(&a), Some(&fail)).unwrap();
-    let all = MarkupDelegate::combine(Some(&before), Some(&b)).unwrap();
+    let before = MarkupDelegate::combine(Some(&a), Some(&fail)).unwrap().unwrap();
+    let all = MarkupDelegate::combine(Some(&before), Some(&b)).unwrap().unwrap();
     assert_eq!(
         all.try_invoke(&[]),
         Err(MarkupInvokeError::Failed("typed-failed".into()))
@@ -170,12 +166,12 @@ fn typed_methods_and_multicast_retain_targets_until_last_handle_drops() {
     let weak = Rc::downgrade(&t);
     let a = bound(&SYSTEM_ACTION_DELEGATE, &t, "Run");
     let b = bound(&SYSTEM_ACTION_DELEGATE, &t, "Run");
-    let list = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap();
+    let list = MarkupDelegate::combine(Some(&a), Some(&b)).unwrap().unwrap();
     drop(t);
     drop(a);
     drop(b);
     assert!(weak.upgrade().is_some());
-    assert!(MarkupDelegate::remove(Some(&list), Some(&list)).is_none());
+    assert!(MarkupDelegate::remove(Some(&list), Some(&list)).unwrap().is_none());
     list.try_invoke(&[]).unwrap();
     assert_eq!(weak.upgrade().unwrap().0.get(), 2);
     drop(list);
