@@ -5,11 +5,11 @@ use ferroui_fonts_web_core::language::language_table;
 use harfbuzz_sys::{hb_language_from_string, hb_ot_tags_from_script_and_language, HB_SCRIPT_COMMON};
 use std::ffi::CString;
 
-/// HarfBuzz is given only the primary language subtag on the path of the framework.
+/// HarfBuzz is given the whole language of the culture on the path of the framework.
 #[test]
 fn harfbuzz_reads_every_entry_of_the_table_as_that_language_system() {
     for (tag, language) in language_table() {
-        let primary = CString::new(language.split('-').next().unwrap()).unwrap();
+        let name = CString::new(*language).unwrap();
         let mut count = 8;
         let mut found = [0u32; 8];
         // SAFETY: the name is a valid C string, and `found` has room for `count` tags. The script
@@ -17,7 +17,7 @@ fn harfbuzz_reads_every_entry_of_the_table_as_that_language_system() {
         unsafe {
             hb_ot_tags_from_script_and_language(
                 HB_SCRIPT_COMMON,
-                hb_language_from_string(primary.as_ptr(), -1),
+                hb_language_from_string(name.as_ptr(), -1),
                 std::ptr::null_mut(),
                 std::ptr::null_mut(),
                 &mut count,

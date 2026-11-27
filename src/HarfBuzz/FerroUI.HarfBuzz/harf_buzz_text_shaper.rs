@@ -17,6 +17,40 @@ ferroui_base::ferro_thread_local! {
 
 const ZERO_WIDTH_NON_JOINER: u32 = 0x200C;
 
+/// The cultures whose HarfBuzz language is kept. An application uses a few.
+pub(crate) const MAX_CACHED_CULTURES: usize = 16;
+
+ferroui_base::ferro_thread_local! {
+    /// The HarfBuzz language of the cultures in use, the most recent first.
+    static LANGUAGES: RefCell<Vec<(Locale, hb::Language)>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The HarfBuzz language of a culture: its language, script, region and variants, so that
+/// `zh-Hant` selects another OpenType language than `zh`, and `iv` for the invariant culture, the
+/// unknown locale. Without allocating for a culture that is already known.
+pub(crate) fn language_of(culture: &Locale) -> hb::Language {
+    LANGUAGES.with(|languages| {
+        let mut languages = languages.borrow_mut();
+        if let Some(index) = languages.iter().position(|(known, _)| known == culture) {
+            languages[..=index].rotate_right(1);
+            return languages[0].1;
+        }
+        let language = if *culture == Locale::UNKNOWN {
+            hb::Language::from_tag("iv")
+        } else {
+            hb::Language::from_tag(&culture.id.to_string())
+        };
+        languages.truncate(MAX_CACHED_CULTURES - 1);
+        languages.insert(0, (culture.clone(), language));
+        language
+    })
+}
+
+#[cfg(test)]
+pub(crate) fn cached_cultures() -> usize {
+    LANGUAGES.with(|languages| languages.borrow().len())
+}
+
 /// A text shaper backed by HarfBuzz.
 #[derive(Default)]
 pub struct HarfBuzzTextShaper;
@@ -142,9 +176,7 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
                 }
             };
 
-            // The primary language subtag (.NET's `TwoLetterISOLanguageName`), `iv` for the
-            // invariant culture, the unknown locale.
-            buffer.set_language(if *used_culture == Locale::UNKNOWN { "iv" } else { used_culture.id.language.as_str() });
+            buffer.set_language(language_of(used_culture));
 
             let features = Self::get_features(options);
 
