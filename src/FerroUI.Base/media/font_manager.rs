@@ -283,7 +283,7 @@ impl FontManager {
                         // resolves to another family). A face the backend substituted for a name
                         // it does not know is neither, and the next family is tried.
                         if glyph_typeface.family_name().contains(family_name)
-                            || (Self::is_system_font_source(&collection_key(Self::absolute_source(&key)))
+                            || (Self::is_system_font_source_ignoring_fragment(Self::absolute_source(&key))
                                 && self.platform_impl.is_family_alias(family_name, glyph_typeface.family_name()))
                         {
                             return Some(glyph_typeface);
@@ -639,6 +639,11 @@ impl FontManager {
         }
 
         None
+    }
+
+    /// `is_system_font_source` of the URL without its fragment, without making that URL.
+    fn is_system_font_source_ignoring_fragment(source: &url::Url) -> bool {
+        source.scheme() == Self::SYSTEM_FONT_SCHEME || source[..url::Position::BeforeFragment] == *Self::SYSTEM_FONTS_KEY
     }
 
     fn is_system_font_source(source: &url::Url) -> bool {
