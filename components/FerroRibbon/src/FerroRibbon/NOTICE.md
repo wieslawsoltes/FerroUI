@@ -1,30 +1,11 @@
-MIT License
-
-Copyright (c) 2026 Wiesław Šoltés
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The MIT license of the RibbonSpace port code, with its copyright notice, is in
+components/FerroRibbon/LICENSE (attributions: components/FerroRibbon/NOTICE.md).
 
 The FontIcon capability adapter in compat/font_icon.rs is adapted from the Uno FontIcon
 child architecture, Copyright (c) Uno Platform Inc., Apache-2.0. Changes use Rust and
 native FerroUI inheritance, properties, layout, child ownership and metadata.
 LICENSE-APACHE-2.0.md retains its license. The remaining RibbonSpace port code retains
-the MIT license above.
+the MIT license of components/FerroRibbon/LICENSE.
 
 Uno.Fonts.Fluent 2.6.1 supplies the unchanged embedded
 Assets/Fonts/uno-fluentui-assets.ttf font. Copyright (C) 2015-2023 Uno Platform inc. -

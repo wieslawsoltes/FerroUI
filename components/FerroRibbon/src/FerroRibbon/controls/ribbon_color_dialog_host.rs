@@ -1,5 +1,5 @@
 //! Existing public color-dialog host, now sharing native chrome with customization.
-//! Copyright Wiesław Šoltés, MIT; source dialog chrome retains Microsoft MIT notices.
+//! source dialog chrome retains Microsoft MIT notices.
 use super::RibbonDialogHost;
 use ferroui_base::{
     FerroObjectImpl, Ref, StyledElementImpl, VisualImpl, ferro_class, ferro_class_info,

@@ -1,5 +1,4 @@
-//! Native bitmap branch of RibbonIconPresenter.CreateImageSource (9755e281). Copyright Wiesław
-//! Šoltés, MIT.
+//! Native bitmap branch of RibbonIconPresenter.CreateImageSource (9755e281).
 use super::ribbon_image_provider::RibbonUriImage;
 use super::ribbon_image_scale::{
     ImageAsset, QualifiedImageSource, ScaleBitmap, qualified_assets, selected_asset,

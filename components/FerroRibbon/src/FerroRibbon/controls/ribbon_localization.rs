@@ -1,5 +1,4 @@
 //! Ribbon.cs strings subscription and deferred root/tab/group refresh.
-//! Copyright (c) 2026 Wiesław Šoltés. MIT.
 use super::*;
 use ferroribbon_core::localization::{RibbonStrings, RibbonStringsChanged};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};

@@ -1,4 +1,4 @@
-//! RibbonTitleBar UI state/ownership port. Copyright Wiesław Šoltés, MIT. Native window
+//! RibbonTitleBar UI state/ownership port. Native window
 //! attachment.
 mod window_chrome;
 use super::{Ribbon, RibbonHandledEventArgs, RibbonQuickAccessToolBar, RibbonSearchBox};

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. CadPage.ShowToolTip native popup helper.
+// CadPage.ShowToolTip native popup helper.
 use super::{CadPage, cad_session::ribbon_item};
 use ferroribbon::controls::{RibbonButton, RibbonControlBase, RibbonScreenTipService};
 use ferroui_base::{BoxedValue, Point, Rect, Visual, styling::ThemeVariant};

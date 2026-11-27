@@ -1,4 +1,4 @@
-//! Port of shared RibbonBackstage.cs. Copyright Wiesław Šoltés, MIT.
+//! Port of shared RibbonBackstage.cs.
 use super::Ribbon;
 use crate::{
     metadata::backstage_items::RibbonBackstageItems, primitives::RibbonIconPresenter,

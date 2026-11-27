@@ -1,4 +1,4 @@
-//! Shared Ribbon.Backstage.cs and Ribbon.cs application action. Copyright Wiesław Šoltés, MIT.
+//! Shared Ribbon.Backstage.cs and Ribbon.cs application action.
 use super::super::{RibbonBackstage, RibbonHandledEventArgs, RibbonItemHelper, RibbonMenu};
 use super::*;
 use ferroui_base::{

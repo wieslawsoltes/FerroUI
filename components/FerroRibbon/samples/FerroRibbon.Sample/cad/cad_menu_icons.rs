@@ -1,4 +1,3 @@
-// Copyright (c) 2026 Wiesław Šoltés. Licensed under the MIT License.
 //! Native port of the original CadMenuIcons.cs
 use ferroui_controls_icons::ImageIcon;
 use ferroribbon::compat::{MenuFlyoutItem, MenuFlyoutSubItem};

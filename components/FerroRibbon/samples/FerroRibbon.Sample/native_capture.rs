@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native services for original Capture.cs.
+// Native services for original Capture.cs.
 use crate::{
     capture::{CadCaptureAction, CaptureAction, CaptureError, CaptureRequest, CaptureSurface},
     pages::CadPage,

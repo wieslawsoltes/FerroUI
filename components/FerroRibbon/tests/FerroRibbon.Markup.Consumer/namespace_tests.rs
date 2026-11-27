@@ -1,5 +1,4 @@
 //! Native equivalents of unchanged upstream XamlNamespaceTests.cs at 9755e281.
-//! Copyright Wiesław Šoltés, MIT.
 use ferroribbon::{controls::*, primitives::RibbonIconPresenter};
 use ferroui_base::{BoxedValue, Ref, controls::NameScope, data::core::ValueTypes};
 use ferroui_controls::{Control, StackPanel, TextBlock, UserControl, Window};

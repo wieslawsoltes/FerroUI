@@ -1,4 +1,4 @@
-<!-- Original RibbonSpace Inputs.xaml SearchBox tree. Copyright Wiesław Šoltés, MIT. -->
+<!-- Original RibbonSpace Inputs.xaml SearchBox tree. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />

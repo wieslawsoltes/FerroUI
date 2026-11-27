@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. ExcelViewModel.BuildRibbon, same graph/order/aliases.
+// ExcelViewModel.BuildRibbon, same graph/order/aliases.
 use super::excel_view_model::{ExcelViewModel, icon, s, toggle};
 use ferroribbon_core::{
     RibbonBackstagePlacement, RibbonGroupItemsLayout, RibbonItemSize as Size,

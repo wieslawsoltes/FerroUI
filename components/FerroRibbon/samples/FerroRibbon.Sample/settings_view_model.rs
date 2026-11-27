@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Presentation behavior from SettingsPage.xaml.cs.
+// Presentation behavior from SettingsPage.xaml.cs.
 use ferroui_reactiveui::{
     ICommand, IReactiveObjectExt, ReactiveCommand, ReactiveObject, reactive_object,
 };

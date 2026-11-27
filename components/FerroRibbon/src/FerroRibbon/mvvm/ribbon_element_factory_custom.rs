@@ -1,5 +1,5 @@
 //! Source RibbonElementFactory.CreateCustom/FindTemplate (9755e281).
-//! Copyright Wiesław Šoltés, MIT. Native controls/templates preserve identity;
+//! Native controls/templates preserve identity;
 //! binding scopes own subscriptions and models, with weak control backlinks.
 use super::custom_template_resources::lookup_with_theme;
 use super::custom_template_theme::TemplateTheme;

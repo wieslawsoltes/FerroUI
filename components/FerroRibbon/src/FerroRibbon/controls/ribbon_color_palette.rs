@@ -1,5 +1,5 @@
 //! RibbonColorPicker.cs palette, source algorithms and native tree/input services.
-//! Copyright Wiesław Šoltés, MIT. Platform/CLR differences are tracked separately.
+//! Platform/CLR differences are tracked separately.
 use crate::{
     compat::FontIcon,
     theming::{RibbonTheme, to_color as native_color, to_ribbon_color as core_color},

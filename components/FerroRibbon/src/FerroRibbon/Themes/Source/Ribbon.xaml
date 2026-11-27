@@ -1,4 +1,4 @@
-<!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
+<!-- Derived from RibbonSpace 9755e281. -->
 <ResourceDictionary xmlns:i="using:FerroRibbon.Internal" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme TargetType="Ribbon" x:Key="{x:Type Ribbon}">
     <Setter Property="Background" Value="{DynamicResource RibbonChromeBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />

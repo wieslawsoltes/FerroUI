@@ -1,5 +1,5 @@
 //! XML namespace declarations from RibbonSpace 9755e281, XmlnsDefinitions.cs.
-//! Copyright Wiesław Šoltés. Distributed under the MIT license; see NOTICE.md.
+//! Distributed under the MIT license; see NOTICE.md.
 
 /// Public namespace identifiers for ribbon markup.
 ///

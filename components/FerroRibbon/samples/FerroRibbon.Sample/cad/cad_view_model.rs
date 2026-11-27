@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Application logic from CadPage.xaml.cs.
+// Application logic from CadPage.xaml.cs.
 //! Presentation logic has no native control, popup, window or rendering dependency.
 use super::cad_commands::{ALIASES, COMMANDS};
 #[path = "cad_page_actions.rs"]

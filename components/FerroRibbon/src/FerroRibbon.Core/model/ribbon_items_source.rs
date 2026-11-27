@@ -1,4 +1,4 @@
-//! Ribbon traversal portions: Copyright Wiesław Šoltés, MIT.
+//! Ribbon traversal portions:
 //! Shared repeatable input for actual ribbon collection/binding properties.
 //! A source has reference identity and yields ordinary Rust iterators. It supplies
 //! no LINQ operators, CLR enumerator state, Current/Reset, or panic recovery.

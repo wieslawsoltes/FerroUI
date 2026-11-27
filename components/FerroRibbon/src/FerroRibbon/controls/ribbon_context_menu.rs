@@ -1,5 +1,5 @@
 //! Ribbon.Menus.cs item menus and Ribbon.Panels.cs visibility/panel entries.
-//! Copyright Wiesław Šoltés, MIT. Native popup/event ownership; no WinUI service facade.
+//! Native popup/event ownership; no WinUI service facade.
 use super::*;
 use crate::{
     compat::{MenuFlyoutItem, MenuFlyoutSeparator, MenuFlyoutSubItem, ToggleMenuFlyoutItem},

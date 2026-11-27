@@ -1,4 +1,4 @@
-//! RibbonTitleBar.cs: RibbonZoomControl. Copyright Wiesław Šoltés, MIT.
+//! RibbonTitleBar.cs: RibbonZoomControl.
 //! Native properties, template parts and commands; Rust callbacks use HandlerList.
 use super::{RibbonControlBase, RibbonControlBaseImpl};
 use crate::compat::RibbonInputSlider;

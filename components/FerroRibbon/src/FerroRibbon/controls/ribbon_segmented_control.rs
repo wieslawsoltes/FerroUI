@@ -1,5 +1,5 @@
 //! Shared RibbonPickers.cs: source segment state, selection and deferred overflow.
-//! Copyright Wiesław Šoltés, MIT. CLR graph/hash override limitations are recorded separately.
+//! CLR graph/hash override limitations are recorded separately.
 use super::{
     RibbonControlBase, RibbonControlBaseImpl, RibbonItemLayout, RibbonOverflowMenuItems,
     RibbonToggleButton,

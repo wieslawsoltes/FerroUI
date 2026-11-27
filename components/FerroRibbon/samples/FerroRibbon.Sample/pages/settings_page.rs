@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Passive native view of the original SettingsPage.
+// Passive native view of the original SettingsPage.
 use super::settings_services::NativeSettingsServices;
 use crate::{
     demo_settings::{DemoSettings, DemoSubscription},

@@ -1,5 +1,5 @@
 //! Ribbon.Menus.cs BuildDisplayOptionsMenu and native display-options popup.
-//! Copyright Wiesław Šoltés, MIT. Source menu order and conditions are retained.
+//! Source menu order and conditions are retained.
 use super::*;
 use crate::{
     compat::{FontIcon, MenuFlyoutSeparator, RadioMenuFlyoutItem, ToggleMenuFlyoutItem},

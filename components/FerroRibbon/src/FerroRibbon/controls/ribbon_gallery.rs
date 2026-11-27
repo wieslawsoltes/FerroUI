@@ -1,4 +1,4 @@
-//! Port of RibbonGallery.cs at RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT.
+//! Port of RibbonGallery.cs at RibbonSpace 9755e281.
 use super::{
     RibbonButton, RibbonControlBase, RibbonControlBaseImpl, RibbonControlBaseImplExt,
     RibbonItemHelper, RibbonItemLayout, RibbonKeyTipResult, RibbonObjectArray, RibbonObjectItems,

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Narrow native bindings for Word presentation.
+// Narrow native bindings for Word presentation.
 use crate::word_view_model::{WordAlignment, WordViewModel};
 use ferroui_base::media::{
     Color, FontFamily, FontStyle, FontWeight, IBrush, ITransform, ScaleTransform, SolidColorBrush,

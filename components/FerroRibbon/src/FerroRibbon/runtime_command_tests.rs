@@ -1,5 +1,5 @@
 //! Pinned shared CommandTests.cs / QuickAccessTests using complete SampleRibbon.
-//! Copyright Wiesław Šoltés, MIT. Headless integration is not native parity.
+//! Headless integration is not native parity.
 use crate::{
     controls::*,
     runtime_sample::{self as sample, Mounted},

@@ -1,4 +1,4 @@
-//! Native metadata for unchanged Core model APIs. Copyright Wiesław Šoltés, MIT.
+//! Native metadata for unchanged Core model APIs.
 use super::*;
 use ferroribbon_core::model::{
     RibbonIcon, RibbonMenuHeaderModel, RibbonMenuItemModel, RibbonMenuItemModelImpl,

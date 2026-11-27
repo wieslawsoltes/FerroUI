@@ -1,4 +1,4 @@
-//! Native metadata for unchanged Core model APIs. Copyright Wiesław Šoltés, MIT.
+//! Native metadata for unchanged Core model APIs.
 use super::*;
 use ferroribbon_core::commands::RibbonCommandCatalog;
 use ferroribbon_core::model::{

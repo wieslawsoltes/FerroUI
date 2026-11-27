@@ -1,4 +1,4 @@
-<!-- Pinned original ExcelPage and BuildSheet visuals. Copyright Wiesław Šoltés, MIT. -->
+<!-- Pinned original ExcelPage and BuildSheet visuals. -->
 <UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.ExcelPage" x:Name="ExcelView" x:DataType="vm:ExcelViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
   <UserControl.Resources>
     <ResourceDictionary>

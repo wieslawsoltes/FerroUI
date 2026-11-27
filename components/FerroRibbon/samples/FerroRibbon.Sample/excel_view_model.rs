@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. ExcelViewModel.cs application model.
+// ExcelViewModel.cs application model.
 use ferroribbon_core::{
     RibbonContextualActivation, RibbonString,
     commands::{ICommand, RibbonCommandCatalog, RibbonCommandMetadata},

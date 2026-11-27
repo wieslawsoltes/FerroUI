@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Framework-independent CAD page actions.
+// Framework-independent CAD page actions.
 use super::*;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

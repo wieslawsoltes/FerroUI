@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original Capture.cs orchestration and compositor.
+// Original Capture.cs orchestration and compositor.
 //! Application-specific actions and futures; no CLR task, reflection or stream runtime.
 use std::{fmt, future::Future, time::Duration};
 #[derive(Clone, Debug, PartialEq, Eq)]

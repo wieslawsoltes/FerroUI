@@ -1,4 +1,3 @@
-// Copyright Wiesław Šoltés, MIT.
 //! Generated-common source maps here; registered property IDs live in the parent single
 //! ferro_properties block required by FerroUI.
 use super::super::{IRibbonItem, IRibbonItemEditable, RibbonItemHelper};

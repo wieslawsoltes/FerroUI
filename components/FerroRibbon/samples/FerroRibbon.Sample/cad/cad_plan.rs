@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. RibbonSpace CAD model construction.
+// RibbonSpace CAD model construction.
 // Private source records become plain Rust enums. No UI or runtime dependency.
 #[derive(Clone, Debug)]
 pub(super) enum Entity {

@@ -1,4 +1,4 @@
-//! Shared Ribbon.Model.cs algorithms. Copyright Wiesław Šoltés, MIT.
+//! Shared Ribbon.Model.cs algorithms.
 //! Native parent/context ownership uses weak backlinks without a managed runtime.
 use super::super::{RibbonBackstage, RibbonItemHelper};
 use super::*;

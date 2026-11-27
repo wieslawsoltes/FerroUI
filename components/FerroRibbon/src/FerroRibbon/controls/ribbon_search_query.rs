@@ -1,4 +1,4 @@
-//! Native search UI port. Copyright Wiesław Šoltés, MIT.
+//! Native search UI port.
 use ferroribbon_core::search::RibbonSearchEntry;
 use ferroui_base::{
     data::core::ValueTypes,

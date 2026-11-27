@@ -1,4 +1,4 @@
-<!-- Adapted from pinned RibbonSpace PowerPointPage.xaml. Copyright Wiesław Šoltés, MIT. -->
+<!-- Adapted from pinned RibbonSpace PowerPointPage.xaml. -->
 <UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.PowerPointPage" x:DataType="vm:PowerPointViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}" x:Name="PowerPointView">
   <Grid Background="{DynamicResource RibbonWindowBackgroundBrush}">
     <Grid.RowDefinitions>

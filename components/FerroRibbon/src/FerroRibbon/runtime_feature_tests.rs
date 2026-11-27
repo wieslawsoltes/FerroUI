@@ -1,5 +1,4 @@
 //! All eighteen pinned shared FeatureTests.cs scenarios, actual native controls. Copyright
-//! Wiesław Šoltés, MIT.
 use crate::{
     controls::*,
     runtime_sample::{self as sample, Mounted, RuntimeHost},

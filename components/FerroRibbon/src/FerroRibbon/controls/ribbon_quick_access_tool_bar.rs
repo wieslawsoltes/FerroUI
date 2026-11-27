@@ -1,5 +1,4 @@
 //! RibbonQuickAccessToolBar.cs, including its shared toolbar automation peer.
-//! Copyright (c) 2026 Wiesław Šoltés, MIT.
 use super::{IRibbonItem, IRibbonLayoutHost, Ribbon, RibbonItemHelper, RibbonItemLayout};
 use crate::{
     metadata::control_items::RibbonControlItems, primitives::RibbonMetrics, theming::RibbonTheme,

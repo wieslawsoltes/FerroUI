@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native port of CadDrawingCanvas.cs.
+// Native port of CadDrawingCanvas.cs.
 use super::cad_plan::{Entity, Plan};
 use ferroui_base::{
     BoxedValue, FerroObjectImpl, FerroObjectImplExt, Point, Ref, RelativePoint, Size,

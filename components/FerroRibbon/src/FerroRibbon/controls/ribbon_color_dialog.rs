@@ -1,5 +1,5 @@
 //! Native modal overlay for the source RibbonColorDialog, with eager request and standard future completion.
-//! Copyright Wiesław Šoltés, MIT. Platform/ContentDialog adaptations are tracked explicitly.
+//! Platform/ContentDialog adaptations are tracked explicitly.
 use super::{
     RibbonColorDialogHost,
     ribbon_color_dialog_content::RibbonColorDialogContent,

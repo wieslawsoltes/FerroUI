@@ -1,4 +1,4 @@
-//! Shared Ribbon.Search.cs. Copyright Wiesław Šoltés, MIT.
+//! Shared Ribbon.Search.cs.
 use ferroribbon_core::collections::RibbonFixedItems;
 use ferroribbon_core::collections::RibbonItems;
 use ferroui_base::{

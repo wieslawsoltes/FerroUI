@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Presentation behavior from WordPage.xaml.cs.
+// Presentation behavior from WordPage.xaml.cs.
 //! Formatting state and actions are independent of native controls, brushes and windows.
 use ferroui_reactiveui::{
     ICommand, IReactiveObject, IReactiveObjectExt, ReactiveCommand, ReactiveObject, reactive_object,

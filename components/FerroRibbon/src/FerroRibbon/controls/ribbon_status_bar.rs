@@ -1,4 +1,4 @@
-//! RibbonTitleBar.cs: RibbonStatusBar. Copyright Wiesław Šoltés, MIT.
+//! RibbonTitleBar.cs: RibbonStatusBar.
 //! Native ownership, collection identity and template integration.
 use super::ribbon_quick_access_tool_bar::as_item;
 use super::{

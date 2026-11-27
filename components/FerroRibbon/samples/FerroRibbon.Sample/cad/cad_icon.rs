@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native Rust/FerroUI CAD extension.
+// Native Rust/FerroUI CAD extension.
 use super::{cad_art::CadArt, cad_icons::CadIcons};
 use ferroribbon_core::model::{RibbonIcon, RibbonIconKind};
 use ferroui_base::metadata::IServiceProvider;

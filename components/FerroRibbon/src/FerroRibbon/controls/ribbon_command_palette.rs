@@ -1,4 +1,4 @@
-//! Staged RibbonCommandPalette from unchanged RibbonSearchBox.cs. Copyright Wiesław Šoltés, MIT.
+//! Staged RibbonCommandPalette from unchanged RibbonSearchBox.cs.
 //! Native TopLevel/Popup, Rust iterators and closures replace XamlRoot/enumerable/delegate
 //! overloads.
 use super::ribbon_search_results::RibbonSearchResultsList;

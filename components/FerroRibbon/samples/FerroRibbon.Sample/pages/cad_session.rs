@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native view services for the original CAD page.
+// Native view services for the original CAD page.
 use super::CadPage;
 use crate::cad::{
     CadDrawingCanvas,

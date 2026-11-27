@@ -1,4 +1,4 @@
-<!-- Original ShellPage. Copyright Wiesław Soltes, MIT. -->
+<!-- Original ShellPage. -->
 <UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="FerroRibbon.Sample.ShellPage" Background="{DynamicResource RibbonWindowBackgroundBrush}" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
   <Grid>
     <Grid.ColumnDefinitions>

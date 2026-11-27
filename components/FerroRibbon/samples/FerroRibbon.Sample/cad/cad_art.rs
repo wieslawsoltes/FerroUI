@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original RibbonSpace CAD assets.
+// Original RibbonSpace CAD assets.
 // Generated from whole unchanged source/PDB-verified static initializers.
 // No .NET code or reflection ships; see the CAD porting note.
 use ferroui_base::ferro_markup_type;

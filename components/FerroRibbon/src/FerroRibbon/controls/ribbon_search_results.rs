@@ -1,5 +1,4 @@
-//! Native staged internal RibbonSearchResultsList from unchanged RibbonSearchBox.cs. Copyright
-//! Wiesław Šoltés, MIT. Source row visuals are themselves programmatic.
+//! Native staged internal RibbonSearchResultsList from unchanged RibbonSearchBox.cs. Source row visuals are themselves programmatic.
 use crate::controls::{IRibbonItem, RibbonBackstageItem};
 use crate::primitives::RibbonIconPresenter;
 use crate::theming::RibbonTheme;

@@ -1,5 +1,4 @@
 //! Source RibbonColorDialog.ShowAsync's retained content and HSL/hex state machine. Copyright
-//! Wiesław Šoltés, MIT.
 use crate::theming::{RibbonTheme, to_color, to_ribbon_color};
 use ferroribbon_core::{RibbonString, theming::RibbonColor};
 use ferroui_base::{

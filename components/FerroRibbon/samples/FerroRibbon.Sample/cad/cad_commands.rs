@@ -1,4 +1,4 @@
-// Original CadPage command/alias constants. Wiesław Šoltés, MIT.
+// Original CadPage command/alias constants.
 pub const COMMANDS: &[(&str, &str, &str)] = &[
     ("line", "LINE", "Specify first point:"),
     ("polyline", "PLINE", "Specify start point:"),

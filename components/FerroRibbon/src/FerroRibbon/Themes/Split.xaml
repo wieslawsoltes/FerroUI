@@ -1,4 +1,4 @@
-<!-- RibbonSpace Items.xaml split styles. Copyright Wiesław Šoltés, MIT. -->
+<!-- RibbonSpace Items.xaml split styles. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />

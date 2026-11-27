@@ -1,5 +1,4 @@
 //! Shared translation tables and their registration transaction. RibbonStrings.cs.
-//! Copyright (c) 2026 Wiesław Šoltés. MIT.
 use super::{localization_data, ribbon_strings::literal};
 use crate::{RibbonString, text::ordinal::OrdinalKey};
 use std::{

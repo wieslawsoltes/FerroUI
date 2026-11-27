@@ -1,5 +1,5 @@
 //! Ribbon.Menus.cs customization entry and cancellation through Rust callbacks.
-//! Copyright Wiesław Šoltés, MIT. The dialog and its native modal scope own UI lifetime.
+//! The dialog and its native modal scope own UI lifetime.
 use super::*;
 use crate::controls::{RibbonCustomizeDialog, RibbonCustomizeDialogError, RibbonCustomizePage};
 use ferroui_base::{

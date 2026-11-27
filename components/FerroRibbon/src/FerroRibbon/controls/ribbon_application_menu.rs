@@ -1,4 +1,4 @@
-//! Port of shared RibbonApplicationMenu.cs. Copyright Wiesław Šoltés, MIT.
+//! Port of shared RibbonApplicationMenu.cs.
 //! The source builds this control's layout programmatically.
 use super::{
     Ribbon, RibbonApplicationMenuItem as Item, RibbonApplicationMenuItemEventArgs as ItemArgs,

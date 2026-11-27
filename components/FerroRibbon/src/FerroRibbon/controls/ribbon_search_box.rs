@@ -1,4 +1,4 @@
-//! Staged source RibbonSearchBox state machine. Copyright Wiesław Šoltés, MIT. Rust ownership
+//! Staged source RibbonSearchBox state machine. Rust ownership
 //! uses weak control references and explicit native subscription disposal.
 use super::{
     RibbonCommandPalette, RibbonSearchQueryEventArgs,

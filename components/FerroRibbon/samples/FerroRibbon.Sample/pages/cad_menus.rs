@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original CAD menu ownership and discovery.
+// Original CAD menu ownership and discovery.
 use super::CadPage;
 use crate::cad::{CadMenuIconError, CadMenuIcons};
 use ferroribbon::{

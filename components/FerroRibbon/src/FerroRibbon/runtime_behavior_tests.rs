@@ -1,5 +1,4 @@
 //! Nine unchanged-source RibbonBehaviorTests scenarios with complete SampleRibbon. Copyright
-//! Wiesław Šoltés, MIT.
 use crate::{
     controls::*,
     runtime_sample::{self as sample, Mounted},

@@ -1,4 +1,4 @@
-<!-- RibbonSpace Inputs.xaml RibbonTextBox. Copyright Wiesław Šoltés, MIT. -->
+<!-- RibbonSpace Inputs.xaml RibbonTextBox. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />

@@ -1,4 +1,4 @@
-<!-- Source Chrome.xaml StatusBar; explicit Border supplies native padding. Copyright Wiesław Šoltés, MIT. -->
+<!-- Source Chrome.xaml StatusBar; explicit Border supplies native padding. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ControlTheme TargetType="RibbonStatusBar" x:Key="{x:Type RibbonStatusBar}">
     <Setter Property="Background" Value="{DynamicResource RibbonStatusBarBackgroundBrush}" />

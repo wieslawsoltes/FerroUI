@@ -1,4 +1,4 @@
-//! Ribbon.cs sealed RibbonHandledEventArgs. Copyright Wiesław Šoltés, MIT.
+//! Ribbon.cs sealed RibbonHandledEventArgs.
 use std::{cell::Cell, rc::Rc};
 #[derive(Default)]
 pub struct RibbonHandledEventArgs {

@@ -1,5 +1,5 @@
 //! Test-only translation of the pinned shared runtime SampleRibbon.cs.
-//! Copyright Wiesław Šoltés, MIT. Original identities and glyphs are retained.
+//! Original identities and glyphs are retained.
 use crate::{compat::MenuFlyoutItem, controls::*};
 use ferroribbon_core::{
     RibbonContextualActivation, RibbonGroupItemsLayout, RibbonGroupState, RibbonItemSize,

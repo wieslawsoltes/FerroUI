@@ -1,4 +1,4 @@
-//! RibbonToolBarPanel.cs, RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT.
+//! RibbonToolBarPanel.cs, RibbonSpace 9755e281.
 use super::ribbon_hidden_focus;
 use crate::{compat::Orientation, controls::RibbonSeparator};
 use ferroribbon_core::collections::RibbonItems;

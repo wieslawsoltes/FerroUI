@@ -1,4 +1,4 @@
-//! Shared RibbonToolBar.cs, RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT.
+//! Shared RibbonToolBar.cs, RibbonSpace 9755e281.
 use super::ribbon_quick_access_tool_bar::as_item;
 use super::{
     IRibbonItemOwner, IRibbonLayoutHost, Ribbon, RibbonButton, RibbonGroup, RibbonInputBase,

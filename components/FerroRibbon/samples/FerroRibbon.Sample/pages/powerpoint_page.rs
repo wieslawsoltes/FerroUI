@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native view of the original PowerPointPage.
+// Native view of the original PowerPointPage.
 use crate::{
     demo_settings::{DemoSettings, DemoSubscription},
     office_view_models::{PowerPointAction, PowerPointViewModel, ThemeApplication},

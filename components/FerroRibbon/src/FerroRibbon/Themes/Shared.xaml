@@ -1,4 +1,4 @@
-<!-- Adapted from pinned RibbonSpace Themes/Shared.xaml, Copyright Wiesław Šoltés, MIT. -->
+<!-- Adapted from pinned RibbonSpace Themes/Shared.xaml, -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ControlTheme x:Key="RibbonChromeButtonStyle" TargetType="Button">
     <Setter Property="Background" Value="Transparent" />

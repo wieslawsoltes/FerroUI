@@ -1,4 +1,4 @@
-//! RibbonElementFactory.cs menu/flyout methods. Copyright Wiesław Šoltés, MIT.
+//! RibbonElementFactory.cs menu/flyout methods.
 //! Native host adapters use existing controls; unavailable picker factories fail explicitly.
 use super::ribbon_element_factory::{editable, native_payload, source, text};
 use super::{

@@ -1,5 +1,5 @@
 //! Pinned ItemTests.cs scenarios using native compiled themes and public controls.
-//! Copyright Wiesław Šoltés, MIT. Configured image-root migration is explicit below.
+//! Configured image-root migration is explicit below.
 use crate::{
     controls::*,
     primitives::RibbonIconPresenter,

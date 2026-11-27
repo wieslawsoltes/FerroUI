@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native services for the source SettingsPage.
+// Native services for the source SettingsPage.
 use super::SettingsPage;
 use crate::{
     demo_settings::DemoSettings,

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original PowerPoint/Tools application actions.
+// Original PowerPoint/Tools application actions.
 //! Control-independent ReactiveUI presentation. Native brushes/controls stay in the views/adapters.
 use ferroui_reactiveui::{
     ICommand, IReactiveObjectExt, ReactiveCommand, ReactiveObject, reactive_object,

@@ -1,5 +1,5 @@
 //! The twelve pinned shared LayoutTests.cs / SelectionTests scenarios, using the complete
-//! SampleRibbon fixture and native compiled themes in Headless. Copyright Wiesław Šoltés, MIT.
+//! SampleRibbon fixture and native compiled themes in Headless.
 use crate::{
     controls::*,
     runtime_sample::{self as sample, Mounted},

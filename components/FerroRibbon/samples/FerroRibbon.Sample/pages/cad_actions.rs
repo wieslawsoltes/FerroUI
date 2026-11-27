@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native services/event boundary of CadPage.
+// Native services/event boundary of CadPage.
 use super::CadPage;
 use crate::cad::{
     CadDrawingCanvas, CadLayer,

@@ -1,4 +1,4 @@
-<!-- RibbonSpace Ribbon.xaml root/tab/header/QAT templates. Copyright Wiesław Šoltés, MIT. -->
+<!-- RibbonSpace Ribbon.xaml root/tab/header/QAT templates. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />

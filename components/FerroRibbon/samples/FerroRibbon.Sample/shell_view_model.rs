@@ -1,4 +1,3 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT.
 //! ShellPage navigation translated through an application-specific native surface.
 //! No controls, visual trees, dispatchers or global application state live here.
 use ferroribbon_core::theming::{RibbonChromeStyle, RibbonThemePalette, RibbonThemeStyle};

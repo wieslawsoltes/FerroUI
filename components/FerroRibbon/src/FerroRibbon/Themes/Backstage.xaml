@@ -1,4 +1,4 @@
-<!-- Original RibbonSpace Backstage template. Copyright Wiesław Šoltés, MIT. -->
+<!-- Original RibbonSpace Backstage template. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:si="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <si:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />

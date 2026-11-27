@@ -1,5 +1,4 @@
 //! Seven pinned shared MvvmRegressionTests scenarios, real native factory/bindings. Copyright
-//! Wiesław Šoltés, MIT.
 use crate::{
     controls::*,
     runtime_sample::{self as sample, Mounted, RuntimeHost},

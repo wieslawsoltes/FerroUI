@@ -1,5 +1,5 @@
 //! ParameterConverter/ParameterCommand from RibbonElementFactory.cs, 9755e281.
-//! Copyright Wiesław Šoltés, MIT. Native commands use ordinary Rust functions.
+//! Native commands use ordinary Rust functions.
 use super::RibbonModelBindings;
 use crate::{
     controls::{RibbonColorPicker, RibbonControlBase, RibbonGallery},

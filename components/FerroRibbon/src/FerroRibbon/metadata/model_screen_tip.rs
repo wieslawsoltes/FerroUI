@@ -1,4 +1,4 @@
-//! Native descriptors for Core Model/RibbonScreenTipModel.cs. Copyright Wiesław Šoltés, MIT.
+//! Native descriptors for Core Model/RibbonScreenTipModel.cs.
 use ferroribbon_core::{
     ObservableObject, RibbonString,
     model::{RibbonIcon, RibbonScreenTipModel},

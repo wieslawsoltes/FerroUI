@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. ExcelPage selection/formatting actions.
+// ExcelPage selection/formatting actions.
 //! Native views supply existing cells; this module creates no controls or brushes.
 use crate::excel_view_model::ExcelViewModel;
 use ferroribbon_core::{RibbonString, model::*, theming::RibbonColor};

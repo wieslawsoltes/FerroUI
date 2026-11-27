@@ -1,4 +1,4 @@
-//! State-editing algorithms from RibbonCustomizeDialog.cs. Copyright Wiesław Šoltés, MIT.
+//! State-editing algorithms from RibbonCustomizeDialog.cs.
 //! Native UI assembly stays in the controls crate; this editor has no UI dependency.
 use crate::collections::RibbonItems;
 use crate::{

@@ -1,4 +1,4 @@
-//! Native RibbonCustomizeDialog.cs. Copyright Wiesław Šoltés, MIT.
+//! Native RibbonCustomizeDialog.cs.
 //! Working editor is UI-independent; this class owns actual dialog controls,
 //! source actions, native focus/modal ownership and subscriptions.
 use super::{

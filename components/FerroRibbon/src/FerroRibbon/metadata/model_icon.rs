@@ -1,4 +1,4 @@
-//! Native descriptors for Core Model/RibbonIcon.cs. Copyright Wiesław Šoltés, MIT.
+//! Native descriptors for Core Model/RibbonIcon.cs.
 use ferroribbon_core::collections::RibbonFixedItems;
 use ferroribbon_core::{
     RibbonString,

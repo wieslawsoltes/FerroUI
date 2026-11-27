@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native view of the complete source WordPage.
+// Native view of the complete source WordPage.
 use crate::{
     demo_settings::{DemoSettings, DemoSubscription},
     word_view_model::{WordAction, WordServices, WordViewModel},

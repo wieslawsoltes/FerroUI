@@ -1,5 +1,5 @@
 //! RibbonPickers.cs: original grid selection, command order and retained template content.
-//! Copyright Wiesław Šoltés, MIT. Native ownership/platform differences are recorded separately.
+//! Native ownership/platform differences are recorded separately.
 use super::RibbonItemHelper;
 use crate::theming::RibbonTheme;
 use ferroribbon_core::collections::RibbonFixedItems;

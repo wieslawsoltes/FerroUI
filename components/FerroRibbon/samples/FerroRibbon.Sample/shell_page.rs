@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original ShellPage native view adapter.
+// Original ShellPage native view adapter.
 use crate::{
     demo_settings::{DemoSettings, DemoSubscription},
     pages::*,

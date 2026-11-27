@@ -1,4 +1,3 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT.
 //! Shared demo state from ShellPage.xaml.cs::DemoSettings. No UI tree belongs here.
 use ferroribbon::{controls::Ribbon, theming::RibbonTheme};
 use ferroribbon_core::{

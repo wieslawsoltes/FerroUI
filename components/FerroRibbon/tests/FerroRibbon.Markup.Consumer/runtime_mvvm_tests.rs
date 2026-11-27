@@ -1,5 +1,5 @@
 //! Source MvvmTests.cs at 9755e281: actual public models and native controls.
-//! Copyright Wiesław Šoltés, MIT. Both native markup paths supply the same host.
+//! Both native markup paths supply the same host.
 use ferroribbon::{
     compat::MenuFlyoutItem,
     controls::*,

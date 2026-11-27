@@ -1,5 +1,4 @@
 //! Process-wide Current storage and its specific notification contract.
-//! Copyright (c) 2026 Wiesław Šoltés. MIT.
 use super::RibbonStrings;
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError};
 pub type RibbonStringsChangedHandler = dyn Fn(&()) + Send + Sync;

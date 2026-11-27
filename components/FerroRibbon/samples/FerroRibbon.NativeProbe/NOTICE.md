@@ -1,6 +1,6 @@
 # Attribution
 
-FerroRibbon derives from RibbonSpace by Wiesław Šoltés, licensed under MIT.
+FerroRibbon derives from RibbonSpace (MIT; see the NOTICE.md of the component).
 Authoritative repository: https://github.com/wieslawsoltes/RibbonSpace Selected commit:
 9755e281547923f10397dffa366e3355b12b55ea. The complete original notice and MIT license
 are retained in LICENSE and src/FerroRibbon.Core/NOTICE.md.

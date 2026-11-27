@@ -1,4 +1,4 @@
-<!-- Adapted from pinned RibbonSpace SettingsPage.xaml. Copyright Wiesław Šoltés, MIT. -->
+<!-- Adapted from pinned RibbonSpace SettingsPage.xaml. -->
 <UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.SettingsPage" Foreground="{DynamicResource ThemeForegroundBrush}" FontSize="14" x:DataType="vm:SettingsViewModel" x:CompileBindings="True">
   <ScrollViewer Background="{DynamicResource RibbonWindowBackgroundBrush}">
     <Border Padding="32">

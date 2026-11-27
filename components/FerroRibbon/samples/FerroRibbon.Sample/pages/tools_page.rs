@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native view of the original ToolsPage.
+// Native view of the original ToolsPage.
 use crate::{
     demo_settings::DemoSettings,
     office_view_models::{ToolsAction, ToolsViewModel},

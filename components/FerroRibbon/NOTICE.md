@@ -2,8 +2,8 @@
 
 FerroRibbon derives from RibbonSpace by Wiesław Šoltés, licensed under MIT
 (https://github.com/wieslawsoltes/RibbonSpace, commit
-9755e281547923f10397dffa366e3355b12b55ea). The MIT license is in `LICENSE` and
-`src/FerroRibbon.Core/NOTICE.md`.
+9755e281547923f10397dffa366e3355b12b55ea). The MIT license, with its copyright notice, is
+in `LICENSE`; the notices of the crates point to it.
 
 FerroUI is a separately licensed MIT dependency, consumed from this repository by path.
 Its license and notices are at the root of the repository.

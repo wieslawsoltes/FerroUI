@@ -1,6 +1,5 @@
 //! Original BindPalette/Replace: materialize before equality, names before colors,
 //! recent collections limited in each transfer, explicit two-way cleanup.
-//! Copyright Wiesław Šoltés, MIT.
 use super::{RibbonElementFactory, RibbonModelBindings};
 use crate::{
     controls::RibbonColorPalette,

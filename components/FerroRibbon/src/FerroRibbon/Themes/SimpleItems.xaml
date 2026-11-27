@@ -1,4 +1,4 @@
-<!-- RibbonSpace Items.xaml simple items/container split. Copyright Wiesław Šoltés, MIT. -->
+<!-- RibbonSpace Items.xaml simple items/container split. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ControlTheme TargetType="RibbonSeparator" x:Key="{x:Type RibbonSeparator}">
     <Setter Property="Template">

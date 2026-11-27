@@ -1,6 +1,6 @@
 # Control attribution
 
-Ribbon controls derive from RibbonSpace, Copyright (c) 2026 Wiesław Šoltés, MIT.
+Ribbon controls derive from RibbonSpace (MIT).
 The original notice/license are preserved at the repository root.
 
 The push-button click/command/flyout order is adapted from the pinned Uno

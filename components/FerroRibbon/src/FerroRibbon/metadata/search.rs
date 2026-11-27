@@ -1,5 +1,5 @@
 //! Native reusable metadata for Core Search/RibbonSearchEngine.cs.
-//! Copyright Wiesław Šoltés, MIT. Core remains independent of native controls.
+//! Core remains independent of native controls.
 use crate::controls::{RibbonAdditionalSearchEntries, RibbonSearchEntries};
 use ferroribbon_core::{
     RibbonString,

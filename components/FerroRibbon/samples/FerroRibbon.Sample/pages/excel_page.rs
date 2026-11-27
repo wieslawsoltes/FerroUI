@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native original ExcelPage view/adapters.
+// Native original ExcelPage view/adapters.
 use crate::{
     demo_settings::{DemoSettings, DemoSubscription},
     excel_sheet::{ExcelAlignment, ExcelCellKey, ExcelCellSurface, ExcelSheet, ExcelSheetSurface},

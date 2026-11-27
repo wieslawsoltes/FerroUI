@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native Rust port of CadModels.cs.
+// Native Rust port of CadModels.cs.
 use super::cad_icon::CadIcon;
 use ferroribbon_core::model::RibbonIcon;
 use ferroui_base::{

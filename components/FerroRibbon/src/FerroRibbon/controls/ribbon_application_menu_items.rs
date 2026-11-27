@@ -1,4 +1,4 @@
-//! RibbonApplicationMenu.cs item models. Copyright Wiesław Šoltés, MIT.
+//! RibbonApplicationMenu.cs item models.
 //! Native properties and collections; no CLR runtime or reflection adapter.
 use ferroui_base::{
     BoxedValue, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref,

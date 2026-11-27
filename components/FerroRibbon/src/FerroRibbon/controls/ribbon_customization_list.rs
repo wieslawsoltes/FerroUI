@@ -1,5 +1,5 @@
 //! Native list used by RibbonCustomizeDialog.cs (ListRow / SelectableList).
-//! Copyright Wiesław Šoltés, MIT. The source builds these row visuals in code.
+//! The source builds these row visuals in code.
 //! Outline-level accessibility and physical screen-reader behavior remain unaudited.
 use crate::{primitives::RibbonIconPresenter, theming::RibbonTheme};
 use ferroribbon_core::RibbonString;

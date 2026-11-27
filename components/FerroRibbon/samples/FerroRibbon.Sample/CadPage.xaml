@@ -1,4 +1,4 @@
-<!-- Adapted from pinned RibbonSpace CadPage.xaml, Wiesław Šoltés, MIT. -->
+<!-- Adapted from pinned RibbonSpace CadPage.xaml (MIT; see the NOTICE.md of the component). -->
 <UserControl xmlns="https://github.com/ferroui" xmlns:cad="using:FerroRibbon.Sample.Cad" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="FerroRibbon.Sample.Pages.CadPage" x:DataType="cad:CadViewModel" x:CompileBindings="True" RequestedThemeVariant="Dark">
   <UserControl.Resources>
     <ResourceDictionary>

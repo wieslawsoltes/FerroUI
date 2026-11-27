@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Original CAD file/layout tab state.
+// Original CAD file/layout tab state.
 use super::CadPage;
 use crate::cad::{
     CadDrawingCanvas,

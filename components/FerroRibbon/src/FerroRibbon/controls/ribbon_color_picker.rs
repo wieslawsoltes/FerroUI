@@ -1,5 +1,4 @@
 //! RibbonColorPicker.cs: owned palette/flyout, source split action and exact copy forwarding.
-//! Copyright Wiesław Šoltés, MIT.
 use super::{
     RibbonColorDialog, RibbonColorPalette, RibbonControlBaseImpl, RibbonItemHelper,
     RibbonSplitButton, RibbonSplitButtonImpl, RibbonSplitButtonImplExt,

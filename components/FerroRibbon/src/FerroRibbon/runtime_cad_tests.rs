@@ -1,6 +1,5 @@
 //! Fifteen pinned CAD scenarios on native controls and themes. The exact-width reduction
-//! scenario runs with real text services in the native sample tests. Copyright Wiesław Šoltés,
-//! MIT.
+//! scenario runs with real text services in the native sample tests.
 use crate::compat::{FontIcon, ImageIcon};
 use crate::{
     controls::*,

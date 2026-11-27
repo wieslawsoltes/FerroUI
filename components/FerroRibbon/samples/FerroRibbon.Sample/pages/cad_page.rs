@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Wiesław Šoltés. MIT. Native CadPage control.
+// Native CadPage control.
 use crate::cad::{
     CadColorOption, CadLayer, CadLinetype, CadLineweight,
     cad_view_model::{CadContextAction, CadInvocation, CadKey, CadLog, CadViewModel},

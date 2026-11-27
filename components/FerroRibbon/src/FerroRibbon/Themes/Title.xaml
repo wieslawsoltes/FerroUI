@@ -1,4 +1,4 @@
-<!-- Original titlebar tree with explicit native padding wrapper. Copyright Wiesław Šoltés, MIT. -->
+<!-- Original titlebar tree with explicit native padding wrapper. -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/Search.xaml" /></ResourceDictionary.MergedDictionaries>
   <ControlTheme TargetType="RibbonTitleBar" x:Key="{x:Type RibbonTitleBar}">
