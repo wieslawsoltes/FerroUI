@@ -4,7 +4,8 @@
 
 use crate::internal::{
     ChildFitter, FileSizeStringConverter, ManagedFileChooserFilterViewModel, ManagedFileChooserItemType,
-    ManagedFileChooserItemViewModel, ManagedFileChooserViewModel, ResourceSelectorConverter,
+    ManagedFileChooserItemViewModel, ManagedFileChooserViewModel, ManagedStorageFallback,
+    ResourceSelectorConverter,
 };
 use crate::{AboutFerroDialog, ManagedFileChooser, ManagedFileChooserOverwritePrompt};
 use ferroui_base::data::converters::IValueConverter;
@@ -46,6 +47,7 @@ const MARKUP_TYPES: &[&MarkupType] = &[
     <ManagedFileChooserItemType as MarkupTyped>::MARKUP,
     <ManagedFileChooserItemViewModel as MarkupTyped>::MARKUP,
     <ManagedFileChooserViewModel as MarkupTyped>::MARKUP,
+    <ManagedStorageFallback as MarkupTyped>::MARKUP,
 ];
 
 // The lists of the view models that are delivered to items source properties.
