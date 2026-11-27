@@ -41,10 +41,43 @@ pub struct BatchQueue {
 #[derive(Default)]
 struct QueuedBatches {
     batches: VecDeque<CommittedBatch>,
+    late_ticks: LateBatchTicks,
+}
+
+/// Who asks for the tick out of turn of a batch that missed its display frame: one request
+/// for one late batch. A batch can be late twice over: it follows a tick that was idle, and it
+/// lands inside the next tick after that tick has looked at the queue.
+#[derive(Default)]
+struct LateBatchTicks {
     /// The last tick of the render thread found no batch and drew no scene,
     /// and no batch has been enqueued since: see
     /// [`BatchQueue::note_idle_tick`].
     idle_tick: bool,
+    /// The compositor has asked for a tick for a batch that is still in the queue. Its request
+    /// comes after the batch is in the queue, so a tick that missed the batch cannot use it up.
+    asked: bool,
+}
+
+impl LateBatchTicks {
+    /// A batch was added. Returns whether the compositor asks for its tick.
+    fn batch_enqueued(&mut self) -> bool {
+        let late = std::mem::take(&mut self.idle_tick);
+        self.asked |= late;
+        late
+    }
+
+    /// A tick took a batch from the queue.
+    fn batch_dequeued(&mut self) {
+        self.idle_tick = false;
+        self.asked = false;
+    }
+
+    /// A tick ended that applied no batch and drew no scene. Returns whether the render thread
+    /// asks for a tick for a batch that came during it.
+    fn idle_tick_ended(&mut self, queue_is_empty: bool) -> bool {
+        self.idle_tick = queue_is_empty;
+        !queue_is_empty && !self.asked
+    }
 }
 
 impl BatchQueue {
@@ -55,14 +88,14 @@ impl BatchQueue {
     pub(crate) fn enqueue(&self, batch: CommittedBatch) -> bool {
         let mut queue = self.queue.lock().unwrap();
         queue.batches.push_back(batch);
-        std::mem::take(&mut queue.idle_tick)
+        queue.late_ticks.batch_enqueued()
     }
 
     fn dequeue(&self) -> Option<CommittedBatch> {
         let mut queue = self.queue.lock().unwrap();
         let batch = queue.batches.pop_front();
         if batch.is_some() {
-            queue.idle_tick = false;
+            queue.late_ticks.batch_dequeued();
         }
         batch
     }
@@ -75,13 +108,14 @@ impl BatchQueue {
     /// (desktop-performance.md, sections 9.33 and 9.51), which draws the one
     /// scene this display frame is still without.
     ///
-    /// Returns whether a batch waits in the queue already: it came during
-    /// the tick and missed it the same way, so the render thread asks for
-    /// the tick out of turn itself. Nothing is noted then.
+    /// Returns whether a batch waits in the queue already and nobody has
+    /// asked for its tick: it came during the tick and missed it the same
+    /// way, so the render thread asks for the tick out of turn itself.
+    /// Nothing is noted when a batch waits.
     fn note_idle_tick(&self) -> bool {
         let mut queue = self.queue.lock().unwrap();
-        queue.idle_tick = queue.batches.is_empty();
-        !queue.idle_tick
+        let queue_is_empty = queue.batches.is_empty();
+        queue.late_ticks.idle_tick_ended(queue_is_empty)
     }
 
     /// Takes a stream buffer for a new batch.
@@ -1166,5 +1200,45 @@ struct NotifyRendered<'a>(&'a ServerCompositor);
 impl Drop for NotifyRendered<'_> {
     fn drop(&mut self) {
         self.0.notify_batches_rendered();
+    }
+}
+
+#[cfg(test)]
+mod late_batch_tick_tests {
+    use super::LateBatchTicks;
+
+    /// The batch follows an idle tick and lands inside the next tick, after that tick looked
+    /// at the queue: the compositor asks for its tick, and the tick it missed does not ask again.
+    #[test]
+    fn a_batch_late_twice_over_asks_for_one_tick() {
+        let mut ticks = LateBatchTicks::default();
+        assert!(!ticks.idle_tick_ended(true));
+        assert!(ticks.batch_enqueued());
+        assert!(!ticks.idle_tick_ended(false));
+        // Another batch before the tick is served by the same tick.
+        assert!(!ticks.batch_enqueued());
+        assert!(!ticks.idle_tick_ended(false));
+    }
+
+    /// No idle tick came before the batch: the tick it missed asks for it.
+    #[test]
+    fn a_batch_that_only_missed_the_running_tick_is_asked_for_by_that_tick() {
+        let mut ticks = LateBatchTicks::default();
+        assert!(!ticks.batch_enqueued());
+        assert!(ticks.idle_tick_ended(false));
+    }
+
+    /// The request covers the batches it was made for, not the ones after them.
+    #[test]
+    fn a_later_late_batch_asks_again() {
+        let mut ticks = LateBatchTicks::default();
+        assert!(!ticks.idle_tick_ended(true));
+        assert!(ticks.batch_enqueued());
+        ticks.batch_dequeued();
+        assert!(!ticks.batch_enqueued());
+        assert!(ticks.idle_tick_ended(false));
+        ticks.batch_dequeued();
+        assert!(!ticks.idle_tick_ended(true));
+        assert!(ticks.batch_enqueued());
     }
 }

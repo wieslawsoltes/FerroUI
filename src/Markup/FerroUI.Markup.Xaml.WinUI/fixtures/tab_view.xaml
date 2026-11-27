@@ -1,0 +1,17 @@
+<TabView xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         x:Name="Tabs" TabWidthMode="SizeToContent" CloseButtonOverlayMode="OnPointerOver"
+         IsAddTabButtonVisible="False" SelectedIndex="1">
+  <TabView.TabStripHeader>
+    <TextBlock x:Name="StripHeader" Text="Documents" />
+  </TabView.TabStripHeader>
+  <TabViewItem x:Name="First" Header="Notes">
+    <TabViewItem.IconSource>
+      <SymbolIconSource Symbol="Document" />
+    </TabViewItem.IconSource>
+    <TextBlock Text="The notes" />
+  </TabViewItem>
+  <TabViewItem x:Name="Second" Header="Drafts" IsClosable="False">
+    <TextBlock x:Name="DraftsContent" Text="The drafts" />
+  </TabViewItem>
+</TabView>

@@ -25,6 +25,7 @@ mod custom_controls;
 mod date_samples;
 pub mod examples;
 mod feedback_samples;
+mod tab_view_samples;
 mod frame_sample;
 pub mod gallery;
 mod ink_samples;
@@ -82,6 +83,9 @@ mod feedback_samples_tests;
 // The Color page is tested on the WinUI theme, which the `theme` feature brings.
 #[cfg(all(test, feature = "theme"))]
 mod color_samples_tests;
+#[cfg(test)]
+mod tab_view_samples_tests;
+
 #[cfg(test)]
 mod navigation_view_samples_tests;
 

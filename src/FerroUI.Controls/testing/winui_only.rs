@@ -9,7 +9,7 @@ use crate::{
     AutoSuggestBox, ContentDialog, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem,
     NavigationViewItemHeader, GridView, GridViewItem, ListView, ListViewItem, NavigationViewItemSeparator, NumberBox,
     PagerControl, PersonPicture, Pivot, PivotHeaderItem, PivotItem, ProgressRing, RadioButtons, RatingControl,
-    RichEditBox, SwipeControl, TitleBar,
+    RichEditBox, SwipeControl, TabView, TabViewItem, TabViewListView, TitleBar,
 };
 use ferroui_base::TypeInfo;
 
@@ -40,6 +40,9 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (PivotHeaderItem::TYPE, "WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes"),
     (SwipeControl::TYPE, "WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes"),
     (ContentDialog::TYPE, "WinUI's ContentDialog: its template is ported from WinUI's ContentDialog.xaml into the WinUI theme and its derived themes"),
+    (TabView::TYPE, "WinUI's TabView: its template is ported from WinUI's TabView.xaml into the WinUI theme"),
+    (TabViewItem::TYPE, "WinUI's TabViewItem: its template is ported from WinUI's TabView.xaml into the WinUI theme"),
+    (TabViewListView::TYPE, "WinUI's TabViewListView: its template is ported from WinUI's TabView.xaml into the WinUI theme"),
 ];
 
 /// Whether only the WinUI theme and the themes derived from it style `control`.
