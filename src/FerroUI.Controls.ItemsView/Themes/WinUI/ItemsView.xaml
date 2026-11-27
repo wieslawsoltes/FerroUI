@@ -1,0 +1,36 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/ItemsView/ItemsView.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes: PART_ScrollView is a ScrollViewer, because FerroUI has no ScrollView. A null
+  Layout is the default StackLayout of the repeater.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type ItemsView}" TargetType="ItemsView">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="ItemsView">
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="PART_ScrollView">
+            <ItemsRepeater x:Name="PART_ItemsRepeater"
+                           HorizontalCacheLength="0"
+                           ItemTransitionProvider="{TemplateBinding ItemTransitionProvider}"
+                           ItemsSource="{TemplateBinding ItemsSource}"
+                           ItemTemplate="{TemplateBinding ItemTemplate}"
+                           Layout="{TemplateBinding Layout}"
+                           Margin="{TemplateBinding Padding}"
+                           VerticalAlignment="Top" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

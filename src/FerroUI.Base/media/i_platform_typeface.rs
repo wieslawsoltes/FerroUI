@@ -1,7 +1,9 @@
 use std::any::Any;
 use std::io::Read;
 
-use crate::media::{FontSimulations, FontStretch, FontStyle, FontVariationSettings, FontWeight, IFontMemory};
+use crate::media::{
+    FontSimulations, FontStretch, FontStyle, FontVariationDesign, FontVariationSettings, FontWeight, IFontMemory,
+};
 
 /// Represents a platform-specific typeface: a font face as loaded by the
 /// font backend, exposing its identity and raw table data.
@@ -36,6 +38,14 @@ pub trait IPlatformTypeface: IFontMemory {
     fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<std::rc::Rc<dyn IPlatformTypeface>> {
         let _ = settings;
         None
+    }
+
+    /// The variation space of the font: its axes and named instances, read by the backend (no
+    /// table is parsed by the framework). Empty, the default, for a font that is not variable and
+    /// for a backend that makes no instances ([`with_variation_settings`](Self::with_variation_settings)
+    /// is `None` there).
+    fn variation_design(&self) -> FontVariationDesign {
+        FontVariationDesign::default()
     }
 
     /// Attempts to obtain a stream over the raw font data.
