@@ -156,11 +156,12 @@ pub(crate) fn keys(record: &[u8]) -> Option<Vec<&[u8]>> {
 /// The record this crate carries: the pipelines of ordinary drawing (fills, rounded rectangles,
 /// borders, text, shadows, gradients, clips), recorded from the screens of the benchmarks on a
 /// Mac with an Apple GPU (`scripts/perf/pipeline-records.py` says how). A key belongs to a kind
-/// of device, and whether Skia refuses a key of another kind or fails on it is not known, so the
-/// record is used where it was made: macOS on Apple silicon.
-#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
-const ORDINARY: Option<&[u8]> = Some(include_bytes!("records/ordinary-macos-apple.fpr"));
-#[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+/// of device, and whether Skia refuses a key of another kind or fails on it is not known, so a
+/// record is used where it was made: `records/ordinary-<platform>.fpr`, which `build.rs` names
+/// for the kind of device of the target when the crate has one (macOS on Apple silicon today).
+#[cfg(ferro_skia_ordinary_pipeline_record)]
+const ORDINARY: Option<&[u8]> = Some(include_bytes!(env!("FERROUI_SKIA_ORDINARY_PIPELINE_RECORD")));
+#[cfg(not(ferro_skia_ordinary_pipeline_record))]
 const ORDINARY: Option<&[u8]> = None;
 
 /// The record this crate carries for this kind of device, if it has one (tests).
