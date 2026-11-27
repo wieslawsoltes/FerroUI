@@ -50,8 +50,8 @@ impl GestureRecognizerImpl for PinchGestureRecognizer {
             let scale = (distance / this.initial_distance.get()) as f64;
             let degree = Self::get_angle_degree_from_points(this.first_point.get(), this.second_point.get());
 
-            let pinch_event_args =
-                PinchEventArgs::with_angle(scale, this.origin.get(), degree, this.previous_angle.get() - degree);
+            let angle_delta = Self::shortest_angle_delta(this.previous_angle.get(), degree);
+            let pinch_event_args = PinchEventArgs::with_angle(scale, this.origin.get(), degree, angle_delta);
             this.previous_angle.set(degree);
             target.raise_event(&pinch_event_args);
 
@@ -156,5 +156,62 @@ impl PinchGestureRecognizer {
         // atan2 returns a value in degrees from -180 to +180; to get the
         // angle between 0 and 360 degrees add 180 degrees.
         (rad * (180.0 / std::f64::consts::PI)) + 180.0
+    }
+
+    /// The shortest turn from `previous` to `current`, in degrees in the
+    /// range (-180, 180]: positive for clockwise. The angles are bearings
+    /// that wrap at 360 degrees.
+    fn shortest_angle_delta(previous: f64, current: f64) -> f64 {
+        let turn = (current - previous).rem_euclid(360.0);
+        if turn > 180.0 {
+            turn - 360.0
+        } else {
+            turn
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn delta_between(first: Point, second: Point, center: Point) -> f64 {
+        PinchGestureRecognizer::shortest_angle_delta(
+            PinchGestureRecognizer::get_angle_degree_from_points(first, center),
+            PinchGestureRecognizer::get_angle_degree_from_points(second, center),
+        )
+    }
+
+    #[test]
+    fn a_clockwise_turn_on_the_screen_has_a_positive_delta() {
+        let center = Point::new(0.0, 0.0);
+        let delta = delta_between(Point::new(0.0, -10.0), Point::new(10.0, 0.0), center);
+        assert!((delta - 90.0).abs() < 1e-9, "{delta}");
+    }
+
+    #[test]
+    fn a_counterclockwise_turn_on_the_screen_has_a_negative_delta() {
+        let center = Point::new(0.0, 0.0);
+        let delta = delta_between(Point::new(10.0, 0.0), Point::new(0.0, -10.0), center);
+        assert!((delta + 90.0).abs() < 1e-9, "{delta}");
+    }
+
+    #[test]
+    fn a_turn_across_the_wrap_stays_small_in_both_directions() {
+        let center = Point::new(0.0, 0.0);
+        let right = Point::new(1.0, 10.0);
+        let left = Point::new(-1.0, 10.0);
+        let expected = 2.0 * 1.0_f64.atan2(10.0).to_degrees();
+        let clockwise = delta_between(right, left, center);
+        let counterclockwise = delta_between(left, right, center);
+        assert!((clockwise - expected).abs() < 1e-9, "{clockwise}");
+        assert!((counterclockwise + expected).abs() < 1e-9, "{counterclockwise}");
+    }
+
+    #[test]
+    fn the_delta_is_in_the_half_open_range() {
+        assert_eq!(PinchGestureRecognizer::shortest_angle_delta(0.0, 180.0), 180.0);
+        assert_eq!(PinchGestureRecognizer::shortest_angle_delta(180.0, 0.0), 180.0);
+        assert_eq!(PinchGestureRecognizer::shortest_angle_delta(10.0, 10.0), 0.0);
     }
 }
