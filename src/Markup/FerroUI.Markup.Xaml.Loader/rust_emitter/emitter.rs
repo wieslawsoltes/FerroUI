@@ -765,6 +765,68 @@ fn compile_time_declared_properties() -> bool {
 const SETTER_VALUE_PROPERTY_INFO_ARGUMENTS: &str =
     "<::ferroui_base::styling::Setter as ::ferroui_base::metadata::MarkupTyped>::MARKUP, \"Value\", false, ::ferroui_base::data::core::ValueType::object(), false";
 
+/// The arguments of `rt::clr_property_info` for a member of a binding.
+macro_rules! binding_member_arguments {
+    ($owner:literal, $name:literal, $handle:literal) => {
+        concat!(
+            "<::ferroui_base::data::",
+            $owner,
+            " as ::ferroui_base::metadata::MarkupTyped>::MARKUP, \"",
+            $name,
+            "\", false, rt::markup_handle(<",
+            $handle,
+            " as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false"
+        )
+    };
+}
+
+/// The members of a binding that are the target property of a nested markup extension, and the
+/// helper that describes each from the member alone (#603): the same description, without naming
+/// the declaration of the binding or of the type of the member.
+const BINDING_TARGET_PROPERTIES: [(&str, &str); 5] = [
+    (
+        binding_member_arguments!(
+            "TemplateBinding",
+            "Converter",
+            "dyn ::ferroui_base::data::converters::IValueConverter"
+        ),
+        "rt::template_binding_converter_property()",
+    ),
+    (
+        binding_member_arguments!(
+            "CompiledBinding",
+            "Converter",
+            "dyn ::ferroui_base::data::converters::IValueConverter"
+        ),
+        "rt::compiled_binding_converter_property()",
+    ),
+    (
+        binding_member_arguments!(
+            "MultiBinding",
+            "Bindings",
+            "::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>"
+        ),
+        "rt::multi_binding_bindings_property()",
+    ),
+    (
+        binding_member_arguments!(
+            "MultiBinding",
+            "Converter",
+            "dyn ::ferroui_base::data::converters::IMultiValueConverter"
+        ),
+        "rt::multi_binding_converter_property()",
+    ),
+    (
+        binding_member_arguments!("ReflectionBinding", "RelativeSource", "::ferroui_base::data::RelativeSource"),
+        "rt::reflection_binding_relative_source_property()",
+    ),
+];
+
+/// The helper of [`BINDING_TARGET_PROPERTIES`] for these arguments of `rt::clr_property_info`.
+fn binding_target_property(arguments: &str) -> Option<&'static str> {
+    BINDING_TARGET_PROPERTIES.iter().find(|(known, _)| *known == arguments).map(|(_, helper)| *helper)
+}
+
 /// Whether `text` borrows a local without evaluating anything: `&local`, or
 /// `local.upcast_ref::<Base>()`.
 fn is_plain_borrow(text: &str) -> bool {
@@ -3677,6 +3739,10 @@ impl<'a> Emitter<'a> {
         // value: the same description, without its arguments at every use.
         if arguments == SETTER_VALUE_PROPERTY_INFO_ARGUMENTS {
             return Ok("rt::setter_value_property()".to_string());
+        }
+        // A member of a binding as the target of a nested markup extension (#603).
+        if let Some(helper) = binding_target_property(&arguments) {
+            return Ok(helper.to_string());
         }
         // The declared property resolved at compile time (#603), with the option on.
         if let Some(index) = index {
