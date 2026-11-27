@@ -45,6 +45,8 @@ pub mod interop;
 #[cfg(target_os = "ios")]
 mod app_notification_manager;
 #[cfg(target_os = "ios")]
+mod badge_notification_manager;
+#[cfg(target_os = "ios")]
 pub mod display_link_timer;
 // OpenGL ES, which Apple deprecated in iOS 12, as are its bindings.
 #[cfg(target_os = "ios")]
@@ -67,6 +69,8 @@ pub use view_controller::{IFerroViewController, StatusBarStyle};
 
 #[cfg(target_os = "ios")]
 pub use app_notification_manager::IosAppNotificationManager;
+#[cfg(target_os = "ios")]
+pub use badge_notification_manager::IosBadgeNotificationManager;
 #[cfg(target_os = "ios")]
 pub use ferro_app_delegate::{run_application, run_application_with, FerroAppDelegate};
 #[cfg(target_os = "ios")]

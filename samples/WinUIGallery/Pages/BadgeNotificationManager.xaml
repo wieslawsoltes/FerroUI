@@ -1,17 +1,22 @@
 <!-- Ported from the two pinned BadgeNotificationManager examples of WinUI Gallery (14061eea) and
      the handlers of BadgeNotificationManagerPage.xaml.cs (notification_samples.rs); see
-     ../NOTICE.md. FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or
-     the home screen: the badge the handlers set is shown by the InfoBadge on the preview of the
-     app's icon beside each example's buttons (the gallery icon of the TitleBar page), and the
-     InfoBar says so where the source asks for a packaged app. The glyphs of BadgeNotificationGlyph
-     are Segoe Fluent Icons glyphs of the same meaning, which need the platform's symbol font. The
-     ComboBox lists the source's enumeration (its x:Bind to the page's list is the items,
-     SelectedItem the index); its Header is composed. -->
+     ../NOTICE.md. The handlers set the badge with FerroUI's BadgeNotificationManager: the system
+     shows it on the app's icon (the Dock tile, the taskbar button of a packaged app, the home
+     screen icon or the icon of an installed web app) where the gallery's badge service can serve
+     the app, and the first InfoBar says so; elsewhere the second InfoBar says that only the page
+     shows it. In both cases the InfoBadge on the preview of the app's icon beside each example's
+     buttons (the gallery icon of the TitleBar page) shows the badge. The glyphs of
+     BadgeNotificationGlyph are Segoe Fluent Icons glyphs of the same meaning on the preview, which
+     need the platform's symbol font. The ComboBox lists the source's enumeration (its x:Bind to
+     the page's list is the items, SelectedItem the index); its Header is composed. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <InfoBar x:Name="BadgeSystemInfoBar" Margin="0,10,0,0" IsOpen="False" IsClosable="False" Severity="Informational"
+           Title="The badge is shown on the app's icon."
+           Message="The examples set the badge of the app's icon in the Dock, the taskbar or the home screen, which the system may ask the user to allow; the preview beside the buttons shows it too." />
   <InfoBar x:Name="BadgeServiceInfoBar" Margin="0,10,0,0" IsOpen="True" IsClosable="False" Severity="Warning"
            Title="The badge is shown on the preview of the app's icon."
-           Message="FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or the home screen: the examples set the badge of the icon on this page." />
+           Message="The app has no badge service of the system here (a Windows app needs a package identity): the examples set the badge of the icon on this page." />
 
   <StackPanel x:Name="BadgeNotificationExample1" Spacing="8">
     <TextBlock Text="Setting badge notifications with count" FontSize="18" />

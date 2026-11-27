@@ -2491,7 +2491,7 @@
       ]
     },
     "BadgeNotificationManager": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/BadgeNotificationManager.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -2509,15 +2509,19 @@
         {
           "path": "samples/WinUIGallery/notification_samples_tests.rs",
           "name": "badge_buttons_set_the_glyph_and_the_selection_follows_once_set"
+        },
+        {
+          "path": "samples/WinUIGallery/notification_samples_tests.rs",
+          "name": "badge_buttons_set_the_badge_of_the_system_when_there_is_a_badge_service"
         }
       ],
-      "notes": "Both source examples with the handlers of BadgeNotificationManagerPage.xaml.cs in Rust (notification_samples.rs): SetBadgeCountButton_Click, SetBadgeGlyphButton_Click, ClearBadgeButton_Click (both Clear badge buttons), BadgeCountBox_ValueChanged and BadgeNotificationGlyphsCombo_SelectionChanged with the source's isBadgeSetted, over the badge of the app that the gallery keeps (BadgeNotificationManager.Current, kept when the page opens again). FerroUI has no service for the badge of the app's icon in the taskbar, the Dock or the home screen: the badge is shown by an InfoBadge on a preview of the app's icon beside each example's buttons (a count is its value, a glyph a Segoe Fluent Icons glyph of the same meaning, the glyph None and a count of 0 no badge), and the InfoBar says so where the source asks for a packaged app. The system's badge is not set, which keeps the page partial. The NumberBox keeps the source's Header, Value 5, Minimum 1, inline spin buttons and changes; the glyph ComboBox lists the thirteen BadgeNotificationGlyph members (SelectedItem is the index, Activity selected); its Header is composed. The glyphs need the platform's symbol font.",
+      "notes": "Both source examples with the handlers of BadgeNotificationManagerPage.xaml.cs in Rust (notification_samples.rs): SetBadgeCountButton_Click, SetBadgeGlyphButton_Click, ClearBadgeButton_Click (both Clear badge buttons), BadgeCountBox_ValueChanged and BadgeNotificationGlyphsCombo_SelectionChanged with the source's isBadgeSetted. BadgeNotificationManager.Current is FerroUI's BadgeNotificationManager (ferroui_base::platform::notifications, #1276): the gallery registers the badge service of its platform (use_platform_badge_notifications), and where that service can serve the app (the Dock tile on macOS, the taskbar button and Start tile of an app with a package identity on Windows, the home screen icon on iOS, the icon of an installed web app in a browser) the system shows the badge, with what each platform shows of it (docs/porting/winui-controls.md, section G3), and the first InfoBar says so. In any case an InfoBadge on a preview of the app's icon beside each example's buttons shows the badge the page set, kept when the page opens again (a count is its value, a glyph a Segoe Fluent Icons glyph of the same meaning, the glyph None and a count of 0 no badge); where the app has no badge service (Android, Linux, Windows without a package identity) the second InfoBar says that only the preview shows it, where the source asks for a packaged app. The NumberBox keeps the source's Header, Value 5, Minimum 1, inline spin buttons and changes; the glyph ComboBox lists the thirteen BadgeNotificationGlyph members (SelectedItem is the index, Activity selected); its Header is composed. The glyphs of the preview need the platform's symbol font.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerSettingBadgeNotificationsCount.txt",
           "source_sha256": "ea0d1f461a996b42dc749d3427d9e2e0932dec0210e2957df859e3aecced0543",
-          "status": "partial",
-          "notes": "SetBadgeAsCount with the NumberBox's value and ClearBadge on the preview's InfoBadge; the value changes the badge once it is set. The system's badge is not set.",
+          "status": "ported",
+          "notes": "SetBadgeAsCount with the NumberBox's value and ClearBadge through BadgeNotificationManager: on the app's icon where the platform's badge service serves the app, and on the preview's InfoBadge; the value changes the badge once it is set.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2526,14 +2530,18 @@
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
               "name": "badge_buttons_set_the_count_and_clear_it_on_the_preview"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "badge_buttons_set_the_badge_of_the_system_when_there_is_a_badge_service"
             }
           ]
         },
         {
           "source": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerSettingBadgeNotificationsGlyph.txt",
           "source_sha256": "4571ddf647129ba9e5fdc7c707be2a744fa329752b35806817a3cbd2bedfb5ae",
-          "status": "partial",
-          "notes": "SetBadgeAsGlyph with the selected BadgeNotificationGlyph (a Segoe Fluent Icons glyph of the same meaning; None shows no badge) and ClearBadge on the preview's InfoBadge; the selection changes the badge once it is set. The system's badge is not set.",
+          "status": "ported",
+          "notes": "SetBadgeAsGlyph with the selected BadgeNotificationGlyph (None clears the badge) and ClearBadge through BadgeNotificationManager: the glyph on Windows, a text symbol of the same meaning on the Dock tile of macOS, the flag badge of the Badging API in a browser and no badge on iOS, whose badge is a number; the preview's InfoBadge shows a Segoe Fluent Icons glyph of the same meaning. The selection changes the badge once it is set.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -2542,6 +2550,10 @@
             {
               "path": "samples/WinUIGallery/notification_samples_tests.rs",
               "name": "badge_buttons_set_the_glyph_and_the_selection_follows_once_set"
+            },
+            {
+              "path": "samples/WinUIGallery/notification_samples_tests.rs",
+              "name": "badge_buttons_set_the_badge_of_the_system_when_there_is_a_badge_service"
             }
           ]
         }

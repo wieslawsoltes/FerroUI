@@ -1041,3 +1041,39 @@ interface IToastNotificationManagerStatics2 : IInspectable
 {
     HRESULT GetHistory([out, retval] IToastNotificationHistory** value);
 }
+
+// The badge of the application (#1276, `badge_notification_manager.rs`): the interfaces of
+// Windows.UI.Notifications the badge of a packaged application uses.
+
+[uuid(075CB4CA-D08A-4E2F-9233-7E289C1F7722)]
+interface IBadgeNotification : IInspectable
+{
+    HRESULT GetContent([out, retval] void** value);
+    HRESULT SetExpirationTime([in] void* value);
+    HRESULT GetExpirationTime([out, retval] void** value);
+}
+
+[uuid(EDF255CE-0618-4D59-948A-5A61040C52F9)]
+interface IBadgeNotificationFactory : IInspectable
+{
+    HRESULT CreateBadgeNotification([in] IXmlDocument* content, [out, retval] IBadgeNotification** value);
+}
+
+[uuid(B5FA1FD4-7562-4F6C-BFA3-1B6ED2E57F2F)]
+interface IBadgeUpdater : IInspectable
+{
+    HRESULT Update([in] IBadgeNotification* notification);
+    HRESULT Clear();
+    HRESULT StartPeriodicUpdate([in] void* badgeContent, [in] INT32 requestedInterval);
+    HRESULT StartPeriodicUpdateAtTime([in] void* badgeContent, [in] INT64 startTime, [in] INT32 requestedInterval);
+    HRESULT StopPeriodicUpdate();
+}
+
+[uuid(33400FAA-6DD5-4105-AEBC-9B50FCA492DA)]
+interface IBadgeUpdateManagerStatics : IInspectable
+{
+    HRESULT CreateBadgeUpdaterForApplication([out, retval] IBadgeUpdater** value);
+    HRESULT CreateBadgeUpdaterForApplicationWithId([in] HSTRING applicationId, [out, retval] IBadgeUpdater** value);
+    HRESULT CreateBadgeUpdaterForSecondaryTile([in] HSTRING tileId, [out, retval] IBadgeUpdater** value);
+    HRESULT GetTemplateContent([in] INT32 type, [out, retval] void** value);
+}

@@ -6,11 +6,13 @@ use ferroui_desktop::AppBuilderDesktopExtensions;
 
 fn main() -> std::process::ExitCode {
     let arguments: Vec<_> = std::env::args().skip(1).collect();
-    // The notifications of the AppNotification page go to the notification center of the system
-    // where the platform's service can serve the gallery (#1276).
+    // The notifications of the AppNotification page go to the notification center of the system,
+    // and the badge of the BadgeNotificationManager page to the app's icon, where the platform's
+    // services can serve the gallery (#1276).
     let builder = AppBuilder::configure::<winui_gallery::App>()
         .use_platform_detect()
-        .use_platform_app_notifications();
+        .use_platform_app_notifications()
+        .use_platform_badge_notifications();
     #[cfg(target_os = "linux")]
     let builder = {
         use ferroui_x11::{X11PlatformOptions, X11RenderingMode};

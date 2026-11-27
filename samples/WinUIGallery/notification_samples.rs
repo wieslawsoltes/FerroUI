@@ -5,19 +5,20 @@
 //! The notifications are those of `AppNotificationManager` (#1276): the notification center of
 //! the system shows them when the app registered the platform's notification service
 //! (`use_platform_app_notifications`) and the service can serve the app; otherwise a card of the
-//! window's `WindowNotificationManager` shows what the notification would. FerroUI has no
-//! service for the badge of the app's icon or for the jump lists of Windows yet: the badge of
-//! `BadgeNotificationManager.Current` is shown by an `InfoBadge` on a preview of the app's icon;
-//! and the jump list of the app is its dock menu (`NativeDock.Menu` of the application), which
-//! the macOS platform shows. Everything the pages draw is ordinary controls, drawn by each
-//! backend's GPU renderer.
+//! window's `WindowNotificationManager` shows what the notification would. The badge is that of
+//! `BadgeNotificationManager` (#1276): the system shows it on the app's icon where the app
+//! registered the platform's badge service (`use_platform_badge_notifications`) and the service
+//! can serve the app, and an `InfoBadge` on a preview of the app's icon shows it on the page in
+//! any case. FerroUI has no service for the jump lists of Windows yet: the jump list of the app
+//! is its dock menu (`NativeDock.Menu` of the application), which the macOS platform shows.
+//! Everything the pages draw is ordinary controls, drawn by each backend's GPU renderer.
 
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{FontFamily, FontWeight, IBrush, ImageBrush, Stretch, TextWrapping};
 use ferroui_base::platform::notifications::{
     AppNotification, AppNotificationBuilder, AppNotificationButton, AppNotificationComboBox,
     AppNotificationImageCrop, AppNotificationManager, AppNotificationProgressBar,
-    AppNotificationSoundEvent,
+    AppNotificationSoundEvent, BadgeNotificationGlyph, BadgeNotificationManager,
 };
 use ferroui_base::utilities::{CultureInfo, DateTime};
 use ferroui_base::{BoxedValue, Ref, WeakRef};
@@ -473,20 +474,20 @@ fn wire_app_notification(root: &Ref<Control>) {
 
 /// The members of `BadgeNotificationGlyph` in the order of `Enum.GetValues`, with the Segoe Fluent
 /// Icons glyph of the same meaning that the preview shows (`None` shows no badge).
-pub(crate) const BADGE_GLYPHS: [(&str, Option<&str>); 13] = [
-    ("None", None),
-    ("Activity", Some("\u{E895}")),
-    ("Alarm", Some("\u{EA8F}")),
-    ("Alert", Some("\u{E7BA}")),
-    ("Attention", Some("\u{E8C9}")),
-    ("Available", Some("\u{E73E}")),
-    ("Away", Some("\u{E823}")),
-    ("Busy", Some("\u{E733}")),
-    ("Error", Some("\u{E783}")),
-    ("NewMessage", Some("\u{E715}")),
-    ("Paused", Some("\u{E769}")),
-    ("Playing", Some("\u{E768}")),
-    ("Unavailable", Some("\u{E711}")),
+pub(crate) const BADGE_GLYPHS: [(BadgeNotificationGlyph, Option<&str>); 13] = [
+    (BadgeNotificationGlyph::None, None),
+    (BadgeNotificationGlyph::Activity, Some("\u{E895}")),
+    (BadgeNotificationGlyph::Alarm, Some("\u{EA8F}")),
+    (BadgeNotificationGlyph::Alert, Some("\u{E7BA}")),
+    (BadgeNotificationGlyph::Attention, Some("\u{E8C9}")),
+    (BadgeNotificationGlyph::Available, Some("\u{E73E}")),
+    (BadgeNotificationGlyph::Away, Some("\u{E823}")),
+    (BadgeNotificationGlyph::Busy, Some("\u{E733}")),
+    (BadgeNotificationGlyph::Error, Some("\u{E783}")),
+    (BadgeNotificationGlyph::NewMessage, Some("\u{E715}")),
+    (BadgeNotificationGlyph::Paused, Some("\u{E769}")),
+    (BadgeNotificationGlyph::Playing, Some("\u{E768}")),
+    (BadgeNotificationGlyph::Unavailable, Some("\u{E711}")),
 ];
 
 /// The source's `selectedGlyph`: `BadgeNotificationGlyph.Activity`.
@@ -500,8 +501,7 @@ pub(crate) enum Badge {
 }
 
 ferroui_base::ferro_thread_local! {
-    /// `BadgeNotificationManager.Current`: the badge of the app, kept when the page is opened
-    /// again.
+    /// The badge the page set, which the previews show: kept when the page is opened again.
     static CURRENT_BADGE: Cell<Option<Badge>> = const { Cell::new(None) };
 }
 
@@ -510,21 +510,32 @@ pub(crate) fn current_badge() -> Option<Badge> {
     CURRENT_BADGE.with(Cell::get)
 }
 
-/// `SetBadgeAsCount`: a count of 0 shows no badge, as on Windows.
+/// Whether the system shows the app's badge: the app registered a badge service that can show
+/// it (`use_platform_badge_notifications`).
+pub(crate) fn is_system_badge() -> bool {
+    BadgeNotificationManager::is_supported()
+}
+
+/// `BadgeNotificationManager.Current.SetBadgeAsCount`: a count of 0 shows no badge, as on
+/// Windows.
 pub(crate) fn set_badge_as_count(count: u32) {
+    BadgeNotificationManager::current().set_badge_as_count(count);
     CURRENT_BADGE.with(|badge| badge.set((count > 0).then_some(Badge::Count(count))));
 }
 
-/// `SetBadgeAsGlyph`: `BadgeNotificationGlyph.None` shows no badge.
+/// `BadgeNotificationManager.Current.SetBadgeAsGlyph`: `BadgeNotificationGlyph.None` shows no
+/// badge.
 pub(crate) fn set_badge_as_glyph(glyph: usize) {
-    let badge = BADGE_GLYPHS
-        .get(glyph)
-        .and_then(|(_, code)| code.map(|_| Badge::Glyph(glyph)));
+    let entry = BADGE_GLYPHS.get(glyph);
+    BadgeNotificationManager::current()
+        .set_badge_as_glyph(entry.map_or(BadgeNotificationGlyph::None, |(glyph, _)| *glyph));
+    let badge = entry.and_then(|(_, code)| code.map(|_| Badge::Glyph(glyph)));
     CURRENT_BADGE.with(|current| current.set(badge));
 }
 
-/// `ClearBadge`.
+/// `BadgeNotificationManager.Current.ClearBadge`.
 pub(crate) fn clear_badge() {
+    BadgeNotificationManager::current().clear_badge();
     CURRENT_BADGE.with(|badge| badge.set(None));
 }
 
@@ -542,7 +553,7 @@ pub(crate) fn badge_description(badge: Option<Badge>) -> String {
     match badge {
         None => "App icon".to_string(),
         Some(Badge::Count(count)) => format!("App icon, badge {count}"),
-        Some(Badge::Glyph(glyph)) => format!("App icon, badge {}", BADGE_GLYPHS[glyph].0),
+        Some(Badge::Glyph(glyph)) => format!("App icon, badge {}", BADGE_GLYPHS[glyph].0.name()),
     }
 }
 
@@ -582,6 +593,12 @@ fn show_badge(root: &Control) {
 }
 
 fn wire_badge_notification_manager(root: &Ref<Control>) {
+    // The InfoBar of where the badge is shown.
+    let system = is_system_badge();
+    root.get_control::<InfoBar>("BadgeSystemInfoBar")
+        .set_is_open(system);
+    root.get_control::<InfoBar>("BadgeServiceInfoBar")
+        .set_is_open(!system);
     // The source's `isBadgeSetted`: the options change the badge once a button of the page set it.
     let is_badge_set = Rc::new(Cell::new(false));
     let count_box = root.get_control::<NumberBox>("BadgeCountBox");

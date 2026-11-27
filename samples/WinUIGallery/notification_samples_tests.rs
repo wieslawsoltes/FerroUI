@@ -2,7 +2,7 @@
 //! source builds, shown through a test double of the notification service or by the window's
 //! notification manager; the badge of the app on the previews of its icon; and the jump list as
 //! the dock menu of the application. Nothing here reaches the notification center, the badge or
-//! the dock of the system.
+//! the dock of the system: the services of the system are test doubles.
 
 use crate::notification_samples::{
     self, badge_count, badge_description, card_content as notification_card, current_badge,
@@ -10,8 +10,9 @@ use crate::notification_samples::{
     JumpListItem, NotificationHost, BADGE_GLYPHS, DEFAULT_GLYPH, SOUND_EVENTS,
 };
 use ferroui_base::platform::notifications::{
-    register_app_notification_manager_impl, AppNotification, AppNotificationError,
-    AppNotificationImageCrop, AppNotificationSoundEvent, IAppNotificationManagerImpl,
+    register_app_notification_manager_impl, register_badge_notification_manager_impl,
+    AppNotification, AppNotificationError, AppNotificationImageCrop, AppNotificationSoundEvent,
+    BadgeNotificationGlyph, IAppNotificationManagerImpl, IBadgeNotificationManagerImpl,
 };
 use ferroui_base::FerroLocator;
 use crate::{examples, tests::start};
@@ -394,6 +395,10 @@ fn badge_buttons_set_the_count_and_clear_it_on_the_preview() {
     );
 
     let root = page("BadgeNotificationManager");
+    // Without a badge service only the preview shows the badge, and the InfoBar says so.
+    assert!(!notification_samples::is_system_badge());
+    assert!(root.get_control::<InfoBar>("BadgeServiceInfoBar").is_open());
+    assert!(!root.get_control::<InfoBar>("BadgeSystemInfoBar").is_open());
     let badge = root.get_control::<InfoBadge>("BadgeCountInfoBadge");
     let count_box = root.get_control::<NumberBox>("BadgeCountBox");
     assert!(!badge.is_visible());
@@ -445,7 +450,12 @@ fn badge_buttons_set_the_glyph_and_the_selection_follows_once_set() {
     let glyphs = root.get_control::<ComboBox>("BadgeNotificationGlyphsCombo");
     assert_eq!(glyphs.item_count(), BADGE_GLYPHS.len() as i32);
     assert_eq!(glyphs.selected_index(), DEFAULT_GLYPH as i32);
-    assert_eq!(BADGE_GLYPHS[DEFAULT_GLYPH].0, "Activity");
+    assert_eq!(BADGE_GLYPHS[DEFAULT_GLYPH].0, BadgeNotificationGlyph::Activity);
+    assert_eq!(
+        BADGE_GLYPHS.map(|(glyph, _)| glyph),
+        BadgeNotificationGlyph::VALUES,
+        "the ComboBox lists the glyphs in the order of their values"
+    );
     // BadgeNotificationGlyphsCombo_SelectionChanged changes nothing before a button set the badge.
     glyphs.set_selected_index(8);
     assert_eq!(current_badge(), None);
@@ -466,7 +476,7 @@ fn badge_buttons_set_the_glyph_and_the_selection_follows_once_set() {
 
     glyphs.set_selected_index(8);
     assert_eq!(current_badge(), Some(Badge::Glyph(8)));
-    assert_eq!(BADGE_GLYPHS[8].0, "Error");
+    assert_eq!(BADGE_GLYPHS[8].0, BadgeNotificationGlyph::Error);
     assert_eq!(glyph(&badge).as_deref(), BADGE_GLYPHS[8].1);
     assert_eq!(badge_description(current_badge()), "App icon, badge Error");
 
@@ -479,6 +489,61 @@ fn badge_buttons_set_the_glyph_and_the_selection_follows_once_set() {
     assert_eq!(current_badge(), Some(Badge::Glyph(9)));
     click(&root, "ClearBadgeGlyphButton");
     assert_eq!(current_badge(), None);
+}
+
+/// A badge service that records what the page sets, in place of the system's.
+#[derive(Default)]
+struct RecordingBadge {
+    calls: std::cell::RefCell<Vec<String>>,
+}
+
+impl IBadgeNotificationManagerImpl for RecordingBadge {
+    fn is_supported(&self) -> bool {
+        true
+    }
+
+    fn set_count(&self, count: u32) {
+        self.calls.borrow_mut().push(format!("count {count}"));
+    }
+
+    fn set_glyph(&self, glyph: BadgeNotificationGlyph) {
+        self.calls.borrow_mut().push(format!("glyph {}", glyph.name()));
+    }
+
+    fn clear(&self) {
+        self.calls.borrow_mut().push("clear".into());
+    }
+}
+
+#[test]
+fn badge_buttons_set_the_badge_of_the_system_when_there_is_a_badge_service() {
+    let _application = start();
+    notification_samples::reset();
+    let scope = FerroLocator::enter_scope();
+    let service = std::rc::Rc::new(RecordingBadge::default());
+    register_badge_notification_manager_impl(service.clone());
+    assert!(notification_samples::is_system_badge());
+
+    let root = page("BadgeNotificationManager");
+    assert!(root.get_control::<InfoBar>("BadgeSystemInfoBar").is_open());
+    assert!(!root.get_control::<InfoBar>("BadgeServiceInfoBar").is_open());
+    root.get_control::<NumberBox>("BadgeCountBox").set_numeric_value(4.0);
+    click(&root, "SetBadgeCountButton");
+    // The preview shows the badge the system shows.
+    assert_eq!(current_badge(), Some(Badge::Count(4)));
+    assert_eq!(root.get_control::<InfoBadge>("BadgeCountInfoBadge").value(), 4);
+    click(&root, "ClearBadgeCountButton");
+    let glyphs = root.get_control::<ComboBox>("BadgeNotificationGlyphsCombo");
+    // Once a button set the badge, the selection sets the glyph (and None clears the badge).
+    glyphs.set_selected_index(9);
+    click(&root, "SetBadgeGlyphButton");
+    glyphs.set_selected_index(0);
+    click(&root, "ClearBadgeGlyphButton");
+    assert_eq!(
+        *service.calls.borrow(),
+        ["count 4", "clear", "glyph NewMessage", "glyph NewMessage", "clear", "clear"]
+    );
+    scope.dispose();
 }
 
 fn menu_items(menu: &NativeMenu) -> Vec<String> {
