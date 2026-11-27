@@ -553,3 +553,55 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.11 TableView (#558)
+
+WinUI's `TableView` (`Microsoft.UI.Xaml.Controls.Tabular`, a preview control of the tabular library) is not ported as a new control. The WinUI Gallery page is built on the upstream-ported `TableView` of `ferroui-controls` (`table_view.rs`, a `ListBox` whose rows are `TableViewRow`s and whose columns are `TableViewColumn`s), and only what is majorly missing is added to it under the rules of section 6: every WinUI member is an addition whose default reproduces upstream, with a test of that default, and the themes add the WinUI look (the converted `TabularControlsResources`, DEVIATIONS.md of the WinUI theme, TV-1 to TVH-3).
+
+`ferroui-controls-treedatagrid` (0.2) already sorts, edits and shows hierarchies, but over its own model (`ITreeDataGridSource`, column models, a row model per item) and above `ferroui-controls` in the crate graph, so `TableView` cannot call it. "Reuse from TreeDataGrid" therefore means: the feature stays where it is, and an application that needs it uses `TreeDataGrid` instead of `TableView`; nothing is moved or shared between the two controls, so no TreeDataGrid path changes.
+
+#### The examples and their gaps
+
+The five examples of the page at the pinned gallery (`samples/WinUIGallery/catalog_data.rs`, entry `TableView`), with what each needs, what `TableView` has, and the decision.
+
+| Example | Needs | `TableView` on main | Decision |
+|---|---|---|---|
+| BasicTable | `CanUserSortColumns`, the columns' `CanSort` and `SortCycle`, the `Sorted` event (`TableViewSortedEventArgs`: `Column`, `Direction`), a sort indicator and the sortable states of the header | No sorting | **Integrate** (part 2): sorting by a header click, through a sorted view the table presents; the items source is not changed |
+| BasicTable | `CanUserResizeColumns`, the columns' `CanResize`, `Width` | `CanUserResizeColumns` and `TableViewColumn::can_user_resize` (`Option<bool>`) with the resizer of the header | **Exists**: `CanResize` is the upstream `CanUserResize`; no second property |
+| BasicTable | `FrozenEdge` of the first column | No frozen columns | **Integrate** (part 3): a frozen column keeps its place while the table scrolls horizontally |
+| BasicTable | `SelectionMode` (Single, Multiple, None), `SelectionChanged`, `SelectedItem` | `ListBox` selection | **Exists**; WinUI's `None` is not a FerroUI `SelectionMode` (as on the ListView page): the page makes the rows not selectable |
+| CustomColumnsTable | `TableViewTextColumn`, `TableViewTemplateColumn` with `CellTemplate`, `SortMemberPath`, `CellToolTipBinding`, `HeaderToolTip` | One column type with `Binding` or `CellTemplate`, which takes priority | **Integrate** (part 2): `TableViewTextColumn` and `TableViewTemplateColumn` as WinUI-named subclasses of `TableViewColumn` (upstream columns unchanged), `SortMemberPath`, the tool tips of the headers and the cells |
+| CustomColumnsTable | `GridLinesVisibility="None"` | The grid lines of the theme (WinUI theme: `All`) | **Integrate** (part 1) |
+| EditingCellsTable | `IsReadOnly` of the table and of a column, in-place editing of text cells, the validation of `INotifyDataErrorInfo` on commit | Read-only (`TableViewCell` presents the value) | **Integrate** (part 5): editing of `TableViewTextColumn` cells, opt-in (`IsReadOnly` is `true` by default, where WinUI's is `false`, so that upstream stays read-only) |
+| FilteringGroupingTable | `TableViewSource.From`, `Filter`, `ClearFilter`, `GroupBy`, `ClearGroupBy`, `ExpandAllGroups`, `CollapseAllGroups`, `EmptyTemplate` | None | **Integrate** (part 4, and `EmptyTemplate` in part 1): `TableViewSource` is an items list over another items source, with a filter, an order and groups; a group is a header row the table presents with its own container |
+| PresentationTable | `GridLinesVisibility`, `Density`, `RowBackground`, `AlternatingRowBackground`, `EmptyTemplate`, 1,000 rows | Virtualized rows of the `ListBox` | **Integrate** (part 1): the presentation options as properties of the table, set in the themes through pseudo-classes, the row backgrounds by the table on its rows |
+| (all) | The hierarchy of WinUI's TableView (row expanders, child rows) | None | **Reuse from TreeDataGrid**: `HierarchicalTreeDataGridSource`; not on the page |
+| (all) | Column virtualization | No column virtualization (`TableViewCellsPresenter`) | **Reuse from TreeDataGrid** for wide tables; not on the page |
+
+#### Parts
+
+One stacked pull request per part (`gh stack link`), each with its tests and the templates of all five themes (Fluent, Simple, WinUI, macOS 26, Material); the WinUI look is the WinUI theme's (and its derived themes').
+
+1. This analysis, and the presentation options: `GridLinesVisibility` (`TableViewGridLinesVisibility`: `All`, `Horizontal`, `Vertical`, `None`), `Density` (`TableViewDensity`: `Standard`, `Compact`, `Comfortable`, the three sizes of the WinUI resources), `RowBackground`, `AlternatingRowBackground` and `EmptyTemplate`.
+2. Sorting and the WinUI column types.
+3. Frozen columns.
+4. `TableViewSource`: filtering and grouping.
+5. In-place editing.
+6. The WinUI Gallery page with native examples, the ControlCatalog page, and `port-status.json`.
+
+The enumerations' value names are chosen where the gallery's markup does not show them (`$(Density)`, `$(FrozenEdge)`), from the WinUI resources and the WinUI conventions; each is recorded with its part.
+
+#### Defaults that keep upstream
+
+| Member | FerroUI default | WinUI default | Why |
+|---|---|---|---|
+| `TableView.CanUserSortColumns` | `false` | `true` | An upstream table does not sort on a header click |
+| `TableView.IsReadOnly` | `true` | `false` | An upstream table does not edit |
+| `TableView.GridLinesVisibility` | `All` | `All` | The lines each theme draws today |
+| `TableView.Density` | `Standard` | `Standard` | The sizes each theme has today |
+| `TableView.RowBackground`, `AlternatingRowBackground`, `EmptyTemplate` | `None` | `None` | Nothing set on the rows; no empty state |
+| `TableViewColumn.FrozenEdge` | `None` | `None` | No frozen columns |
+
+#### Performance
+
+A table that sets none of the additions takes the paths it takes on main: no view over its items, no handler of the scroll offset for frozen columns, no work per cell. Sorting and grouping present a view the table builds once per change of the order, the filter or the groups (a stable sort of indexes), not per frame; a frozen column subscribes the rows to the horizontal offset only while it exists.
