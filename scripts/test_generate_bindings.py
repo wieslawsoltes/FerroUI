@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Tests of the generators of the bindings: the API model (`generate_api_model.py`), its Osprey
+"""Tests of the generators of the bindings: the API model (`generate_api_model.py`), its C++
+backend (`generate_cpp_bindings.py`), its Osprey
 backend (`generate_osprey_bindings.py`) and the selection of an application they share with the
 generator of its library (`ferroui_selection.py`).
 
@@ -14,7 +15,10 @@ import importlib.util
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 
 SCRIPTS = os.path.dirname(os.path.abspath(__file__))
@@ -28,8 +32,18 @@ def load(name):
     return module
 
 
+import ferroui_selection  # noqa: E402
+
 MODEL = load("generate_api_model")
 OSPREY = load("generate_osprey_bindings")
+CPP = load("generate_cpp_bindings")
+GO = load("generate_go_bindings")
+DART = load("generate_dart_bindings")
+CSHARP = load("generate_csharp_bindings")
+sys.path.insert(0, os.path.join(SCRIPTS, "capi"))
+_collect = importlib.util.spec_from_file_location("collect_manifest", os.path.join(SCRIPTS, "capi", "collect_manifest.py"))
+COLLECT = importlib.util.module_from_spec(_collect)
+_collect.loader.exec_module(COLLECT)
 
 
 class ModelTests(unittest.TestCase):
@@ -101,6 +115,59 @@ class ModelTests(unittest.TestCase):
                          "src/FerroUI.CApi/api_ids.rs is stale: python3 scripts/generate_api_model.py")
 
 
+class CppTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        with open(CPP.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = CPP.generate(cls.model)
+
+    def test_names_follow_cpp(self):
+        self.assertEqual(CPP.snake(["font", "size"]), "font_size")
+        self.assertEqual(CPP.safe("template"), "template_")
+        self.assertEqual(CPP.safe("handle"), "handle_")
+        self.assertEqual(CPP.safe("font_size"), "font_size")
+
+    def test_accessors_chain_and_call_constants(self):
+        self.assertRegex(self.text, r"double font_size\(\) const \{ return detail::get_f64\(this->handle\(\), \d+\); \}")
+        self.assertRegex(self.text, r"Self& font_size\(double value_\) \{ detail::check\(ferro_set_f64\(this->handle\(\), \d+, value_\)\); return this->self\(\); \}")
+        self.assertNotIn("ferro_property_id(", self.text, "no name is looked up at run time")
+        self.assertIn("class Button final : public ButtonApi<Button>", self.text)
+        self.assertIn("static void set_row(const Object& target, std::int64_t value_)", self.text)
+        self.assertIn("Self& on_click(Handler&& handler)", self.text)
+
+    def test_a_selection_has_its_classes_and_their_bases(self):
+        text = CPP.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("class Button final", text)
+        self.assertIn("class ContentControl final", text, "a base of the class")
+        self.assertNotIn("class Grid final", text)
+        self.assertIn("ferro_type_button();", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in CPP.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, CPP.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), CPP.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_cpp_bindings.py")
+
+    @unittest.skipUnless(shutil.which("c++"), "no C++ compiler")
+    def test_every_accessor_compiles(self):
+        # A member of a class template is checked when it is instantiated.
+        lines = ['#include "ferroui.hpp"']
+        lines += [f"template class ferroui::{c['name']}Api<ferroui::{c['name']}>;" for c in self.model["classes"]]
+        with tempfile.TemporaryDirectory() as directory:
+            source = os.path.join(directory, "all.cpp")
+            with open(source, "w", encoding="utf-8") as file:
+                file.write("\n".join(lines) + "\n")
+            include = os.path.join(MODEL.ROOT, "src", "FerroUI.CApi", "include")
+            result = subprocess.run(["c++", "-std=c++17", "-fsyntax-only", f"-I{CPP.OUT}", f"-I{include}", source],
+                                    capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr[:2000])
+
+
 class OspreyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -154,6 +221,290 @@ class OspreyTests(unittest.TestCase):
                 path = os.path.join(directory, name)
                 with open(path, encoding="utf-8") as f:
                     self.assertEqual(f.read(), text, f"{path} is stale: python3 scripts/generate_osprey_bindings.py")
+
+
+class GoTests(unittest.TestCase):
+    """What can be checked without a Go toolchain; the job of capi.yml compiles and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(GO.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.files = dict(GO.generate(cls.model))
+        cls.api = cls.files["api.go"]
+
+    def test_accessors_are_on_their_class(self):
+        self.assertIn("type Button struct{ ContentControl }", self.api)
+        self.assertRegex(self.api, r"func \(o TextBlock\) SetText\(value string\) error \{ return setString\(o\.h, \d+, value\) \}")
+        self.assertRegex(self.api, r"func GridSetRow\(target Wrapper, value int64\) error")
+        self.assertRegex(self.api, r"func \(o Button\) OnClick\(handler func\(Button\)\) \(Subscription, error\)")
+        self.assertNotIn('import "C"', self.api, "only the runtime and the entries use cgo")
+
+    def test_names_do_not_collide(self):
+        methods = re.findall(r"^func \(o (\w+)\) (\w+)\(", self.api, re.M)
+        self.assertEqual(len(methods), len(set(methods)))
+        names = re.findall(r"^(?:func|type) (\w+)", self.api, re.M) + re.findall(r"^\t(\w+) \w+ = ", self.api, re.M)
+        self.assertEqual(len(names), len(set(names)))
+        embedded = dict(re.findall(r"^type (\w+) struct\{ (\w+) \}", self.api, re.M))
+        self.assertEqual([m for m in methods if embedded.get(m[0]) == m[1]], [], "a method named as its embedded base")
+
+    def test_a_selection_registers_its_classes(self):
+        files = dict(GO.generate(self.model, {"classes": ["Button"]}))
+        self.assertIn("C.ferro_type_button()", files["entries.go"])
+        self.assertIn("type ContentControl struct", files["api.go"])
+        self.assertNotIn("type Grid struct", files["api.go"])
+        self.assertNotIn('import "C"', self.files["entries.go"], "the full bindings register nothing")
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in GO.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            for name, text in GO.generate(self.model, manifest):
+                with open(os.path.join(directory, name), encoding="utf-8") as file:
+                    self.assertEqual(file.read(), text, f"{directory}/{name} is stale: python3 scripts/generate_go_bindings.py")
+
+
+class DartTests(unittest.TestCase):
+    """What can be checked without a Dart SDK; the job of capi.yml analyzes and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(DART.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = DART.generate(cls.model)
+
+    def test_names_follow_dart(self):
+        self.assertEqual(DART.camel(["font", "size"]), "fontSize")
+        self.assertEqual(DART.safe("default"), "defaultValue")
+        self.assertEqual(DART.safe("fontSize"), "fontSize")
+
+    def test_properties_are_getters_and_setters(self):
+        self.assertIn("extension type Button._(int handle) implements ContentControl {", self.text)
+        self.assertRegex(self.text, r"double get fontSize => _getF64\(handle, \d+\);")
+        self.assertRegex(self.text, r"set fontSize\(double value\) => _setF64\(handle, \d+, value\);")
+        self.assertRegex(self.text, r"static void setRow\(FerroObject target, int value\)")
+        self.assertIn("Subscription onClick(void Function(Button sender) handler)", self.text)
+
+    def test_only_reads_are_leaf_calls(self):
+        # A write can raise an event whose handler is Dart code, which a leaf call cannot run.
+        for name in ("ferro_set_f64", "ferro_set_str", "ferro_set_bool", "ferro_set_handle", "ferro_raise", "ferro_app_run"):
+            found = re.search(r"'" + name + r"'([^)]*)\)", self.text)
+            self.assertIsNotNone(found, name)
+            self.assertNotIn("isLeaf", found.group(1), name)
+        self.assertIn("'ferro_get_f64_or', isLeaf: true", self.text)
+
+    def test_members_do_not_collide(self):
+        for name, body in re.findall(r"^extension type (?:const )?(\w+)[^\n]*\{\n(.*?)^\}", self.text, re.M | re.S):
+            getters = re.findall(r"^  (?:static )?[\w<>?]+ get (\w+) =>", body, re.M)
+            self.assertEqual(len(getters), len(set(getters)), name)
+            statics = re.findall(r"^  static const \w+ (\w+) =", body, re.M)
+            self.assertEqual(len(statics), len(set(statics)), name)
+
+    def test_a_selection_registers_its_classes(self):
+        text = DART.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("'ferro_type_button'", text)
+        self.assertIn("extension type ContentControl._", text)
+        self.assertNotIn("extension type Grid._", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in DART.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, DART.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), DART.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_dart_bindings.py")
+
+
+class CSharpTests(unittest.TestCase):
+    """What can be checked without a .NET SDK; the job of capi.yml compiles and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(CSHARP.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = CSHARP.generate(cls.model)
+
+    def test_wrappers_and_extensions(self):
+        self.assertIn("public readonly struct Button : IButton", self.text)
+        self.assertIn("public interface IButton : IContentControl { }", self.text)
+        self.assertRegex(self.text, r"public static T Opacity<T>\(this T self, double value\) where T : struct, IVisual")
+        self.assertRegex(self.text, r"public static void SetRow\(IFerroObject target, long value\)")
+        self.assertRegex(self.text, r"public static Subscription OnClick<T>\(this T self, global::System\.Action<T> handler\)")
+
+    def test_only_reads_skip_the_gc_transition(self):
+        # A write can raise an event whose handler is managed code.
+        for line in self.text.split("\n"):
+            if "SuppressGCTransition" in line and "partial" in line:
+                self.assertRegex(line, r"ferro_get_(f64|i64|bool)_or")
+
+    def test_no_call_is_ambiguous(self):
+        # Constraints leave one candidate per name unless a class and its ancestor both have it.
+        bases = dict(re.findall(r"public interface (I\w+) : (I\w+) \{", self.text))
+        signatures = {}
+        pattern = r"public static class (\w+)Extensions\n    \{\n(.*?)\n    \}\n"
+        for name, body in re.findall(pattern, self.text, re.S):
+            found = re.findall(r"public static [\w.:<>]+ (\w+)<T>\(this T self(?:, ([^)]*))?\)", body)
+            signatures["I" + name] = {(method, (parameter or "").rsplit(" ", 1)[0]) for method, parameter in found}
+        for interface, own in signatures.items():
+            base = bases.get(interface)
+            while base:
+                self.assertEqual(own & signatures.get(base, set()), set(), f"{interface} and {base}")
+                base = bases.get(base)
+
+    def test_a_selection_registers_its_classes(self):
+        text = CSHARP.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("ferro_type_button();", text)
+        self.assertIn("public readonly struct ContentControl", text)
+        self.assertNotIn("public readonly struct Grid", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in CSHARP.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, CSHARP.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), CSHARP.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_csharp_bindings.py")
+
+
+class ManifestTests(unittest.TestCase):
+    """The lists of properties and events of a manifest, and a manifest collected from sources."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model, cls.names = OSPREY.load_model()
+
+    def collect(self, name, text):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, name)
+            with open(path, "w", encoding="utf-8") as file:
+                file.write(text)
+            return COLLECT.collect([path], self.model, self.names)
+
+    def test_the_lists_narrow_the_bindings_and_not_the_library(self):
+        whole = {"classes": ["Button"]}
+        narrow = {"classes": ["Button"], "properties": ["Content"], "events": ["Click"]}
+        self.assertEqual(ferroui_selection.AppSelection(self.model, whole).fingerprint,
+                         ferroui_selection.AppSelection(self.model, narrow).fingerprint)
+        cpp = CPP.generate(self.model, narrow)
+        self.assertIn("Self& content(std::string_view value_)", cpp)
+        self.assertIn("Self& on_click(Handler&& handler)", cpp)
+        self.assertNotIn(" font_size(", cpp)
+        self.assertNotIn("on_pointer_pressed(", cpp)
+        self.assertLess(len(cpp), len(CPP.generate(self.model, whole)))
+        objects = dict(OSPREY.outputs({**narrow, "layers": ["objects"]}, self.model, self.names)[0])["objects.osp"]
+        self.assertIn("fn content(object, value)", objects)
+        self.assertNotIn("fn fontSize(", objects)
+
+    def test_a_name_the_model_does_not_have_is_refused(self):
+        with self.assertRaises(SystemExit):
+            ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "properties": ["NoSuchProperty"]})
+        with self.assertRaises(SystemExit):
+            ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "events": ["NoSuchEvent"]})
+
+    def test_c_sources(self):
+        found = self.collect("app.c", """
+            /* TextBox in a comment is not a use. */
+            // Neither is "Slider".
+            int64_t t = ferro_type_button();
+            int64_t p = ferro_property_id("FontSize", -1);
+            int64_t e = ferro_event_id("Click", -1);
+            ferro_frame_begin();
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["FontSize"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertEqual(found["abi"], ["frames"])
+
+    def test_cpp_sources(self):
+        found = self.collect("app.cpp", """
+            // Slider in a comment is not a use.
+            auto button = Button::create();
+            button.font_size(12).content("Grid in a text");
+            button.on_click([](Button&) {});
+            Grid::set_row(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button", "Grid"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertEqual(found["abi"], [])
+
+    def test_go_sources(self):
+        found = self.collect("app.go", """
+            // Slider in a comment is not a use.
+            button, _ := ferroui.NewButton()
+            button.SetFontSize(12)
+            button.SetContent("Grid in a text")
+            button.OnClick(func(ferroui.Button) {})
+            ferroui.GridSetRow(button, 1)
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
+    def test_dart_sources(self):
+        found = self.collect("app.dart", """
+            // Slider in a comment is not a use.
+            final button = Button()
+              ..fontSize = 12
+              ..content = 'Grid in a text';
+            button.onClick((sender) {});
+            Grid.setRow(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
+    def test_csharp_sources(self):
+        found = self.collect("App.cs", """
+            // Slider in a comment is not a use.
+            var button = Button.Create().FontSize(12).Content("Grid in a text");
+            button.OnClick(sender => { });
+            Grid.SetRow(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
+    def test_osprey_sources_keep_every_group(self):
+        found = self.collect("app.osp", 'let b = button() |> fontSize(12.0) |> onClick(1)\n')
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertIn("FontSize", found["properties"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertNotIn("abi", found)
+
+    def test_a_manifest_that_leaves_out_a_use_is_reported(self):
+        found = {"classes": ["Button", "Grid"], "properties": ["Content"], "events": [], "abi": ["frames"]}
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button"]}), [("classes", ["Grid"])])
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button", "Grid"], "properties": [], "abi": []}),
+                         [("properties", ["Content"]), ("abi", ["frames"])])
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button", "Grid"]}), [])
+
+    def test_the_manifests_of_the_samples_cover_their_sources(self):
+        samples = os.path.join(MODEL.ROOT, "samples", "CApi")
+        cases = [([os.path.join(samples, "hello_world.c")], os.path.join(samples, "hello_world.ferroui.json")),
+                 ([os.path.join(samples, "gauge.c"), os.path.join(samples, "gauge.h")],
+                  os.path.join(samples, "gauge.ferroui.json"))]
+        for manifest in glob.glob(os.path.join(samples, "cpp", "*", "ferroui.json")):
+            if "hello_world" in manifest:
+                cases.append(([os.path.dirname(manifest)], manifest))
+        cases.append(([os.path.join(samples, "go", "hello_world", "main.go")],
+                      os.path.join(samples, "go", "hello_world", "ferroui.json")))
+        cases.append(([os.path.join(samples, "dart", "hello_world", "main.dart")],
+                      os.path.join(samples, "dart", "hello_world", "ferroui.json")))
+        cases.append(([os.path.join(samples, "csharp", "hello_world", "Program.cs")],
+                      os.path.join(samples, "csharp", "hello_world", "ferroui.json")))
+        for manifest in glob.glob(os.path.join(samples, "osprey-bindings", "*", "ferroui.json")):
+            cases.append(([os.path.dirname(manifest)], manifest))
+        self.assertGreater(len(cases), 5)
+        for paths, manifest in cases:
+            with open(manifest, encoding="utf-8") as file:
+                self.assertEqual(COLLECT.missing(COLLECT.collect(paths, self.model, self.names), json.load(file)), [], manifest)
 
 
 class SelectionTests(unittest.TestCase):
