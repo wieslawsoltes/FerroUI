@@ -102,6 +102,9 @@ impl LayoutHelper {
         available_size
     }
 
+    // The two below run for every child that is measured and arranged with a border or padding:
+    // inlined, as the check of the rounding of the parent they replaced was.
+    #[inline(always)]
     fn layout_border_insets(child: Option<&Layoutable>, padding: Thickness, border: Thickness) -> Thickness {
         let Some((scale, winui)) = Self::parent_layout_rounding(child) else {
             return padding + border;
@@ -113,6 +116,7 @@ impl LayoutHelper {
     }
 
     /// Returns the layout scale and WinUI mode of the child's layout-rounded parent.
+    #[inline]
     fn parent_layout_rounding(child: Option<&Layoutable>) -> Option<(f64, bool)> {
         let parent = child?.visual_parent()?;
         let parent = parent.downcast_ref::<Layoutable>()?;
@@ -178,6 +182,44 @@ impl LayoutHelper {
 
     pub(crate) fn round_winui_size(size: Size, scale: f64) -> Size {
         Size::new(Self::round_winui_dimension(size.width, scale), Self::round_winui_dimension(size.height, scale))
+    }
+
+    // The WinUI measure rounding (`Layoutable::use_winui_measure_rounding`) is rare: its steps of
+    // the measure and the arrange of every element are cold calls, so that the path of an element
+    // without it is the one it was before the option existed.
+
+    /// The limits and the constraint of a measure under WinUI rounding.
+    #[cold]
+    #[inline(never)]
+    pub(crate) fn winui_measure_inputs(min_max: crate::layout::MinMax, available: Size, scale: f64) -> (crate::layout::MinMax, Size) {
+        (min_max.round_for_winui(scale), Self::round_winui_measure_constraint(available, scale))
+    }
+
+    /// The arranged size and the available size of an arrange under WinUI rounding.
+    #[cold]
+    #[inline(never)]
+    pub(crate) fn winui_arrange_sizes(
+        min_max: crate::layout::MinMax,
+        size: Size,
+        available: Size,
+        scale: f64,
+    ) -> (Size, Size) {
+        let size = Self::apply_layout_constraints_min_max(min_max.round_for_winui(scale), size);
+        (Self::round_winui_size(size, scale), Self::round_winui_size(available, scale))
+    }
+
+    /// A measured size under WinUI rounding.
+    #[cold]
+    #[inline(never)]
+    pub(crate) fn round_winui_size_cold(size: Size, scale: f64) -> Size {
+        Self::round_winui_size(size, scale)
+    }
+
+    /// An arranged origin under WinUI rounding.
+    #[cold]
+    #[inline(never)]
+    pub(crate) fn round_winui_point(origin: crate::Point, scale: f64) -> crate::Point {
+        crate::Point::new(Self::round_winui_dimension(origin.x, scale), Self::round_winui_dimension(origin.y, scale))
     }
 
     /// Rounds a size to an integer number of device pixels, rounding up.

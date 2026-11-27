@@ -1045,6 +1045,9 @@ impl ValueStore {
         }
     }
 
+    // Inlined into the activation of a style instance, the path of every class or pseudo-class
+    // change (pinned: thin LTO stopped inlining it after unrelated changes of the store).
+    #[inline]
     pub fn on_frame_activation_changed(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) {
         match frame.base().entry_count() {
             0 => {}
@@ -1389,10 +1392,12 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
-                // The pending pass does not know this was a clear: record it on the value now.
+                // The pending pass does not know this was a clear: a property that opted out of
+                // coercion on reevaluation records it on the value now. Every other value is left
+                // to the pass, as before the option existed.
                 if ignore_local_value {
-                    if let Some(current) = &current {
-                        current.begin_reevaluation(true, changed_value_entry.is_some());
+                    if let Some(current) = current.as_ref().filter(|current| current.clears_coercion_on_clear()) {
+                        record_deferred_clear(&**current, changed_value_entry.is_some());
                     }
                 }
                 self.reevaluation_pending.set(true);
@@ -1677,6 +1682,14 @@ struct EvaluatingGuard<'a>(&'a Cell<u32>);
 
 /// A store dropped with effective values of inheriting properties no longer holds them
 /// (`FerroProperty::holders`).
+/// Records a clear of a value of a property that opted out of coercion on reevaluation, while a
+/// styling pass defers its reevaluation.
+#[cold]
+#[inline(never)]
+fn record_deferred_clear(current: &dyn EffectiveValueDyn, changed_value_entry: bool) {
+    current.begin_reevaluation(true, changed_value_entry);
+}
+
 impl Drop for ValueStore {
     fn drop(&mut self) {
         for (_, value) in self.effective_values.get_mut().iter() {
