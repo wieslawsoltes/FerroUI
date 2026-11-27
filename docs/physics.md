@@ -20,11 +20,13 @@ fluid simulations, robotics, and general 2D simulation.
 | `controller` | Production `CharacterController2D` with swept `shape_cast` move-and-slide, slope limits, coyote time, jump buffering, and dynamic box pushing. |
 | `fracture`, `snapshot` | Radial convex shard fracturing (`fracture_body`) conserving linear/angular velocity, and deterministic ring-buffer `WorldHistory` / `WorldSnapshot` for rollback and studio timeline scrubbing. |
 | `ui` | Unconditionally stable closed-form analytical harmonic springs (`Spring1D`, `Spring2D`, `Spring3D`), `SpringChain`, `LayoutSpringGroup`, native-feel `InertiaScroller` (exponential decay, rubber-banding, bounce-back, magnetic detents), `MagneticSnap`, `GestureTracker`, and `DraggableCard`. |
+| `ferroui` *(feature `ferroui`)* | Zero-layout-thrash FerroUI Visual & Logical tree physics bridge (`VisualPhysicsHost`, `VisualSpringDriver`, `DraggableVisual`, `start_ui_physics_timer`) updating persistent `MatrixTransform` render transforms (`O(active)`, zero layout passes, automatic weak cleanup). |
 
 ## Features
 
 - `simd` (default): enables architecture-native NEON / AVX2 / SSE2 kernels.
 - `gpu`: enables `wgpu` compute shaders (`GpuPhysicsContext`, `GpuParticleSolver`, `GpuRigidBatchIntegrator`) with automatic graceful fallback to CPU SIMD when no GPU adapter is available.
+- `ferroui`: enables zero-layout-thrash bindings to apply rigid bodies, elastic home-springs, shockwaves, magnetic hover, tactile pops, error-shake, and drag-and-throw directly to any FerroUI `Visual` or `StyledElement` subtree.
 
 ## Quick Examples
 

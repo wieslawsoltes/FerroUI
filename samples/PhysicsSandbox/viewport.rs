@@ -5,7 +5,7 @@
 //! - Character controller visor + slope & ground-normal telemetry
 //! - Floating translucent in-viewport HUD card with live 90-frame performance sparkline
 
-use crate::scenes::{SandboxEngine, SceneKind, WORLD_HEIGHT, WORLD_WIDTH};
+use crate::scenes::{SandboxEngine, SceneKind, ARENA_WALL_TAG, WORLD_HEIGHT, WORLD_WIDTH};
 use ferroui_base::input::{InputElementImpl, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -171,6 +171,11 @@ impl VisualImpl for PhysicsViewport {
         let h = bounds.height.max(1.0);
         let (scale, ox, oy) = viewport_transform(w, h);
 
+        // Strictly clip all viewport rendering to this control's layout bounds so nothing ever
+        // overlaps sibling panels (left tool rail, top header, right inspector, or status bar).
+        let clip_state = dc.push_clip(Rect::new(0.0, 0.0, w, h));
+        let mut dc = dc.scope(clip_state);
+
         // Studio dark canvas background
         dc.fill_rectangle(&this.palette.bg, Rect::new(0.0, 0.0, w, h), 0.0);
 
@@ -192,29 +197,29 @@ impl VisualImpl for PhysicsViewport {
         // Subtle ruler meter ticks along top edge
         for gx in (2..=(WORLD_WIDTH as i32 - 2)).step_by(2) {
             let sx = ox + gx as f64 * scale;
-            draw_label(dc, &format!("{gx}m"), Point::new(sx + 3.0, oy + 3.0), 9.5, &this.palette.hud_muted);
+            draw_label(&mut dc, &format!("{gx}m"), Point::new(sx + 3.0, oy + 3.0), 9.5, &this.palette.hud_muted);
         }
 
         let engine = this.engine.borrow();
         let sim = engine.borrow();
 
         match sim.scene {
-            SceneKind::GpuParticles => this.render_particles(dc, &sim, scale, ox, oy),
-            SceneKind::UiSprings => this.render_ui_springs(dc, &sim, scale, ox, oy),
+            SceneKind::GpuParticles => this.render_particles(&mut dc, &sim, scale, ox, oy),
+            SceneKind::UiSprings => this.render_ui_springs(&mut dc, &sim, scale, ox, oy),
             _ => {
-                this.render_rigid_world(dc, &sim, scale, ox, oy);
+                this.render_rigid_world(&mut dc, &sim, scale, ox, oy);
                 if sim.cloth.is_some() || !sim.soft_bodies.is_empty() {
-                    this.render_cloth_and_softbodies(dc, &sim, scale, ox, oy);
+                    this.render_cloth_and_softbodies(&mut dc, &sim, scale, ox, oy);
                 }
                 if sim.character.is_some() {
-                    this.render_character(dc, &sim, scale, ox, oy);
+                    this.render_character(&mut dc, &sim, scale, ox, oy);
                 }
             }
         }
 
         // Floating Pro Studio telemetry overlay + real-time frame-time sparkline
         if sim.show_hud_graph {
-            this.render_hud_overlay(dc, &sim, ox + 14.0, oy + 20.0);
+            this.render_hud_overlay(&mut dc, &sim, ox + 14.0, oy + 20.0);
         }
     }
 }
@@ -231,6 +236,7 @@ impl PhysicsViewport {
 
     pub fn new() -> Ref<Self> {
         let this = instantiate(Self::construct());
+        this.set_clip_to_bounds(true);
 
         let timer = DispatcherTimer::new();
         timer.set_interval(Duration::from_secs_f64(1.0 / 60.0));
@@ -352,6 +358,9 @@ impl PhysicsViewport {
 
         // 2. Rigid bodies
         for body in sim.world.bodies() {
+            if body.user_data == ARENA_WALL_TAG {
+                continue;
+            }
             let argb = if body.user_data != 0 { body.user_data as u32 } else { 0xFF38BDF8 };
             let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(argb));
             let pen = if body.is_sleeping { &self.palette.sleep_outline_pen } else { &self.palette.outline_pen };
@@ -790,8 +799,11 @@ fn draw_spring_coil(dc: &mut DrawingContext, pen: &Rc<dyn IPen>, a: Point, b: Po
 }
 
 fn viewport_transform(width: f64, height: f64) -> (f64, f64, f64) {
-    let sx = width / WORLD_WIDTH as f64;
-    let sy = height / WORLD_HEIGHT as f64;
+    let pad = 16.0;
+    let avail_w = (width - pad * 2.0).max(1.0);
+    let avail_h = (height - pad * 2.0).max(1.0);
+    let sx = avail_w / WORLD_WIDTH as f64;
+    let sy = avail_h / WORLD_HEIGHT as f64;
     let scale = sx.min(sy).max(1.0);
     let ox = (width - WORLD_WIDTH as f64 * scale) * 0.5;
     let oy = (height - WORLD_HEIGHT as f64 * scale) * 0.5;

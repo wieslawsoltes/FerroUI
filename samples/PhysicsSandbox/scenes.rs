@@ -16,6 +16,10 @@ use std::f32::consts::{FRAC_PI_2, PI};
 pub const WORLD_WIDTH: f32 = 16.0;
 pub const WORLD_HEIGHT: f32 = 10.0;
 
+/// Sentinel `user_data` value marking invisible outer arena containment walls so they are not
+/// drawn as thick overlapping slabs outside the crisp studio grid border.
+pub const ARENA_WALL_TAG: u64 = 0xFFFF_0000_0000_0001;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SceneKind {
     Playground,
@@ -400,29 +404,30 @@ impl SandboxEngine {
 
     fn add_arena_walls(&mut self) {
         let wall_mat = PhysicsMaterial::new(0.0, 0.2, 0.65);
+        // Placed cleanly outside [0..WORLD_WIDTH] x [0..WORLD_HEIGHT] so inner faces sit flush on the studio grid border.
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 1.0, 0.8))
-                .position((WORLD_WIDTH * 0.5, WORLD_HEIGHT - 0.35))
+            BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 2.0, 0.8))
+                .position((WORLD_WIDTH * 0.5, WORLD_HEIGHT + 0.4))
                 .material(wall_mat)
-                .user_data(0xFF1E293B),
+                .user_data(ARENA_WALL_TAG),
         );
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 1.0, 0.8))
+            BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 2.0, 0.8))
                 .position((WORLD_WIDTH * 0.5, -0.4))
                 .material(wall_mat)
-                .user_data(0xFF1E293B),
+                .user_data(ARENA_WALL_TAG),
         );
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 1.0))
-                .position((-0.35, WORLD_HEIGHT * 0.5))
+            BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 2.0))
+                .position((-0.4, WORLD_HEIGHT * 0.5))
                 .material(wall_mat)
-                .user_data(0xFF1E293B),
+                .user_data(ARENA_WALL_TAG),
         );
         self.world.add_body(
-            BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 1.0))
-                .position((WORLD_WIDTH + 0.35, WORLD_HEIGHT * 0.5))
+            BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 2.0))
+                .position((WORLD_WIDTH + 0.4, WORLD_HEIGHT * 0.5))
                 .material(wall_mat)
-                .user_data(0xFF1E293B),
+                .user_data(ARENA_WALL_TAG),
         );
     }
 

@@ -46,6 +46,13 @@ pub mod world;
 #[cfg(feature = "gpu")]
 pub mod gpu;
 
+#[cfg(feature = "ferroui")]
+pub mod ferroui_bridge;
+
+/// Alias for [`ferroui_bridge`] providing zero-layout-thrash FerroUI Visual & Logical tree physics.
+#[cfg(feature = "ferroui")]
+pub use ferroui_bridge as ferroui;
+
 /// Frequently used types for building games, simulations, and physics-driven UIs.
 pub mod prelude {
     pub use crate::body::{BodyBuilder, BodyHandle, BodyType, RigidBody};
@@ -73,6 +80,12 @@ pub mod prelude {
     pub use crate::gpu::{
         GpuAabbRecord, GpuDeviceInfo, GpuParticleSolver, GpuPhysicsContext, GpuRigidBatchIntegrator,
         GpuRigidBodyRecord,
+    };
+
+    #[cfg(feature = "ferroui")]
+    pub use crate::ferroui_bridge::{
+        start_ui_physics_timer, DraggableVisual, SpringVisualId, VisualBodyOptions, VisualPhysicsHost,
+        VisualSpringDriver, VisualSyncStats,
     };
 }
 

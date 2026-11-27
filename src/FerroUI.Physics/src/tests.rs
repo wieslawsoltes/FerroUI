@@ -526,3 +526,41 @@ fn fracture_and_world_history_rollback_work_accurately() {
     }
     assert!(chain.nodes.last().unwrap().value().distance(Vec2::new(10.0, 5.0)) < 1.0);
 }
+
+#[cfg(feature = "ferroui")]
+#[test]
+fn ferroui_visual_physics_host_and_spring_driver_update_render_transforms() {
+    use ferroui_base::{Rect, Visual};
+
+    let vis = Visual::new();
+    let mut host = VisualPhysicsHost::new(64.0);
+    host.world.gravity = Vec2::new(0.0, 9.81);
+    host.set_container_bounds(Rect::new(0.0, 0.0, 640.0, 480.0));
+    let bh = host.attach_visual(&vis, Some(Rect::new(100.0, 40.0, 120.0, 48.0)), VisualBodyOptions::dynamic_card());
+
+    for _ in 0..30 {
+        host.step_and_sync(1.0 / 60.0);
+    }
+    let mat = vis.render_transform().expect("MatrixTransform attached").value();
+    assert!(mat.m32 > 10.0, "expected visual to fall downward under gravity via render_transform, m32={}", mat.m32);
+
+    // Enable home springs and verify it pulls back toward rest (0, 0)
+    host.world.gravity = Vec2::ZERO;
+    host.enable_home_springs(4.5, 0.85);
+    for _ in 0..120 {
+        host.step_and_sync(1.0 / 60.0);
+    }
+    let mat_home = vis.render_transform().unwrap().value();
+    assert!(mat_home.m32.abs() < 4.0, "home spring should pull visual back to layout origin, m32={}", mat_home.m32);
+    assert!(host.world.body(bh).is_some());
+
+    // VisualSpringDriver error-shake & pop test
+    let vis2 = Visual::new();
+    let mut driver = VisualSpringDriver::new();
+    let sid = driver.attach(&vis2, SpringConfig::bouncy());
+    driver.impulse_shake(sid, 400.0);
+    let active = driver.step(1.0 / 60.0);
+    assert_eq!(active, 1);
+    let shake_mat = vis2.render_transform().unwrap().value();
+    assert!(shake_mat.m31.abs() > 1.0, "expected horizontal shake offset, m31={}", shake_mat.m31);
+}

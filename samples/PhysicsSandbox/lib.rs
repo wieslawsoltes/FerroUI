@@ -1,6 +1,7 @@
 //! **FerroUI Physics Studio** — Professional hardware-accelerated physics showcase built on
 //! `ferroui-physics` and `ferroui-view`.
 
+pub mod live_ui_tree;
 pub mod scenes;
 pub mod viewport;
 
@@ -34,6 +35,7 @@ pub fn physics_sandbox() -> Element {
     let engine = Rc::new(RefCell::new(SandboxEngine::new()));
 
     let active_scene = signal(SceneKind::Playground);
+    let live_ui_mode = signal(false);
     let active_tool = signal(ToolMode::Drag);
     let active_preset = signal(SpringPreset::Bouncy);
     let active_solver = signal(SolverProfile::Game);
@@ -79,18 +81,30 @@ pub fn physics_sandbox() -> Element {
         let eng = engine.clone();
         scene_tabs = scene_tabs.child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
+                .padding((8.0, 5.0, 8.0, 5.0))
                 .corner_radius(6.0)
-                .background(move || if active_scene.get() == kind { "#0284C7" } else { "#182235" })
+                .background(move || if !live_ui_mode.get() && active_scene.get() == kind { "#0284C7" } else { "#182235" })
                 .foreground("#F1F5F9")
                 .content(kind.title())
                 .on_click(move |_| {
+                    live_ui_mode.set(false);
                     eng.borrow_mut().load_scene(kind);
                     active_scene.set(kind);
                     paused.set(false);
                 }),
         );
     }
+    scene_tabs = scene_tabs.child(
+        button()
+            .padding((9.0, 5.0, 9.0, 5.0))
+            .corner_radius(6.0)
+            .background(move || if live_ui_mode.get() { "#059669" } else { "#14332A" })
+            .foreground("#ECFDF5")
+            .content("⚡ Live UI Tree")
+            .on_click(move |_| {
+                live_ui_mode.set(true);
+            }),
+    );
 
     let eng_back = engine.clone();
     let eng_pause = engine.clone();
@@ -222,11 +236,12 @@ pub fn physics_sandbox() -> Element {
 
     let left_rail = border()
         .dock_panel_dock(Dock::Left)
-        .width(80.0)
+        .width(88.0)
         .background("#0D1321")
         .border_brush("#1E293B")
         .border_thickness((0.0, 0.0, 1.0, 0.0))
         .padding(8.0)
+        .clip_to_bounds(true)
         .child(tool_rail_stack);
 
     // -------------------------------------------------------------------------
@@ -451,10 +466,11 @@ pub fn physics_sandbox() -> Element {
 
     let inspector = border()
         .dock_panel_dock(Dock::Right)
-        .width(300.0)
+        .width(308.0)
         .background("#0D1321")
         .border_brush("#1E293B")
         .border_thickness((1.0, 0.0, 0.0, 0.0))
+        .clip_to_bounds(true)
         .child(
             scroll_viewer().child(
                 stack_panel()
@@ -511,9 +527,19 @@ pub fn physics_sandbox() -> Element {
         }
     });
 
-    let vp = El::<PhysicsViewport>::new().with(move |control| {
-        control.bind_engine(eng_vp.clone(), tick_cb.clone());
-    });
+    let center_stage = border().clip_to_bounds(true).child(show_else(
+        move || live_ui_mode.get(),
+        move || live_ui_tree::live_ui_tree_showcase(),
+        move || {
+            let eng_vp = eng_vp.clone();
+            let tick_cb = tick_cb.clone();
+            El::<PhysicsViewport>::new()
+                .with(move |control| {
+                    control.bind_engine(eng_vp.clone(), tick_cb.clone());
+                })
+                .into_element()
+        },
+    ));
 
     dock_panel()
         .background("#090D16")
@@ -521,7 +547,7 @@ pub fn physics_sandbox() -> Element {
         .child(status_bar)
         .child(left_rail)
         .child(inspector)
-        .child(vp)
+        .child(center_stage)
         .into()
 }
 

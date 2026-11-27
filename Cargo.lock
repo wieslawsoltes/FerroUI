@@ -2720,6 +2720,7 @@ dependencies = [
 name = "ferroui-physics"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-base",
  "naga",
  "rustc-hash 2.1.3",
  "smallvec",

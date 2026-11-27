@@ -23,7 +23,7 @@ path = "main.rs"
 test = false
 
 [dependencies]
-ferroui-physics = { workspace = true, features = ["simd", "gpu"] }
+ferroui-physics = { workspace = true, features = ["simd", "gpu", "ferroui"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-view = { workspace = true }

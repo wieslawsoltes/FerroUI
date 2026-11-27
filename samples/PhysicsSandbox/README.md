@@ -27,3 +27,4 @@ cargo run --profile fast-release -p physics-sandbox --no-default-features --feat
 6. **Vehicle**: 2D car with spring `WheelJoint` suspension and motorized drive wheels crossing ramps into a shimmering buoyant water pool.
 7. **Character**: `CharacterController2D` swept move-and-slide across walkable slopes, moving kinematic platforms, and pushable crates.
 8. **Ray & Orbit**: Orbital vortex gravity well with a 6-bounce live `raycast` laser and `closest_point` proximity tether.
+9. **⚡ Live UI Tree**: Real clickable FerroUI controls (`Button`, `Slider`, `Border`, `TextBlock`) driven directly by `VisualPhysicsHost` and `VisualSpringDriver` via persistent `MatrixTransform`s (zero layout passes): toggle UI Gravity, Elastic Snap Home, UI Shockwaves, Invalid Form Shake, Cascading Entrances, Magnetic Hover Dock, and direct Drag & Fling!

@@ -22,6 +22,7 @@ path = "src/lib.rs"
 smallvec.workspace = true
 rustc-hash.workspace = true
 wgpu = { workspace = true, optional = true }
+ferroui-base = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 wgpu = { workspace = true, optional = true, features = ["vulkan", "gles"] }
@@ -35,6 +36,8 @@ default = ["simd"]
 simd = []
 # Hardware-accelerated GPU compute solver via wgpu (Metal / Vulkan / DX12 / WebGPU).
 gpu = ["dep:wgpu"]
+# Zero-layout-thrash FerroUI Visual & Logical tree physics bindings via RenderTransform.
+ferroui = ["dep:ferroui-base"]
 
 [dev-dependencies]
 naga = { workspace = true, features = ["wgsl-in"] }
@@ -43,4 +46,4 @@ naga = { workspace = true, features = ["wgsl-in"] }
 group = "core"
 
 [package.metadata.docs.rs]
-features = ["simd", "gpu"]
+features = ["simd", "gpu", "ferroui"]
