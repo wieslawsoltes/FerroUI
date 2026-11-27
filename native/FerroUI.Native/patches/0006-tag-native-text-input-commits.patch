@@ -44,69 +44,84 @@ index 000000000..9969949f2
 +    }
 +};
 diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
-index 01ce3c8c3..ef13822b5 100644
 --- a/native/FerroUI.Native/src/OSX/FrnView.mm
 +++ b/native/FerroUI.Native/src/OSX/FrnView.mm
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,11 @@
  #import <AppKit/AppKit.h>
  #import <Carbon/Carbon.h> /* For the TIS functions used to classify the keyboard input source. */
++// The origin of committed text (keyboard or input method) for the editor: the `text-editor`
++// feature of ferroui-native (FRN_TEXT_EDITOR). Without it every commit is a text input event
++// as on main.
++#if FRN_TEXT_EDITOR
 +#include "FrnTextInputDispatch.h"
++#endif
  #include "FrnView.h"
  #include "automation.h"
  #import "WindowInterfaces.h"
-@@ -18,6 +19,7 @@
+@@ -18,6 +24,9 @@
      NSMutableAttributedString* _text;
      NSRange _selectedRange;
      NSRange _markedRange;
++#if FRN_TEXT_EDITOR
 +    FrnTextInputDispatch _textInputDispatch;
++#endif
      NSMutableArray* _accessibilityChildren;
      NSString* _keyboardInputSourceId;
      bool _keyboardInputSourceComposes;
-@@ -845,6 +847,7 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+@@ -845,6 +854,9 @@
      if(parent->InputMethod->IsActive())
      {
          // Let the input context produce the text or drive the composition.
++#if FRN_TEXT_EDITOR
 +        FrnTextInputDispatch::KeyEvent dispatch(_textInputDispatch, imeProcessed);
++#endif
          [[self inputContext] handleEvent:event];
      }
      else if(keySymbol != nullptr && key != FrnKeyEnter)
-@@ -950,6 +953,9 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+@@ -950,6 +962,11 @@
          markedText = @"";
      }
-
+ 
++#if FRN_TEXT_EDITOR
 +    if ([markedText length] != 0)
 +        _textInputDispatch.MarkComposition();
++#endif
 +
      auto parent = _parent.tryGet();
-
+ 
      // Delete any replaced range
-@@ -1027,6 +1033,10 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+@@ -1027,6 +1044,12 @@
          return;
      }
-
+ 
++#if FRN_TEXT_EDITOR
 +    auto hasMarkedText = [self hasMarkedText];
 +    auto fromInputMethod = _textInputDispatch.IsInputMethodCommit(
 +        hasMarkedText, replacementRange.location != NSNotFound);
++#endif
 +
      NSString* text;
-
+ 
      if([string isKindOfClass:[NSAttributedString class]])
-@@ -1046,7 +1056,7 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+@@ -1046,7 +1069,11 @@
      auto finalReplacementRange = [self clampRangeToText:replacementRange];
-
+ 
      if (finalReplacementRange.location != NSNotFound &&
--        ![self hasMarkedText] &&
++#if FRN_TEXT_EDITOR
 +        !hasMarkedText &&
++#else
+         ![self hasMarkedText] &&
++#endif
          parent->InputMethod->IsActive())
      {
          parent->InputMethod->Client->SelectInSurroundingText((int)finalReplacementRange.location, (int)(finalReplacementRange.location + finalReplacementRange.length));
-@@ -1057,8 +1067,18 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+@@ -1057,8 +1084,22 @@
      uint64_t timestamp = static_cast<uint64_t>([NSDate timeIntervalSinceReferenceDate] * 1000);
-
+ 
      const char* utf8Text = [text UTF8String];
++#if FRN_TEXT_EDITOR
 +    const char* inputText = utf8Text != nullptr ? utf8Text : "";
-
--    parent->TopLevelEvents->RawTextInputEvent(timestamp, utf8Text != nullptr ? utf8Text : "");
+ 
 +    ComPtr<IFrnTextInputMethodEvents> methodEvents;
 +    if (fromInputMethod && parent->TopLevelEvents->QueryInterface(
 +        &IID_IFrnTextInputMethodEvents, reinterpret_cast<void**>(&methodEvents)) == S_OK)
@@ -117,8 +132,11 @@ index 01ce3c8c3..ef13822b5 100644
 +    {
 +        parent->TopLevelEvents->RawTextInputEvent(timestamp, inputText);
 +    }
++#else
+     parent->TopLevelEvents->RawTextInputEvent(timestamp, utf8Text != nullptr ? utf8Text : "");
++#endif
  }
-
+ 
  - (NSUInteger)characterIndexForPoint:(NSPoint)point
 diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
 index a500de796..e9903e486 100644

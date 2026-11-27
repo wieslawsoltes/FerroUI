@@ -99,7 +99,12 @@ ferro_properties! { impl CompletionWindowBase {
 impl CompletionWindowBase {
     pub fn construct() -> Self {
         Self {
-            base: Popup::construct(),
+            base: {
+                // Anchored inside the scrolled text area: follow it when layout moves it.
+                let base = Popup::construct();
+                base.set_follows_placement_target_layout(true);
+                base
+            },
             editor: RefCell::new(None),
             document: RefCell::new(None),
             start: Cell::new(NavigationCaret::at_offset(0)),

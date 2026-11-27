@@ -1,6 +1,11 @@
 #import <AppKit/AppKit.h>
 #import <Carbon/Carbon.h> /* For the TIS functions used to classify the keyboard input source. */
+// The origin of committed text (keyboard or input method) for the editor: the `text-editor`
+// feature of ferroui-native (FRN_TEXT_EDITOR). Without it every commit is a text input event
+// as on main.
+#if FRN_TEXT_EDITOR
 #include "FrnTextInputDispatch.h"
+#endif
 #include "FrnView.h"
 #include "automation.h"
 #import "WindowInterfaces.h"
@@ -19,7 +24,9 @@
     NSMutableAttributedString* _text;
     NSRange _selectedRange;
     NSRange _markedRange;
+#if FRN_TEXT_EDITOR
     FrnTextInputDispatch _textInputDispatch;
+#endif
     NSMutableArray* _accessibilityChildren;
     NSString* _keyboardInputSourceId;
     bool _keyboardInputSourceComposes;
@@ -847,7 +854,9 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     if(parent->InputMethod->IsActive())
     {
         // Let the input context produce the text or drive the composition.
+#if FRN_TEXT_EDITOR
         FrnTextInputDispatch::KeyEvent dispatch(_textInputDispatch, imeProcessed);
+#endif
         [[self inputContext] handleEvent:event];
     }
     else if(keySymbol != nullptr && key != FrnKeyEnter)
@@ -953,8 +962,10 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
         markedText = @"";
     }
 
+#if FRN_TEXT_EDITOR
     if ([markedText length] != 0)
         _textInputDispatch.MarkComposition();
+#endif
 
     auto parent = _parent.tryGet();
 
@@ -1033,9 +1044,11 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
         return;
     }
 
+#if FRN_TEXT_EDITOR
     auto hasMarkedText = [self hasMarkedText];
     auto fromInputMethod = _textInputDispatch.IsInputMethodCommit(
         hasMarkedText, replacementRange.location != NSNotFound);
+#endif
 
     NSString* text;
 
@@ -1056,7 +1069,11 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     auto finalReplacementRange = [self clampRangeToText:replacementRange];
 
     if (finalReplacementRange.location != NSNotFound &&
+#if FRN_TEXT_EDITOR
         !hasMarkedText &&
+#else
+        ![self hasMarkedText] &&
+#endif
         parent->InputMethod->IsActive())
     {
         parent->InputMethod->Client->SelectInSurroundingText((int)finalReplacementRange.location, (int)(finalReplacementRange.location + finalReplacementRange.length));
@@ -1067,6 +1084,7 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     uint64_t timestamp = static_cast<uint64_t>([NSDate timeIntervalSinceReferenceDate] * 1000);
 
     const char* utf8Text = [text UTF8String];
+#if FRN_TEXT_EDITOR
     const char* inputText = utf8Text != nullptr ? utf8Text : "";
 
     ComPtr<IFrnTextInputMethodEvents> methodEvents;
@@ -1079,6 +1097,9 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     {
         parent->TopLevelEvents->RawTextInputEvent(timestamp, inputText);
     }
+#else
+    parent->TopLevelEvents->RawTextInputEvent(timestamp, utf8Text != nullptr ? utf8Text : "");
+#endif
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)point
