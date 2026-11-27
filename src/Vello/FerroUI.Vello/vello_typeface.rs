@@ -1,7 +1,7 @@
 use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{
-    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight, IFontMemory,
-    IPlatformTypeface,
+    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationAxis, FontVariationDesign,
+    FontVariationInstance, FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
 use kurbo::{Affine, BezPath, Diagonal2, Join, Shape};
@@ -478,6 +478,45 @@ impl IPlatformTypeface for VelloTypeface {
         FontVariationSettings::new(self.variations.iter().copied())
     }
 
+    /// The axes and the named instances of the font, read with `skrifa` (`fvar` and the `name`
+    /// table).
+    fn variation_design(&self) -> FontVariationDesign {
+        let font = self.face.font_ref();
+        let string = |id: StringId| -> Option<String> {
+            font.localized_strings(id).english_or_first().map(|name| name.chars().collect())
+        };
+        let axes: Vec<_> = font.axes().iter().collect();
+        FontVariationDesign {
+            axes: axes
+                .iter()
+                .map(|axis| FontVariationAxis {
+                    tag: OpenTypeTag::new(u32::from_be_bytes(axis.tag().to_be_bytes())),
+                    name: string(axis.name_id()),
+                    min_value: axis.min_value() as f64,
+                    default_value: axis.default_value() as f64,
+                    max_value: axis.max_value() as f64,
+                    is_hidden: axis.is_hidden(),
+                })
+                .collect(),
+            named_instances: font
+                .named_instances()
+                .iter()
+                .map(|instance| FontVariationInstance {
+                    name: string(instance.subfamily_name_id()),
+                    postscript_name: instance.postscript_name_id().and_then(|id| string(id)),
+                    coordinates: FontVariationSettings::new(axes.iter().zip(instance.user_coords()).map(
+                        |(axis, value)| {
+                            FontVariation::new(
+                                OpenTypeTag::new(u32::from_be_bytes(axis.tag().to_be_bytes())),
+                                value as f64,
+                            )
+                        },
+                    )),
+                })
+                .collect(),
+        }
+    }
+
     /// The typeface of the same font data at the position: the axes of `settings` take their
     /// values, the others the values this typeface was made with. The optical size of a text is
     /// chosen with it (#859).
@@ -512,5 +551,40 @@ impl IPlatformTypeface for VelloTypeface {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod font_data_tests {
+    use super::*;
+    use crate::FontManagerImpl;
+    use ferroui_base::platform::IFontManagerImpl;
+
+    /// Hands its buffer over instead of copying it, as a decoded web font is passed in.
+    struct MovingReader(Vec<u8>);
+
+    impl Read for MovingReader {
+        fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+            panic!("the stream path reads a font with read_to_end");
+        }
+
+        fn read_to_end(&mut self, buffer: &mut Vec<u8>) -> std::io::Result<usize> {
+            assert!(buffer.is_empty());
+            std::mem::swap(buffer, &mut self.0);
+            Ok(buffer.len())
+        }
+    }
+
+    #[test]
+    fn the_stream_path_keeps_the_decoded_buffer_itself() {
+        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf").to_vec();
+        let address = bytes.as_ptr();
+        let mut reader = MovingReader(bytes);
+        let typeface = FontManagerImpl::new()
+            .try_create_glyph_typeface_from_stream(&mut reader, FontSimulations::None)
+            .expect("a typeface");
+        assert_eq!(reader.0.capacity(), 0);
+        let typeface = typeface.as_any().downcast_ref::<VelloTypeface>().expect("a Vello typeface");
+        assert_eq!(typeface.face.data.data.data().as_ptr(), address, "no copy was made");
     }
 }
