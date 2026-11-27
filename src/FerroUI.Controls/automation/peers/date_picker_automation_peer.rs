@@ -79,7 +79,7 @@ impl DatePickerAutomationPeer {
         if let Some(result) =
             value.and_then(|value| DateTimeOffset::try_parse(value, &CultureInfo::current_formatting()))
         {
-            self.owner().set_selected_date(Some(result));
+            self.owner().set_current_value(DatePicker::selected_date_property(), Some(result));
         }
 
         Ok(())

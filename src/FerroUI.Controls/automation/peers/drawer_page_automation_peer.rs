@@ -105,13 +105,13 @@ impl DrawerPageAutomationPeer {
 
     /// Closes the drawer (the expand and collapse provider contract).
     pub fn collapse(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_open(false);
+        self.owner().set_current_value(DrawerPage::is_open_property(), false);
         Ok(())
     }
 
     /// Opens the drawer (the expand and collapse provider contract).
     pub fn expand(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_open(true);
+        self.owner().set_current_value(DrawerPage::is_open_property(), true);
         Ok(())
     }
 

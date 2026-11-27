@@ -471,7 +471,7 @@
    "class": "port",
    "note": "ContentControl name no longer falls back to a type name.",
    "part": "automation",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "7fda9c36a58311a8a44e83df34e9f565857016be",
@@ -585,7 +585,7 @@
    "class": "port",
    "note": "Automation peers use `set_current_value`, so bindings survive.",
    "part": "automation",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "e61863dff76f565c9956e09ed16f0d3884900d40",
@@ -785,7 +785,7 @@
    "class": "port",
    "note": "TreeViewItem expand and collapse provider.",
    "part": "automation",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "23dce09edcf1d7aae7131714447d3abb809e5aa2",
@@ -1555,7 +1555,7 @@
    "class": "port",
    "note": "Peer parent kept after a move.",
    "part": "automation",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "281e59e13854766c4a8152c944ce0ab8063b7525",
