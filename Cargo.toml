@@ -28,6 +28,7 @@ members = [
     # WPF-style 3D (#608, docs/porting/media3d.md).
     "src/FerroUI.Media3D",
     "src/FerroUI.Rendering3D",
+    "src/FerroUI.Physics",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
     "src/FerroUI.Media.Qr",
@@ -263,6 +264,7 @@ members = [
     "samples/PlatformSanityChecks",
     "samples/SingleProjectSandbox",
     "samples/GpuInterop",
+    "samples/PhysicsSandbox",
 ]
 
 [workspace.package]
@@ -301,6 +303,7 @@ ferroui-media-camera-browser = { version = "=0.5.1-preview.1", path = "src/Ferro
 ferroui-media = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media" }
 ferroui-media3d = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media3D" }
 ferroui-render3d = { version = "=0.5.1-preview.1", path = "src/FerroUI.Rendering3D" }
+ferroui-physics = { version = "=0.5.1-preview.1", path = "src/FerroUI.Physics" }
 ferroui-media-metal = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.Metal" }
 ferroui-media-opengl = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.OpenGL" }
 ferroui-media-android = { version = "=0.5.1-preview.1", path = "src/FerroUI.Media.Android" }
