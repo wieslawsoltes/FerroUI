@@ -396,6 +396,7 @@ impl PieChartEngine {
                     if s.name.is_empty() { "" } else { ": " },
                     format_number(c.primary_value)
                 ),
+                label_parts: crate::scene::TooltipLabelParts::of(&s.name, ""),
             });
             if s.data_labels {
                 let measured = label_sizes[si][slice.point];
