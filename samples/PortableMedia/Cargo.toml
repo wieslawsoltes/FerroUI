@@ -9,6 +9,8 @@ publish = false
 [features]
 memory-audit = ["synthetic-camera"]
 native-pixel-tests = ["image/png", "dep:ferroui-skia", "dep:skia-safe"]
+# A video on a turning cube over the flat video (`--cube`, #608 D7).
+video-cube = ["dep:ferroui-media3d", "dep:ferroui-skia", "ferroui-skia/media3d"]
 macos-verification = ["native-pixel-tests", "ferroui-media-video-apple/native-lifetime-tests"]
 synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera", "dep:ferroui-media-camera-controls", "native-pixel-tests"]
 [[bin]]
@@ -19,6 +21,7 @@ ferroui-base.workspace = true
 ferroui-media.workspace = true
 ferroui-controls.workspace = true
 ferroui-media-controls.workspace = true
+ferroui-media3d = {workspace=true,optional=true}
 ferroui-media-video-controls.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
