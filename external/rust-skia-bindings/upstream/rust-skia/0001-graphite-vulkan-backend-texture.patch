@@ -1,0 +1,61 @@
+rust-skia: a Graphite backend texture of a VkImage
+
+skia-bindings has the Graphite context for Vulkan (`C_SkContexts_MakeGraphiteVulkan`) but no way
+to wrap a VkImage the application owns as a Graphite `BackendTexture`, which drawing into a swap
+chain image or an image shared with another renderer needs. This adds the C function
+`C_BackendTextures_MakeVulkan`, a thin wrapper of
+`skgpu::graphite::BackendTextures::MakeVulkan`, under `SK_VULKAN` like the context function next
+to it. The texture is single-sampled, without mipmaps, and Skia allocates no memory for it.
+
+A safe wrapper in skia-safe (`gpu::graphite::backend_textures::make_vk`, next to the Metal one)
+would follow the existing Metal and Dawn constructors; it is not part of this patch.
+
+Applies to `skia-bindings/src/graphite.cpp` of the rust-skia repository at 0.153.3
+(`git apply -p1` from the root of the repository).
+
+--- a/skia-bindings/src/graphite.cpp
++++ b/skia-bindings/src/graphite.cpp
+@@ -29,6 +29,8 @@
+ #ifdef SK_VULKAN
+ #include "include/gpu/vk/VulkanBackendContext.h"
+ #include "include/gpu/graphite/vk/VulkanGraphiteContext.h"
++#include "include/gpu/graphite/vk/VulkanGraphiteTypes.h"
++#include <cstring>
+ #endif
+ 
+ // Forward declaration to avoid including Recording.h which exposes std::unordered_set
+@@ -431,4 +433,34 @@
+     return SkContexts::MakeGraphite(
+         *static_cast<const skgpu::VulkanBackendContext*>(backendContext), *options).release();
+ }
++
++// A Graphite backend texture of a VkImage the caller owns: single-sampled, without mipmaps, and
++// with no memory allocated by Skia. The handle is passed as 64 bits, which VkImage is on every
++// target (a non-dispatchable handle).
++extern "C" void C_BackendTextures_MakeVulkan(
++    skgpu::graphite::BackendTexture* uninitialized,
++    int width,
++    int height,
++    uint32_t format,
++    uint32_t imageTiling,
++    uint32_t imageUsageFlags,
++    uint32_t imageLayout,
++    uint32_t queueFamilyIndex,
++    uint64_t image) {
++    skgpu::graphite::VulkanTextureInfo info;
++    info.fFormat = static_cast<VkFormat>(format);
++    info.fImageTiling = static_cast<VkImageTiling>(imageTiling);
++    info.fImageUsageFlags = imageUsageFlags;
++    VkImage handle;
++    static_assert(sizeof(handle) == sizeof(image), "a VkImage is 64 bits");
++    std::memcpy(&handle, &image, sizeof(handle));
++    new(uninitialized) skgpu::graphite::BackendTexture(
++        skgpu::graphite::BackendTextures::MakeVulkan(
++            SkISize::Make(width, height),
++            info,
++            static_cast<VkImageLayout>(imageLayout),
++            queueFamilyIndex,
++            handle,
++            skgpu::VulkanAlloc()));
++}
+ #endif
