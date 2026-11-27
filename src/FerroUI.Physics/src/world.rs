@@ -51,14 +51,22 @@ pub struct PhysicsWorld {
     force_fields: Vec<ForceField>,
 
     bvh: DynamicBvh,
+    active_proxies: Vec<usize>,
     broadphase_pairs: Vec<(usize, usize)>,
+    ignored_pairs: FxHashSet<(BodyHandle, BodyHandle)>,
     manifolds: Vec<ContactManifold>,
     warm_start: WarmStartCache,
 
     prev_contact_pairs: FxHashSet<(BodyHandle, BodyHandle)>,
+    curr_contact_pairs: FxHashSet<(BodyHandle, BodyHandle)>,
     prev_sensor_pairs: FxHashSet<(BodyHandle, BodyHandle)>,
+    curr_sensor_pairs: FxHashSet<(BodyHandle, BodyHandle)>,
     collision_events: Vec<CollisionEvent>,
     trigger_events: Vec<TriggerEvent>,
+
+    // Reusable CCD scratch buffers (zero per-step heap allocations)
+    ccd_bullets: Vec<(usize, Transform2D, Transform2D)>,
+    ccd_candidates: Vec<usize>,
 
     // Reusable SoA scratch buffers for SIMD velocity integration
     soa_indices: Vec<usize>,
@@ -93,13 +101,19 @@ impl PhysicsWorld {
             free_joint_slots: Vec::new(),
             force_fields: Vec::new(),
             bvh: DynamicBvh::new(),
+            active_proxies: Vec::with_capacity(128),
             broadphase_pairs: Vec::with_capacity(256),
+            ignored_pairs: FxHashSet::default(),
             manifolds: Vec::with_capacity(128),
             warm_start: WarmStartCache::default(),
             prev_contact_pairs: FxHashSet::default(),
+            curr_contact_pairs: FxHashSet::default(),
             prev_sensor_pairs: FxHashSet::default(),
+            curr_sensor_pairs: FxHashSet::default(),
             collision_events: Vec::new(),
             trigger_events: Vec::new(),
+            ccd_bullets: Vec::new(),
+            ccd_candidates: Vec::new(),
             soa_indices: Vec::new(),
             soa_vx: Vec::new(),
             soa_vy: Vec::new(),
@@ -127,13 +141,19 @@ impl PhysicsWorld {
         self.free_joint_slots.clear();
         self.force_fields.clear();
         self.bvh.clear();
+        self.active_proxies.clear();
         self.broadphase_pairs.clear();
+        self.ignored_pairs.clear();
         self.manifolds.clear();
         self.warm_start.clear();
         self.prev_contact_pairs.clear();
+        self.curr_contact_pairs.clear();
         self.prev_sensor_pairs.clear();
+        self.curr_sensor_pairs.clear();
         self.collision_events.clear();
         self.trigger_events.clear();
+        self.ccd_bullets.clear();
+        self.ccd_candidates.clear();
     }
 
     /// Adds a rigid body from a [`BodyBuilder`] and returns its generational [`BodyHandle`].
@@ -501,7 +521,7 @@ impl PhysicsWorld {
     }
 
     fn update_broadphase(&mut self, dt: f32) {
-        let mut active_proxies = Vec::with_capacity(self.bodies.len());
+        self.active_proxies.clear();
         for body in self.bodies.iter_mut().filter_map(|s| s.as_mut()) {
             let tight = body.shape.compute_aabb(body.transform());
             body.aabb = tight;
@@ -509,23 +529,24 @@ impl PhysicsWorld {
                 if body.body_type != BodyType::Static && !body.is_sleeping {
                     self.bvh.update(proxy, tight, body.linear_velocity * dt);
                 }
-                active_proxies.push(proxy);
+                self.active_proxies.push(proxy);
             }
         }
-        self.bvh.collect_pairs(&active_proxies, &mut self.broadphase_pairs);
+        self.bvh.collect_pairs(&self.active_proxies, &mut self.broadphase_pairs);
     }
 
     fn run_narrowphase(&mut self) {
         self.manifolds.clear();
 
-        // Build non-colliding joint pair exclusion set
-        let mut ignored_pairs: FxHashSet<(BodyHandle, BodyHandle)> = FxHashSet::default();
+        // Build non-colliding joint pair exclusion set using reusable scratch hashset
+        self.ignored_pairs.clear();
         for joint in self.joints.iter().filter_map(|j| j.as_ref()) {
             if !joint.broken && !joint.collide_connected && joint.body_b != BodyHandle::INVALID {
                 let pair = ordered_pair(joint.body_a, joint.body_b);
-                ignored_pairs.insert(pair);
+                self.ignored_pairs.insert(pair);
             }
         }
+        let has_ignored = !self.ignored_pairs.is_empty();
 
         for &(idx_a, idx_b) in &self.broadphase_pairs {
             let (Some(a), Some(b)) = (self.bodies[idx_a].as_ref(), self.bodies[idx_b].as_ref()) else {
@@ -543,7 +564,7 @@ impl PhysicsWorld {
             if !a.aabb.intersects(b.aabb) {
                 continue;
             }
-            if ignored_pairs.contains(&ordered_pair(a.handle, b.handle)) {
+            if has_ignored && self.ignored_pairs.contains(&ordered_pair(a.handle, b.handle)) {
                 continue;
             }
 
@@ -586,8 +607,8 @@ impl PhysicsWorld {
     fn integrate_positions_and_ccd(&mut self, dt: f32) -> usize {
         let mut ccd_hits = 0usize;
 
-        // Collect fast bullet indices first so we can query static/solid obstacles cleanly
-        let mut bullets: Vec<(usize, Transform2D, Transform2D)> = Vec::new();
+        // Collect fast bullet indices first into reusable scratch buffer (zero allocs/step)
+        self.ccd_bullets.clear();
         for (idx, slot) in self.bodies.iter_mut().enumerate() {
             let Some(body) = slot.as_mut() else { continue };
             if body.body_type == BodyType::Static || body.is_sleeping {
@@ -602,7 +623,7 @@ impl PhysicsWorld {
             if self.config.enable_ccd && body.is_bullet && body.is_dynamic() && !body.is_sensor
                 && travel > body.shape.bounding_radius() * 0.5
             {
-                bullets.push((idx, tf0, tf1));
+                self.ccd_bullets.push((idx, tf0, tf1));
             } else {
                 body.position = new_pos;
                 body.angle = new_angle;
@@ -611,13 +632,15 @@ impl PhysicsWorld {
         }
 
         // Resolve CCD bullets against candidate obstacles in the BVH
-        for (idx, tf0, tf1) in bullets {
+        for b_i in 0..self.ccd_bullets.len() {
+            let (idx, tf0, tf1) = self.ccd_bullets[b_i];
             let (shape_a, filter_a) = match self.bodies[idx].as_ref() {
                 Some(b) => (b.shape.clone(), b.filter),
                 None => continue,
             };
             let sweep_aabb = shape_a.compute_aabb(tf0).union(shape_a.compute_aabb(tf1));
-            let mut candidates = Vec::new();
+            self.ccd_candidates.clear();
+            let candidates = &mut self.ccd_candidates;
             self.bvh.query_aabb(sweep_aabb, |other_idx| {
                 if other_idx != idx {
                     candidates.push(other_idx);
@@ -626,7 +649,7 @@ impl PhysicsWorld {
 
             let mut min_toi = 1.0_f32;
             let mut hit_other: Option<usize> = None;
-            for other_idx in candidates {
+            for &other_idx in &self.ccd_candidates {
                 let Some(other) = self.bodies[other_idx].as_ref() else { continue };
                 if other.is_sensor || !filter_a.should_collide(other.filter) {
                     continue;
@@ -702,25 +725,29 @@ impl PhysicsWorld {
     fn emit_events(&mut self) {
         self.collision_events.clear();
         self.trigger_events.clear();
+        self.curr_contact_pairs.clear();
+        self.curr_sensor_pairs.clear();
 
-        let mut curr_contacts = FxHashSet::default();
-        let mut curr_sensors = FxHashSet::default();
+        let bodies = &self.bodies;
+        let lookup_body = |handle: BodyHandle| -> Option<&RigidBody> {
+            bodies.get(handle.index())?.as_ref().filter(|b| b.handle == handle)
+        };
 
         for m in &self.manifolds {
             let pair = ordered_pair(m.body_a, m.body_b);
             if m.is_sensor {
-                curr_sensors.insert(pair);
+                self.curr_sensor_pairs.insert(pair);
                 if !self.prev_sensor_pairs.contains(&pair) {
-                    let a_is_sensor = self.body(m.body_a).is_some_and(|b| b.is_sensor);
+                    let a_is_sensor = lookup_body(m.body_a).is_some_and(|b| b.is_sensor);
                     let (sensor, other) = if a_is_sensor { (m.body_a, m.body_b) } else { (m.body_b, m.body_a) };
                     self.trigger_events.push(TriggerEvent::Entered { sensor, other });
                 }
             } else {
-                curr_contacts.insert(pair);
+                self.curr_contact_pairs.insert(pair);
                 let pt = m.points.first().map_or(Vec2::ZERO, |p| p.position);
                 if !self.prev_contact_pairs.contains(&pair) {
-                    let va = self.body(m.body_a).map_or(Vec2::ZERO, |b| b.linear_velocity);
-                    let vb = self.body(m.body_b).map_or(Vec2::ZERO, |b| b.linear_velocity);
+                    let va = lookup_body(m.body_a).map_or(Vec2::ZERO, |b| b.linear_velocity);
+                    let vb = lookup_body(m.body_b).map_or(Vec2::ZERO, |b| b.linear_velocity);
                     let impact_speed = (va - vb).dot(m.normal).abs();
                     self.collision_events.push(CollisionEvent::Started {
                         body_a: m.body_a,
@@ -741,20 +768,20 @@ impl PhysicsWorld {
         }
 
         for &pair in &self.prev_contact_pairs {
-            if !curr_contacts.contains(&pair) {
+            if !self.curr_contact_pairs.contains(&pair) {
                 self.collision_events.push(CollisionEvent::Ended { body_a: pair.0, body_b: pair.1 });
             }
         }
         for &pair in &self.prev_sensor_pairs {
-            if !curr_sensors.contains(&pair) {
-                let a_is_sensor = self.body(pair.0).is_some_and(|b| b.is_sensor);
+            if !self.curr_sensor_pairs.contains(&pair) {
+                let a_is_sensor = lookup_body(pair.0).is_some_and(|b| b.is_sensor);
                 let (sensor, other) = if a_is_sensor { (pair.0, pair.1) } else { (pair.1, pair.0) };
                 self.trigger_events.push(TriggerEvent::Exited { sensor, other });
             }
         }
 
-        self.prev_contact_pairs = curr_contacts;
-        self.prev_sensor_pairs = curr_sensors;
+        std::mem::swap(&mut self.prev_contact_pairs, &mut self.curr_contact_pairs);
+        std::mem::swap(&mut self.prev_sensor_pairs, &mut self.curr_sensor_pairs);
     }
 
     // -------------------------------------------------------------------------

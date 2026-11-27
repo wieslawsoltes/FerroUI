@@ -24,6 +24,7 @@ use ferroui_controls::{Control, ControlImpl};
 use ferroui_physics::prelude::*;
 use ferroui_view::ViewClass;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
@@ -63,6 +64,7 @@ struct Palette {
     particle_brushes: Vec<Rc<dyn IBrush>>,
     char_fill: Rc<dyn IBrush>,
     char_visor: Rc<dyn IBrush>,
+    solar_corona: Rc<dyn IBrush>,
 }
 
 impl Palette {
@@ -114,6 +116,7 @@ impl Palette {
                 .collect(),
             char_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF38BDF8)),
             char_visor: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFFDE047)),
+            solar_corona: Rc::new(ImmutableSolidColorBrush::from_uint32(0x28FBBF24)),
         }
     }
 }
@@ -124,6 +127,8 @@ pub struct PhysicsViewport {
     engine: RefCell<Rc<RefCell<SandboxEngine>>>,
     on_tick: RefCell<Option<Rc<dyn Fn(&SandboxEngine)>>>,
     palette: Palette,
+    brush_cache: RefCell<HashMap<u32, Rc<dyn IBrush>>>,
+    trail_pen_cache: RefCell<HashMap<u32, Rc<dyn IPen>>>,
 }
 
 ferro_class!(PhysicsViewport: Control);
@@ -197,10 +202,19 @@ impl VisualImpl for PhysicsViewport {
         }
         dc.draw_rectangle_outline(&this.palette.arena_border_pen, Rect::new(ox, oy, arena_w, arena_h), 4.0);
 
-        // Subtle ruler meter ticks along top edge
-        for gx in (2..=(WORLD_WIDTH as i32 - 2)).step_by(2) {
+        // Subtle ruler meter ticks along top edge (zero per-frame String allocations)
+        const RULER_TICKS: [(i32, &str); 7] = [
+            (2, "2m"),
+            (4, "4m"),
+            (6, "6m"),
+            (8, "8m"),
+            (10, "10m"),
+            (12, "12m"),
+            (14, "14m"),
+        ];
+        for (gx, lbl) in RULER_TICKS {
             let sx = ox + gx as f64 * scale;
-            draw_label(&mut dc, &format!("{gx}m"), Point::new(sx + 3.0, oy + 3.0), 9.5, &this.palette.hud_muted);
+            draw_label(&mut dc, lbl, Point::new(sx + 3.0, oy + 3.0), 9.5, &this.palette.hud_muted);
         }
 
         let engine = this.engine.borrow();
@@ -240,7 +254,28 @@ impl PhysicsViewport {
             engine: RefCell::new(Rc::new(RefCell::new(SandboxEngine::new()))),
             on_tick: RefCell::new(None),
             palette: Palette::new(),
+            brush_cache: RefCell::new(HashMap::with_capacity(32)),
+            trail_pen_cache: RefCell::new(HashMap::with_capacity(16)),
         }
+    }
+
+    #[inline]
+    fn cached_brush(&self, argb: u32) -> Rc<dyn IBrush> {
+        let mut cache = self.brush_cache.borrow_mut();
+        cache
+            .entry(argb)
+            .or_insert_with(|| Rc::new(ImmutableSolidColorBrush::from_uint32(argb)) as Rc<dyn IBrush>)
+            .clone()
+    }
+
+    #[inline]
+    fn cached_trail_pen(&self, argb: u32) -> Rc<dyn IPen> {
+        let key = (argb & 0x00FF_FFFF) | 0x6600_0000;
+        let mut cache = self.trail_pen_cache.borrow_mut();
+        cache
+            .entry(key)
+            .or_insert_with(|| Rc::new(ImmutablePen::from_uint32(key, 1.8)) as Rc<dyn IPen>)
+            .clone()
     }
 
     pub fn new() -> Ref<Self> {
@@ -344,8 +379,7 @@ impl PhysicsViewport {
                 ForceField::NewtonianGravity { center, .. } => {
                     let c = to_screen(center);
                     // Crisp Keplerian orbital reference rings matching the 5 planetary orbits + soft solar corona
-                    let corona: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0x28FBBF24));
-                    dc.draw_ellipse_at(Some(&corona), None, c, 1.05 * scale, 1.05 * scale);
+                    dc.draw_ellipse_at(Some(&self.palette.solar_corona), None, c, 1.05 * scale, 1.05 * scale);
                     for r in [1.45_f64, 2.25, 3.05, 3.85, 4.55] {
                         dc.draw_ellipse_at(None, Some(&self.palette.major_grid_pen), c, r * scale, r * scale);
                     }
@@ -379,7 +413,7 @@ impl PhysicsViewport {
             if trail.len() < 2 {
                 continue;
             }
-            let trail_pen: Rc<dyn IPen> = Rc::new(ImmutablePen::from_uint32((*color & 0x00FF_FFFF) | 0x6600_0000, 1.8));
+            let trail_pen = self.cached_trail_pen(*color);
             let mut prev = to_screen(trail[0]);
             for &pt in trail.iter().skip(1) {
                 let cur = to_screen(pt);
@@ -394,7 +428,7 @@ impl PhysicsViewport {
                 continue;
             }
             let argb = if body.user_data != 0 { body.user_data as u32 } else { 0xFF38BDF8 };
-            let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(argb));
+            let fill = self.cached_brush(argb);
             let pen = if body.is_sleeping { &self.palette.sleep_outline_pen } else { &self.palette.outline_pen };
 
             match &body.shape {
@@ -602,7 +636,7 @@ impl PhysicsViewport {
                 }
                 ctx.end_figure(true);
             }
-            let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(sb.color_argb));
+            let fill = self.cached_brush(sb.color_argb);
             let base_geom: Ref<ferroui_base::media::Geometry> = geom.upcast();
             dc.draw_geometry(Some(&fill), Some(&self.palette.outline_pen), &base_geom);
 
@@ -750,7 +784,7 @@ impl PhysicsViewport {
             if p.distance(sim.ui_fab_center) > 0.15 {
                 let sp_pt = to_screen(p);
                 dc.draw_line(&self.palette.slot_pen, fab_c, sp_pt);
-                let orb_fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(*col));
+                let orb_fill = self.cached_brush(*col);
                 dc.draw_ellipse_at(Some(&orb_fill), Some(&self.palette.outline_pen), sp_pt, 18.0, 18.0);
                 draw_label(dc, lbl, Point::new(sp_pt.x - 11.0, sp_pt.y - 6.0), 10.0, &self.palette.hud_text);
             }
@@ -797,7 +831,7 @@ impl PhysicsViewport {
                 Rect::new(c.x - w * 0.5 + 6.0, c.y - h * 0.5 + 10.0, w, h),
                 12.0,
             );
-            let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(item.accent_argb));
+            let fill = self.cached_brush(item.accent_argb);
             g.draw_rectangle(
                 Some(&fill),
                 Some(&self.palette.outline_pen),
@@ -839,7 +873,7 @@ impl PhysicsViewport {
                 let p = to_screen(Vec2::new(wx, 8.48));
                 let pw = 2.4 * scale;
                 let ph = 1.25 * scale;
-                let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(pill_colors[i]));
+                let fill = self.cached_brush(pill_colors[i]);
                 g.draw_rectangle(
                     Some(&fill),
                     Some(&self.palette.outline_pen),

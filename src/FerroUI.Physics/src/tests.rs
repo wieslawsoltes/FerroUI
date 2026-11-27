@@ -747,8 +747,18 @@ fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
     );
     assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Physics]);
 
-    // Trigger an impact ripple & shockwave, then step via the compositor contract.
-    ctrl.trigger_impact(0, Point::new(0.5, 0.5), 0.9, Vec2::new(220.0, -140.0));
+    // Trigger 3 overlapping concentric impact ripples on visual 0, plus live intensity/distortion tuning.
+    ctrl.set_shader_intensity(1.35);
+    ctrl.set_shader_distortion(1.15);
+    ctrl.set_spring_config(SpringConfig::snappy());
+    assert!((ctrl.shader_intensity() - 1.35).abs() < 1e-5);
+    assert!((ctrl.shader_distortion() - 1.15).abs() < 1e-5);
+
+    ctrl.trigger_impact(0, Point::new(0.25, 0.35), 0.9, Vec2::new(220.0, -140.0));
+    ctrl.trigger_ripple_at(0, Point::new(0.75, 0.65), 0.8);
+    ctrl.trigger_ripple_at(0, Point::new(0.50, 0.50), 0.7);
+    assert_eq!(ctrl.telemetry().active_ripples, 3, "expected 3 simultaneous overlapping ripples");
+
     for _ in 0..20 {
         let res = compositor.step_simulations(1.0 / 60.0);
         assert_eq!(res, SimulationStepResult::Active);

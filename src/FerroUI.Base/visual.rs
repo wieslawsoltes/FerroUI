@@ -856,9 +856,11 @@ impl VisualImpl for Visual {
             comp.set_cache_mode(cache_mode);
         }
 
-        let effect = if inputs.has_effect { this.effect() } else { None };
-        if !crate::media::EffectExtensions::effect_equals(comp.effect().as_deref(), effect.as_deref()) {
-            comp.set_effect(effect.as_ref().map(crate::media::EffectExtensions::to_immutable));
+        if !comp.has_simulation_effect_override() {
+            let effect = if inputs.has_effect { this.effect() } else { None };
+            if !crate::media::EffectExtensions::effect_equals(comp.effect().as_deref(), effect.as_deref()) {
+                comp.set_effect(effect.as_ref().map(crate::media::EffectExtensions::to_immutable));
+            }
         }
 
         comp.set_render_options(this.render_options());

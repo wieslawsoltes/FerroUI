@@ -20,13 +20,9 @@
 
 use super::{CompositionVisual, Compositor, ElementComposition};
 use crate::animation::SignedDuration;
-use crate::media::effects::{
-    CustomEffect, EffectExtensions, IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect,
-    IImmutableEffect, ImmutableCustomEffect,
-};
+use crate::media::effects::{CustomEffect, EffectExtensions, IImmutableEffect, ImmutableCustomEffect};
 use crate::media::MediaContext;
 use crate::{FerroLocator, LocatorExtensions, Ref, Vector, Vector3D, Visual};
-use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
@@ -134,40 +130,6 @@ impl fmt::Debug for SimulationEffectUpdate {
             Self::Clear => f.write_str("Clear"),
             Self::Set(_) => f.write_str("Set(<IImmutableEffect>)"),
         }
-    }
-}
-
-/// Adapter that lets any [`Arc<dyn IImmutableEffect>`] be assigned to [`Visual::set_effect`]
-/// while unwrapping back to the exact same `Arc` in [`EffectExtensions::to_immutable`].
-struct SharedImmutableEffect(Arc<dyn IImmutableEffect>);
-
-impl IEffect for SharedImmutableEffect {
-    fn as_any(&self) -> &dyn Any {
-        self.0.as_any()
-    }
-
-    fn as_blur_effect(&self) -> Option<&dyn IBlurEffect> {
-        self.0.as_blur_effect()
-    }
-
-    fn as_drop_shadow_effect(&self) -> Option<&dyn IDropShadowEffect> {
-        self.0.as_drop_shadow_effect()
-    }
-
-    fn as_direction_drop_shadow_effect(&self) -> Option<&dyn IDirectionDropShadowEffect> {
-        self.0.as_direction_drop_shadow_effect()
-    }
-
-    fn as_custom_effect(&self) -> Option<&ImmutableCustomEffect> {
-        self.0.as_custom_effect()
-    }
-
-    fn as_immutable_effect(&self) -> Option<&dyn IImmutableEffect> {
-        Some(self.0.as_ref())
-    }
-
-    fn into_immutable_effect(self: Rc<Self>) -> Option<Arc<dyn IImmutableEffect>> {
-        Some(self.0.clone())
     }
 }
 
@@ -332,10 +294,11 @@ impl SimulationVisualPatch {
     ///   `scale`, `offset`, `opacity`) are written directly to the backing
     ///   [`CompositionVisual`] via [`ElementComposition::get_element_visual`] so
     ///   no UI layout pass is triggered.
-    /// - Effect / GPU shader updates are synchronized onto both [`Visual::set_effect`]
-    ///   (preventing draw-list repaints from clearing the effect) and the backing
-    ///   [`CompositionVisual`] (so the current batch immediately ships the updated
-    ///   shader uniforms).
+    /// - Effect / GPU shader updates are written directly to the backing
+    ///   [`CompositionVisual`] with `simulation_effect_override` enabled, avoiding
+    ///   UI-thread draw-list re-recording (`invalidate_visual`) and property-store
+    ///   allocations while preventing unrelated control repaints from clobbering
+    ///   the simulation's live shader. Clearing restores `visual.effect()`.
     ///
     /// Returns `true` if the visual currently has a backing [`CompositionVisual`].
     pub fn apply_to_visual(&self, visual: &Visual) -> bool {
@@ -375,22 +338,28 @@ impl SimulationVisualPatch {
             }
         }
 
-        // Sync GPU/CPU shader effect cleanly with both Visual and CompositionVisual.
+        // Write effect / GPU shader straight to CompositionVisual with ZERO UI-thread
+        // draw-list re-recording and ZERO property-store allocations. `simulation_effect_override`
+        // ensures unrelated control repaints (hover/focus/click) never clobber the live shader.
         match &self.effect {
             SimulationEffectUpdate::Keep => {}
             SimulationEffectUpdate::Clear => {
-                if visual.effect().is_some() {
-                    visual.set_effect(None);
-                }
-                if comp.effect().is_some() {
-                    comp.set_effect(None);
+                comp.set_simulation_effect_override(false);
+                let base_effect = visual.effect().as_ref().map(EffectExtensions::to_immutable);
+                let current_comp = comp.effect();
+                let same = match (current_comp.as_deref(), base_effect.as_deref()) {
+                    (None, None) => true,
+                    (Some(a), Some(b)) => a.equals(Some(b)),
+                    _ => false,
+                };
+                if !same {
+                    comp.set_effect(base_effect);
                 }
             }
             SimulationEffectUpdate::Set(effect) => {
+                comp.set_simulation_effect_override(true);
                 let current_comp = comp.effect();
                 if !EffectExtensions::effect_equals(current_comp.as_deref(), Some(effect.as_ref())) {
-                    let wrapped: Rc<dyn IEffect> = Rc::new(SharedImmutableEffect(effect.clone()));
-                    visual.set_effect(Some(wrapped));
                     comp.set_effect(Some(effect.clone()));
                 }
             }
@@ -1156,5 +1125,24 @@ mod tests {
         assert_eq!(compositor.simulation_count(), 0);
         // HarmonicWaveSimulation resets its target on detach.
         assert_eq!(v1.translation(), Vector3D::new(0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn simulation_effect_override_toggles_cleanly_on_composition_visual() {
+        let test = TestCompositor::new();
+        let compositor = &test.compositor;
+        let visual = compositor.create_solid_color_visual();
+
+        assert!(!visual.has_simulation_effect_override());
+        visual.set_simulation_effect_override(true);
+        let blur: Arc<dyn IImmutableEffect> = Arc::new(ImmutableBlurEffect::new(6.0));
+        SimulationVisualPatch::new().with_effect(blur).apply_to_composition_visual(&visual);
+        assert!(visual.has_simulation_effect_override());
+        assert!(visual.effect().is_some());
+
+        visual.set_simulation_effect_override(false);
+        SimulationVisualPatch::new().without_effect().apply_to_composition_visual(&visual);
+        assert!(!visual.has_simulation_effect_override());
+        assert!(visual.effect().is_none());
     }
 }

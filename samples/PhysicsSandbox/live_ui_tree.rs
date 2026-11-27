@@ -114,7 +114,6 @@ pub fn live_ui_tree_showcase() -> Element {
     });
 
     dock_panel()
-        .background("#090D16")
         .clip_to_bounds(true)
         .child(top_nav)
         .child(body)

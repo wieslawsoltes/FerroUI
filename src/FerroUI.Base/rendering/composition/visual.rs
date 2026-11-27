@@ -70,6 +70,9 @@ pub struct CompositionVisual {
     pub(super) hit_test_children: RefCell<Option<Box<CompositionHitTestAabbTree>>>,
     opacity_mask: RefCell<Option<Rc<dyn IBrush>>>,
     pub(super) custom_hit_test_count_in_sub_tree: Cell<i32>,
+    /// True while a registered [`ICompositionSimulation`](super::ICompositionSimulation)
+    /// owns this visual's composition-layer effect so UI repaints do not clobber it.
+    simulation_effect_override: Cell<bool>,
     tag: RefCell<Option<Rc<dyn Any>>>,
     readback: Arc<VisualReadback>,
 }
@@ -153,11 +156,24 @@ impl CompositionVisual {
             hit_test_children: RefCell::new(None),
             opacity_mask: RefCell::new(None),
             custom_hit_test_count_in_sub_tree: Cell::new(0),
+            simulation_effect_override: Cell::new(false),
             tag: RefCell::new(None),
             readback,
         });
         visual.initialize_defaults();
         visual
+    }
+
+    /// Whether a registered composition simulation currently owns `effect`.
+    #[inline]
+    pub(crate) fn has_simulation_effect_override(&self) -> bool {
+        self.simulation_effect_override.get()
+    }
+
+    /// Marks whether a registered composition simulation owns `effect`.
+    #[inline]
+    pub(crate) fn set_simulation_effect_override(&self, active: bool) {
+        self.simulation_effect_override.set(active);
     }
 
     fn initialize_defaults(&self) {
