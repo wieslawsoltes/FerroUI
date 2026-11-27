@@ -18,6 +18,26 @@ pub struct RayHit {
     pub normal: Vec2,
 }
 
+/// Result of a swept [`Shape2D`] cast hitting a rigid body.
+#[derive(Clone, Copy, Debug)]
+pub struct ShapeCastHit {
+    pub body: BodyHandle,
+    /// Distance traveled along the cast direction before first impact (`0.0..=max_toi`).
+    pub toi: f32,
+    /// Approximate world-space impact point.
+    pub point: Vec2,
+    /// Outward surface normal of the hit body pointing toward the cast shape.
+    pub normal: Vec2,
+}
+
+/// Result of a nearest-point query against rigid bodies.
+#[derive(Clone, Copy, Debug)]
+pub struct ClosestPointHit {
+    pub body: BodyHandle,
+    pub point: Vec2,
+    pub distance: f32,
+}
+
 /// Lifecycle collision event emitted between two solid bodies.
 #[derive(Clone, Copy, Debug)]
 pub enum CollisionEvent {

@@ -1,15 +1,18 @@
-//! Six interactive physics showcase scenes built on `ferroui-physics`:
-//! 1. Rigid Body Playground (Games: pyramid, polygons, motorized windmill, chain bridge, spawning)
-//! 2. GPU Compute Particles (3,072 colliding fluid/sand particles on Metal/Vulkan/DX12 wgpu or CPU SIMD)
-//! 3. UI Physics & Micro-Interactions (DraggableCard springs + MagneticSnap + rubber-band InertiaScroller)
-//! 4. Ragdoll & Wrecking Ball (Articulated ragdolls, swinging pendulum, breakable welded tower)
-//! 5. Suspension Vehicle & Terrain (2D car with WheelJoint spring suspension + motorized drive)
-//! 6. Laser Raycasting & Orbital Gravity Well (Multi-bounce raycast + Vortex/Radial force fields)
+//! Eight interactive physics studio scenes built on `ferroui-physics`:
+//! 1. Playground — Rigid-body pyramid, polygons, motorized windmill, chain bridge, shatterable boxes
+//! 2. GPU Fluid — 2K/4K/8K colliding particles on Metal/Vulkan/DX12 wgpu compute vs CPU SIMD
+//! 3. Cloth & Jelly — XPBD tearable wind-blown cloth curtain + pressure-inflated jelly soft bodies
+//! 4. UI Studio — Velocity-tilting DraggableCards, MagneticSnap, SpringChain cursor trail, InertiaScroller
+//! 5. Destruction — Swinging wrecking ball smashing breakable welded beams, shattering crates & ragdolls
+//! 6. Vehicle — 2D suspension car crossing ramps, speed bumps, and a buoyant water pool
+//! 7. Character — Kinematic CharacterController2D with swept shape_cast, slopes, moving platforms & crates
+//! 8. Ray & Orbit — Orbital vortex well, 6-bounce sweeping laser raycast, and closest_point tether
 
 use ferroui_physics::prelude::*;
+use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, PI};
 
-/// Logical world dimensions in meters (16:10 widescreen coordinate space, Y-down).
+/// Logical studio world dimensions in meters (16:10 widescreen, Y-down).
 pub const WORLD_WIDTH: f32 = 16.0;
 pub const WORLD_HEIGHT: f32 = 10.0;
 
@@ -17,41 +20,49 @@ pub const WORLD_HEIGHT: f32 = 10.0;
 pub enum SceneKind {
     Playground,
     GpuParticles,
+    ClothSoftBody,
     UiSprings,
     RagdollWrecking,
     VehicleTerrain,
+    CharacterDemo,
     LaserGravity,
 }
 
 impl SceneKind {
-    pub const ALL: [SceneKind; 6] = [
+    pub const ALL: [SceneKind; 8] = [
         Self::Playground,
         Self::GpuParticles,
+        Self::ClothSoftBody,
         Self::UiSprings,
         Self::RagdollWrecking,
         Self::VehicleTerrain,
+        Self::CharacterDemo,
         Self::LaserGravity,
     ];
 
     pub fn title(self) -> &'static str {
         match self {
             Self::Playground => "Playground",
-            Self::GpuParticles => "GPU Particles",
-            Self::UiSprings => "UI Springs",
-            Self::RagdollWrecking => "Ragdoll",
+            Self::GpuParticles => "GPU Fluid",
+            Self::ClothSoftBody => "Cloth & Jelly",
+            Self::UiSprings => "UI Studio",
+            Self::RagdollWrecking => "Destruction",
             Self::VehicleTerrain => "Vehicle",
+            Self::CharacterDemo => "Character",
             Self::LaserGravity => "Ray & Orbit",
         }
     }
 
     pub fn hint(self) -> &'static str {
         match self {
-            Self::Playground => "Drag bodies, spawn shapes, or right-click for shockwave blasts",
-            Self::GpuParticles => "Move/hold pointer to swirl 3,072 particles; toggle GPU vs CPU SIMD",
-            Self::UiSprings => "Drag & fling cards into magnetic dock slots, or flick the bottom scroller",
-            Self::RagdollWrecking => "Wrecking ball smashes breakable welded beams & articulated ragdolls",
-            Self::VehicleTerrain => "Motorized suspension car drives over ramps; click to drop obstacles",
-            Self::LaserGravity => "6-bounce live raycast + orbital vortex well; drag or spawn satellites",
+            Self::Playground => "Drag bodies, spawn shapes/jelly, use Shatter tool, or right-click for shockwaves",
+            Self::GpuParticles => "Hold left/right mouse to swirl or blast particles; switch 2K/4K/8K & GPU vs CPU SIMD",
+            Self::ClothSoftBody => "Left-drag to pull cloth & drop jelly blobs; right-drag to slice/tear the cloth mesh!",
+            Self::UiSprings => "Drag & fling cards into magnetic slots, sweep cursor for SpringChain ribbon, flick scroller",
+            Self::RagdollWrecking => "Wrecking ball shatters crates, snaps welded beams & launches articulated ragdolls",
+            Self::VehicleTerrain => "Spring-suspended car drives over ramps & splashes into a buoyant water pool",
+            Self::CharacterDemo => "Move pointer to guide CharacterController2D (click to jump) across slopes & platforms",
+            Self::LaserGravity => "6-bounce live laser raycast + orbital vortex + closest_point proximity tether",
         }
     }
 }
@@ -62,15 +73,19 @@ pub enum ToolMode {
     SpawnBox,
     SpawnCircle,
     SpawnPolygon,
+    SpawnJelly,
+    Shatter,
     Explosion,
 }
 
 impl ToolMode {
-    pub const ALL: [ToolMode; 5] = [
+    pub const ALL: [ToolMode; 7] = [
         Self::Drag,
         Self::SpawnBox,
         Self::SpawnCircle,
         Self::SpawnPolygon,
+        Self::SpawnJelly,
+        Self::Shatter,
         Self::Explosion,
     ];
 
@@ -80,6 +95,8 @@ impl ToolMode {
             Self::SpawnBox => "Box",
             Self::SpawnCircle => "Circle",
             Self::SpawnPolygon => "Hex",
+            Self::SpawnJelly => "Jelly",
+            Self::Shatter => "Shatter",
             Self::Explosion => "Blast",
         }
     }
@@ -124,41 +141,77 @@ impl SpringPreset {
     }
 }
 
-/// Visual metadata for UI spring cards in `SceneKind::UiSprings`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SolverProfile {
+    Game,
+    Precision,
+    UiFast,
+}
+
+impl SolverProfile {
+    pub const ALL: [SolverProfile; 3] = [Self::Game, Self::Precision, Self::UiFast];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Game => "Game",
+            Self::Precision => "Precision",
+            Self::UiFast => "UI Fast",
+        }
+    }
+
+    pub fn config(self) -> SolverConfig {
+        match self {
+            Self::Game => SolverConfig::game_default(),
+            Self::Precision => SolverConfig::high_precision(),
+            Self::UiFast => SolverConfig::ui_realtime(),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct UiDemoCard {
     pub label: &'static str,
+    pub subtitle: &'static str,
     pub accent_argb: u32,
     pub half_size: Vec2,
     pub card: DraggableCard,
     pub slot_index: usize,
 }
 
-/// Live telemetry snapshot surfaced in the HUD bar.
 #[derive(Clone, Debug, Default)]
 pub struct TelemetrySnapshot {
     pub backend_label: String,
     pub step_ms: f32,
+    pub fps: f32,
+    pub breakdown: String,
     pub entity_summary: String,
     pub gpu_available: bool,
+    pub history_frame: usize,
+    pub history_len: usize,
 }
 
-/// Self-contained simulation engine state powering the `PhysicsSandbox` viewport.
+/// Complete studio simulation engine managing all 8 showcase scenes, history rollback, and profiler metrics.
 pub struct SandboxEngine {
     pub scene: SceneKind,
     pub tool: ToolMode,
     pub spring_preset: SpringPreset,
+    pub solver_profile: SolverProfile,
     pub paused: bool,
     pub time_scale: f32,
     pub gravity_y: f32,
     pub restitution: f32,
+    pub wind_x: f32,
     pub show_aabbs: bool,
     pub show_contacts: bool,
     pub show_velocities: bool,
+    pub show_joints: bool,
+    pub show_hud_graph: bool,
     pub prefer_gpu: bool,
+    pub particle_target_count: usize,
 
-    // Core rigid-body simulation
+    // Rigid-body world + history rollback
     pub world: PhysicsWorld,
+    pub history: WorldHistory,
     drag_joint: Option<JointHandle>,
 
     // Particle / GPU compute simulation
@@ -167,10 +220,19 @@ pub struct SandboxEngine {
     gpu_solver: Option<GpuParticleSolver>,
     gpu_synced: bool,
 
-    // UI spring & inertia simulation
+    // XPBD Cloth & Soft-body jelly
+    pub cloth: Option<ClothMesh>,
+    pub soft_bodies: Vec<SoftBody2D>,
+
+    // Character controller demo
+    pub character: Option<CharacterController2D>,
+    moving_platform: Option<(BodyHandle, Vec2)>,
+
+    // UI spring, chain & inertia simulation
     pub ui_cards: Vec<UiDemoCard>,
     pub ui_snap: MagneticSnap,
     pub ui_scroller: InertiaScroller,
+    pub ui_ribbon: SpringChain,
     active_card_idx: Option<usize>,
     dragging_scroller: bool,
     last_pointer_world: Vec2,
@@ -178,40 +240,54 @@ pub struct SandboxEngine {
     pointer_right: bool,
     gesture_tracker: GestureTracker,
 
-    // Vehicle & laser state
+    // Visual effects & telemetry
     pub sim_time: f32,
     pub laser_segments: Vec<(Vec2, Vec2, Option<Vec2>)>,
+    pub closest_tether: Option<(Vec2, Vec2, f32)>,
     pub blast_ring: Option<(Vec2, f32)>,
+    pub step_ms_history: VecDeque<f32>,
     pub telemetry: TelemetrySnapshot,
 
     spawn_counter: u64,
+    shatter_candidates: Vec<BodyHandle>,
 }
 
 impl SandboxEngine {
     pub fn new() -> Self {
-        let gpu_solver = GpuParticleSolver::try_new(4096);
+        let gpu_solver = GpuParticleSolver::try_new(8192);
         let gpu_available = gpu_solver.is_some();
         let mut engine = Self {
             scene: SceneKind::Playground,
             tool: ToolMode::Drag,
             spring_preset: SpringPreset::Bouncy,
+            solver_profile: SolverProfile::Game,
             paused: false,
             time_scale: 1.0,
             gravity_y: 9.81,
             restitution: 0.35,
+            wind_x: 3.2,
             show_aabbs: false,
             show_contacts: false,
             show_velocities: false,
+            show_joints: true,
+            show_hud_graph: true,
             prefer_gpu: gpu_available,
+            particle_target_count: 4096,
             world: PhysicsWorld::new(Vec2::new(0.0, 9.81)),
+            history: WorldHistory::new(240),
             drag_joint: None,
             particles: ParticleSystem::new(ParticleConfig::default()),
             gpu_particles_view: Vec::new(),
             gpu_solver,
             gpu_synced: false,
+            cloth: None,
+            soft_bodies: Vec::new(),
+            character: None,
+            moving_platform: None,
             ui_cards: Vec::new(),
             ui_snap: MagneticSnap::new(Vec::new()),
             ui_scroller: InertiaScroller::new(0.0, 12.0, 4.0),
+            ui_ribbon: SpringChain::new(12, Vec2::new(8.0, 5.0), SpringConfig::from_response_damping(0.18, 0.78)),
             active_card_idx: None,
             dragging_scroller: false,
             last_pointer_world: Vec2::new(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5),
@@ -220,14 +296,17 @@ impl SandboxEngine {
             gesture_tracker: GestureTracker::default(),
             sim_time: 0.0,
             laser_segments: Vec::new(),
+            closest_tether: None,
             blast_ring: None,
+            step_ms_history: VecDeque::with_capacity(96),
             telemetry: TelemetrySnapshot {
                 backend_label: SimdBackend::active().name().to_string(),
-                step_ms: 0.0,
-                entity_summary: String::new(),
+                fps: 60.0,
                 gpu_available,
+                ..Default::default()
             },
             spawn_counter: 1,
+            shatter_candidates: Vec::new(),
         };
         engine.load_scene(SceneKind::Playground);
         engine
@@ -249,64 +328,109 @@ impl SandboxEngine {
         }
     }
 
+    pub fn set_solver_profile(&mut self, profile: SolverProfile) {
+        self.solver_profile = profile;
+        self.world.config = profile.config();
+    }
+
+    pub fn set_particle_count(&mut self, count: usize) {
+        self.particle_target_count = count;
+        if self.scene == SceneKind::GpuParticles {
+            self.build_gpu_particles_scene();
+        }
+    }
+
+    pub fn step_back_history(&mut self) {
+        self.paused = true;
+        self.history.step_back(&mut self.world);
+        self.telemetry.history_frame = self.history.cursor();
+        self.telemetry.history_len = self.history.len();
+    }
+
+    pub fn step_forward_one(&mut self) {
+        if self.history.step_forward(&mut self.world) {
+            self.telemetry.history_frame = self.history.cursor();
+            self.telemetry.history_len = self.history.len();
+        } else {
+            let was_paused = self.paused;
+            self.paused = false;
+            self.step(1.0 / 60.0);
+            self.paused = was_paused;
+        }
+    }
+
+    pub fn scrub_history(&mut self, normalized_t: f32) {
+        self.paused = true;
+        if self.history.scrub(&mut self.world, normalized_t) {
+            self.telemetry.history_frame = self.history.cursor();
+            self.telemetry.history_len = self.history.len();
+        }
+    }
+
     pub fn load_scene(&mut self, kind: SceneKind) {
         self.scene = kind;
         self.world.clear();
+        self.history.clear();
         self.drag_joint = None;
         self.active_card_idx = None;
         self.dragging_scroller = false;
+        self.cloth = None;
+        self.soft_bodies.clear();
+        self.character = None;
+        self.moving_platform = None;
         self.laser_segments.clear();
+        self.closest_tether = None;
         self.blast_ring = None;
+        self.shatter_candidates.clear();
         self.sim_time = 0.0;
         self.gpu_synced = false;
 
         match kind {
             SceneKind::Playground => self.build_playground_scene(),
             SceneKind::GpuParticles => self.build_gpu_particles_scene(),
+            SceneKind::ClothSoftBody => self.build_cloth_softbody_scene(),
             SceneKind::UiSprings => self.build_ui_springs_scene(),
             SceneKind::RagdollWrecking => self.build_ragdoll_scene(),
             SceneKind::VehicleTerrain => self.build_vehicle_scene(),
+            SceneKind::CharacterDemo => self.build_character_scene(),
             SceneKind::LaserGravity => self.build_laser_gravity_scene(),
         }
+        self.history.record(&self.world);
     }
 
     fn add_arena_walls(&mut self) {
         let wall_mat = PhysicsMaterial::new(0.0, 0.2, 0.65);
-        // Floor
         self.world.add_body(
             BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 1.0, 0.8))
                 .position((WORLD_WIDTH * 0.5, WORLD_HEIGHT - 0.35))
                 .material(wall_mat)
-                .user_data(0xFF263042),
+                .user_data(0xFF1E293B),
         );
-        // Ceiling
         self.world.add_body(
             BodyBuilder::static_body(Shape2D::rect(WORLD_WIDTH + 1.0, 0.8))
                 .position((WORLD_WIDTH * 0.5, -0.4))
                 .material(wall_mat)
-                .user_data(0xFF263042),
+                .user_data(0xFF1E293B),
         );
-        // Left & Right walls
         self.world.add_body(
             BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 1.0))
                 .position((-0.35, WORLD_HEIGHT * 0.5))
                 .material(wall_mat)
-                .user_data(0xFF263042),
+                .user_data(0xFF1E293B),
         );
         self.world.add_body(
             BodyBuilder::static_body(Shape2D::rect(0.8, WORLD_HEIGHT + 1.0))
                 .position((WORLD_WIDTH + 0.35, WORLD_HEIGHT * 0.5))
                 .material(wall_mat)
-                .user_data(0xFF263042),
+                .user_data(0xFF1E293B),
         );
     }
 
     fn build_playground_scene(&mut self) {
         self.world.gravity = Vec2::new(0.0, self.gravity_y);
-        self.world.config = SolverConfig::game_default();
+        self.world.config = self.solver_profile.config();
         self.add_arena_walls();
 
-        // 1. Pyramid stack of boxes on the left
         let palette = [0xFF38BDF8, 0xFF818CF8, 0xFFF472B6, 0xFF34D399, 0xFFFBBF24, 0xFFFB7185];
         let base_x = 3.8;
         let base_y = WORLD_HEIGHT - 1.05;
@@ -327,22 +451,22 @@ impl SandboxEngine {
             }
         }
 
-        // 2. Motorized windmill spinner in center-right
+        // Motorized windmill spinner
         let hub = self.world.add_body(
             BodyBuilder::static_body(Shape2D::circle(0.18))
-                .position((10.8, 5.2))
+                .position((10.8, 5.4))
                 .user_data(0xFF94A3B8),
         );
         let blade = self.world.add_body(
-            BodyBuilder::dynamic(Shape2D::rect(3.4, 0.24))
-                .position((10.8, 5.2))
+            BodyBuilder::dynamic(Shape2D::rect(3.5, 0.24))
+                .position((10.8, 5.4))
                 .density(2.0)
                 .can_sleep(false)
                 .user_data(0xFFF59E0B),
         );
         self.world.add_joint(Joint::revolute(hub, blade, Vec2::ZERO, Vec2::ZERO).with_motor(2.2, 85.0));
 
-        // 3. Hanging suspension chain bridge at top
+        // Hanging chain bridge
         let left_anchor = self.world.add_body(
             BodyBuilder::static_body(Shape2D::circle(0.15))
                 .position((7.0, 2.0))
@@ -371,7 +495,6 @@ impl SandboxEngine {
         }
         self.world.add_joint(Joint::revolute(prev, right_anchor, prev_local, Vec2::ZERO));
 
-        // 4. Bouncy circles & convex polygons dropping onto the bridge and windmill
         for i in 0..7 {
             let x = 8.0 + i as f32 * 0.95;
             let shape = match i % 3 {
@@ -390,10 +513,17 @@ impl SandboxEngine {
     }
 
     fn build_gpu_particles_scene(&mut self) {
+        let radius = if self.particle_target_count >= 8000 {
+            0.056
+        } else if self.particle_target_count >= 4000 {
+            0.070
+        } else {
+            0.088
+        };
         let config = ParticleConfig {
             bounds: Aabb2::new(Vec2::new(0.25, 0.25), Vec2::new(WORLD_WIDTH - 0.25, WORLD_HEIGHT - 0.25)),
             gravity: Vec2::new(0.0, self.gravity_y),
-            particle_radius: 0.078,
+            particle_radius: radius,
             damping: 0.996,
             restitution: 0.3,
             stiffness: 0.58,
@@ -401,20 +531,71 @@ impl SandboxEngine {
             substeps: 2,
             pointer_center: Vec2::new(WORLD_WIDTH * 0.5, WORLD_HEIGHT * 0.5),
             pointer_strength: 0.0,
-            pointer_radius: 3.2,
+            pointer_radius: 3.4,
         };
         self.particles = ParticleSystem::new(config);
-        self.particles.spawn_grid(Aabb2::new(Vec2::new(0.6, 0.6), Vec2::new(9.2, 8.8)), 3072);
+        self.particles
+            .spawn_grid(Aabb2::new(Vec2::new(0.55, 0.55), Vec2::new(10.0, 9.0)), self.particle_target_count);
         self.particles.obstacles = vec![
-            ParticleObstacle { center: [5.5, 5.2], radius: 0.85, restitution: 0.5 },
-            ParticleObstacle { center: [10.6, 6.4], radius: 1.05, restitution: 0.5 },
-            ParticleObstacle { center: [12.8, 3.8], radius: 0.72, restitution: 0.5 },
+            ParticleObstacle { center: [5.4, 5.1], radius: 0.85, restitution: 0.5 },
+            ParticleObstacle { center: [10.4, 6.4], radius: 1.05, restitution: 0.5 },
+            ParticleObstacle { center: [12.9, 3.8], radius: 0.72, restitution: 0.5 },
         ];
         self.gpu_particles_view = self.particles.to_gpu_particles();
         if let Some(gpu) = self.gpu_solver.as_mut() {
             gpu.upload_particles(&self.gpu_particles_view);
             self.gpu_synced = true;
         }
+    }
+
+    fn build_cloth_softbody_scene(&mut self) {
+        self.world.gravity = Vec2::new(0.0, self.gravity_y);
+        self.world.config = SolverConfig::game_default();
+        self.add_arena_walls();
+
+        let bounds = Aabb2::new(Vec2::new(0.2, 0.2), Vec2::new(WORLD_WIDTH - 0.2, WORLD_HEIGHT - 0.78));
+        // Tearable XPBD hanging cloth curtain on the left
+        self.cloth = Some(ClothMesh::grid(
+            Vec2::new(1.2, 1.0),
+            16,
+            11,
+            0.36,
+            0.00018,
+            Some(2.05),
+            bounds,
+        ));
+
+        // Rigid bumper pegs & ramps on the right for jelly soft bodies to squish over!
+        for &(x, y, r) in &[(10.2, 5.2, 0.65), (12.8, 6.4, 0.72), (8.6, 7.6, 0.55)] {
+            self.world.add_body(
+                BodyBuilder::static_body(Shape2D::circle(r))
+                    .position((x, y))
+                    .user_data(0xFF334155),
+            );
+        }
+        // Slanted ramp under the jelly drop zone
+        self.world.add_body(
+            BodyBuilder::static_body(Shape2D::rect(3.4, 0.22))
+                .position((11.6, 8.2))
+                .angle(-0.22)
+                .user_data(0xFF475569),
+        );
+        // Dynamic ball swinging into cloth
+        let ball = self.world.add_body(
+            BodyBuilder::dynamic(Shape2D::circle(0.52))
+                .position((3.6, 6.8))
+                .linear_velocity((3.2, -2.0))
+                .restitution(0.75)
+                .user_data(0xFFF59E0B),
+        );
+        let _ = ball;
+
+        // Three colorful pressure-inflated XPBD jelly blobs!
+        self.soft_bodies = vec![
+            SoftBody2D::circle_blob(Vec2::new(10.0, 2.2), 0.92, 18, 1.15, 0.00035, bounds, 0xCC34D399),
+            SoftBody2D::circle_blob(Vec2::new(12.5, 2.6), 0.85, 18, 1.12, 0.0004, bounds, 0xCCF472B6),
+            SoftBody2D::circle_blob(Vec2::new(11.3, 1.1), 0.78, 16, 1.18, 0.0003, bounds, 0xCC38BDF8),
+        ];
     }
 
     fn build_ui_springs_scene(&mut self) {
@@ -429,24 +610,25 @@ impl SandboxEngine {
         let cfg = self.spring_preset.config();
 
         let defs = [
-            ("Spring Card A", 0xFF38BDF8, 0),
-            ("Tilt Physics B", 0xFFA78BFA, 1),
-            ("Magnetic C", 0xFFF472B6, 2),
-            ("Critically D", 0xFF34D399, 3),
+            ("Spring2D", "Analytical ODE", 0xFF0284C7, 0),
+            ("Tilt Torque", "Velocity-Coupled", 0xFF7C3AED, 1),
+            ("MagneticSnap", "Projected Target", 0xFFDB2777, 2),
+            ("SpringChain", "12-Node Ribbon", 0xFF059669, 3),
         ];
         self.ui_cards = defs
             .into_iter()
-            .map(|(label, accent_argb, slot_index)| {
+            .map(|(label, subtitle, accent_argb, slot_index)| {
                 let mut card = DraggableCard::new(anchors[slot_index] + Vec2::new(0.0, -1.8), cfg);
                 card.position.set_target(anchors[slot_index]);
                 card.tilt_sensitivity = 0.035;
-                UiDemoCard { label, accent_argb, half_size: Vec2::new(1.55, 0.92), card, slot_index }
+                UiDemoCard { label, subtitle, accent_argb, half_size: Vec2::new(1.55, 0.92), card, slot_index }
             })
             .collect();
 
         self.ui_scroller = InertiaScroller::new(0.0, 12.0, 5.0);
         self.ui_scroller.detents = vec![0.0, 3.0, 6.0, 9.0, 12.0];
         self.ui_scroller.position = 3.0;
+        self.ui_ribbon = SpringChain::new(12, Vec2::new(8.0, 4.2), SpringConfig::from_response_damping(0.16, 0.78));
     }
 
     fn build_ragdoll_scene(&mut self) {
@@ -454,7 +636,6 @@ impl SandboxEngine {
         self.world.config = SolverConfig::high_precision();
         self.add_arena_walls();
 
-        // Breakable tower of welded beams
         let beam_x = 10.6;
         let floor_y = WORLD_HEIGHT - 0.75;
         let mut prev_left: Option<BodyHandle> = None;
@@ -462,64 +643,70 @@ impl SandboxEngine {
         for level in 0..4 {
             let y_pillar = floor_y - 0.7 - level as f32 * 1.55;
             let left = self.world.add_body(
-                BodyBuilder::dynamic(Shape2D::rect(0.26, 1.35))
-                    .position((beam_x - 1.1, y_pillar))
+                BodyBuilder::dynamic(Shape2D::rect(0.28, 1.35))
+                    .position((beam_x - 1.15, y_pillar))
                     .density(1.4)
                     .friction(0.7)
                     .user_data(0xFF60A5FA),
             );
             let right = self.world.add_body(
-                BodyBuilder::dynamic(Shape2D::rect(0.26, 1.35))
-                    .position((beam_x + 1.1, y_pillar))
+                BodyBuilder::dynamic(Shape2D::rect(0.28, 1.35))
+                    .position((beam_x + 1.15, y_pillar))
                     .density(1.4)
                     .friction(0.7)
                     .user_data(0xFF60A5FA),
             );
             let top = self.world.add_body(
-                BodyBuilder::dynamic(Shape2D::rect(2.7, 0.24))
+                BodyBuilder::dynamic(Shape2D::rect(2.8, 0.26))
                     .position((beam_x, y_pillar - 0.78))
                     .density(1.2)
                     .friction(0.7)
                     .user_data(0xFFFBBF24),
             );
-            // Breakable welds hold the frame until the wrecking ball strikes!
+            // Glass-like shatterable core crate inside each bay!
+            let crate_h = self.world.add_body(
+                BodyBuilder::dynamic(Shape2D::rect(0.95, 0.95))
+                    .position((beam_x, y_pillar + 0.12))
+                    .density(0.9)
+                    .user_data(0xFF38BDF8),
+            );
+            self.shatter_candidates.push(crate_h);
+
             self.world.add_joint(
-                Joint::weld(left, top, Vec2::new(0.0, -0.68), Vec2::new(-1.1, 0.12), 0.0).with_break_force(180.0),
+                Joint::weld(left, top, Vec2::new(0.0, -0.68), Vec2::new(-1.15, 0.13), 0.0).with_break_force(175.0),
             );
             self.world.add_joint(
-                Joint::weld(right, top, Vec2::new(0.0, -0.68), Vec2::new(1.1, 0.12), 0.0).with_break_force(180.0),
+                Joint::weld(right, top, Vec2::new(0.0, -0.68), Vec2::new(1.15, 0.13), 0.0).with_break_force(175.0),
             );
             if let (Some(pl), Some(pr)) = (prev_left, prev_right) {
                 self.world.add_joint(
-                    Joint::weld(pl, left, Vec2::new(0.0, -0.68), Vec2::new(0.0, 0.68), 0.0).with_break_force(160.0),
+                    Joint::weld(pl, left, Vec2::new(0.0, -0.68), Vec2::new(0.0, 0.68), 0.0).with_break_force(155.0),
                 );
                 self.world.add_joint(
-                    Joint::weld(pr, right, Vec2::new(0.0, -0.68), Vec2::new(0.0, 0.68), 0.0).with_break_force(160.0),
+                    Joint::weld(pr, right, Vec2::new(0.0, -0.68), Vec2::new(0.0, 0.68), 0.0).with_break_force(155.0),
                 );
             }
             prev_left = Some(left);
             prev_right = Some(right);
         }
 
-        // Two articulated ragdolls standing near/on the tower
-        self.spawn_ragdoll(Vec2::new(10.6, 2.2), -10);
-        self.spawn_ragdoll(Vec2::new(13.4, 6.2), -11);
+        self.spawn_ragdoll(Vec2::new(10.6, 2.0), -10);
+        self.spawn_ragdoll(Vec2::new(13.6, 6.2), -11);
 
-        // Heavy swinging wrecking ball raised high on the left!
         let crane = self.world.add_body(
             BodyBuilder::static_body(Shape2D::circle(0.22))
                 .position((6.8, 0.9))
                 .user_data(0xFF94A3B8),
         );
         let ball = self.world.add_body(
-            BodyBuilder::dynamic(Shape2D::circle(0.72))
-                .position((1.5, 2.1))
-                .density(9.5)
+            BodyBuilder::dynamic(Shape2D::circle(0.75))
+                .position((1.4, 2.0))
+                .density(10.5)
                 .restitution(0.35)
                 .bullet(true)
                 .user_data(0xFFEF4444),
         );
-        self.world.add_joint(Joint::distance(crane, ball, Vec2::ZERO, Vec2::ZERO, 5.45));
+        self.world.add_joint(Joint::distance(crane, ball, Vec2::ZERO, Vec2::ZERO, 5.5));
     }
 
     fn spawn_ragdoll(&mut self, origin: Vec2, group: i16) {
@@ -585,12 +772,18 @@ impl SandboxEngine {
         self.world.config = SolverConfig::high_precision();
         self.add_arena_walls();
 
-        // Sculpted ramps and speed bumps across the arena
+        // Buoyant water pool on the right side!
+        self.world.add_force_field(ForceField::Buoyancy {
+            region: Aabb2::new(Vec2::new(10.8, 7.2), Vec2::new(15.6, 9.6)),
+            fluid_density: 2.2,
+            linear_drag: 2.4,
+            angular_drag: 2.0,
+        });
+
         let terrain_mat = PhysicsMaterial::new(0.0, 0.1, 0.95);
         for (x, y, w, h, ang) in [
             (4.8, 9.1, 3.2, 0.28, -0.22),
             (8.2, 8.95, 2.8, 0.28, 0.18),
-            (11.6, 9.15, 3.0, 0.28, -0.25),
         ] {
             self.world.add_body(
                 BodyBuilder::static_body(Shape2D::rect(w, h))
@@ -600,22 +793,20 @@ impl SandboxEngine {
                     .user_data(0xFF334155),
             );
         }
-        // Small speed-bump rollers
-        for i in 0..4 {
+        for i in 0..3 {
             self.world.add_body(
                 BodyBuilder::static_body(Shape2D::circle(0.24))
-                    .position((5.6 + i as f32 * 1.9, 9.32))
+                    .position((5.4 + i as f32 * 1.9, 9.32))
                     .material(terrain_mat)
                     .user_data(0xFF475569),
             );
         }
 
-        // Vehicle chassis + two spring-suspended motorized wheels
         let car_filter = CollisionFilter::ALL.with_group(-20);
         let chassis = self.world.add_body(
             BodyBuilder::dynamic(Shape2D::rect(2.3, 0.56))
-                .position((2.4, 7.2))
-                .density(1.8)
+                .position((2.3, 7.1))
+                .density(1.5)
                 .filter(car_filter)
                 .can_sleep(false)
                 .user_data(0xFF38BDF8),
@@ -623,7 +814,7 @@ impl SandboxEngine {
         let wheel_mat = PhysicsMaterial::new(2.2, 0.2, 1.4);
         let wheel_l = self.world.add_body(
             BodyBuilder::dynamic(Shape2D::circle(0.42))
-                .position((1.55, 7.85))
+                .position((1.45, 7.75))
                 .material(wheel_mat)
                 .filter(car_filter)
                 .can_sleep(false)
@@ -631,7 +822,7 @@ impl SandboxEngine {
         );
         let wheel_r = self.world.add_body(
             BodyBuilder::dynamic(Shape2D::circle(0.42))
-                .position((3.25, 7.85))
+                .position((3.15, 7.75))
                 .material(wheel_mat)
                 .filter(car_filter)
                 .can_sleep(false)
@@ -647,17 +838,63 @@ impl SandboxEngine {
                 .with_motor(11.0, 55.0),
         );
 
-        // Stack of light crates at the right end for the car to crash through!
-        for row in 0..4 {
-            for col in 0..2 {
-                self.world.add_body(
-                    BodyBuilder::dynamic(Shape2D::rect(0.55, 0.55))
-                        .position((13.6 + col as f32 * 0.62, 8.95 - row as f32 * 0.57))
-                        .density(0.45)
-                        .user_data(0xFF34D399),
-                );
-            }
+        // Floating wooden crates bobbing in the water pool!
+        for i in 0..4 {
+            self.world.add_body(
+                BodyBuilder::dynamic(Shape2D::rect(0.62, 0.62))
+                    .position((11.6 + i as f32 * 0.95, 7.4 - (i % 2) as f32 * 0.6))
+                    .density(0.65)
+                    .can_sleep(false)
+                    .user_data(0xFF34D399),
+            );
         }
+    }
+
+    fn build_character_scene(&mut self) {
+        self.world.gravity = Vec2::new(0.0, self.gravity_y);
+        self.world.config = SolverConfig::game_default();
+        self.add_arena_walls();
+
+        // Walkable slope ramps + floating platforms
+        for (x, y, w, h, ang) in [
+            (4.4, 8.6, 4.2, 0.35, -0.32),
+            (9.2, 7.8, 3.2, 0.35, 0.0),
+            (13.2, 6.4, 3.4, 0.35, -0.25),
+            (3.2, 5.2, 3.2, 0.3, 0.0),
+        ] {
+            self.world.add_body(
+                BodyBuilder::static_body(Shape2D::rect(w, h))
+                    .position((x, y))
+                    .angle(ang)
+                    .user_data(0xFF334155),
+            );
+        }
+
+        // Moving kinematic elevator platform
+        let plat_origin = Vec2::new(7.4, 5.4);
+        let plat = self.world.add_body(
+            BodyBuilder::kinematic(Shape2D::rect(2.4, 0.28))
+                .position(plat_origin)
+                .user_data(0xFF0EA5E9),
+        );
+        self.moving_platform = Some((plat, plat_origin));
+
+        // Pushable dynamic physics crates on platforms
+        for (x, y, col) in [
+            (9.4, 7.1, 0xFFF59E0B),
+            (10.1, 7.1, 0xFFFB7185),
+            (9.75, 6.4, 0xFFA78BFA),
+            (2.8, 4.6, 0xFF34D399),
+        ] {
+            self.world.add_body(
+                BodyBuilder::dynamic(Shape2D::rect(0.58, 0.58))
+                    .position((x, y))
+                    .density(0.8)
+                    .user_data(col),
+            );
+        }
+
+        self.character = Some(CharacterController2D::new(Shape2D::capsule(0.36, 0.26), Vec2::new(2.0, 8.0)));
     }
 
     fn build_laser_gravity_scene(&mut self) {
@@ -673,7 +910,6 @@ impl SandboxEngine {
             radius: 7.5,
         });
 
-        // Central static glowing star core
         self.world.add_body(
             BodyBuilder::static_body(Shape2D::circle(0.65))
                 .position(center)
@@ -681,7 +917,6 @@ impl SandboxEngine {
                 .user_data(0xFFFBBF24),
         );
 
-        // Orbiting mirror satellites & convex crystals
         let colors = [0xFF38BDF8, 0xFFA78BFA, 0xFF34D399, 0xFFF472B6, 0xFFFB923C];
         for i in 0..14 {
             let ang = i as f32 * (2.0 * PI / 14.0);
@@ -708,7 +943,6 @@ impl SandboxEngine {
         }
     }
 
-    /// Advances the active scene by `dt` seconds.
     pub fn step(&mut self, raw_dt: f32) {
         if self.paused {
             return;
@@ -718,16 +952,26 @@ impl SandboxEngine {
 
         if let Some((_, ref mut r)) = self.blast_ring {
             *r += dt * 14.0;
-            if *r > 5.0 {
+            if *r > 5.2 {
                 self.blast_ring = None;
             }
         }
 
         match self.scene {
             SceneKind::GpuParticles => self.step_particles(dt),
+            SceneKind::ClothSoftBody => self.step_cloth_softbody(dt),
             SceneKind::UiSprings => self.step_ui_springs(dt),
+            SceneKind::CharacterDemo => self.step_character(dt),
             _ => self.step_rigid_world(dt),
         }
+
+        // Push sparkline sample
+        if self.step_ms_history.len() >= 90 {
+            self.step_ms_history.pop_front();
+        }
+        self.step_ms_history.push_back(self.telemetry.step_ms);
+        let inst_fps = if raw_dt > 1e-4 { (1.0 / raw_dt).clamp(1.0, 240.0) } else { 60.0 };
+        self.telemetry.fps = self.telemetry.fps * 0.9 + inst_fps * 0.1;
     }
 
     fn step_rigid_world(&mut self, dt: f32) {
@@ -741,19 +985,141 @@ impl SandboxEngine {
 
         let stats = self.world.step(dt);
 
-        // Update 6-bounce live sweeping laser in LaserGravity scene
+        // Automatic impact shattering in Destruction scene!
+        if self.scene == SceneKind::RagdollWrecking && !self.shatter_candidates.is_empty() {
+            let mut to_shatter: Vec<(BodyHandle, Vec2)> = Vec::new();
+            for ev in self.world.collision_events() {
+                if let CollisionEvent::Started { body_a, body_b, point, impact_speed, .. } = *ev {
+                    if impact_speed > 5.5 {
+                        if self.shatter_candidates.contains(&body_a) {
+                            to_shatter.push((body_a, point));
+                        }
+                        if self.shatter_candidates.contains(&body_b) {
+                            to_shatter.push((body_b, point));
+                        }
+                    }
+                }
+            }
+            for (h, pt) in to_shatter {
+                self.shatter_candidates.retain(|&x| x != h);
+                fracture_body(&mut self.world, h, pt, 2.8);
+            }
+        }
+
         if self.scene == SceneKind::LaserGravity {
             self.update_laser_raycast();
+            self.closest_tether = self
+                .world
+                .closest_point(self.last_pointer_world, 8.0, CollisionFilter::ALL)
+                .map(|hit| (self.last_pointer_world, hit.point, hit.distance));
         }
+
+        self.history.record(&self.world);
 
         self.telemetry = TelemetrySnapshot {
             backend_label: stats.simd_backend.map_or("CPU", |b| b.name()).to_string(),
             step_ms: stats.total_us as f32 / 1000.0,
+            fps: self.telemetry.fps,
+            breakdown: format!(
+                "BP {:.2}ms · NP {:.2}ms · Solve {:.2}ms · Int {:.2}ms",
+                stats.broadphase_us as f32 / 1000.0,
+                stats.narrowphase_us as f32 / 1000.0,
+                stats.solver_us as f32 / 1000.0,
+                stats.integrate_us as f32 / 1000.0,
+            ),
             entity_summary: format!(
                 "{} bodies ({} awake) · {} contacts · {} joints",
                 stats.total_bodies, stats.active_bodies, stats.contact_points, stats.active_joints
             ),
             gpu_available: self.gpu_solver.is_some(),
+            history_frame: self.history.cursor(),
+            history_len: self.history.len(),
+        };
+    }
+
+    fn step_cloth_softbody(&mut self, dt: f32) {
+        let start = std::time::Instant::now();
+        self.world.gravity = Vec2::new(0.0, self.gravity_y);
+        self.world.step(dt);
+
+        let bodies_snapshot: Vec<RigidBody> = self.world.bodies().cloned().collect();
+        let body_refs: Vec<&RigidBody> = bodies_snapshot.iter().collect();
+        let g = Vec2::new(0.0, self.gravity_y);
+        let wind = Vec2::new(self.wind_x, 0.0);
+
+        if let Some(cloth) = self.cloth.as_mut() {
+            cloth.step(dt, g, wind, self.sim_time, &body_refs);
+        }
+        for sb in &mut self.soft_bodies {
+            sb.step(dt, g, &body_refs);
+        }
+
+        let us = start.elapsed().as_micros();
+        let cloth_links = self.cloth.as_ref().map_or(0, ClothMesh::active_constraint_count);
+        self.telemetry = TelemetrySnapshot {
+            backend_label: format!("XPBD Cloth + SoftBody ({})", SimdBackend::active().name()),
+            step_ms: us as f32 / 1000.0,
+            fps: self.telemetry.fps,
+            breakdown: format!("XPBD 6 substeps · wind {:.1} m/s²", self.wind_x),
+            entity_summary: format!("{} cloth links · {} jelly blobs", cloth_links, self.soft_bodies.len()),
+            gpu_available: self.gpu_solver.is_some(),
+            history_frame: 0,
+            history_len: 0,
+        };
+    }
+
+    fn step_character(&mut self, dt: f32) {
+        let start = std::time::Instant::now();
+        self.world.gravity = Vec2::new(0.0, self.gravity_y);
+
+        // Animate kinematic elevator smoothly
+        if let Some((plat_h, origin)) = self.moving_platform {
+            let offset_y = (self.sim_time * 1.4).sin() * 1.4;
+            let new_pos = origin + Vec2::new(0.0, offset_y);
+            if let Some(p) = self.world.body_mut(plat_h) {
+                p.linear_velocity = (new_pos - p.position) / dt;
+                p.set_position(new_pos);
+            }
+        }
+
+        let stats = self.world.step(dt);
+
+        let mut char_info = String::new();
+        if let Some(ctrl) = self.character.as_mut() {
+            // Guide character smoothly toward pointer X (or patrol gently if idle)
+            let target_x = self.last_pointer_world.x.clamp(1.0, WORLD_WIDTH - 1.0);
+            let dx = target_x - ctrl.position.x;
+            let desired_vx = if dx.abs() > 0.25 { (dx * 3.5).clamp(-6.5, 6.5) } else { 0.0 };
+            ctrl.velocity.x = ctrl.velocity.x + (desired_vx - ctrl.velocity.x) * (10.0 * dt).min(1.0);
+            ctrl.velocity.y += self.gravity_y * dt;
+
+            // Auto-hop onto high targets if pointer is significantly above character
+            if self.last_pointer_world.y + 1.4 < ctrl.position.y && ctrl.last_result.is_grounded {
+                ctrl.request_jump();
+            }
+            ctrl.try_consume_jump(7.8);
+
+            let res = ctrl.move_and_slide(&mut self.world, dt, None);
+            let slope_deg = res.slope_angle_radians.to_degrees();
+            char_info = format!(
+                "{} · slope {:.0}° · pos ({:.1}, {:.1})",
+                if res.is_grounded { "Grounded" } else { "Airborne" },
+                slope_deg,
+                res.position.x,
+                res.position.y
+            );
+        }
+
+        let total_us = start.elapsed().as_micros();
+        self.telemetry = TelemetrySnapshot {
+            backend_label: format!("CharacterController2D + {}", SimdBackend::active().name()),
+            step_ms: total_us as f32 / 1000.0,
+            fps: self.telemetry.fps,
+            breakdown: char_info,
+            entity_summary: format!("{} bodies · {} contacts", stats.total_bodies, stats.contact_points),
+            gpu_available: self.gpu_solver.is_some(),
+            history_frame: 0,
+            history_len: 0,
         };
     }
 
@@ -772,7 +1138,6 @@ impl SandboxEngine {
             let ray = Ray2::new(origin, dir);
             if let Some(hit) = self.world.raycast(ray, 25.0, CollisionFilter::ALL) {
                 self.laser_segments.push((origin, hit.point, Some(hit.normal)));
-                // Reflect off surface normal
                 dir = (dir - hit.normal * (2.0 * dir.dot(hit.normal))).normalize_or_zero();
                 origin = hit.point + hit.normal * 0.02;
             } else {
@@ -783,11 +1148,11 @@ impl SandboxEngine {
     }
 
     fn step_particles(&mut self, dt: f32) {
-        self.particles.config.gravity = Vec2::new(0.0, self.gravity_y);
+        self.particles.config.gravity = Vec2::new(self.wind_x * 0.35, self.gravity_y);
         self.particles.config.restitution = self.restitution;
         self.particles.config.pointer_center = self.last_pointer_world;
         self.particles.config.pointer_strength = if self.pointer_down {
-            if self.pointer_right { -90.0 } else { 95.0 }
+            if self.pointer_right { -105.0 } else { 110.0 }
         } else {
             0.0
         };
@@ -812,7 +1177,6 @@ impl SandboxEngine {
             }
         } else {
             if self.gpu_synced {
-                // Transfer live GPU positions back into CPU SoA arrays seamlessly!
                 self.particles.load_from_gpu_particles(&self.gpu_particles_view);
                 self.gpu_synced = false;
             }
@@ -821,11 +1185,20 @@ impl SandboxEngine {
             s
         };
 
+        let m_per_sec = if stats.step_us > 0 {
+            (stats.particle_count as f32 / (stats.step_us as f32 * 1e-6)) / 1_000_000.0
+        } else {
+            0.0
+        };
         self.telemetry = TelemetrySnapshot {
             backend_label: stats.backend_name.to_string(),
             step_ms: stats.step_us as f32 / 1000.0,
+            fps: self.telemetry.fps,
+            breakdown: format!("Throughput {:.2}M particles/s · O(N) atomic spatial hash", m_per_sec),
             entity_summary: format!("{} particles · 3 obstacles", stats.particle_count),
             gpu_available: self.gpu_solver.is_some(),
+            history_frame: 0,
+            history_len: 0,
         };
     }
 
@@ -835,23 +1208,20 @@ impl SandboxEngine {
             c.card.step(dt);
         }
         self.ui_scroller.step(dt);
+        self.ui_ribbon.set_leader_target(self.last_pointer_world);
+        self.ui_ribbon.step(dt);
         let us = start.elapsed().as_micros();
         self.telemetry = TelemetrySnapshot {
             backend_label: format!("Analytical UI Springs ({})", self.spring_preset.label()),
             step_ms: us as f32 / 1000.0,
-            entity_summary: format!(
-                "{} cards · scroll={:.2} · vel={:.1}",
-                self.ui_cards.len(),
-                self.ui_scroller.position,
-                self.ui_scroller.velocity
-            ),
+            fps: self.telemetry.fps,
+            breakdown: format!("scroll={:.2} · vel={:.1} · 12-node SpringChain", self.ui_scroller.position, self.ui_scroller.velocity),
+            entity_summary: format!("{} cards · 5 detents", self.ui_cards.len()),
             gpu_available: self.gpu_solver.is_some(),
+            history_frame: 0,
+            history_len: 0,
         };
     }
-
-    // -------------------------------------------------------------------------
-    // Pointer Interaction Handlers (world coordinates)
-    // -------------------------------------------------------------------------
 
     pub fn on_pointer_pressed(&mut self, world_pos: Vec2, right_button: bool) {
         self.pointer_down = true;
@@ -864,14 +1234,37 @@ impl SandboxEngine {
             return;
         }
 
+        if self.scene == SceneKind::CharacterDemo {
+            if let Some(ctrl) = self.character.as_mut() {
+                ctrl.request_jump();
+                ctrl.try_consume_jump(8.5);
+            }
+            return;
+        }
+
+        if self.scene == SceneKind::ClothSoftBody {
+            if right_button {
+                if let Some(cloth) = self.cloth.as_mut() {
+                    cloth.tear_at(world_pos, 0.55);
+                }
+            } else if self.tool == ToolMode::SpawnJelly {
+                self.spawn_jelly_at(world_pos);
+            } else if let Some(cloth) = self.cloth.as_mut() {
+                if let Some(node_idx) = cloth.pick_node(world_pos, 0.9) {
+                    cloth.grab_node = Some((node_idx, world_pos));
+                } else {
+                    self.spawn_jelly_at(world_pos);
+                }
+            }
+            return;
+        }
+
         if self.scene == SceneKind::UiSprings {
-            // Check bottom scroller band (y > 7.4)
             if world_pos.y > 7.4 {
                 self.dragging_scroller = true;
                 self.ui_scroller.begin_drag();
                 return;
             }
-            // Check cards top-to-bottom
             for i in (0..self.ui_cards.len()).rev() {
                 let c = &self.ui_cards[i];
                 let d = (world_pos - c.card.position.value()).abs();
@@ -884,14 +1277,20 @@ impl SandboxEngine {
             return;
         }
 
-        // Rigid-body scenes
         if right_button || self.tool == ToolMode::Explosion {
-            self.world.apply_explosion(world_pos, 4.8, 16.0);
+            self.world.apply_explosion(world_pos, 5.0, 17.0);
             self.blast_ring = Some((world_pos, 0.2));
             return;
         }
 
         match self.tool {
+            ToolMode::Shatter => {
+                if let Some(handle) = self.world.pick_body(world_pos, true) {
+                    fracture_body(&mut self.world, handle, world_pos, 3.6);
+                    self.blast_ring = Some((world_pos, 0.15));
+                }
+            }
+            ToolMode::SpawnJelly => self.spawn_jelly_at(world_pos),
             ToolMode::Drag => {
                 if let Some(handle) = self.world.pick_body(world_pos, true) {
                     if let Some(body) = self.world.body(handle) {
@@ -917,6 +1316,21 @@ impl SandboxEngine {
             self.gesture_tracker.push(self.sim_time as f64, world_pos);
         }
 
+        if self.scene == SceneKind::ClothSoftBody {
+            if self.pointer_down {
+                if self.pointer_right {
+                    if let Some(cloth) = self.cloth.as_mut() {
+                        cloth.tear_at(world_pos, 0.5);
+                    }
+                } else if let Some(cloth) = self.cloth.as_mut() {
+                    if let Some((_, ref mut target)) = cloth.grab_node {
+                        *target = world_pos;
+                    }
+                }
+            }
+            return;
+        }
+
         if self.scene == SceneKind::UiSprings {
             if self.dragging_scroller {
                 self.ui_scroller.drag_by(-delta.x * 1.15);
@@ -934,6 +1348,10 @@ impl SandboxEngine {
     pub fn on_pointer_released(&mut self) {
         self.pointer_down = false;
         self.pointer_right = false;
+
+        if let Some(cloth) = self.cloth.as_mut() {
+            cloth.grab_node = None;
+        }
 
         if self.scene == SceneKind::UiSprings {
             let vel = self.gesture_tracker.velocity();
@@ -955,13 +1373,23 @@ impl SandboxEngine {
         }
     }
 
+    fn spawn_jelly_at(&mut self, pos: Vec2) {
+        let colors = [0xCC34D399, 0xCCF472B6, 0xCC38BDF8, 0xCCFBBF24, 0xCCA78BFA];
+        let col = colors[(self.spawn_counter as usize) % colors.len()];
+        self.spawn_counter += 1;
+        let bounds = Aabb2::new(Vec2::new(0.2, 0.2), Vec2::new(WORLD_WIDTH - 0.2, WORLD_HEIGHT - 0.78));
+        if self.soft_bodies.len() < 12 {
+            self.soft_bodies.push(SoftBody2D::circle_blob(pos, 0.76, 16, 1.14, 0.00035, bounds, col));
+        }
+    }
+
     fn spawn_shape_at(&mut self, pos: Vec2, kind: ToolMode) {
         let colors = [0xFF38BDF8, 0xFFA78BFA, 0xFFF472B6, 0xFF34D399, 0xFFFBBF24, 0xFFFB7185];
         let color = colors[(self.spawn_counter as usize) % colors.len()];
         self.spawn_counter += 1;
 
         let shape = match kind {
-            ToolMode::SpawnBox => Shape2D::rect(0.62, 0.62),
+            ToolMode::SpawnBox => Shape2D::rect(0.64, 0.64),
             ToolMode::SpawnPolygon => Shape2D::regular_polygon(6, 0.38),
             _ => Shape2D::circle(0.34),
         };
@@ -983,8 +1411,11 @@ impl SandboxEngine {
             self.load_scene(SceneKind::GpuParticles);
             return;
         }
+        if self.scene == SceneKind::ClothSoftBody {
+            self.spawn_jelly_at(Vec2::new(11.0, 1.5));
+            return;
+        }
         if self.scene == SceneKind::UiSprings {
-            // Shuffle cards across magnetic slots with energetic spring fling!
             let anchors = self.ui_snap.anchors.clone();
             for (i, c) in self.ui_cards.iter_mut().enumerate() {
                 let next_slot = (c.slot_index + 1) % anchors.len();

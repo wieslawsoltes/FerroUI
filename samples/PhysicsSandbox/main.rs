@@ -1,8 +1,9 @@
-//! Launches the `PhysicsSandbox` desktop window:
+//! Launches **FerroUI Physics Studio**:
 //! - macOS native Metal: `cargo run --profile fast-release -p physics-sandbox --no-default-features --features quartz-metal`
 //! - Default Skia:       `cargo run --profile fast-release -p physics-sandbox`
 //! - Smoke test:         `FERROUI_SMOKE_EXIT_MS=1500 cargo run -p physics-sandbox --no-default-features --features quartz-metal`
 
+use ferroui_base::styling::ThemeVariant;
 use ferroui_controls::{AppBuilder, Application, Window};
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use ferroui_view::prelude::*;
@@ -28,14 +29,15 @@ fn main() {
 
     builder.use_platform_detect().start(
         move |app, _| {
+            app.set_requested_theme_variant(Some(ThemeVariant::dark()));
             app.styles()
                 .add(ferroui_themes_winui::WinUITheme::with_parts(None, THEME_PARTS).as_style());
             let owner = Owner::new_root();
             let win = owner.with(|| {
                 let control = window()
-                    .title("FerroUI Physics Engine — Hardware-Accelerated Sandbox")
-                    .width(1280.0)
-                    .height(800.0)
+                    .title("FerroUI Physics Studio — Hardware-Accelerated Engine")
+                    .width(1400.0)
+                    .height(860.0)
                     .child(physics_sandbox::physics_sandbox())
                     .into_element()
                     .mount();

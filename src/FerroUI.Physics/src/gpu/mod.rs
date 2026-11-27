@@ -524,12 +524,20 @@ struct RigidUniforms {
 }
 
 /// Hardware-accelerated GPU batch integrator for large rigid-body swarms, computing updated
-/// velocities, positions, rotations, and broadphase AABBs in parallel on the GPU.
+/// velocities, positions, rotations, and broadphase AABBs in parallel on the GPU with
+/// persistent zero-allocation buffer reuse in steady state.
 pub struct GpuRigidBatchIntegrator {
     ctx: GpuPhysicsContext,
     pipeline: wgpu::ComputePipeline,
     bgl: wgpu::BindGroupLayout,
     uniform_buffer: wgpu::Buffer,
+    capacity: usize,
+    body_buf: wgpu::Buffer,
+    radii_buf: wgpu::Buffer,
+    aabb_buf: wgpu::Buffer,
+    body_rb: wgpu::Buffer,
+    aabb_rb: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
 }
 
 impl GpuRigidBatchIntegrator {
@@ -571,13 +579,28 @@ impl GpuRigidBatchIntegrator {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        Self { ctx, pipeline, bgl, uniform_buffer }
+        let initial_cap = 256usize;
+        let (body_buf, radii_buf, aabb_buf, body_rb, aabb_rb, bind_group) =
+            create_rigid_buffers(&ctx.device, &bgl, &uniform_buffer, initial_cap);
+        Self {
+            ctx,
+            pipeline,
+            bgl,
+            uniform_buffer,
+            capacity: initial_cap,
+            body_buf,
+            radii_buf,
+            aabb_buf,
+            body_rb,
+            aabb_rb,
+            bind_group,
+        }
     }
 
     /// Integrates `bodies` on the GPU for `dt` seconds under `gravity` and writes back updated
     /// body states and computed world-space AABBs.
     pub fn integrate_batch(
-        &self,
+        &mut self,
         bodies: &mut [GpuRigidBodyRecord],
         radii: &[f32],
         gravity: [f32; 2],
@@ -587,56 +610,25 @@ impl GpuRigidBatchIntegrator {
         if n == 0 || dt <= 0.0 {
             return Vec::new();
         }
+        if n > self.capacity {
+            let new_cap = n.next_power_of_two().max(256);
+            let (bb, rb, ab, brb, arb, bg) =
+                create_rigid_buffers(&self.ctx.device, &self.bgl, &self.uniform_buffer, new_cap);
+            self.body_buf = bb;
+            self.radii_buf = rb;
+            self.aabb_buf = ab;
+            self.body_rb = brb;
+            self.aabb_rb = arb;
+            self.bind_group = bg;
+            self.capacity = new_cap;
+        }
         let body_bytes = (n * std::mem::size_of::<GpuRigidBodyRecord>()) as u64;
-        let radii_bytes = (n * std::mem::size_of::<f32>()) as u64;
         let aabb_bytes = (n * std::mem::size_of::<GpuAabbRecord>()) as u64;
-
-        let body_buf = self.ctx.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("rigid bodies"),
-            size: body_bytes,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
-            mapped_at_creation: false,
-        });
-        let radii_buf = self.ctx.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("rigid radii"),
-            size: radii_bytes,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        let aabb_buf = self.ctx.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("rigid aabbs"),
-            size: aabb_bytes,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
-            mapped_at_creation: false,
-        });
-        let body_rb = self.ctx.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("rigid bodies readback"),
-            size: body_bytes,
-            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-        let aabb_rb = self.ctx.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("rigid aabbs readback"),
-            size: aabb_bytes,
-            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
 
         let uniforms = RigidUniforms { gravity, dt, body_count: n as u32 };
         self.ctx.queue.write_buffer(&self.uniform_buffer, 0, struct_as_bytes(&uniforms));
-        self.ctx.queue.write_buffer(&body_buf, 0, slice_as_bytes(&bodies[..n]));
-        self.ctx.queue.write_buffer(&radii_buf, 0, slice_as_bytes(&radii[..n]));
-
-        let bg = self.ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("rigid integrate bg"),
-            layout: &self.bgl,
-            entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: self.uniform_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: body_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 2, resource: radii_buf.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 3, resource: aabb_buf.as_entire_binding() },
-            ],
-        });
+        self.ctx.queue.write_buffer(&self.body_buf, 0, slice_as_bytes(&bodies[..n]));
+        self.ctx.queue.write_buffer(&self.radii_buf, 0, slice_as_bytes(&radii[..n]));
 
         let mut encoder = self.ctx.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("rigid integrate encoder"),
@@ -647,44 +639,97 @@ impl GpuRigidBatchIntegrator {
                 timestamp_writes: None,
             });
             pass.set_pipeline(&self.pipeline);
-            pass.set_bind_group(0, &bg, &[]);
+            pass.set_bind_group(0, &self.bind_group, &[]);
             let groups = (n as u32 + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
             pass.dispatch_workgroups(groups, 1, 1);
         }
-        encoder.copy_buffer_to_buffer(&body_buf, 0, &body_rb, 0, body_bytes);
-        encoder.copy_buffer_to_buffer(&aabb_buf, 0, &aabb_rb, 0, aabb_bytes);
+        encoder.copy_buffer_to_buffer(&self.body_buf, 0, &self.body_rb, 0, body_bytes);
+        encoder.copy_buffer_to_buffer(&self.aabb_buf, 0, &self.aabb_rb, 0, aabb_bytes);
         self.ctx.queue.submit(Some(encoder.finish()));
 
         let body_done = Arc::new(AtomicBool::new(false));
         let aabb_done = Arc::new(AtomicBool::new(false));
         let bd = Arc::clone(&body_done);
         let ad = Arc::clone(&aabb_done);
-        body_rb.slice(..).map_async(wgpu::MapMode::Read, move |r| bd.store(r.is_ok(), Ordering::SeqCst));
-        aabb_rb.slice(..).map_async(wgpu::MapMode::Read, move |r| ad.store(r.is_ok(), Ordering::SeqCst));
+        self.body_rb.slice(0..body_bytes).map_async(wgpu::MapMode::Read, move |r| bd.store(r.is_ok(), Ordering::SeqCst));
+        self.aabb_rb.slice(0..aabb_bytes).map_async(wgpu::MapMode::Read, move |r| ad.store(r.is_ok(), Ordering::SeqCst));
         let _ = self.ctx.device.poll(wgpu::PollType::wait_indefinitely());
 
         if body_done.load(Ordering::SeqCst) {
-            if let Ok(view) = body_rb.slice(..).get_mapped_range() {
+            if let Ok(view) = self.body_rb.slice(0..body_bytes).get_mapped_range() {
                 // SAFETY: GpuRigidBodyRecord is #[repr(C)] POD matching WGSL GpuRigidBody.
                 let dst = unsafe {
                     std::slice::from_raw_parts_mut(bodies.as_mut_ptr() as *mut u8, body_bytes as usize)
                 };
                 dst.copy_from_slice(&view[..dst.len()]);
             }
-            body_rb.unmap();
+            self.body_rb.unmap();
         }
 
         let mut aabbs = vec![GpuAabbRecord::default(); n];
         if aabb_done.load(Ordering::SeqCst) {
-            if let Ok(view) = aabb_rb.slice(..).get_mapped_range() {
+            if let Ok(view) = self.aabb_rb.slice(0..aabb_bytes).get_mapped_range() {
                 // SAFETY: GpuAabbRecord is #[repr(C)] POD matching WGSL GpuAabb.
                 let dst = unsafe {
                     std::slice::from_raw_parts_mut(aabbs.as_mut_ptr() as *mut u8, aabb_bytes as usize)
                 };
                 dst.copy_from_slice(&view[..dst.len()]);
             }
-            aabb_rb.unmap();
+            self.aabb_rb.unmap();
         }
         aabbs
     }
+}
+
+fn create_rigid_buffers(
+    device: &wgpu::Device,
+    bgl: &wgpu::BindGroupLayout,
+    uniform_buffer: &wgpu::Buffer,
+    capacity: usize,
+) -> (wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::BindGroup) {
+    let body_bytes = (capacity * std::mem::size_of::<GpuRigidBodyRecord>()) as u64;
+    let radii_bytes = (capacity * std::mem::size_of::<f32>()) as u64;
+    let aabb_bytes = (capacity * std::mem::size_of::<GpuAabbRecord>()) as u64;
+
+    let body_buf = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("rigid bodies"),
+        size: body_bytes,
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+        mapped_at_creation: false,
+    });
+    let radii_buf = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("rigid radii"),
+        size: radii_bytes,
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    });
+    let aabb_buf = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("rigid aabbs"),
+        size: aabb_bytes,
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+        mapped_at_creation: false,
+    });
+    let body_rb = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("rigid bodies readback"),
+        size: body_bytes,
+        usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    });
+    let aabb_rb = device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("rigid aabbs readback"),
+        size: aabb_bytes,
+        usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    });
+    let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: Some("rigid integrate bg"),
+        layout: bgl,
+        entries: &[
+            wgpu::BindGroupEntry { binding: 0, resource: uniform_buffer.as_entire_binding() },
+            wgpu::BindGroupEntry { binding: 1, resource: body_buf.as_entire_binding() },
+            wgpu::BindGroupEntry { binding: 2, resource: radii_buf.as_entire_binding() },
+            wgpu::BindGroupEntry { binding: 3, resource: aabb_buf.as_entire_binding() },
+        ],
+    });
+    (body_buf, radii_buf, aabb_buf, body_rb, aabb_rb, bind_group)
 }

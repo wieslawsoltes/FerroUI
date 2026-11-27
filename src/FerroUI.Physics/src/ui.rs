@@ -569,3 +569,74 @@ impl DraggableCard {
         self.scale.step(dt);
     }
 }
+
+/// Cascading spring chain where each node tracks the previous node with a spring, ideal for
+/// trailing cursor ribbons, staggered notification stacks, and fluid UI motion paths.
+#[derive(Clone, Debug)]
+pub struct SpringChain {
+    pub nodes: Vec<Spring2D>,
+}
+
+impl SpringChain {
+    pub fn new(count: usize, start: Vec2, config: SpringConfig) -> Self {
+        let n = count.max(1);
+        Self { nodes: (0..n).map(|_| Spring2D::new(start, config)).collect() }
+    }
+
+    pub fn set_config(&mut self, config: SpringConfig) {
+        for node in &mut self.nodes {
+            node.set_config(config);
+        }
+    }
+
+    pub fn set_leader_target(&mut self, target: Vec2) {
+        if let Some(first) = self.nodes.first_mut() {
+            first.set_target(target);
+        }
+    }
+
+    pub fn step(&mut self, dt: f32) {
+        if self.nodes.is_empty() {
+            return;
+        }
+        self.nodes[0].step(dt);
+        for i in 1..self.nodes.len() {
+            let prev_val = self.nodes[i - 1].value();
+            self.nodes[i].set_target(prev_val);
+            self.nodes[i].step(dt);
+        }
+    }
+}
+
+/// FLIP-style layout spring group that smoothly animates a collection of UI item rectangles
+/// `(x, y, width, height)` when items reorder, filter, or resize.
+#[derive(Clone, Debug)]
+pub struct LayoutSpringGroup {
+    pub items: Vec<(Spring2D, Spring2D)>,
+}
+
+impl LayoutSpringGroup {
+    pub fn new(initial_rects: &[(Vec2, Vec2)], config: SpringConfig) -> Self {
+        let items = initial_rects
+            .iter()
+            .map(|&(pos, size)| (Spring2D::new(pos, config), Spring2D::new(size, config)))
+            .collect();
+        Self { items }
+    }
+
+    pub fn set_targets(&mut self, targets: &[(Vec2, Vec2)]) {
+        for (i, &(pos, size)) in targets.iter().enumerate() {
+            if let Some((sp_pos, sp_size)) = self.items.get_mut(i) {
+                sp_pos.set_target(pos);
+                sp_size.set_target(size);
+            }
+        }
+    }
+
+    pub fn step(&mut self, dt: f32) {
+        for (sp_pos, sp_size) in &mut self.items {
+            sp_pos.step(dt);
+            sp_size.step(dt);
+        }
+    }
+}

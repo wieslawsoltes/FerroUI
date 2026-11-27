@@ -27,6 +27,8 @@
 
 pub mod body;
 pub mod broadphase;
+pub mod controller;
+pub mod fracture;
 pub mod joints;
 pub mod material;
 pub mod math;
@@ -35,6 +37,8 @@ pub mod particles;
 pub mod queries;
 pub mod shapes;
 pub mod simd;
+pub mod snapshot;
+pub mod softbody;
 pub mod solver;
 pub mod ui;
 pub mod world;
@@ -46,17 +50,22 @@ pub mod gpu;
 pub mod prelude {
     pub use crate::body::{BodyBuilder, BodyHandle, BodyType, RigidBody};
     pub use crate::broadphase::{DynamicBvh, SpatialHashGrid};
+    pub use crate::controller::{CharacterController2D, CharacterMoveResult};
+    pub use crate::fracture::fracture_body;
     pub use crate::joints::{Joint, JointHandle, JointKind};
     pub use crate::material::{CollisionFilter, CombineMode, PhysicsMaterial};
     pub use crate::math::{Aabb2, Mat2, Ray2, Rot2, Transform2D, Vec2, Vec3};
     pub use crate::narrowphase::{ContactManifold, ContactPoint, FeatureId};
     pub use crate::particles::{GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem};
-    pub use crate::queries::{CollisionEvent, ForceField, RayHit, TriggerEvent};
+    pub use crate::queries::{ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent};
     pub use crate::shapes::{ConvexPolygon, MassProperties, Shape2D};
     pub use crate::simd::SimdBackend;
+    pub use crate::snapshot::{BodySnapshot, WorldHistory, WorldSnapshot};
+    pub use crate::softbody::{ClothMesh, DistanceConstraint, SoftBody2D, SoftNode};
     pub use crate::solver::{FixedTimestep, SolverConfig};
     pub use crate::ui::{
-        DraggableCard, GestureTracker, InertiaScroller, MagneticSnap, Spring1D, Spring2D, Spring3D, SpringConfig,
+        DraggableCard, GestureTracker, InertiaScroller, LayoutSpringGroup, MagneticSnap, Spring1D, Spring2D, Spring3D,
+        SpringChain, SpringConfig,
     };
     pub use crate::world::{PhysicsWorld, StepStats};
 
@@ -68,13 +77,17 @@ pub mod prelude {
 }
 
 pub use body::{BodyBuilder, BodyHandle, BodyType, RigidBody};
+pub use controller::{CharacterController2D, CharacterMoveResult};
+pub use fracture::fracture_body;
 pub use joints::{Joint, JointHandle, JointKind};
 pub use material::{CollisionFilter, PhysicsMaterial};
 pub use math::{Aabb2, Ray2, Rot2, Transform2D, Vec2, Vec3};
 pub use particles::{GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem};
-pub use queries::{CollisionEvent, ForceField, RayHit, TriggerEvent};
+pub use queries::{ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent};
 pub use shapes::{ConvexPolygon, Shape2D};
 pub use simd::SimdBackend;
+pub use snapshot::{WorldHistory, WorldSnapshot};
+pub use softbody::{ClothMesh, SoftBody2D};
 pub use solver::{FixedTimestep, SolverConfig};
 pub use world::{PhysicsWorld, StepStats};
 

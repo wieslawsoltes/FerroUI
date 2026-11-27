@@ -7,8 +7,9 @@ use crate::broadphase::DynamicBvh;
 use crate::joints::{Joint, JointHandle, JointKind};
 use crate::material::{CollisionFilter, PhysicsMaterial};
 use crate::math::{Aabb2, Ray2, Rot2, Transform2D, Vec2};
-use crate::narrowphase::{collide_shapes, swept_toi, ContactManifold};
-use crate::queries::{raycast_shape, CollisionEvent, ForceField, RayHit, TriggerEvent};
+use crate::narrowphase::{collide_shapes, closest_point_on_segment, swept_toi, ContactManifold};
+use crate::queries::{raycast_shape, ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent};
+use crate::shapes::Shape2D;
 use crate::simd::{integrate_rigid_velocities_soa, SimdBackend};
 use crate::solver::{solve_constraints, SolverConfig, WarmStartCache};
 use rustc_hash::FxHashSet;
@@ -258,6 +259,11 @@ impl PhysicsWorld {
 
     pub fn joints(&self) -> impl Iterator<Item = &Joint> {
         self.joints.iter().filter_map(|j| j.as_ref()).filter(|j| !j.broken)
+    }
+
+    /// Iterates over all live joints including broken ones (used for snapshot/rollback).
+    pub fn all_joints(&self) -> impl Iterator<Item = &Joint> {
+        self.joints.iter().filter_map(|j| j.as_ref())
     }
 
     /// Updates the world target of a [`JointKind::Target`] (e.g., mouse/touch dragging).
@@ -813,6 +819,155 @@ impl PhysicsWorld {
         }
         hits
     }
+
+    /// Sweeps `shape` from `start_tf` along unit `direction` up to `max_distance` and returns
+    /// the closest solid impact.
+    pub fn shape_cast(
+        &mut self,
+        shape: &Shape2D,
+        start_tf: Transform2D,
+        direction: Vec2,
+        max_distance: f32,
+        filter: CollisionFilter,
+        ignore_body: Option<BodyHandle>,
+    ) -> Option<ShapeCastHit> {
+        let dir = direction.normalize_or_zero();
+        if max_distance <= 0.0 || dir.length_squared() < 0.5 {
+            return None;
+        }
+        let end_tf = Transform2D { position: start_tf.position + dir * max_distance, rotation: start_tf.rotation };
+        let sweep_aabb = shape.compute_aabb(start_tf).union(shape.compute_aabb(end_tf)).expanded(0.05);
+
+        let mut candidates = Vec::new();
+        self.bvh.query_aabb(sweep_aabb, |idx| candidates.push(idx));
+
+        let mut best: Option<ShapeCastHit> = None;
+        let mut best_toi = max_distance;
+
+        for idx in candidates {
+            let Some(body) = self.bodies.get(idx).and_then(|s| s.as_ref()) else { continue };
+            if body.is_sensor || Some(body.handle) == ignore_body || !filter.should_collide(body.filter) {
+                continue;
+            }
+            let body_tf = body.transform();
+            // Already overlapping at t = 0
+            if let Some(m) = collide_shapes(BodyHandle::INVALID, shape, start_tf, body.handle, &body.shape, body_tf) {
+                let pt = m.points.first().map_or(start_tf.position, |p| p.position);
+                // Normal points from cast shape -> hit body; outward from hit body is -m.normal
+                let outward = -m.normal;
+                if outward.dot(dir) < 0.0 {
+                    return Some(ShapeCastHit { body: body.handle, toi: 0.0, point: pt, normal: outward });
+                }
+                continue;
+            }
+
+            let cur_end = Transform2D { position: start_tf.position + dir * best_toi, rotation: start_tf.rotation };
+            let frac = swept_toi(shape, start_tf, cur_end, &body.shape, body_tf).or_else(|| {
+                // Fine linear sweep for short casts (< 0.5 * bounding_radius)
+                let steps = 8;
+                let mut prev = 0.0_f32;
+                for s in 1..=steps {
+                    let t = s as f32 / steps as f32;
+                    let tf_t = start_tf.interpolate(cur_end, t);
+                    if collide_shapes(BodyHandle::INVALID, shape, tf_t, body.handle, &body.shape, body_tf).is_some() {
+                        let mut lo = prev;
+                        let mut hi = t;
+                        for _ in 0..6 {
+                            let mid = 0.5 * (lo + hi);
+                            if collide_shapes(BodyHandle::INVALID, shape, start_tf.interpolate(cur_end, mid), body.handle, &body.shape, body_tf).is_some() {
+                                hi = mid;
+                            } else {
+                                lo = mid;
+                            }
+                        }
+                        return Some(lo);
+                    }
+                    prev = t;
+                }
+                None
+            });
+
+            if let Some(t_frac) = frac {
+                let hit_dist = t_frac * best_toi;
+                let probe = start_tf.interpolate(cur_end, (t_frac + 0.01).min(1.0));
+                if let Some(m) = collide_shapes(BodyHandle::INVALID, shape, probe, body.handle, &body.shape, body_tf) {
+                    if hit_dist < best_toi {
+                        best_toi = hit_dist;
+                        let pt = m.points.first().map_or(start_tf.position + dir * hit_dist, |p| p.position);
+                        best = Some(ShapeCastHit { body: body.handle, toi: hit_dist, point: pt, normal: -m.normal });
+                    }
+                }
+            }
+        }
+        best
+    }
+
+    /// Finds the nearest surface point on any solid body within `max_radius` of `query_point`.
+    pub fn closest_point(
+        &mut self,
+        query_point: Vec2,
+        max_radius: f32,
+        filter: CollisionFilter,
+    ) -> Option<ClosestPointHit> {
+        let region = Aabb2::from_center_half_extents(query_point, Vec2::splat(max_radius.max(0.01)));
+        let mut candidates = Vec::new();
+        self.bvh.query_aabb(region, |idx| candidates.push(idx));
+
+        let mut best: Option<ClosestPointHit> = None;
+        let mut best_d2 = max_radius * max_radius;
+
+        for idx in candidates {
+            let Some(body) = self.bodies.get(idx).and_then(|s| s.as_ref()) else { continue };
+            if body.is_sensor || !filter.should_collide(body.filter) {
+                continue;
+            }
+            let tf = body.transform();
+            let closest = closest_point_on_shape(&body.shape, tf, query_point);
+            let d2 = closest.distance_squared(query_point);
+            if d2 < best_d2 {
+                best_d2 = d2;
+                best = Some(ClosestPointHit { body: body.handle, point: closest, distance: d2.sqrt() });
+            }
+        }
+        best
+    }
+}
+
+fn closest_point_on_shape(shape: &Shape2D, tf: Transform2D, world_point: Vec2) -> Vec2 {
+    let local = tf.inv_transform_point(world_point);
+    let local_closest = match shape {
+        Shape2D::Circle { radius } => {
+            let len = local.length();
+            if len > *radius { local * (*radius / len) } else { local }
+        }
+        Shape2D::Box { half_extents } => local.clamp(-*half_extents, *half_extents),
+        Shape2D::Capsule { half_height, radius } => {
+            let seg_pt = Vec2::new(0.0, local.y.clamp(-*half_height, *half_height));
+            let d = local - seg_pt;
+            let len = d.length();
+            if len > *radius { seg_pt + d * (*radius / len) } else { local }
+        }
+        Shape2D::Segment { a, b } => closest_point_on_segment(local, *a, *b),
+        Shape2D::Polygon(poly) => {
+            if shape.contains_point(Transform2D::IDENTITY, local) {
+                local
+            } else {
+                let n = poly.vertices.len();
+                let mut best_p = poly.vertices[0];
+                let mut best_d2 = f32::INFINITY;
+                for i in 0..n {
+                    let c = closest_point_on_segment(local, poly.vertices[i], poly.vertices[(i + 1) % n]);
+                    let d2 = c.distance_squared(local);
+                    if d2 < best_d2 {
+                        best_d2 = d2;
+                        best_p = c;
+                    }
+                }
+                best_p
+            }
+        }
+    };
+    tf.transform_point(local_closest)
 }
 
 #[inline]

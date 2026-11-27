@@ -15,8 +15,11 @@ fluid simulations, robotics, and general 2D simulation.
 | `narrowphase` | Exact analytic contact manifolds, SAT + Sutherland-Hodgman 2-point face clipping with persistent `FeatureId`s, GJK/EPA general convex fallback, and swept Continuous Collision Detection (CCD). |
 | `joints` | `Distance`, `Spring`, `Revolute` (limits + motor), `Prismatic` (limits + motor), `Weld`, `Wheel` (suspension + drive motor), `Rope`, and `Target` (pointer drag), all supporting breakable force thresholds. |
 | `solver`, `world` | Substepped Sequential Impulse / Soft-Step solver with warm-starting, Coulomb friction, positional stabilization, automatic sleeping/waking, deterministic `FixedTimestep`, spatial queries, force fields, and per-step profiling telemetry (`StepStats`). |
-| `particles`, `gpu` | Identical SoA particle layout for CPU SIMD and `wgpu` GPU compute shaders (Metal / Vulkan / DX12 / WebGPU): 3-pass lock-free atomic O(N) spatial-hash particle solver (`clear_grid` → `integrate_and_hash` → `resolve_collisions`) plus `GpuRigidBatchIntegrator`. |
-| `ui` | Unconditionally stable closed-form analytical harmonic springs (`Spring1D`, `Spring2D`, `Spring3D`), native-feel `InertiaScroller` (exponential decay, rubber-banding, bounce-back, magnetic detents), `MagneticSnap`, `GestureTracker`, and `DraggableCard`. |
+| `particles`, `gpu` | Identical SoA particle layout for CPU SIMD and `wgpu` GPU compute shaders (Metal / Vulkan / DX12 / WebGPU): 3-pass lock-free atomic O(N) spatial-hash particle solver (`clear_grid` → `integrate_and_hash` → `resolve_collisions`) plus persistent-buffer `GpuRigidBatchIntegrator`. |
+| `softbody` | Extended Position-Based Dynamics (XPBD): tearable `ClothMesh` with structural/shear/bending constraints, stress heatmaps, and wind gusts, plus pressure-inflated area-preserving `SoftBody2D` jelly meshes. |
+| `controller` | Production `CharacterController2D` with swept `shape_cast` move-and-slide, slope limits, coyote time, jump buffering, and dynamic box pushing. |
+| `fracture`, `snapshot` | Radial convex shard fracturing (`fracture_body`) conserving linear/angular velocity, and deterministic ring-buffer `WorldHistory` / `WorldSnapshot` for rollback and studio timeline scrubbing. |
+| `ui` | Unconditionally stable closed-form analytical harmonic springs (`Spring1D`, `Spring2D`, `Spring3D`), `SpringChain`, `LayoutSpringGroup`, native-feel `InertiaScroller` (exponential decay, rubber-banding, bounce-back, magnetic detents), `MagneticSnap`, `GestureTracker`, and `DraggableCard`. |
 
 ## Features
 

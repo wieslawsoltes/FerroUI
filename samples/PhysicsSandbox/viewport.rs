@@ -1,15 +1,21 @@
-//! High-FPS custom FerroUI `Control` (`PhysicsViewport`) that renders rigid bodies, joints,
-//! GPU/SIMD particles, UI spring cards, laser raycasts, and debug overlays directly onto
-//! FerroUI's `DrawingContext` with zero per-frame brush allocations.
+//! Studio-grade hardware-rendered FerroUI `PhysicsViewport` control featuring:
+//! - Major/minor studio coordinate grid with meter ruler ticks
+//! - Specular bevel highlights, realistic zig-zag spring coils, animated buoyant water waves
+//! - XPBD stress-colored tearable cloth meshes and glowing pressure-inflated jelly soft bodies
+//! - Character controller visor + slope & ground-normal telemetry
+//! - Floating translucent in-viewport HUD card with live 90-frame performance sparkline
 
 use crate::scenes::{SandboxEngine, SceneKind, WORLD_HEIGHT, WORLD_WIDTH};
 use ferroui_base::input::{InputElementImpl, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
-use ferroui_base::media::{BoxShadows, DrawingContext, IBrush, IPen, StreamGeometry};
+use ferroui_base::media::{
+    BoxShadows, DrawingContext, FlowDirection, FormattedText, IBrush, IPen, StreamGeometry, Typeface,
+};
 use ferroui_base::platform::IGeometryContext;
 use ferroui_base::threading::DispatcherTimer;
+use ferroui_base::utilities::locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Matrix, Point, Rect, Ref,
     StyledElementImpl, VisualImpl,
@@ -23,10 +29,14 @@ use std::time::{Duration, Instant};
 
 struct Palette {
     bg: Rc<dyn IBrush>,
-    grid_pen: Rc<dyn IPen>,
+    minor_grid_pen: Rc<dyn IPen>,
+    major_grid_pen: Rc<dyn IPen>,
+    arena_border_pen: Rc<dyn IPen>,
     outline_pen: Rc<dyn IPen>,
     sleep_outline_pen: Rc<dyn IPen>,
+    highlight_pen: Rc<dyn IPen>,
     joint_pen: Rc<dyn IPen>,
+    spring_pen: Rc<dyn IPen>,
     aabb_pen: Rc<dyn IPen>,
     contact_pen: Rc<dyn IPen>,
     vel_pen: Rc<dyn IPen>,
@@ -34,48 +44,80 @@ struct Palette {
     laser_core_pen: Rc<dyn IPen>,
     blast_pen: Rc<dyn IPen>,
     slot_pen: Rc<dyn IPen>,
+    tether_pen: Rc<dyn IPen>,
+    water_fill: Rc<dyn IBrush>,
+    water_crest_pen: Rc<dyn IPen>,
     card_shadow: Rc<dyn IBrush>,
     track_bg: Rc<dyn IBrush>,
     track_pill: Rc<dyn IBrush>,
     obstacle_fill: Rc<dyn IBrush>,
     spoke_pen: Rc<dyn IPen>,
+    hud_bg: Rc<dyn IBrush>,
+    hud_border: Rc<dyn IPen>,
+    hud_text: Rc<dyn IBrush>,
+    hud_muted: Rc<dyn IBrush>,
+    hud_accent: Rc<dyn IBrush>,
+    sparkline_pen: Rc<dyn IPen>,
+    sparkline_budget_pen: Rc<dyn IPen>,
+    cloth_pens: Vec<Rc<dyn IPen>>,
     particle_brushes: Vec<Rc<dyn IBrush>>,
+    char_fill: Rc<dyn IBrush>,
+    char_visor: Rc<dyn IBrush>,
 }
 
 impl Palette {
     fn new() -> Self {
-        // 16-stop velocity/pressure heat gradient for thousands of particles (zero allocs/frame)
         let particle_colors = [
-            0xFF0EA5E9, 0xFF22D3EE, 0xFF38BDF8, 0xFF60A5FA, 0xFF818CF8, 0xFFA78BFA, 0xFFC084FC, 0xFFE879F9,
-            0xFFF472B6, 0xFFFB7185, 0xFFF97316, 0xFFFB923C, 0xFFFBBF24, 0xFFFDE047, 0xFFBEF264, 0xFF34D399,
+            0xFF0284C7, 0xFF0EA5E9, 0xFF22D3EE, 0xFF38BDF8, 0xFF60A5FA, 0xFF818CF8, 0xFFA78BFA, 0xFFC084FC,
+            0xFFE879F9, 0xFFF472B6, 0xFFFB7185, 0xFFF97316, 0xFFFB923C, 0xFFFBBF24, 0xFFFDE047, 0xFF34D399,
         ];
+        let cloth_colors = [0xFF38BDF8, 0xFF60A5FA, 0xFFA78BFA, 0xFFF59E0B, 0xFFEF4444];
         Self {
-            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0D1117)),
-            grid_pen: Rc::new(ImmutablePen::from_uint32(0xFF1A2230, 1.0)),
+            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF090D16)),
+            minor_grid_pen: Rc::new(ImmutablePen::from_uint32(0xFF101726, 1.0)),
+            major_grid_pen: Rc::new(ImmutablePen::from_uint32(0xFF192338, 1.0)),
+            arena_border_pen: Rc::new(ImmutablePen::from_uint32(0xFF2B3B58, 1.5)),
             outline_pen: Rc::new(ImmutablePen::from_uint32(0xFFE2E8F0, 1.5)),
             sleep_outline_pen: Rc::new(ImmutablePen::from_uint32(0xFF64748B, 1.2)),
+            highlight_pen: Rc::new(ImmutablePen::from_uint32(0x55FFFFFF, 1.4)),
             joint_pen: Rc::new(ImmutablePen::from_uint32(0xFFFDE047, 2.0)),
-            aabb_pen: Rc::new(ImmutablePen::from_uint32(0xAA38BDF8, 1.0)),
-            contact_pen: Rc::new(ImmutablePen::from_uint32(0xFFEF4444, 2.0)),
+            spring_pen: Rc::new(ImmutablePen::from_uint32(0xFF38BDF8, 1.8)),
+            aabb_pen: Rc::new(ImmutablePen::from_uint32(0x9938BDF8, 1.0)),
+            contact_pen: Rc::new(ImmutablePen::from_uint32(0xFFFB7185, 2.0)),
             vel_pen: Rc::new(ImmutablePen::from_uint32(0xFF22D3EE, 1.6)),
-            laser_glow_pen: Rc::new(ImmutablePen::from_uint32(0x66EF4444, 6.0)),
-            laser_core_pen: Rc::new(ImmutablePen::from_uint32(0xFFFFE4E6, 2.0)),
-            blast_pen: Rc::new(ImmutablePen::from_uint32(0xAAF59E0B, 3.0)),
-            slot_pen: Rc::new(ImmutablePen::from_uint32(0x8838BDF8, 2.0)),
-            card_shadow: Rc::new(ImmutableSolidColorBrush::from_uint32(0x55000000)),
-            track_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF161E2E)),
-            track_pill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF2563EB)),
-            obstacle_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF334155)),
-            spoke_pen: Rc::new(ImmutablePen::from_uint32(0xCC0F172A, 2.0)),
+            laser_glow_pen: Rc::new(ImmutablePen::from_uint32(0x66EF4444, 7.0)),
+            laser_core_pen: Rc::new(ImmutablePen::from_uint32(0xFFFFF1F2, 2.0)),
+            blast_pen: Rc::new(ImmutablePen::from_uint32(0xCCF59E0B, 3.0)),
+            slot_pen: Rc::new(ImmutablePen::from_uint32(0x7738BDF8, 1.8)),
+            tether_pen: Rc::new(ImmutablePen::from_uint32(0xCC34D399, 1.8)),
+            water_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x440EA5E9)),
+            water_crest_pen: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 2.2)),
+            card_shadow: Rc::new(ImmutableSolidColorBrush::from_uint32(0x66000000)),
+            track_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF111827)),
+            track_pill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF38BDF8)),
+            obstacle_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF1E293B)),
+            spoke_pen: Rc::new(ImmutablePen::from_uint32(0xCC090D16, 2.0)),
+            hud_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xCC0D1322)),
+            hud_border: Rc::new(ImmutablePen::from_uint32(0xFF26334D, 1.0)),
+            hud_text: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF1F5F9)),
+            hud_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF94A3B8)),
+            hud_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF38BDF8)),
+            sparkline_pen: Rc::new(ImmutablePen::from_uint32(0xFF34D399, 1.8)),
+            sparkline_budget_pen: Rc::new(ImmutablePen::from_uint32(0x55F59E0B, 1.0)),
+            cloth_pens: cloth_colors
+                .into_iter()
+                .map(|c| Rc::new(ImmutablePen::from_uint32(c, 1.7)) as Rc<dyn IPen>)
+                .collect(),
             particle_brushes: particle_colors
                 .into_iter()
                 .map(|c| Rc::new(ImmutableSolidColorBrush::from_uint32(c)) as Rc<dyn IBrush>)
                 .collect(),
+            char_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF38BDF8)),
+            char_visor: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFFDE047)),
         }
     }
 }
 
-/// Custom FerroUI viewport control hosting the live `SandboxEngine`.
 #[repr(C)]
 pub struct PhysicsViewport {
     base: Control,
@@ -129,17 +171,28 @@ impl VisualImpl for PhysicsViewport {
         let h = bounds.height.max(1.0);
         let (scale, ox, oy) = viewport_transform(w, h);
 
-        // Background
+        // Studio dark canvas background
         dc.fill_rectangle(&this.palette.bg, Rect::new(0.0, 0.0, w, h), 0.0);
 
-        // Subtle 1-meter studio coordinate grid
-        for gx in 0..=(WORLD_WIDTH as i32) {
-            let sx = ox + gx as f64 * scale;
-            dc.draw_line(&this.palette.grid_pen, Point::new(sx, oy), Point::new(sx, oy + WORLD_HEIGHT as f64 * scale));
+        // Minor 0.5m and Major 1.0m coordinate studio grid
+        let arena_w = WORLD_WIDTH as f64 * scale;
+        let arena_h = WORLD_HEIGHT as f64 * scale;
+        for step in 0..=((WORLD_WIDTH * 2.0) as i32) {
+            let sx = ox + (step as f64 * 0.5) * scale;
+            let pen = if step % 2 == 0 { &this.palette.major_grid_pen } else { &this.palette.minor_grid_pen };
+            dc.draw_line(pen, Point::new(sx, oy), Point::new(sx, oy + arena_h));
         }
-        for gy in 0..=(WORLD_HEIGHT as i32) {
-            let sy = oy + gy as f64 * scale;
-            dc.draw_line(&this.palette.grid_pen, Point::new(ox, sy), Point::new(ox + WORLD_WIDTH as f64 * scale, sy));
+        for step in 0..=((WORLD_HEIGHT * 2.0) as i32) {
+            let sy = oy + (step as f64 * 0.5) * scale;
+            let pen = if step % 2 == 0 { &this.palette.major_grid_pen } else { &this.palette.minor_grid_pen };
+            dc.draw_line(pen, Point::new(ox, sy), Point::new(ox + arena_w, sy));
+        }
+        dc.draw_rectangle_outline(&this.palette.arena_border_pen, Rect::new(ox, oy, arena_w, arena_h), 4.0);
+
+        // Subtle ruler meter ticks along top edge
+        for gx in (2..=(WORLD_WIDTH as i32 - 2)).step_by(2) {
+            let sx = ox + gx as f64 * scale;
+            draw_label(dc, &format!("{gx}m"), Point::new(sx + 3.0, oy + 3.0), 9.5, &this.palette.hud_muted);
         }
 
         let engine = this.engine.borrow();
@@ -148,7 +201,20 @@ impl VisualImpl for PhysicsViewport {
         match sim.scene {
             SceneKind::GpuParticles => this.render_particles(dc, &sim, scale, ox, oy),
             SceneKind::UiSprings => this.render_ui_springs(dc, &sim, scale, ox, oy),
-            _ => this.render_rigid_world(dc, &sim, scale, ox, oy),
+            _ => {
+                this.render_rigid_world(dc, &sim, scale, ox, oy);
+                if sim.cloth.is_some() || !sim.soft_bodies.is_empty() {
+                    this.render_cloth_and_softbodies(dc, &sim, scale, ox, oy);
+                }
+                if sim.character.is_some() {
+                    this.render_character(dc, &sim, scale, ox, oy);
+                }
+            }
+        }
+
+        // Floating Pro Studio telemetry overlay + real-time frame-time sparkline
+        if sim.show_hud_graph {
+            this.render_hud_overlay(dc, &sim, ox + 14.0, oy + 20.0);
         }
     }
 }
@@ -202,16 +268,85 @@ impl PhysicsViewport {
         Vec2::new(((pt.x - ox) / scale) as f32, ((pt.y - oy) / scale) as f32)
     }
 
+    fn render_hud_overlay(&self, dc: &mut DrawingContext, sim: &SandboxEngine, x: f64, y: f64) {
+        let card_w = 248.0;
+        let card_h = 84.0;
+        let rect = Rect::new(x, y, card_w, card_h);
+        dc.fill_rectangle(&self.palette.hud_bg, rect, 8.0);
+        dc.draw_rectangle_outline(&self.palette.hud_border, rect, 8.0);
+
+        let title = format!("{}  ·  {:.0} FPS", sim.scene.title(), sim.telemetry.fps);
+        draw_label(dc, &title, Point::new(x + 10.0, y + 7.0), 12.0, &self.palette.hud_text);
+        let sub = format!("{}  ·  {:.2} ms", sim.telemetry.backend_label, sim.telemetry.step_ms);
+        draw_label(dc, &sub, Point::new(x + 10.0, y + 23.0), 10.0, &self.palette.hud_accent);
+
+        // 90-frame step-time sparkline
+        let gx = x + 10.0;
+        let gy = y + 42.0;
+        let gw = card_w - 20.0;
+        let gh = 32.0;
+        // 4ms reference budget line
+        let max_ms = 6.0_f32;
+        let budget_y = gy + gh - (2.0 / max_ms) as f64 * gh;
+        dc.draw_line(&self.palette.sparkline_budget_pen, Point::new(gx, budget_y), Point::new(gx + gw, budget_y));
+
+        let n = sim.step_ms_history.len();
+        if n >= 2 {
+            let step_x = gw / (90.0 - 1.0);
+            let mut prev = Point::new(
+                gx,
+                gy + gh - (sim.step_ms_history[0].min(max_ms) / max_ms) as f64 * gh,
+            );
+            for (i, &ms) in sim.step_ms_history.iter().enumerate().skip(1) {
+                let pt = Point::new(
+                    gx + i as f64 * step_x,
+                    gy + gh - (ms.min(max_ms) / max_ms) as f64 * gh,
+                );
+                dc.draw_line(&self.palette.sparkline_pen, prev, pt);
+                prev = pt;
+            }
+        }
+    }
+
     fn render_rigid_world(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
         let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
 
-        // 1. Force field rings (vortex / gravity well)
+        // 1. Force fields (vortex rings & animated water buoyancy zones)
         for field in sim.world.force_fields() {
-            if let ForceField::Vortex { center, radius, .. } | ForceField::Radial { center, radius, .. } = *field {
-                let c = to_screen(center);
-                for ring in [0.35_f64, 0.65, 1.0] {
-                    dc.draw_ellipse_at(None, Some(&self.palette.slot_pen), c, radius as f64 * ring * scale, radius as f64 * ring * scale);
+            match *field {
+                ForceField::Vortex { center, radius, .. } | ForceField::Radial { center, radius, .. } => {
+                    let c = to_screen(center);
+                    for ring in [0.32_f64, 0.64, 1.0] {
+                        dc.draw_ellipse_at(
+                            None,
+                            Some(&self.palette.slot_pen),
+                            c,
+                            radius as f64 * ring * scale,
+                            radius as f64 * ring * scale,
+                        );
+                    }
                 }
+                ForceField::Buoyancy { region, .. } => {
+                    let tl = to_screen(region.min);
+                    let br = to_screen(region.max);
+                    dc.fill_rectangle(
+                        &self.palette.water_fill,
+                        Rect::new(tl.x, tl.y, br.x - tl.x, br.y - tl.y),
+                        4.0,
+                    );
+                    // Animated shimmering sine-wave water crest
+                    let segments = 18;
+                    let mut prev = Point::new(tl.x, tl.y);
+                    for i in 1..=segments {
+                        let frac = i as f64 / segments as f64;
+                        let wx = tl.x + (br.x - tl.x) * frac;
+                        let wave = (frac * 12.0 + sim.sim_time as f64 * 4.2).sin() * 3.5;
+                        let cur = Point::new(wx, tl.y + wave);
+                        dc.draw_line(&self.palette.water_crest_pen, prev, cur);
+                        prev = cur;
+                    }
+                }
+                ForceField::Wind { .. } => {}
             }
         }
 
@@ -226,7 +361,6 @@ impl PhysicsViewport {
                     let c = to_screen(body.position);
                     let r = *radius as f64 * scale;
                     dc.draw_ellipse_at(Some(&fill), Some(pen), c, r, r);
-                    // Orientation spoke
                     let edge = to_screen(body.position + body.rotation.x_axis() * *radius);
                     dc.draw_line(&self.palette.spoke_pen, c, edge);
                 }
@@ -245,6 +379,13 @@ impl PhysicsViewport {
                         4.0,
                         &BoxShadows::default(),
                     );
+                    if w > 12.0 && h > 10.0 {
+                        g.draw_line(
+                            &self.palette.highlight_pen,
+                            Point::new(c.x - w * 0.42, c.y - h * 0.42),
+                            Point::new(c.x + w * 0.42, c.y - h * 0.42),
+                        );
+                    }
                 }
                 Shape2D::Capsule { half_height, radius } => {
                     let c = to_screen(body.position);
@@ -297,19 +438,30 @@ impl PhysicsViewport {
             }
         }
 
-        // 3. Joints
-        for joint in sim.world.joints() {
-            if let Some(a) = sim.world.body(joint.body_a) {
-                let b = sim.world.body(joint.body_b);
-                let (pa, pb) = joint.world_anchors(a, b);
-                let sa = to_screen(pa);
-                let sb = to_screen(pb);
-                dc.draw_line(&self.palette.joint_pen, sa, sb);
-                dc.draw_ellipse_at(None, Some(&self.palette.joint_pen), sa, 3.5, 3.5);
+        // 3. Joints (with realistic zig-zag spring coils for elastic joints!)
+        if sim.show_joints {
+            for joint in sim.world.joints() {
+                if let Some(a) = sim.world.body(joint.body_a) {
+                    let b = sim.world.body(joint.body_b);
+                    let (pa, pb) = joint.world_anchors(a, b);
+                    let sa = to_screen(pa);
+                    let sb = to_screen(pb);
+                    let is_spring = match joint.kind {
+                        JointKind::Wheel { .. } | JointKind::Target { .. } => true,
+                        JointKind::Distance { frequency_hz, .. } => frequency_hz > 0.0,
+                        _ => false,
+                    };
+                    if is_spring {
+                        draw_spring_coil(dc, &self.palette.spring_pen, sa, sb, 7, 5.5);
+                    } else {
+                        dc.draw_line(&self.palette.joint_pen, sa, sb);
+                    }
+                    dc.draw_ellipse_at(None, Some(&self.palette.joint_pen), sa, 3.2, 3.2);
+                }
             }
         }
 
-        // 4. Multi-bounce laser rays
+        // 4. Multi-bounce laser rays & closest_point proximity tether
         for &(p0, p1, hit_normal) in &sim.laser_segments {
             let s0 = to_screen(p0);
             let s1 = to_screen(p1);
@@ -320,8 +472,21 @@ impl PhysicsViewport {
                 dc.draw_line(&self.palette.vel_pen, s1, to_screen(p1 + n * 0.45));
             }
         }
+        if let Some((from, to, dist)) = sim.closest_tether {
+            let sf = to_screen(from);
+            let st = to_screen(to);
+            dc.draw_line(&self.palette.tether_pen, sf, st);
+            dc.draw_ellipse_at(None, Some(&self.palette.tether_pen), st, 4.0, 4.0);
+            draw_label(
+                dc,
+                &format!("{dist:.2}m"),
+                Point::new((sf.x + st.x) * 0.5 + 4.0, (sf.y + st.y) * 0.5 - 12.0),
+                10.0,
+                &self.palette.hud_accent,
+            );
+        }
 
-        // 5. Contact points & normals overlay
+        // 5. Contact points & normals
         if sim.show_contacts {
             for m in sim.world.contacts() {
                 for pt in &m.points {
@@ -341,24 +506,118 @@ impl PhysicsViewport {
         }
     }
 
+    fn render_cloth_and_softbodies(
+        &self,
+        dc: &mut DrawingContext,
+        sim: &SandboxEngine,
+        scale: f64,
+        ox: f64,
+        oy: f64,
+    ) {
+        let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
+
+        // XPBD Tearable Cloth with stress heatmap coloring (cyan -> purple -> amber -> red!)
+        if let Some(cloth) = sim.cloth.as_ref() {
+            let n_pens = self.palette.cloth_pens.len();
+            for c in &cloth.constraints {
+                if c.broken {
+                    continue;
+                }
+                // Only draw structural links for crisp uncluttered lattice visuals
+                let a = cloth.nodes[c.a].pos;
+                let b = cloth.nodes[c.b].pos;
+                let stress = ((c.stretch_ratio - 1.0) / 0.85).clamp(0.0, 0.999);
+                let pen = &self.palette.cloth_pens[(stress * n_pens as f32) as usize];
+                dc.draw_line(pen, to_screen(a), to_screen(b));
+            }
+            for node in &cloth.nodes {
+                if node.inv_mass <= 0.0 {
+                    dc.draw_ellipse_at(
+                        Some(&self.palette.hud_accent),
+                        Some(&self.palette.outline_pen),
+                        to_screen(node.pos),
+                        4.5,
+                        4.5,
+                    );
+                }
+            }
+        }
+
+        // XPBD Pressure-Inflated Jelly Soft Bodies
+        for sb in &sim.soft_bodies {
+            if sb.nodes.len() < 3 {
+                continue;
+            }
+            let geom = StreamGeometry::new();
+            {
+                let mut ctx = geom.open();
+                ctx.begin_figure(to_screen(sb.nodes[0].pos), true);
+                for n in &sb.nodes[1..] {
+                    ctx.line_to(to_screen(n.pos), true);
+                }
+                ctx.end_figure(true);
+            }
+            let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(sb.color_argb));
+            let base_geom: Ref<ferroui_base::media::Geometry> = geom.upcast();
+            dc.draw_geometry(Some(&fill), Some(&self.palette.outline_pen), &base_geom);
+
+            // Inner glowing pressure core
+            let c = to_screen(sb.center());
+            dc.draw_ellipse_at(None, Some(&self.palette.highlight_pen), c, 10.0, 10.0);
+        }
+    }
+
+    fn render_character(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
+        let Some(ctrl) = sim.character.as_ref() else { return };
+        let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
+
+        if let Shape2D::Capsule { half_height, radius } = ctrl.shape {
+            let c = to_screen(ctrl.position);
+            let r = radius as f64 * scale;
+            let w = r * 2.0;
+            let h = (half_height + radius) as f64 * 2.0 * scale;
+            dc.draw_rectangle(
+                Some(&self.palette.char_fill),
+                Some(&self.palette.outline_pen),
+                Rect::new(c.x - w * 0.5, c.y - h * 0.5, w, h),
+                r,
+                r,
+                &BoxShadows::default(),
+            );
+            // Expressive directional visor
+            let face = if ctrl.velocity.x >= -0.05 { 1.0 } else { -1.0 };
+            dc.fill_rectangle(
+                &self.palette.char_visor,
+                Rect::new(c.x + face * r * 0.25 - 6.0, c.y - h * 0.26, 12.0, 6.0),
+                3.0,
+            );
+            // Ground normal vector indicator
+            if ctrl.last_result.is_grounded {
+                let foot = to_screen(ctrl.position + Vec2::new(0.0, half_height + radius));
+                let ntip = to_screen(
+                    ctrl.position + Vec2::new(0.0, half_height + radius) + ctrl.last_result.ground_normal * 0.75,
+                );
+                dc.draw_line(&self.palette.tether_pen, foot, ntip);
+                dc.draw_ellipse_at(None, Some(&self.palette.tether_pen), foot, 5.0, 5.0);
+            }
+        }
+    }
+
     fn render_particles(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
         let to_screen = |x: f32, y: f32| Point::new(ox + x as f64 * scale, oy + y as f64 * scale);
 
-        // Container border
         let b = sim.particles.config.bounds;
         let tl = to_screen(b.min.x, b.min.y);
         let br = to_screen(b.max.x, b.max.y);
-        dc.draw_rectangle_outline(&self.palette.outline_pen, Rect::new(tl.x, tl.y, br.x - tl.x, br.y - tl.y), 6.0);
+        dc.draw_rectangle_outline(&self.palette.arena_border_pen, Rect::new(tl.x, tl.y, br.x - tl.x, br.y - tl.y), 6.0);
 
-        // Obstacles
         for obs in &sim.particles.obstacles {
             let c = to_screen(obs.center[0], obs.center[1]);
             let r = obs.radius as f64 * scale;
             dc.draw_ellipse_at(Some(&self.palette.obstacle_fill), Some(&self.palette.outline_pen), c, r, r);
         }
 
-        // Thousands of hardware-simulated particles (drawn as crisp rounded squares/dots for max throughput)
-        let r_px = (sim.particles.config.particle_radius as f64 * scale * 1.15).max(2.2);
+        let r_px = (sim.particles.config.particle_radius as f64 * scale * 1.12).max(2.0);
         let d_px = r_px * 2.0;
         let palette_len = self.palette.particle_brushes.len();
         for p in &sim.gpu_particles_view {
@@ -370,7 +629,6 @@ impl PhysicsViewport {
             dc.fill_rectangle(brush, Rect::new(sx, sy, d_px, d_px), r_px as f32);
         }
 
-        // Pointer vortex halo when active
         if sim.particles.config.pointer_strength.abs() > 0.1 {
             let c = to_screen(sim.particles.config.pointer_center.x, sim.particles.config.pointer_center.y);
             let pr = sim.particles.config.pointer_radius as f64 * scale;
@@ -386,8 +644,8 @@ impl PhysicsViewport {
     fn render_ui_springs(&self, dc: &mut DrawingContext, sim: &SandboxEngine, scale: f64, ox: f64, oy: f64) {
         let to_screen = |p: Vec2| Point::new(ox + p.x as f64 * scale, oy + p.y as f64 * scale);
 
-        // 1. Magnetic dock slot outlines
-        for &anchor in &sim.ui_snap.anchors {
+        // 1. Magnetic dock slots
+        for (i, &anchor) in sim.ui_snap.anchors.iter().enumerate() {
             let c = to_screen(anchor);
             let w = 3.1 * scale;
             let h = 1.84 * scale;
@@ -396,18 +654,33 @@ impl PhysicsViewport {
                 Rect::new(c.x - w * 0.5, c.y - h * 0.5, w, h),
                 12.0,
             );
+            draw_label(
+                dc,
+                &format!("SLOT {}", i + 1),
+                Point::new(c.x - 20.0, c.y - 6.0),
+                10.0,
+                &self.palette.hud_muted,
+            );
         }
 
-        // 2. Draggable spring cards with elevation shadow, scale spring, and velocity tilt!
+        // 2. Glowing 12-node SpringChain cursor trail ribbon!
+        for i in 1..sim.ui_ribbon.nodes.len() {
+            let p0 = to_screen(sim.ui_ribbon.nodes[i - 1].value());
+            let p1 = to_screen(sim.ui_ribbon.nodes[i].value());
+            dc.draw_line(&self.palette.spring_pen, p0, p1);
+            let r = (7.5 - i as f64 * 0.45).max(2.0);
+            dc.draw_ellipse_at(Some(&self.palette.hud_accent), None, p1, r, r);
+        }
+
+        // 3. Draggable spring cards with titles, drop shadow, scale spring, and velocity tilt
         for item in &sim.ui_cards {
             let pos = item.card.position.value();
             let target = item.card.position.target();
             let sc = item.card.scale.value as f64;
             let tilt = item.card.tilt_radians.value as f64;
 
-            // Subtle elastic tether line to magnetic target
             if pos.distance(target) > 0.08 {
-                dc.draw_line(&self.palette.joint_pen, to_screen(pos), to_screen(target));
+                draw_spring_coil(dc, &self.palette.joint_pen, to_screen(pos), to_screen(target), 6, 4.5);
             }
 
             let c = to_screen(pos);
@@ -417,13 +690,11 @@ impl PhysicsViewport {
             let scope = dc.push_transform(tf);
             let mut g = dc.scope(scope);
 
-            // Drop shadow
             g.fill_rectangle(
                 &self.palette.card_shadow,
-                Rect::new(c.x - w * 0.5 + 5.0, c.y - h * 0.5 + 8.0, w, h),
+                Rect::new(c.x - w * 0.5 + 6.0, c.y - h * 0.5 + 10.0, w, h),
                 12.0,
             );
-            // Card body
             let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(item.accent_argb));
             g.draw_rectangle(
                 Some(&fill),
@@ -433,9 +704,16 @@ impl PhysicsViewport {
                 12.0,
                 &BoxShadows::default(),
             );
+            g.draw_line(
+                &self.palette.highlight_pen,
+                Point::new(c.x - w * 0.42, c.y - h * 0.42),
+                Point::new(c.x + w * 0.42, c.y - h * 0.42),
+            );
+            draw_label(&mut g, item.label, Point::new(c.x - w * 0.38, c.y - 16.0), 13.5, &self.palette.hud_text);
+            draw_label(&mut g, item.subtitle, Point::new(c.x - w * 0.38, c.y + 4.0), 10.5, &self.palette.hud_text);
         }
 
-        // 3. Bottom rubber-band InertiaScroller carousel strip with 5 magnetic detents
+        // 4. Rubber-band InertiaScroller carousel strip
         let strip_tl = to_screen(Vec2::new(0.8, 7.6));
         let strip_br = to_screen(Vec2::new(WORLD_WIDTH - 0.8, 9.45));
         let strip_rect = Rect::new(strip_tl.x, strip_tl.y, strip_br.x - strip_tl.x, strip_br.y - strip_tl.y);
@@ -447,6 +725,7 @@ impl PhysicsViewport {
             let mut g = dc.scope(clip);
             let scroll = sim.ui_scroller.position;
             let pill_colors = [0xFF0284C7, 0xFF7C3AED, 0xFFDB2777, 0xFF059669, 0xFFD97706];
+            let pill_titles = ["Detent 1", "Detent 2", "Detent 3", "Detent 4", "Detent 5"];
             for i in 0..5 {
                 let wx = 4.0 + i as f32 * 3.0 - scroll;
                 let p = to_screen(Vec2::new(wx, 8.52));
@@ -461,9 +740,9 @@ impl PhysicsViewport {
                     10.0,
                     &BoxShadows::default(),
                 );
+                draw_label(&mut g, pill_titles[i], Point::new(p.x - 28.0, p.y - 8.0), 12.0, &self.palette.hud_text);
             }
         }
-        // Detent dots beneath strip
         for (i, &detent) in sim.ui_scroller.detents.iter().enumerate() {
             let dot = to_screen(Vec2::new(6.8 + i as f32 * 0.6, 9.72));
             let active = (sim.ui_scroller.position - detent).abs() < 1.2;
@@ -471,6 +750,43 @@ impl PhysicsViewport {
             dc.draw_ellipse_at(Some(brush), None, dot, 4.5, 4.5);
         }
     }
+}
+
+fn draw_label(dc: &mut DrawingContext, text: &str, origin: Point, size: f64, brush: &Rc<dyn IBrush>) {
+    let ft = FormattedText::new(
+        text,
+        locale!("en-US"),
+        FlowDirection::LeftToRight,
+        Typeface::default(),
+        size,
+        Some(brush.clone()),
+    );
+    dc.draw_text(&ft, origin);
+}
+
+fn draw_spring_coil(dc: &mut DrawingContext, pen: &Rc<dyn IPen>, a: Point, b: Point, coils: usize, amp: f64) {
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    let len = (dx * dx + dy * dy).sqrt();
+    if len < 8.0 {
+        dc.draw_line(pen, a, b);
+        return;
+    }
+    let ux = dx / len;
+    let uy = dy / len;
+    let px = -uy;
+    let py = ux;
+
+    let mut prev = a;
+    let steps = coils * 2;
+    for i in 1..steps {
+        let t = i as f64 / steps as f64;
+        let side = if i % 2 == 1 { amp } else { -amp };
+        let cur = Point::new(a.x + dx * t + px * side, a.y + dy * t + py * side);
+        dc.draw_line(pen, prev, cur);
+        prev = cur;
+    }
+    dc.draw_line(pen, prev, b);
 }
 
 fn viewport_transform(width: f64, height: f64) -> (f64, f64, f64) {

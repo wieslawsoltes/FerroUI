@@ -316,7 +316,7 @@ fn gpu_particle_solver_executes_on_hardware_device() {
 #[cfg(feature = "gpu")]
 #[test]
 fn gpu_rigid_batch_integrator_computes_positions_and_aabbs() {
-    let Some(integrator) = GpuRigidBatchIntegrator::try_new() else {
+    let Some(mut integrator) = GpuRigidBatchIntegrator::try_new() else {
         return;
     };
     let mut bodies = vec![
@@ -432,4 +432,97 @@ fn draggable_card_magnetic_snap_and_fixed_timestep_work_cleanly() {
     assert_eq!(steps, 120);
     assert!(card.position.value().distance(target) < 1.0);
     assert!(card.tilt_radians.value.abs() < 0.02);
+}
+
+#[test]
+fn xpbd_cloth_tears_and_softbody_preserves_area() {
+    let bounds = Aabb2::new(Vec2::new(0.0, 0.0), Vec2::new(16.0, 10.0));
+    let mut cloth = ClothMesh::grid(Vec2::new(2.0, 1.0), 8, 6, 0.4, 0.0002, Some(2.2), bounds);
+    let before = cloth.active_constraint_count();
+    for i in 0..30 {
+        cloth.step(1.0 / 60.0, Vec2::new(0.0, 9.81), Vec2::new(4.0, 0.0), i as f32 / 60.0, &[]);
+    }
+    let torn = cloth.tear_at(Vec2::new(3.4, 2.2), 0.65);
+    assert!(torn > 0 && cloth.active_constraint_count() < before);
+
+    let mut jelly = SoftBody2D::circle_blob(Vec2::new(8.0, 3.0), 0.9, 14, 1.12, 0.0004, bounds, 0xFF34D399);
+    let rest_area = jelly.rest_area;
+    for _ in 0..120 {
+        jelly.step(1.0 / 60.0, Vec2::new(0.0, 9.81), &[]);
+    }
+    let cur_area = jelly.current_area();
+    assert!(
+        (cur_area / rest_area - 1.0).abs() < 0.35,
+        "softbody collapsed or exploded: rest={rest_area}, cur={cur_area}"
+    );
+    assert!(jelly.center().y > 7.5, "jelly should settle near floor");
+}
+
+#[test]
+fn character_controller_slides_grounds_and_pushes_boxes() {
+    let mut world = PhysicsWorld::new(Vec2::new(0.0, 9.81));
+    world.add_body(BodyBuilder::static_body(Shape2D::rect(20.0, 1.0)).position((8.0, 9.5)));
+    let crate_h = world.add_body(
+        BodyBuilder::dynamic(Shape2D::rect(0.8, 0.8))
+            .position((6.0, 8.6))
+            .can_sleep(false),
+    );
+    world.step(1.0 / 60.0);
+
+    let mut ctrl = CharacterController2D::new(Shape2D::capsule(0.35, 0.28), Vec2::new(3.0, 7.5));
+    let mut ever_grounded = false;
+    for _ in 0..90 {
+        ctrl.velocity.x = 5.0;
+        ctrl.velocity.y += 9.81 * (1.0 / 60.0);
+        let res = ctrl.move_and_slide(&mut world, 1.0 / 60.0, None);
+        if res.is_grounded {
+            ever_grounded = true;
+        }
+        world.step(1.0 / 60.0);
+    }
+    assert!(ever_grounded, "character should land on floor");
+    assert!(world.body(crate_h).unwrap().position.x > 6.1, "character should push dynamic crate");
+}
+
+#[test]
+fn fracture_and_world_history_rollback_work_accurately() {
+    let mut world = PhysicsWorld::new(Vec2::new(0.0, 9.81));
+    world.add_body(BodyBuilder::static_body(Shape2D::rect(20.0, 1.0)).position((8.0, 9.5)));
+    let box_h = world.add_body(
+        BodyBuilder::dynamic(Shape2D::rect(1.4, 1.4))
+            .position((8.0, 3.0))
+            .linear_velocity((2.0, 0.0))
+            .can_sleep(false),
+    );
+
+    let mut history = WorldHistory::new(120);
+    history.record(&world);
+    let pos0 = world.body(box_h).unwrap().position;
+
+    for _ in 0..30 {
+        world.step(1.0 / 60.0);
+        history.record(&world);
+    }
+    let pos30 = world.body(box_h).unwrap().position;
+    assert!(pos30.y > pos0.y + 0.5);
+
+    // Scrub back to frame 0 and verify exact restoration!
+    assert!(history.scrub(&mut world, 0.0));
+    assert!(world.body(box_h).unwrap().position.distance(pos0) < 1e-4);
+
+    // Fracture box into shards
+    let shards = fracture_body(&mut world, box_h, pos0 + Vec2::new(0.1, 0.0), 3.0);
+    assert!(shards.len() >= 4, "expected >=4 shards, got {}", shards.len());
+    assert!(world.body(box_h).is_none(), "original body should be removed after fracture");
+
+    // Verify closest_point and SpringChain
+    let hit = world.closest_point(Vec2::new(8.0, 8.2), 3.0, CollisionFilter::ALL);
+    assert!(hit.is_some());
+
+    let mut chain = SpringChain::new(6, Vec2::ZERO, SpringConfig::snappy());
+    chain.set_leader_target(Vec2::new(10.0, 5.0));
+    for _ in 0..60 {
+        chain.step(1.0 / 60.0);
+    }
+    assert!(chain.nodes.last().unwrap().value().distance(Vec2::new(10.0, 5.0)) < 1.0);
 }
