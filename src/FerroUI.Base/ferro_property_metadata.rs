@@ -17,45 +17,55 @@ pub struct FerroPropertyMetadata {
     /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); `None` inherits it, by default
     /// it does. Kept here, untyped, so that the typed metadata of every value type is what it is
     /// without it.
-    /// One address: the metadata is copied by the code of every value type.
-    reevaluation: Option<&'static ExplicitCoercion>,
+    /// One byte: the metadata is copied by the code of every value type; the typed operations of
+    /// explicit coercion (`Some(false)`) are found by their value type (`EXPLICIT_TABLES`).
+    reevaluation: Option<bool>,
 }
 
-/// The untyped head of the table of the typed operations of explicit coercion of one value type
-/// (`ExplicitFns`, whose first field it is), or `COERCE_ON_REEVALUATION`.
-pub(crate) struct ExplicitCoercion {
-    /// The type of the table, checked where it is read.
-    of: fn() -> TypeId,
-    /// The table of the storage type.
-    pub(crate) storage: fn() -> &'static ExplicitCoercion,
-}
+/// The tables of the typed operations of explicit coercion (`ExplicitFns`), by the type of the
+/// table, of the value types whose coercion is explicit somewhere (`with_coerce_on_reevaluation`).
+static EXPLICIT_TABLES: std::sync::Mutex<Vec<(TypeId, usize)>> = std::sync::Mutex::new(Vec::new());
 
-impl std::fmt::Debug for ExplicitCoercion {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(if self.is_explicit() { "Explicit" } else { "Coerce" })
+/// Registers `table`, the table of the typed operations of explicit coercion of one value type.
+pub(crate) fn register_explicit_table<T: 'static>(table: &'static ExplicitFns<T>) {
+    let id = TypeId::of::<ExplicitFns<T>>();
+    let mut tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
+    if !tables.iter().any(|(known, _)| *known == id) {
+        tables.push((id, table as *const ExplicitFns<T> as usize));
     }
 }
 
-/// The policy of a property that coerces an unchanged input again (`with_coerce_on_reevaluation(true)`).
-static COERCE_ON_REEVALUATION: ExplicitCoercion =
-    ExplicitCoercion { of: TypeId::of::<()>, storage: || &COERCE_ON_REEVALUATION };
+/// The resets of explicit coercion (`reset_coercion`), by the type of the effective value.
+type ExplicitReset = fn(&dyn EffectiveValueDyn, &FerroObject);
+static EXPLICIT_RESETS: std::sync::Mutex<Vec<(TypeId, ExplicitReset)>> = std::sync::Mutex::new(Vec::new());
 
-impl ExplicitCoercion {
-    pub(crate) const fn new(of: fn() -> TypeId, storage: fn() -> &'static ExplicitCoercion) -> Self {
-        Self { of, storage }
+fn register_explicit_reset(id: TypeId, reset: ExplicitReset) {
+    let mut resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    if !resets.iter().any(|(known, _)| *known == id) {
+        resets.push((id, reset));
     }
+}
 
-    fn is_explicit(&self) -> bool {
-        !std::ptr::eq(self, &COERCE_ON_REEVALUATION)
-    }
+/// The reset of explicit coercion of an effective value of the type `id`, if its coercion is
+/// explicit somewhere.
+pub(crate) fn explicit_reset(id: TypeId) -> Option<ExplicitReset> {
+    let resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    resets.iter().find(|(known, _)| *known == id).map(|(_, reset)| *reset)
+}
 
-    /// The table, of the value type `T` it was made for.
-    pub(crate) fn ops<T: 'static>(&'static self) -> &'static ExplicitFns<T> {
-        assert!((self.of)() == TypeId::of::<ExplicitFns<T>>(), "explicit coercion of another value type");
-        // SAFETY: an `ExplicitCoercion` of that type is the first field of the constant table
-        // `ExplicitFns::<T>::get` (`repr(C)`), valid for the whole program.
-        unsafe { &*(self as *const ExplicitCoercion).cast::<ExplicitFns<T>>() }
-    }
+/// The address of the registered table of the type `id` (one function for every value type).
+#[inline(never)]
+fn explicit_table_address(id: TypeId) -> Option<usize> {
+    let tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
+    tables.iter().find(|(known, _)| *known == id).map(|(_, address)| *address)
+}
+
+/// The table of the typed operations of explicit coercion of `T`, if registered.
+fn explicit_table<T: 'static>() -> Option<&'static ExplicitFns<T>> {
+    let address = explicit_table_address(TypeId::of::<ExplicitFns<T>>())?;
+    // SAFETY: the address of the constant table `ExplicitFns::<T>::get`, registered with the
+    // type of the table checked above; valid for the whole program.
+    Some(unsafe { &*(address as *const ExplicitFns<T>) })
 }
 
 impl FerroPropertyMetadata {
@@ -67,16 +77,6 @@ impl FerroPropertyMetadata {
             binding_writeback_uses_change_value: None,
             reevaluation: None,
         }
-    }
-
-    /// A copy for the metadata of the storage type of the value type: explicit coercion takes
-    /// the table of the storage type.
-    pub(crate) fn for_storage(&self) -> Self {
-        let mut copy = self.clone();
-        if let Some(explicit) = copy.reevaluation {
-            copy.reevaluation = Some((explicit.storage)());
-        }
-        copy
     }
 
     /// The default binding mode for the property.
@@ -440,13 +440,13 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
     /// Whether frame reevaluation recalculates coercion for an unchanged input
     /// (`with_coerce_on_reevaluation`).
     pub fn coerce_on_reevaluation(&self) -> bool {
-        !self.base.reevaluation.is_some_and(|policy| policy.is_explicit())
+        self.base.reevaluation != Some(false)
     }
 
     /// The typed operations of explicit coercion, for a property whose coercion is explicit.
     pub(crate) fn explicit_coercion(&self) -> Option<&'static crate::property_store::ExplicitFns<T>> {
         match self.base.reevaluation {
-            Some(explicit) if explicit.is_explicit() => Some(explicit.ops::<T>()),
+            Some(false) => explicit_table::<T>(),
             _ => None,
         }
     }
@@ -494,11 +494,14 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
     /// Clearing an input also resets its coercion output without a callback.
     /// `FerroObject::reset_coercion` applies to a property whose coercion is explicit.
     pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
-        self.base.reevaluation = Some(if value {
-            &COERCE_ON_REEVALUATION
-        } else {
-            crate::property_store::ExplicitFns::<T>::get().head()
-        });
+        if !value {
+            // The tables of the value type and of its storage type, which the store reads.
+            register_explicit_table(crate::property_store::ExplicitFns::<T>::get());
+            register_explicit_table(crate::property_store::ExplicitFns::<T::Storage>::get());
+            // The store holds the values of the storage type.
+            register_explicit_reset(TypeId::of::<EffectiveValue<T::Storage>>(), EffectiveValue::<T::Storage>::reset_erased);
+        }
+        self.base.reevaluation = Some(value);
         self
     }
 
@@ -541,7 +544,7 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
                 Coercion::new(wrapped)
             });
             let copy = Rc::new(StyledPropertyMetadata::<T::Storage> {
-                base: self.base.for_storage(),
+                base: self.base.clone(),
                 default_value: self.default_value.clone().map(T::into_storage),
                 coerce,
                 storage: OnceCell::new(),
