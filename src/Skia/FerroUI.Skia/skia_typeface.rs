@@ -13,6 +13,12 @@ use std::io::{Cursor, Read};
 use std::rc::Rc;
 use std::sync::OnceLock;
 
+/// The index of a typeface in its font collection, from the data it keeps; 0 without data. The
+/// bytes of the font are never copied for it.
+fn collection_index(typeface: &Typeface) -> u32 {
+    typeface.to_existing_font_data().map_or(0, |(_, index)| index)
+}
+
 /// A platform typeface over a Skia typeface.
 pub struct SkiaTypeface {
     sk_typeface: Typeface,
@@ -153,12 +159,11 @@ impl IPlatformTypeface for SkiaTypeface {
                 None => coordinates.push(Coordinate { axis, value }),
             }
         }
-        // A variable face can come from a nonzero index in a font collection.
-        let index = *self.collection_index.get_or_init(|| {
-            self.sk_typeface.to_existing_font_data().map(|(_, index)| index)
-                .or_else(|| self.sk_typeface.to_font_bytes().map(|(_, index)| index))
-                .unwrap_or_default()
-        });
+        // A variable face can come from a nonzero index in a font collection. The index is read
+        // from the data the typeface keeps; a system typeface (Core Text, DirectWrite, a file of
+        // fontconfig) keeps none and is addressed by its own handle, so it is 0 and the font file
+        // is never read for it.
+        let index = *self.collection_index.get_or_init(|| collection_index(&self.sk_typeface));
         let mut arguments = FontArguments::new();
         arguments.set_collection_index(index as usize);
         let arguments = arguments.set_variation_design_position(VariationPosition { coordinates: &coordinates });
@@ -175,5 +180,26 @@ impl IPlatformTypeface for SkiaTypeface {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod collection_index_tests {
+    use super::*;
+
+    /// A typeface made from data reads its index from that data; a variation of it keeps the
+    /// face. Nothing reads the bytes of a font to find its index.
+    #[test]
+    fn the_collection_index_comes_from_the_kept_data() {
+        let bytes = include_bytes!("test_assets/assets/AdobeBlank2VF.ttf");
+        let typeface = skia_safe::FontMgr::new()
+            .new_from_data(bytes, None)
+            .expect("a typeface from the bytes of a variable font");
+        assert_eq!(collection_index(&typeface), 0);
+        let platform = SkiaTypeface::new(typeface, FontSimulations::None);
+        let varied = platform
+            .with_variation_settings(&FontVariationSettings::default())
+            .expect("a variation of the typeface");
+        assert_eq!(varied.family_name(), platform.family_name());
     }
 }

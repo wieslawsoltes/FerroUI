@@ -26,6 +26,9 @@ pub struct TestFontManagerImpl {
     default_family_name: String,
     fonts: RefCell<Vec<Rc<TestPlatformTypeface>>>,
     aliases: RefCell<Vec<(String, String)>>,
+    /// The family of the face given for a name the backend does not know (`None`: no face), as a
+    /// system that substitutes a face gives one.
+    substitute: RefCell<Option<String>>,
     installed_font_family_names: RefCell<Option<Vec<String>>>,
     stream_typeface_creations: Cell<usize>,
     create_typeface_requests: RefCell<Vec<String>>,
@@ -41,6 +44,7 @@ impl TestFontManagerImpl {
             default_family_name: default_family_name.to_owned(),
             fonts: RefCell::new(Vec::new()),
             aliases: RefCell::new(Vec::new()),
+            substitute: RefCell::new(None),
             installed_font_family_names: RefCell::new(None),
             stream_typeface_creations: Cell::new(0),
             create_typeface_requests: RefCell::new(Vec::new()),
@@ -91,6 +95,12 @@ impl TestFontManagerImpl {
     /// name. An alias is not an installed family name.
     pub fn add_alias(&self, alias: &str, family_name: &str) {
         self.aliases.borrow_mut().push((alias.to_owned(), family_name.to_owned()));
+    }
+
+    /// Makes the backend give a face of `family_name` for a name it does not know, as Core Text
+    /// substitutes a face for an unknown family.
+    pub fn set_substitute(&self, family_name: Option<&str>) {
+        *self.substitute.borrow_mut() = family_name.map(str::to_owned);
     }
 
     /// Overrides the installed family names reported by the backend
@@ -196,6 +206,12 @@ impl IFontManagerImpl for TestFontManagerImpl {
         best.map(|(font, _)| font.clone() as Rc<dyn IPlatformTypeface>)
     }
 
+    fn is_family_alias(&self, family_name: &str, face_family_name: &str) -> bool {
+        self.aliases.borrow().iter().any(|(alias, family)| {
+            equals_ordinal_ignore_case(alias, family_name) && equals_ordinal_ignore_case(family, face_family_name)
+        })
+    }
+
     fn try_create_glyph_typeface(
         &self,
         family_name: &str,
@@ -205,7 +221,13 @@ impl IFontManagerImpl for TestFontManagerImpl {
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         self.create_typeface_requests.borrow_mut().push(family_name.to_owned());
 
-        let family_name = self.resolve_alias(family_name);
+        let mut family_name = self.resolve_alias(family_name);
+        let known = self.fonts.borrow().iter().any(|font| equals_ordinal_ignore_case(&font.family_name(), &family_name));
+        if !known {
+            if let Some(substitute) = self.substitute.borrow().clone() {
+                family_name = substitute;
+            }
+        }
 
         let mut family_match: Option<Rc<TestPlatformTypeface>> = None;
 
