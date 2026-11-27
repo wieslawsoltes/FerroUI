@@ -52,10 +52,7 @@ pub(crate) enum EntryCoercion {
 /// The typed operations of explicit coercion (`StyledPropertyMetadata::with_coerce_on_reevaluation`).
 /// The table of a value type is made by that builder alone, so a value type whose coercion is not
 /// explicit carries none of them (docs/binary-size.md, section 4.17).
-#[repr(C)]
 pub(crate) struct ExplicitFns<T> {
-    /// The untyped head (first: the metadata holds its address).
-    head: crate::ferro_property_metadata::ExplicitCoercion,
     /// The uncoerced inputs become the value and the base value again (`reset_coercion`).
     reset: fn(&EffectiveValue<T>, &FerroObject),
     /// The output of a write whose coercion is reused or skipped, `None` to coerce it.
@@ -64,7 +61,6 @@ pub(crate) struct ExplicitFns<T> {
 
 impl<T: StyledValue> ExplicitFns<T> {
     const FNS: Self = Self {
-        head: crate::ferro_property_metadata::ExplicitCoercion::new(TypeId::of::<Self>, Self::storage_table),
         reset: EffectiveValue::<T>::reset_coerced,
         output: EffectiveValue::<T>::explicit_output,
     };
@@ -72,15 +68,6 @@ impl<T: StyledValue> ExplicitFns<T> {
     /// The table of `T`, a constant.
     pub(crate) fn get() -> &'static Self {
         &Self::FNS
-    }
-
-    /// Its untyped head, what the metadata holds.
-    pub(crate) fn head(&'static self) -> &'static crate::ferro_property_metadata::ExplicitCoercion {
-        &self.head
-    }
-
-    fn storage_table() -> &'static crate::ferro_property_metadata::ExplicitCoercion {
-        ExplicitFns::<T::Storage>::get().head()
     }
 }
 
