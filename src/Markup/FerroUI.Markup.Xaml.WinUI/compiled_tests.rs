@@ -20,7 +20,7 @@ use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestAppli
 use ferroui_controls::{
     Frame, NavigationView, NavigationViewBackButtonVisible, NavigationViewItem,
     NavigationViewItemHeader, NavigationViewItemSeparator, NavigationViewPaneDisplayMode, PageType,
-    Symbol, SymbolIcon,
+    Symbol, SymbolIcon, TabView, TabViewCloseButtonOverlayMode, TabViewItem, TabViewWidthMode,
 };
 use ferroui_controls::{
     AutoSuggestBox, Button, ContentControl, ContentPage, Control, FontIcon, FontIconSource,
@@ -45,6 +45,7 @@ const ROOT: &str = include_str!("fixtures/winui_root.xaml");
 const TEMPLATE: &str = include_str!("fixtures/winui_template.xaml");
 const NAVIGATION: &str = include_str!("fixtures/winui_navigation.xaml");
 const NATIVE_CONTROLS: &str = include_str!("fixtures/native_controls.xaml");
+const TAB_VIEW: &str = include_str!("fixtures/tab_view.xaml");
 
 fn options() -> WinUIXamlOptions {
     WinUIXamlOptions {
@@ -404,6 +405,49 @@ fn compiled_native_presentation_namespace_constructs_the_same_controls() {
     assert_native_controls(generated::build_native_controls_xaml(Some(provider)).unwrap());
 }
 
+/// The TabView document (#418): its tabs come from the content (TabItems), with their headers,
+/// icons and close button state, and the strip header, width mode and selection are set.
+fn assert_tab_view(build: impl Fn() -> Ref<TabView>) {
+    let weak = {
+        let view = build();
+        let scope = NameScope::get_name_scope(&view).expect("tab view name scope");
+        let first = scope.find_as::<TabViewItem>("First").unwrap();
+        let second = scope.find_as::<TabViewItem>("Second").unwrap();
+        assert_eq!(view.tab_items().count(), 2);
+        assert!(Control::from_boxed(&view.tab_items().get_at(0).unwrap()).unwrap().ptr_eq(&first));
+        assert_eq!(view.tab_width_mode(), TabViewWidthMode::SizeToContent);
+        assert_eq!(view.close_button_overlay_mode(), TabViewCloseButtonOverlayMode::OnPointerOver);
+        assert!(!view.is_add_tab_button_visible());
+        assert_eq!(view.selected_index(), 1);
+        assert!(Control::from_boxed(&view.tab_strip_header().unwrap()).unwrap().cast::<TextBlock>().is_some());
+        assert_eq!(first.header().and_then(|header| header.downcast_ref::<String>().cloned()).as_deref(), Some("Notes"));
+        assert!(first.is_closable());
+        assert!(!second.is_closable());
+        let icon = first.icon_source().unwrap().cast::<SymbolIconSource>().unwrap();
+        assert_eq!(icon.symbol(), Symbol::Document);
+        assert!(first.tab_view_template_settings().icon_element().is_some(), "the icon element of the icon source");
+        let content = Control::from_boxed(&second.content().unwrap()).unwrap();
+        assert!(content.ptr_eq(&scope.find_as::<TextBlock>("DraftsContent").unwrap()));
+        view.downgrade()
+    };
+    assert!(weak.upgrade().is_none(), "markup and tab subscriptions release the tab view");
+}
+
+#[test]
+fn interpreted_tab_view_has_its_tabs_icons_and_options() {
+    let _app = start();
+    assert_tab_view(|| crate::parse_winui_as(TAB_VIEW, None, &options()).unwrap());
+}
+
+#[test]
+fn compiled_tab_view_has_the_same_tabs_icons_and_options() {
+    let _app = start();
+    assert_tab_view(|| {
+        let provider = XamlIlRuntimeHelpers::create_root_service_provider_v3(None);
+        generated::build_tab_view_xaml(Some(provider)).unwrap()
+    });
+}
+
 #[test]
 fn generated_winui_binding_fixture_matches_the_current_compiler() {
     assert_eq!(
@@ -419,6 +463,7 @@ fn emitted_fixture() -> String {
         ("root.xaml", ROOT),
         ("template.xaml", TEMPLATE),
         ("navigation.xaml", NAVIGATION),
+        ("tab_view.xaml", TAB_VIEW),
     ]
     .into_iter()
     .map(|(name, source)| {

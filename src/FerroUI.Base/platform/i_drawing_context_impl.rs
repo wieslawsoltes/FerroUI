@@ -216,6 +216,24 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
     /// Whether the layer can be blitted with [`blit`](Self::blit).
     fn can_blit(&self) -> bool;
 
+    /// Draws the layer onto `context` replacing what the context has (the `Src` blend mode),
+    /// when the layer covers all of it and the backend can: the pixels of a clear to transparent
+    /// and a [`blit`](Self::blit) after it, without the clear and without reading the
+    /// destination. Returns `false`, having drawn nothing, when it cannot; the caller then clears
+    /// and blits.
+    fn blit_replacing(&self, context: &mut dyn IDrawingContextImpl) -> bool {
+        let _ = context;
+        false
+    }
+
+    /// Tells the layer which rows of pixels the next frame drawn on it can change, from `top` to
+    /// `bottom` (exclusive): the frame draws nothing outside them, and the layer keeps its pixels
+    /// there. `None`: any row. A layer that draws its frames in parts (the bands of a pipelined
+    /// layer) leaves out the parts outside the rows; any other layer ignores it.
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        let _ = rows;
+    }
+
     /// Whether the layer's contents have been lost.
     fn is_corrupted(&self) -> bool;
 
