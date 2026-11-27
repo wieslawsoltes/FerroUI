@@ -27,6 +27,7 @@ impl PartialEq for View {
 #[test]
 fn conditional_reference_view_preserves_object_and_nullable_identity_and_declines_unknown() {
     ValueTypes::register_reference::<Model>();
+    ValueTypes::register_erased_value::<Model>();
     ValueTypes::register_reference_view_if::<View>(|view| match view {
         View::Model(model) => Some(model.clone()),
         View::Opaque(_) => None,
@@ -85,6 +86,7 @@ fn conditional_callback_can_register_its_concrete_model_reentrantly() {
     struct Reentrant(Rc<Cell<i64>>);
     ValueTypes::register_reference_view_if::<Reentrant>(|v| {
         ValueTypes::register_reference::<Cell<i64>>();
+        ValueTypes::register_erased_value::<Cell<i64>>();
         Some(v.0.clone())
     });
     let model = Rc::new(Cell::new(4i64));

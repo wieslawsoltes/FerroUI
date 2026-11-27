@@ -1135,11 +1135,15 @@ impl FerroObject {
         })
     }
 
+    // One copy: the coerced write of every value type calls it.
+    #[inline(never)]
     pub(crate) fn has_suppressed_local_value_handlers(&self) -> bool {
         self.instance_data::<SuppressedLocalValueHandlers>()
             .is_some_and(|handlers| !handlers.0.is_empty())
     }
 
+    // One copy: the coerced write of every value type calls it.
+    #[inline(never)]
     pub(crate) fn notify_suppressed_local_value_changed(&self, property: &'static FerroProperty) {
         if let Some(handlers) = self.instance_data::<SuppressedLocalValueHandlers>() {
             for (_, handler) in handlers.0.snapshot().iter() {

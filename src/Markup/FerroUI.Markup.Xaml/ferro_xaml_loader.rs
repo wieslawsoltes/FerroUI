@@ -116,7 +116,7 @@ impl FerroXamlLoader {
         let Some(assembly) = assets.get_assembly(uri, base_uri) else { return false };
         let registration = compiled_loaders().read().unwrap_or_else(|e| e.into_inner()).get(assembly.name()).copied();
         registration.is_some_and(|r| r.public_documents.iter().any(|document|
-            crate::xaml_il::runtime::compiled::uri_equals(absolute.as_str(), document, "")))
+            crate::xaml_il::runtime::compiled::uri_equals_escaped(absolute.as_str(), document, "")))
     }
 
     /// Loads the XAML into a FerroUI component.
