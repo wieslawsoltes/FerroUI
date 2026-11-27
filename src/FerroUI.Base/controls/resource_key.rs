@@ -65,6 +65,9 @@ impl ResourceKey {
 }
 
 impl PartialEq for ResourceKey {
+    // Inlined into the look-up of a resource dictionary with the hash below: out of line it took
+    // the look-up of the map out of line too (`HashMap::get_inner`), a call per host searched.
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (ResourceKey::String(a), ResourceKey::String(b)) => a == b,
