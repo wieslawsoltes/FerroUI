@@ -1164,6 +1164,26 @@ fn click_count_follows_double_tap_time_and_size() {
 }
 
 #[test]
+fn click_count_should_restart_when_the_pressed_button_changes() {
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    let counts = Rc::new(RefCell::new(Vec::new()));
+    let recorded = counts.clone();
+    tree.root.root.pointer_pressed(move |_, e| recorded.borrow_mut().push(e.click_count()));
+
+    let host = &tree.root.host;
+    let press = |down, up, timestamp: u64| {
+        host.pointer(&device, down, OVER_CANVAS, timestamp);
+        host.pointer(&device, up, OVER_CANVAS, timestamp);
+    };
+    press(RawPointerEventType::RightButtonDown, RawPointerEventType::RightButtonUp, 1000);
+    press(RawPointerEventType::LeftButtonDown, RawPointerEventType::LeftButtonUp, 1050);
+    press(RawPointerEventType::LeftButtonDown, RawPointerEventType::LeftButtonUp, 1100);
+
+    assert_eq!(*counts.borrow(), [1, 1, 2]);
+}
+
+#[test]
 fn click_count_is_zero_without_platform_settings() {
     let device = MouseDevice::new();
     let tree = pointer_tree();
@@ -1627,6 +1647,10 @@ impl MouseTestHelper {
     }
 
     fn down(&self, target: &Ref<TestControl>, mouse_button: MouseButton, click_count: i32) {
+        self.down_at(target, mouse_button, Self::midpoint_relative_to_root(target), click_count);
+    }
+
+    fn down_at(&self, target: &Ref<TestControl>, mouse_button: MouseButton, position: Point, click_count: i32) {
         self.pressed_buttons.set(self.pressed_buttons.get() | Self::convert(mouse_button));
         let kind = match mouse_button {
             MouseButton::Left => PointerUpdateKind::LeftButtonPressed,
@@ -1642,7 +1666,7 @@ impl MouseTestHelper {
             target,
             self.pointer.clone(),
             &Self::get_root(target),
-            Self::midpoint_relative_to_root(target),
+            position,
             self.timestamp(),
             props,
             KeyModifiers::NONE,
@@ -1906,6 +1930,139 @@ fn tapped_should_not_be_raised_when_released_far_from_press() {
     mouse.up(&tree.border, MouseButton::Left, Some(Point::new(80.0, 80.0)));
 
     assert!(!raised.get());
+}
+
+#[test]
+fn tapped_should_be_raised_after_hold_duration_when_hold_with_mouse_is_disabled() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let result = log();
+    add_gesture_handlers(&tree, &result, false);
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    // The pointer is held longer than the hold duration before being released.
+    let timers = crate::threading::Dispatcher::snapshot_timers_for_unit_tests();
+    assert_eq!(timers.len(), 1);
+    force_fire(&timers[0]);
+    mouse.up(&tree.border, MouseButton::Left, None);
+
+    assert_eq!(*result.borrow(), ["bp", "dp", "br", "dr", "bt", "dt"]);
+}
+
+#[test]
+fn tapped_should_not_be_raised_for_drag() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let (raised, handler) = raised_flag();
+    tree.root.root.tapped(handler);
+
+    mouse.down_at(&tree.border, MouseButton::Left, Point::new(10.0, 10.0), 1);
+    mouse.move_to(&tree.border, Point::new(60.0, 60.0));
+    mouse.up(&tree.border, MouseButton::Left, Some(Point::new(60.0, 60.0)));
+
+    assert!(!raised.get());
+}
+
+#[test]
+fn tapped_should_be_raised_when_the_target_moves_under_the_pointer() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let (raised, handler) = raised_flag();
+    tree.root.root.tapped(handler);
+    let position = Point::new(50.0, 50.0);
+
+    mouse.down_at(&tree.border, MouseButton::Left, position, 1);
+    // A layout between press and release, as a slider moving its thumb to the pointer.
+    let _ = tree.border.clone().at(30.0, 0.0, 100.0, 100.0);
+    mouse.up(&tree.border, MouseButton::Left, Some(position));
+
+    assert!(raised.get());
+}
+
+#[test]
+fn right_tapped_should_be_raised_when_pointer_moves_within_tap_size() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let (raised, handler) = raised_flag();
+    tree.root.root.right_tapped(handler);
+
+    mouse.down_at(&tree.border, MouseButton::Right, Point::new(50.0, 50.0), 1);
+    mouse.move_to(&tree.border, Point::new(52.0, 52.0));
+    mouse.up(&tree.border, MouseButton::Right, Some(Point::new(52.0, 52.0)));
+
+    assert!(raised.get());
+}
+
+#[test]
+fn right_tapped_should_not_be_raised_for_drag() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let (raised, handler) = raised_flag();
+    tree.root.root.right_tapped(handler);
+
+    mouse.down_at(&tree.border, MouseButton::Right, Point::new(50.0, 50.0), 1);
+    mouse.move_to(&tree.border, Point::new(100.0, 100.0));
+    mouse.up(&tree.border, MouseButton::Right, Some(Point::new(100.0, 100.0)));
+
+    assert!(!raised.get());
+}
+
+#[test]
+fn tapped_should_not_be_raised_on_double_tapped_release() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let result = log();
+    add_gesture_handlers(&tree, &result, false);
+
+    mouse.click(&tree.border, MouseButton::Left);
+    mouse.down(&tree.border, MouseButton::Left, 2);
+    mouse.up(&tree.border, MouseButton::Left, None);
+
+    assert_eq!(*result.borrow(), ["bp", "dp", "br", "dr", "bt", "dt", "bp", "dp", "bdt", "ddt", "br", "dr"]);
+}
+
+#[test]
+fn double_tapped_should_be_raised_after_control_changes() {
+    let mouse = MouseTestHelper::new();
+    let border1 = TestControl::new("border1").at(0.0, 0.0, 100.0, 100.0);
+    let border2 = TestControl::new("border2").at(0.0, 0.0, 100.0, 100.0);
+    border2.set_is_visible(false);
+    let panel = TestControl::new("panel").at(0.0, 0.0, 100.0, 100.0).with_children(&[&border1, &border2]);
+    let _root = TestRoot::with_child(&panel);
+    let result = log();
+
+    let recorded = result.clone();
+    let (first, second) = (border1.clone(), border2.clone());
+    border1.double_tapped(move |_, _| {
+        recorded.borrow_mut().push("dt1".to_string());
+        first.set_is_visible(false);
+        second.set_is_visible(true);
+    });
+    let recorded = result.clone();
+    border2.double_tapped(move |_, _| recorded.borrow_mut().push("dt2".to_string()));
+
+    mouse.click(&border1, MouseButton::Left);
+    mouse.down(&border1, MouseButton::Left, 2);
+    mouse.up(&border1, MouseButton::Left, None);
+    mouse.down(&border2, MouseButton::Left, 3);
+    mouse.up(&border2, MouseButton::Left, None);
+    mouse.down(&border2, MouseButton::Left, 4);
+
+    assert_eq!(*result.borrow(), ["dt1", "dt2"]);
+}
+
+#[test]
+fn double_tapped_should_not_be_raised_when_click_count_is_reset() {
+    let mouse = MouseTestHelper::new();
+    let tree = gesture_tree();
+    let result = log();
+    add_gesture_handlers(&tree, &result, false);
+
+    mouse.click(&tree.border, MouseButton::Left);
+    mouse.click(&tree.border, MouseButton::Left);
+
+    assert_eq!(*result.borrow(), ["bp", "dp", "br", "dr", "bt", "dt", "bp", "dp", "br", "dr", "bt", "dt"]);
 }
 
 #[test]
@@ -4039,6 +4196,125 @@ fn open_main_menu_on_alt_key_up(focus_menu: bool) {
 
     raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
     assert_eq!(menu.times_open_called.get(), 1);
+}
+
+/// A root with a handler and a menu, for the sequences of Alt with another modifier.
+fn alt_chord_fixture() -> (TestRoot, Rc<AccessKeyHandler>, Rc<FakeMenu>, Rc<KeyboardDevice>) {
+    let keyboard = real_focus();
+    let target = AccessKeyHandler::new();
+    let menu = FakeMenu::new();
+    let root = TestRoot::with_child(&button("menu"));
+    target.set_owner(&element(&root.root));
+    target.set_main_menu(Some(menu.clone()));
+    (root, target, menu, keyboard)
+}
+
+const ALT_CHORD_MODIFIERS: [(Key, KeyModifiers); 6] = [
+    (Key::LeftShift, KeyModifiers::SHIFT),
+    (Key::RightShift, KeyModifiers::SHIFT),
+    (Key::LeftCtrl, KeyModifiers::CONTROL),
+    (Key::RightCtrl, KeyModifiers::CONTROL),
+    (Key::LWin, KeyModifiers::META),
+    (Key::RWin, KeyModifiers::META),
+];
+
+#[test]
+fn should_not_open_main_menu_on_alt_key_up_when_alt_is_pressed_with_another_modifier() {
+    for (modifier_key, modifier) in ALT_CHORD_MODIFIERS {
+        let (root, _target, menu, _keyboard) = alt_chord_fixture();
+        raise_key(&root.root, true, modifier_key, None, modifier);
+        raise_key(&root.root, true, Key::LeftAlt, None, modifier | KeyModifiers::ALT);
+        raise_key(&root.root, false, Key::LeftAlt, None, modifier);
+        raise_key(&root.root, false, modifier_key, None, KeyModifiers::NONE);
+        assert_eq!(menu.times_open_called.get(), 0, "{modifier_key:?}");
+    }
+}
+
+#[test]
+fn should_open_main_menu_on_alt_key_up_after_alt_was_pressed_with_another_modifier() {
+    let (root, _target, menu, _keyboard) = alt_chord_fixture();
+    raise_key(&root.root, true, Key::LeftShift, None, KeyModifiers::SHIFT);
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::SHIFT | KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::SHIFT);
+    raise_key(&root.root, false, Key::LeftShift, None, KeyModifiers::NONE);
+
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+
+    assert_eq!(menu.times_open_called.get(), 1);
+}
+
+#[test]
+fn should_open_main_menu_on_alt_key_up_after_chord_whose_alt_key_up_was_missed() {
+    let (root, _target, menu, _keyboard) = alt_chord_fixture();
+    // Shift+Alt+Tab: the window is deactivated before it receives any key up.
+    raise_key(&root.root, true, Key::LeftShift, None, KeyModifiers::SHIFT);
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::SHIFT | KeyModifiers::ALT);
+
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+
+    assert_eq!(menu.times_open_called.get(), 1);
+}
+
+#[test]
+fn should_not_open_main_menu_on_alt_key_up_when_modifier_is_released_before_alt() {
+    for (modifier_key, modifier) in ALT_CHORD_MODIFIERS {
+        let (root, _target, menu, _keyboard) = alt_chord_fixture();
+        raise_key(&root.root, true, modifier_key, None, modifier);
+        raise_key(&root.root, true, Key::LeftAlt, None, modifier | KeyModifiers::ALT);
+        raise_key(&root.root, false, modifier_key, None, KeyModifiers::ALT);
+        raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+        assert_eq!(menu.times_open_called.get(), 0, "{modifier_key:?}");
+    }
+}
+
+#[test]
+fn should_not_open_main_menu_on_alt_key_up_when_alt_repeats_after_modifier_is_released() {
+    let (root, _target, menu, _keyboard) = alt_chord_fixture();
+    raise_key(&root.root, true, Key::LeftShift, None, KeyModifiers::SHIFT);
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::SHIFT | KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftShift, None, KeyModifiers::ALT);
+    raise_key(&root.root, true, Key::LeftAlt, None, KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftAlt, None, KeyModifiers::NONE);
+
+    assert_eq!(menu.times_open_called.get(), 0);
+}
+
+#[test]
+fn should_not_open_main_menu_on_alt_gr_key_up() {
+    let (root, _target, menu, _keyboard) = alt_chord_fixture();
+    // Windows reports AltGr as LeftCtrl+RightAlt.
+    raise_key(&root.root, true, Key::LeftCtrl, None, KeyModifiers::CONTROL);
+    raise_key(&root.root, true, Key::RightAlt, None, KeyModifiers::CONTROL | KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::LeftCtrl, None, KeyModifiers::ALT);
+    raise_key(&root.root, false, Key::RightAlt, None, KeyModifiers::NONE);
+
+    assert_eq!(menu.times_open_called.get(), 0);
+}
+
+#[test]
+fn should_show_access_keys_when_alt_is_pressed_with_another_modifier() {
+    for (modifier_key, modifier) in ALT_CHORD_MODIFIERS {
+        let (root, _target, _menu, _keyboard) = alt_chord_fixture();
+        raise_key(&root.root, true, modifier_key, None, modifier);
+        raise_key(&root.root, true, Key::LeftAlt, None, modifier | KeyModifiers::ALT);
+        assert!(root.root.get_value(AccessKeyHandler::show_access_key_property()), "{modifier_key:?}");
+    }
+}
+
+#[test]
+fn should_close_open_main_menu_when_alt_is_pressed_with_another_modifier() {
+    for (modifier_key, modifier) in ALT_CHORD_MODIFIERS {
+        let (root, _target, menu, _keyboard) = alt_chord_fixture();
+        menu.is_open.set(true);
+        raise_key(&root.root, true, modifier_key, None, modifier);
+        raise_key(&root.root, true, Key::LeftAlt, None, modifier | KeyModifiers::ALT);
+        raise_key(&root.root, false, Key::LeftAlt, None, modifier);
+        raise_key(&root.root, false, modifier_key, None, KeyModifiers::NONE);
+        assert_eq!(menu.times_close_called.get(), 1, "{modifier_key:?}");
+        assert_eq!(menu.times_open_called.get(), 0, "{modifier_key:?}");
+    }
 }
 
 #[test]

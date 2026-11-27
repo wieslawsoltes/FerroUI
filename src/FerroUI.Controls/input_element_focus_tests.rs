@@ -291,6 +291,82 @@ fn focus_should_be_cleared_when_control_is_effectively_hidden() {
 }
 
 #[test]
+fn try_move_focus_skips_disabled_elements() {
+    for direction in [NavigationDirection::Next, NavigationDirection::Previous] {
+        let _app = UnitTestApplication::start(real_focus());
+        let (target1, target2, target3) = (Button::new(), Button::new(), Button::new());
+        target2.set_is_enabled(false);
+        let panel = StackPanel::new();
+        for target in [&target1, &target2, &target3] {
+            panel.children().add(target);
+        }
+        let _root = TestRoot::with_child(&panel);
+
+        let focus_manager = FocusManager::get_focus_manager(&target1).unwrap();
+        let (start, expected) = if direction == NavigationDirection::Next {
+            (&target1, &target3)
+        } else {
+            (&target3, &target1)
+        };
+        start.focus();
+
+        let expected: Ref<InputElement> = expected.clone().upcast();
+        assert!(focus_manager.find_next_element(direction, None).is_some_and(|next| next == expected));
+        assert!(focus_manager.try_move_focus(direction, None));
+        assert!(focus_manager.get_focused_element().is_some_and(|focused| focused == expected));
+    }
+}
+
+#[test]
+fn try_move_focus_skips_children_of_disabled_container() {
+    for direction in [NavigationDirection::Next, NavigationDirection::Previous] {
+        let _app = UnitTestApplication::start(real_focus());
+        let (target1, inside, target3) = (Button::new(), Button::new(), Button::new());
+        let container = StackPanel::new();
+        container.set_is_enabled(false);
+        container.children().add(&inside);
+        let panel = StackPanel::new();
+        panel.children().add(&target1);
+        panel.children().add(&container);
+        panel.children().add(&target3);
+        let _root = TestRoot::with_child(&panel);
+
+        let focus_manager = FocusManager::get_focus_manager(&target1).unwrap();
+        let (start, expected) = if direction == NavigationDirection::Next {
+            (&target1, &target3)
+        } else {
+            (&target3, &target1)
+        };
+        start.focus();
+
+        let expected: Ref<InputElement> = expected.clone().upcast();
+        assert!(focus_manager.try_move_focus(direction, None));
+        assert!(focus_manager.get_focused_element().is_some_and(|focused| focused == expected));
+    }
+}
+
+#[test]
+fn find_first_focusable_element_and_find_last_focusable_element_skip_disabled_elements() {
+    let _app = UnitTestApplication::start(real_focus());
+    let (first, target2, target3, last) = (Button::new(), Button::new(), Button::new(), Button::new());
+    first.set_is_enabled(false);
+    last.set_is_enabled(false);
+    let panel = StackPanel::new();
+    for target in [&first, &target2, &target3, &last] {
+        panel.children().add(target);
+    }
+    let _root = TestRoot::with_child(&panel);
+
+    let focus_manager = FocusManager::get_focus_manager(&target2).unwrap();
+    target2.focus();
+
+    let (expected_first, expected_last): (Ref<InputElement>, Ref<InputElement>) =
+        (target2.clone().upcast(), target3.clone().upcast());
+    assert!(focus_manager.find_first_focusable_element().is_some_and(|element| element == expected_first));
+    assert!(focus_manager.find_last_focusable_element().is_some_and(|element| element == expected_last));
+}
+
+#[test]
 fn focus_should_be_cleared_when_control_is_disabled() {
     let _app = UnitTestApplication::start(real_focus());
     let target = Button::new();

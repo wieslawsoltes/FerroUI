@@ -24,14 +24,19 @@ impl FocusHelpers {
         if let Some(children) = parent.children_in_tab_focus_order() {
             return children
                 .iter()
-                .any(|child| Self::is_visible(child) && (child.focusable() || Self::can_have_focusable_children(Some(&**child))));
+                .any(|child| {
+                    Self::is_visible(child)
+                        && (Self::is_focusable(Some(&**child)) || Self::can_have_focusable_children(Some(&**child)))
+                });
         }
         let Some(children) = parent.visual_children_snapshot() else { return false };
 
         for child in children.iter() {
             let Some(child) = child.downcast_ref::<InputElement>() else { continue };
 
-            if Self::is_visible(child) && (child.focusable() || Self::can_have_focusable_children(Some(child))) {
+            if Self::is_visible(child)
+                && (Self::is_focusable(Some(child)) || Self::can_have_focusable_children(Some(child)))
+            {
                 return true;
             }
         }
@@ -60,7 +65,8 @@ impl FocusHelpers {
     }
 
     pub fn is_focusable(element: Option<&InputElement>) -> bool {
-        element.is_some_and(InputElement::focusable)
+        // A disabled element cannot take focus, as in Tab navigation and `FocusManager::can_focus`.
+        element.is_some_and(|element| element.focusable() && element.is_effectively_enabled())
     }
 
     #[allow(dead_code)]
