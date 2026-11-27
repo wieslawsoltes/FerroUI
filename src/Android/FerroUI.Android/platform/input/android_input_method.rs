@@ -17,19 +17,17 @@ use std::rc::{Rc, Weak};
 /// `android.text.InputType`.
 pub(crate) mod input_types {
     pub const MASK_CLASS: i32 = 0x0000_000f;
-    pub const MASK_VARIATION: i32 = 0x0000_0ff0;
     pub const CLASS_TEXT: i32 = 0x0000_0001;
     pub const CLASS_NUMBER: i32 = 0x0000_0002;
     pub const CLASS_PHONE: i32 = 0x0000_0003;
     pub const TEXT_FLAG_CAP_SENTENCES: i32 = 0x0000_4000;
     pub const TEXT_FLAG_MULTI_LINE: i32 = 0x0002_0000;
     pub const TEXT_FLAG_NO_SUGGESTIONS: i32 = 0x0008_0000;
-    pub const TEXT_VARIATION_NORMAL: i32 = 0x0000_0000;
     pub const TEXT_VARIATION_URI: i32 = 0x0000_0010;
     pub const TEXT_VARIATION_EMAIL_ADDRESS: i32 = 0x0000_0020;
     pub const TEXT_VARIATION_PERSON_NAME: i32 = 0x0000_0060;
     pub const TEXT_VARIATION_PASSWORD: i32 = 0x0000_0080;
-    pub const TEXT_VARIATION_VISIBLE_PASSWORD: i32 = 0x0000_0090;
+    pub const TEXT_VARIATION_FILTER: i32 = 0x0000_00B0;
     pub const NUMBER_FLAG_SIGNED: i32 = 0x0000_1000;
     pub const NUMBER_FLAG_DECIMAL: i32 = 0x0000_2000;
     pub const NUMBER_VARIATION_PASSWORD: i32 = 0x0000_0010;
@@ -269,7 +267,8 @@ impl AndroidInputMethod {
             TextInputContentType::Digits => CLASS_PHONE,
             TextInputContentType::Url => CLASS_TEXT | TEXT_VARIATION_URI,
             TextInputContentType::Name => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
-            // Alpha/Normal/Social/Search have no dedicated Android keyboard
+            TextInputContentType::Search => CLASS_TEXT | TEXT_VARIATION_FILTER,
+            // Alpha/Normal/Social have no dedicated Android keyboard
             _ => CLASS_TEXT,
         };
 
@@ -303,10 +302,6 @@ impl AndroidInputMethod {
 
         if options.show_suggestions == Some(false) && (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT {
             out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
-
-            if (out_attrs.input_type & MASK_VARIATION) == TEXT_VARIATION_NORMAL {
-                out_attrs.input_type |= TEXT_VARIATION_VISIBLE_PASSWORD;
-            }
         }
 
         if options.is_sensitive {
@@ -348,6 +343,7 @@ impl AndroidInputMethod {
                 TextInputContentType::Digits => CLASS_PHONE,
                 TextInputContentType::Url => CLASS_TEXT | TEXT_VARIATION_URI,
                 TextInputContentType::Name => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
+                TextInputContentType::Search => CLASS_TEXT | TEXT_VARIATION_FILTER,
                 _ => CLASS_TEXT,
             },
         };
@@ -385,10 +381,6 @@ impl AndroidInputMethod {
 
         if options.show_suggestions == Some(false) && (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT {
             out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
-
-            if (out_attrs.input_type & MASK_VARIATION) == TEXT_VARIATION_NORMAL {
-                out_attrs.input_type |= TEXT_VARIATION_VISIBLE_PASSWORD;
-            }
         }
 
         let scope_is_secret = matches!(
@@ -768,7 +760,7 @@ mod tests {
         assert_eq!(of(TextInputContentType::Normal), CLASS_TEXT);
         assert_eq!(of(TextInputContentType::Alpha), CLASS_TEXT);
         assert_eq!(of(TextInputContentType::Social), CLASS_TEXT);
-        assert_eq!(of(TextInputContentType::Search), CLASS_TEXT);
+        assert_eq!(of(TextInputContentType::Search), CLASS_TEXT | TEXT_VARIATION_FILTER);
         assert_eq!(of(TextInputContentType::Email), 0x21);
         assert_eq!(of(TextInputContentType::Number), 0x3002);
         assert_eq!(of(TextInputContentType::Password), 0x81);
@@ -802,9 +794,10 @@ mod tests {
         assert_eq!(caps.input_type, CLASS_TEXT | TEXT_FLAG_CAP_SENTENCES | TEXT_FLAG_MULTI_LINE);
         assert_eq!(caps.initial_caps_mode, CAPITALIZATION_MODE_SENTENCES);
 
-        // No suggestions: a normal text also becomes a visible password, which is how a keyboard is told.
+        // No suggestions: the variation stays what it was, because a password variation changes
+        // the keyboard and what the system does with the text.
         let plain = info(&TextInputOptions { show_suggestions: Some(false), ..Default::default() });
-        assert_eq!(plain.input_type, CLASS_TEXT | TEXT_FLAG_NO_SUGGESTIONS | TEXT_VARIATION_VISIBLE_PASSWORD);
+        assert_eq!(plain.input_type, CLASS_TEXT | TEXT_FLAG_NO_SUGGESTIONS);
         let email = info(&TextInputOptions {
             show_suggestions: Some(false),
             content_type: TextInputContentType::Email,
