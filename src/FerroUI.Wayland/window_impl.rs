@@ -39,7 +39,7 @@ use ferroui_controls::{
     AcrylicPlatformCompensationLevels, TopLevel, WindowCloseReason, WindowDecorations, WindowEdge, WindowResizeReason,
     WindowState, WindowTransparencyLevel,
 };
-use ferroui_dialogs::ManagedStorageProvider;
+use ferroui_controls::platform::managed_storage_fallback;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -321,7 +321,7 @@ impl WindowImpl {
         // floating, unparented window is worse UX than a managed in-process picker.
         // If the probe fails (no exporter global, surface not mapped, or compositor
         // never delivers the handle), return None and let FallbackStorageProvider
-        // move on to ManagedStorageProvider. The factory is re-evaluated on every
+        // move on to the managed chooser of the theme. The factory is re-evaluated on every
         // (re)connect via FallbackStorageProvider::reset.
         let portal: StorageProviderFactory = Rc::new(move || {
             let window = portal_window.clone();
@@ -339,7 +339,7 @@ impl WindowImpl {
                 .upgrade()
                 .and_then(|window| window.base.input_root())
                 .and_then(|input_root| input_root.focus_root().cast::<TopLevel>())
-                .map(|tl| Rc::new(ManagedStorageProvider::new(Some(&tl), None)) as Rc<dyn IStorageProvider>);
+                .map(|tl| managed_storage_fallback(&tl));
             Box::pin(std::future::ready(provider))
         })]
     }
