@@ -24,6 +24,10 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-android = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
+# Named only to turn on its 3D scenes (`media3d`) for the pages of the section "3D" of the catalog:
+# on Ganesh GLES the GL executor of `ferroui-opengl` draws them on the GPU (docs/porting/media3d.md,
+# section 3.20). Without it a scene draws nothing. The backend itself comes with `ferroui-android`.
+ferroui-skia = { workspace = true, features = ["media3d"] }
 
 [features]
 native-media = [
