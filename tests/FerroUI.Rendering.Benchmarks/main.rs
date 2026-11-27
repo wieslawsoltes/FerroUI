@@ -80,6 +80,8 @@ fn run() -> Result<(), String> {
         "text-arabic",
         "text-hebrew",
         "shadows",
+        "shadows-small",
+        "shadows-animated",
         "opacity-layers",
     ] {
         if only != "all" && only != name {
@@ -344,7 +346,7 @@ impl Scene {
         match self.name.as_str() {
             "rounded-rects" | "geometry" => 256,
             "bitmaps" => 96,
-            "shadows" | "opacity-layers" => 24,
+            "shadows" | "shadows-small" | "shadows-animated" | "opacity-layers" => 24,
             _ => self.runs.len(),
         }
     }
@@ -391,6 +393,35 @@ impl Scene {
                         ..Default::default()
                     }),
                 ),
+                // A box too small for its blur, which the closed form of a blurred rounded
+                // rectangle does not cover; the animated one changes its scale in every frame.
+                "shadows-small" | "shadows-animated" => {
+                    if self.name == "shadows-animated" {
+                        let s = scale * (0.85 + (index % 16) as f64 * 0.01);
+                        c.set_transform(Matrix::create_scale(s, s));
+                    }
+                    c.draw_rectangle(
+                        Some(&fill),
+                        None,
+                        RoundedRect::from_radius_xy(
+                            Rect::new(
+                                32. + (i % 6) as f64 * 200.,
+                                32. + (i / 6) as f64 * 180.,
+                                120.,
+                                20.,
+                            ),
+                            10.,
+                            10.,
+                        ),
+                        &BoxShadows::new(BoxShadow {
+                            offset_x: 2.,
+                            offset_y: 2.,
+                            blur: 20.,
+                            color: Color::from_argb(100, 0, 0, 0),
+                            ..Default::default()
+                        }),
+                    );
+                }
                 "opacity-layers" => {
                     c.push_opacity(0.7, Some(Rect::new(x, y, 140., 90.)));
                     for j in 0..4 {
