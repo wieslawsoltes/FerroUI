@@ -4018,6 +4018,154 @@ fn build_control_theme_template_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `control_theme_base_class_template.xaml`.
+static BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/control_theme_base_class_template.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `control_theme_base_class_template.xaml`.
+pub fn build_control_theme_base_class_template_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::Border>, ::ferroui_markup_xaml::XamlLoadError> {
+    // control_theme_base_class_template.xaml(1,2) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    let context = rt::populate_context(service_provider, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT, rt::to_value(border_0.clone()));
+    let name_scope = context.name_scope_field();
+    border_0.begin_init();
+    rt::push_parent(&context, &border_0);
+    let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>()));
+    if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
+        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 1, 2)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 1, 2)?, count_0.wrapping_add(2_i32));
+    }
+    // control_theme_base_class_template.xaml(1,118) Resources (resource)
+    let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_base_class_template_xaml_deferred_0, 1, 118)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 118)?, rt::boxed(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 118)?;
+    // control_theme_base_class_template.xaml(1,307) Resources (resource)
+    let dictionary_1 = ::ferroui_base::StyledElement::__markup_get_Resources(border_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_control_theme_base_class_template_xaml_deferred_2, 1, 307)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_1.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 1, 307)?, rt::string_object("PasswordTheme"), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 1, 307)?;
+    // control_theme_base_class_template.xaml(1,630) Child
+    // control_theme_base_class_template.xaml(1,630) TemplatedControl
+    let templated_control_0 = ::ferroui_controls::primitives::TemplatedControl::new();
+    templated_control_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&templated_control_0).upcast::<::ferroui_controls::Control>()));
+    rt::push_parent(&context, &templated_control_0);
+    // control_theme_base_class_template.xaml(1,647) Theme (setter chosen at run time)
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordTheme"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 1, 647)?;
+    let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
+    rt::assign_resource_value(templated_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0, &rt::ResourceChoice { name: "Theme", member: "FerroUI.StyledElement.set_Theme", index: 0, unset: true, instance: rt::ValueHandle::Class(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), null: true, line: 1, position: 647 }, ::core::option::Option::None)?;
+    rt::pop_parent_end_init(&context, &templated_control_0, 1, 630)?;
+    rt::pop_parent_end_init(&context, &border_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&border_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(border_0)
+}
+
+/// A property definition of the tables of `control_theme_base_class_template.xaml` (#568).
+fn build_control_theme_base_class_template_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_controls::primitives::TemplatedControl::template_property())
+}
+
+/// The control theme built by `build_control_theme_base_class_template_xaml_deferred_0`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DEFERRED_0_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: false,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_base_class_template_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_control_theme_base_class_template_xaml_deferred_1, parent: false, line: 1, position: 223 }) }),
+    ],
+};
+
+/// A property definition of the tables of `control_theme_base_class_template.xaml` (#568).
+fn build_control_theme_base_class_template_xaml_property_1() -> &'static ::ferroui_base::FerroProperty {
+    rt::property(::ferroui_base::input::InputElement::is_tab_stop_property())
+}
+
+/// The control theme built by `build_control_theme_base_class_template_xaml_deferred_2`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DEFERRED_2_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+    parent: false,
+    members: &[
+        rt::StyleMember::TargetType(<::ferroui_controls::primitives::TemplatedControl as ::ferroui_base::StaticType>::TYPE),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_base_class_template_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Bool(false) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_control_theme_base_class_template_xaml_property_0, form: rt::SetterForm::Created, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_control_theme_base_class_template_xaml_deferred_3, parent: false, line: 1, position: 462 }) }),
+    ],
+};
+
+/// Builds the deferred content at `control_theme_base_class_template.xaml(1,118)` (a template or a deferred resource).
+fn build_control_theme_base_class_template_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT);
+    // control_theme_base_class_template.xaml(1,118) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DEFERRED_0_THEME)
+}
+
+/// Builds the deferred content at `control_theme_base_class_template.xaml(1,223)` (a template or a deferred resource).
+fn build_control_theme_base_class_template_xaml_deferred_1(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
+    // control_theme_base_class_template.xaml(1,223) TextPresenter
+    let text_presenter_0 = ::ferroui_controls::presenters::TextPresenter::new();
+    rt::set_intermediate_root(&context, &text_presenter_0);
+    text_presenter_0.begin_init();
+    // control_theme_base_class_template.xaml(1,237) Name
+    rt::name_element(name_scope.as_ref(), &text_presenter_0, &text_presenter_0, "PART_TextPresenter", 1, 237)?;
+    rt::end_init(&text_presenter_0, 1, 223)?;
+    ::core::result::Result::Ok(rt::to_value(text_presenter_0.clone()))
+}
+
+/// Builds the deferred content at `control_theme_base_class_template.xaml(1,307)` (a template or a deferred resource).
+fn build_control_theme_base_class_template_xaml_deferred_2(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT);
+    // control_theme_base_class_template.xaml(1,307) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DEFERRED_2_THEME)
+}
+
+/// Builds the deferred content at `control_theme_base_class_template.xaml(1,462)` (a template or a deferred resource).
+fn build_control_theme_base_class_template_xaml_deferred_3(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &BUILD_CONTROL_THEME_BASE_CLASS_TEMPLATE_XAML_DOCUMENT);
+    let name_scope = context.name_scope_field();
+    // control_theme_base_class_template.xaml(1,462) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    rt::set_intermediate_root(&context, &stack_panel_0);
+    stack_panel_0.begin_init();
+    // control_theme_base_class_template.xaml(1,474) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // control_theme_base_class_template.xaml(1,474) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
+    // control_theme_base_class_template.xaml(1,484) Name
+    rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, "HeaderText", 1, 484)?;
+    rt::end_init(&text_block_0, 1, 474)?;
+    // control_theme_base_class_template.xaml(1,506) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // control_theme_base_class_template.xaml(1,506) TextBox
+    let text_box_0 = ::ferroui_controls::TextBox::new();
+    text_box_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
+    // control_theme_base_class_template.xaml(1,514) Name
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "PasswordInput", 1, 514)?;
+    // control_theme_base_class_template.xaml(1,506) PasswordChar
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    text_box_0.set_value_with_priority(::ferroui_controls::TextBox::password_char_property(), '*', priority_0);
+    rt::end_init(&text_box_0, 1, 506)?;
+    rt::end_init(&stack_panel_0, 1, 462)?;
+    ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
+}
+
+fn build_control_theme_base_class_template_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_control_theme_base_class_template_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The base URI and the XML namespaces of `style_selectors.xaml`.
 static BUILD_STYLE_SELECTORS_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/style_selectors.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5823,6 +5971,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("control_template_parts.xaml", build_control_template_parts_xaml_untyped as BuildDocument),
     ("data_template.xaml", build_data_template_xaml_untyped as BuildDocument),
     ("control_theme_template.xaml", build_control_theme_template_xaml_untyped as BuildDocument),
+    ("control_theme_base_class_template.xaml", build_control_theme_base_class_template_xaml_untyped as BuildDocument),
     ("style_selectors.xaml", build_style_selectors_xaml_untyped as BuildDocument),
     ("style_nested.xaml", build_style_nested_xaml_untyped as BuildDocument),
     ("style_resources.xaml", build_style_resources_xaml_untyped as BuildDocument),
