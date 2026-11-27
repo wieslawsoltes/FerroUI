@@ -78,6 +78,7 @@ mod hyperlink_automation_peer;
 mod rich_edit_box_automation_peer;
 mod rich_edit_box_text_presenter_automation_peer;
 mod rich_text_block_automation_peer;
+mod semantic_zoom_automation_peer;
 mod text_block_automation_peer;
 mod text_box_automation_peer;
 mod thumb_automation_peer;
@@ -171,6 +172,7 @@ pub use hyperlink_automation_peer::HyperlinkAutomationPeer;
 pub use rich_edit_box_automation_peer::RichEditBoxAutomationPeer;
 pub use rich_edit_box_text_presenter_automation_peer::RichEditBoxTextPresenterAutomationPeer;
 pub use rich_text_block_automation_peer::RichTextBlockAutomationPeer;
+pub use semantic_zoom_automation_peer::SemanticZoomAutomationPeer;
 pub use text_block_automation_peer::TextBlockAutomationPeer;
 pub use text_box_automation_peer::{
     TextBoxAutomationPeer, TextBoxAutomationPeerImpl, TextBoxAutomationPeerImplExt, TextBoxAutomationPeerVTable,

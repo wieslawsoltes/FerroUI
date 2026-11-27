@@ -106,6 +106,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
 | `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
+| `SemanticZoom` | WinUI's SemanticZoom: its template is ported from the SemanticZoom style of WinUI's generic.xaml into the WinUI theme and its derived themes | #1271 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
@@ -510,6 +511,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
 | ListView | 10 of 10 on ListView: grouping and sticky headers (#1258), `TextBlock.IsTextTrimmed`, `ItemsUpdatingScrollMode` and the check boxes of `Multiple` (#1424) | ported | `list_samples.rs` | `list_samples_tests.rs` |
+| SemanticZoom | 1 of 1: the groups of the gallery in a GridView and a ListView; no pinch (section 10.20) | ported | `semantic_zoom_samples.rs` | `semantic_zoom_samples_tests.rs` |
 | TreeView | 3 ported, 1 partial: no drag and drop of the items | partial | `tree_samples.rs` | `tree_samples_tests.rs` |
 | SplitView | 1 of 1 | ported | `split_view_samples.rs` | `split_view_samples_tests.rs`, `x_bind_tests.rs` |
 | ScrollViewer | 1 of 1 | ported | `scroll_samples.rs` | `scroll_samples_tests.rs` |
@@ -575,3 +577,38 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.20 SemanticZoom (#1271)
+
+`src/FerroUI.Controls/semantic_zoom/` (`SemanticZoom`, the trait `ISemanticZoomInformation`,
+`SemanticZoomLocation`, `SemanticZoomViewChangedEventArgs` and the zoom of a change on the
+compositor), `list_view/list_view_base_semantic_zoom.rs` (`ListViewBase` as a view) and
+`SemanticZoomAutomationPeer`, from `dxaml/xcp/dxaml/lib/SemanticZoom_Partial.cpp`,
+`ListViewBase_Partial_SemanticZoomInformation.cpp`, the semantic zoom parts of
+`ListViewBase_Partial_Interaction.cpp` and `SemanticZoomAutomationPeer_Partial.cpp`. The template
+is the implicit style of `generic.xaml` in the WinUI theme (`Controls/SemanticZoom.xaml`) and its
+macOS and Material copies; its resources (`SemanticZoomButton*`) are in the WinUI theme's
+`Resources/Generic.xaml`. A change keeps WinUI's order of calls: `InitializeViewChange` of both
+views, `StartViewChangeFrom` of the source and `StartViewChangeTo` of the destination,
+`ViewChangeStarted`, the active views, `MakeVisible` of the destination, `CompleteViewChangeFrom`
+and `CompleteViewChangeTo`, and when the zoom has ended `ViewChangeCompleted` and
+`CompleteViewChange`. A `ListView` or `GridView` of a grouped source is the jump list of WinUI:
+zooming out from the grid goes to the group of its first item (or of the tapped header, at the
+bottom of the list), zooming in from a group of the list (`View.CollectionGroups`) goes to the
+object of the group's header, whose header comes to the start of the grid. The tests are
+`semantic_zoom/semantic_zoom_tests.rs` (after `SemanticZoomIntegrationTests.cpp` where it needs no
+DirectManipulation), a theme test of the WinUI theme, the gallery page and a ControlCatalog page
+(`SemanticZoomPage`).
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The pinch of DirectManipulation changes the views at zoom thresholds (`NotifyStateChange`, `UpdateThresholds`, the correction transforms of the remainder). | Not ported: the views change through `IsZoomedInViewActive`, `ToggleActiveView`, the keyboard, Ctrl+wheel, the zoom-out button and the taps on items and headers. | FerroUI has no DirectManipulation; a pinch can follow with the gesture recognizers. |
+| A programmatic change animates the ScrollViewer of the template from 1 to 0.5 or back (`BringIntoViewport`) while the states `ZoomInView` and `ZoomOutView` cross-fade the presenters; `ViewChangeCompleted` follows the storyboards. | The template has no ScrollViewer; the control animates `Scale.X`, `Scale.Y` (about the centre) and `Opacity` of the composition visuals of the two presenters, 300 ms with the spline 0.1,0.9 0.2,1.0 for the scale and linear for the opacity, and raises `ViewChangeCompleted` at the end of the scoped batch. Without a composition visual or with animations off the change completes at once. | The motion runs on the compositor (GPU) and the views are not drawn again; the duration is the port's, as WinUI takes it from DirectManipulation and the platform's animation library. |
+| Ctrl+wheel changes the views when the ScrollViewer of the template allows zooming (the default style disables it). | The same with an optional `ScrollViewer` part of a custom template; the default template has none, so Ctrl+wheel does nothing, as in WinUI's default. | The same behaviour of the default style. |
+| Both presenters start collapsed and an alternate-view timer (150 ms) shows them; the inactive view is faded out, without hits, and skipped by focus (`SetSkipFocusSubtree`). | Both presenters are visible; the inactive one has the opacity 0, no hit testing and the tab navigation `None`. | FerroUI has no `SetSkipFocusSubtree`; the timer only delays the realization of the inactive view. |
+| The fades of the zoom-out button and the hidden state after 3 s (`ZoomOutButtonStates`). | `:zoom-out-button-visible` while shown, cleared 3 s after the last pointer move; the opacity changes without a fade. | |
+| `ISemanticZoomInformation` is a COM interface of any element; `ListViewBase` implements it with dependency properties (`IsActiveView`, `IsZoomedInView`, `SemanticZoomOwner`). | A Rust trait; a class registers its implementation (`register_semantic_zoom_information`, as `ListViewBase` from the class initialization of `SemanticZoom`); the list keeps the three values in a state it allocates when a semantic zoom takes it, and the owner as a weak reference. | No cycle between the semantic zoom and its views, and no memory for a list without a semantic zoom. |
+| `ListViewBase` blocks its scroll indicators and turns off its scrolling placeholders during a change, and searches the nested `GroupItem`s of the old grouping panels. | Left out. | FerroUI's lists have neither, and their panels hold the headers themselves. |
+| `GetLastFocusedIndex`: the index of the last focused item. | The focused item, else the item a tap on the zoomed-out view jumped from, else the selected item, else the first. | FerroUI's lists keep no last focused index. |
+| The automation control type `SemanticZoom`. | `Group`, with the toggle pattern and the children of the active view as in WinUI. | A control type of UI Automation alone; every platform's accessibility knows a group. |
+| The back button of a phone cancels the jump list (`OnBackButtonPressedImpl`). | Left out. | No back button integration. |

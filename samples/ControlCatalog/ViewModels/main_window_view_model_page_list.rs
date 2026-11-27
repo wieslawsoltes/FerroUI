@@ -87,6 +87,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: ListView of WinUI (docs/porting/winui-calculator-gaps.md, LV-1).
             // Not from upstream: GridView of WinUI (docs/porting/winui-calculator-gaps.md, LV-2).
             s.add("/Pages/GridViewPage.xaml", "GridView", Icons::GRID, "WinUI's grid of items in wrapping rows");
+            // Not from upstream: SemanticZoom of WinUI (docs/porting/winui-controls.md, section 10.20).
+            s.add("/Pages/SemanticZoomPage.xaml", "SemanticZoom", Icons::LAYERS, "Two views of grouped items: the items and their groups");
             s.add("/Pages/ListViewPage.xaml", "ListView", Icons::LIST, "WinUI's list with selection modes and item clicks");
             // Not from upstream: PagerControl of WinUI (docs/porting/winui-controls.md, G2).
             s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");

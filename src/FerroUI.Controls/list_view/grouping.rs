@@ -46,6 +46,16 @@ impl CollectionViewGroup {
     }
 }
 
+// The group as the data of a template (WinUI's `x:Bind Group` of an `ICollectionViewGroup`, the
+// items of the zoomed-out view of a semantic zoom); registered by `CollectionViewSource`.
+ferroui_base::ferro_markup_type!(class CollectionViewGroup {
+    this: Rc<CollectionViewGroup>,
+    handles: [CollectionViewGroup, Rc<CollectionViewGroup>, Option<Rc<CollectionViewGroup>>],
+    properties: [
+        Group: Option<BoxedValue> { get: |this: &Rc<CollectionViewGroup>| this.group() },
+    ],
+});
+
 /// A group is itself: two groups are equal when they are the same group.
 impl PartialEq for CollectionViewGroup {
     fn eq(&self, other: &Self) -> bool {
@@ -379,6 +389,14 @@ impl FerroObjectImpl for CollectionViewSource {
 }
 
 impl CollectionViewSource {
+    fn static_constructor() {
+        // The groups of `collection_groups` as the data of templates (their markup type), with the
+        // class rather than in the list of every application.
+        ferroui_base::metadata::MarkupType::register_all(&[
+            <CollectionViewGroup as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        ]);
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self { base: FerroObject::construct(), view: RefCell::new(None) }

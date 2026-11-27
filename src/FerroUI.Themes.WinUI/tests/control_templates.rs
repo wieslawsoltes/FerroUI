@@ -308,6 +308,7 @@ control_tests! {
     pivot_item => "PivotItem";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
+    semantic_zoom => "SemanticZoom";
     refresh_visualizer => "RefreshVisualizer";
     slider => "Slider";
     split_button => "SplitButton";
@@ -1345,4 +1346,42 @@ fn the_groups_and_the_check_boxes_of_a_grid_view() {
     window.update_layout();
     assert!(part(0, "MultiSelectSquare").is_none());
     window.close();
+}
+
+/// WinUI's SemanticZoom (`Controls/SemanticZoom.xaml`; docs/porting/winui-controls.md, section
+/// 10.20) gets its presenters and its zoom-out button from the theme, shows the zoomed-in view,
+/// and changes to the zoomed-out view.
+#[test]
+fn the_semantic_zoom_gets_its_parts_from_the_theme_and_changes_views() {
+    use ferroui_controls::{ListView, SemanticZoom};
+
+    let _app = start_themed_application();
+    let zoom = SemanticZoom::new();
+    let (zoomed_in, zoomed_out) = (ListView::new(), ListView::new());
+    zoom.set_zoomed_in_view(Some(zoomed_in.clone().upcast()));
+    zoom.set_zoomed_out_view(Some(zoomed_out.clone().upcast()));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&zoom)));
+    window.show();
+    window.update_layout();
+    // WinUI's default style turns the zoom-out button off.
+    assert!(!zoom.is_zoom_out_button_enabled());
+    let part = |name: &str| {
+        zoom.get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .and_then(|element| element.cast::<Control>())
+            .unwrap_or_else(|| panic!("the part {name} of the semantic zoom"))
+    };
+    let (in_part, out_part, button) = (part("ZoomedInPresenter"), part("ZoomedOutPresenter"), part("ZoomOutButton"));
+    assert_eq!(in_part.opacity(), 1.0);
+    assert_eq!(out_part.opacity(), 0.0);
+    assert!(!out_part.is_hit_test_visible());
+    assert_eq!(button.opacity(), 0.0, "the hidden zoom-out button");
+    let in_visual: Ref<ferroui_base::Visual> = in_part.clone().upcast();
+    assert!(zoomed_in.get_visual_ancestors().any(|ancestor| ancestor == in_visual));
+    zoom.set_is_zoomed_in_view_active(false);
+    window.update_layout();
+    assert!(zoom.pseudo_classes().contains(":zoomed-out"));
+    assert!(out_part.is_hit_test_visible() && !in_part.is_hit_test_visible());
 }

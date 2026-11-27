@@ -535,8 +535,8 @@ ports a control updates its state by porting it, not by editing the table.
 | `ItemsControl.xaml` | `{ItemsControl}` | No WinUI style in the merged theme (ItemsControl has a built-in template): an ItemsPresenter of the ItemsPanel. | B1 | ported |
 | `Label.xaml` | `{Label}` | No WinUI control: the implicit style of ContentControl ({ContentControl}, generic.xaml), which Controls/Label.xaml ports. | B1 | ported |
 | `ListBox.xaml` | `{ListBox}` | ListBox: DefaultListBoxStyle (ListBox_themeresources.xaml). | B3 | ported |
-| `GridView.xaml` | `{GridView}`, `{GridViewItem}`, `DefaultGridViewItemStyle` | GridView: {GridView} (generic.xaml), {GridViewItem} and DefaultGridViewItemStyle (GridViewItem_themeresources.xaml; the chrome of ListViewItemPresenter drawn with elements). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-2); the Fluent theme has no document for it. | B3 | ported |
-| `ListView.xaml` | `{ListView}`, `{ListViewItem}` | ListView: {ListView} (generic.xaml) and {ListViewItem} (ListViewItem_themeresources.xaml, based on DefaultListViewItemStyle of ListBoxItem.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document for it. | B3 | ported |
+| `GridView.xaml` | `{GridView}`, `{GridViewItem}`, `DefaultGridViewItemStyle`, `{GridViewHeaderItem}` | GridView: {GridView} (generic.xaml), {GridViewItem} and DefaultGridViewItemStyle (GridViewItem_themeresources.xaml; the chrome of ListViewItemPresenter drawn with elements). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-2); the Fluent theme has no document for it. | B3 | ported |
+| `ListView.xaml` | `{ListView}`, `{ListViewItem}`, `{ListViewHeaderItem}` | ListView: {ListView} (generic.xaml) and {ListViewItem} (ListViewItem_themeresources.xaml, based on DefaultListViewItemStyle of ListBoxItem.xaml). A WinUI control in ferroui-controls (docs/porting/winui-calculator-gaps.md, LV-1); the Fluent theme has no document for it. | B3 | ported |
 | `ListBoxItem.xaml` | `{ListBoxItem}` | ListBoxItem: DefaultListBoxItemStyle (ListBox_themeresources.xaml). | B3 | ported |
 | `ManagedFileChooser.xaml` | `{ManagedFileChooser}`, `{ManagedFileChooserOverwritePrompt}` | No WinUI control: built from the ListViewItem (ListViewItem_themeresources.xaml), TextBox, Button and ContentDialog (DefaultContentDialogStyle) styles. | B6 | ported |
 | `Menu.xaml` | `{Menu}` | MenuBar: DefaultMenuBarStyle (MenuBar.xaml); MenuBarItem (MenuBarItem.xaml). | B3 | ported |
@@ -574,6 +574,7 @@ ports a control updates its state by porting it, not by editing the table.
 | `ScrollBar.xaml` | `{ScrollBar}` | ScrollBar: DefaultScrollBarStyle (ScrollBar_themeresources.xaml); {Thumb} (generic.xaml). | F | ported |
 | `ScrollViewer.xaml` | `{ScrollViewer}` | ScrollViewer: DefaultScrollViewerStyle (ScrollViewer_themeresources.xaml). | F | ported |
 | `SelectableTextBlock.xaml` | `{SelectableTextBlock}` | No WinUI control (TextBlock.IsTextSelectionEnabled): the selection colours of the text selection manager of WinUI (SystemControlHighlightAccentBrush, SystemColorHighlightTextColor). | B1 | ported |
+| `SemanticZoom.xaml` | `{SemanticZoom}` | SemanticZoom: {SemanticZoom} (generic.xaml; the ScrollViewer of DirectManipulation left out). A WinUI control in ferroui-controls (docs/porting/winui-controls.md, section 10.20); the Fluent theme has no document for it. | B6 | ported |
 | `Separator.xaml` | `{Separator}` | MenuFlyoutSeparator: {MenuFlyoutSeparator} (MenuFlyout_themeresources.xaml); AppBarSeparator for a separator in a command bar. | B1 | ported |
 | `Slider.xaml` | `{Slider}` | Slider: DefaultSliderStyle (Slider_themeresources.xaml). | B2 | ported |
 | `SplitButton.xaml` | `{SplitButton}` | SplitButton: SplitButtonStyle (SplitButton.xaml), SplitButtonCommandBarStyle (SplitButton_themeresources.xaml); ToggleSplitButton. | B2 | ported |
@@ -679,6 +680,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `ScrollViewer` | `ScrollViewer` | F |  |
 | `SelectorBar` | `TabStrip` | B5 |  |
 | `SelectorBarItem` | `TabStripItem` | B5 |  |
+| `SemanticZoom` | `SemanticZoom` | B6 |  |
 | `Shape` | no FerroUI control | B3 | ColorPickerBorderStyle (waived with ColorPicker) |
 | `Slider` | `Slider` | B2 |  |
 | `SplitButton` | `SplitButton` | B2 |  |
@@ -702,7 +704,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridViewHeaderItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `GridViewHeaderItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListViewHeaderItem`, `MapControl`, `PickerFlyoutPresenter`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

@@ -1354,6 +1354,30 @@
       "notes": "The source example uses native ScrollViewer with the source's cliff.jpg and the code behind of ScrollViewerPage.xaml.cs in Rust (scroll_samples.rs): the constructor's ZoomToFactor(4) (once the scroll viewer is first loaded, when it has its presenter), ZoomModeComboBox_SelectionChanged (the zoom mode, the slider enabled only with zooming, the factor 2 otherwise), ZoomSlider_ValueChanged (ChangeView), ScrollViewerControl_ViewChanged (the slider follows a change of ZoomFactor) and the four scroll mode and bar visibility handlers; the slider keeps the source's OneWay x:Bind of MinZoomFactor and MaxZoomFactor (its Header is composed). FerroUI's ScrollViewer has no HorizontalScrollMode or VerticalScrollMode: a Disabled scroll mode is the bar's Disabled visibility, which turns the scrolling of the axis off, and Enabled and Auto keep the visibility of the bar's box. IsVerticalScrollChainingEnabled is IsScrollChainingEnabled.",
       "examples": []
     },
+    "SemanticZoom": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SemanticZoom.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/semantic_zoom_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/semantic_zoom_samples_tests.rs",
+          "name": "semantic_zoom_shows_the_controls_grouped_and_the_list_of_the_groups"
+        },
+        {
+          "path": "samples/WinUIGallery/semantic_zoom_samples_tests.rs",
+          "name": "semantic_zoom_templates_show_the_titles_of_the_controls_and_the_groups"
+        }
+      ],
+      "notes": "The source example uses native SemanticZoom with the code behind of SemanticZoomPage.xaml.cs in Rust (semantic_zoom_samples.rs): the zoomed-in GridView shows the View of the page's cvsGroups, a CollectionViewSource with IsSourceGrouped and ItemsPath Items, under the headers of its GroupStyle.HeaderTemplate (#1424), and the zoomed-out ListView its View.CollectionGroups; a tap on a group of the list or on a header of the grid changes the view, and List_GotFocus brings the semantic zoom into view. The groups of ControlInfoDataSource are the categories of the gallery's catalog with their controls; x:Bind in the templates is {Binding} over markup types (ControlInfoDataGroup, ControlInfoDataItem, CollectionViewGroup). The pinch of DirectManipulation is not ported (Ctrl+Plus and Ctrl+Minus, the taps and the API change the views, zooming the two views on the compositor; docs/porting/winui-controls.md, section 10.20).",
+      "examples": []
+    },
     "Shape": {
       "status": "ported",
       "implementation": [

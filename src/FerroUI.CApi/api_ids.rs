@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 3635999352226567406;
+pub(crate) const API_FINGERPRINT: i64 = -8497764506148868314;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 512] = [
+pub(crate) static TYPE_NAMES: [&str; 514] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -383,6 +383,8 @@ pub(crate) static TYPE_NAMES: [&str; 512] = [
     "SelectingItemsControlAutomationPeer",
     "SelectingMultiPage",
     "SelectionIndicator",
+    "SemanticZoom",
+    "SemanticZoomAutomationPeer",
     "Separator",
     "Shadow",
     "Shape",
@@ -524,7 +526,7 @@ pub(crate) static TYPE_NAMES: [&str; 512] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1046] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1051] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -620,6 +622,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1046] = [
     "CacheLength",
     "CacheMode",
     "CacheSize",
+    "CanChangeViews",
     "CanCopy",
     "CanCut",
     "CanDragItems",
@@ -986,6 +989,8 @@ pub(crate) static PROPERTY_NAMES: [&str; 1046] = [
     "IsVisited",
     "IsWeekNumberVisible",
     "IsWrapEnabled",
+    "IsZoomOutButtonEnabled",
+    "IsZoomedInViewActive",
     "ItalicState",
     "ItemContainerTheme",
     "ItemCount",
@@ -1571,6 +1576,8 @@ pub(crate) static PROPERTY_NAMES: [&str; 1046] = [
     "ZIndex",
     "ZoomFactor",
     "ZoomMode",
+    "ZoomedInView",
+    "ZoomedOutView",
 ];
 
 /// The routed events, by event ID.

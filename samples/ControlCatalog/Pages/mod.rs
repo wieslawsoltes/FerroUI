@@ -57,6 +57,7 @@ mod info_badge_page;
 mod swipe_control_page;
 mod info_bar_page;
 mod grid_view_page;
+mod semantic_zoom_page;
 mod list_view_page;
 mod pivot_page;
 mod navigation_view_page;
@@ -221,6 +222,7 @@ pub use info_badge_page::InfoBadgePage;
 pub use swipe_control_page::SwipeControlPage;
 pub use info_bar_page::InfoBarPage;
 pub use grid_view_page::GridViewPage;
+pub use semantic_zoom_page::SemanticZoomPage;
 pub use list_view_page::ListViewPage;
 pub use pivot_page::PivotPage;
 pub use progress_ring_page::ProgressRingPage;
@@ -337,6 +339,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     InfoBarPage::TYPE,
     ListViewPage::TYPE,
     GridViewPage::TYPE,
+    SemanticZoomPage::TYPE,
     PivotPage::TYPE,
     ProgressRingPage::TYPE,
     NavigationViewPage::TYPE,
@@ -450,6 +453,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &InfoBarPage::XAML_CLASS,
     &ListViewPage::XAML_CLASS,
     &GridViewPage::XAML_CLASS,
+    &SemanticZoomPage::XAML_CLASS,
     &PivotPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,

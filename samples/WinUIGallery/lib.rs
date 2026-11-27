@@ -31,6 +31,7 @@ mod ink_samples;
 mod input_samples;
 mod layout_samples;
 mod list_samples;
+mod semantic_zoom_samples;
 mod materials_samples;
 mod menu_samples;
 mod media_samples;
@@ -129,6 +130,9 @@ mod date_samples_tests;
 
 #[cfg(test)]
 mod list_samples_tests;
+
+#[cfg(test)]
+mod semantic_zoom_samples_tests;
 
 #[cfg(test)]
 mod tree_samples_tests;

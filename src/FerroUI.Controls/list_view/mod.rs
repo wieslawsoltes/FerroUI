@@ -7,6 +7,7 @@ mod items_stack_panel;
 mod items_wrap_grid;
 mod list_view;
 mod list_view_base;
+mod list_view_base_semantic_zoom;
 
 #[cfg(test)]
 mod grid_view_grouping_tests;
@@ -15,7 +16,7 @@ mod grouping_tests;
 #[cfg(test)]
 mod items_updating_scroll_mode_tests;
 #[cfg(test)]
-mod list_view_tests;
+pub(crate) mod list_view_tests;
 
 pub use grid_view::{GridView, GridViewHeaderItem, GridViewItem, GridViewItemTemplateSettings};
 pub use grouping::{CollectionViewGroup, CollectionViewSource, GroupStyle, GroupedItemsView};

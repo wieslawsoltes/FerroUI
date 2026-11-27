@@ -195,6 +195,15 @@ with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
 directly (`controls/dev/NavigationView` with the English texts of its
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
 
+The files under `semantic_zoom/` (WinUI's `SemanticZoom`, `ISemanticZoomInformation`,
+`SemanticZoomLocation` and `SemanticZoomViewChangedEventArgs`),
+`list_view/list_view_base_semantic_zoom.rs` (`ListViewBase` as a view of a semantic zoom) and
+`automation/peers/semantic_zoom_automation_peer.rs` are ported from the WinUI project directly (`dxaml/xcp/dxaml/lib/SemanticZoom_Partial.cpp`,
+`SemanticZoom_Partial.h`, `SemanticZoomLocation_Partial.h`,
+`ListViewBase_Partial_SemanticZoomInformation.cpp`, the semantic zoom parts of
+`ListViewBase_Partial_Interaction.cpp` and `SemanticZoomAutomationPeer_Partial.cpp`, at the same
+commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

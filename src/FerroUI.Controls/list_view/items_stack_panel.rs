@@ -705,6 +705,13 @@ impl ItemsStackPanel {
         self.set_value(Self::are_sticky_group_headers_enabled_property(), value)
     }
 
+    /// The realized header of the group `group`, if the panel shows the groups of a grouped source.
+    pub(crate) fn group_header(&self, group: usize) -> Option<Ref<ListViewHeaderItem>> {
+        let groups = self.groups.borrow();
+        let header = groups.as_ref()?.headers.borrow().get(&group).cloned();
+        header
+    }
+
     /// The first realized container, including the cache (WinUI's `FirstCacheIndex`).
     pub fn first_cache_index(&self) -> i32 {
         self.first_realized_index()

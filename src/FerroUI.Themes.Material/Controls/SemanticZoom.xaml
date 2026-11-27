@@ -1,0 +1,75 @@
+<!-- Material 3 Expressive theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/SemanticZoom.xaml),
+     as docs/porting/material-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of SemanticZoom; its resources are in
+    Resources/Generic.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's SemanticZoom, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-controls.md, section 10.20); the Fluent theme has no document for it.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The ScrollViewer of DirectManipulation (its scroll and zoom modes, rails and the zoom factors
+    0.5 to 1) is left out with the pinch it serves; the Grid it holds, with the padding, the
+    background and the border of the control, is a Border around the two presenters. The
+    CompositeTransforms of the presenters are left out: the control zooms the presenters'
+    composition visuals (section 10.20).
+  - SemanticZoomStates: ZoomOutView is the :zoomed-out pseudo-class. Its storyboards
+    (FadeInThemeAnimation, FadeOutThemeAnimation of the presenters) are the cross-fade the
+    control runs on the compositor; at rest the control sets the opacity and the hit testing of
+    the presenters itself, so the states set nothing here.
+  - ZoomOutButtonStates: ZoomOutButtonVisible is the :zoom-out-button-visible pseudo-class; the
+    hidden state (opacity 0, IsHitTestVisible False) is the button's own setters. The delay of the
+    transition to the hidden state (BeginTime 0:0:3) is the control's; the fades are not ported.
+  - UseSystemFocusVisuals is FerroUI's focus visual of the button; IsTabStop False is Focusable
+    False.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type SemanticZoom}" TargetType="SemanticZoom">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="IsZoomOutButtonEnabled" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <Border Padding="{TemplateBinding Padding}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}">
+            <Grid>
+              <ContentPresenter x:Name="ZoomedInPresenter"
+                                Content="{TemplateBinding ZoomedInView}" />
+              <ContentPresenter x:Name="ZoomedOutPresenter"
+                                Content="{TemplateBinding ZoomedOutView}"
+                                IsHitTestVisible="False"
+                                Opacity="0" />
+            </Grid>
+          </Border>
+          <Button x:Name="ZoomOutButton"
+                  Focusable="False"
+                  Margin="0,0,19,19"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                  FontSize="4"
+                  Content="&#xE0B8;"
+                  Width="12"
+                  Height="12"
+                  Padding="0"
+                  Opacity="0"
+                  IsHitTestVisible="False" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:zoom-out-button-visible /template/ Button#ZoomOutButton">
+      <Setter Property="Opacity" Value="1" />
+      <Setter Property="IsHitTestVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

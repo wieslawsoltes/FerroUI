@@ -90,6 +90,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Expander.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/PipsPager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RefreshContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SemanticZoom.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RefreshVisualizer.xaml" />
         <!-- B3: flyouts, menus, lists and selection. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/FlyoutPresenter.xaml" />

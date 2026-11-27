@@ -299,6 +299,7 @@ control_tests! {
     numeric_up_down => "NumericUpDown";
     pips_pager => "PipsPager";
     refresh_container => "RefreshContainer";
+    semantic_zoom => "SemanticZoom";
     refresh_visualizer => "RefreshVisualizer";
     slider => "Slider";
     split_button => "SplitButton";
