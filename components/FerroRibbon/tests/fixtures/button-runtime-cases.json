@@ -1,0 +1,378 @@
+[
+  {
+    "name": "denial-and-request-recovery",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "notify",
+        "value": false
+      },
+      {
+        "op": "notify",
+        "value": true
+      },
+      {
+        "op": "local",
+        "value": false
+      },
+      {
+        "op": "notify",
+        "value": false
+      },
+      {
+        "op": "notify",
+        "value": true
+      },
+      {
+        "op": "local",
+        "value": true
+      },
+      {
+        "op": "command",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "clear-without-local",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "clear"
+      },
+      {
+        "op": "notify",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "clear-local",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "local",
+        "value": true
+      },
+      {
+        "op": "local",
+        "value": true
+      },
+      {
+        "op": "clear"
+      },
+      {
+        "op": "notify",
+        "value": false
+      },
+      {
+        "op": "notify",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "styles",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "style",
+        "value": "empty"
+      },
+      {
+        "op": "style",
+        "value": "empty"
+      },
+      {
+        "op": "style",
+        "value": true
+      },
+      {
+        "op": "style",
+        "value": true
+      },
+      {
+        "op": "style",
+        "value": null
+      },
+      {
+        "op": "notify",
+        "value": false
+      },
+      {
+        "op": "notify",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "style-with-local",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "local",
+        "value": true
+      },
+      {
+        "op": "style",
+        "value": false
+      },
+      {
+        "op": "style",
+        "value": true
+      },
+      {
+        "op": "style",
+        "value": null
+      },
+      {
+        "op": "clear"
+      },
+      {
+        "op": "notify",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "ancestor-with-denied-command",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "parent",
+        "value": false
+      },
+      {
+        "op": "parent",
+        "value": true
+      },
+      {
+        "op": "parent",
+        "value": false
+      },
+      {
+        "op": "parent_remove"
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "notify",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "ancestor-with-local",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "local",
+        "value": true
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "parent",
+        "value": false
+      },
+      {
+        "op": "parent_remove"
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "parent",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "ancestor-with-allowed-command",
+    "operations": [
+      {
+        "op": "command",
+        "value": "allow"
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "parent",
+        "value": false
+      },
+      {
+        "op": "parent_remove"
+      },
+      {
+        "op": "parent_add"
+      },
+      {
+        "op": "parent",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "enhanced-entry-leave",
+    "operations": [
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "enter",
+        "value": true
+      },
+      {
+        "op": "leave",
+        "value": true
+      },
+      {
+        "op": "notify",
+        "value": true
+      },
+      {
+        "op": "enter",
+        "value": true
+      },
+      {
+        "op": "leave",
+        "value": true
+      },
+      {
+        "op": "command",
+        "value": "deny"
+      },
+      {
+        "op": "enter",
+        "value": true
+      },
+      {
+        "op": "leave",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "alternating-parameters",
+    "operations": [
+      {
+        "op": "command",
+        "value": "alternating"
+      },
+      {
+        "op": "parameter",
+        "value": "p0"
+      },
+      {
+        "op": "parameter",
+        "value": "p1"
+      },
+      {
+        "op": "parameter",
+        "value": null
+      },
+      {
+        "op": "parameter",
+        "value": "p3"
+      },
+      {
+        "op": "command",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "query-error-boundaries",
+    "operations": [
+      {
+        "op": "command",
+        "value": "allow"
+      },
+      {
+        "op": "throw",
+        "value": true
+      },
+      {
+        "op": "parameter",
+        "value": "p0"
+      },
+      {
+        "op": "notify",
+        "value": true
+      },
+      {
+        "op": "throw",
+        "value": false
+      },
+      {
+        "op": "parameter",
+        "value": "ok"
+      },
+      {
+        "op": "command",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "shared-command-subscriptions",
+    "operations": [
+      {
+        "op": "command",
+        "value": "allow"
+      },
+      {
+        "op": "peer_add"
+      },
+      {
+        "op": "notify",
+        "value": false
+      },
+      {
+        "op": "peer_remove"
+      },
+      {
+        "op": "notify",
+        "value": true
+      },
+      {
+        "op": "peer_add"
+      },
+      {
+        "op": "command",
+        "value": null
+      },
+      {
+        "op": "peer_remove"
+      }
+    ]
+  }
+]

@@ -1,0 +1,22 @@
+[package]
+name = "ferroribbon-browser"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+
+[[bin]]
+name = "ferroribbon-browser"
+path = "program.rs"
+
+[target.'cfg(target_os = "emscripten")'.dependencies]
+ferroribbon-sample = { path = "../FerroRibbon.Sample", default-features = false }
+ferroui-base = { workspace = true }
+ferroui-browser = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-fonts-inter = { workspace = true }
+wasm-bindgen = "=0.2.129"
+
+[lints.rust]
+unsafe_code = "forbid"

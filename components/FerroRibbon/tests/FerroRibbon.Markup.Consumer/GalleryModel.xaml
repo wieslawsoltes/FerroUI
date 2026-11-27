@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Gallery.xaml" /></ResourceDictionary.MergedDictionaries>
+<RibbonGalleryModel x:Key="Model" Id="styles" Label="Styles" MinColumns="2" MaxColumns="5" IsFilterEnabled="True" Rows="2">
+ <RibbonGalleryModel.Items><RibbonGalleryItemModel Id="normal" Label="Normal" Value="normal-style" Category="Paragraph" Content="AaBb" /><RibbonGalleryItemModel Id="heading" Label="Heading" Value="heading-style" Category="Headings" /></RibbonGalleryModel.Items>
+ <RibbonGalleryModel.MenuItems><RibbonMenuItemModel Id="footer" Label="Apply styles" /></RibbonGalleryModel.MenuItems>
+</RibbonGalleryModel>
+</ResourceDictionary></StackPanel.Resources>
+<TextBlock x:DataType="RibbonGalleryModel" DataContext="{StaticResource Model}" Text="{Binding Items.Count}" />
+<TextBlock x:DataType="RibbonGalleryModel" DataContext="{StaticResource Model}" Text="{Binding Rows}" />
+</StackPanel>

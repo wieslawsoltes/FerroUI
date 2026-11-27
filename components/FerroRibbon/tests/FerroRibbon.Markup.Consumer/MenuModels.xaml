@@ -1,0 +1,18 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:CompileBindings="True">
+ <StackPanel.Resources><ResourceDictionary>
+  <RibbonMenuHeaderModel x:Key="Header"><x:Arguments><x:String>Clipboard</x:String></x:Arguments></RibbonMenuHeaderModel>
+  <RibbonDropDownButtonModel x:Key="Drop" Id="paste" Label="Paste"><RibbonDropDownButtonModel.MenuItems>
+   <StaticResource ResourceKey="Header" />
+   <RibbonMenuItemModel Id="plain" Label="Plain" Shortcut="Ctrl+Shift+V" KeyTip="P" />
+   <RibbonMenuSeparatorModel />
+   <RibbonMenuItemModel Id="options" Label="Options"><RibbonMenuItemModel.Items><RibbonMenuItemModel Id="keep" Label="Keep format" IsCheckable="True" IsChecked="True" /></RibbonMenuItemModel.Items></RibbonMenuItemModel>
+  </RibbonDropDownButtonModel.MenuItems></RibbonDropDownButtonModel>
+  <RibbonSplitButtonModel x:Key="Split" Id="choice" Label="Choice" IsCheckable="True" FollowLastChoice="True"><RibbonSplitButtonModel.MenuItems><RibbonMenuItemModel Id="last" Label="Last choice" /></RibbonSplitButtonModel.MenuItems></RibbonSplitButtonModel>
+  <RibbonCheckBoxModel x:Key="Check" Id="state" Label="State" IsThreeState="True" IsChecked="{x:Null}" />
+  <RibbonModel x:Key="Graph"><RibbonModel.Tabs><RibbonTabModel Id="home" Label="Home"><RibbonTabModel.Groups><RibbonGroupModel Id="clipboard" Label="Clipboard"><RibbonGroupModel.Items><StaticResource ResourceKey="Drop" /><StaticResource ResourceKey="Split" /><StaticResource ResourceKey="Check" /></RibbonGroupModel.Items></RibbonGroupModel></RibbonTabModel.Groups></RibbonTabModel></RibbonModel.Tabs></RibbonModel>
+ </ResourceDictionary></StackPanel.Resources>
+ <Ribbon Model="{StaticResource Graph}" IsDisplayOptionsButtonVisible="False" />
+ <TextBlock x:DataType="RibbonDropDownButtonModel" DataContext="{StaticResource Drop}" Text="{Binding MenuItems.Count}" />
+ <TextBlock x:DataType="RibbonMenuHeaderModel" DataContext="{StaticResource Header}" Text="{Binding Label}" />
+ <CheckBox x:DataType="RibbonCheckBoxModel" DataContext="{StaticResource Check}" IsThreeState="True" IsChecked="{Binding IsChecked, Mode=TwoWay}" />
+</StackPanel>

@@ -1,0 +1,164 @@
+<!-- Adapted from pinned RibbonSpace ToolsPage.xaml. -->
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.ToolsPage" x:DataType="vm:ToolsViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}" x:Name="ToolsView">
+  <Grid Background="{DynamicResource RibbonWindowBackgroundBrush}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <RibbonMenuBar x:Name="MenuBar">
+      <RibbonMenuBarItem Header="File">
+        <MenuFlyoutItem Text="New..." KeyboardAcceleratorTextOverride="Ctrl+N" />
+        <MenuFlyoutItem Text="Open..." KeyboardAcceleratorTextOverride="Ctrl+O" />
+        <MenuFlyoutSubItem Text="Open Recent">
+          <MenuFlyoutItem Text="poster.psd" />
+          <MenuFlyoutItem Text="logo.svg" />
+        </MenuFlyoutSubItem>
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S" />
+        <MenuFlyoutItem Text="Export As..." KeyboardAcceleratorTextOverride="Alt+Shift+Ctrl+W" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="Edit">
+        <MenuFlyoutItem Text="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z" />
+        <MenuFlyoutItem Text="Redo" KeyboardAcceleratorTextOverride="Shift+Ctrl+Z" />
+        <MenuFlyoutSeparator />
+        <MenuFlyoutItem Text="Cut" KeyboardAcceleratorTextOverride="Ctrl+X" />
+        <MenuFlyoutItem Text="Copy" KeyboardAcceleratorTextOverride="Ctrl+C" />
+        <MenuFlyoutItem Text="Paste" KeyboardAcceleratorTextOverride="Ctrl+V" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="Image">
+        <MenuFlyoutItem Text="Image Size..." />
+        <MenuFlyoutItem Text="Canvas Size..." />
+        <ToggleMenuFlyoutItem Text="Pixel Aspect Ratio Correction" IsChecked="True" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="Layer">
+        <MenuFlyoutItem Text="New Layer" KeyboardAcceleratorTextOverride="Shift+Ctrl+N" />
+        <MenuFlyoutItem Text="Duplicate Layer" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="View">
+        <ToggleMenuFlyoutItem Text="Rulers" IsChecked="True" KeyboardAcceleratorTextOverride="Ctrl+R" />
+        <ToggleMenuFlyoutItem Text="Grid" />
+        <ToggleMenuFlyoutItem Text="Snap" IsChecked="True" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="Window">
+        <ToggleMenuFlyoutItem Text="Layers" IsChecked="True" />
+        <ToggleMenuFlyoutItem Text="Properties" IsChecked="True" />
+      </RibbonMenuBarItem>
+      <RibbonMenuBarItem Header="Help">
+        <MenuFlyoutItem Text="Keyboard Shortcuts" />
+        <MenuFlyoutItem Text="About" />
+      </RibbonMenuBarItem>
+    </RibbonMenuBar>
+    <RibbonContextualToolBar x:Name="Options" Grid.Row="1" ActiveContext="{Binding ActiveContext, Mode=TwoWay}" Margin="6,4">
+      <RibbonToolBar RibbonContextualToolBar.Context="move" CornerRadius="6">
+        <RibbonLabel Label="Move" Icon="" />
+        <RibbonSeparator />
+        <RibbonCheckBox Label="Auto-Select" IsChecked="True" />
+        <RibbonCheckBox Label="Show Transform Controls" />
+        <RibbonSeparator />
+        <RibbonButton Label="Align Left" Icon="" />
+        <RibbonButton Label="Align Center" Icon="" />
+        <RibbonButton Label="Align Right" Icon="" />
+      </RibbonToolBar>
+      <RibbonToolBar RibbonContextualToolBar.Context="brush" CornerRadius="6">
+        <RibbonLabel Label="Brush" Icon="" />
+        <RibbonSeparator />
+        <RibbonSpinner Label="Size:" Value="24" Minimum="1" Maximum="5000" Unit="px" InputWidth="70" />
+        <RibbonSpinner Label="Hardness:" Value="80" Minimum="0" Maximum="100" Unit="%" InputWidth="62" />
+        <RibbonComboBox Label="Mode" ShowLabel="True" Text="Normal" InputWidth="110">
+          <x:String>Normal</x:String>
+          <x:String>Multiply</x:String>
+          <x:String>Screen</x:String>
+          <x:String>Overlay</x:String>
+        </RibbonComboBox>
+        <RibbonSlider Label="Opacity" Value="100" Maximum="100" InputWidth="100" />
+        <RibbonToggleButton Label="Airbrush" Icon="" />
+        <RibbonToggleButton Label="Pressure for size" Icon="" />
+        <RibbonColorPicker Label="Brush color" Icon="" SelectedColor="#1473E6" />
+      </RibbonToolBar>
+      <RibbonToolBar RibbonContextualToolBar.Context="text" CornerRadius="6">
+        <RibbonLabel Label="Type" Icon="" />
+        <RibbonSeparator />
+        <RibbonFontComboBox Text="Inter" />
+        <RibbonFontSizeComboBox Text="24" />
+        <RibbonButtonGroup>
+          <RibbonToggleButton Label="Bold" Icon="" />
+          <RibbonToggleButton Label="Italic" Icon="" />
+        </RibbonButtonGroup>
+        <RibbonSegmentedControl Label="Alignment">
+          <RibbonSegment Icon="" Label="Left" />
+          <RibbonSegment Icon="" Label="Center" />
+          <RibbonSegment Icon="" Label="Right" />
+        </RibbonSegmentedControl>
+      </RibbonToolBar>
+    </RibbonContextualToolBar>
+    <Border Padding="6,0,6,6" Grid.Row="2">
+      <Grid ColumnSpacing="6">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <RibbonToolBar x:Name="Tools" Orientation="Vertical" Columns="2" VerticalAlignment="Top">
+          <RibbonToggleButton Label="Move (V)" Icon="" GroupName="tool" Tag="move" Shortcut="V" />
+          <RibbonToggleButton Label="Select (M)" Icon="" GroupName="tool" Tag="move" />
+          <RibbonToggleButton Label="Brush (B)" Icon="" GroupName="tool" Tag="brush" IsChecked="True" />
+          <RibbonToggleButton Label="Pen (P)" Icon="" GroupName="tool" Tag="brush" />
+          <RibbonToggleButton Label="Eraser (E)" Icon="" GroupName="tool" Tag="brush" />
+          <RibbonToggleButton Label="Type (T)" Icon="" GroupName="tool" Tag="text" />
+          <RibbonSeparator />
+          <RibbonSplitButton Label="Rectangle" Icon="" Size="Small" FollowLastChoice="True">
+            <MenuFlyout>
+              <MenuFlyoutItem Text="Rectangle" Tag="" />
+              <MenuFlyoutItem Text="Ellipse" Tag="" />
+              <MenuFlyoutItem Text="Polygon" Tag="" />
+              <MenuFlyoutItem Text="Line" Tag="" />
+            </MenuFlyout>
+          </RibbonSplitButton>
+          <RibbonButton Label="Crop" Icon="" />
+          <RibbonButton Label="Zoom" Icon="" />
+          <RibbonButton Label="Hand" Icon="" />
+          <RibbonSeparator />
+          <RibbonColorPicker Label="Foreground" Icon="" SelectedColor="#1473E6" />
+          <RibbonColorPicker Label="Background" Icon="" SelectedColor="White" />
+        </RibbonToolBar>
+        <Border Grid.Column="1" CornerRadius="6" Background="#FF3A3A3A" BorderThickness="1" BorderBrush="{DynamicResource RibbonCommandBarBorderBrush}">
+          <Grid>
+            <Border Width="480" Height="320" Background="White" CornerRadius="2">
+              <TextBlock x:Name="CanvasText" Text="{Binding CanvasText, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#555555" />
+            </Border>
+            <RibbonToolBar VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,16" MaxWidth="360">
+              <RibbonButton Label="Undo" Icon="" />
+              <RibbonButton Label="Redo" Icon="" />
+              <RibbonSeparator />
+              <RibbonButton Label="Zoom In" Icon="" />
+              <RibbonButton Label="Zoom Out" Icon="" />
+              <RibbonButton Label="Fit" Icon="" />
+              <RibbonSeparator />
+              <RibbonToggleButton Label="Grid" Icon="" />
+              <RibbonToggleButton Label="Snap" Icon="" IsChecked="True" />
+              <RibbonToggleButton Label="Rulers" Icon="" />
+              <RibbonButton Label="Rotate" Icon="" />
+              <RibbonButton Label="Flip" Icon="" />
+              <RibbonButton Label="Export" Icon="" />
+            </RibbonToolBar>
+          </Grid>
+        </Border>
+        <RibbonToolBar Grid.Column="2" Orientation="Vertical" VerticalAlignment="Top">
+          <RibbonToggleButton Label="Layers" Icon="" GroupName="panel" IsChecked="True" />
+          <RibbonToggleButton Label="Properties" Icon="" GroupName="panel" />
+          <RibbonToggleButton Label="History" Icon="" GroupName="panel" />
+          <RibbonToggleButton Label="Libraries" Icon="" GroupName="panel" />
+        </RibbonToolBar>
+      </Grid>
+    </Border>
+    <RibbonStatusBar Grid.Row="3">
+      <TextBlock x:Name="ToolStatus" Text="{Binding ToolStatus, Mode=TwoWay}" VerticalAlignment="Center" DataContext="{Binding #ToolsView.((vm:ToolsViewModel)DataContext)}" />
+      <TextBlock Text="1920 × 1080 px · RGB/8" VerticalAlignment="Center" />
+      <RibbonStatusBar.EndItems>
+        <RibbonZoomControl Value="66" />
+      </RibbonStatusBar.EndItems>
+    </RibbonStatusBar>
+  </Grid>
+</UserControl>

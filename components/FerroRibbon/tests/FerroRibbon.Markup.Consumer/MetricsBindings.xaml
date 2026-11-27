@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="using:FerroRibbon.Consumer"
+ x:CompileBindings="True">
+ <local:MetricsConsumer x:Name="MetricsSource" Density="Touch" CustomMetrics="{x:Static RibbonMetrics.Touch}" Metrics="{x:Static RibbonMetrics.Touch}" />
+ <TextBlock Text="{Binding #MetricsSource.Metrics.RowHeight}" />
+ <local:MetricsConsumer Density="{Binding #MetricsSource.Density, Mode=TwoWay}" CustomMetrics="{Binding #MetricsSource.CustomMetrics, Mode=TwoWay}" />
+</StackPanel>

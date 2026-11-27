@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <Ribbon x:Name="RibbonRoot" x:DataType="local:CommandViewModel" VisibilityMode="TabsOnly" MinimizeBehavior="CycleAll" IsMinimizeButtonVisible="True" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <Ribbon.DataContext><local:CommandViewModel /></Ribbon.DataContext>
+  <RibbonTab Header="Home"><RibbonGroup Header="Tools"><RibbonButton Label="Run" Command="{Binding Command}" CommandParameter="{Binding Value}" /></RibbonGroup></RibbonTab>
+ </Ribbon>
+ <TextBlock Text="{Binding ElementName=RibbonRoot,Path=IsMinimized}" />
+</StackPanel>

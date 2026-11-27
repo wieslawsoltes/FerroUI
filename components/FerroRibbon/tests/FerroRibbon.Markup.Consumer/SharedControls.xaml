@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:local="using:FerroRibbon.Consumer">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries><RibbonThemeResources /></ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <RibbonKeyTip Text="{Binding IconText,Mode=TwoWay}" x:DataType="local:IconViewModel">
+    <RibbonKeyTip.DataContext><local:IconViewModel /></RibbonKeyTip.DataContext>
+  </RibbonKeyTip>
+  <Button Content="Run" Theme="{DynamicResource RibbonChromeButtonStyle}" RibbonKeyTip.KeyTip="R" />
+  <Button Content="Option" Theme="{DynamicResource RibbonGalleryItemStyle}" />
+  <Button Width="20" Height="20" Theme="{DynamicResource RibbonSwatchButtonStyle}" Background="#123456" />
+</StackPanel>

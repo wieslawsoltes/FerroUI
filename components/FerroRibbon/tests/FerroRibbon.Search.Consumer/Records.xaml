@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Search.Consumer">
+ <StackPanel.Resources><ResourceDictionary><RibbonSearchEntry x:Key="Entry"><x:Arguments><x:String>help</x:String><x:String>Help</x:String><x:String>Home</x:String><x:String>Description</x:String><x:Null /><x:Null /><x:Static Member="local:SearchActions.Help" /><x:Boolean>True</x:Boolean></x:Arguments></RibbonSearchEntry><RibbonSearchEngine x:Key="Engine" MaxRecent="5" /></ResourceDictionary></StackPanel.Resources>
+ <TextBlock x:Name="Label" x:DataType="RibbonSearchEntry" DataContext="{StaticResource Entry}" Text="{Binding Label}" />
+ <TextBlock x:Name="Recent" x:DataType="RibbonSearchEngine" DataContext="{StaticResource Engine}" Text="{Binding MaxRecent}" />
+</StackPanel>

@@ -1,0 +1,25 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <RibbonComboBox Label="Choose" />
+  <RibbonFontComboBox Label="Font" />
+  <RibbonFontSizeComboBox Label="Font Size" />
+  <RibbonComboBox Label="Custom">
+    <RibbonComboBox.Template>
+      <ControlTemplate>
+        <StackPanel Orientation="Horizontal">
+          <TextBox x:Name="PART_TextBox" Width="100" />
+          <Button x:Name="PART_DropDownButton" AutomationProperties.Name="Downstream options">
+            <FontIcon Glyph="v" />
+          </Button>
+        </StackPanel>
+      </ControlTemplate>
+    </RibbonComboBox.Template>
+  </RibbonComboBox>
+</StackPanel>

@@ -1,0 +1,5 @@
+<Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="NativeRoot">
+ <Grid.ColumnDefinitions><ColumnDefinition x:Name="FirstSpacer" Width="12.5" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+ <Border x:Name="Surface"><Border.RenderTransform><ScaleTransform x:Name="ScaleTransform" ScaleX="1.25" ScaleY="2.5" /></Border.RenderTransform></Border>
+ <ContentControl Grid.Column="1" Content="{Binding ElementName=FirstSpacer,Path=Width}" />
+</Grid>

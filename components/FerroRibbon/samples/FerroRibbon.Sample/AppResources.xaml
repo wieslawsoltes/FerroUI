@@ -1,0 +1,7 @@
+<!-- Application scope supplies the public default themes, including Gallery's
+     source direct shared-style lookup. Individual dictionaries remain usable. -->
+<ResourceDictionary xmlns="https://github.com/ferroui">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

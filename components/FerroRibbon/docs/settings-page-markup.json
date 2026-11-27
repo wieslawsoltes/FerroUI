@@ -1,0 +1,68 @@
+{
+  "source": "samples/RibbonSpace.Demo/Pages/SettingsPage.xaml",
+  "revision": "9755e281547923f10397dffa366e3355b12b55ea",
+  "sha256": "f7eaa61206b7fdfa4fce126059c841b6651597aca12779e338ce30c34898c50b",
+  "source_elements": 45,
+  "source_names": [
+    "Theme",
+    "Palette",
+    "Chrome",
+    "Surface",
+    "Density",
+    "Layout",
+    "LanguageBox",
+    "ShowState",
+    "ResetCustomization",
+    "Customize",
+    "Palette2",
+    "StateJson",
+    "LogText"
+  ],
+  "native_elements": 60,
+  "changes": [
+    {
+      "source": "implicit WinUI control text defaults",
+      "native": "explicit inherited FontSize14 and native SimpleTheme ThemeForegroundBrush; live light/dark resource lookup"
+    },
+    {
+      "source": "Grid.Padding",
+      "native": "Border.Padding around the unchanged native Grid; row/column spacing retained"
+    },
+    {
+      "element": "Theme",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "Palette",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "Chrome",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "Surface",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "Density",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "Layout",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    },
+    {
+      "element": "LanguageBox",
+      "source": "WinUI ComboBox.Header",
+      "native": "passive native TextBlock and ComboBox, shared width280, native AutomationProperties.Name/LabeledBy; no added label invocation behavior"
+    }
+  ],
+  "bindings": "Passive compiled XAML with ReactiveUI commands/state; source UI event order is forwarded by the native view."
+}

@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui">
+  <RibbonIconPresenter Icon="Assets/cut.png" />
+  <RibbonIconPresenter Icon="ms-appx:///Assets/cut.png" IconSize="24" />
+  <RibbonIconPresenter Icon="ferres://ferroribbon_image_consumer/Assets/cut.png" />
+</StackPanel>

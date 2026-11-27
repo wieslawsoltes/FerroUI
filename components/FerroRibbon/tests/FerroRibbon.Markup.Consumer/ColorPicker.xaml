@@ -1,0 +1,12 @@
+<local:PaletteView xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
+ <local:PaletteView.Resources><ResourceDictionary>
+  <ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/ColorPicker.xaml" /><ResourceInclude Source="ferres://FerroRibbon/Themes/ColorPalette.xaml" /></ResourceDictionary.MergedDictionaries>
+  <RibbonColorPickerModel x:Key="ColorModel" Id="color" Label="Font color" SelectedColor="#80010203" ShowMoreColors="False">
+   <RibbonColorPickerModel.ThemeColors><RibbonColorSwatch><x:Arguments><RibbonColor>#FF112233</RibbonColor><x:String>Named shade</x:String></x:Arguments></RibbonColorSwatch></RibbonColorPickerModel.ThemeColors>
+   <RibbonColorPickerModel.RecentColors><RibbonColor>#FF445566</RibbonColor></RibbonColorPickerModel.RecentColors>
+  </RibbonColorPickerModel>
+ </ResourceDictionary></local:PaletteView.Resources>
+ <local:ConsumerColorPicker x:Name="Picker" Tag="{x:Static RibbonColorPicker.NoColorParameter}" SelectedColor="#80010203" IsSplit="False" ColorSelected="Selected" ShowNoColor="True" />
+ <TextBlock Text="{Binding ElementName=Picker,Path=SelectedColor}" />
+ <TextBlock x:DataType="RibbonColorPickerModel" DataContext="{StaticResource ColorModel}" Text="{Binding RecentColors.Count}" />
+</local:PaletteView>

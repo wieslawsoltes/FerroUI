@@ -1,0 +1,6 @@
+<local:ConsumerGrid xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FerroRibbon.Consumer"
+    Columns="2" ItemWidth="20" ItemHeight="10" Spacing="2" UseLayoutRounding="False">
+  <Button />
+</local:ConsumerGrid>

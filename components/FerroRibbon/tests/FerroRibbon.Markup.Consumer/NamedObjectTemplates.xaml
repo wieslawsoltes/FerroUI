@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+ <StackPanel.Resources>
+  <ControlTemplate x:Key="NamedTemplate" TargetType="ContentControl">
+   <Border x:Name="Surface">
+    <Border.RenderTransform><ScaleTransform x:Name="ScaleTransform" ScaleX="1.25" /></Border.RenderTransform>
+    <Grid><Grid.ColumnDefinitions><ColumnDefinition x:Name="FirstSpacer" Width="8" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+     <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" />
+    </Grid>
+   </Border>
+  </ControlTemplate>
+ </StackPanel.Resources>
+ <ContentControl Template="{StaticResource NamedTemplate}"><TextBox Text="one" /></ContentControl>
+ <ContentControl Template="{StaticResource NamedTemplate}"><TextBox Text="two" /></ContentControl>
+</StackPanel>

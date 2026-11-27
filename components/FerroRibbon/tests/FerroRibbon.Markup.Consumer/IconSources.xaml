@@ -1,0 +1,17 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources><ResourceDictionary>
+    <FontIconSource x:Key="Font" Glyph="Source" FontFamily="Consumer Symbols" FontWeight="Bold"
+        FontStyle="Italic" FontSize="99" MirroredWhenRightToLeft="True" Foreground="#0000ff" />
+    <PathIconSource x:Key="Path" Data="M0,0 L10,0 L0,10 Z" Foreground="#0000ff" />
+    <ImageIconSource x:Key="Image" ImageSource="{x:Null}" Foreground="#0000ff" />
+  </ResourceDictionary></StackPanel.Resources>
+  <RibbonIconPresenter Icon="{StaticResource Font}" IconSize="23.5" Foreground="#ff0000" />
+  <RibbonIconPresenter Icon="{StaticResource Path}" IconSize="23.5" Foreground="#ff0000" />
+  <RibbonIconPresenter Icon="{StaticResource Image}" IconSize="23.5" Foreground="#ff0000" />
+  <RibbonIconPresenter IconSize="25"><RibbonIconPresenter.Icon>
+    <FontIconSource Glyph="Inline" FontFamily="Inline Symbols" />
+  </RibbonIconPresenter.Icon></RibbonIconPresenter>
+  <MenuFlyoutItem Text="Font" RibbonMenu.Icon="{StaticResource Font}" />
+  <MenuFlyoutItem Text="Path" RibbonMenu.Icon="{StaticResource Path}" />
+  <MenuFlyoutItem Text="Image" RibbonMenu.Icon="{StaticResource Image}" />
+</StackPanel>

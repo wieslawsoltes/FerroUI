@@ -1,0 +1,8 @@
+<Ribbon xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer"
+ x:DataType="local:CommandViewModel" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False"
+ SelectedTabId="home" ReductionStrategy="GroupByGroup">
+ <Ribbon.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></Ribbon.Resources>
+ <Ribbon.DataContext><local:CommandViewModel /></Ribbon.DataContext>
+ <RibbonTab Id="home" Header="Home"><RibbonGroup Header="Commands"><RibbonButton Label="Run" Command="{Binding Command}" CommandParameter="{Binding Value}" /></RibbonGroup></RibbonTab>
+ <RibbonTab Id="insert" Header="Insert"><RibbonGroup Header="Insert"><RibbonLabel Label="Ready" /></RibbonGroup></RibbonTab>
+</Ribbon>
