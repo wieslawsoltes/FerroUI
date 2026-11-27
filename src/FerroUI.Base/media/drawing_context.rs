@@ -153,23 +153,6 @@ pub trait IDrawingContextCore {
     /// Releases the core. Called once, after every pushed state has been
     /// popped, when an owned context is disposed.
     fn dispose_core(&mut self);
-
-    /// Records a color composition through the native draw-operation path.
-    fn draw_color_core(
-        &mut self,
-        color: crate::media::Color,
-        blend: crate::media::imaging::BitmapBlendingMode,
-        bounds: Rect,
-    ) {
-        let operation: std::sync::Arc<dyn ICustomDrawOperation> = std::sync::Arc::new(
-            crate::rendering::scene_graph::color_draw_operation::ColorDrawOperation {
-                color,
-                blend,
-                bounds,
-            },
-        );
-        self.custom(&operation);
-    }
 }
 
 /// The kind of a pushed state; decides which `pop_*_core` restores it.
@@ -422,7 +405,12 @@ impl<'a> DrawingContext<'a> {
         blend: crate::media::imaging::BitmapBlendingMode,
         bounds: Rect,
     ) {
-        self.core().draw_color_core(color, blend, bounds);
+        // Recorded through the native draw-operation path: one function, not a default method
+        // of every drawing context.
+        let operation: std::sync::Arc<dyn ICustomDrawOperation> = std::sync::Arc::new(
+            crate::rendering::scene_graph::color_draw_operation::ColorDrawOperation { color, blend, bounds },
+        );
+        self.core().custom(&operation);
     }
 
     /// Draws text. `origin` is the upper-left corner of the text.

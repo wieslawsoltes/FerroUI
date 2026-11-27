@@ -66,6 +66,13 @@ impl Pointer {
     }
 
     fn create(id: i32, type_: PointerType, is_primary: bool, platform_capture: Option<PlatformCapture>) -> Rc<Pointer> {
+        let pointer = Self::create_core(id, type_, is_primary, platform_capture);
+        let known: Rc<dyn IPointer> = pointer.clone();
+        remember_pointer(&known);
+        pointer
+    }
+
+    fn create_core(id: i32, type_: PointerType, is_primary: bool, platform_capture: Option<PlatformCapture>) -> Rc<Pointer> {
         Rc::new_cyclic(|this| Pointer {
             this: this.clone(),
             id,
@@ -205,18 +212,6 @@ impl Pointer {
         drop(self.captured_gesture_recognizer.replace(gesture_recognizer));
         self.capture_source.set(source);
 
-        // Publish membership before platform callbacks and CaptureLost handlers
-        // can inspect or reenter capture. The element holds only weak pointers.
-        if old_capture != control {
-            if let Some(old) = &old_capture {
-                old.unregister_pointer_capture(&this);
-            }
-            if let Some(new) = &control {
-                new.register_pointer_capture(&this);
-            }
-        }
-
-
         // However, we still want to notify the platform only if the captured
         // element actually changed.
         let effective_capturer = self.effective_capturer();
@@ -355,4 +350,27 @@ impl IPointer for Pointer {
     fn as_any(&self) -> &dyn Any {
         self
     }
+}
+
+thread_local! {
+    /// The pointers of the thread, held weakly: what an element reads its captures from
+    /// (`InputElement::pointer_captures`), whoever captured them.
+    static KNOWN_POINTERS: RefCell<Vec<Weak<dyn IPointer>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Adds `pointer` to the pointers of the thread (`KNOWN_POINTERS`), once.
+pub(crate) fn remember_pointer(pointer: &Rc<dyn IPointer>) {
+    let weak = Rc::downgrade(pointer);
+    KNOWN_POINTERS.with(|known| {
+        let mut known = known.borrow_mut();
+        known.retain(|p| p.strong_count() != 0);
+        if !known.iter().any(|p| p.ptr_eq(&weak)) {
+            known.push(weak);
+        }
+    });
+}
+
+/// The live pointers of the thread.
+pub(crate) fn known_pointers() -> Vec<Rc<dyn IPointer>> {
+    KNOWN_POINTERS.with(|known| known.borrow().iter().filter_map(Weak::upgrade).collect())
 }
