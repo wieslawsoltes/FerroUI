@@ -14,6 +14,19 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+# The text ranges of an editor's text provider for VoiceOver: the Objective-C text range methods of
+# the accessibility element (character, line, selection and style ranges) and the TextProvider
+# methods of the automation peer behind them. Off by default, so an application without an editor
+# links none of it; `ferroui-edit` turns it on, so every application that links the editor has it.
+# Without it the accessibility of text fields is the one without span support (docs/binary-size.md).
+text-editor = []
+# The web custom formats a browser exchanges application formats with (Chromium's map and its
+# numbered slots) on the macOS clipboard, and the checks of a pasteboard that changes while it is
+# read: the Rust side and clipboard.mm. Off by default, so an application without it has main's
+# clipboard and links none of it; `ferroui-edit` turns it on.
+chromium-clipboard-map = ["ferroui-base/chromium-clipboard-map"]
+
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true

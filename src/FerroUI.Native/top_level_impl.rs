@@ -45,7 +45,8 @@ use ferroui_controls::platform::{
 use ferroui_controls::{
     AcrylicPlatformCompensationLevels, Control, TopLevel, WindowResizeReason, WindowTransparencyLevel,
 };
-use ferroui_microcom::{ComPtr, HResult};
+use ferroui_microcom::{make_com_with, InterfaceEntry};
+use ferroui_microcom::{ComPtr, HResult, ImplementedBy};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::ffi::{c_void, CStr};
@@ -460,7 +461,7 @@ impl TopLevelImpl {
         focus_root.cast::<Control>().map(|c| ControlAutomationPeer::create_peer_for_element(&c))
     }
 
-    pub fn raw_text_input_event(&self, time_stamp: u64, text: &str) -> bool {
+    fn raw_text_input_event(&self, time_stamp: u64, text: &str, from_input_method: bool) -> bool {
         let Some(input_root) = self.input_root() else {
             return false;
         };
@@ -472,7 +473,8 @@ impl TopLevelImpl {
         Self::run_jobs_before_input();
 
         let device: Rc<dyn IInputDevice> = keyboard;
-        let args = Rc::new(RawTextInputEventArgs::new(device, time_stamp, input_root, text));
+        let args = RawTextInputEventArgs::new(device, time_stamp, input_root, text);
+        let args = Rc::new(if from_input_method { args.with_input_method_origin() } else { args });
 
         self.invoke_input(args.clone());
 
@@ -1149,6 +1151,36 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
 /// and window event interfaces when `P` provides the matching members.
 pub(crate) struct TopLevelEvents<P>(pub(crate) Rc<P>);
 
+impl<P: TopLevelParent> TopLevelEvents<P> {
+    /// The events object of a top-level. It answers `IFrnTopLevelWheelEvents`, through which the
+    /// view sends the platform wheel data. With the `text-editor` feature it also answers
+    /// `IFrnTextInputMethodEvents`, through which the view tags the text an input method
+    /// commits; without it the view sends every commit as a text input event, as on main.
+    pub(crate) fn for_parent<I: ImplementedBy<Self>>(parent: Rc<P>) -> ComPtr<I> {
+        #[cfg(feature = "text-editor")]
+        return make_com_with(
+            Self(parent),
+            [InterfaceEntry::of::<IFrnTextInputMethodEvents>(), InterfaceEntry::of::<IFrnTopLevelWheelEvents>()],
+        );
+        #[cfg(not(feature = "text-editor"))]
+        make_com_with(Self(parent), [InterfaceEntry::of::<IFrnTopLevelWheelEvents>()])
+    }
+
+    fn dispatch_text(&self, time_stamp: u64, text: Option<&CStr>, from_input_method: bool) -> bool {
+        crate::callback_base::guard(false, || {
+            let text = c_str_to_string(text).unwrap_or_default();
+            self.0.top_level().raw_text_input_event(time_stamp, &text, from_input_method)
+        })
+    }
+}
+
+#[cfg(feature = "text-editor")]
+impl<P: TopLevelParent> IFrnTextInputMethodEventsImpl for TopLevelEvents<P> {
+    fn raw_text_input_method_commit(&self, time_stamp: u64, text: Option<&CStr>) -> bool {
+        self.dispatch_text(time_stamp, text, true)
+    }
+}
+
 /// Disposes the top-level when the `Closed` callback is done, whether it
 /// returned or panicked.
 struct DisposeOnExit<'a, P: TopLevelParent> {
@@ -1251,10 +1283,7 @@ impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
     }
 
     fn raw_text_input_event(&self, time_stamp: u64, text: Option<&CStr>) -> bool {
-        crate::callback_base::guard(false, || {
-            let text = c_str_to_string(text).unwrap_or_default();
-            self.0.top_level().raw_text_input_event(time_stamp, &text)
-        })
+        self.dispatch_text(time_stamp, text, false)
     }
 
     fn scaling_changed(&self, scaling: f64) {
@@ -1696,7 +1725,7 @@ mod tests {
             Some("a".to_string()),
         );
         assert!(!handled);
-        assert!(!top_level.raw_text_input_event(8, "ä"));
+        assert!(!top_level.raw_text_input_event(8, "ä", false));
 
         {
             let received = received.borrow();
@@ -1720,7 +1749,7 @@ mod tests {
             FrnPhysicalKey::FrnPhysicalKeyNone,
             None,
         ));
-        assert!(top_level.raw_text_input_event(10, "x"));
+        assert!(top_level.raw_text_input_event(10, "x", false));
     }
 
     #[test]
@@ -1748,7 +1777,7 @@ mod tests {
         let (top_level, received) = top_level(false);
 
         mouse(&top_level, FrnRawMouseEventType::Move, FrnPointerDeviceType::Mouse, false);
-        assert!(!top_level.raw_text_input_event(1, "x"));
+        assert!(!top_level.raw_text_input_event(1, "x", false));
         assert!(!top_level.raw_key_event(
             FrnRawKeyEventType::KeyDown,
             1,

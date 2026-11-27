@@ -42,8 +42,8 @@ The interfaces of a node follow the providers of its peer, as upstream's `BuildA
 | `Action` | `IInvokeProvider`, `IToggleProvider`, `IExpandCollapseProvider`, `IScrollProvider` or `ISelectionItemProvider` | the actions `click`, `toggle`, `expand or collapse`, `scroll up`/`down`/`left`/`right`, `select` (for an item that cannot be invoked), in that order |
 | `Value` | `IRangeValueProvider` | minimum, maximum, small change, the value (writable, clamped to the range) |
 | `Selection` | `ISelectionProvider` | the selected children; select, deselect, select all, clear, through the selection items below the peer |
-| `Text` | `IValueProvider` without `IRangeValueProvider` | the value as text: ranges, the text at, before and after an offset by character and word (`StringUtils` of the controls crate), character count. Caret, selections, attributes and extents are constants, as upstream |
-| `EditableText` | the same, when the value is not read-only | set, insert, delete through `IValueProvider::set_value`; the clipboard members answer false |
+| `Text` | `ITextProvider` or `IValueProvider` without `IRangeValueProvider` | plain text, character count, and character, word, sentence, visual-line and paragraph queries. Providers with absolute UTF-16 ranges expose caret movement, selection, visible character and range bounds, and glyph hit testing, bounded text ranges and substring scrolling in screen, window and parent coordinates. Editor providers also expose default text formatting and attribute runs. |
+| `EditableText` | the same, when the value is not read-only | set the value, insert or delete at Unicode character offsets, and count an insertion payload in UTF-8 bytes. Editor providers also copy and cut explicit ranges and paste at an explicit offset via the system clipboard. Editor edits use the active session's protected-range and undo policies. |
 | `Image` | the control type is `Image` | description, extents |
 | `Event.Object` | always | signals only (section 6) |
 | `Event.Window` | a window | signals only |
@@ -51,7 +51,19 @@ The interfaces of a node follow the providers of its peer, as upstream's `BuildA
 
 Every path with an object also answers `org.freedesktop.DBus.Properties` (`Get`, `GetAll`, `Set`) and `org.freedesktop.DBus.Introspectable`; a path without an object answers `Introspect` when registered paths lie below it (so `gdbus introspect --recurse` and `busctl tree` work), and everything else with `UnknownObject`. An interface a path does not have is `UnknownInterface`, a member `UnknownMethod`, a property `UnknownProperty`, arguments of the wrong types `InvalidArgs`, and a provider that refuses (its element is not enabled) `Failed` with its message. A call without an interface is not answered, as upstream.
 
-Roles (`at_spi_node_role_mapping.rs`) and states (`at_spi_node_state_mapping.rs`) are upstream's tables: 43 control types to roles (a button with a toggle provider is a toggle button, a peer with a heading level is a heading; the numbers of the roles from `Document` to `Timer` are those of the protocol since upstream 2385ce7aab), and the state set from enabled, offscreen, focusable, focused, the toggle state, the expand/collapse state, selection, the read-only flags, "required for form", and the control type (a window is always `active`, an edit is `single-line`). Offsets of the text interfaces are UTF-16 code units, as upstream's (the indices of its strings); the specification counts characters, which differs for text outside the basic plane.
+Roles (`at_spi_node_role_mapping.rs`) and states (`at_spi_node_state_mapping.rs`) are upstream's tables: 43 control types to roles (a button with a toggle provider is a toggle button, a peer with a heading level is a heading; the numbers of the roles from `Document` to `Timer` are those of the protocol since upstream 2385ce7aab), and the state set from enabled, offscreen, focusable, focused, the toggle state, the expand/collapse state, selection, the read-only flags, "required for form", and the control type. A window always reports `active`. An edit reports `multi-line` when its text provider supports vertical line navigation.
+
+The text interfaces count Unicode scalar values on the wire. A supplementary character has one AT-SPI offset. The editor converts between those offsets and its native UTF-16 ranges using cached surrogate-pair counts in the document rope.
+
+Word and sentence queries use the framework's Unicode break enumerators. Legacy queries distinguish start and end boundaries. Line queries use the editor's rendered rows, including soft wrapping and the document's exact delimiters.
+
+The editor reports the typography, solid colors, simple decorations, baseline alignment, edit protection and visibility it uses for rendering. `GetAttributeRun` includes inherited values when requested. Otherwise it reports effective values that differ from the editor defaults. Custom decoration geometry and non-solid brushes have no representation in this mapping.
+
+Substring scrolling uses the editor's shaped text and scroll extent. Ranges that fit use their text bounds. Longer ranges use the first character, or the last for bottom placements. Coordinate requests place the text relative to a point inside the editor viewport and respect its scroll limits. The requests preserve the caret and selection.
+
+Bounded text queries use visible glyph rectangles and the requested clip edges. They return contiguous text in logical document order and keep grapheme clusters together.
+
+Accessible copy uses the editor's existing plain text and HTML transfer. Cut applies one undoable deletion after the platform accepts the transfer. Paste inserts the clipboard text at the requested offset. These operations leave selection tracking to the document and reject a delayed edit if the displayed document or revision changed during the transfer.
 
 ## 4. Threading: no object server, one message loop
 
@@ -60,7 +72,7 @@ Upstream serves every object from handlers that its D-Bus library calls on the s
 So the accessibility connection has **no object server** (`zbus` then answers no method call by itself; `connection/mod.rs` of 5.19.0: the task that answers is started by the first use of the object server) and `AtSpiConnection` (`at_spi/dbus/connection.rs`) does what upstream's connection class does:
 
 - A `MessageStream` of the connection, created with it, is read by one task of the UI dispatcher (`signal_watch::watch_stream`). Method calls are dispatched by path and interface to the handler registered there (`ObjectTable`); everything else on the stream (replies to the module's own calls, signals of the registry) is left to the proxies.
-- Handlers are objects of the UI thread (`Rc`, no locks) and answer synchronously: a handler returns the reply body or an error, and the connection builds the message.
+- Handlers are UI-thread objects (`Rc`, no locks). A method returns a reply immediately or yields a future for the dispatcher to poll. Clipboard replies await the platform operation while the accessibility connection continues answering incoming requests.
 - Replies and signals go through one queue that a task of the dispatcher sends in order, so a state change emitted inside a call arrives after the calls that were answered before it, in the order it happened.
 - Registration is synchronous (upstream's `RegisterObjects` is awaited): a node is reachable from the moment it is attached.
 
@@ -96,6 +108,10 @@ A node subscribes to its peer when it is attached and translates:
 | the expand/collapse state | `StateChanged` `expanded`, then `collapsed` |
 | the selection property | `SelectionChanged` |
 | the bounding rectangle | `BoundsChanged` |
+| the text caret | `TextCaretMoved` with its updated offset |
+| the text selection | `TextSelectionChanged` |
+| the editor text edit | `TextChanged` for the nonempty removed and inserted ranges, in that order, with offset, length and text. Embedded NULs travel as U+FFFD because D-Bus strings forbid NUL. |
+| the editor text formatting or defaults | `TextAttributesChanged` |
 
 The server adds: `ChildrenChanged` `add`/`remove` of the root for windows; `StateChanged` `defunct` for a node that is released; `StateChanged` `focused` for the node of the peer the root provider says has the focus; for a window `StateChanged` `active` and `Activate` or `Deactivate` of `org.a11y.atspi.Event.Window` when the platform window is activated or deactivated.
 
@@ -103,7 +119,7 @@ The server adds: `ChildrenChanged` `add`/`remove` of the root for windows; `Stat
 
 ## 7. The input: automation peers and providers
 
-Checked member by member against `src/FerroUI.Controls/automation` (2026-10-10). Everything the module reads exists there; nothing had to be added to the controls crate.
+The bridge reads its automation peer and provider contracts from `src/FerroUI.Controls/automation`. Providers can opt into absolute text ranges, caret and selection notifications, and exact edit deltas.
 
 | Read by | Members |
 |---|---|
@@ -114,7 +130,7 @@ Checked member by member against `src/FerroUI.Controls/automation` (2026-10-10).
 | `Action` | `IInvokeProvider::invoke`; `IToggleProvider::toggle`; `IExpandCollapseProvider::expand`, `collapse`; `IScrollProvider::scroll`, `vertically_scrollable`, `horizontally_scrollable` with `ScrollAmount`; `ISelectionItemProvider::select` |
 | `Value` | `IRangeValueProvider::minimum`, `maximum`, `small_change`, `value`, `set_value` |
 | `Selection` | `ISelectionProvider::get_selection`; `ISelectionItemProvider::add_to_selection`, `remove_from_selection`, `is_selected` |
-| `Text`, `EditableText` | `IValueProvider::value`, `set_value`, `is_read_only`; `StringUtils::previous_word`, `next_word`, `is_start_of_word`, `is_end_of_word` |
+| `Text`, `EditableText` | `IValueProvider::value`, `set_value`, `is_read_only`; `ITextProvider::is_multiline`, `utf16_offset_from_character`, `character_offset_from_utf16`, `replace_text`, `copy_text_to_clipboard`, `paste_text_from_clipboard`, `range_from_offsets`, `range_from_point`, `get_selection`, `text_selection_changed`, `text_edited`, `default_text_attributes`, `text_attribute_run`, `text_attributes_changed`; `ITextProvider2::get_caret_range`; `ITextRangeProvider::text_offsets`, `get_bounding_rectangles`, `expand_to_enclosing_unit`, `move_endpoint_by_unit`, `scroll_to`; `WordBreakEnumerator`, `SentenceBreakEnumerator` |
 | The window node | `IRootProvider::focus_changed`, `get_focus`; `IWindowBaseImpl::activated`, `set_activated`, `deactivated`, `set_deactivated` |
 | The X11 crate | `ControlAutomationPeer::create_peer_for_element`, `from_element` (upstream's internal `GetAutomationPeer`), `AutomationPeer::get_automation_root`; `IInputRoot::focus_root` |
 
@@ -147,7 +163,7 @@ Checked member by member against `src/FerroUI.Controls/automation` (2026-10-10).
 | `Handlers/AtSpiEventWindowHandler.cs` | 47 | `handlers/at_spi_event_window_handler.rs` | |
 | `Handlers/AtSpiImageHandler.cs` | 48 | `handlers/at_spi_image_handler.rs` | |
 | `Handlers/AtSpiSelectionHandler.cs` | 139 | `handlers/at_spi_selection_handler.rs` | |
-| `Handlers/AtSpiTextHandler.cs` | 296 | `handlers/at_spi_text_handler.rs` | the text functions over UTF-16 units |
+| `Handlers/AtSpiTextHandler.cs` | 296 | `handlers/at_spi_text_handler.rs` | character offsets on D-Bus, with translation to native provider ranges |
 | `Handlers/AtSpiValueHandler.cs` | 46 | `handlers/at_spi_value_handler.rs` | |
 
 All 27 are built. Files of the port without an upstream file of that project: `at_spi/dbus/*` (section 5) and `at_spi/tests.rs`.
@@ -195,8 +211,8 @@ Nothing had to be changed in the module or in the platform after the first run o
 
 ### Not verified
 
-- **A screen reader.** Orca was not run, nor Accerciser or `pyatspi`: nothing here shows what a user hears, how Orca's own heuristics (which roles it announces, what it does with a tree that has no cache items, how it follows focus) take this tree, or whether keyboard navigation announces what it should. The reading side of every check is a D-Bus client that makes the same calls, which shows the protocol and the content of the answers, not the experience.
-- Events of text (`TextChanged`, `TextCaretMoved`, `TextSelectionChanged`): upstream emits none at the tracked commit, and the caret offset is always 0. A screen reader cannot follow typing through this interface.
+- Physical speech and braille output, and Orca scenarios beyond the exercised keyboard navigation and selection sequence, remain open.
+- Accessible clipboard behavior on Wayland remains unverified. Value-only providers do not expose the editor's native range clipboard hooks.
 - The key event interfaces (`DeviceEventController`): not served upstream.
 - The status watcher against a session that toggles accessibility at run time, and a registry that restarts.
 

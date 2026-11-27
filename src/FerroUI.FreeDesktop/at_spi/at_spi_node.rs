@@ -24,7 +24,7 @@ use super::dbus::types::AtSpiAttributeSet;
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, IRootProvider, IScrollProvider,
-    ISelectionItemProvider, ISelectionProvider, IToggleProvider, IValueProvider, ToggleState,
+    ISelectionItemProvider, ISelectionProvider, ITextProvider, IToggleProvider, IValueProvider, ToggleState,
 };
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationProperties, AutomationPropertyChangedEventArgs, ExpandCollapsePatternIdentifiers,
@@ -204,15 +204,21 @@ impl AtSpiNode {
             handlers.selection = Some(selection);
         }
 
-        if let (Some(value_provider), false) = (peer.get_provider::<dyn IValueProvider>(), has_range_value) {
+        let text_value = if has_range_value {
+            None
+        } else {
+            peer.get_provider::<dyn IValueProvider>()
+        };
+        if text_value.is_some() || peer.get_provider::<dyn ITextProvider>().is_some() {
             let text = Rc::new(AtSpiTextHandler::new(node.clone()));
+            text.observe_text();
             targets.push(text.clone());
             handlers.text = Some(text);
-            if !value_provider.is_read_only() {
-                let editable_text = Rc::new(AtSpiEditableTextHandler::new(node.clone()));
-                targets.push(editable_text.clone());
-                handlers.editable_text = Some(editable_text);
-            }
+        }
+        if text_value.is_some_and(|provider| !provider.is_read_only()) {
+            let editable_text = Rc::new(AtSpiEditableTextHandler::new(node.clone()));
+            targets.push(editable_text.clone());
+            handlers.editable_text = Some(editable_text);
         }
 
         if peer.get_automation_control_type() == AutomationControlType::Image {

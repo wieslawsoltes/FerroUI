@@ -336,7 +336,8 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
     assert!(target.state().is_ready);
 
     let mut first_image = 0;
-    for frame in 0..3 {
+    // More frames than the display has slots for frames in flight, so that every slot is reused.
+    for frame in 0..5 {
         let session = target.begin_draw();
         // The device is locked for the time of the frame.
         assert_ne!(vk::Handle::as_raw(vulkan.main_queue_handle()), 0);

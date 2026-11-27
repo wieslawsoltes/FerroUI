@@ -21,6 +21,7 @@ use ferroui_base::input::LocalBoxFuture;
 use ferroui_freedesktop::dbus_system_dialog::{DBusSystemDialog, ParentLeaseProvider};
 use ferroui_freedesktop::i_portal_parent_lease::IPortalParentLease;
 use crate::window_impl_text_input::WaylandTextInputMethod;
+use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{IInputRoot, KeyboardDevice, PointerPressedEventArgs, WindowDecorationsElementRole};
@@ -495,6 +496,11 @@ impl ISinkOwner for WindowImpl {
 
 impl IOptionalFeatureProvider for WindowImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            let clipboard = FerroLocator::current().get_service::<dyn IClipboard>()?;
+            return Some(Rc::new(clipboard));
+        }
+
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             let text_input_method: Rc<dyn ITextInputMethodImpl> = self
                 .text_input_method
