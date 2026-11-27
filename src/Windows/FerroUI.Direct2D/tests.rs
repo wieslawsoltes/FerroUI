@@ -251,6 +251,7 @@ fn certified_simple_shaping_matches_full_directwrite_exactly() {
                                     [0].as_ptr(),
                                     [text.len() as u32].as_ptr(),
                                     features,
+                                    std::ptr::null_mut(),
                                     &mut glyphs as *mut _ as ffi::Ptr,
                                     emit,
                                 )
@@ -264,6 +265,89 @@ fn certified_simple_shaping_matches_full_directwrite_exactly() {
             }
         }
     }
+}
+
+#[test]
+fn shared_paragraph_analysis_preserves_directwrite_placement_for_slices() {
+    use std::ffi::CString;
+    use std::ptr::null_mut;
+
+    let manager = fonts::FontManager::default();
+    let face = manager
+        .try_create_glyph_typeface(
+            "Consolas",
+            FontStyle::Normal,
+            FontWeight::Normal,
+            FontStretch::Normal,
+        )
+        .unwrap();
+    let font = face
+        .as_any()
+        .downcast_ref::<fonts::Typeface>()
+        .unwrap()
+        .font
+        .raw();
+    extern "C" fn emit(info: ffi::Ptr, glyph: ffi::Glyph) {
+        unsafe { (&mut *(info as *mut Vec<ffi::Glyph>)).push(glyph) }
+    }
+
+    for (fragment, locale, rtl) in [
+        ("ab\t1234Z", "en-GB", false),
+        ("office\tAV a\u{301} 😀 سلام \u{05ea}\u{05bc} ", "ar-SA", true),
+    ] {
+        let fragment_len = fragment.encode_utf16().count();
+        let text = ReadOnlyMemory::from_str(&fragment.repeat(100));
+        let owner = text.owner().unwrap();
+        let locale = CString::new(locale).unwrap();
+        let first_slice = text.slice(0, fragment_len);
+        let analysis = fonts::shape_analysis(&first_slice, &locale, rtl).unwrap();
+        let other_locale = CString::new("tr-TR").unwrap();
+        let other_analysis = fonts::shape_analysis(&first_slice, &other_locale, rtl).unwrap();
+        assert!(!Rc::ptr_eq(&analysis, &other_analysis));
+
+        for start in [0, fragment_len * 30, text.len() - fragment_len] {
+            let slice = text.slice(start, fragment_len);
+            let reused = fonts::shape_analysis(&slice, &locale, rtl).unwrap();
+            assert!(Rc::ptr_eq(&analysis, &reused));
+            for features in [0, 1] {
+                let shape = |reference: bool, plan: ffi::Ptr, language: &CString| {
+                    let mut glyphs = Vec::<ffi::Glyph>::new();
+                    let call = if reference { ffi::d2_shape_reference } else { ffi::d2_shape };
+                    let result = unsafe {
+                        call(
+                            font,
+                            owner.as_ptr(),
+                            owner.len(),
+                            start,
+                            fragment_len,
+                            language.as_ptr(),
+                            15.25,
+                            i32::from(rtl),
+                            [u32::from_be_bytes(*b"liga")].as_ptr(),
+                            [0].as_ptr(),
+                            [(start + 1) as u32].as_ptr(),
+                            [(start + 4) as u32].as_ptr(),
+                            features,
+                            plan,
+                            &mut glyphs as *mut _ as ffi::Ptr,
+                            emit,
+                        )
+                    };
+                    assert_ne!(result, 0);
+                    glyphs
+                };
+                assert_eq!(shape(false, reused.0, &locale), shape(true, null_mut(), &locale));
+                assert_eq!(
+                    shape(false, reused.0, &other_locale),
+                    shape(true, null_mut(), &other_locale),
+                );
+            }
+        }
+    }
+
+    let paragraphs = ReadOnlyMemory::from_str(&"first\r\nsecond\u{2028}".repeat(30));
+    let locale = CString::new("en-US").unwrap();
+    assert!(fonts::shape_analysis(&paragraphs.slice(0, 5), &locale, false).is_none());
 }
 
 #[test]

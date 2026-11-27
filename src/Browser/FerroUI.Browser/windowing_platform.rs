@@ -76,6 +76,16 @@ impl BrowserWindowingPlatform {
         KEYBOARD.with(|slot| *slot.borrow_mut() = Some(keyboard.clone()));
         let keyboard_device: Rc<dyn IKeyboardDevice> = keyboard;
         let platform_settings = BrowserPlatformSettings::new();
+        #[cfg(target_arch = "wasm32")]
+        let platform = crate::interop::dom_helper::get_navigator_platform(&Self::global_this());
+        #[cfg(not(target_arch = "wasm32"))]
+        let platform: Option<String> = None;
+        let hotkeys = match platform.as_deref() {
+            Some(platform) if platform.starts_with("Mac") || matches!(platform, "iPhone" | "iPad" | "iPod") => {
+                PlatformHotkeyConfiguration::apple()
+            }
+            _ => PlatformHotkeyConfiguration::default(),
+        };
         let activatable_lifetime = BrowserActivatableLifetime::new();
         let system_navigation_manager = Rc::new(BrowserSystemNavigationManagerImpl::default());
         let locator = FerroLocator::current_mutable();
@@ -103,7 +113,7 @@ impl BrowserWindowingPlatform {
             .to_constant(instance)
             .bind::<dyn IPlatformIconLoader>()
             .to_singleton::<IconLoaderStub>(|instance| instance)
-            .bind_to_self_singleton::<PlatformHotkeyConfiguration>()
+            .bind_to_self(Rc::new(hotkeys))
             .bind_to_self(Rc::new(KeyGestureFormatInfo::new(Some(HashMap::new()), "Cmd", "Ctrl", "Alt", "Shift")))
             .bind::<dyn IActivatableLifetime>()
             .to_constant(activatable_lifetime.clone())

@@ -170,6 +170,9 @@ jobs:
             echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
             exit 1
           fi
+      # The bundled grammars, themes and highlighting definitions keep their pinned hashes.
+      - name: Pinned editor resources
+        run: python3 scripts/edit-port/check_assets.py
       # A merge resolved by hand can leave a conflict marker behind, most often in the CHANGELOG.
       - name: No leftover merge conflict markers
         run: |

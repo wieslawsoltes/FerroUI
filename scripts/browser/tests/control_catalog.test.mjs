@@ -356,6 +356,19 @@ check("three pages are reached through the drawer and show their content", async
     assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
 });
 
+check("FerroEdit loads its TextMate scanner and switches languages", async (page) => {
+    await navigate(page, "Text");
+    await navigate(page, "FerroEdit");
+    const status = (language) => (e) => inContent(e) && e.name === "Status"
+        && e.text?.startsWith(`${language}  |`);
+    await page.element("the Rust editor status", status("Rust"));
+    for (const language of ["C#", "JavaScript", "HTML", "Rust"]) {
+        await page.clickElement(await page.find(language, inContent));
+        await page.element(`the ${language} editor status`, status(language));
+    }
+    assert(page.errors.length === 0, `errors were logged:\n${page.errors.join("\n")}`);
+});
+
 check("Visual States opens and applies setters from both state groups", async (page) => {
     await navigate(page, "Layout");
     await navigate(page, "Visual States");
