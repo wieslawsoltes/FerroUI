@@ -12,3 +12,4 @@ mod theme_class_tests;
 mod macos_theme_tests;
 mod accessibility_tests;
 mod macos_control_states;
+mod typed_keys_tests;
