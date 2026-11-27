@@ -95,13 +95,41 @@ fn iconography_shows_the_icons_and_the_first_icon_in_the_side_panel() {
     assert_eq!(tags.items_source().map(|items| items.count()), Some(5));
 }
 
+/// The page in a window with the WinUI theme: the search box raises `TextChanged` from its text
+/// box part, after its 150 ms timer ([`tick`]).
+#[cfg(feature = "theme")]
+fn window_page() -> (Ref<ferroui_controls::Window>, Ref<Control>) {
+    use ferroui_controls::testing::MockWindowingPlatform;
+    let root = page();
+    let window =
+        ferroui_controls::Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(1400.0, 900.0));
+    window.set_content(Some(Control::boxed(&root)));
+    window.show();
+    window.update_layout();
+    (window, root)
+}
+
+/// Fires the timer of `AutoSuggestBox.TextChanged` and runs the jobs it posts.
+#[cfg(feature = "theme")]
+fn tick() {
+    use ferroui_base::threading::Dispatcher;
+    for timer in Dispatcher::timers_for_unit_tests() {
+        if timer.interval() == std::time::Duration::from_millis(150) {
+            Dispatcher::force_fire_timer_for_unit_tests(&timer);
+        }
+    }
+    Dispatcher::ui_thread().run_jobs(None);
+}
+
+#[cfg(feature = "theme")]
 #[test]
 fn iconography_search_filters_the_icons_and_selects_the_first() {
-    let _application = start();
-    let root = page();
+    let _application = crate::tests::start_winui();
+    let (_window, root) = window_page();
     let search = root.get_control::<AutoSuggestBox>("IconsAutoSuggestBox");
 
     search.set_text("E74E");
+    tick();
     assert_eq!(shown(&root), 1);
     assert_eq!(text(&root, "IconsFoundText"), "1 icon found.");
     assert_eq!(selected(&root).name(), "Save");
@@ -113,17 +141,20 @@ fn iconography_search_filters_the_icons_and_selects_the_first() {
     assert!(root.get_control::<TextBlock>("SymbolXamlLabel").is_visible());
 
     search.set_text("wifi");
+    tick();
     assert_eq!(shown(&root), 46);
     assert_eq!(text(&root, "IconsFoundText"), "46 icons found.");
     assert_eq!(selected(&root).name(), "Wifi");
 
     // No icon: the side panel keeps the selected icon.
     search.set_text("zzzz");
+    tick();
     assert_eq!(shown(&root), 0);
     assert_eq!(text(&root, "IconsFoundText"), "No icons found.");
     assert_eq!(selected(&root).name(), "Wifi");
 
     search.set_text("");
+    tick();
     assert_eq!(shown(&root), 1574);
 }
 
@@ -133,17 +164,12 @@ fn iconography_search_filters_the_icons_and_selects_the_first() {
 #[test]
 fn iconography_tags_search_for_their_text_when_invoked() {
     use ferroui_base::input::{InputElement, Key, KeyEventArgs};
-    use ferroui_controls::testing::MockWindowingPlatform;
-    use ferroui_controls::{FontIcon, Window};
+    use ferroui_controls::FontIcon;
     use ferroui_controls_items_view::ItemContainer;
     use ferroui_controls_repeater::{FlowLayout, ItemsRepeater};
 
     let _application = crate::tests::start_winui();
-    let root = page();
-    let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(1400.0, 900.0));
-    window.set_content(Some(Control::boxed(&root)));
-    window.show();
-    window.update_layout();
+    let (_window, root) = window_page();
 
     let repeater = |view: &Ref<ItemsView>| {
         view.get_visual_descendants()
@@ -176,11 +202,19 @@ fn iconography_tags_search_for_their_text_when_invoked() {
         .expect("the second tag")
         .cast::<ItemContainer>()
         .unwrap();
-    assert!(tag.focus());
+    assert!(
+        tag.focus(),
+        "the tag takes the focus: focusable {}, visible {}, enabled {}, template {}",
+        tag.focusable(),
+        tag.is_effectively_visible(),
+        tag.is_effectively_enabled(),
+        tag.template().is_some()
+    );
     let mut enter = KeyEventArgs::new();
     enter.key = Key::Enter;
     enter.set_routed_event(Some(InputElement::key_down_event()));
     tag.raise_event(&enter);
+    tick();
     assert_eq!(
         root.get_control::<AutoSuggestBox>("IconsAutoSuggestBox").text(),
         "hamburger"
