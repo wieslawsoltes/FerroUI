@@ -466,7 +466,10 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let state = ibus_state(key.modifiers(), key.type_());
 
             match context {
-                Some(context) => Ok(context.process_key_event(key_val as u32, key_code as u32, state.bits()).await?),
+                // IBus expects evdev keycodes, which are X11 keycodes minus 8.
+                Some(context) => {
+                    Ok(context.process_key_event(key_val as u32, (key_code - 8) as u32, state.bits()).await?)
+                }
                 None => Ok(false),
             }
         })

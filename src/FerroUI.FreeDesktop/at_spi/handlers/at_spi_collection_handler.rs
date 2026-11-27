@@ -42,7 +42,7 @@ impl MatchSubject {
             states: node.compute_states(),
             role: AtSpiNode::to_at_spi_role(node.peer().get_automation_control_type(), Some(node.peer())) as u32,
             interfaces: node.get_supported_interfaces(),
-            attributes: AtSpiNode::get_attributes(node.peer()),
+            attributes: node.get_attributes(),
         }
     }
 }

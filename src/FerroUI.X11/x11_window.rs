@@ -415,6 +415,9 @@ pub struct X11Window {
     pub(crate) x11: Rc<X11Info>,
     configure: Cell<Option<XConfigureEvent>>,
     configure_point: Cell<Option<PixelPoint>>,
+    /// The serial of the last resize request whose size was applied to `real_size` here. A
+    /// `ConfigureNotify` the server generated before it processed that request is stale.
+    self_resize_request_serial: Cell<std::ffi::c_ulong>,
     triggered_expose: Cell<bool>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     mouse: Rc<MouseDevice>,
@@ -646,6 +649,7 @@ impl X11Window {
             x11: x11.clone(),
             configure: Cell::new(None),
             configure_point: Cell::new(None),
+            self_resize_request_serial: Cell::new(0),
             triggered_expose: Cell::new(false),
             input_root: RefCell::new(None),
             mouse: MouseDevice::primary(),
@@ -1200,6 +1204,11 @@ impl X11Window {
             if self.use_render_window {
                 xlib::x_map_window(display, self.render_handle.get());
             }
+            self.enqueue_position_refresh();
+        } else if event_type == XEventName::ReparentNotify as i32 {
+            if xlib::reparent_event(ev).window == self.handle.get() {
+                self.enqueue_position_refresh();
+            }
         } else if event_type == XEventName::UnmapNotify as i32 {
             self.mapped.set(false);
         } else if event_type == XEventName::Expose as i32
@@ -1336,7 +1345,10 @@ impl X11Window {
         self.configure.set(None);
         self.configure_point.set(None);
 
-        let nsize = PixelSize::new(cev.width, cev.height);
+        // Only the size of an event older than our last applied resize is stale: that request did
+        // not touch the position, and a no-op resize produces no later event to correct it.
+        let stale_size = cev.serial < self.self_resize_request_serial.get();
+        let nsize = if stale_size { self.real_size.get() } else { PixelSize::new(cev.width, cev.height) };
         let changed_size = self.real_size.get() != nsize;
         let changed_pos = self.position.get() != Some(npos);
         self.set_real_size(nsize);
@@ -1355,6 +1367,37 @@ impl X11Window {
                 resized(self.client_size_value(), WindowResizeReason::Unspecified);
             }
         }
+    }
+
+    /// A position translated on `ConfigureNotify` can be stale if the window manager was
+    /// reparenting the window at the time, and some window managers send no later event to
+    /// correct it. It is translated again once that has settled.
+    fn enqueue_position_refresh(&self) {
+        let weak = self.this.clone();
+        Dispatcher::ui_thread().post_local(
+            move || {
+                let Some(this) = weak.upgrade() else { return };
+                if this.handle.get() == 0 || this.configure.get().is_some() {
+                    return;
+                }
+                let Some((x, y, _)) =
+                    xlib::x_translate_coordinates(this.display(), this.handle.get(), this.x11.root_window(), 0, 0)
+                else {
+                    return;
+                };
+                let position = PixelPoint::new(x, y);
+                if this.position.get() == Some(position) {
+                    return;
+                }
+                this.position.set(Some(position));
+                if let Some(position_changed) = get(&this.position_changed) {
+                    position_changed(position);
+                }
+                this.update_scaling(false);
+                this.update_ime_position();
+            },
+            DispatcherPriority::BACKGROUND,
+        );
     }
 
     fn handle_activation(&self, active: bool) {
@@ -1770,6 +1813,7 @@ impl X11Window {
 
         let pixel_size = self.to_pixel_size(client_size);
         self.update_size_hints(Some(pixel_size), false);
+        let resize_request_serial = xlib::x_next_request(self.display());
         xlib::x_configure_resize_window(self.display(), self.handle.get(), pixel_size.width, pixel_size.height);
         if self.use_render_window && !self.use_compositor_driven_render_window_resize {
             xlib::x_configure_resize_window(self.display(), self.render_handle.get(), pixel_size.width, pixel_size.height);
@@ -1778,6 +1822,7 @@ impl X11Window {
 
         if force || !self.was_mapped_at_least_once.get() || (self.override_redirect && need_immediate_popup_resize) {
             self.set_real_size(pixel_size);
+            self.self_resize_request_serial.set(resize_request_serial);
             if let Some(resized) = get(&self.resized) {
                 resized(self.client_size_value(), reason);
             }

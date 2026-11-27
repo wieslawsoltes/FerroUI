@@ -256,7 +256,8 @@ impl AtSpiNode {
 
     /// Builds the AT-SPI object attributes reported for a peer: the attributes shared by
     /// `Accessible.GetAttributes` and Collection matching.
-    pub(crate) fn get_attributes(peer: &Ref<AutomationPeer>) -> AtSpiAttributeSet {
+    pub(crate) fn get_attributes(&self) -> AtSpiAttributeSet {
+        let peer = self.peer();
         let mut attrs = AtSpiAttributeSet::new();
         attrs.insert("toolkit".to_string(), TOOLKIT_NAME.to_string());
 
@@ -292,6 +293,10 @@ impl AtSpiNode {
             if size > 0 {
                 attrs.insert("setsize".to_string(), size.to_string());
             }
+        }
+
+        if let Some(window_id) = self.as_root().and_then(RootAtSpiNode::x11_window_id) {
+            attrs.insert("ferroui-window-handle".to_string(), window_id.to_string());
         }
 
         attrs

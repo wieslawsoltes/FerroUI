@@ -101,9 +101,9 @@ impl X11Screen {
             self.x11.root_window(),
             self.x11.atoms()._NET_WORKAREA,
             0,
-            128,
+            0x7fff_ffff,
             false,
-            xlib::ANY_PROPERTY_TYPE,
+            self.x11.atoms().CARDINAL,
         );
         self.base.set_working_area(working_area(self.base.bounds(), &property));
     }

@@ -3329,8 +3329,9 @@ mod app {
                 // The input method was offered both keys, each press before its release.
                 let offered: Vec<String> =
                     ibus_double::calls().into_iter().filter(|call| call.starts_with("ProcessKeyEvent(")).collect();
-                let key_code_a = xtest::key_code(display, 0x61);
-                let key_code_b = xtest::key_code(display, 0x62);
+                // IBus takes evdev keycodes: the X11 keycode minus 8.
+                let key_code_a = xtest::key_code(display, 0x61) - 8;
+                let key_code_b = xtest::key_code(display, 0x62) - 8;
                 let expected_calls = vec![
                     format!("ProcessKeyEvent(0x61, {key_code_a}, 0x0)"),
                     format!("ProcessKeyEvent(0x61, {key_code_a}, 0x40000000)"),
