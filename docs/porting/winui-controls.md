@@ -424,7 +424,11 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
 | Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
 | `FileOpenPicker` and `FileSavePicker` of the RichEditBox editor. | The storage provider of the window (RTF). | The pickers are Windows APIs; the provider is FerroUI's. |
+| `FileOpenPicker`, `FileSavePicker` and `FolderPicker` of `Microsoft.Windows.Storage.Pickers` (StoragePickers page). | The file, save and folder pickers of the window's storage provider, opened only where it has them (`can_open`, `can_save`, `can_pick_folder`); otherwise the example says that the platform has none. `CommitButtonText` is the picker's title, `SuggestedStartLocation` a well-known folder (`ComputerFolder`, `Objects` and `Unspecified` none), `SuggestedFolder` the start location when one is selected, and the default extension is given without its dot. `ViewMode` has no counterpart. | The pickers are Windows App SDK APIs; the provider is FerroUI's, and its pickers are the platform's dialogs. |
+| `StorageFile.GetThumbnailAsync` with a `ThumbnailMode`. | The picked file decoded as an image and scaled within the requested size, the same for every mode; a file that is not an image has no thumbnail. | FerroUI has no shell thumbnails; the image is drawn by the `Image` element of the page. |
 | The InkToolbar styles. | The application includes `ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml` after the WinUI theme. | The inking crate has its own control themes. |
+
+The storage providers on main have all three pickers on macOS, Windows, Linux (GTK, and the desktop portal, which picks folders from its version 3), the browser, iOS and Android (files from API 19, folders from API 21). A window without a platform storage provider (the headless and test platforms) gets one without pickers, and the StoragePickers examples say so in their output.
 
 #### G2: the WinUI controls not on main (#418)
 
@@ -445,6 +449,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | AccessibilityKeyboard | 4 ported, 2 partial: no Key Tips (access keys are letters of the header), no accelerator tooltips | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | AccessibilityScreenReader | 9 ported, 2 partial: no FullDescription (HelpText), no Custom landmark or LocalizedLandmarkType, no TextBox Header (LabeledBy) | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
 | Clipboard | 4 ported, 2 partial: no clipboard history, roaming or ContentChanged | partial | `platform_samples.rs` | `tests.rs` |
+| StoragePickers | 5 of 5; no ViewMode or commit button text (the title), no shell thumbnails (the decoded image) | ported | `storage_picker_samples.rs` | `storage_picker_samples_tests.rs` |
 | Button | 4 of 4 | ported | `button_samples.rs` | `tests.rs`, `button_samples_tests.rs` |
 | RepeatButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
 | HyperlinkButton | 2 of 2 | ported | `gallery.rs` (`examples::GALLERY_LINKS`) | `button_samples_tests.rs` |

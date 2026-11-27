@@ -1568,6 +1568,50 @@
       "notes": "The source example uses native StackPanel with the source's OneWay x:Bind of Spacing to the slider and OrientationGroup_SelectionChanged of StackPanelPage.xaml.cs in Rust: the Tag of the checked option is the orientation. FerroUI's Slider has no Header (composed) and no StepFrequency or SnapsTo: the steps of 1 of the source are TickFrequency 1 with IsSnapToTickEnabled, the same values.",
       "examples": []
     },
+    "StoragePickers": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/StoragePickers.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/storage_picker_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_page_fills_the_option_lists_of_the_source"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_pick_files_with_the_filter_title_and_start_location"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_save_the_content_with_the_choices_and_the_suggested_folder"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_pick_a_folder_and_keep_the_button_disabled_while_it_is_open"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_thumbnail_reports_the_file_without_an_image_and_a_failed_read"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_report_a_window_or_a_platform_without_pickers"
+        },
+        {
+          "path": "samples/WinUIGallery/storage_picker_samples_tests.rs",
+          "name": "storage_pickers_map_the_file_types_and_the_thumbnail_size"
+        }
+      ],
+      "notes": "All five source examples with the handlers of StoragePickersPage.xaml.cs in Rust (storage_picker_samples.rs), over the window's storage provider (TopLevel.StorageProvider): PickSingleFileButton_Click and PickMultipleFilesButton_Click with the file type filter of the selected item's Tag (txt, jpg and png, or all files), SaveFileButton_Click with the checked file type choices, the default extension, the suggested file name and SelectSuggestedFolderButton_Click's suggested folder (the start location when one is selected), writing the file content to the picked file, PickFolderButton_Click, and PickFileForThumbnailButton_Click. Each button is disabled while its picker is open; a picker the provider does not have (CanOpen, CanSave, CanPickFolder) is reported in the example's output. CommitButtonText is the picker's title (FerroUI's pickers have no commit button text), SuggestedStartLocation is the provider's well-known folder of the location (ComputerFolder, Objects and Unspecified leave it to the platform) and FerroUI's pickers have no ViewMode (the view mode options feed the source viewer's substitutions only, as the code substitutions of the file types do). FerroUI has no shell thumbnails: the thumbnail of an image file is the image decoded within the requested size, the same for each ThumbnailMode, and a file that is not an image has none. The location, view mode and thumbnail mode lists are filled in Rust; the Headers are composed where the control has none; the announcements of UIHelper.AnnounceActionForAccessibility are polite live regions.",
+      "examples": []
+    },
     "TabView": {
       "status": "partial",
       "source_page": {
