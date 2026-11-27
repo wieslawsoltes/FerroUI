@@ -26,6 +26,8 @@ pub use i_vello_scene_sink::{VelloSceneFilter, VelloSceneFilterCapabilities, Vel
 #[cfg(any(feature = "hybrid", feature = "gpu"))]
 pub use i_vello_scene_sink::VelloSceneTexture;
 pub use vello_cpu_scene_sink::VelloCpuSceneSink;
+#[cfg(test)]
+pub(crate) use vello_cpu_scene_sink::cpu_scenes_made;
 #[cfg(feature = "gpu")]
 pub use vello_gpu_scene_sink::{VelloGpuAntiAliasing, VelloGpuSceneSink};
 #[cfg(feature = "hybrid")]
