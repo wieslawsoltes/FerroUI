@@ -1,8 +1,11 @@
 //! The sample windows of the SystemBackdrops and TitleBar examples: the windows the buttons open,
 //! their backdrops and controllers, and the TitleBar behaviours the source handlers drive. The
-//! platform's drawing of the materials and the window dragging are not tested here.
+//! platform's drawing of the materials and the window dragging are not tested here. The pages
+//! open windows from a window of the mock windowing platform, as the gallery's main window; a
+//! page in a single view (the root of an embeddable top level, as the browser, iOS and Android
+//! host the gallery) opens none and says so.
 
-use crate::window_samples::{self, BackdropType, BackdropWindow};
+use crate::window_samples::{self, BackdropType, BackdropWindow, NO_WINDOWS};
 use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::rendering::composition::system_backdrops::{
@@ -10,7 +13,9 @@ use ferroui_base::rendering::composition::system_backdrops::{
 };
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::Ref;
+use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop};
+use ferroui_controls::testing::{embeddable_control_root_template, MockImplKind, MockWindowImpl};
 use ferroui_controls::{
     Button, ComboBox, Control, Frame, NavigationView, RadioButtons, StackPanel, TextBlock, TextBox, TitleBar,
     ToggleSwitch, Window,
@@ -18,6 +23,29 @@ use ferroui_controls::{
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap()
+}
+
+/// The page in a shown window of the mock windowing platform, as the gallery's main window.
+fn host(root: &Ref<Control>) -> Ref<Window> {
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window
+}
+
+/// The page as the content of an embeddable top level that is not a window: the single view of
+/// the browser, iOS and Android.
+fn single_view(root: &Ref<Control>) -> Ref<EmbeddableControlRoot> {
+    let view = EmbeddableControlRoot::with_impl(MockWindowImpl::bare(MockImplKind::TopLevel));
+    view.set_template(Some(embeddable_control_root_template()));
+    view.set_content(Some(Control::boxed(root.clone())));
+    view.prepare();
+    view
+}
+
+fn error_text(root: &Ref<Control>) -> Option<String> {
+    let error = root.get_control::<TextBlock>("WindowSampleError");
+    error.is_visible().then(|| error.text().unwrap_or_default())
 }
 
 fn click(root: &Ref<Control>, name: &str) {
@@ -47,12 +75,14 @@ fn status(window: &Ref<Window>) -> String {
 fn system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_backdrop() {
     let _application = start();
     let root = page("SystemBackdrops");
+    let _host = host(&root);
     for index in 1..=3 {
         assert!(root.find_control::<StackPanel>(&format!("SystemBackdropsExample{index}")).is_some());
     }
     assert!(window_samples::opened_windows().is_empty());
     // createBuiltInWindow_Click.
     click(&root, "ShowBuiltInBackdropWindow");
+    assert_eq!(error_text(&root), None);
     let windows = window_samples::opened_windows();
     assert_eq!(windows.len(), 1);
     let window = windows[0].clone();
@@ -112,6 +142,7 @@ fn system_backdrops_page_opens_the_built_in_backdrop_window_and_switches_its_bac
 fn controller_windows_drive_mica_and_desktop_acrylic_controllers_with_a_configuration() {
     let _application = start();
     let root = page("SystemBackdrops");
+    let _host = host(&root);
     // createCustomMicaWindow_Click and createCustomDesktopAcrylicWindow_Click open windows.
     click(&root, "ShowMicaControllerWindow");
     click(&root, "ShowDesktopAcrylicControllerWindow");
@@ -204,6 +235,7 @@ fn title_bar_configuration_binds_title_subtitle_and_button_visibility_to_the_opt
 fn title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content() {
     let _application = start();
     let root = page("TitleBar");
+    let _host = host(&root);
     click(&root, "ShowTitleBarDragRegionsWindow");
     let windows = window_samples::opened_windows();
     assert_eq!(windows.len(), 1);
@@ -245,6 +277,7 @@ fn title_bar_drag_regions_window_sets_is_drag_region_and_toggles_dynamic_content
 fn title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back() {
     let _application = start();
     let root = page("TitleBar");
+    let _host = host(&root);
     click(&root, "ShowTitleBarWindow");
     let windows = window_samples::opened_windows();
     assert_eq!(windows.len(), 1);
@@ -268,4 +301,45 @@ fn title_bar_window_navigates_the_frame_and_binds_the_back_button_to_can_go_back
     assert!(frame.can_go_back());
     assert!(bar.is_back_button_visible());
     close_all();
+}
+
+#[test]
+fn show_window_buttons_report_a_single_view_platform_instead_of_opening_a_window() {
+    let _application = start();
+    for (id, buttons) in [
+        (
+            "SystemBackdrops",
+            &["ShowBuiltInBackdropWindow", "ShowMicaControllerWindow", "ShowDesktopAcrylicControllerWindow"][..],
+        ),
+        ("TitleBar", &["ShowTitleBarDragRegionsWindow", "ShowTitleBarWindow"][..]),
+    ] {
+        // In the single view of an embeddable top level, and in no top level at all.
+        let root = page(id);
+        let view = single_view(&root);
+        assert!(window_samples::owner_window(&root).is_none(), "{id}");
+        for root in [root, page(id)] {
+            assert_eq!(error_text(&root), None, "{id}");
+            for button in buttons {
+                click(&root, button);
+                assert_eq!(error_text(&root).as_deref(), Some(NO_WINDOWS), "{id}: {button}");
+                assert!(window_samples::opened_windows().is_empty(), "{id}: {button}");
+            }
+        }
+        drop(view);
+    }
+}
+
+#[test]
+fn show_window_buttons_clear_the_single_view_message_once_the_page_is_in_a_window() {
+    let _application = start();
+    let root = page("TitleBar");
+    click(&root, "ShowTitleBarWindow");
+    assert_eq!(error_text(&root).as_deref(), Some(NO_WINDOWS));
+    let host = host(&root);
+    assert!(window_samples::owner_window(&root).is_some_and(|owner| owner == host));
+    click(&root, "ShowTitleBarWindow");
+    assert_eq!(error_text(&root), None);
+    assert_eq!(window_samples::opened_windows().len(), 1);
+    close_all();
+    assert!(window_samples::opened_windows().is_empty());
 }
