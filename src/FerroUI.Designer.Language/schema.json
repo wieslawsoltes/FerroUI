@@ -2536,6 +2536,25 @@
     ]
   },
   {
+    "name": "CollectionViewGroup",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "CollectionViewGroup",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Group": {
+        "name": "Group",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CollectionViewGroup.Group: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "CollectionViewSource",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::CollectionViewSource",
@@ -21966,6 +21985,134 @@
     "namespace_aliases": [
       "using:FerroUI.Styling",
       "clr-namespace:FerroUI.Styling;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "SemanticZoom",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SemanticZoom",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "ZoomedInView": {
+        "name": "ZoomedInView",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "SemanticZoom.ZoomedInView: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "ZoomedOutView": {
+        "name": "ZoomedOutView",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "SemanticZoom.ZoomedOutView: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "IsZoomedInViewActive": {
+        "name": "IsZoomedInViewActive",
+        "type_name": "bool",
+        "documentation": "SemanticZoom.IsZoomedInViewActive: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanChangeViews": {
+        "name": "CanChangeViews",
+        "type_name": "bool",
+        "documentation": "SemanticZoom.CanChangeViews: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsZoomOutButtonEnabled": {
+        "name": "IsZoomOutButtonEnabled",
+        "type_name": "bool",
+        "documentation": "SemanticZoom.IsZoomOutButtonEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SemanticZoomAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::SemanticZoomAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SemanticZoomLocation",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "SemanticZoomLocation",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Item": {
+        "name": "Item",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "SemanticZoomLocation.Item: Option<BoxedValue>",
+        "values": []
+      },
+      "Bounds": {
+        "name": "Bounds",
+        "type_name": "Rect",
+        "documentation": "SemanticZoomLocation.Bounds: Rect",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SemanticZoomViewChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "SemanticZoomViewChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsSourceZoomedInView": {
+        "name": "IsSourceZoomedInView",
+        "type_name": "bool",
+        "documentation": "SemanticZoomViewChangedEventArgs.IsSourceZoomedInView: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "SourceItem": {
+        "name": "SourceItem",
+        "type_name": "SemanticZoomLocation",
+        "documentation": "SemanticZoomViewChangedEventArgs.SourceItem: SemanticZoomLocation",
+        "values": []
+      },
+      "DestinationItem": {
+        "name": "DestinationItem",
+        "type_name": "SemanticZoomLocation",
+        "documentation": "SemanticZoomViewChangedEventArgs.DestinationItem: SemanticZoomLocation",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

@@ -1635,6 +1635,19 @@ pub fn selection_indicator() -> El<ferroui_controls::SelectionIndicator> {
     El::new()
 }
 
+pub use ferroui_controls::SemanticZoom;
+
+impl ViewClass for ferroui_controls::SemanticZoom {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SemanticZoom>::new()
+    }
+}
+
+/// Starts an element of [`SemanticZoom`](ferroui_controls::SemanticZoom).
+pub fn semantic_zoom() -> El<ferroui_controls::SemanticZoom> {
+    El::new()
+}
+
 pub use ferroui_controls::Separator;
 
 impl ViewClass for ferroui_controls::Separator {
@@ -8426,6 +8439,35 @@ pub trait SelectingMultiPageProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::SelectingMultiPage>> SelectingMultiPageProps for El<T> {}
+
+/// The properties and routed events of [`SemanticZoom`](ferroui_controls::SemanticZoom).
+pub trait SemanticZoomProps: ElementBuilder {
+    /// Sets [`SemanticZoom::zoomed_in_view_property`](ferroui_controls::SemanticZoom::zoomed_in_view_property).
+    fn zoomed_in_view<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::SemanticZoom>::zoomed_in_view_property(), value)
+    }
+
+    /// Sets [`SemanticZoom::zoomed_out_view_property`](ferroui_controls::SemanticZoom::zoomed_out_view_property).
+    fn zoomed_out_view<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::SemanticZoom>::zoomed_out_view_property(), value)
+    }
+
+    /// Sets [`SemanticZoom::is_zoomed_in_view_active_property`](ferroui_controls::SemanticZoom::is_zoomed_in_view_active_property).
+    fn is_zoomed_in_view_active<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::SemanticZoom>::is_zoomed_in_view_active_property(), value)
+    }
+
+    /// Sets [`SemanticZoom::can_change_views_property`](ferroui_controls::SemanticZoom::can_change_views_property).
+    fn can_change_views<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::SemanticZoom>::can_change_views_property(), value)
+    }
+
+    /// Sets [`SemanticZoom::is_zoom_out_button_enabled_property`](ferroui_controls::SemanticZoom::is_zoom_out_button_enabled_property).
+    fn is_zoom_out_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::SemanticZoom>::is_zoom_out_button_enabled_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SemanticZoom>> SemanticZoomProps for El<T> {}
 
 /// The properties and routed events of [`Shape`](ferroui_controls::shapes::Shape).
 pub trait ShapeProps: ElementBuilder {
