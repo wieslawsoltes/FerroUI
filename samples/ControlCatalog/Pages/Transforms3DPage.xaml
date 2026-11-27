@@ -1,0 +1,104 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="3D Transforms and animation"
+             x:Class="ControlCatalog.Pages.Transforms3DPage">
+  <!-- Not from upstream: the 3D transforms of FerroUI's 3D API (ferroui-media3d,
+       docs/porting/media3d.md). A large cube is scaled, turned and moved by a Transform3DGroup; a
+       small cube is moved out and then turned about the centre, so that it circles it. The angles of
+       both AxisAngleRotation3D are run by animations of the framework (an AxisAngleRotation3D is
+       Animatable), started by the code-behind (`transforms_3d_page.rs`) while the page is shown. -->
+  <ContentPage.Resources>
+    <!-- Four positions a face, so that each face has its own normal. -->
+    <MeshGeometry3D x:Key="CubeMesh"
+                    Positions="-1,-1,1 1,-1,1 1,1,1 -1,1,1  1,-1,-1 -1,-1,-1 -1,1,-1 1,1,-1  1,-1,1 1,-1,-1 1,1,-1 1,1,1  -1,-1,-1 -1,-1,1 -1,1,1 -1,1,-1  -1,1,1 1,1,1 1,1,-1 -1,1,-1  -1,-1,-1 1,-1,-1 1,-1,1 -1,-1,1"
+                    TriangleIndices="0 1 2 0 2 3  4 5 6 4 6 7  8 9 10 8 10 11  12 13 14 12 14 15  16 17 18 16 18 19  20 21 22 20 22 23"/>
+  </ContentPage.Resources>
+  <StackPanel Orientation="Vertical" Spacing="4">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A Transform3DGroup applies its transforms in order: scale, rotate and translate turn a cube in place and move it, translate and then rotate make it circle the centre.</TextBlock>
+
+    <WrapPanel Margin="2,12,2,2" Orientation="Horizontal">
+      <Border Margin="0,0,16,16" Background="#FF1E2330" CornerRadius="6" ClipToBounds="True">
+        <Viewport3D x:Name="Viewport" Width="560" Height="380">
+          <Viewport3D.Camera>
+            <PerspectiveCamera Position="0,3,9" LookDirection="0,-0.33,-1" UpDirection="0,1,0" FieldOfView="45"/>
+          </Viewport3D.Camera>
+          <ModelVisual3D>
+            <ModelVisual3D.Content>
+              <Model3DGroup>
+                <AmbientLight Color="#FF404040"/>
+                <DirectionalLight Color="White" Direction="-0.5,-1,-0.6"/>
+              </Model3DGroup>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+          <!-- The large cube: scaled, turned about its axis, then moved. -->
+          <ModelVisual3D>
+            <ModelVisual3D.Transform>
+              <Transform3DGroup>
+                <ScaleTransform3D ScaleX="1" ScaleY="1" ScaleZ="1"/>
+                <RotateTransform3D>
+                  <RotateTransform3D.Rotation>
+                    <AxisAngleRotation3D Axis="0,1,0" Angle="0"/>
+                  </RotateTransform3D.Rotation>
+                </RotateTransform3D>
+                <TranslateTransform3D OffsetX="0" OffsetY="0"/>
+              </Transform3DGroup>
+            </ModelVisual3D.Transform>
+            <ModelVisual3D.Content>
+              <GeometryModel3D Geometry="{StaticResource CubeMesh}">
+                <GeometryModel3D.Material>
+                  <MaterialGroup>
+                    <DiffuseMaterial Brush="#FF0078D4"/>
+                    <SpecularMaterial Brush="White" SpecularPower="30"/>
+                  </MaterialGroup>
+                </GeometryModel3D.Material>
+              </GeometryModel3D>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+          <!-- The small cube: made small, moved out, then turned about the centre of the scene. -->
+          <ModelVisual3D>
+            <ModelVisual3D.Transform>
+              <Transform3DGroup>
+                <ScaleTransform3D ScaleX="0.35" ScaleY="0.35" ScaleZ="0.35"/>
+                <TranslateTransform3D OffsetX="2.8"/>
+                <RotateTransform3D>
+                  <RotateTransform3D.Rotation>
+                    <AxisAngleRotation3D Axis="0,1,0" Angle="0"/>
+                  </RotateTransform3D.Rotation>
+                </RotateTransform3D>
+              </Transform3DGroup>
+            </ModelVisual3D.Transform>
+            <ModelVisual3D.Content>
+              <GeometryModel3D Geometry="{StaticResource CubeMesh}">
+                <GeometryModel3D.Material>
+                  <DiffuseMaterial Brush="#FFFFB900"/>
+                </GeometryModel3D.Material>
+              </GeometryModel3D>
+            </ModelVisual3D.Content>
+          </ModelVisual3D>
+        </Viewport3D>
+      </Border>
+
+      <StackPanel Width="260" Spacing="4">
+        <TextBlock FontSize="14" FontWeight="Bold">Animation</TextBlock>
+        <CheckBox x:Name="Animate" IsChecked="True" Content="Animate the rotations" IsCheckedChanged="AnimationChanged"/>
+        <TextBlock>Seconds a turn</TextBlock>
+        <Slider x:Name="SecondsPerTurn" Minimum="2" Maximum="20" Value="8" ValueChanged="AnimationChanged"/>
+        <TextBlock>Axis of the large cube</TextBlock>
+        <ComboBox x:Name="SpinAxis" SelectedIndex="0" HorizontalAlignment="Stretch" SelectionChanged="TransformChanged">
+          <ComboBoxItem>Y (up)</ComboBoxItem>
+          <ComboBoxItem>X (right)</ComboBoxItem>
+          <ComboBoxItem>Z (toward the camera)</ComboBoxItem>
+          <ComboBoxItem>Diagonal (1, 1, 1)</ComboBoxItem>
+        </ComboBox>
+
+        <TextBlock Margin="0,12,0,0" FontSize="14" FontWeight="Bold">Large cube</TextBlock>
+        <TextBlock>Scale</TextBlock>
+        <Slider x:Name="Scale" Minimum="0.4" Maximum="1.6" Value="1" ValueChanged="TransformChanged"/>
+        <TextBlock>Offset X</TextBlock>
+        <Slider x:Name="OffsetX" Minimum="-1.5" Maximum="1.5" Value="0" ValueChanged="TransformChanged"/>
+        <TextBlock>Offset Y</TextBlock>
+        <Slider x:Name="OffsetY" Minimum="-1" Maximum="1" Value="0" ValueChanged="TransformChanged"/>
+      </StackPanel>
+    </WrapPanel>
+  </StackPanel>
+</ContentPage>
