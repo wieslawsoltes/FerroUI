@@ -121,6 +121,29 @@ impl dyn TextRunProperties {
         )))
     }
 
+    /// The same properties with another foreground and other decorations.
+    pub(crate) fn with_style(
+        self: &Rc<Self>,
+        foreground: Option<&Rc<dyn IBrush>>,
+        decorations: Option<&TextDecorationCollection>,
+    ) -> Rc<dyn TextRunProperties> {
+        Rc::new(
+            GenericTextRunProperties::with_all(
+                self.typeface().clone(),
+                self.font_rendering_em_size(),
+                decorations.cloned(),
+                foreground.cloned(),
+                self.background_brush().cloned(),
+                self.baseline_alignment(),
+                self.culture_info().cloned(),
+                self.font_features().cloned(),
+            )
+            .with_requested_font_family(self.requested_font_family().clone())
+            .with_font_scale(self.font_scale())
+            .with_cached_glyph_typeface(self.cached_glyph_typeface()),
+        )
+    }
+
     /// The same properties with another typeface.
     pub(crate) fn with_typeface(self: &Rc<Self>, typeface: &Typeface) -> Rc<dyn TextRunProperties> {
         if self.typeface() == typeface {
