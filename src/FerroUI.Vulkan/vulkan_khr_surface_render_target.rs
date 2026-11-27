@@ -59,18 +59,21 @@ impl VulkanKhrRenderTarget {
     }
 
     fn create_image(&self, display: &VulkanDisplay) -> Result<(), VulkanError> {
+        // One mip level: the image is rendered to and copied to the swap chain, never sampled with mips.
         let image = VulkanImage::new(
             self.context.clone(),
             display.command_buffer_pool().clone(),
             self.format,
             display.size(),
-            0,
+            1,
         )?;
         *self.image.borrow_mut() = Some(Rc::new(image));
         Ok(())
     }
 
     fn destroy_image(&self) {
+        // Allowed wait (resize and dispose, never a steady frame): the image may be destroyed only when the frames
+        // in flight are done with it.
         let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
         if let Some(image) = self.image.borrow_mut().take() {
             image.dispose();
@@ -80,17 +83,15 @@ impl VulkanKhrRenderTarget {
     fn try_begin_draw(&self, lock: &LockGuard) -> Result<Rc<VulkanImage>, VulkanError> {
         let _ = lock;
         let display = self.display();
-        display.command_buffer_pool().free_used_command_buffers();
+        // Frees what has run of the one-time submissions (the layout of a new image), without waiting. The frames
+        // themselves use the frame slots of the display, which wait only for the frame of their slot.
+        display.command_buffer_pool().free_finished_command_buffers();
         let recreated = display.ensure_swapchain_available()?;
-        let image = self.image.borrow().clone();
-        match image {
-            Some(image) if !recreated => {
-                image.transition_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE)?;
-            }
-            _ => {
-                self.destroy_image();
-                self.create_image(&display)?;
-            }
+        // A kept image is in the layout of a colour attachment: it was created in it, and the copy of every frame
+        // to the swap chain returns it there. Only a new swap chain or the first frame makes a new image.
+        if recreated || self.image.borrow().is_none() {
+            self.destroy_image();
+            self.create_image(&display)?;
         }
         Ok(self.image.borrow().clone().expect("the image was created above"))
     }
@@ -114,6 +115,7 @@ impl IPlatformRenderSurfaceRenderTarget for VulkanKhrRenderTarget {
 
 impl IVulkanRenderTarget for VulkanKhrRenderTarget {
     fn dispose(&self) {
+        // Allowed wait (dispose): nothing of the target may be destroyed while a frame in flight uses it.
         let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
         self.destroy_image();
         if let Some(display) = self.display.borrow_mut().take() {

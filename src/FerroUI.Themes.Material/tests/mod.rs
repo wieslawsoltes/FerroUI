@@ -14,3 +14,4 @@ mod segmented_group;
 mod date_picker;
 mod time_picker;
 mod chips;
+mod typed_keys_tests;
