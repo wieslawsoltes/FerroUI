@@ -121,6 +121,15 @@ impl NavigationViewItemBase {
         }
     }
 
+    /// Whether the item is in the overflow menu of the top pane (WinUI's `Position` `TopOverflow`).
+    pub(crate) fn set_top_overflow(&self, value: bool) {
+        if let Some(item) = self.to_ref().cast::<NavigationViewItem>() {
+            if item.top_overflow.replace(value) != value {
+                item.update_parts();
+            }
+        }
+    }
+
     pub(crate) fn set_pane_open(&self, value: bool) {
         if let Some(item) = self.to_ref().cast::<NavigationViewItem>() {
             item.set_pane_open(value);
@@ -186,6 +195,7 @@ pub struct NavigationViewItem {
     restore_expanded: Cell<bool>,
     depth: Cell<usize>,
     top_navigation: Cell<bool>,
+    top_overflow: Cell<bool>,
     repeater_in_flyout: Cell<bool>,
     suggested_tool_tip: RefCell<Option<BoxedValue>>,
     is_pressed: Cell<bool>,
@@ -215,7 +225,7 @@ ferro_class_info!(NavigationViewItem {
             TemplatePart("NavigationViewItemMenuItemsHost", type(Ref<StackPanel>)),
             TemplatePart("ChildrenFlyout", type(Ref<Popup>)),
             TemplatePart("FlyoutContentGrid", type(Ref<Panel>)),
-            PseudoClasses(":pressed", ":on-top-navigation-primary", ":icon-collapsed", ":icon-only", ":content-only",
+            PseudoClasses(":pressed", ":on-top-navigation-primary", ":on-top-navigation-overflow", ":icon-collapsed", ":icon-only", ":content-only",
                 ":info-badge-collapsed", ":chevron-visible-open", ":chevron-visible-closed",
                 ":closed-compact-and-top-level-item"),
         ],
@@ -522,6 +532,7 @@ impl NavigationViewItem {
             restore_expanded: Cell::new(false),
             depth: Cell::new(0),
             top_navigation: Cell::new(false),
+            top_overflow: Cell::new(false),
             repeater_in_flyout: Cell::new(false),
             suggested_tool_tip: RefCell::new(None),
             is_pressed: Cell::new(false),
@@ -903,6 +914,8 @@ impl NavigationViewItem {
         let expanded = self.is_expanded();
         // UpdateVisualStateForNavigationViewPositionChange.
         classes.set(":on-top-navigation-primary", top);
+        let overflow = self.top_overflow.get() && !top;
+        classes.set(":on-top-navigation-overflow", overflow);
         // IconStates (the left pane) and NavigationViewIconPositionStates (the top pane).
         classes.set(":icon-collapsed", !show_icon);
         classes.set(":icon-only", show_icon && !show_content);
@@ -918,7 +931,7 @@ impl NavigationViewItem {
 
         let parts = self.parts.borrow().clone();
         // UpdateItemIndentation: an item in a flyout is at depth 0.
-        indent(&parts.content_grid, if top { 0 } else { self.depth.get() });
+        indent(&parts.content_grid, if top || overflow { 0 } else { self.depth.get() });
         // ShowSelectionIndicator: the indicator of the selected item, or of the collapsed
         // ancestor of a selected child.
         if let Some(indicator) = &parts.selection_indicator {

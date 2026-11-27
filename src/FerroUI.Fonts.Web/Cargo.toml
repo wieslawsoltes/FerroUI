@@ -1,0 +1,60 @@
+[package]
+name = "ferroui-fonts-web"
+description = "Web fonts for FerroUI: @font-face, the CSS Font Loading API, WOFF and WOFF2"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+# WOFF2, which needs a Brotli decoder. Off by default: its static dictionary is the largest part
+# of what this feature adds to an application.
+woff2 = ["dep:brotli-decompressor"]
+# Fonts over `https:` on desktop and mobile. Off by default: it brings a TLS stack. In the browser
+# fonts are fetched by the browser, and this feature adds nothing.
+http = ["dep:ureq"]
+# Fonts over the network in the browser, through `fetch()`.
+browser = ["dep:wasm-bindgen", "dep:js-sys"]
+
+[dependencies]
+ferroui-base.workspace = true
+# The text controls, whose layouts are redone when a font arrives.
+ferroui-controls.workspace = true
+ferroui-fonts-web-core.workspace = true
+url.workspace = true
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+brotli-decompressor = { workspace = true, optional = true }
+
+# HTTPS only unless plain HTTP is asked for, with limits on redirects, size and time.
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+ureq = { version = "2.12.1", default-features = false, features = ["tls"], optional = true }
+
+[dev-dependencies]
+ferroui-fonts-web-core = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["testing", "type-tables"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The run-time loader and the compiler of markup, for the tests that declare a face in XAML.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+ferroui-markup-xaml.workspace = true
+# A real backend for the tests. A path and no version: a development dependency without a version
+# is left out of the published package (docs/release.md, "Dependency order").
+ferroui-vello = { path = "../Vello/FerroUI.Vello" }
+# The real shaper and its language tags, for the tests of `font-language-override`.
+ferroui-harfbuzz = { path = "../HarfBuzz/FerroUI.HarfBuzz" }
+harfbuzz-sys.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
