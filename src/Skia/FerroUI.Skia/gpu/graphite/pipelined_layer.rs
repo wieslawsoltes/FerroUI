@@ -1306,6 +1306,20 @@ fn dirty_band_clips(mut clips: Vec<(usize, IRect)>, rows: Option<(i32, i32)>) ->
     clips
 }
 
+/// What the bands of a frame walk and draw: every band walks every draw of the frame's picture
+/// (`walked`), and draws those whose device rows meet its own (`inside`).
+fn band_draw_counts(rows: &[(f32, f32)], clips: &[(usize, IRect)]) -> (u64, u64) {
+    let walked = (rows.len() * clips.len()) as u64;
+    let inside = clips
+        .iter()
+        .map(|(_, clip)| {
+            let (top, bottom) = (clip.top as f32, clip.bottom as f32);
+            rows.iter().filter(|(draw_top, draw_bottom)| *draw_top < bottom && *draw_bottom > top).count() as u64
+        })
+        .sum();
+    (walked, inside)
+}
+
 /// How long the threads worked on each band of a frame, by the index of the band: on the stack.
 struct BandTimes {
     times: [Duration; MAX_FRAME_PIPELINING_BANDS],
@@ -1443,6 +1457,8 @@ struct PipelinedLayer {
     clips_scratch: RefCell<Vec<(usize, IRect)>>,
     /// The leases of the frame before, reused by the next when nothing else holds them.
     leases: RefCell<Option<Rc<RecordedLeases>>>,
+    /// The device rows of the draws of the recorded frame (with the feature `perf-counters`).
+    draw_rows: RefCell<Vec<(f32, f32)>>,
 }
 
 impl PipelinedLayer {
@@ -1534,6 +1550,10 @@ impl PipelinedLayer {
             }
             Err(reason) => {
                 ferroui_base::perf_count!(SkiaPipelinedFramesPlayedDirectly);
+                if ferroui_base::diagnostics::perf_counters::ENABLED {
+                    // The draws of a frame the bands did not walk are not counted.
+                    crate::drawing_context_impl::take_band_draw_rows(&mut self.draw_rows.borrow_mut());
+                }
                 self.flush_pending();
                 self.play_on_main(&picture, None);
                 if reason != Fallback::Disposed {
@@ -1643,6 +1663,14 @@ impl PipelinedLayer {
                 if pool.play(band) {
                     sent += 1;
                 }
+            }
+            if ferroui_base::diagnostics::perf_counters::ENABLED {
+                let mut rows = self.draw_rows.borrow_mut();
+                crate::drawing_context_impl::take_band_draw_rows(&mut rows);
+                let (walked, inside) = band_draw_counts(&rows, &clips);
+                use ferroui_base::diagnostics::perf_counters::{add, PerfCounter};
+                add(PerfCounter::SkiaBandDrawsWalked, walked);
+                add(PerfCounter::SkiaBandDrawsInside, inside);
             }
             // A band that was not sent is found missing when the frame is
             // collected, and played on the recorder of the context then.
@@ -1758,6 +1786,7 @@ impl PipelinedLayerSurface {
             frame_rows: Cell::new(None),
             clips_scratch: RefCell::new(Vec::new()),
             leases: RefCell::new(None),
+            draw_rows: RefCell::new(Vec::new()),
             src_paint: {
                 let mut paint = Paint::default();
                 paint.set_blend_mode(BlendMode::Src);
@@ -2220,6 +2249,16 @@ mod tests {
 
         let mut policy = PipelinePolicy::new(SkiaFramePipelining::Off);
         assert!(!run(&mut policy, &mut now, 10, FRAME, Duration::from_millis(30)).iter().any(|pipelined| *pipelined));
+    }
+
+    #[test]
+    fn the_draws_a_band_walks_and_those_in_its_rows_are_counted() {
+        let clips = band_clips((100, 256), 4);
+        // One draw in the top band, one across the first edge, one over all of the layer.
+        let rows = [(2.0, 20.0), (60.0, 70.0), (0.0, 256.0)];
+        assert_eq!(band_draw_counts(&rows, &clips), (12, 1 + 2 + 4));
+        assert_eq!(band_draw_counts(&rows, &clips[..1]), (3, 3));
+        assert_eq!(band_draw_counts(&[], &clips), (0, 0));
     }
 
     #[test]
