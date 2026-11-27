@@ -183,6 +183,46 @@ fn viewbox_options_size_and_stretch_the_viewbox() {
     assert_eq!(viewbox.stretch_direction(), StretchDirection::Both);
 }
 
+/// VariableSizedWrapGridPage: the four tiles in 44 pixel cells, three per column, and
+/// `OrientationGroup_SelectionChanged`, which lays the same tiles out in rows.
+#[test]
+fn variable_sized_wrap_grid_example_places_the_tiles_and_follows_the_orientation() {
+    use ferroui_base::layout::Orientation;
+    use ferroui_base::Rect;
+    use ferroui_controls::{RadioButtons, VariableSizedWrapGrid};
+    let _application = start();
+    let root = page("VariableSizedWrapGrid");
+    let panel = root.get_control::<VariableSizedWrapGrid>("Control1");
+    assert_eq!(panel.children().count(), 4);
+    assert_eq!((panel.item_width(), panel.item_height(), panel.maximum_rows_or_columns()), (44.0, 44.0, 3));
+    let blue = panel.children().get(1);
+    let yellow = panel.children().get(3);
+    assert_eq!((VariableSizedWrapGrid::get_row_span(&blue), VariableSizedWrapGrid::get_column_span(&blue)), (2, 1));
+    assert_eq!(
+        (VariableSizedWrapGrid::get_row_span(&yellow), VariableSizedWrapGrid::get_column_span(&yellow)),
+        (2, 2)
+    );
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    assert_eq!(panel.orientation(), Orientation::Vertical);
+    let bounds = |index: usize| panel.children().get(index).bounds();
+    assert_eq!(bounds(0), Rect::new(0.0, 0.0, 44.0, 44.0));
+    assert_eq!(bounds(1), Rect::new(0.0, 48.0, 44.0, 80.0));
+    assert_eq!(bounds(2), Rect::new(48.0, 0.0, 80.0, 44.0));
+    assert_eq!(bounds(3), Rect::new(48.0, 48.0, 80.0, 80.0));
+    let group = root.get_control::<RadioButtons>("OrientationGroup");
+    group.set_selected_index(0);
+    assert_eq!(panel.orientation(), Orientation::Horizontal);
+    window.update_layout();
+    assert_eq!(bounds(1), Rect::new(44.0, 4.0, 44.0, 80.0));
+    assert_eq!(bounds(2), Rect::new(4.0, 88.0, 80.0, 44.0));
+    group.set_selected_index(1);
+    assert_eq!(panel.orientation(), Orientation::Vertical);
+    window.close();
+}
+
 #[test]
 fn wrap_panel_options_set_the_orientation_spacing_and_padding() {
     use ferroui_base::layout::Orientation;

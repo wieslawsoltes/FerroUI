@@ -1128,6 +1128,14 @@ FerroUI.Controls.TreeViewItem overrides FerroUI.Controls.PlatformFeedback.Feedba
 FerroUI.Controls.TreeViewItem overrides FerroUI.Input.InputElement.Focusable = True; OneWay
 FerroUI.Controls.TreeViewItem.IsExpanded: bool = False; TwoWay
 FerroUI.Controls.Utils.BindingEvaluator.Value: Option<Rc<dyn AnyValue>> = (null); OneWay
+FerroUI.Controls.VariableSizedWrapGrid.ColumnSpan: i32 = 1; OneWay; attached
+FerroUI.Controls.VariableSizedWrapGrid.HorizontalChildrenAlignment: HorizontalAlignment = Left; OneWay
+FerroUI.Controls.VariableSizedWrapGrid.ItemHeight: f64 = NaN; OneWay
+FerroUI.Controls.VariableSizedWrapGrid.ItemWidth: f64 = NaN; OneWay
+FerroUI.Controls.VariableSizedWrapGrid.MaximumRowsOrColumns: i32 = -1; OneWay
+FerroUI.Controls.VariableSizedWrapGrid.Orientation: Orientation = Vertical; OneWay
+FerroUI.Controls.VariableSizedWrapGrid.RowSpan: i32 = 1; OneWay; attached
+FerroUI.Controls.VariableSizedWrapGrid.VerticalChildrenAlignment: VerticalAlignment = Top; OneWay
 FerroUI.Controls.Viewbox overrides FerroUI.Visual.ClipToBounds = True; OneWay
 FerroUI.Controls.Viewbox.Stretch: Stretch = Uniform; OneWay
 FerroUI.Controls.Viewbox.StretchDirection: StretchDirection = Both; OneWay

@@ -117,6 +117,7 @@ mod tree_view_page;
 mod viewbox_page;
 mod window_customizations_page;
 mod wrap_panel_page;
+mod variable_sized_wrap_grid_page;
 
 #[path = "TextBox/mod.rs"]
 mod text_box;
@@ -311,6 +312,7 @@ pub use tree_view_page::TreeViewPage;
 pub use viewbox_page::ViewboxPage;
 pub use window_customizations_page::WindowCustomizationsPage;
 pub use wrap_panel_page::WrapPanelPage;
+pub use variable_sized_wrap_grid_page::VariableSizedWrapGridPage;
 
 /// The classes of this namespace (`X::TYPE`), per directory.
 pub(crate) const TYPES: &[&[&TypeInfo]] = &[ROOT_TYPES, open_gl::TYPES, text_box::TYPES, command_bar::TYPES, gestures::TYPES, content_page::TYPES, navigation_page::TYPES, drawer_page::TYPES, pips_pager::TYPES, tabbed_page::TYPES, carousel_page_samples::TYPES];
@@ -458,6 +460,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ViewboxPage::TYPE,
     WindowCustomizationsPage::TYPE,
     WrapPanelPage::TYPE,
+    VariableSizedWrapGridPage::TYPE,
 ];
 
 const ROOT_CLASSES: &[&XamlClass] = &[
@@ -572,6 +575,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ViewboxPage::XAML_CLASS,
     &WindowCustomizationsPage::XAML_CLASS,
     &WrapPanelPage::XAML_CLASS,
+    &VariableSizedWrapGridPage::XAML_CLASS,
 ];
 
 const ROOT_MARKUP_TYPES: &[&MarkupType] =

@@ -363,6 +363,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::window::Window,
     crate::window_base::WindowBase,
     crate::wrap_panel::WrapPanel,
+    // --- WinUI's VariableSizedWrapGrid (docs/porting/winui-controls.md, section 10.19) ---
+    crate::variable_sized_wrap_grid::VariableSizedWrapGrid,
     // FerroUI.Controls.Chrome
     crate::chrome::ResizeGripLayer,
     crate::chrome::WindowDecorationProperties,

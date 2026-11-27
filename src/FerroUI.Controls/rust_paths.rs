@@ -181,6 +181,7 @@ ferroui_base::ferro_rust_paths! {
         crate::TreeView,
         crate::TreeViewItem,
         crate::UserControl,
+        crate::VariableSizedWrapGrid,
         crate::Viewbox,
         crate::VirtualizingCarouselPanel,
         crate::VirtualizingPanel,

@@ -2233,6 +2233,19 @@ pub fn user_control() -> El<ferroui_controls::UserControl> {
     El::new()
 }
 
+pub use ferroui_controls::VariableSizedWrapGrid;
+
+impl ViewClass for ferroui_controls::VariableSizedWrapGrid {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::VariableSizedWrapGrid>::new()
+    }
+}
+
+/// Starts an element of [`VariableSizedWrapGrid`](ferroui_controls::VariableSizedWrapGrid).
+pub fn variable_sized_wrap_grid() -> El<ferroui_controls::VariableSizedWrapGrid> {
+    El::new()
+}
+
 pub use ferroui_controls::Viewbox;
 
 impl ViewClass for ferroui_controls::Viewbox {
@@ -10569,6 +10582,50 @@ pub trait UniformGridProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::UniformGrid>> UniformGridProps for El<T> {}
 
+/// The properties and routed events of [`VariableSizedWrapGrid`](ferroui_controls::VariableSizedWrapGrid).
+pub trait VariableSizedWrapGridProps: ElementBuilder {
+    /// Sets [`VariableSizedWrapGrid::item_height_property`](ferroui_controls::VariableSizedWrapGrid::item_height_property).
+    fn item_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::item_height_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::item_width_property`](ferroui_controls::VariableSizedWrapGrid::item_width_property).
+    fn item_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::item_width_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::orientation_property`](ferroui_controls::VariableSizedWrapGrid::orientation_property).
+    fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::orientation_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::horizontal_children_alignment_property`](ferroui_controls::VariableSizedWrapGrid::horizontal_children_alignment_property).
+    fn horizontal_children_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::horizontal_children_alignment_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::vertical_children_alignment_property`](ferroui_controls::VariableSizedWrapGrid::vertical_children_alignment_property).
+    fn vertical_children_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::vertical_children_alignment_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::maximum_rows_or_columns_property`](ferroui_controls::VariableSizedWrapGrid::maximum_rows_or_columns_property).
+    fn maximum_rows_or_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::maximum_rows_or_columns_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::row_span_property`](ferroui_controls::VariableSizedWrapGrid::row_span_property).
+    fn row_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::row_span_property(), value)
+    }
+
+    /// Sets [`VariableSizedWrapGrid::column_span_property`](ferroui_controls::VariableSizedWrapGrid::column_span_property).
+    fn column_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::column_span_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::VariableSizedWrapGrid>> VariableSizedWrapGridProps for El<T> {}
+
 /// The properties and routed events of [`Viewbox`](ferroui_controls::Viewbox).
 pub trait ViewboxProps: ElementBuilder {
     /// Sets [`Viewbox::stretch_property`](ferroui_controls::Viewbox::stretch_property).
@@ -11937,6 +11994,16 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`Typography::variants_property`](ferroui_controls::documents::Typography::variants_property).
     fn typography_variants<M>(self, value: impl IntoProp<ferroui_base::media::FontVariants, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::variants_property(), value)
+    }
+
+    /// Sets the attached [`VariableSizedWrapGrid::row_span_property`](ferroui_controls::VariableSizedWrapGrid::row_span_property).
+    fn variable_sized_wrap_grid_row_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::row_span_property(), value)
+    }
+
+    /// Sets the attached [`VariableSizedWrapGrid::column_span_property`](ferroui_controls::VariableSizedWrapGrid::column_span_property).
+    fn variable_sized_wrap_grid_column_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::VariableSizedWrapGrid>::column_span_property(), value)
     }
 
     /// Sets the attached [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).

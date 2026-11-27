@@ -1,0 +1,29 @@
+<!-- Ported from the pinned VariableSizedWrapGrid example of WinUI Gallery (14061eea) and the
+     handler of VariableSizedWrapGridPage.xaml.cs (layout_samples.rs); see ../NOTICE.md. The
+     native VariableSizedWrapGrid of ferroui-controls with the source's four tiles: 44 pixel
+     cells, three per line, a tile of two rows, one of two columns and one of two by two. The
+     option group keeps the source's RadioButton items with their Tags (Vertical checked, so the
+     SelectedIndex is 1); the Orientation substitution of the source viewer follows the panel. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="A VariableSizedWrapGrid control." FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <VariableSizedWrapGrid x:Name="Control1" Width="400" HorizontalAlignment="Left" VerticalAlignment="Top"
+                             ItemHeight="44" ItemWidth="44" MaximumRowsOrColumns="3">
+        <Rectangle Fill="Red" />
+        <Rectangle Height="80" Fill="Blue" VariableSizedWrapGrid.RowSpan="2" />
+        <Rectangle Width="80" Fill="Green" VariableSizedWrapGrid.ColumnSpan="2" />
+        <Rectangle Width="80" Height="80" Fill="Yellow" VariableSizedWrapGrid.ColumnSpan="2"
+                   VariableSizedWrapGrid.RowSpan="2" />
+      </VariableSizedWrapGrid>
+      <RadioButtons x:Name="OrientationGroup" Grid.Column="1"
+                    AutomationProperties.AutomationId="VariableSizedWrapGridOrientation"
+                    AutomationProperties.Name="VariableSizedWrapGrid orientation" Header="Orientation"
+                    SelectedIndex="1">
+        <RadioButton Content="Horizontal" Tag="Horizontal" />
+        <RadioButton Content="Vertical" Tag="Vertical" />
+      </RadioButtons>
+    </Grid>
+  </StackPanel>
+</StackPanel>
