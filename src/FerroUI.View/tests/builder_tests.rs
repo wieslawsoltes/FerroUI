@@ -319,6 +319,89 @@ fn definitions_of_the_same_count_and_kinds_take_their_sizes_in_place() {
 }
 
 #[test]
+fn typed_definitions_take_their_sizes_in_place_like_text() {
+    use crate::{auto, px, rerender, star, GridDefinitionSizes, GridDefinitionsText};
+    use ferroui_controls::{ColumnDefinition, GridLength, GridUnitType};
+    let owner = Owner::new_root();
+    let (weight, pixels, control) = owner.with(|| {
+        let (weight, pixels) = (signal(1_u32), signal(false));
+        let control = rerender(move || {
+            let rows = if pixels.get() { [auto(), px(40.0)] } else { [auto(), star(1.0)] };
+            grid()
+                .row_definitions(rows)
+                .set(GridDefinitionSizes::columns_property(), move || [star(f64::from(weight.get())), auto()])
+        })
+        .into_element()
+        .mount();
+        (weight, pixels, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    let columns = grid.column_definitions();
+    let first: Ref<ColumnDefinition> = columns.snapshot()[0].clone();
+    assert_eq!(first.width(), star(1.0));
+
+    // The same count and kinds: the collection and its definitions stay and take the sizes.
+    weight.set(3);
+    assert!(grid.column_definitions() == columns);
+    assert!(grid.column_definitions().snapshot()[0].ptr_eq(&first));
+    assert_eq!(first.width(), star(3.0));
+
+    // Another kind: a new collection, as the setter of the grid gives it.
+    let rows = grid.row_definitions();
+    pixels.set(true);
+    assert!(grid.row_definitions() != rows);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), GridLength::new(40.0, GridUnitType::Pixel));
+
+    // The typed form holds no text.
+    assert_eq!(grid.get_value(GridDefinitionsText::rows_property()), None);
+    assert_eq!(grid.get_value(GridDefinitionsText::columns_property()), None);
+    owner.dispose();
+}
+
+#[test]
+fn typed_and_text_definitions_are_the_same_lengths() {
+    use crate::{auto, px, star, IntoGridLengths};
+    let typed = [auto(), star(1.0), star(2.0), px(40.0)].into_grid_lengths("row");
+    assert_eq!(typed, "Auto,*,2*,40".into_grid_lengths("row"));
+    let (control, owner) = mount(grid().row_definitions([auto(), star(2.0)]).column_definitions("*,40"));
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), star(2.0));
+    assert_eq!(grid.column_definitions().snapshot()[1].width(), px(40.0));
+    owner.dispose();
+}
+
+#[test]
+fn an_element_going_from_text_to_typed_lengths_keeps_the_typed_ones() {
+    use crate::{auto, px, rerender, GridDefinitionSizes, GridDefinitionsText};
+    let owner = Owner::new_root();
+    let (typed, control) = owner.with(|| {
+        let typed = signal(false);
+        let control = rerender(move || {
+            if typed.get() {
+                grid().set(GridDefinitionSizes::rows_property(), [auto(), px(10.0)])
+            } else {
+                grid().set(GridDefinitionsText::rows_property(), "Auto,20")
+            }
+        })
+        .into_element()
+        .mount();
+        (typed, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(20.0));
+    typed.set(true);
+    assert_eq!(grid.row_definitions().count(), 2);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    owner.dispose();
+}
+
+#[test]
+#[should_panic(expected = "are not row definitions")]
+fn row_definitions_that_do_not_parse_say_so() {
+    let _ = grid().row_definitions("Auto,nonsense");
+}
+
+#[test]
 fn an_element_is_data_that_compares_by_value() {
     let a: Element = button().width(10.0).child("x").into_element();
     let b: Element = button().width(10.0).child("x").into_element();
