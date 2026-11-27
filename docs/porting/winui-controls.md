@@ -521,6 +521,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | RadialGradientBrush | 1 of 1 | ported | `brush_samples.rs` | `brush_samples_tests.rs` |
 | IconElement | 3 ported, 3 partial: no BitmapIcon or ImageIcon (Images), no SVG | partial | `brush_samples.rs` | `tests.rs`, `brush_samples_tests.rs` |
 | Spacing | 1 of 1 | ported | `brush_samples.rs` (no code-behind upstream) | `brush_samples_tests.rs` |
+| Iconography | the page (no catalog example): the 1574 icons of `IconsData.json` in an `ItemsView`, the search over code, name and tags, the side panel with the `FontIcon` and `SymbolIcon` code, the tags in a `FlowLayout` (the source's `WrapLayout`) | ported | `iconography_samples.rs`, `icons_data.rs` (generated, gallery only) | `iconography_samples_tests.rs` |
 | Typography | 1 partial: no TeachingTip (a Flyout) | partial | `brush_samples.rs` | `brush_samples_tests.rs` |
 | Binding | 7 of 7 | ported | `binding_samples.rs` | `x_bind_tests.rs`, `binding_samples_tests.rs` |
 | Templates | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
