@@ -1,0 +1,33 @@
+<!--
+  Not from the upstream theme: FontIcon of WinUI, with the template part and the properties of the
+  WinUI theme of this repository (Controls/FontIcon.xaml there). One text block, stretched
+  horizontally and centred vertically, is the part PART_Text; the control gives it the glyph, the
+  font and the foreground of the icon. The font is not bundled: off Windows an application supplies
+  a symbol font and sets SymbolThemeFontFamily or the icon's FontFamily.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <FontIcon Glyph="&#xE710;" />
+        <FontIcon Glyph="&#xE72D;" MirroredWhenRightToLeft="True" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type FontIcon}" TargetType="FontIcon">
+    <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock x:Name="PART_Text"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   AutomationProperties.AccessibilityView="Raw" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
