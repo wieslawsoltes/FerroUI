@@ -1,4 +1,4 @@
-use crate::{Border, WrapPanel, WrapPanelItemsAlignment};
+use crate::{Border, WrapPanel, WrapPanelItemsAlignment, WrapPanelItemsStretch};
 use ferroui_base::layout::{LayoutHelper, Orientation};
 use ferroui_base::{Rect, Ref, Size};
 
@@ -47,6 +47,41 @@ fn lays_out_horizontally_on_separate_lines() {
     assert_eq!(target.bounds().size(), Size::new(100.0, 100.0));
     assert_eq!(bounds(&target, 0), Rect::new(0.0, 0.0, 100.0, 50.0));
     assert_eq!(bounds(&target, 1), Rect::new(0.0, 50.0, 100.0, 50.0));
+}
+
+#[test]
+fn items_stretch_last_gives_the_final_item_the_rest_of_its_line() {
+    let target = WrapPanel::new();
+    target.set_width(200.0);
+    target.set_item_spacing(10.0);
+    target.set_items_stretch(WrapPanelItemsStretch::Last);
+    target.children().add(border(120.0, 50.0));
+    target.children().add(min_width_border(40.0));
+    target.children().add(min_width_border(40.0));
+
+    measure_and_arrange(&target);
+
+    assert_eq!(target.bounds().size().width, 200.0);
+    assert_eq!(bounds(&target, 0).width, 120.0);
+    assert_eq!(bounds(&target, 1), Rect::new(130.0, 0.0, 40.0, 50.0));
+    // The final item is on the next line, alone: it takes all of it.
+    assert_eq!(bounds(&target, 2).x, 0.0);
+    assert_eq!(bounds(&target, 2).width, 200.0);
+
+    target.set_items_stretch(WrapPanelItemsStretch::None);
+    measure_and_arrange(&target);
+    assert_eq!(bounds(&target, 2).width, 40.0);
+}
+
+#[test]
+fn items_stretch_last_without_a_width_keeps_the_size_of_the_item() {
+    let target = WrapPanel::new();
+    target.set_items_stretch(WrapPanelItemsStretch::Last);
+    target.children().add(border(100.0, 50.0));
+
+    measure_and_arrange(&target);
+
+    assert_eq!(bounds(&target, 0).width, 100.0);
 }
 
 #[test]

@@ -1,0 +1,37 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.TabViewPage"
+             xmlns="https://github.com/ferroui"
+             Header="TabView">
+    <StackPanel Orientation="Vertical" Spacing="8">
+        <TextBlock Classes="h2">Tabs that can be added, closed and selected, with the content of the selected tab</TextBlock>
+        <Separator Margin="0 16"/>
+        <TabView x:Name="Tabs" Height="260" SelectedIndex="0">
+            <TabViewItem Header="Home" IsClosable="False">
+                <TabViewItem.IconSource>
+                    <SymbolIconSource Symbol="Home"/>
+                </TabViewItem.IconSource>
+                <TextBlock Text="The first tab cannot be closed." Margin="12"/>
+            </TabViewItem>
+            <TabViewItem Header="Document 1">
+                <TabViewItem.IconSource>
+                    <SymbolIconSource Symbol="Document"/>
+                </TabViewItem.IconSource>
+                <TextBlock Text="The content of Document 1." Margin="12"/>
+            </TabViewItem>
+            <TabViewItem Header="Document 2">
+                <TabViewItem.IconSource>
+                    <SymbolIconSource Symbol="Document"/>
+                </TabViewItem.IconSource>
+                <TextBlock Text="The content of Document 2." Margin="12"/>
+            </TabViewItem>
+        </TabView>
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <TextBlock Text="Tab width" VerticalAlignment="Center"/>
+            <ComboBox x:Name="WidthMode" SelectedIndex="0" Width="160">
+                <ComboBoxItem Content="Equal"/>
+                <ComboBoxItem Content="SizeToContent"/>
+                <ComboBoxItem Content="Compact"/>
+            </ComboBox>
+        </StackPanel>
+    </StackPanel>
+</ContentPage>

@@ -1,6 +1,7 @@
 //! Exercises the original page handlers against native Frame and animation services.
 
 use crate::connected_animation_samples::{
+    activate_item,
     content, item_control, ConnectedCardPage, ConnectedDetailPage, ConnectedFirstPage,
     ConnectedListPage, ConnectedRepeaterPage, ConnectedSecondPage,
 };
@@ -34,13 +35,8 @@ fn click(button: &Button) {
 }
 
 fn item_count(root: &Control) -> usize {
-    root.get_logical_descendants()
-        .filter_map(|child| child.cast::<Button>())
-        .filter(|button| {
-            button
-                .name()
-                .is_some_and(|name| name.starts_with("ConnectedItem"))
-        })
+    (1..=64)
+        .take_while(|index| item_control::<Control>(root, &format!("ConnectedItem{index}")).is_some())
         .count()
 }
 
@@ -102,8 +98,7 @@ fn connected_collection_passes_selected_data_and_returns_to_the_cached_source_pa
         NavigationCacheMode::Enabled
     );
     let list = content(&frame).unwrap();
-    let third = item_control::<Button>(&list, "ConnectedItem3").unwrap();
-    click(&third);
+    activate_item(&list, 2);
     assert_eq!(
         frame.current_source_page_type(),
         Some(ConnectedDetailPage::PAGE_TYPE)
@@ -162,7 +157,7 @@ fn connected_collection_description_tooltip_tracks_real_trimming_and_releases_it
     let weak_description = {
         let root = page();
         let collection = content(&root.get_control::<Frame>("ConnectedCollectionFrame")).unwrap();
-        let item = item_control::<Button>(&collection, "ConnectedItem5").unwrap();
+        let item = item_control::<Control>(&collection, "ConnectedItem5").unwrap();
         let description = item
             .get_logical_descendants()
             .filter_map(|child| child.cast::<TextBlock>())
@@ -271,7 +266,7 @@ fn connected_manual_items_accept_keyboard_activation_and_restore_the_saved_scrol
         saved.y > 0.0,
         "the real scroll presenter has a nonzero offset"
     );
-    let item = item_control::<Button>(&form, "ConnectedItem7").unwrap();
+    let item = item_control::<Control>(&form, "ConnectedItem7").unwrap();
     assert!(item.focus());
     let mut enter = KeyEventArgs::new();
     enter.key = Key::Enter;
@@ -330,7 +325,7 @@ fn connected_card_uses_selected_item_details_and_restores_its_overlay_after_retu
     let smoke = form.get_control::<Grid>("SmokeGrid");
     let destination = form.get_control::<Border>("DestinationElement");
     assert!(!smoke.is_visible());
-    click(&item_control::<Button>(&form, "ConnectedItem10").unwrap());
+    activate_item(&form, 9);
     assert!(smoke.is_visible());
     assert_eq!(
         form.get_control::<TextBlock>("CardTitle").text().as_deref(),
@@ -522,7 +517,7 @@ fn connected_capture_decodes_original_landscapes_and_propagates_the_selected_bit
     let collection = content(&frame).unwrap();
     let source = item_control::<Image>(&collection, "ConnectedImage3").unwrap();
     let source_pixels = pixels(&source, PixelSize::new(400, 268));
-    click(&item_control::<Button>(&collection, "ConnectedItem3").unwrap());
+    activate_item(&collection, 2);
     let detail = content(&frame).unwrap();
     assert_eq!(
         pixels(
@@ -540,7 +535,7 @@ fn connected_capture_decodes_original_landscapes_and_propagates_the_selected_bit
         .unwrap()
         .source()
         .unwrap();
-    click(&item_control::<Button>(&card, "ConnectedItem10").unwrap());
+    activate_item(&card, 9);
     let selected = card.get_control::<Image>("DetailImage").source().unwrap();
     assert!(
         Rc::ptr_eq(&original, &selected),

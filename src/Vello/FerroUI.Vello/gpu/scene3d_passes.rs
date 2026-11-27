@@ -25,16 +25,23 @@
 //! then draws its 3D scenes with the CPU reference of step D3, each counted
 //! (`ferroui_render3d::scenes_drawn_on_cpu`) by the drawing context.
 //!
+//! **Frames of a video or a camera (step D7).** An image brush whose bitmap is a shared frame of
+//! this device samples the frame's converted texture ([`VelloSharedFrameBitmap::texture`], the one
+//! conversion the 2D path also draws from): no copy, no upload, and a new frame is a new render
+//! with no mesh or texture upload.
+//!
 //! The executors are kept per device and thread, as the pipelines of the other passes are, and
 //! go with their device.
 
-use super::{effect_passes, VelloDeviceTexture, VelloWgpuDevice};
+use super::{effect_passes, VelloDeviceTexture, VelloSharedFrameBitmap, VelloWgpuDevice};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::SharedBitmapImpl;
 use ferroui_base::rendering::scene3d::Scene3DSnapshot;
 use ferroui_base::PixelSize;
 use ferroui_render3d::brush::scene_texture_inputs;
 use ferroui_render3d::wgpu_executor::{
-    gpu_counters, texture_counters, Scene3DTarget, Scene3DViewport, Scene3DWgpuError, Scene3DWgpuExecutor,
+    gpu_counters, texture_counters, Scene3DDeviceTexture, Scene3DDeviceTextures, Scene3DTarget, Scene3DViewport,
+    Scene3DWgpuError, Scene3DWgpuExecutor,
 };
 use std::cell::{Cell, RefCell};
 use std::mem::ManuallyDrop;
@@ -155,6 +162,31 @@ fn report_failure(error: &Scene3DWgpuError) {
              (docs/porting/media3d.md, section 3.15).",
             &[&reason],
         );
+    }
+}
+
+/// The shared frames of a device, as the executor samples them.
+struct FrameTextures<'a>(&'a Arc<VelloWgpuDevice>);
+
+impl FrameTextures<'_> {
+    fn frame<'b>(&self, bitmap: &'b SharedBitmapImpl) -> Option<&'b VelloSharedFrameBitmap> {
+        let frame = bitmap.as_any().downcast_ref::<VelloSharedFrameBitmap>()?;
+        Arc::ptr_eq(frame.device(), self.0).then_some(frame)
+    }
+}
+
+impl Scene3DDeviceTextures for FrameTextures<'_> {
+    fn is_on_device(&self, bitmap: &SharedBitmapImpl) -> bool {
+        self.frame(bitmap).is_some()
+    }
+
+    fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<Scene3DDeviceTexture> {
+        let texture = self.frame(bitmap)?.texture()?;
+        Some(Scene3DDeviceTexture {
+            texture: texture.texture().clone(),
+            view: texture.view().clone(),
+            owner: texture,
+        })
     }
 }
 
@@ -284,7 +316,8 @@ pub(crate) fn scene_texture(
         };
         let uploads = texture_counters().textures_uploaded;
         let rendered = super::with_autorelease_pool(|| {
-            executor.render(device.device(), device.queue(), &mut slot.viewport, scene, &target)
+            let frames = FrameTextures(device);
+            executor.render_with_textures(device.device(), device.queue(), &mut slot.viewport, scene, &target, &frames)
         });
         match rendered {
             Ok(report) => {
