@@ -300,7 +300,7 @@ have their own support that varies by OS version.
 | `block` | 3 s | Infinite |
 | `swap` | 100 ms | Infinite |
 | `fallback` | 100 ms | 3 s |
-| `optional` | Until the first paint | None: never swaps after a fallback was painted |
+| `optional` | 100 ms, or until the first paint | None: never swaps after a fallback was painted |
 
 Timers start at the first use of the face. During a block period text is laid out with the
 fallback font's metrics and drawn invisibly. The invisible face is a generated OpenType font
