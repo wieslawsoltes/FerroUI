@@ -155,11 +155,22 @@ counted on the WinUI theme, the pools of all its tables are 266,234 bytes with o
 table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
 and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
 pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
-16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
+16 bits in the pool of its unit keeps a pool of its own.
 It is on because the measurement kept it: on macOS the stripped executables were smaller in
 every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
 34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
 typed backend encodes the same runs as its programs; with it no packed table is written.
+
+A run of plain values (numbers, thicknesses, corner radii, colours, texts) is written as an
+`rt::PackedValueRows` when the 48 bytes of that table and its records are smaller than the slice
+of rows; a shorter run keeps its slice. A record is the key as an offset and a length in the pool
+of strings, the line and the position, then the index of the number, the indices of the four
+components, the two halves of the colour, or the text in the pool. The tables of one unit share
+its pool of strings and a static of its numbers, `{DOCUMENT}_UNIT_{n}_NUMBERS`, so a trimmed unit
+takes both with it. `rt::add_packed_double_resources`, `add_packed_thickness_resources`,
+`add_packed_corner_radius_resources`, `add_packed_color_resources` and
+`add_packed_string_resources` add the values in the same order, with the same errors at the same
+positions as the helpers of the slices.
 
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
