@@ -142,6 +142,12 @@ mod uikit {
         /// notifications in the notification center (#1276). Without this call
         /// `AppNotificationManager::is_supported()` is `false`.
         fn use_platform_app_notifications(&self) -> AppBuilder;
+
+        /// Registers the badge count of the application's icon as the badge service of the
+        /// application once the platform services are set up, so that
+        /// `BadgeNotificationManager` shows its count on the home screen (#1276). Without this
+        /// call `BadgeNotificationManager::is_supported()` is `false`.
+        fn use_platform_badge_notifications(&self) -> AppBuilder;
     }
 
     fn use_ios(builder: &AppBuilder, app_delegate: Option<Rc<dyn IFerroAppDelegate>>) -> AppBuilder {
@@ -171,6 +177,10 @@ mod uikit {
 
         fn use_platform_app_notifications(&self) -> AppBuilder {
             self.after_platform_services_setup(|_| crate::IosAppNotificationManager::register())
+        }
+
+        fn use_platform_badge_notifications(&self) -> AppBuilder {
+            self.after_platform_services_setup(|_| crate::IosBadgeNotificationManager::register())
         }
     }
 

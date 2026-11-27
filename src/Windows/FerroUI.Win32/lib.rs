@@ -63,6 +63,8 @@ mod window_impl_custom_caption_proc;
 #[cfg(windows)]
 mod app_notification_manager;
 #[cfg(windows)]
+mod badge_notification_manager;
+#[cfg(windows)]
 mod clipboard_impl;
 #[cfg(windows)]
 mod data_transfer_to_ole_data_object_wrapper;
@@ -105,6 +107,8 @@ pub use swap_chain_top_level_impl::SwapChainTopLevelImpl;
 
 #[cfg(windows)]
 pub use app_notification_manager::Win32AppNotificationManager;
+#[cfg(windows)]
+pub use badge_notification_manager::Win32BadgeNotificationManager;
 #[cfg(windows)]
 pub use clipboard_impl::ClipboardImpl;
 #[cfg(windows)]

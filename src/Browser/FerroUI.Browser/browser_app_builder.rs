@@ -227,6 +227,12 @@ pub trait BrowserAppBuilder {
     /// shows the application's notifications (#1276). Without this call
     /// `AppNotificationManager::is_supported()` is `false`.
     fn use_platform_app_notifications(&self) -> AppBuilder;
+
+    /// Registers the Badging API of the page as the badge service of the application once the
+    /// platform services are set up, so that `BadgeNotificationManager` shows the badge on the
+    /// icon of the installed web application (#1276). Without this call
+    /// `BadgeNotificationManager::is_supported()` is `false`.
+    fn use_platform_badge_notifications(&self) -> AppBuilder;
 }
 
 fn pre_setup_browser(builder: &AppBuilder, options: Option<BrowserPlatformOptions>) -> AppBuilder {
@@ -335,6 +341,10 @@ impl BrowserAppBuilder for AppBuilder {
 
     fn use_platform_app_notifications(&self) -> AppBuilder {
         self.after_platform_services_setup(|_| crate::BrowserAppNotificationManager::register())
+    }
+
+    fn use_platform_badge_notifications(&self) -> AppBuilder {
+        self.after_platform_services_setup(|_| crate::BrowserBadgeNotificationManager::register())
     }
 }
 

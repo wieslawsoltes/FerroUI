@@ -32,8 +32,9 @@ extern "C" {
 const RTLD_LAZY_GLOBAL: std::ffi::c_int = 0x1 | 0x8;
 
 /// Loads the UserNotifications framework the first time it is needed: the crate does not link
-/// it, so that an application that shows no notification does not load it at start-up.
-fn framework_loaded() -> bool {
+/// it, so that an application that shows no notification does not load it at start-up. The badge
+/// service (`badge_notification_manager.rs`) loads it in the same way.
+pub(crate) fn framework_loaded() -> bool {
     static LOADED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *LOADED.get_or_init(|| {
         let path = c"/System/Library/Frameworks/UserNotifications.framework/UserNotifications";
@@ -44,12 +45,12 @@ fn framework_loaded() -> bool {
 }
 
 /// A class of the framework, which `is_supported` loaded.
-fn class(name: &std::ffi::CStr) -> &'static AnyClass {
+pub(crate) fn class(name: &std::ffi::CStr) -> &'static AnyClass {
     AnyClass::get(name).unwrap_or_else(|| panic!("the class {name:?} of the UserNotifications framework"))
 }
 
 /// `UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert`.
-const AUTHORIZATION_OPTIONS: usize = (1 << 0) | (1 << 1) | (1 << 2);
+pub(crate) const AUTHORIZATION_OPTIONS: usize = (1 << 0) | (1 << 1) | (1 << 2);
 /// `UNNotificationPresentationOptionSound | List | Banner`: shown while the application is in
 /// front, as when it is not.
 const PRESENTATION_OPTIONS: usize = (1 << 1) | (1 << 3) | (1 << 4);

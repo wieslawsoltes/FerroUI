@@ -21,6 +21,7 @@ mod browser_accessibility;
 mod browser_activatable_lifetime;
 mod browser_app_builder;
 mod browser_app_notification_manager;
+mod browser_badge_notification_manager;
 mod browser_clipboard_data_transfer;
 mod browser_clipboard_data_transfer_item;
 mod browser_data_format_helper;
@@ -55,6 +56,7 @@ mod windowing_platform;
 pub use browser_accessibility::BrowserAccessibility;
 pub use browser_activatable_lifetime::BrowserActivatableLifetime;
 pub use browser_app_notification_manager::BrowserAppNotificationManager;
+pub use browser_badge_notification_manager::BrowserBadgeNotificationManager;
 pub use browser_app_builder::{
     BrowserAccessibilityMode, BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode,
 };

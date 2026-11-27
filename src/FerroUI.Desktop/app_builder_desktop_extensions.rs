@@ -27,6 +27,14 @@ pub trait AppBuilderDesktopExtensions {
     /// on Linux. Without this call, or where the service cannot serve the application,
     /// `AppNotificationManager::is_supported()` is `false`.
     fn use_platform_app_notifications(&self) -> AppBuilder;
+
+    /// Registers the badge service of the operating system once the platform services are set
+    /// up, so that `BadgeNotificationManager` shows the badge of the application's icon (#1276):
+    /// the badge of the Dock tile on macOS and the badge of a packaged application (one with a
+    /// package identity) on the taskbar and the Start tile on Windows 10 and later. Linux has no
+    /// common badge service: nothing is registered there. Without this call, or where the service
+    /// cannot serve the application, `BadgeNotificationManager::is_supported()` is `false`.
+    fn use_platform_badge_notifications(&self) -> AppBuilder;
 }
 
 impl AppBuilderDesktopExtensions for AppBuilder {
@@ -82,6 +90,10 @@ impl AppBuilderDesktopExtensions for AppBuilder {
     fn use_platform_app_notifications(&self) -> AppBuilder {
         self.after_platform_services_setup(|_| register_app_notifications())
     }
+
+    fn use_platform_badge_notifications(&self) -> AppBuilder {
+        self.after_platform_services_setup(|_| register_badge_notifications())
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -101,6 +113,21 @@ fn register_app_notifications() {
 
 #[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
 fn register_app_notifications() {}
+
+#[cfg(target_os = "macos")]
+fn register_badge_notifications() {
+    ferroui_native::MacOSBadgeNotificationManager::register();
+}
+
+#[cfg(windows)]
+fn register_badge_notifications() {
+    ferroui_win32::Win32BadgeNotificationManager::register();
+}
+
+/// Linux has no common badge service: some docks show the count of the
+/// `com.canonical.Unity.LauncherEntry` signal of a desktop entry, which is not sent.
+#[cfg(not(any(target_os = "macos", windows)))]
+fn register_badge_notifications() {}
 
 #[cfg(target_os = "macos")]
 fn load_ferro_native(builder: &AppBuilder) {
