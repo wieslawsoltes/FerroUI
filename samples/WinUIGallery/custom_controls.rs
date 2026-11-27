@@ -5,8 +5,7 @@
 //!
 //! WinUI's `DefaultStyleKey` is the control theme the page gives the control (a native page has
 //! no Generic.xaml of its own), `GetTemplateChild` is the name scope of the applied template, and
-//! a `DependencyProperty` is a styled property. FerroUI has no PasswordBox: the password box of
-//! the template is a TextBox with a PasswordChar.
+//! a `DependencyProperty` is a styled property.
 
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::input::InputElementImpl;
@@ -25,6 +24,7 @@ use ferroui_controls::primitives::{
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
 };
 use ferroui_base::styling::ControlTheme;
+use ferroui_controls_password_box::PasswordBox;
 use ferroui_controls::{
     Button, ContentControl, Control, ControlImpl, FontIcon, StackPanel, TextBlock, TextBox, UserControl,
 };
@@ -163,7 +163,7 @@ pub(crate) const TOO_SHORT: (&str, &str) = ("\u{EA39}", "Too short!");
 #[repr(C)]
 pub struct ValidatedPasswordBox {
     base: TemplatedControl,
-    password_input: RefCell<Option<Ref<TextBox>>>,
+    password_input: RefCell<Option<Ref<PasswordBox>>>,
     validation_lines: RefCell<Option<Ref<StackPanel>>>,
 }
 
@@ -221,7 +221,7 @@ impl TemplatedControlImpl for ValidatedPasswordBox {
     /// `Password`, and the validation lines, which follow the theme.
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
-        let input = e.name_scope().find_as::<TextBox>("PasswordInput");
+        let input = e.name_scope().find_as::<PasswordBox>("PasswordInput");
         *this.validation_lines.borrow_mut() = e.name_scope().find_as::<StackPanel>("ValidationLines");
         if let Some(header) = e.name_scope().find_as::<TextBlock>("HeaderText") {
             header.set_text(this.header().as_deref());
@@ -232,14 +232,13 @@ impl TemplatedControlImpl for ValidatedPasswordBox {
             AutomationProperties::set_name(&input, this.header().as_deref());
             let weak = this.to_ref().downgrade();
             let weak_input = input.downgrade();
-            input.property_changed(move |change| {
-                if change.property() != TextBox::text_property().as_property() {
-                    return;
-                }
-                if let (Some(this), Some(input)) = (weak.upgrade(), weak_input.upgrade()) {
-                    this.set_password(input.text().unwrap_or_default());
-                }
-            });
+            input
+                .password_changed(move || {
+                    if let (Some(this), Some(input)) = (weak.upgrade(), weak_input.upgrade()) {
+                        this.set_password(input.password());
+                    }
+                })
+                .detach();
         }
         *this.password_input.borrow_mut() = input;
         let weak = this.to_ref().downgrade();

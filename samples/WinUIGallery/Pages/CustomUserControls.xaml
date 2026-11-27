@@ -1,8 +1,8 @@
 <!-- Ported from the three pinned CustomUserControls examples of WinUI Gallery (14061eea) with the
      custom controls of the page in Rust (custom_controls.rs, which creates them in their hosts);
      see ../NOTICE.md. The control themes below are the default
-     styles of CounterControl.xaml and ValidatedPasswordBox.xaml (DefaultStyleKey); FerroUI has no
-     PasswordBox, so the template's password box is a TextBox with a PasswordChar, and its Header
+     styles of CounterControl.xaml and ValidatedPasswordBox.xaml (DefaultStyleKey); the template's
+     password box is the PasswordBox of ferroui-controls-password-box, and its Header
      is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
      theme's SubtitleTextBlockStyle with heading level 2. The Submit button's x:Bind of IsValid is
      the code behind in Rust. -->
@@ -27,7 +27,7 @@
         <ControlTemplate>
           <StackPanel Spacing="4">
             <TextBlock x:Name="HeaderText" />
-            <TextBox x:Name="PasswordInput" PasswordChar="●" />
+            <PasswordBox x:Name="PasswordInput" />
             <StackPanel x:Name="ValidationLines" AutomationProperties.LiveSetting="Polite" IsVisible="False" />
           </StackPanel>
         </ControlTemplate>

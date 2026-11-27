@@ -1,0 +1,4 @@
+# Uses of deprecated FerroUI items in the samples (#423 C6).
+# Written by scripts/idioms/deprecated_uses.py; rerun it on main to update this file.
+# Source: the logs ci-main-336498e69-linux-workspace.log, check-control-gallery-winui-xembed-sample.json, check-portable-media-control-catalog-desktop-safe-area-demo-desktop.json
+# Uses: 0
