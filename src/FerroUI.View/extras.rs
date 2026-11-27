@@ -199,24 +199,18 @@ ferroui_base::ferro_properties! { impl GridDefinitionSizes {
 
 impl GridDefinitionSizes {
     fn static_constructor() {
-        Self::rows_property().changed().add_class_handler::<Grid>(|grid, _| {
-            let lengths = grid.get_value(Self::rows_property());
-            let lengths = lengths.as_deref().unwrap_or(&[]);
-            let rows = grid.row_definitions();
-            if !take_sizes(&rows.snapshot(), lengths, RowDefinition::height, RowDefinition::set_height) {
-                let rows = RowDefinitions::from_items(lengths.iter().copied().map(RowDefinition::with_height));
-                grid.set_row_definitions(rows);
-            }
+        // Lengths that are taken away leave the grid the lengths of its text, if it has one (an
+        // element that went from typed lengths to text sets one and clears the other, in either
+        // order).
+        Self::rows_property().changed().add_class_handler::<Grid>(|grid, _| match grid.get_value(Self::rows_property()) {
+            Some(lengths) => give_rows(grid, &lengths),
+            None => give_rows(grid, &text_lengths(grid, GridDefinitionsText::rows_property(), "row")),
         })
         .detach();
         Self::columns_property().changed().add_class_handler::<Grid>(|grid, _| {
-            let lengths = grid.get_value(Self::columns_property());
-            let lengths = lengths.as_deref().unwrap_or(&[]);
-            let columns = grid.column_definitions();
-            if !take_sizes(&columns.snapshot(), lengths, ColumnDefinition::width, ColumnDefinition::set_width) {
-                grid.set_column_definitions(ColumnDefinitions::from_items(
-                    lengths.iter().copied().map(ColumnDefinition::with_width),
-                ));
+            match grid.get_value(Self::columns_property()) {
+                Some(lengths) => give_columns(grid, &lengths),
+                None => give_columns(grid, &text_lengths(grid, GridDefinitionsText::columns_property(), "column")),
             }
         })
         .detach();
@@ -224,9 +218,10 @@ impl GridDefinitionSizes {
 }
 
 /// The definitions of a grid in the text form (`"Auto,*,2*,40"`), for text that follows state
-/// (`.set(GridDefinitionsText::columns_property(), move || ..)`). A new text is parsed into the
-/// lengths of [`GridDefinitionSizes`], which give the grid its sizes. An addition of the
-/// declarative layer (no upstream counterpart).
+/// (`.set(GridDefinitionsText::columns_property(), move || ..)`). A new text is parsed and gives
+/// the grid its sizes as the lengths of [`GridDefinitionSizes`] do; the text is not copied into
+/// them, so a text that follows state costs one parse and no other value of the grid. An addition
+/// of the declarative layer (no upstream counterpart).
 pub struct GridDefinitionsText;
 
 ferroui_base::ferro_static_type!(GridDefinitionsText);
@@ -249,38 +244,46 @@ ferroui_base::ferro_properties! { impl GridDefinitionsText {
 
 impl GridDefinitionsText {
     fn static_constructor() {
-        Self::rows_property().changed().add_class_handler::<Grid>(|grid, change| {
-            let old = change.get_old_value::<Option<String>>().flatten();
-            follow_text(grid, GridDefinitionSizes::rows_property(), old, grid.get_value(Self::rows_property()), "row");
+        // A text that is taken away leaves the grid its typed lengths, if it has them (an element
+        // that went from text to typed lengths sets one and clears the other, in either order).
+        Self::rows_property().changed().add_class_handler::<Grid>(|grid, _| {
+            match grid.get_value(GridDefinitionSizes::rows_property()) {
+                Some(lengths) if grid.get_value(Self::rows_property()).is_none() => give_rows(grid, &lengths),
+                _ => give_rows(grid, &text_lengths(grid, Self::rows_property(), "row")),
+            }
         })
         .detach();
-        Self::columns_property().changed().add_class_handler::<Grid>(|grid, change| {
-            let old = change.get_old_value::<Option<String>>().flatten();
-            let new = grid.get_value(Self::columns_property());
-            follow_text(grid, GridDefinitionSizes::columns_property(), old, new, "column");
+        Self::columns_property().changed().add_class_handler::<Grid>(|grid, _| {
+            match grid.get_value(GridDefinitionSizes::columns_property()) {
+                Some(lengths) if grid.get_value(Self::columns_property()).is_none() => give_columns(grid, &lengths),
+                _ => give_columns(grid, &text_lengths(grid, Self::columns_property(), "column")),
+            }
         })
         .detach();
     }
 }
 
-/// Gives `sizes` the lengths of a new text. A text that is taken away takes its lengths with it,
-/// unless typed lengths have replaced them (an element that went from text to typed lengths sets
-/// one and clears the other, in either order).
-fn follow_text(
-    grid: &Grid,
-    sizes: &'static AttachedProperty<Option<GridLengths>>,
-    old: Option<String>,
-    new: Option<String>,
-    kind: &str,
-) {
-    match new {
-        Some(text) => grid.set_value(sizes, Some(lengths(&text, kind).into())),
-        None => {
-            let from_text = old.map(|text| lengths(&text, kind));
-            if grid.get_value(sizes).as_deref() == from_text.as_deref() {
-                grid.clear_value(sizes);
-            }
-        }
+/// The lengths of the text of a grid, none without one.
+fn text_lengths(grid: &Grid, text: &'static AttachedProperty<Option<String>>, kind: &str) -> Vec<GridLength> {
+    grid.get_value(text).map(|text| lengths(&text, kind)).unwrap_or_default()
+}
+
+/// Gives the rows of a grid these lengths: in place where they fit ([`take_sizes`]), otherwise a
+/// new collection.
+fn give_rows(grid: &Grid, lengths: &[GridLength]) {
+    let rows = grid.row_definitions();
+    if !take_sizes(&rows.snapshot(), lengths, RowDefinition::height, RowDefinition::set_height) {
+        grid.set_row_definitions(RowDefinitions::from_items(lengths.iter().copied().map(RowDefinition::with_height)));
+    }
+}
+
+/// Gives the columns of a grid these lengths, as [`give_rows`] does the rows.
+fn give_columns(grid: &Grid, lengths: &[GridLength]) {
+    let columns = grid.column_definitions();
+    if !take_sizes(&columns.snapshot(), lengths, ColumnDefinition::width, ColumnDefinition::set_width) {
+        grid.set_column_definitions(ColumnDefinitions::from_items(
+            lengths.iter().copied().map(ColumnDefinition::with_width),
+        ));
     }
 }
 
