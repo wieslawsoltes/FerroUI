@@ -710,31 +710,18 @@ impl InputElement {
     /// Custom `IPointer` implementations should use this entry point so that
     /// element-wide capture operations can observe them as well.
     pub fn capture_pointer(&self, pointer: &Rc<dyn super::IPointer>) -> bool {
+        super::pointer::remember_pointer(pointer);
         pointer.capture(Some(&self.to_ref()));
-        if pointer.captured().is_some_and(|p| p.ptr_eq(&self.to_ref())) {
-            self.register_pointer_capture(pointer);
-            true
-        } else {
-            false
-        }
+        pointer.captured().is_some_and(|p| p.ptr_eq(&self.to_ref()))
     }
 
     /// A snapshot of the pointers currently captured by this element. Native
     /// `Pointer::capture` also participates, even when called directly.
-    /// Tracking is weak and does not extend a pointer's lifetime.
+    /// The pointers are known weakly; this does not extend a pointer's lifetime.
     pub fn pointer_captures(&self) -> Vec<Rc<dyn super::IPointer>> {
-        let Some(captures) = self.instance_data::<PointerCaptures>() else {
-            return Vec::new();
-        };
-        let snapshot = {
-            let mut captures = captures.0.borrow_mut();
-            captures.retain(|p| p.strong_count() != 0);
-            captures.clone()
-        };
         let this = self.to_ref();
-        snapshot
+        super::pointer::known_pointers()
             .into_iter()
-            .filter_map(|p| p.upgrade())
             .filter(|p| p.captured().is_some_and(|c| c.ptr_eq(&this)))
             .collect()
     }
@@ -749,36 +736,6 @@ impl InputElement {
             if pointer.captured().is_some_and(|c| c.ptr_eq(&this)) {
                 pointer.capture(None);
             }
-            if pointer.captured().is_none_or(|c| !c.ptr_eq(&this)) {
-                self.unregister_pointer_capture(&pointer);
-            }
-        }
-    }
-
-    pub(crate) fn register_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
-        let captures = self.instance_data::<PointerCaptures>().unwrap_or_else(|| {
-            let captures = Rc::new(PointerCaptures::default());
-            self.set_instance_data(Some(captures.clone()));
-            captures
-        });
-        let weak = Rc::downgrade(pointer);
-        let mut captures = captures.0.borrow_mut();
-        captures.retain(|p| p.strong_count() != 0);
-        if !captures.iter().any(|p| p.ptr_eq(&weak)) {
-            captures.push(weak);
-        }
-    }
-
-    pub(crate) fn unregister_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
-        let Some(captures) = self.instance_data::<PointerCaptures>() else { return };
-        let weak = Rc::downgrade(pointer);
-        let empty = {
-            let mut captures = captures.0.borrow_mut();
-            captures.retain(|p| p.strong_count() != 0 && !p.ptr_eq(&weak));
-            captures.is_empty()
-        };
-        if empty {
-            self.set_instance_data::<PointerCaptures>(None);
         }
     }
 
@@ -1282,8 +1239,3 @@ impl IInputElement for InputElement {
         InputElement::focus_with(self, method, key_modifiers)
     }
 }
-
-/// The pointers captured by an element, held weakly. Instance data rather than a field: few
-/// elements ever capture a pointer, and the slot is removed with the last capture.
-#[derive(Default)]
-struct PointerCaptures(RefCell<Vec<Weak<dyn super::IPointer>>>);
