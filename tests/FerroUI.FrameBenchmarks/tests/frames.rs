@@ -1007,6 +1007,7 @@ scenes! {
     transforms => "transforms",
     width => "width",
     wall => "wall",
+    wall_with_the_clock => "wall+clock",
     wall_with_the_pointer => "wall+pointer",
     moves => "moves",
     lines => "lines",
@@ -1039,8 +1040,8 @@ starts! {
 #[test]
 fn every_scene_has_a_test() {
     let tested = [
-        "text", "paragraph", "list", "transforms", "width", "wall", "wall+pointer", "moves", "lines", "items",
-        "recolor", "cards", "reorder", "deep", "rows", "pile", "grow",
+        "text", "paragraph", "list", "transforms", "width", "wall", "wall+clock", "wall+pointer", "moves", "lines",
+        "items", "recolor", "cards", "reorder", "deep", "rows", "pile", "grow",
     ];
     for scene in SCENES {
         assert!(tested.contains(&scene.name), "the scene {} has no test", scene.name);
