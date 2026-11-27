@@ -5,13 +5,17 @@
 //!
 //! - [`css`]: the `@font-face` rule and each of its descriptors (CSS Fonts 4 and 5).
 //! - [`sfnt`]: the OpenType container and the sanitizer every font from the network goes through.
+//! - [`FontDecoder`]: from the bytes of a file, whatever its container, to a sanitized font.
 
 #![forbid(unsafe_code)]
 
 pub mod css;
+mod decoder;
 mod error;
 mod limits;
 pub mod sfnt;
+mod woff;
 
+pub use decoder::{decode_font, sniff_container, FontContainer, FontDecoder};
 pub use error::FontDecodeError;
 pub use limits::WebFontLimits;
