@@ -49,9 +49,16 @@ pub mod gpu;
 #[cfg(feature = "ferroui")]
 pub mod ferroui_bridge;
 
+#[cfg(feature = "ferroui")]
+pub mod compositor_integration;
+
 /// Alias for [`ferroui_bridge`] providing zero-layout-thrash FerroUI Visual & Logical tree physics.
 #[cfg(feature = "ferroui")]
 pub use ferroui_bridge as ferroui;
+
+/// Alias for [`compositor_integration`] providing native FerroUI `Compositor` + GPU shader physics integration.
+#[cfg(feature = "ferroui")]
+pub use compositor_integration as compositor;
 
 /// Frequently used types for building games, simulations, and physics-driven UIs.
 pub mod prelude {
@@ -86,6 +93,12 @@ pub mod prelude {
     pub use crate::ferroui_bridge::{
         start_ui_physics_timer, DraggableVisual, SpringVisualId, VisualBodyOptions, VisualPhysicsHost,
         VisualSpringDriver, VisualSyncStats,
+    };
+
+    #[cfg(feature = "ferroui")]
+    pub use crate::compositor_integration::{
+        CompositorPhysicsController, CompositorPhysicsSimulation, CompositorPhysicsTelemetry,
+        PhysicsCompositorBehavior, PhysicsImpactRippleEffect, PhysicsKineticGlassEffect, PhysicsShaderMode,
     };
 }
 

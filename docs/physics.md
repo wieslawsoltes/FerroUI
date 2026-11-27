@@ -21,6 +21,16 @@ fluid simulations, robotics, and general 2D simulation.
 | `fracture`, `snapshot` | Radial convex shard fracturing (`fracture_body`) conserving linear/angular velocity, and deterministic ring-buffer `WorldHistory` / `WorldSnapshot` for rollback and studio timeline scrubbing. |
 | `ui` | Unconditionally stable closed-form analytical harmonic springs (`Spring1D`, `Spring2D`, `Spring3D`), `SpringChain`, `LayoutSpringGroup`, native-feel `InertiaScroller` (exponential decay, rubber-banding, bounce-back, magnetic detents), `MagneticSnap`, `GestureTracker`, and `DraggableCard`. |
 | `ferroui` *(feature `ferroui`)* | Zero-layout-thrash FerroUI Visual & Logical tree physics bridge (`VisualPhysicsHost`, `VisualSpringDriver`, `DraggableVisual`, `start_ui_physics_timer`) updating persistent `MatrixTransform` render transforms (`O(active)`, zero layout passes, automatic weak cleanup). |
+| `compositor` *(feature `ferroui`)* | Native integration into `ferroui-base`'s public `ICompositionSimulation` contract (`CompositorPhysicsSimulation`, `CompositorPhysicsController`) driving `CompositionVisual` transforms directly on `Compositor` (`MediaContext` clock, auto-idle) plus physics-driven WGSL/SkSL GPU shader effects (`PhysicsKineticGlassEffect`, `PhysicsImpactRippleEffect`). |
+
+## Composition Engine & Multi-Mode Simulation Contract
+
+`ferroui-base::rendering::composition` defines a domain-agnostic public simulation contract so any simulation mode — physics, springs, harmonic waves, audio-reactive, particles, or custom modes — plugs directly into FerroUI's `Compositor` and per-visual `Effect` / GPU shader pipeline without coupling `ferroui-base` to `ferroui-physics`:
+
+- `ICompositionSimulation` + `SimulationMode` (`Physics`, `SpringDynamics`, `Harmonic`, `AudioReactive`, `Particles`, `Custom`)
+- `Compositor::register_simulation(...) -> CompositionSimulationHandle` (pause/resume/wake/RAII detach, synced to `MediaContext` animation frames with automatic sleep on `SimulationStepResult::Idle`)
+- `SimulationVisualPatch` & `SimulationTarget` (`Composition(Rc<CompositionVisual>)` or `Visual(Ref<Visual>)`) applying composition transforms (`translation`, `rotation_angle`, `scale`, `center_point`, `opacity`) and immutable GPU shader effects (`ImmutableCustomEffect`) with zero layout passes
+- Built-in non-physics reference mode `HarmonicWaveSimulation` in `ferroui-base`, alongside `CompositorPhysicsSimulation`, `PhysicsKineticGlassEffect`, and `PhysicsImpactRippleEffect` in `ferroui-physics` (WGSL compiled to Metal MSL via `ferroui-quartz` / Vello, SkSL for Skia, and CPU reference).
 
 ## Features
 

@@ -1,6 +1,7 @@
 //! **FerroUI Physics Studio** — Professional hardware-accelerated physics showcase built on
 //! `ferroui-physics` and `ferroui-view`.
 
+pub mod compositor_showcase;
 pub mod live_ui_tree;
 pub mod node_graph_studio;
 pub mod scenes;
@@ -35,6 +36,7 @@ fn studio_card(title: &'static str, body: impl IntoElement) -> Element {
 enum StudioViewMode {
     Canvas,
     LiveUiTree,
+    CompositorShaders,
     NodeGraph,
 }
 
@@ -113,6 +115,17 @@ pub fn physics_sandbox() -> Element {
                 .content("⚡ Live UI Tree")
                 .on_click(move |_| {
                     view_mode.set(StudioViewMode::LiveUiTree);
+                }),
+        )
+        .child(
+            button()
+                .padding((9.0, 5.0, 9.0, 5.0))
+                .corner_radius(6.0)
+                .background(move || if view_mode.get() == StudioViewMode::CompositorShaders { "#0EA5E9" } else { "#122B3E" })
+                .foreground("#F0F9FF")
+                .content("✨ Compositor & Shaders")
+                .on_click(move |_| {
+                    view_mode.set(StudioViewMode::CompositorShaders);
                 }),
         )
         .child(
@@ -552,6 +565,7 @@ pub fn physics_sandbox() -> Element {
 
     let center_stage = border().clip_to_bounds(true).child(dynamic(move || match view_mode.get() {
         StudioViewMode::LiveUiTree => live_ui_tree::live_ui_tree_showcase(),
+        StudioViewMode::CompositorShaders => compositor_showcase::compositor_shader_showcase(),
         StudioViewMode::NodeGraph => node_graph_studio::node_graph_physics_studio(),
         StudioViewMode::Canvas => {
             let eng_vp = eng_vp.clone();

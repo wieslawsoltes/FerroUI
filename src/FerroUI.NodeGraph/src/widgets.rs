@@ -1,8 +1,8 @@
-//! Embeddable FerroUI custom Visual Controls styled after original **Rhino Grasshopper**:
-//! - [`GraphMapperControl`]: Crisp drafting-paper Bezier / Sine / Parabola / Gaussian curve shaper
-//! - [`MdSliderControl`]: Crisp 2D XY Multi-Dimensional joystick pad (`[0..1] × [0..1]`)
+//! Embeddable FerroUI custom Visual Controls styled with the host's stock FerroUI theme:
+//! - [`GraphMapperControl`]: Interactive Bezier / Sine / Parabola / Gaussian curve shaper
+//! - [`MdSliderControl`]: Interactive 2D XY Multi-Dimensional joystick pad (`[0..1] × [0..1]`)
 
-use crate::types::{CanvasTheme, GraphCurveKind};
+use crate::types::GraphCurveKind;
 use ferroui_base::input::{
     InputElement, InputElementImpl, PointerEventArgs, PointerPressedEventArgs,
     PointerReleasedEventArgs,
@@ -14,24 +14,30 @@ use ferroui_base::media::{
     BoxShadows, DrawingContext, IBrush, IImmutableBrush, IPen, PenLineCap, StreamGeometry,
 };
 use ferroui_base::platform::IGeometryContext;
+use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Rect,
     Ref, StyledElementImpl, VisualImpl,
 };
-use ferroui_controls::{Control, ControlImpl};
+use ferroui_controls::{Application, Control, ControlImpl};
 use ferroui_view::ViewClass;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+fn is_control_dark(ctrl: &Control) -> bool {
+    ctrl.get_value(ThemeVariant::actual_theme_variant_property())
+        .or_else(|| Application::current().and_then(|app| app.actual_theme_variant()))
+        .is_some_and(|v| v == ThemeVariant::dark())
+}
+
 // =============================================================================
-// 1. Authentic Rhino Grasshopper Interactive Graph Mapper Control
+// 1. Interactive Graph Mapper Control
 // =============================================================================
 
 #[repr(C)]
 pub struct GraphMapperControl {
     base: Control,
     curve: Cell<GraphCurveKind>,
-    theme: Cell<CanvasTheme>,
     p1: Cell<[f64; 2]>,
     p2: Cell<[f64; 2]>,
     dragging_handle: Cell<Option<u8>>,
@@ -73,19 +79,18 @@ impl GraphMapperControl {
         Self {
             base: Control::construct(),
             curve: Cell::new(GraphCurveKind::Bezier),
-            theme: Cell::new(CanvasTheme::ClassicGrasshopper),
             p1: Cell::new([0.25, 0.80]),
             p2: Cell::new([0.75, 0.20]),
             dragging_handle: Cell::new(None),
             on_changed: RefCell::new(None),
-            bg_light: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF7F6F1)),
-            bg_dark: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0C1220)),
-            grid_light: Rc::new(ImmutablePen::from_uint32(0xFFDAD8CE, 1.0)),
-            grid_dark: Rc::new(ImmutablePen::from_uint32(0xFF1F2B42, 1.0)),
-            border_light: Rc::new(ImmutablePen::from_uint32(0xFF6B6A64, 1.2)),
-            border_dark: Rc::new(ImmutablePen::from_uint32(0xFF334155, 1.2)),
+            bg_light: Rc::new(ImmutableSolidColorBrush::from_uint32(0x14000000)),
+            bg_dark: Rc::new(ImmutableSolidColorBrush::from_uint32(0x24000000)),
+            grid_light: Rc::new(ImmutablePen::from_uint32(0x28000000, 1.0)),
+            grid_dark: Rc::new(ImmutablePen::from_uint32(0x24FFFFFF, 1.0)),
+            border_light: Rc::new(ImmutablePen::from_uint32(0x44000000, 1.0)),
+            border_dark: Rc::new(ImmutablePen::from_uint32(0x38FFFFFF, 1.0)),
             curve_light: Rc::new(ImmutablePen::from_uint32(0xFF1F1F1F, 2.2)),
-            curve_dark: Rc::new(ImmutablePen::from_uint32(0xFF38BDF8, 2.2)),
+            curve_dark: Rc::new(ImmutablePen::from_uint32(0xFF60CDFF, 2.2)),
             guide_pen: Rc::new(ImmutablePen::new(Some(guide_br), 1.1, Some(dash), PenLineCap::Round, Default::default(), 4.0)),
             handle_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFFFFFFF)),
             handle1_ring: Rc::new(ImmutablePen::from_uint32(0xFF28A745, 2.2)),
@@ -104,24 +109,17 @@ impl GraphMapperControl {
         curve: GraphCurveKind,
         p1: [f64; 2],
         p2: [f64; 2],
-        theme: CanvasTheme,
         on_changed: Rc<dyn Fn(GraphCurveKind, [f64; 2], [f64; 2])>,
     ) {
         self.curve.set(curve);
         self.p1.set(p1);
         self.p2.set(p2);
-        self.theme.set(theme);
         *self.on_changed.borrow_mut() = Some(on_changed);
         self.invalidate_visual();
     }
 
     pub fn set_curve(&self, curve: GraphCurveKind) {
         self.curve.set(curve);
-        self.invalidate_visual();
-    }
-
-    pub fn set_theme(&self, theme: CanvasTheme) {
-        self.theme.set(theme);
         self.invalidate_visual();
     }
 
@@ -198,7 +196,7 @@ impl VisualImpl for GraphMapperControl {
         let b = this.bounds();
         let w = b.width.max(20.0);
         let h = b.height.max(20.0);
-        let is_light = this.theme.get() == CanvasTheme::ClassicGrasshopper;
+        let is_light = !is_control_dark(this);
         let bg = if is_light { &this.bg_light } else { &this.bg_dark };
         let grid_pen = if is_light { &this.grid_light } else { &this.grid_dark };
         let border_pen = if is_light { &this.border_light } else { &this.border_dark };
@@ -257,7 +255,6 @@ impl VisualImpl for GraphMapperControl {
 pub struct MdSliderControl {
     base: Control,
     pos: Cell<[f64; 2]>,
-    theme: Cell<CanvasTheme>,
     dragging: Cell<bool>,
     on_changed: RefCell<Option<Rc<dyn Fn(f64, f64)>>>,
     bg_light: Rc<dyn IBrush>,
@@ -294,17 +291,16 @@ impl MdSliderControl {
         Self {
             base: Control::construct(),
             pos: Cell::new([0.5, 0.5]),
-            theme: Cell::new(CanvasTheme::ClassicGrasshopper),
             dragging: Cell::new(false),
             on_changed: RefCell::new(None),
-            bg_light: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF7F6F1)),
-            bg_dark: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0C1220)),
-            grid_light: Rc::new(ImmutablePen::from_uint32(0xFFDAD8CE, 1.0)),
-            grid_dark: Rc::new(ImmutablePen::from_uint32(0xFF1F2B42, 1.0)),
+            bg_light: Rc::new(ImmutableSolidColorBrush::from_uint32(0x14000000)),
+            bg_dark: Rc::new(ImmutableSolidColorBrush::from_uint32(0x24000000)),
+            grid_light: Rc::new(ImmutablePen::from_uint32(0x28000000, 1.0)),
+            grid_dark: Rc::new(ImmutablePen::from_uint32(0x24FFFFFF, 1.0)),
             cross_light: Rc::new(ImmutablePen::from_uint32(0xBB2E2E2E, 1.2)),
-            cross_dark: Rc::new(ImmutablePen::from_uint32(0x9938BDF8, 1.2)),
-            border_light: Rc::new(ImmutablePen::from_uint32(0xFF6B6A64, 1.2)),
-            border_dark: Rc::new(ImmutablePen::from_uint32(0xFF334155, 1.2)),
+            cross_dark: Rc::new(ImmutablePen::from_uint32(0x9960CDFF, 1.2)),
+            border_light: Rc::new(ImmutablePen::from_uint32(0x44000000, 1.0)),
+            border_dark: Rc::new(ImmutablePen::from_uint32(0x38FFFFFF, 1.0)),
             puck_glow: Rc::new(ImmutableSolidColorBrush::from_uint32(0x38D9383A)),
             puck_core: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFD9383A)),
             ring_pen: Rc::new(ImmutablePen::from_uint32(0xFFFFFFFF, 1.6)),
@@ -317,15 +313,9 @@ impl MdSliderControl {
         this
     }
 
-    pub fn configure(&self, x: f64, y: f64, theme: CanvasTheme, on_changed: Rc<dyn Fn(f64, f64)>) {
+    pub fn configure(&self, x: f64, y: f64, on_changed: Rc<dyn Fn(f64, f64)>) {
         self.pos.set([x.clamp(0.0, 1.0), y.clamp(0.0, 1.0)]);
-        self.theme.set(theme);
         *self.on_changed.borrow_mut() = Some(on_changed);
-        self.invalidate_visual();
-    }
-
-    pub fn set_theme(&self, theme: CanvasTheme) {
-        self.theme.set(theme);
         self.invalidate_visual();
     }
 
@@ -373,7 +363,7 @@ impl VisualImpl for MdSliderControl {
         let b = this.bounds();
         let w = b.width.max(20.0);
         let h = b.height.max(20.0);
-        let is_light = this.theme.get() == CanvasTheme::ClassicGrasshopper;
+        let is_light = !is_control_dark(this);
         let bg = if is_light { &this.bg_light } else { &this.bg_dark };
         let grid_pen = if is_light { &this.grid_light } else { &this.grid_dark };
         let cross_pen = if is_light { &this.cross_light } else { &this.cross_dark };

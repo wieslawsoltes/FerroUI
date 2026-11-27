@@ -113,6 +113,7 @@ mod i_composition_target_debug_events;
 mod i_compositor_serializable;
 mod matrix_utils;
 mod render_interface_feature;
+mod simulation;
 
 pub use alpha_mask::{AlphaMask, ALPHA_MASK_MAX_SIZE};
 pub use composition_batch::{
@@ -197,6 +198,11 @@ pub use compositor::{
 pub use enums::{
     CompositionBitmapInterpolationMode, CompositionBlendMode, CompositionDropShadowSourcePolicy,
     CompositionGradientExtendMode, CompositionStretch, CompositionTileMode,
+};
+pub use simulation::{
+    CompositionSimulationContext, CompositionSimulationHandle, HarmonicEffectDriver, HarmonicWaveSimulation,
+    ICompositionSimulation, SimulationEffectUpdate, SimulationFrame, SimulationId, SimulationMode,
+    SimulationStepResult, SimulationTarget, SimulationVisualPatch,
 };
 pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, PendingAnimations};
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;

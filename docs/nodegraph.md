@@ -6,7 +6,8 @@ CAD/geometry, live physics simulations, procedural UI, audio/DSP, shaders, or da
 
 ## Key Capabilities
 
-- **Built from Real FerroUI UI Visuals (`feature = "ferroui"`)**:
+- **Built from Real FerroUI UI Visuals & Stock Theme (`feature = "ferroui"`)**:
+  - Uses the host application's **stock current FerroUI theme** (Light or Dark `ThemeVariant`) automatically with zero custom theme overrides — all `Button`, `Slider`, `TextBox`, `TextBlock`, and `Border` controls inherit stock styling natively, while vector grid/wire layers and custom widgets (`GraphMapperControl`, `MdSliderControl`) adapt automatically to `actual_theme_variant()`.
   - Every node on the canvas is a genuine FerroUI control tree (`Border`, `Slider`, `TextBox`,
     `Button`, `StackPanel`, `DockPanel`, `GraphMapperControl`, `MdSliderControl`) keyed via
     `for_each` inside a GPU-transformed `Canvas` (`MatrixTransform` — zero layout passes while

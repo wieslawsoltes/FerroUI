@@ -49,7 +49,7 @@ pub mod prelude {
     pub use crate::serialization::{graph_from_json, graph_to_json};
     pub use crate::stdlib::{eval_math_expression, register_standard_nodes};
     pub use crate::types::{
-        AlignMode, CanvasTheme, DataMatching, GraphCurveKind, GroupId, NodeCategory, NodeId,
+        AlignMode, DataMatching, GraphCurveKind, GroupId, NodeCategory, NodeId,
         NodeKind, NodeState, ParamAccess, ParamModifier, ParamWidget, PortDirection, PortSpec,
         PortType, WireDataKind, WireDisplay, WireId,
     };

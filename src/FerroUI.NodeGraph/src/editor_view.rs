@@ -1,14 +1,14 @@
 //! Complete **Rhino Grasshopper Visual-Tree Editor (`node_graph_editor`)**:
 //!
-//! Authentic Rhino Grasshopper chrome & UX with one-click **Classic GH Parchment** / **Dark GH** toggle:
-//! - Top Rhino Grasshopper Ribbon (`Params`, `Math`, `Logic`, `Sets`, `Vector`, `Geometry`, `Physics`)
-//! - Auto-Fit framing on mount so every graph definition opens perfectly centered
-//! - Layer 0: `WireBackdropLayer` (warm parchment drafting grid, pastel groups, Fancy Bezier Wires,
+//! Styled cleanly with FerroUI's **stock current application theme** (no custom theme!):
+//! - Top Component Ribbon (`Params`, `Math`, `Logic`, `Sets`, `Vector`, `Geometry`, `Physics`)
+//! - Auto-Fit framing on mount so every graph definition opens centered
+//! - Layer 0: `WireBackdropLayer` (stock-adaptive grid, node groups, Fancy Bezier Wires,
 //!   L→R Window vs R→L Crossing marquee, minimap, DataTree hover tooltips)
 //! - Layer 1: GPU-transformed `Canvas` (`MatrixTransform`) hosting keyed real FerroUI node visuals
 //! - Layer 2: Floating **Multi-Select Align & Distribute Bar**
 //! - Layer 3: Floating **Double-Click / Spacebar Quick-Search Popup**
-//! - Layer 4: Floating **Right-Click Grasshopper Context Menu**
+//! - Layer 4: Floating **Right-Click Context Menu**
 
 use crate::canvas::{VisualGraphState, WireBackdropLayer};
 use crate::eval::evaluate_graph;
@@ -16,7 +16,7 @@ use crate::graph::NodeGraph;
 use crate::node::NodeRegistry;
 use crate::node_visual::build_node_visual;
 use crate::serialization::graph_to_json;
-use crate::types::{AlignMode, CanvasTheme, DataMatching, NodeCategory, NodeId, WireDisplay};
+use crate::types::{AlignMode, DataMatching, NodeCategory, NodeId, WireDisplay};
 use ferroui_base::input::Key;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -33,7 +33,7 @@ fn solid(argb: u32) -> Option<Rc<dyn IBrush>> {
     Some(Rc::new(ImmutableSolidColorBrush::from_uint32(argb)) as Rc<dyn IBrush>)
 }
 
-/// Builds a complete, Rhino Grasshopper-styled visual node graph editor `Element`.
+/// Builds a complete Rhino Grasshopper visual node graph editor `Element` using the stock theme.
 pub fn node_graph_editor(
     graph: Rc<RefCell<NodeGraph>>,
     registry: Rc<NodeRegistry>,
@@ -53,7 +53,7 @@ pub fn node_graph_editor(
     let show_profiler = signal(graph.borrow().show_profiler);
     let solution_locked = signal(graph.borrow().solution_locked);
 
-    // Post-layout sync + auto-fit on first mount so every graph opens perfectly framed & wires lock pixel-tight!
+    // Post-layout sync + auto-fit on first mount so every graph opens framed & wires lock tight.
     {
         let st_init = state.clone();
         let ticks = std::cell::Cell::new(0u8);
@@ -77,61 +77,29 @@ pub fn node_graph_editor(
         on_cleanup(move || timer.stop());
     }
 
-    let is_light = {
-        let th = state.theme;
-        move || th.get() == CanvasTheme::ClassicGrasshopper
-    };
+    let is_dark = state.is_dark_theme;
 
     // -------------------------------------------------------------------------
-    // 1. Top Rhino Grasshopper Ribbon & Canvas Toolbar
+    // 1. Top Component Ribbon & Canvas Toolbar (Stock FerroUI Controls)
     // -------------------------------------------------------------------------
     let mut cat_tabs = stack_panel().orientation(Orientation::Horizontal).spacing(3.0);
     for cat in &categories {
         let c = cat.clone();
-        let c_bg = c.clone();
-        let c_fg = c.clone();
+        let c_act = c.clone();
         let c_cl = c.clone();
-        let th_bg = state.theme;
-        let th_fg = state.theme;
         cat_tabs = cat_tabs.child(
             button()
                 .padding((10.0, 4.0, 10.0, 4.0))
-                .corner_radius(4.0)
-                .background(move || {
-                    let active = active_cat.get() == c_bg;
-                    if th_bg.get() == CanvasTheme::ClassicGrasshopper {
-                        if active { solid(0xFF28A745) } else { solid(0xFFD8D7CE) }
-                    } else if active {
-                        solid(0xFF0284C7)
-                    } else {
-                        solid(0xFF182235)
-                    }
-                })
-                .foreground(move || {
-                    let active = active_cat.get() == c_fg;
-                    if th_fg.get() == CanvasTheme::ClassicGrasshopper && !active {
-                        solid(0xFF242422)
-                    } else {
-                        solid(0xFFFFFFFF)
-                    }
-                })
+                .border_brush(move || if active_cat.get() == c_act { solid(0xFF0078D4) } else { None })
+                .border_thickness(move || if active_cat.get() == c { 1.5 } else { 1.0 })
                 .font_size(11.0)
-                .content(c.label().to_string())
+                .content(c_cl.label().to_string())
                 .on_click(move |_| {
                     search_query.set(String::new());
                     active_cat.set(c_cl.clone());
                 }),
         );
     }
-
-    let tool_btn_bg = {
-        let th = state.theme;
-        move || if th.get() == CanvasTheme::ClassicGrasshopper { solid(0xFFD8D7CE) } else { solid(0xFF1E293B) }
-    };
-    let tool_btn_fg = {
-        let th = state.theme;
-        move || if th.get() == CanvasTheme::ClassicGrasshopper { solid(0xFF1F1F1D) } else { solid(0xFFE2E8F0) }
-    };
 
     let st_undo = state.clone();
     let st_redo = state.clone();
@@ -143,7 +111,6 @@ pub fn node_graph_editor(
     let st_lock = state.clone();
     let st_fancy = state.clone();
     let st_prof = state.clone();
-    let st_theme = state.clone();
     let st_json = state.clone();
 
     let action_bar = stack_panel()
@@ -152,9 +119,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("↶")
                 .on_click(move |_| {
@@ -167,9 +131,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("↷")
                 .on_click(move |_| {
@@ -182,9 +143,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("⊞ Layout")
                 .on_click(move |_| {
@@ -197,9 +155,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("⊡ Fit")
                 .on_click(move |_| st_fit.fit_view()),
@@ -207,9 +162,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("▢ Group")
                 .on_click(move |_| {
@@ -221,9 +173,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("⧉ Dup")
                 .on_click(move |_| {
@@ -236,9 +185,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background("#B91C1C")
-                .foreground("#FFFFFF")
                 .font_size(10.5)
                 .content("✕")
                 .on_click(move |_| {
@@ -251,9 +197,7 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(move || if solution_locked.get() { solid(0xFFD97706) } else { tool_btn_bg() })
-                .foreground(move || if solution_locked.get() { solid(0xFFFFFFFF) } else { tool_btn_fg() })
+                .border_brush(move || if solution_locked.get() { solid(0xFFD97706) } else { None })
                 .font_size(10.5)
                 .content(move || if solution_locked.get() { "🔒 Locked" } else { "🔓 Live" })
                 .on_click(move |_| {
@@ -268,9 +212,7 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(move || if fancy_wires.get() { solid(0xFF28A745) } else { tool_btn_bg() })
-                .foreground(move || if fancy_wires.get() { solid(0xFFFFFFFF) } else { tool_btn_fg() })
+                .border_brush(move || if fancy_wires.get() { solid(0xFF22C55E) } else { None })
                 .font_size(10.5)
                 .content("Fancy")
                 .on_click(move |_| {
@@ -283,9 +225,7 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(move || if show_profiler.get() { solid(0xFF28A745) } else { tool_btn_bg() })
-                .foreground(move || if show_profiler.get() { solid(0xFFFFFFFF) } else { tool_btn_fg() })
+                .border_brush(move || if show_profiler.get() { solid(0xFF22C55E) } else { None })
                 .font_size(10.5)
                 .content("Prof")
                 .on_click(move |_| {
@@ -298,27 +238,6 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background("#2B2B29")
-                .foreground("#FFFFFF")
-                .font_size(10.5)
-                .content({
-                    let th = state.theme;
-                    move || th.get().label()
-                })
-                .on_click(move |_| {
-                    let next = st_theme.theme.get_untracked().toggle();
-                    st_theme.graph.borrow_mut().theme = next;
-                    st_theme.theme.set(next);
-                    st_theme.invalidate_wires();
-                }),
-        )
-        .child(
-            button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .corner_radius(4.0)
-                .background(tool_btn_bg)
-                .foreground(tool_btn_fg)
                 .font_size(10.5)
                 .content("{ }")
                 .on_click(move |_| {
@@ -336,7 +255,6 @@ pub fn node_graph_editor(
     let shelf = dynamic(move || {
         let q = search_query.get();
         let cat = active_cat.get();
-        let light = st_shelf.theme.get() == CanvasTheme::ClassicGrasshopper;
         let items = if q.trim().is_empty() {
             st_shelf.registry.by_category(&cat)
         } else {
@@ -350,11 +268,6 @@ pub fn node_graph_editor(
             row = row.child(
                 button()
                     .padding((8.0, 3.0, 8.0, 3.0))
-                    .corner_radius(4.0)
-                    .background(if light { solid(0xFFF3F2EC) } else { solid(0xFF141C2F) })
-                    .foreground(if light { solid(0xFF1F1F1D) } else { solid(0xFFE2E8F0) })
-                    .border_brush(if light { solid(0xFFB5B3A8) } else { solid(0xFF28354D) })
-                    .border_thickness(1.0)
                     .font_size(10.5)
                     .content(meta.nickname)
                     .on_click(move |_| {
@@ -383,8 +296,7 @@ pub fn node_graph_editor(
 
     let ribbon = border()
         .dock_panel_dock(Dock::Top)
-        .background(move || if is_light() { solid(0xFFE8E7E0) } else { solid(0xFF0D1321) })
-        .border_brush(move || if is_light() { solid(0xFFB5B3A7) } else { solid(0xFF1E293B) })
+        .border_brush(move || if is_dark.get() { solid(0x1FFFFFFF) } else { solid(0x1F000000) })
         .border_thickness((0.0, 0.0, 0.0, 1.0))
         .padding((10.0, 6.0, 10.0, 6.0))
         .clip_to_bounds(true)
@@ -462,12 +374,11 @@ pub fn node_graph_editor(
         .child(context_menu_overlay);
 
     // -------------------------------------------------------------------------
-    // 3. Bottom Grasshopper Status & Per-Port Modifier Bar
+    // 3. Bottom Status & Per-Port Modifier Bar (Stock Theme)
     // -------------------------------------------------------------------------
     let inspector_bar = build_bottom_inspector(&state);
 
     dock_panel()
-        .background(move || if is_light() { solid(0xFFD5D3C8) } else { solid(0xFF0A0F1A) })
         .clip_to_bounds(true)
         .horizontal_alignment(HorizontalAlignment::Stretch)
         .child(ribbon)
@@ -478,13 +389,11 @@ pub fn node_graph_editor(
 
 fn build_align_overlay(state: &VisualGraphState) -> Element {
     let st_vis = state.clone();
+    let is_dark = state.is_dark_theme;
     let make_align_btn = |label: &'static str, mode: AlignMode| {
         let st_a = state.clone();
         button()
             .padding((7.0, 3.0, 7.0, 3.0))
-            .corner_radius(4.0)
-            .background("#2B2B29")
-            .foreground("#FFFFFF")
             .font_size(10.0)
             .content(label)
             .on_click(move |_| {
@@ -499,9 +408,9 @@ fn build_align_overlay(state: &VisualGraphState) -> Element {
         .horizontal_alignment(HorizontalAlignment::Center)
         .vertical_alignment(VerticalAlignment::Top)
         .margin((0.0, 10.0, 0.0, 0.0))
-        .background("#F4F3EC")
-        .border_brush("#28A745")
-        .border_thickness(1.5)
+        .background(move || if is_dark.get() { solid(0xF02B2B2B) } else { solid(0xF0F9F9F9) })
+        .border_brush(move || if is_dark.get() { solid(0x33FFFFFF) } else { solid(0x33000000) })
+        .border_thickness(1.0)
         .corner_radius(7.0)
         .padding((8.0, 4.0, 8.0, 4.0))
         .is_visible(move || {
@@ -512,7 +421,7 @@ fn build_align_overlay(state: &VisualGraphState) -> Element {
             stack_panel()
                 .orientation(Orientation::Horizontal)
                 .spacing(4.0)
-                .child(text_block().text("ALIGN").font_size(10.0).foreground("#1E7E24").vertical_alignment(VerticalAlignment::Center))
+                .child(text_block().text("ALIGN").font_size(10.0).vertical_alignment(VerticalAlignment::Center))
                 .child(make_align_btn("⇤ Left", AlignMode::Left))
                 .child(make_align_btn("⇥ Right", AlignMode::Right))
                 .child(make_align_btn("⤒ Top", AlignMode::Top))
@@ -533,6 +442,7 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                 let Some((screen_pt, canvas_pt)) = st_in.quick_search.get() else {
                     return Element::Empty;
                 };
+                let dark = st_in.is_dark_theme.get();
                 let q = quick_query.get();
                 let matches = st_in.registry.search(&q);
                 let first_match = matches.first().cloned();
@@ -547,9 +457,7 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                         button()
                             .horizontal_alignment(HorizontalAlignment::Stretch)
                             .padding((8.0, 4.0, 8.0, 4.0))
-                            .corner_radius(4.0)
-                            .background(if i == 0 { "#28A745" } else { "#ECEBE4" })
-                            .foreground(if i == 0 { "#FFFFFF" } else { "#1E1E1C" })
+                            .border_brush(if i == 0 { solid(0xFF0078D4) } else { None })
                             .font_size(11.0)
                             .content(format!("{}  [{}]  ·  {}", meta.display_name, meta.nickname, cat))
                             .on_click(move |_| {
@@ -580,9 +488,9 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                     .canvas_left(screen_pt.x.max(12.0))
                     .canvas_top(screen_pt.y.max(12.0))
                     .width(268.0)
-                    .background("#F7F6F0")
-                    .border_brush("#28A745")
-                    .border_thickness(1.8)
+                    .background(if dark { solid(0xF52C2C2C) } else { solid(0xF5F9F9F9) })
+                    .border_brush(if dark { solid(0x38FFFFFF) } else { solid(0x38000000) })
+                    .border_thickness(1.0)
                     .corner_radius(8.0)
                     .padding(9.0)
                     .child(
@@ -594,18 +502,10 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                                         button()
                                             .dock_panel_dock(Dock::Right)
                                             .padding((5.0, 1.0, 5.0, 1.0))
-                                            .corner_radius(3.0)
-                                            .background("#D8D7CE")
-                                            .foreground("#222220")
                                             .content("✕")
                                             .on_click(move |_| st_close.quick_search.set(None)),
                                     )
-                                    .child(
-                                        text_block()
-                                            .text("Enter a search keyword…")
-                                            .font_size(10.5)
-                                            .foreground("#1E7E24"),
-                                    ),
+                                    .child(text_block().text("Enter a search keyword…").font_size(10.5)),
                             )
                             .child(
                                 text_box()
@@ -653,6 +553,7 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                 let Some((nid, screen_pt)) = st_in.context_menu.get() else {
                     return Element::Empty;
                 };
+                let dark = st_in.is_dark_theme.get();
                 let (title, disabled, matching) = {
                     let g = st_in.graph.borrow();
                     let Some(n) = g.nodes.get(&nid) else { return Element::Empty };
@@ -673,13 +574,10 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                 let st_del = st_in.clone();
                 let st_cls = st_in.clone();
 
-                let menu_btn = |text: String, bg: &'static str, fg: &'static str| {
+                let menu_btn = |text: String| {
                     button()
                         .horizontal_alignment(HorizontalAlignment::Stretch)
                         .padding((8.0, 4.0, 8.0, 4.0))
-                        .corner_radius(4.0)
-                        .background(bg)
-                        .foreground(fg)
                         .font_size(11.0)
                         .content(text)
                 };
@@ -688,9 +586,9 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                     .canvas_left(screen_pt.x.max(12.0))
                     .canvas_top(screen_pt.y.max(12.0))
                     .width(216.0)
-                    .background("#F7F6F0")
-                    .border_brush("#4A4A46")
-                    .border_thickness(1.4)
+                    .background(if dark { solid(0xF52C2C2C) } else { solid(0xF5F9F9F9) })
+                    .border_brush(if dark { solid(0x38FFFFFF) } else { solid(0x38000000) })
+                    .border_thickness(1.0)
                     .corner_radius(7.0)
                     .padding(7.0)
                     .child(
@@ -702,20 +600,17 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                         button()
                                             .dock_panel_dock(Dock::Right)
                                             .padding((5.0, 1.0, 5.0, 1.0))
-                                            .corner_radius(3.0)
-                                            .background("#D8D7CE")
-                                            .foreground("#222220")
                                             .content("✕")
                                             .on_click(move |_| st_cls.context_menu.set(None)),
                                     )
-                                    .child(text_block().text(title).font_size(11.0).foreground("#1E7E24")),
+                                    .child(text_block().text(title).font_size(11.0)),
                             )
                             .child(
-                                menu_btn(
-                                    if disabled { "▶ Enable (Ctrl+E)".into() } else { "⏸ Disable (Ctrl+E)".into() },
-                                    "#E8E7E0",
-                                    "#1E1E1C",
-                                )
+                                menu_btn(if disabled {
+                                    "▶ Enable (Ctrl+E)".into()
+                                } else {
+                                    "⏸ Disable (Ctrl+E)".into()
+                                })
                                 .on_click(move |_| {
                                     {
                                         let mut g = st_dis.graph.borrow_mut();
@@ -729,23 +624,21 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                     st_dis.reevaluate_and_notify();
                                 }),
                             )
-                            .child(
-                                menu_btn(format!("Lacing: {matching:?} ↻"), "#E8E7E0", "#1E1E1C").on_click(move |_| {
-                                    {
-                                        let mut g = st_lac.graph.borrow_mut();
-                                        if let Some(n) = g.nodes.get_mut(&nid) {
-                                            n.matching = match n.matching {
-                                                DataMatching::LongestList => DataMatching::ShortestList,
-                                                DataMatching::ShortestList => DataMatching::CrossReference,
-                                                DataMatching::CrossReference => DataMatching::LongestList,
-                                            };
-                                        }
-                                        g.mark_dirty(nid);
+                            .child(menu_btn(format!("Lacing: {matching:?} ↻")).on_click(move |_| {
+                                {
+                                    let mut g = st_lac.graph.borrow_mut();
+                                    if let Some(n) = g.nodes.get_mut(&nid) {
+                                        n.matching = match n.matching {
+                                            DataMatching::LongestList => DataMatching::ShortestList,
+                                            DataMatching::ShortestList => DataMatching::CrossReference,
+                                            DataMatching::CrossReference => DataMatching::LongestList,
+                                        };
                                     }
-                                    st_lac.context_menu.set(None);
-                                    st_lac.reevaluate_and_notify();
-                                }),
-                            )
+                                    g.mark_dirty(nid);
+                                }
+                                st_lac.context_menu.set(None);
+                                st_lac.reevaluate_and_notify();
+                            }))
                             .child(
                                 stack_panel()
                                     .orientation(Orientation::Horizontal)
@@ -753,9 +646,6 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                     .child(
                                         button()
                                             .padding((6.0, 3.0, 6.0, 3.0))
-                                            .corner_radius(3.0)
-                                            .background("#2B2B29")
-                                            .foreground("#FFFFFF")
                                             .font_size(10.0)
                                             .content("Wire: Def")
                                             .on_click(move |_| {
@@ -767,9 +657,6 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                     .child(
                                         button()
                                             .padding((6.0, 3.0, 6.0, 3.0))
-                                            .corner_radius(3.0)
-                                            .background("#D8D7CE")
-                                            .foreground("#1E1E1C")
                                             .font_size(10.0)
                                             .content("Faint")
                                             .on_click(move |_| {
@@ -781,9 +668,6 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                     .child(
                                         button()
                                             .padding((6.0, 3.0, 6.0, 3.0))
-                                            .corner_radius(3.0)
-                                            .background("#D8D7CE")
-                                            .foreground("#1E1E1C")
                                             .font_size(10.0)
                                             .content("Hidden")
                                             .on_click(move |_| {
@@ -793,7 +677,7 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                             }),
                                     ),
                             )
-                            .child(menu_btn("⧉ Duplicate (Ctrl+D)".into(), "#E8E7E0", "#1E1E1C").on_click(move |_| {
+                            .child(menu_btn("⧉ Duplicate (Ctrl+D)".into()).on_click(move |_| {
                                 {
                                     let mut g = st_dup.graph.borrow_mut();
                                     g.selected_nodes.clear();
@@ -804,16 +688,20 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                 st_dup.notify_topology_changed();
                                 st_dup.notify_selection_changed();
                             }))
-                            .child(menu_btn("✕ Delete (Del)".into(), "#DC2626", "#FFFFFF").on_click(move |_| {
-                                {
-                                    let mut g = st_del.graph.borrow_mut();
-                                    g.push_undo_checkpoint();
-                                    g.remove_node(nid);
-                                }
-                                st_del.context_menu.set(None);
-                                st_del.notify_topology_changed();
-                                st_del.notify_selection_changed();
-                            })),
+                            .child(
+                                menu_btn("✕ Delete (Del)".into())
+                                    .border_brush(solid(0xFFDC2626))
+                                    .on_click(move |_| {
+                                        {
+                                            let mut g = st_del.graph.borrow_mut();
+                                            g.push_undo_checkpoint();
+                                            g.remove_node(nid);
+                                        }
+                                        st_del.context_menu.set(None);
+                                        st_del.notify_topology_changed();
+                                        st_del.notify_selection_changed();
+                                    }),
+                            ),
                     )
                     .into()
             }
@@ -823,27 +711,20 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
 
 fn build_bottom_inspector(state: &VisualGraphState) -> Element {
     let st_i = state.clone();
-    let th_bg = state.theme;
-    let th_bd = state.theme;
+    let is_dark = state.is_dark_theme;
     border()
         .dock_panel_dock(Dock::Bottom)
-        .background(move || if th_bg.get() == CanvasTheme::ClassicGrasshopper { solid(0xFFE8E7E0) } else { solid(0xFF0B101D) })
-        .border_brush(move || if th_bd.get() == CanvasTheme::ClassicGrasshopper { solid(0xFFB5B3A7) } else { solid(0xFF1E293B) })
+        .border_brush(move || if is_dark.get() { solid(0x1FFFFFFF) } else { solid(0x1F000000) })
         .border_thickness((0.0, 1.0, 0.0, 0.0))
         .padding((10.0, 5.0, 10.0, 5.0))
         .clip_to_bounds(true)
         .child(dynamic(move || -> Element {
             let _ = st_i.selection_rev.get();
             let _ = st_i.eval_rev.get();
-            let light = st_i.theme.get() == CanvasTheme::ClassicGrasshopper;
             let sel_id = st_i.graph.borrow().selected_nodes.iter().next().copied();
             let Some(nid) = sel_id else {
                 let msg = st_i.status_msg;
-                return text_block()
-                    .text(move || msg.get())
-                    .font_size(10.5)
-                    .foreground(if light { solid(0xFF3E3E3A) } else { solid(0xFF7DD3FC) })
-                    .into();
+                return text_block().text(move || msg.get()).font_size(10.5).into();
             };
 
             let (title, out_summary, cur_match, in0_mod, has_in) = {
@@ -867,14 +748,11 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
             let mut bar = stack_panel()
                 .orientation(Orientation::Horizontal)
                 .spacing(8.0)
-                .child(text_block().text(title).font_size(11.0).foreground(if light { solid(0xFF1E7E24) } else { solid(0xFF34D399) }))
-                .child(text_block().text(out_summary).font_size(10.5).foreground(if light { solid(0xFF262624) } else { solid(0xFFCBD5E1) }))
+                .child(text_block().text(title).font_size(11.0))
+                .child(text_block().text(out_summary).font_size(10.5))
                 .child(
                     button()
                         .padding((7.0, 2.0, 7.0, 2.0))
-                        .corner_radius(4.0)
-                        .background("#2B2B29")
-                        .foreground("#FFFFFF")
                         .font_size(10.0)
                         .content(format!("Lacing: {cur_match:?}"))
                         .on_click(move |_| {
@@ -898,9 +776,7 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
                     let st_x = st_i.clone();
                     button()
                         .padding((6.0, 2.0, 6.0, 2.0))
-                        .corner_radius(4.0)
-                        .background(if active { solid(col) } else if light { solid(0xFFD8D7CE) } else { solid(0xFF1E293B) })
-                        .foreground(if active || !light { solid(0xFFFFFFFF) } else { solid(0xFF222220) })
+                        .border_brush(if active { solid(col) } else { None })
                         .font_size(10.0)
                         .content(lbl)
                         .on_click(move |_| {
@@ -925,7 +801,7 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
                     .child(make_mod("↓ Flatten", in0_mod.flatten, 0xFF0284C7, 0))
                     .child(make_mod("↑ Graft", in0_mod.graft, 0xFF7C3AED, 1))
                     .child(make_mod("⇄ Reverse", in0_mod.reverse, 0xFFD97706, 2))
-                    .child(make_mod("∗ Simplify", in0_mod.simplify, 0xFF28A745, 3));
+                    .child(make_mod("∗ Simplify", in0_mod.simplify, 0xFF22C55E, 3));
             }
             bar.into()
         }))

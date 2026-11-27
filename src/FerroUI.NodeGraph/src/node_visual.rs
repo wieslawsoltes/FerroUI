@@ -1,17 +1,13 @@
-//! **Authentic Rhino Grasshopper Real FerroUI Visual-Tree Node Capsules (`build_node_visual`)**.
+//! **Rhino Grasshopper Real FerroUI Visual-Tree Node Capsules (`build_node_visual`)**.
 //!
-//! Styled directly after original Rhino Grasshopper:
-//! - Standard components are ultra-clean **3-part horizontal capsules** (`[Inputs | Dark Center Pill | Outputs]`)
-//!   with protruding half-round Grasshopper port nubs and zero bulky title-bar clutter!
-//! - Selected nodes illuminate in iconic **Grasshopper Mint/Lime Green (`#A5E6A0` / `#1E7E24`)**,
-//!   warnings in **Grasshopper Amber (`#F7CB7C`)**, and errors in **Grasshopper Crimson (`#F29A9A`)**!
-//! - `NumberSlider` is a sleek single-bar Grasshopper pill `[ Name | Slider | 7.20 ]`!
-//! - `Panel` is the iconic **Grasshopper butter-yellow sticky note (`#FFF2A6`)**!
-//! - `GraphMapper` and `MdSlider` embed real interactive drafting-box controls right inside the capsule!
-//! - Automatically adapts between **Classic Rhino Grasshopper Parchment** and **Dark Studio** themes!
+//! Styled cleanly with FerroUI's **stock current application theme** (no custom theme!):
+//! - Standard components are compact **3-part horizontal capsules** (`[Inputs | Center Pill | Outputs]`)
+//!   with protruding port nubs.
+//! - Stock FerroUI controls (`Slider`, `Button`, `TextBox`, `TextBlock`, `Border`) inherit the
+//!   host application's active theme automatically, adapting to Light or Dark `ThemeVariant`.
 
 use crate::canvas::{ActiveWireDrag, VisualGraphState};
-use crate::types::{CanvasTheme, NodeId, NodeKind, NodeState, ParamWidget, PortDirection, PortSpec};
+use crate::types::{NodeId, NodeKind, NodeState, ParamWidget, PortDirection, PortSpec};
 use crate::widgets::{GraphMapperControl, MdSliderControl};
 use ferroui_base::input::{InputElement, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
@@ -91,12 +87,12 @@ pub fn build_node_visual(state: VisualGraphState, nid: NodeId) -> Element {
         }
     };
 
-    // Authentic Rhino Grasshopper reactive capsule colors (Silver / Mint-Green / Amber / Crimson / Yellow Panel!)
+    // Stock-theme adaptive capsule surfaces (follows host Light/Dark ThemeVariant with semantic states)
     let st_bg = state.clone();
     let capsule_bg = move || -> Option<Rc<dyn IBrush>> {
         let _ = st_bg.selection_rev.get();
         let _ = st_bg.eval_rev.get();
-        let theme = st_bg.theme.get();
+        let dark = st_bg.is_dark_theme.get();
         let g = st_bg.graph.borrow();
         let sel = g.selected_nodes.contains(&nid);
         let st = g.nodes.get(&nid).map(|n| n.state.clone()).unwrap_or_default();
@@ -104,34 +100,26 @@ pub fn build_node_visual(state: VisualGraphState, nid: NodeId) -> Element {
         if kind == NodeKind::Scribble {
             return None;
         }
-        let argb = match theme {
-            CanvasTheme::ClassicGrasshopper => match kind {
-                NodeKind::Panel => if sel { 0xFFD9F7A6 } else { 0xFFFFF2A6 }, // Iconic GH Yellow Sticky Note!
-                NodeKind::ParamViewer => if sel { 0xFFC4F0C8 } else { 0xFFE9F2EC },
-                _ => if sel {
-                    0xFFA8E6A3 // Iconic Grasshopper Mint-Green selection!
-                } else {
-                    match st {
-                        NodeState::Error(_) => 0xFFF29A9A,
-                        NodeState::Warning(_) => 0xFFF7CB7C,
-                        NodeState::Disabled => 0xFFB8B6AE,
-                        NodeState::Normal => 0xFFE9E9E5, // Crisp Rhino Grasshopper Silver Capsule!
-                    }
-                },
-            },
-            CanvasTheme::DarkStudio => match kind {
-                NodeKind::Panel => if sel { 0xFF22331E } else { 0xFF1C2416 },
-                _ => if sel {
-                    0xFF153827
-                } else {
-                    match st {
-                        NodeState::Error(_) => 0xFF33151F,
-                        NodeState::Warning(_) => 0xFF2E2210,
-                        NodeState::Disabled => 0xFF0F1522,
-                        NodeState::Normal => 0xFF182236,
-                    }
-                },
-            },
+        let argb = if dark {
+            if sel {
+                0xFF1F3628
+            } else {
+                match st {
+                    NodeState::Error(_) => 0xFF3A1D22,
+                    NodeState::Warning(_) => 0xFF362A16,
+                    NodeState::Disabled => 0xFF202020,
+                    NodeState::Normal => 0xFF2B2B2B,
+                }
+            }
+        } else if sel {
+            0xFFD9F3DC
+        } else {
+            match st {
+                NodeState::Error(_) => 0xFFFDE2E2,
+                NodeState::Warning(_) => 0xFFFEF3C7,
+                NodeState::Disabled => 0xFFE5E5E5,
+                NodeState::Normal => 0xFFF6F6F6,
+            }
         };
         solid_brush(argb)
     };
@@ -140,22 +128,17 @@ pub fn build_node_visual(state: VisualGraphState, nid: NodeId) -> Element {
     let capsule_border = move || -> Option<Rc<dyn IBrush>> {
         let _ = st_bd.selection_rev.get();
         let _ = st_bd.eval_rev.get();
-        let theme = st_bd.theme.get();
+        let dark = st_bd.is_dark_theme.get();
         let g = st_bd.graph.borrow();
         let sel = g.selected_nodes.contains(&nid);
         let st = g.nodes.get(&nid).map(|n| n.state.clone()).unwrap_or_default();
         let argb = if sel {
-            0xFF1E9E2E // Signature Grasshopper Green outline!
+            0xFF22C55E
         } else {
             match st {
-                NodeState::Error(_) => 0xFFD9383A,
-                NodeState::Warning(_) => 0xFFD9820B,
-                _ => match theme {
-                    CanvasTheme::ClassicGrasshopper => {
-                        if kind == NodeKind::Panel { 0xFFC2A843 } else { 0xFF4C4C48 }
-                    }
-                    CanvasTheme::DarkStudio => 0xFF334155,
-                },
+                NodeState::Error(_) => 0xFFDC2626,
+                NodeState::Warning(_) => 0xFFD97706,
+                _ => if dark { 0x33FFFFFF } else { 0x33000000 },
             }
         };
         solid_brush(argb)
@@ -167,15 +150,15 @@ pub fn build_node_visual(state: VisualGraphState, nid: NodeId) -> Element {
         if st_op.graph.borrow().nodes.get(&nid).is_some_and(|n| n.disabled) { 0.45 } else { 1.0 }
     };
 
-    // Tiny Grasshopper Profiler Pill directly beneath the capsule!
+    // Compact Profiler Pill directly beneath the capsule
     let st_prof = state.clone();
     let profiler_pill = border()
         .horizontal_alignment(HorizontalAlignment::Center)
         .background(move || {
-            if st_prof.theme.get() == CanvasTheme::ClassicGrasshopper {
-                solid_brush(0xFF42423E)
+            if st_prof.is_dark_theme.get() {
+                solid_brush(0xCC202020)
             } else {
-                solid_brush(0xFF1E293B)
+                solid_brush(0xCCECECEC)
             }
         })
         .corner_radius(3.0)
@@ -191,7 +174,6 @@ pub fn build_node_visual(state: VisualGraphState, nid: NodeId) -> Element {
         .child(
             text_block()
                 .font_size(8.5)
-                .foreground("#EAEAE4")
                 .text({
                     let st_pt = state.clone();
                     move || {
@@ -358,7 +340,7 @@ fn build_port_row(
     let st_sk = state.clone();
     let port_color = spec.port_type.color_argb();
 
-    // Classic Grasshopper nub: crisp white bead with dark charcoal ring (or colored dot in Dark mode!)
+    // Port socket bead: semantic port color (or selection green) with stock-adaptive border ring
     let socket = border()
         .width(11.0)
         .height(11.0)
@@ -366,9 +348,7 @@ fn build_port_row(
         .background(move || {
             let _ = st_sk.selection_rev.get();
             if st_sk.graph.borrow().selected_nodes.contains(&nid) {
-                solid_brush(0xFF28B838)
-            } else if st_sk.theme.get() == CanvasTheme::ClassicGrasshopper {
-                solid_brush(0xFFFFFFFF)
+                solid_brush(0xFF22C55E)
             } else {
                 solid_brush(port_color)
             }
@@ -376,10 +356,10 @@ fn build_port_row(
         .border_brush({
             let st_sb = state.clone();
             move || {
-                if st_sb.theme.get() == CanvasTheme::ClassicGrasshopper {
-                    solid_brush(0xFF2C2C2A)
+                if st_sb.is_dark_theme.get() {
+                    solid_brush(0xFF181818)
                 } else {
-                    solid_brush(0xFF090D16)
+                    solid_brush(0xFF2C2C2C)
                 }
             }
         })
@@ -478,7 +458,6 @@ fn build_port_row(
 
     let nick = spec.nickname.clone();
     let st_l = state.clone();
-    let st_lc = state.clone();
     let label = text_block()
         .text(move || {
             let _ = st_l.eval_rev.get();
@@ -504,13 +483,6 @@ fn build_port_row(
             }
         })
         .font_size(10.0)
-        .foreground(move || {
-            if st_lc.theme.get() == CanvasTheme::ClassicGrasshopper {
-                solid_brush(0xFF222220)
-            } else {
-                solid_brush(0xFFCBD5E1)
-            }
-        })
         .vertical_alignment(VerticalAlignment::Center);
 
     let mut row = stack_panel()
@@ -524,7 +496,7 @@ fn build_port_row(
     row.into()
 }
 
-/// Builds the authentic Rhino Grasshopper center control for every [`NodeKind`].
+/// Builds the center FerroUI control for every [`NodeKind`] using the stock current theme.
 fn build_node_center(
     state: &VisualGraphState,
     nid: NodeId,
@@ -533,26 +505,14 @@ fn build_node_center(
     accent_argb: u32,
     init_widget: ParamWidget,
 ) -> Element {
-    let st_txt = state.clone();
-    let fg_primary = move || {
-        if st_txt.theme.get() == CanvasTheme::ClassicGrasshopper {
-            solid_brush(0xFF1F1F1D)
-        } else {
-            solid_brush(0xFFF1F5F9)
-        }
-    };
-
     match kind {
         NodeKind::NumberSlider => {
-            // Iconic Rhino Grasshopper compact horizontal slider bar: [ Name | ===●--- | 7.20 ]
             let (init_v, min, max, step, integer) = match init_widget {
                 ParamWidget::Slider { value, min, max, step, integer } => (value, min, max, step, integer),
                 _ => (5.0, 0.0, 10.0, 0.1, false),
             };
             let val_sig = signal(init_v);
             let st_s = state.clone();
-            let st_nc = state.clone();
-            let st_vc = state.clone();
             let st_vb = state.clone();
             stack_panel()
                 .orientation(Orientation::Horizontal)
@@ -562,13 +522,6 @@ fn build_node_center(
                     text_block()
                         .text(title.to_string())
                         .font_size(10.5)
-                        .foreground(move || {
-                            if st_nc.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                solid_brush(0xFF262624)
-                            } else {
-                                solid_brush(0xFFCBD5E1)
-                            }
-                        })
                         .vertical_alignment(VerticalAlignment::Center),
                 )
                 .child(
@@ -609,26 +562,19 @@ fn build_node_center(
                 .child(
                     border()
                         .background(move || {
-                            if st_vb.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                solid_brush(0xFFFFFFFF)
+                            if st_vb.is_dark_theme.get() {
+                                solid_brush(0x28000000)
                             } else {
-                                solid_brush(0xFF0E1626)
+                                solid_brush(0x14000000)
                             }
                         })
-                        .border_brush(solid_brush(0xFF8C8B84))
+                        .border_brush(solid_brush(0x40888888))
                         .border_thickness(1.0)
                         .corner_radius(3.0)
                         .padding((5.0, 1.0, 5.0, 1.0))
                         .child(
                             text_block()
                                 .font_size(10.5)
-                                .foreground(move || {
-                                    if st_vc.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                        solid_brush(0xFF1A1A18)
-                                    } else {
-                                        solid_brush(0xFF38BDF8)
-                                    }
-                                })
                                 .text(move || {
                                     let v = val_sig.get();
                                     if integer { format!("{:.0}", v.round()) } else { format!("{v:.2}") }
@@ -646,13 +592,10 @@ fn build_node_center(
                 .orientation(Orientation::Horizontal)
                 .spacing(6.0)
                 .vertical_alignment(VerticalAlignment::Center)
-                .child(text_block().text(title.to_string()).font_size(10.5).foreground(fg_primary).vertical_alignment(VerticalAlignment::Center))
+                .child(text_block().text(title.to_string()).font_size(10.5).vertical_alignment(VerticalAlignment::Center))
                 .child(
                     button()
                         .padding((8.0, 2.0, 8.0, 2.0))
-                        .corner_radius(4.0)
-                        .background(move || if sig.get() { solid_brush(0xFF22A033) } else { solid_brush(0xFF3A3A38) })
-                        .foreground("#FFFFFF")
                         .font_size(10.5)
                         .content(move || if sig.get() { "True" } else { "False" })
                         .on_click(move |_| {
@@ -676,9 +619,6 @@ fn build_node_center(
             let st_b = state.clone();
             button()
                 .padding((10.0, 4.0, 10.0, 4.0))
-                .corner_radius(5.0)
-                .background("#2B2B29")
-                .foreground("#FFFFFF")
                 .font_size(10.5)
                 .content(title.to_string())
                 .on_click(move |_| {
@@ -761,13 +701,7 @@ fn build_node_center(
             stack_panel()
                 .width(152.0)
                 .spacing(3.0)
-                .child(
-                    border()
-                        .background("#2B2B29")
-                        .corner_radius(3.0)
-                        .padding((6.0, 2.0, 6.0, 2.0))
-                        .child(text_block().text(title.to_string()).font_size(10.0).foreground("#FFFFFF")),
-                )
+                .child(text_block().text(title.to_string()).font_size(10.0))
                 .child(text_box().text(txt_sig.two_way()).font_size(10.5))
                 .into()
         }
@@ -805,42 +739,21 @@ fn build_node_center(
                 .width(142.0)
                 .spacing(3.0)
                 .child(text_box().text(src_sig.two_way()).font_size(10.0))
-                .child(text_block().text("↓  Path Map").font_size(9.0).foreground(fg_primary).horizontal_alignment(HorizontalAlignment::Center))
+                .child(text_block().text("↓  Path Map").font_size(9.0).horizontal_alignment(HorizontalAlignment::Center))
                 .child(text_box().text(tgt_sig.two_way()).font_size(10.0))
                 .into()
         }
 
         NodeKind::Panel => {
-            // Iconic Rhino Grasshopper butter-yellow sticky note Panel!
             let st_pn = state.clone();
-            let st_pt = state.clone();
-            let st_ph = state.clone();
             stack_panel()
                 .width(172.0)
                 .spacing(3.0)
-                .child(
-                    text_block()
-                        .text(title.to_string())
-                        .font_size(10.0)
-                        .foreground(move || {
-                            if st_ph.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                solid_brush(0xFF6B5B1E)
-                            } else {
-                                solid_brush(0xFFA3E635)
-                            }
-                        }),
-                )
+                .child(text_block().text(title.to_string()).font_size(10.0))
                 .child(
                     text_block()
                         .min_height(56.0)
                         .font_size(10.0)
-                        .foreground(move || {
-                            if st_pt.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                solid_brush(0xFF2D2710)
-                            } else {
-                                solid_brush(0xFFD9F99D)
-                            }
-                        })
                         .text(move || {
                             let _ = st_pn.eval_rev.get();
                             st_pn
@@ -858,28 +771,14 @@ fn build_node_center(
 
         NodeKind::ParamViewer => {
             let st_pv = state.clone();
-            let st_pc = state.clone();
             stack_panel()
                 .width(156.0)
                 .spacing(3.0)
-                .child(
-                    border()
-                        .background("#2B2B29")
-                        .corner_radius(3.0)
-                        .padding((6.0, 2.0, 6.0, 2.0))
-                        .child(text_block().text("Param Viewer").font_size(9.5).foreground("#FFFFFF")),
-                )
+                .child(text_block().text("Param Viewer").font_size(10.0))
                 .child(
                     text_block()
                         .min_height(52.0)
                         .font_size(9.5)
-                        .foreground(move || {
-                            if st_pc.theme.get() == CanvasTheme::ClassicGrasshopper {
-                                solid_brush(0xFF1F3829)
-                            } else {
-                                solid_brush(0xFFBAE6FD)
-                            }
-                        })
                         .text(move || {
                             let _ = st_pv.eval_rev.get();
                             let g = st_pv.graph.borrow();
@@ -909,9 +808,8 @@ fn build_node_center(
                 row = row.child(
                     button()
                         .padding((7.0, 3.0, 7.0, 3.0))
-                        .corner_radius(4.0)
-                        .background(move || if sel_sig.get() == idx { solid_brush(0xFF22A033) } else { solid_brush(0xFF3A3A38) })
-                        .foreground("#FFFFFF")
+                        .border_brush(move || if sel_sig.get() == idx { solid_brush(0xFF22C55E) } else { None })
+                        .border_thickness(move || if sel_sig.get() == idx { 1.5 } else { 1.0 })
                         .font_size(10.0)
                         .content(label)
                         .on_click(move |_| {
@@ -941,15 +839,7 @@ fn build_node_center(
             let curve_sig = signal(init_curve);
             let gm_ref = NodeRef::<GraphMapperControl>::new();
             let st_gm = state.clone();
-            let st_th = state.clone();
             let st_btn = state.clone();
-
-            effect(move || {
-                let th = st_th.theme.get();
-                if let Some(ctrl) = gm_ref.get_untracked() {
-                    ctrl.set_theme(th);
-                }
-            });
 
             stack_panel()
                 .spacing(4.0)
@@ -964,7 +854,6 @@ fn build_node_center(
                                 init_curve,
                                 init_p1,
                                 init_p2,
-                                st_gm.theme.get_untracked(),
                                 Rc::new(move |c, p1, p2| {
                                     {
                                         let mut g = st_cb.graph.borrow_mut();
@@ -982,9 +871,6 @@ fn build_node_center(
                     button()
                         .horizontal_alignment(HorizontalAlignment::Stretch)
                         .padding((6.0, 2.0, 6.0, 2.0))
-                        .corner_radius(3.0)
-                        .background("#2B2B29")
-                        .foreground("#FFFFFF")
                         .font_size(9.5)
                         .content(move || format!("{} ↻", curve_sig.get().label()))
                         .on_click(move |_| {
@@ -1016,14 +902,6 @@ fn build_node_center(
             let xy_sig = signal((init_x, init_y));
             let md_ref = NodeRef::<MdSliderControl>::new();
             let st_md = state.clone();
-            let st_th = state.clone();
-
-            effect(move || {
-                let th = st_th.theme.get();
-                if let Some(ctrl) = md_ref.get_untracked() {
-                    ctrl.set_theme(th);
-                }
-            });
 
             stack_panel()
                 .spacing(3.0)
@@ -1037,7 +915,6 @@ fn build_node_center(
                             ctrl.configure(
                                 init_x,
                                 init_y,
-                                st_md.theme.get_untracked(),
                                 Rc::new(move |x, y| {
                                     xy_sig.set((x, y));
                                     {
@@ -1056,7 +933,6 @@ fn build_node_center(
                     text_block()
                         .horizontal_alignment(HorizontalAlignment::Center)
                         .font_size(9.5)
-                        .foreground(fg_primary)
                         .text(move || {
                             let (x, y) = xy_sig.get();
                             format!("({x:.2}, {y:.2})")
@@ -1085,19 +961,19 @@ fn build_node_center(
         NodeKind::Relay => Element::Empty,
 
         NodeKind::Component => {
-            // Iconic Rhino Grasshopper dark glossy center badge (deep GH green when selected!)
             let st_cc = state.clone();
             border()
                 .min_width(54.0)
                 .min_height(34.0)
                 .background(move || {
                     let _ = st_cc.selection_rev.get();
+                    let dark = st_cc.is_dark_theme.get();
                     if st_cc.graph.borrow().selected_nodes.contains(&nid) {
-                        solid_brush(0xFF1D7E25)
-                    } else if st_cc.theme.get() == CanvasTheme::ClassicGrasshopper {
-                        solid_brush(0xFF2B2B29)
+                        solid_brush(0x2822C55E)
+                    } else if dark {
+                        solid_brush(0x28000000)
                     } else {
-                        solid_brush(0xFF0D1424)
+                        solid_brush(0x14000000)
                     }
                 })
                 .border_brush(solid_brush(accent_argb))
@@ -1109,7 +985,6 @@ fn build_node_center(
                     text_block()
                         .text(title.to_string())
                         .font_size(10.5)
-                        .foreground("#FFFFFF")
                         .horizontal_alignment(HorizontalAlignment::Center)
                         .vertical_alignment(VerticalAlignment::Center),
                 )

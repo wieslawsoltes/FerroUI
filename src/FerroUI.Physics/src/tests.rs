@@ -598,3 +598,154 @@ fn newtonian_gravity_conserves_circular_orbit_across_substeps() {
         "circular orbit radius should be conserved across substeps: r0={r0}, r_now={r_now}"
     );
 }
+
+#[cfg(feature = "ferroui")]
+#[test]
+fn physics_custom_shader_effects_validate_wgsl_and_uniform_layout() {
+    use crate::compositor_integration::{PhysicsImpactRippleEffect, PhysicsKineticGlassEffect};
+    use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformType};
+
+    for (label, eff) in [
+        ("kinetic_glass", ImmutableCustomEffect::new(PhysicsKineticGlassEffect::default())),
+        ("impact_ripple", ImmutableCustomEffect::new(PhysicsImpactRippleEffect::default())),
+    ] {
+        let shader = eff.shader().expect("effect must expose a runtime shader");
+        let wgsl = shader.wgsl_module();
+        let module = naga::front::wgsl::parse_str(&wgsl)
+            .unwrap_or_else(|e| panic!("{label} WGSL parse error:\n{}", e.emit_to_string(&wgsl)));
+        naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::empty(),
+        )
+        .validate(&module)
+        .unwrap_or_else(|e| panic!("{label} WGSL validation error:\n{}", e.emit_to_string(&wgsl)));
+
+        // Verify struct Uniforms fields match `shader_uniform_layout()` identically (what Quartz Metal checks!).
+        let var = module
+            .global_variables
+            .iter()
+            .find(|(_, v)| v.name.as_deref() == Some("uniforms") && v.space == naga::AddressSpace::Uniform)
+            .unwrap_or_else(|| panic!("{label} missing uniforms global"))
+            .1;
+        let naga::TypeInner::Struct { members, .. } = &module.types[var.ty].inner else {
+            panic!("{label} uniforms must be a struct");
+        };
+        let layout = eff.shader_uniform_layout();
+        assert_eq!(members.len(), layout.len(), "{label} uniform count mismatch");
+        for (m, (name, ty)) in members.iter().zip(&layout) {
+            assert_eq!(m.name.as_deref(), Some(name.as_str()), "{label} uniform name mismatch");
+            let ok = match (&module.types[m.ty].inner, ty) {
+                (naga::TypeInner::Scalar(s), ShaderUniformType::Float) => *s == naga::Scalar::F32,
+                (naga::TypeInner::Scalar(s), ShaderUniformType::Int) => *s == naga::Scalar::I32,
+                (naga::TypeInner::Vector { size: naga::VectorSize::Bi, scalar }, ShaderUniformType::Float2) => {
+                    *scalar == naga::Scalar::F32
+                }
+                (naga::TypeInner::Vector { size: naga::VectorSize::Quad, scalar }, ShaderUniformType::Float4) => {
+                    *scalar == naga::Scalar::F32
+                }
+                _ => false,
+            };
+            assert!(ok, "{label} uniform type mismatch for {name}");
+        }
+
+        // Verify CPU fallback executes cleanly on a small RGBA buffer.
+        let mut pixels = vec![128u8; 16 * 16 * 4];
+        assert!(eff.cpu_reference(&mut pixels, 16, 16, 1.0));
+    }
+}
+
+#[cfg(feature = "ferroui")]
+#[test]
+fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
+    use crate::compositor_integration::{
+        CompositorPhysicsController, PhysicsCompositorBehavior, PhysicsShaderMode,
+    };
+    use ferroui_base::media::Color;
+    use ferroui_base::rendering::composition::{
+        Compositor, HarmonicWaveSimulation, ICompositorScheduler, SimulationMode,
+        SimulationStepResult, SimulationTarget,
+    };
+    use ferroui_base::rendering::{IRenderLoop, IRenderLoopTask};
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_base::{Point, Vector};
+    use std::rc::Rc;
+    use std::sync::Arc;
+
+    struct NoopRenderLoop;
+    impl IRenderLoop for NoopRenderLoop {
+        fn add(&self, _: Arc<dyn IRenderLoopTask>) {}
+        fn remove(&self, _: &Arc<dyn IRenderLoopTask>) {}
+        fn runs_in_background(&self) -> bool { false }
+        fn wakeup(&self) {}
+    }
+    struct NoopScheduler;
+    impl ICompositorScheduler for NoopScheduler {
+        fn commit_requested(&self, _: &Rc<Compositor>) {}
+    }
+
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let scheduler: Rc<dyn ICompositorScheduler> = Rc::new(NoopScheduler);
+    let compositor = Compositor::with_scheduler(
+        Arc::new(NoopRenderLoop),
+        None,
+        true,
+        &scheduler,
+        Dispatcher::ui_thread(),
+        None,
+        None,
+    );
+
+    let v1 = compositor.create_solid_color_visual();
+    v1.set_size(Vector::new(140.0, 90.0));
+    let v2 = compositor.create_solid_color_visual();
+    v2.set_size(Vector::new(140.0, 90.0));
+
+    let (handle, ctrl) = CompositorPhysicsController::attach_to_compositor(
+        &compositor,
+        "test-physics",
+        640.0,
+        420.0,
+        PhysicsCompositorBehavior::RigidBody,
+    );
+    ctrl.bind_visual(
+        SimulationTarget::composition((*v1).clone()),
+        Vec2::new(200.0, 120.0),
+        Vec2::new(140.0, 90.0),
+        Color::from_argb(255, 56, 189, 248),
+    );
+    ctrl.bind_visual(
+        SimulationTarget::composition((*v2).clone()),
+        Vec2::new(380.0, 120.0),
+        Vec2::new(140.0, 90.0),
+        Color::from_argb(255, 168, 85, 247),
+    );
+    assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Physics]);
+
+    // Trigger an impact ripple & shockwave, then step via the compositor contract.
+    ctrl.trigger_impact(0, Point::new(0.5, 0.5), 0.9, Vec2::new(220.0, -140.0));
+    for _ in 0..20 {
+        let res = compositor.step_simulations(1.0 / 60.0);
+        assert_eq!(res, SimulationStepResult::Active);
+    }
+
+    assert!(v1.translation().x.abs() > 1.0 || v1.translation().y.abs() > 1.0, "expected rigid body displacement");
+    assert!(v1.effect().is_some(), "expected physics-driven GPU shader effect attached to CompositionVisual");
+    assert!(ctrl.telemetry().step_count >= 20);
+
+    // Switch live to ElasticSprings mode and disable shaders cleanly.
+    ctrl.set_behavior(PhysicsCompositorBehavior::ElasticSprings);
+    ctrl.set_shader_mode(PhysicsShaderMode::KineticGlassOnly);
+    assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
+
+    // Verify a non-physics HarmonicWaveSimulation can take over the same visuals cleanly!
+    drop(handle);
+    assert_eq!(compositor.simulation_count(), 0);
+    let wave_handle = compositor.register_simulation(HarmonicWaveSimulation::new(
+        "harmonic-takeover",
+        vec![SimulationTarget::composition((*v1).clone())],
+    ));
+    assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Harmonic]);
+    assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
+    assert!(v1.translation().x.abs() > 0.0 || v1.translation().y.abs() > 0.0);
+    drop(wave_handle);
+}

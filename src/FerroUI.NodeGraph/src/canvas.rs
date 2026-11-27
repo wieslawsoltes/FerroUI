@@ -1,20 +1,18 @@
-//! **Authentic Rhino Grasshopper Visual-Tree Coordinator & Hardware Vector Wire/Grid Layer**.
+//! **Rhino Grasshopper Visual-Tree Coordinator & Hardware Vector Wire/Grid Layer**.
 //!
-//! Renders behind the real FerroUI node visual tree with both **Classic Grasshopper Warm Parchment**
-//! and **Dark Studio** themes:
-//! - Adaptive Rhino drafting grid + origin crosshair
-//! - Pastel Grasshopper Node Groups measured directly from mounted real node visuals
-//! - **Signature Grasshopper Fancy Wires**: charcoal single Item wire, double-line List wire,
-//!   dashed double-line DataTree wire, luminous **Grasshopper Green** selected wires, orange Empty wire
+//! Automatically adapts to FerroUI's stock current application theme (`ThemeVariant`)
+//! with zero custom theme overrides:
+//! - Adaptive drafting grid + origin crosshair rendered cleanly over the stock surface
+//! - Node Groups measured directly from mounted real node visuals
+//! - **Signature Grasshopper Fancy Wires**: single Item wire, double-line List wire,
+//!   dashed double-line DataTree wire, selected wires, orange Empty wire
 //! - **Rhino Window vs Crossing Marquee** (left→right Blue Window Select, right→left Green Crossing Select!)
 //! - Magnetic port snap halo + `+` Shift multi-wire badge, interactive minimap, and DataTree tooltips!
 
 use crate::eval::evaluate_graph;
 use crate::graph::{NodeGraph, NodeInstance};
 use crate::node::NodeRegistry;
-use crate::types::{
-    CanvasTheme, NodeId, PortDirection, WireDataKind, WireDisplay, WireId,
-};
+use crate::types::{NodeId, PortDirection, WireDataKind, WireDisplay, WireId};
 use ferroui_base::input::{
     InputElement, InputElementImpl, Key, KeyEventArgs, KeyModifiers, PointerEventArgs,
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerWheelEventArgs,
@@ -27,12 +25,13 @@ use ferroui_base::media::{
     MatrixTransform, PenLineCap, StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
+use ferroui_base::styling::ThemeVariant;
 use ferroui_base::utilities::locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Matrix, Point,
     Rect, Ref, StyledElementImpl, Visual, VisualImpl, WeakRef,
 };
-use ferroui_controls::{Control, ControlImpl};
+use ferroui_controls::{Application, Control, ControlImpl};
 use ferroui_view::prelude::*;
 use ferroui_view::ViewClass;
 use rustc_hash::FxHashMap;
@@ -67,7 +66,8 @@ pub struct VisualGraphState {
     pub topology_rev: Signal<u64>,
     pub eval_rev: Signal<u64>,
     pub selection_rev: Signal<u64>,
-    pub theme: Signal<CanvasTheme>,
+    /// Tracks whether the host application's stock `ThemeVariant` is currently dark.
+    pub is_dark_theme: Signal<bool>,
     pub quick_search: Signal<Option<(Point, [f64; 2])>>,
     pub context_menu: Signal<Option<(NodeId, Point)>>,
     pub status_msg: Signal<String>,
@@ -79,7 +79,9 @@ impl VisualGraphState {
         registry: Rc<NodeRegistry>,
         on_evaluated: Rc<dyn Fn(&NodeGraph)>,
     ) -> Self {
-        let init_theme = graph.borrow().theme;
+        let init_dark = Application::current()
+            .and_then(|app| app.actual_theme_variant())
+            .is_some_and(|v| v == ThemeVariant::dark());
         Self {
             graph,
             registry,
@@ -94,7 +96,7 @@ impl VisualGraphState {
             topology_rev: signal(0),
             eval_rev: signal(0),
             selection_rev: signal(0),
-            theme: signal(init_theme),
+            is_dark_theme: signal(init_dark),
             quick_search: signal(None),
             context_menu: signal(None),
             status_msg: signal(String::from(
@@ -389,91 +391,91 @@ struct ThemeBrushes {
 }
 
 impl ThemeBrushes {
-    fn classic_grasshopper() -> Self {
+    /// Neutral vector strokes/grid brushes for stock Light `ThemeVariant`.
+    fn stock_light() -> Self {
         let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
         let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFE07A00));
-        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF343434));
-        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFD5D3C8));
-        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22A033));
+        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF3A3A3A));
+        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF3F3F3));
+        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF16A34A));
         Self {
-            // Original Rhino Grasshopper warm drafting parchment!
-            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFD5D3C8)),
-            minor_grid: Rc::new(ImmutablePen::from_uint32(0xFFC8C5B9, 1.0)),
-            major_grid: Rc::new(ImmutablePen::from_uint32(0xFFB5B2A5, 1.1)),
-            origin_pen: Rc::new(ImmutablePen::from_uint32(0xFF9E9A8C, 1.5)),
+            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0x00000000)),
+            minor_grid: Rc::new(ImmutablePen::from_uint32(0x14000000, 1.0)),
+            major_grid: Rc::new(ImmutablePen::from_uint32(0x24000000, 1.0)),
+            origin_pen: Rc::new(ImmutablePen::from_uint32(0x3C000000, 1.4)),
             wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.9, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
-            wire_item: Rc::new(ImmutablePen::from_uint32(0xFF3A3A3A, 2.0)),
-            wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xFF343434, 4.6)),
-            wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFFD5D3C8, 1.8)),
+            wire_item: Rc::new(ImmutablePen::from_uint32(0xCC3A3A3A, 2.0)),
+            wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD343434, 4.6)),
+            wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFFF3F3F3, 1.8)),
             wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
             wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.8, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
-            // Signature Rhino Grasshopper luminous lime-green selected wire!
-            wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF28B838, 3.6)),
-            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFFD9F7DC, 1.3)),
-            wire_faint: Rc::new(ImmutablePen::from_uint32(0x55484848, 1.2)),
-            wire_preview_ok: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 2.8)),
-            wire_preview_bad: Rc::new(ImmutablePen::from_uint32(0xFFD9383A, 2.8)),
-            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x280284C7)),
-            window_border: Rc::new(ImmutablePen::from_uint32(0xCC0284C7, 1.4)),
-            crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2828B838)),
+            wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF16A34A, 3.6)),
+            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFFDCFCE7, 1.3)),
+            wire_faint: Rc::new(ImmutablePen::from_uint32(0x44484848, 1.2)),
+            wire_preview_ok: Rc::new(ImmutablePen::from_uint32(0xFF16A34A, 2.8)),
+            wire_preview_bad: Rc::new(ImmutablePen::from_uint32(0xFFDC2626, 2.8)),
+            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x220078D4)),
+            window_border: Rc::new(ImmutablePen::from_uint32(0xCC0078D4, 1.4)),
+            crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2216A34A)),
             crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
-            minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xE8EAE8DF)),
-            minimap_border: Rc::new(ImmutablePen::from_uint32(0xFF9A988E, 1.2)),
-            minimap_view: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 1.6)),
-            text_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF55544E)),
-            text_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF222220)),
-            text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF1A1A18)),
-            tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF8FFFCE8)),
-            tooltip_border: Rc::new(ImmutablePen::from_uint32(0xFF888472, 1.2)),
-            snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF22A033, 2.6)),
-            snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFD9383A, 2.6)),
-            node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF5A5A54)),
-            node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF28B838)),
-            badge_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22A033)),
+            minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDCF3F3F3)),
+            minimap_border: Rc::new(ImmutablePen::from_uint32(0x38000000, 1.0)),
+            minimap_view: Rc::new(ImmutablePen::from_uint32(0xFF0078D4, 1.5)),
+            text_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF5A5A5A)),
+            text_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF1F1F1F)),
+            text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF1A1A1A)),
+            tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF5FFFFFF)),
+            tooltip_border: Rc::new(ImmutablePen::from_uint32(0x38000000, 1.0)),
+            snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF16A34A, 2.6)),
+            snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFDC2626, 2.6)),
+            node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF666666)),
+            node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF16A34A)),
+            badge_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF16A34A)),
         }
     }
 
-    fn dark_studio() -> Self {
+    /// Neutral vector strokes/grid brushes for stock Dark `ThemeVariant`.
+    fn stock_dark() -> Self {
         let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
         let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xCCF59E0B));
-        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xDDA78BFA));
-        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0A0F1A));
+        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xDD93C5FD));
+        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF202020));
         let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF34D399));
         Self {
-            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF0A0F1A)),
-            minor_grid: Rc::new(ImmutablePen::from_uint32(0xFF111827, 1.0)),
-            major_grid: Rc::new(ImmutablePen::from_uint32(0xFF1A253A, 1.0)),
-            origin_pen: Rc::new(ImmutablePen::from_uint32(0xFF2B3A55, 1.4)),
+            bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0x00000000)),
+            minor_grid: Rc::new(ImmutablePen::from_uint32(0x10FFFFFF, 1.0)),
+            major_grid: Rc::new(ImmutablePen::from_uint32(0x1FFFFFFF, 1.0)),
+            origin_pen: Rc::new(ImmutablePen::from_uint32(0x34FFFFFF, 1.4)),
             wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.8, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
-            wire_item: Rc::new(ImmutablePen::from_uint32(0xCC94A3B8, 2.2)),
-            wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD38BDF8, 4.8)),
-            wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFF0A0F1A, 1.9)),
+            wire_item: Rc::new(ImmutablePen::from_uint32(0xCCA8A8A8, 2.2)),
+            wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD60CDFF, 4.8)),
+            wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFF202020, 1.9)),
             wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
             wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.9, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
             wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF22C55E, 3.6)),
-            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFF0A0F1A, 1.3)),
-            wire_faint: Rc::new(ImmutablePen::from_uint32(0x4494A3B8, 1.2)),
+            wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFF202020, 1.3)),
+            wire_faint: Rc::new(ImmutablePen::from_uint32(0x44A8A8A8, 1.2)),
             wire_preview_ok: Rc::new(ImmutablePen::from_uint32(0xFF34D399, 2.8)),
             wire_preview_bad: Rc::new(ImmutablePen::from_uint32(0xFFF43F5E, 2.8)),
-            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2238BDF8)),
-            window_border: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 1.4)),
+            window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2260CDFF)),
+            window_border: Rc::new(ImmutablePen::from_uint32(0xCC60CDFF, 1.4)),
             crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2234D399)),
             crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
-            minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDE0B101D)),
-            minimap_border: Rc::new(ImmutablePen::from_uint32(0xFF2B3B58, 1.2)),
-            minimap_view: Rc::new(ImmutablePen::from_uint32(0xCC38BDF8, 1.5)),
-            text_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF94A3B8)),
-            text_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF7DD3FC)),
-            text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF1F5F9)),
-            tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF00F172A)),
-            tooltip_border: Rc::new(ImmutablePen::from_uint32(0xFF38BDF8, 1.2)),
+            minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDC242424)),
+            minimap_border: Rc::new(ImmutablePen::from_uint32(0x2EFFFFFF, 1.0)),
+            minimap_view: Rc::new(ImmutablePen::from_uint32(0xCC60CDFF, 1.5)),
+            text_muted: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFB4B4B4)),
+            text_accent: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF60CDFF)),
+            text_primary: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF3F3F3)),
+            tooltip_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xF02B2B2B)),
+            tooltip_border: Rc::new(ImmutablePen::from_uint32(0x38FFFFFF, 1.0)),
             snap_ok_pen: Rc::new(ImmutablePen::from_uint32(0xFF10B981, 2.6)),
             snap_bad_pen: Rc::new(ImmutablePen::from_uint32(0xFFF43F5E, 2.6)),
-            node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF64748B)),
+            node_dot: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF888888)),
             node_dot_sel: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF22C55E)),
             badge_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF10B981)),
         }
@@ -485,7 +487,7 @@ pub struct WireBackdropLayer {
     base: Control,
     state: RefCell<Option<VisualGraphState>>,
     drag: RefCell<BackdropDrag>,
-    classic: ThemeBrushes,
+    light: ThemeBrushes,
     dark: ThemeBrushes,
 }
 
@@ -511,8 +513,8 @@ impl WireBackdropLayer {
             base: Control::construct(),
             state: RefCell::new(None),
             drag: RefCell::new(BackdropDrag::Idle),
-            classic: ThemeBrushes::classic_grasshopper(),
-            dark: ThemeBrushes::dark_studio(),
+            light: ThemeBrushes::stock_light(),
+            dark: ThemeBrushes::stock_dark(),
         }
     }
 
@@ -817,15 +819,19 @@ impl VisualImpl for WireBackdropLayer {
         let clip = dc.push_clip(Rect::new(0.0, 0.0, w, h));
         let mut dc = dc.scope(clip);
 
+        let is_dark = this
+            .get_value(ThemeVariant::actual_theme_variant_property())
+            .or_else(|| Application::current().and_then(|app| app.actual_theme_variant()))
+            .is_some_and(|v| v == ThemeVariant::dark());
+
         let Some(st) = this.state.borrow().clone() else {
-            dc.fill_rectangle(&this.classic.bg, Rect::new(0.0, 0.0, w, h), 0.0);
             return;
         };
+        if st.is_dark_theme.is_alive() && st.is_dark_theme.get_untracked() != is_dark {
+            st.is_dark_theme.set(is_dark);
+        }
         let g = st.graph.borrow();
-        let pal = match g.theme {
-            CanvasTheme::ClassicGrasshopper => &this.classic,
-            CanvasTheme::DarkStudio => &this.dark,
-        };
+        let pal = if is_dark { &this.dark } else { &this.light };
 
         // 1. Rhino Grasshopper Drafting Canvas & Adaptive Grid
         dc.fill_rectangle(&pal.bg, Rect::new(0.0, 0.0, w, h), 0.0);
@@ -911,9 +917,10 @@ impl VisualImpl for WireBackdropLayer {
                     (max_x - min_x) + pad_x * 2.0,
                     (max_y - min_y) + pad_top + pad_bot,
                 );
-                let fill_col = match g.theme {
-                    CanvasTheme::ClassicGrasshopper => (group.color_argb & 0x00FF_FFFF) | 0x3800_0000,
-                    CanvasTheme::DarkStudio => group.color_argb,
+                let fill_col = if is_dark {
+                    (group.color_argb & 0x00FF_FFFF) | 0x2600_0000
+                } else {
+                    (group.color_argb & 0x00FF_FFFF) | 0x2000_0000
                 };
                 let border_col = (group.color_argb & 0x00FF_FFFF) | 0x9900_0000;
                 let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(fill_col));

@@ -102,6 +102,8 @@ pub struct Compositor {
     /// The open scoped batches and the batch of the current frame (WinUI
     /// `CompositionScopedBatch` and `CompositionCommitBatch`).
     animation_batches: super::composition_batch::CompositorBatches,
+    /// Active composition simulations plugged into the compositor clock.
+    simulations: super::simulation::CompositionSimulationHost,
 }
 
 /// The render loop task of a compositor. The loop may tick on any thread;
@@ -450,6 +452,7 @@ impl Compositor {
             render_context_changed: HandlerList::new(),
             default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
             animation_batches: super::composition_batch::CompositorBatches::new(),
+            simulations: super::simulation::CompositionSimulationHost::new(),
         });
         COMPOSITORS.with(|compositors| {
             let mut compositors = compositors.borrow_mut();
@@ -480,6 +483,58 @@ impl Compositor {
     /// The open scoped batches and the batch of the current frame.
     pub(crate) fn animation_batches(&self) -> &super::composition_batch::CompositorBatches {
         &self.animation_batches
+    }
+
+    /// The simulation host attached to this compositor.
+    pub(crate) fn simulations(&self) -> &super::simulation::CompositionSimulationHost {
+        &self.simulations
+    }
+
+    /// Registers a simulation (physics, springs, harmonic waves, audio-reactive,
+    /// custom procedural, etc.) on this compositor's frame loop.
+    ///
+    /// Dropping the returned [`CompositionSimulationHandle`](super::CompositionSimulationHandle)
+    /// unregisters the simulation unless [`detach`](super::CompositionSimulationHandle::detach)
+    /// is called.
+    pub fn register_simulation(
+        &self,
+        simulation: impl super::ICompositionSimulation,
+    ) -> super::CompositionSimulationHandle {
+        self.register_boxed_simulation(Box::new(simulation))
+    }
+
+    /// Registers a boxed [`ICompositionSimulation`](super::ICompositionSimulation)
+    /// on this compositor's frame loop.
+    pub fn register_boxed_simulation(
+        &self,
+        simulation: Box<dyn super::ICompositionSimulation>,
+    ) -> super::CompositionSimulationHandle {
+        self.dispatcher.verify_access();
+        self.simulations.register(&self.this(), simulation)
+    }
+
+    /// Number of simulations currently registered on this compositor.
+    pub fn simulation_count(&self) -> usize {
+        self.simulations.count()
+    }
+
+    /// Modes of all non-paused simulations currently registered on this compositor.
+    pub fn active_simulation_modes(&self) -> Vec<super::SimulationMode> {
+        self.simulations.active_modes()
+    }
+
+    /// Wakes all non-paused simulations so idle simulations step on the next frame.
+    pub fn wake_simulations(&self) {
+        self.dispatcher.verify_access();
+        self.simulations.wake_all(&self.this());
+    }
+
+    /// Steps all active simulations deterministically by `dt_seconds`.
+    ///
+    /// Useful for headless unit tests, deterministic scrubbing, and custom frame loops.
+    pub fn step_simulations(&self, dt_seconds: f64) -> super::SimulationStepResult {
+        self.dispatcher.verify_access();
+        self.simulations.step_all(&self.this(), dt_seconds, self.clock_elapsed())
     }
 
     /// The render loop the server compositor is driven by.

@@ -63,7 +63,7 @@ pub fn node_graph_physics_studio() -> Element {
     });
 
     // -------------------------------------------------------------------------
-    // 1. Top Template & Live-Sync Bar
+    // 1. Top Template & Live-Sync Bar (Stock FerroUI Theme)
     // -------------------------------------------------------------------------
     let mut tpl_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
     for tpl in PhysicsGraphTemplate::ALL {
@@ -73,9 +73,7 @@ pub fn node_graph_physics_studio() -> Element {
         tpl_row = tpl_row.child(
             button()
                 .padding((10.0, 5.0, 10.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if active_template.get() == tpl { "#7C3AED" } else { "#182235" })
-                .foreground("#F8FAFC")
+                .border_thickness(move || if active_template.get() == tpl { 1.5 } else { 1.0 })
                 .content(tpl.label())
                 .on_click(move |_| {
                     let mut next = tpl.build(&r_t);
@@ -103,18 +101,12 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if live_rebuild.get() { "#059669" } else { "#334155" })
-                .foreground("#FFFFFF")
                 .content(move || if live_rebuild.get() { "⚡ Live Sync: ON" } else { "⚡ Live Sync: OFF" })
                 .on_click(move |_| live_rebuild.update(|v| *v = !*v)),
         )
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background("#0284C7")
-                .foreground("#FFFFFF")
                 .content("↺ Rebuild Sim")
                 .on_click(move |_| {
                     let mut g = g_reb.borrow_mut();
@@ -129,9 +121,6 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background(move || if preview_paused.get() { "#059669" } else { "#1E293B" })
-                .foreground("#FFFFFF")
                 .content(move || if preview_paused.get() { "▶ Play" } else { "⏸ Pause" })
                 .on_click(move |_| {
                     let next = !preview_paused.get_untracked();
@@ -142,9 +131,6 @@ pub fn node_graph_physics_studio() -> Element {
         .child(
             button()
                 .padding((9.0, 5.0, 9.0, 5.0))
-                .corner_radius(6.0)
-                .background("#D97706")
-                .foreground("#FFFFFF")
                 .content("💥 Blast")
                 .on_click(move |_| {
                     eng_blast.borrow_mut().world.apply_explosion(Vec2::new(8.0, 5.5), 6.5, 16.0);
@@ -153,8 +139,6 @@ pub fn node_graph_physics_studio() -> Element {
 
     let top_bar = border()
         .dock_panel_dock(Dock::Top)
-        .background("#101726")
-        .border_brush("#24314A")
         .border_thickness((0.0, 0.0, 0.0, 1.0))
         .padding((12.0, 8.0, 12.0, 8.0))
         .child(dock_panel().child(controls_row.dock_panel_dock(Dock::Right)).child(tpl_row));
@@ -168,8 +152,6 @@ pub fn node_graph_physics_studio() -> Element {
     let live_preview_pane = border()
         .dock_panel_dock(Dock::Right)
         .width(500.0)
-        .background("#080C14")
-        .border_brush("#24314A")
         .border_thickness((1.0, 0.0, 0.0, 0.0))
         .clip_to_bounds(true)
         .child(
@@ -177,8 +159,6 @@ pub fn node_graph_physics_studio() -> Element {
                 .child(
                     border()
                         .dock_panel_dock(Dock::Top)
-                        .background("#0D1321")
-                        .border_brush("#1E293B")
                         .border_thickness((0.0, 0.0, 0.0, 1.0))
                         .padding((10.0, 6.0, 10.0, 6.0))
                         .child(
@@ -187,14 +167,12 @@ pub fn node_graph_physics_studio() -> Element {
                                 .child(
                                     text_block()
                                         .text("⚡ LIVE GRASSHOPPER → PHYSICS VIEWPORT")
-                                        .font_size(11.0)
-                                        .foreground("#34D399"),
+                                        .font_size(11.0),
                                 )
                                 .child(
                                     text_block()
                                         .text(move || summary_text.get())
-                                        .font_size(10.5)
-                                        .foreground("#94A3B8"),
+                                        .font_size(10.5),
                                 ),
                         ),
                 )
@@ -220,7 +198,6 @@ pub fn node_graph_physics_studio() -> Element {
     }));
 
     dock_panel()
-        .background("#090D16")
         .clip_to_bounds(true)
         .child(top_bar)
         .child(live_preview_pane)
