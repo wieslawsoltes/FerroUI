@@ -43,6 +43,7 @@ mod desktop_media;
 pub mod navigation;
 mod color_samples;
 mod color_sections;
+mod composition_interop_samples;
 mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
@@ -139,6 +140,8 @@ mod scratch_pad_samples_tests;
 mod selector_bar_samples_tests;
 #[cfg(test)]
 mod status_samples_tests;
+#[cfg(test)]
+mod composition_interop_samples_tests;
 
 #[cfg(test)]
 mod command_samples_tests;

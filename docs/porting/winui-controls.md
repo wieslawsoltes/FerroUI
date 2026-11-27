@@ -408,10 +408,14 @@ Phase G1 of the full port (#418) gives the pending pages whose control is on mai
 | LayoutPanel | 1 of 1 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
 | InkCanvas | 3 of 3 | ported | `ink_samples.rs` | `ink_samples_tests.rs` |
 | Chart | 3 ported, 4 partial | partial | `chart_samples.rs` | `chart_samples_tests.rs` |
+| XamlCompInterop | 5 of 5; the expressions read `Size` and `Offset` of the element's visual for `ActualSize` and `ActualOffset` | ported | `composition_interop_samples.rs` | `composition_interop_samples_tests.rs` |
+| ContentIsland | not applicable: no content islands (the page keeps its cards with a diagnostic) | ported | `Pages/ContentIsland.xaml` | `composition_interop_samples_tests.rs` |
 | ItemsView | 0 of 3 | pending | | |
 | SystemBackdropElement | no catalog sample | pending | | |
 
 ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `ItemContainer`) and `SystemBackdropElement` are not on main (the system backdrop of an element is crate-private, for the menu flyout presenter), so they are G2 work. The other pending pages are G2 and G3 (#418); the owner's deferrals (media, WebView2, maps, TableView) are unchanged.
+
+The XamlCompInterop examples run on the compositor of the window: the scale and the translation are transforms of composition visuals, which each backend's renderer applies on its GPU path, and nothing of the page is drawn on the CPU. A window rendered without a compositor (a test host) shows a line that says so. Their hover examples need a mouse, pen or touchpad pointer: a touch does not raise `PointerEntered`, so on iOS and Android, and on touch screens elsewhere, the scale examples need such a pointer, while the circle and the popup follow their sliders on every platform. The popup is in the overlay layer of the window on every platform, also where other popups are platform windows.
 
 | WinUI Gallery | Port | Why |
 |---|---|---|
@@ -420,6 +424,10 @@ ItemsView and SystemBackdropElement stay `pending`: WinUI's `ItemsView` (with `I
 | `UIHelper.AnnounceActionForAccessibility` (a UIA notification). | The text of a polite live region. | FerroUI has no notification event; live regions are its announcement. |
 | `TitleBarHelper.ApplySystemThemeToCaptionButtons`. | Not called: the decorations of the window follow its theme. | The caption buttons are the window's. |
 | `ImageIconSource` of the gallery icon and `PersonPicture` in the TitleBar examples. | A `PathIconSource` and a composed circle with the initials. | Neither type was on main when G1 landed (PersonPicture is G2a since). |
+| `UIElement.StartAnimation` and an element given to `SetExpressionReferenceParameter` (XamlCompInterop). | The animation started with its `Target` on the element's composition visual (`ElementCompositionPreview.GetElementVisual`), and that visual as the reference; the expressions read its `Size` and `Offset`, which the renderer writes from the element's layout, for `ActualSize` and `ActualOffset`. | FerroUI's elements have no animation methods of their own and the port has no `IAnimationObject` (`winui-composition.md`, section 7); the element's `Scale` and `Translation` are those of its visual while the facades are not set. |
+| `Popup.StartAnimation` of the ActualOffset example. | The `Translation` of the popup's content, started when the popup opens, in the window's overlay layer at the top left corner of the popup's grid moved by its margin of 5 (`AnchorAndGravity` with the offsets). | A FerroUI popup shows its child in a popup host, not in its own visual; the overlay layer keeps it in the window, as WinUI's popup in its XAML root. |
+| The `doubleToThicknessConverter` of the ActualOffset example. | The slider's `ValueChanged` sets a uniform margin. | The gallery's converter is a class of the gallery app. |
+| `ContentIsland`, `ChildSiteLink` and the `SceneNode` model (ContentIsland). | `not-applicable`, with a diagnostic on the page; the button is disabled. | They host the content of another framework or process, which FerroUI does not; a FerroUI composition tree is hosted with `ElementCompositionPreview.SetElementChildVisual`. |
 | The ThemeShadow, the AcrylicBrush resources and the SolidColorBrush items with `ColorTemplate`. | A ThemeShadow resource set as `Shadow`; the brushes made in Rust with the source's values, page resources under the source's keys; composed swatch items, the handlers map the index to the colour. | As the templates of the WinUI theme share their shadow; the C# handlers change the brushes. |
 | The Hyperlink of the Acrylic and TitleBar intros to other gallery pages. | Text. | A page of the gallery cannot navigate its shell. |
 | Math mode and MathML of RichEditBox. | `not-applicable`, with a diagnostic on the page. | They are the math engine of the Windows RichEdit control. |
