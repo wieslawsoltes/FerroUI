@@ -160,6 +160,32 @@ impl CompositionDrawingSurface {
         })
     }
 
+    /// Puts a directly sampled frame into `slot`, for the 3D materials that sample it. The surface
+    /// keeps its content; it is the way to the render thread and to the checks of the import.
+    pub fn update_frame_slot_async(
+        &self,
+        image: &dyn ICompositionImportedGpuImage,
+        frame: super::frames::FrameLease,
+        producer_ready: super::frames::GpuCompletion,
+        slot: Arc<crate::rendering::scene3d::Scene3DFrameSlot>,
+    ) -> ServerJobTask<()> {
+        let image = imported_image(image);
+        self.invoke(move |compositor, server| {
+            server.update_frame_slot(image.get(compositor), frame, producer_ready, &slot)
+        })
+    }
+
+    /// Empties `slot` on the render thread, where its frame is released.
+    pub fn clear_frame_slot_async(
+        &self,
+        slot: Arc<crate::rendering::scene3d::Scene3DFrameSlot>,
+    ) -> ServerJobTask<()> {
+        self.invoke(move |_, _| {
+            slot.clear();
+            Ok(())
+        })
+    }
+
     /// Clears presentation without pretending outstanding GPU reads completed.
     pub fn clear_async(&self) -> ServerJobTask<()> {
         self.invoke(|_, server| { server.clear(); Ok(()) })

@@ -102,6 +102,14 @@ impl<T: ?Sized + 'static> RefCounted<T> {
         RefCounted { item: Mutex::new(Some(cast(item))), counter: self.counter.clone() }
     }
 
+    /// A reference that does not keep the resource: it gives a counted reference for as long as
+    /// another one is live. Panics if this reference has been disposed.
+    pub fn downgrade(&self) -> WeakRefCounted<T> {
+        let item = self.item.lock().unwrap().clone();
+        let Some(item) = item else { Self::disposed() };
+        WeakRefCounted { item: Arc::downgrade(&item), counter: Arc::downgrade(&self.counter) }
+    }
+
     /// Whether this reference has not been disposed.
     pub fn is_alive(&self) -> bool {
         self.item.lock().unwrap().is_some()
@@ -121,6 +129,34 @@ impl<T: ?Sized + 'static> RefCounted<T> {
     }
 }
 
+/// A reference to a counted resource that does not keep it ([`RefCounted::downgrade`]).
+pub struct WeakRefCounted<T: ?Sized + 'static> {
+    item: std::sync::Weak<T>,
+    counter: std::sync::Weak<RefCounter>,
+}
+
+impl<T: ?Sized + 'static> WeakRefCounted<T> {
+    /// A counted reference to the resource, unless its last one was disposed.
+    pub fn upgrade(&self) -> Option<RefCounted<T>> {
+        let counter = self.counter.upgrade()?;
+        if !counter.try_add_ref() {
+            return None;
+        }
+        match self.item.upgrade() {
+            Some(item) => Some(RefCounted { item: Mutex::new(Some(item)), counter }),
+            None => {
+                counter.release();
+                None
+            }
+        }
+    }
+
+    /// Whether a counted reference to the resource is live.
+    pub fn is_alive(&self) -> bool {
+        self.counter.upgrade().is_some_and(|counter| counter.ref_count() > 0)
+    }
+}
+
 impl<T: ?Sized + 'static> Drop for RefCounted<T> {
     fn drop(&mut self) {
         self.dispose();
@@ -131,6 +167,26 @@ impl<T: ?Sized + 'static> Drop for RefCounted<T> {
 mod tests {
     // Not from upstream.
     use super::*;
+
+    #[test]
+    fn a_weak_reference_does_not_keep_the_resource() {
+        let released = Arc::new(AtomicI32::new(0));
+        let count = released.clone();
+        let first = RefCountable::create(Arc::new(5), move || {
+            count.fetch_add(1, Ordering::SeqCst);
+        });
+        let weak = first.downgrade();
+        assert!(weak.is_alive());
+        let second = weak.upgrade().expect("a live reference");
+        assert_eq!(2, first.ref_count());
+        first.dispose();
+        assert_eq!(0, released.load(Ordering::SeqCst), "the second reference keeps it");
+        assert!(weak.is_alive());
+        second.dispose();
+        assert_eq!(1, released.load(Ordering::SeqCst));
+        assert!(!weak.is_alive());
+        assert!(weak.upgrade().is_none(), "released once, and not given again");
+    }
 
     #[test]
     fn releases_when_the_last_reference_is_disposed() {
