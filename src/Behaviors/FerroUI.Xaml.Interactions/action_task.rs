@@ -10,7 +10,6 @@
 //! futures run by the dispatcher of the user interface.
 
 #[allow(deprecated)]
-use ferroui_base::threading::DispatcherTask;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer, JoinError, JoinHandle};
 use std::any::Any;
@@ -146,20 +145,6 @@ impl<T: 'static> TaskHandle<T> {
     pub fn from_handle(handle: JoinHandle<T>) -> Self {
         let state = HandleState { handle: Some(handle), status: Status::Running, outcome: None, panic_message: None };
         Self { state: Rc::new(RefCell::new(state)), wakers: Arc::default() }
-    }
-
-    /// The task of an existing dispatcher task.
-    ///
-    /// Deprecated: the task of the handle of a task of the dispatcher is
-    /// [`from_handle`](Self::from_handle) (`From`); the `DispatcherTask` converts into a
-    /// `JoinHandle` (on the dispatcher thread).
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `TaskHandle::from_handle` with a `JoinHandle` (`DispatcherTask` converts into one)"
-    )]
-    #[allow(deprecated)]
-    pub fn from_task(task: DispatcherTask<T>) -> Self {
-        Self::from_handle(task.into())
     }
 
     /// Takes the outcome from the handle when the task has ended, which tells how it ended.

@@ -9,10 +9,6 @@ pub struct OpenGlError {
     error_code: Option<i32>,
 }
 
-/// The name of [`OpenGlError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `OpenGlError`")]
-pub type OpenGlException = OpenGlError;
-
 impl OpenGlError {
     /// A failure without an OpenGL error code.
     pub fn new(message: impl Into<String>) -> Self {

@@ -351,61 +351,6 @@ fn check_cancelled(cancellation: &CancellationToken) -> Result<(), StudioError> 
     }
 }
 
-/// The cancellation of an AI request: a flag that any clone sets, and that wakes the requests
-/// waiting for it.
-#[deprecated(
-    since = "0.5.0",
-    note = "use `CancellationToken` (`ferroui_system::threading::CancellationToken`, re-exported here), which the requests take"
-)]
-#[derive(Clone)]
-pub struct AiCancellationToken {
-    token: CancellationToken,
-}
-#[allow(deprecated)]
-impl Default for AiCancellationToken {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-#[allow(deprecated)]
-impl std::fmt::Debug for AiCancellationToken {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AiCancellationToken")
-            .field("cancelled", &self.is_cancelled())
-            .finish()
-    }
-}
-#[allow(deprecated)]
-impl AiCancellationToken {
-    pub fn new() -> Self {
-        Self {
-            token: CancellationToken::new(),
-        }
-    }
-    pub fn cancel(&self) {
-        self.token.cancel();
-    }
-    pub fn is_cancelled(&self) -> bool {
-        self.token.is_cancelled()
-    }
-    pub fn check(&self) -> Result<(), StudioError> {
-        check_cancelled(&self.token)
-    }
-}
-/// The token, which the requests take: `&CancellationToken` coerces to `&CancellationToken`.
-#[allow(deprecated)]
-impl std::ops::Deref for AiCancellationToken {
-    type Target = CancellationToken;
-    fn deref(&self) -> &CancellationToken {
-        &self.token
-    }
-}
-#[allow(deprecated)]
-impl From<AiCancellationToken> for CancellationToken {
-    fn from(token: AiCancellationToken) -> Self {
-        token.token
-    }
-}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

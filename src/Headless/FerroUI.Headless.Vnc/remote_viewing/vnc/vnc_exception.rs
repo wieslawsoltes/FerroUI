@@ -13,10 +13,6 @@ pub struct VncError {
     inner_exception: Option<Box<dyn Error + Send + Sync>>,
 }
 
-/// The name of [`VncError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `VncError`")]
-pub type VncException = VncError;
-
 impl VncError {
     /// Initializes a new instance of the [`VncError`] class, with a
     /// `reason` and optionally the error that caused it.

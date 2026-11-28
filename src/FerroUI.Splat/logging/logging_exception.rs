@@ -14,10 +14,6 @@ pub struct LoggingError {
     inner: Option<Box<dyn Error + Send + Sync>>,
 }
 
-/// The name of [`LoggingError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `LoggingError`")]
-pub type LoggingException = LoggingError;
-
 impl LoggingError {
     /// The exception with the default message (`LoggingException()`).
     pub fn new() -> Self {

@@ -8,10 +8,6 @@ pub struct VulkanError {
     result: Option<vk::Result>,
 }
 
-/// The name of [`VulkanError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `VulkanError`")]
-pub type VulkanException = VulkanError;
-
 impl VulkanError {
     /// A failure without a result of Vulkan.
     pub fn new(message: impl Into<String>) -> Self {

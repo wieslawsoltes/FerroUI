@@ -205,10 +205,6 @@ pub struct XamlMemberError {
     line_position: Option<i32>,
 }
 
-/// The name of [`XamlMemberError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `XamlMemberError`")]
-pub type XamlMemberException = XamlMemberError;
-
 impl XamlMemberError {
     /// The message of the member.
     pub fn message(&self) -> &str {

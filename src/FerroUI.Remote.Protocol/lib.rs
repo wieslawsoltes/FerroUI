@@ -79,8 +79,6 @@ pub use bson_tcp_transport::BsonTcpTransport;
 pub use default_message_type_resolver::DefaultMessageTypeResolver;
 pub use error::Error;
 pub use ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
-#[allow(deprecated)]
-pub use guid::Guid;
 pub use i_message_type_resolver::IMessageTypeResolver;
 pub use i_transport::{
     exception_handler, message_handler, Delegate, ExceptionHandler, Handler, HandlerToken,

@@ -53,8 +53,6 @@ use uuid::Uuid;
 
 use crate::error::Error;
 use crate::guid::uuid_from_byte_array;
-#[allow(deprecated)]
-use crate::guid::Guid;
 
 use self::configuration::BsonConfiguration;
 
@@ -899,24 +897,6 @@ bson_simple_value!(Regex, Regex, "Regex", |v| ValueRef::Regex(v), Regex);
 bson_simple_value!(DateTime, DateTime, "DateTime", |v| ValueRef::DateTime(*v), DateTime);
 bson_simple_value!(Vec<u8>, ByteArray, "Byte[]", |v| ValueRef::ByteArray(v), ByteArray);
 bson_simple_value!(ObjectId, ObjectId, "ObjectId", |v| ValueRef::ObjectId(v), ObjectId);
-
-/// A property of the deprecated port type `Guid`: the same element as a
-/// [`Uuid`], until the type is removed after 0.5.
-#[allow(deprecated)]
-impl BsonValue for Guid {
-    const TYPE: Type = Type::Guid;
-
-    fn as_value(&self) -> ValueRef<'_> {
-        ValueRef::Guid(Uuid::from(*self))
-    }
-
-    fn from_value(value: Value) -> Result<Self, Error> {
-        match value {
-            Value::Guid(value) => Ok(Guid::from(value)),
-            other => Err(invalid_cast(&other, "Guid")),
-        }
-    }
-}
 
 impl BsonValue for ScopedCode {
     const TYPE: Type = Type::ScopedCode;
@@ -2465,10 +2445,6 @@ pub struct BsonError {
     message: Option<String>,
     inner_exception: Option<Arc<dyn std::error::Error + Send + Sync>>,
 }
-
-/// The name of [`BsonError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `BsonError`")]
-pub type BsonException = BsonError;
 
 impl BsonError {
     pub fn new() -> BsonError {
